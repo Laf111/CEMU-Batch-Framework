@@ -68,13 +68,11 @@ REM : main
         timeout /T 4 > NUL
         exit /b 10
     )
-    
     for /F %%i in ('type !lgpvLog!') do set "zipFile=%%i"
 
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
-
     if exist !zipLogFile! (
-        @echo No new graphics packs update(s) available, last version is still !zipFile!
+        @echo No new graphics packs update^(s^) available^, last version is still !zipFile!
         timeout /T 4 > NUL
         exit /b 20
     )
