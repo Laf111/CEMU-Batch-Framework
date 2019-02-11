@@ -247,7 +247,7 @@ REM : main
     if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! > NUL
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Downloading newest graphics packs^.^.^.
+    @echo Extracting graphics packs^.^.^.
     @echo ---------------------------------------------------------
     REM : extract "!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar" in !GAMES_FOLDER!
     set "rarFile="!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar""
@@ -261,7 +261,7 @@ REM : main
         exit /b 1
     )
 
-    @echo ^> External graphic packs installed
+    @echo ^> Graphic packs installed from archive
 
    :updateGp
     REM : check if an internet connection is active
@@ -270,6 +270,8 @@ REM : main
 
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:importModForGames
 
+    @echo ---------------------------------------------------------
+    @echo Downloading latest graphics packs^.^.^.
     @echo ---------------------------------------------------------
 
     REM : update graphic packs
