@@ -20,6 +20,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
@@ -218,6 +219,9 @@ REM : main
     set "completeGP="NONE""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "COMPLETE_GP" 2^>NUL') do set "completeGP="YES""
 
+    REM : log CEMU
+    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+
     if [!completeGP!] == ["NONE"] goto:getFullScreenMode
 
     REM : launching user's software
@@ -226,8 +230,7 @@ REM : main
     REM : flag to create legacy packs
     set "createLegacyPacks=true"
 
-    REM : log CEMU
-    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+
     if not exist !cemuLog! goto:updateGameGraphicPack
 
     REM set "version=NOT_FOUND"
@@ -805,7 +808,6 @@ REM : main
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu%
     )
-
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
     wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
@@ -816,6 +818,7 @@ REM : main
     REM : search in logFile, getting only the last occurence
     set "OPENGL_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
+
 
     if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:searchCacheFolder
 
@@ -1085,7 +1088,6 @@ REM : main
     )
 
     call:saveCemuOptions
-
 
     REM : echo compress game's saves
     set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
@@ -1866,6 +1868,8 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             set "strTmp=%%l"
             goto:firstOcShaderCache
         )
+
+        
         :firstOcShaderCache
 
         if ["!strTmp!"] == ["NONE"] (
@@ -1877,7 +1881,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
         set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%.bin"
 
         set "OLD_TRANS_SHADER=%OLD_SHADER_CACHE_ID%.bin"
-
+        
         if ["!SHADER_MODE!"] == ["CONVENTIONAL"] (
             set "OLD_TRANS_SHADER=%OLD_SHADER_CACHE_ID%_j.bin"
             set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%_j.bin"
