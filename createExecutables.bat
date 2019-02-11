@@ -554,7 +554,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:£=!"
+        set "str=!str:ï¿½=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1111,7 +1111,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
-    :userGameShortcut
+    :userGameExe
         set "user=%~1"
 
         REM : Creating shortcut to launch game
@@ -1298,7 +1298,7 @@ REM        @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
-        REM detect (,),&,%,£ and ^
+        REM detect (,),&,%,ï¿½ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
         set "str=!str:\"=!"

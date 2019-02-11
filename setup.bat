@@ -490,7 +490,7 @@ REM : main
     @echo - 1: Windows shortcuts
     @echo - 2: Executables files
     @echo -
-    call:getUserInput "Enter your choice?: " "1, 2" ANSWER
+    call:getUserInput "Enter your choice?: " "1,2" ANSWER
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
     set "outputType=EXE"
