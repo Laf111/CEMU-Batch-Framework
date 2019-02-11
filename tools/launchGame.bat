@@ -1957,11 +1957,11 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             @echo - >> !tscl!
             @echo - Is !CEMU_FOLDER_NAME! change the shaderCacheId ^? >> !tscl!
             @echo - >> !tscl!
-            @echo - Rename saved cache to !OLD_SHADER_CACHE_ID!.old >> !tscl!
+            @echo - Renaming saved cache to !OLD_SHADER_CACHE_ID!.old >> !tscl!
 
             move /Y !otscf! !otscr! > NUL
             @echo - >> !tscl!
-            @echo - Move CEMU^'s transferable shader cache to saving folder >> !tscl!
+            @echo - Moving CEMU^'s transferable shader cache to game^'s folder >> !tscl!
             wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
             @echo - >> !tscl!
 
@@ -1978,9 +1978,8 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             @echo - >> !tscl!
 
             @echo - You certainly about import an external transferable shader cache with a wrong name >> !tscl!
-            @echo - Rename saved cache with CEMU^'s one name >> !tscl!
+            @echo - Renaming saved cache with CEMU^'s one name^.^.^. >> !tscl!
             @echo - >> !tscl!
-            @echo - If it don't work^, CEMU will start building a new one >> !tscl!
 
             move /Y !otscf! !gntscf! > NUL
 
