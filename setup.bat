@@ -12,7 +12,7 @@ REM : main
 
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -45,7 +45,7 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
-
+    
     REM : checking arguments
     set /A "nbArgs=0"
    :continue
@@ -98,7 +98,7 @@ REM : main
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
-
+    
     cls
     if %nbArgs% EQU 0 (
         @echo =========================================================
@@ -120,7 +120,7 @@ REM : main
     ) else (
         @echo =========================================================
         @echo Register more than one CEMU's version
-        @echo and optionally edit your BatchFW^'s settings
+        @echo and optionally Edit your BatchFW^'s settings
         @echo =========================================================
         @echo ^(in case of false input close this main window to cancel^)
     )
@@ -175,7 +175,7 @@ REM : main
 
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName! ^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
+            @echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -190,7 +190,7 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
-            call:getUserInput "Renaming folder for you? (y, n): " "y,n" ANSWER
+            call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
@@ -201,7 +201,7 @@ REM : main
 
     if %NB_GAMES_VALID% EQU 0 (
         @echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^^!
-        @echo Please extract BatchFw in your loadiines games^'s folder
+        @echo Please extract BatchFw in your loadiines games^' folder
         REM : show doc
         set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
@@ -216,7 +216,7 @@ REM : main
     if %QUIET_MODE% EQU 0 (
 
         @echo ---------------------------------------------------------
-        call:getUserInput "Read the goals of BatchFW? (y, n)" "y,n" ANSWER
+        call:getUserInput "Read the goals of BatchFW? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:goalsOK
         @echo ---------------------------------------------------------
 
@@ -224,14 +224,14 @@ REM : main
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :goalsOK
-        call:getUserInput "Read informations on CEMU interfaces history? (y, n)" "y,n" ANSWER
+        call:getUserInput "Read informations on CEMU interfaces history? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :iFOK
-        call:getUserInput "Read how graphic packs are handled? (y, n)" "y,n" ANSWER
+        call:getUserInput "Read how graphic packs are handled? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:externalGP
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
@@ -247,7 +247,7 @@ REM : main
     if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! > NUL
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Installing graphic packs^.^.^.
+    @echo Downloading newest graphics packs^.^.^.
     @echo ---------------------------------------------------------
     REM : extract "!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar" in !GAMES_FOLDER!
     set "rarFile="!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar""
@@ -280,14 +280,14 @@ REM : main
    :importModForGames
     cls
     @echo ---------------------------------------------------------
-    call:getUserInput "Have you got some mods for your games that you wish to import (y, n)? " "y,n" ANSWER
+    call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
 
    :askAnotherModFolder
     set "im="!BFW_TOOLS_PATH:"=!\importModsForAllGames.bat""
     wscript /nologo !StartWait! !im!
 
-    call:getUserInput "Do you want to add another mod folder (y, n)?" "y,n" ANSWER
+    call:getUserInput "Do you want to add another mod folder (y,n)?" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:askAnotherModFolder
     @echo Next time use the shortcut in
     @echo Wii-U Games^\BatchFW^\Tools^\Graphic packs^\Import Mods for my games^.lnk
@@ -299,7 +299,7 @@ REM : main
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
 
-    choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y, n)  "
+    choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n)  "
     if !ERRORLEVEL! EQU 1 (
         set "msg="COMPLETE_GP=YES""
         call:log2HostFile !msg!
@@ -311,7 +311,7 @@ REM : main
    :askRatios
     REM : flush logFile of DESIRED_ASPECT_RATIO
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "DESIRED_ASPECT_RATIO" 2^>NUL') do call:cleanHostLogFile DESIRED_ASPECT_RATIO
-
+    REM :? 1366*768
     @echo ---------------------------------------------------------
     @echo Choose your display ratio ^(for extra graphic packs^)
     @echo Ratios availables:
@@ -345,7 +345,7 @@ REM : main
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
-    choice /C yn /N /M "Add another ratio? (y, n): "
+    choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
    :askScreenMode
@@ -353,7 +353,7 @@ REM : main
     REM : flush logFile of SCREEN_MODE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
 
-    choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y, n)  "
+    choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n)  "
     if !ERRORLEVEL! EQU 1 goto:getUserMode
 
     set "msg="SCREEN_MODE=windowed""
@@ -371,7 +371,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do set "usersList=!usersList! %%i"
 
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
-    choice /C ny /N /M "Do you want to add more than one user? (y, n)  "
+    choice /C ny /N /M "Do you want to add more than one user? (y,n)  "
     if !ERRORLEVEL! EQU 1 (
         set "msg="USER_REGISTERED=%USERNAME%""
         call:log2HostFile !msg!
@@ -382,7 +382,7 @@ REM : main
 
     set "usersList=!usersList:EMPTY=!"
     @echo Users already registered in BatchFW: !usersList!
-    choice /C ny /N /M "Edit this list? (y, n): "
+    choice /C ny /N /M "Edit this list? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:getSoftware
 
     REM : flush logFile of USER_REGISTERED
@@ -397,7 +397,7 @@ REM : main
     set "msg="USER_REGISTERED=%userName%""
     call:log2HostFile !msg!
 
-    choice /C yn /N /M "Add another user? (y, n): "
+    choice /C yn /N /M "Add another user? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:getUsers
 
    :getSoftware
@@ -409,27 +409,27 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
 
     if not ["%softwareList%"] == ["EMPTY"] goto:handleSoftware
-    @echo Do you want BatchFw to launch a third party software
-    @echo before launching CEMU^?
+    @echo Do you want BatchFw to launch a third party software 
+    @echo before launching CEMU^? 
     @echo ^(E^.G^. DS4Windows^, cemuGyro^, a speed hack^.^.^.^)
     @echo.
     @echo They will be launched in the order you will enter here^.
     @echo.
-    choice /C ny /N /M "Register a third party software? (y, n) "
+    choice /C ny /N /M "Register a third party software? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
-    @echo.
-    @echo You^ll be asked to enter the full command line to
+    @echo.    
+    @echo You^ll be asked to enter the full command line to 
     @echo the software and its arguments^.
-    @echo Use the file^'s absolute path and be sure that the
+    @echo Use the file^'s absolute path and be sure that the 
     @echo command works by checking it in a cmd prompt before^!
-    @echo.
+    @echo.    
    :handleSoftware
     if ["%softwareList%"] == ["EMPTY"] goto:getSpath
 
-    set "softwareList=!softwareList:EMPTY=!"
+    set "softwareList=!softwareList:EMPTY=!"    
     @echo Software already registered in BatchFW: !softwareList!
-    choice /C ny /N /M "Edit this list? (y, n) "
+    choice /C ny /N /M "Edit this list? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     REM : flush logFile of TO_BE_LAUNCHED
@@ -447,39 +447,39 @@ REM : main
     set "msg="TO_BE_LAUNCHED=!spath!""
     call:log2HostFile !msg! 2>NUL
 
-    choice /C yn /N /M "Add another third party software? (y, n): "
-    if !ERRORLEVEL! EQU 1 goto:getSpath
+    choice /C yn /N /M "Add another third party software? (y,n): "
+    if !ERRORLEVEL! EQU 1 goto:getSpath    
 
    :askExtMlC01Folders
-    if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
+    if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (        
         @echo ---------------------------------------------------------
-        choice /C ny /N /M "Do you use an external mlc01 folder you wish to import? (y, n): "
+        choice /C ny /N /M "Do you use an external mlc01 folder you wish to import? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getOuptutsType
 
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
         set cr=!ERRORLEVEL!
-
+        
         if !cr! EQU 2 set "script="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
        :getExtMlc01
-        wscript /nologo !StartWait! !script!
+        wscript /nologo !StartWait! !script! 
         set cr=!ERRORLEVEL!
         if !cr! NEQ 0 (
             @echo ERROR in !script!^, cr=!cr!
             pause
         )
-        choice /C yn /N /M "Add another external mlc01 folder? (y, n): "
-        if !ERRORLEVEL! EQU 1 goto:getExtMlc01
-
+        choice /C yn /N /M "Add another external mlc01 folder? (y,n): "
+        if !ERRORLEVEL! EQU 1 goto:getExtMlc01    
+        
         @echo ^> External mlc01 data was imported^!
         @echo.
         @echo Next time use the shortcuts in
         @echo Wii-U Games^\BatchFW^\Tools^\Mlc01 folder handling
         @echo.
         pause
-
+        
     )
-
+    
    :getOuptutsType
     cls
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -547,7 +547,7 @@ REM : main
     if ["!noAMD!"] == ["!GPU_VENDOR!"] set "gpuType=OTHER"
         cls
         @echo ---------------------------------------------------------
-        @echo BatchFw needs you to register and import mlc01 data of
+        @echo BatchFw needS you to register and import mlc01 data of
         @echo the last^(s^) version^(s^) of CEMU you used to play your games^.
         @echo.
 
@@ -609,14 +609,14 @@ REM : main
     call:regCemuInstall %NBCV% !CEMU_FOLDER!
 
     @echo ---------------------------------------------------------
-    call:getUserInput "Do you want to add another version? (y, n)" "y,n" ANSWER
+    call:getUserInput "Do you want to add another version? (y,n)" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:getCemuFolder
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo ^> Done
 
     if %QUIET_MODE% EQU 0 (
-        call:getUserInput "Would you like to see how BatchFW works? (y, n)" "y,n" ANSWER
+        call:getUserInput "Would you like to see how BatchFW works? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:done
 
         set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""
@@ -641,7 +641,7 @@ REM : main
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when collecting
+    @echo If you encounter any issues or have made a mistake when collecting 
     @echo settings for a game^:
     @echo ---------------------------------------------------------
     @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using the shortcut
@@ -675,9 +675,7 @@ REM : main
     )
 
     endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    exit /b 0
-
+    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     goto:eof
 
     REM : ------------------------------------------------------------------
@@ -723,7 +721,7 @@ REM : functions
             if %QUIET_MODE% EQU 0  wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
         )
 
-        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y, n)  "
+        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y,n)  "
         if !ERRORLEVEL! EQU 2 goto:createShortcuts
 
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
@@ -751,12 +749,12 @@ REM : functions
         for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
-
+        
         @echo Opening CemuHook download page^.^.^.
 
         wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
         @echo Download and extract CemuHook in !CEMU_FOLDER!
-
+    
         timeout /T 2 > NUL
         wscript /nologo !Start! !StartWait! "%windir%\explorer.exe" !CEMU_FOLDER!
 
@@ -775,10 +773,10 @@ REM : functions
         @echo Set your REGION^, language
         @echo And finally download sharedFonts using Cemuhook button
         @echo Then close CEMU to continue
-
+  
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
-
+    
        :getCemuVersion
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
@@ -812,7 +810,7 @@ REM : functions
         REM : importMode
         set "argOpt=-noImport"
         set "IMPORT_MODE=DISABLED"
-        call:getUserInput "Enable automatic settings import? (y, n): " "n,y" ANSWER
+        call:getUserInput "Enable automatic settings import? (y,n): " "n,y" ANSWER
 
         if [!ANSWER!] == ["y"] (
             set "argOpt="
@@ -841,7 +839,7 @@ REM : functions
                 @echo   GLCache is shared by all installs
                 @echo.
             )
-            call:getUserInput "Ignore precompiled shader cache for all games? (y, n): " "n,y" ANSWER
+            call:getUserInput "Ignore precompiled shader cache for all games? (y,n): " "n,y" ANSWER
 
             if [!ANSWER!] == ["y"] (
                 set "IGNORE_PRECOMP=ENABLED"
@@ -858,14 +856,14 @@ REM : functions
             @echo ---------------------------------------------------------
             REM : CEMU < 1.15.1
             if %post1151% EQU 0 (
-                call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y, n): " "n,y" ANSWER
+                call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y,n): " "n,y" ANSWER
                 if [!ANSWER!] == ["n"] goto:launchCreate
                 set "argOpt=%argOpt% -noLegacy"
                 goto:launchCreate
             )
             REM : CEMU >= 1.15.1
             if %post1151% EQU 1 (
-                call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y, n): " "n,y" ANSWER
+                call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y,n): " "n,y" ANSWER
                 if [!ANSWER!] == ["n"] goto:launchCreate
                 set "argOpt=%argOpt% -Legacy"
                 goto:launchCreate
@@ -888,7 +886,7 @@ REM : functions
         @echo ^> Shortcuts created for !CEMU_FOLDER_NAME!
         goto:eof
 
-        :createExe
+       :createExe
         REM : calling createExecutables.bat
         set "tobeLaunch="!BFW_PATH:"=!\createExecutables.bat""
         call !tobeLaunch! !CEMU_FOLDER! !OUTPUT_FOLDER! %argOpt%
@@ -908,7 +906,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:£=!"
+        set "str=!str:Â£=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1047,9 +1045,9 @@ REM : functions
             if ["%%k"] == ["inGameSaves"] (
                 if not exist !cemuFolder! mkdir !cemuFolder! > NUL
 
-                @echo   An inGameSaves subfolder was found directly under the game^'s path root
+                @echo   AN inGameSaves subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
-                @echo   ^(if you haven't used a BatchFW V10 or later^, choose to move without a second thought^)
+                @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
                 if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
@@ -1061,7 +1059,7 @@ REM : functions
 
                 @echo   A shaderCache subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
-                @echo   ^(if you haven't used a BatchFW V10 or later^, choose to move without a second thought^)
+                @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
                 if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
@@ -1073,7 +1071,7 @@ REM : functions
 
                 @echo   A graphicPacks subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
-                @echo   ^(if you haven't used a BatchFW V10 or later^, choose move without a second thought^)
+                @echo   ^(if you haven't used a BatchFW V10 or later, choose move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
                 if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
@@ -1139,7 +1137,7 @@ REM : functions
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
-        REM detect (,),&,%,£ and ^
+        REM detect (,),&,%,Â£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
         set "str=!str:\"=!"
