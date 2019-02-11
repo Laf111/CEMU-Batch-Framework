@@ -1,0 +1,29 @@
+=========================================================
+GRAPHIC_PACKS :
+=========================================================
+
+BatchFw have an auto-update process of its graphic packs folder (_BatchFW_Graphic_Packs) and check
+update availability (when registering new CEMU install). You can force this detection/update by using
+the created shortcut : "Wii-U Games\Update my graphic packs to latest.lnk"
+
+If a game is not supported in the Slashiee's repository, BatchFW create a generic one (only resolution scaling).
+
+Those graphic packs are very simple ones compared to Slashiee's ones (only scale without tweaking shaders). 
+Except if V2 graphic packs exist (using shader files). In this case, the v3 graphic packs will import those 
+files and upgrade them to the V3 syntax (import the double native resolution graphic pack V2 and replace 
+    res(X|Y|)Scale = 2.0 by res(X|Y|)Scale = ($width/($gameWidth|gameHeight))
+
+When comes out an official pack, batchFw replace his packs with the official ones automatically 
+(during the graphic pack folder auto-update process) and define missing presets for your desired 
+aspect ratios (16/10 for example)
+
+If you check on a new game and if the graphic pack is not applied or if you have any issue, the native resolution 
+in the BatchFW's internal database might be wrong for this game. Get the true native resolution 
+using CEMU UI's feature "/ Debug / View texture cache info" and update the BatchFW's database. 
+Also check if the cemu FPS value is correct (speed adjustement (FPS CAP) graphic packs)
+
+If you have to customized a graphic pack (create an user defined one), create it under %GAME_FOLDER_PATH%\Cemu\graphicPacks (but as a folder !)
+
+BatchFW use this folder to gather all graphic packs available for a game (V2 + V3, V2 are prefixed with V2_). It creates links (junction)
+to its graphic packs folder (_BatchFW_Graphic_Packs). 
+Those links are automatically updated (if drive letter change), deleted (broken links) and recreated each time you launch the game.

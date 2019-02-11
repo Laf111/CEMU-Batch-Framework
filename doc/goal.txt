@@ -1,0 +1,74 @@
+=========================================================
+GOAL : 
+=========================================================
+
+
+BatchFW is a DOS scripts (batch files) FrameWork to create automatically (by lot) windows shortcuts for all your loadiines games (rpx) with providing game's icons (for more than one hundred games) to launch all your differents versions of CEMU >=1.11 with :
+
+    launching the game in full screen or windowed mode, with high priority mode (realtime if you launch as Admin) and affinity to all cores after checking if an instance is not already running
+
+    using a lock file to be thread safe
+
+    creating V2 and V3 missing graphic packs resolution and speed (FPS cap) using FPS++ presence, native resolution and FPS of the game (including games that not exist in Slashiee package yet)
+
+    launch CEMU with only the game's graphic packs needed (only one external graphic pack folder for all versions of CEMU that is automatically updated)
+
+    using -noLegacy option only if you're running an Intel integrated GPU (iGPU) and if you choose to activated it
+
+    reduce stuttering in all your games with a backup per game of your GPU openGL shader cache (that handling the changing cache’s name as when you update your GPU's driver)
+
+    automatically ignoring precompiled shader cache for all your games (no need to set it individually in each CEMU UI for each game) and so keep only one shader cache that is valid for all versions of CEMU : the GPU openGL one)
+
+    backup/restore game saves to each version of CEMU and for each users
+
+    backup/restore transferrable shader cache (support conventional and separable shaders) to each versions you use
+
+    analysing cemu return code and check that CEMU is not still running in background
+
+Saves all settings (including controllers profiles) per game and pass it to all versions registered in BatchFW :
+
+    emulation parameters that are not still handled in game's profile (because game’s profiles are left in each version’s folder as they could be specifics to one version and might be updated by the CEMU dev)
+
+        controller settings for all players
+
+        amiibo paths (NFC tags)
+
+        cemuHook settings
+
+        graphic packs selected
+
+    missing game's profiles created (existing game’s profiles are left in each version’s folder and can be edited using shortcuts with icons directly from your desktop)
+
+    automatically import existing saved settings from the last version played with comparing the two game’s profiles lines side by side (if needed) to sync/merge your own settings
+
+Automatic graphic pack update when creating shortcuts for a new version (from https://github.com/slashiee/cemu_graphic_packs/releases/latest, if an active network connexion is found).
+
+Fill silently local game’s compatibility reports (for every host used) :
+
+    a CEMU X.Y.Z game’s compatibility report for your games with version X.Y.Z .For each game (row), the last column contain the formatted line to paste for reporting @ http://compat.cemu.info/
+
+    Global compatibility report : contain one row for each game giving the first version of CEMU that manage to boot the game on your rig.
+
+You'll need to use the provided script at least to copy (or move) your saves, update and DLC in the game's folder one (then BatchFw use CEMU’s -mlc option and each versions of CEMU share the same mlc01 folder located in the game's folder)
+
+    that's ease CEMU update (install only cemuHook, launch one time to download shader fonts and that’s all).
+
+    So only game profiles for this version and useless data are left in your CEMU install folder :
+
+        ending with only one big mlc01 folder containing all game’s data (saves, updates, DLC) mixed in. Game’s data are tidy in the game’s folder
+
+        no useless game’s data store in mlc01 folder when you decide to uninstall/delete a game
+
+        only useless data left in CEMU’s folders only precompiled shader cache (valid only for this version, if you do not ignore it in settings)
+
+If you don't import your mlc01 data for all your games, batchFw will create and use a new mlc01 folder (the one it creates in the game's folder).
+In this case, you might not recover your saves and update + DLC will not be availables in CEMU.
+
+So i recommend you to choose copy mlc01 data when asked. (your initial mlc01 folder in your Cemu's folder will be untouched)
+And if you uninstall BatchFw and have progressed in some games, choose to revert mlc01 from games's folders to your Cemu'folder in order to keep your last saves.
+        
+BatchFW does not need Adminstrator rights but if you launch the shortcut as an Admin, CEMU will set with realtime priority.
+
+All batch source code is in delayed expansion mode and use your system charset to check/handle the minimum of unsupported characters in paths.
+
+Code is well commented and is readonly. If you edit source code, uses a text editor that don't change ANSI files format to UTF8 !

@@ -1,0 +1,506 @@
+11/02/2019 V13 : 
+- fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
+  * full re-writing of all external calls (start command behavior is altered on such system)
+  * force enabling extension inside cmd environnement (add a directive for that in all the code)
+- batchFw is now completly silent when launching games and create a log "shortcuted" in Wii-U Games\BatchFW
+  On failure, batchFw's log is displayed. When CEMU's return code is <> 0, the log.txt is displayed.
+- use message box instead of cmd console to display messages
+- add an ordered programs list to launch before CEMU (DS4, CemuGyro, speed hack ..) only if not already running
+- add a complementary check for detection cache corruption (backupN must always be greater than backupN-1)
+- importModsForAllGames.bat : enlarge filter for detecting more mods
+- create windowed OR fullscreen packs only (depending of your choice made for launching CEMU) : speed-up graphic pack completion
+- taken into account new variables in graphic packs (internalRes, dither, scaleShader)
+- fix error on ASPECT RATIOS not detected when disabling BatchFw's extra presets/packs creation.
+- add a script to reset BatchFw's settings to default
+- add a script to force graphic update and BatchFw's completion (if enabled)
+- add a script to import new games with theirs updates and dlc (if (update) and (dlc) folders are found, tidy 
+  all data under each game's folder to prepare the games for launching with BatchFw)
+- remove useless script createMlc01FolderForNewGames.bat
+- enhance CEMU and CemuHook settings display in wizardFirstLaunch.bat
+- take into account new filters for UpscaleFilter and add DownscaleFilter
+- missing icon creation automatization with an onfly JPG to ICO conversion
+- add the option to import mlc01 data from an external mlc01 folder in setup.bat
+- update text dialogs (thanks to TheMasterSimo for the translations)
+
+
+20/01/2019 V12-1 : 
+    - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat
+    - Minor fix : remove the twice message in setup.bat
+    - Add icons for : Pinball Arcade, Darts Up, Cube Life Island Survival, Coaster Crazy Deluxe
+    - update GFX pack to 338
+
+19/01/2019 V12 : 
+    - Restore executables creation
+    - Now in setup.bat (installation and shorctut : "Wii-U Games\BatchFW\Register CEMU installs.lnk")
+        - create BatchFw's users : add an optional arg to launchGame.bat allowing to handle multpile saves on a single player's game like BOTW
+	- 2 levels of backup is applied to each user's save 
+    - Scripts for creating shortcuts or executable loop on users list to create a one more level folder using user's name 
+      in "Wii-U Games"
+    - Add a script ImportSaves.bat and a shortcut to it in "Wii-U Games\BatchFW\Tools\Games's saves"
+    - Automatization of the step need on each CEMU's update in setup.bat and child scripts that create shortcuts and executables : 
+        - get CemuHook if not found 
+        - launch a first time to download CemuHook's shaderFonts, set REGION and language in CEMU
+    - Legacy option support for IGPU  : shortcut's names for CEMU > 1.15 will be suffixed by -Legacy. 
+      And with -NoLegacy for earlier versions
+    - wizardFirstRun.bat : 
+        - dump cemuHook and Cemu settings.xml (if they exists)
+        - if CemuHook's timer is different than "Cemu default" check if CEMU's RDTSC timer is disabled in game's profile
+          raise a warning otherwise (many games crash otherwise since 1.14)
+        - it is now possible to loop on game's profile completion step to finalize it
+    - ask fullscreen mode in createShortcuts.bat and createExecutables.bat
+    - update embeded graphic pack folder to V320
+    - create windowed packs (full screen in windowed mode without streching) also for other aspects ratios than 16/10
+
+11/01/2019 V11-4 : 
+    - fix BOTW's graphic pack's preset completion failure (taking heightfix var into account). If the res graphic 
+      pack for a game use a heightfix workaround, batchFw will recall you that you have to set it to 1 if black 
+      borders appears for the preset you choosen.
+      
+06/01/2019 V11-3 : 
+    - for NVIDIA users only : add the unexpected missing level GLCache in shaderCache\driver\nvidia 
+
+04/01/2019 V11-2 : 
+    - for NVIDIA users only : handle a different GLCache working directory for CEMU >= 1.15.1 
+      (cache restore/backup process remain the same and still use one cache by game). 
+      now it's recommend to install CEMU on C: to keep the move operation instantaneous.
+    - add an NTFS volume detection in setup.bat (as it uses symlinks, BatchFw will refuse to be installed 
+      on a non NTFS volume)
+    - iGPU option noLegacy replaced by Legacy when running CEMU>=1.15.1 ([No legacy] is added to each shortcut's name
+      for shortcuts created with CEMU>=1.15.1)
+      
+27/12/2018 V11-1 : 
+    - Now if a new game if added in your library, the mlc01 subfolder is created silently in the game's one.
+      If want to launch a version earlier < 1.10 : copy the game's mlc01 subfolder in the Cemu's install
+    - update the documentation 
+    
+22/12/2018 V11 : 
+    - add a import Mods script (called in setup.bat) and a shortcut to run it. It ask for a mods source folder and 
+      copy all mods folders under each %GAME_FOLDER_PATH%\Cemu\mods (in the game concern, by using rules.txt titleId)
+    - Rename embeded V2 graphic pack internal names in order to differenciate them on version of CEMU earlier than 1.14
+    - add a supplementary level of backup for saves and transferable cache : because the launch following the crash that 
+      have corrupted files (when you aknowledge the issue), backup files are replaced (lost) by the corrupt backup.
+	- add the possibility to disable graphic pack creation/completion. You still can create graphic packs for a game
+	  using the shortcut "Wii-U Games\BatchFW\Tools\Graphic packs\Create game's graphic packs using its titleId.lnk"   
+
+2018/12/12 V10-8 : 
+    - complete informations displayed in the consoles
+    - remove all flashing CMD consoles due to parallelizing processes
+    - create 16/10 windowed graphic packs (or presets in V3) only if user choose to launch CEMU windowed during setup.bat
+    - enhance launchGame.bat (reduce time to wait before launching CEMU) and clean its console's log
+    - fix errors detected on V2 graphic packs created by BatchFW in createExtraGraphicPacks.bat
+    - update embeded V3 graphic packs to v248
+    - remove timeout choice on settings items also in createShortcuts.bat
+    - create Cemu/mods folder in createShortcuts.bat and invite user to move its mods in
+    - uninstall.bat move mods folder founds under game's folder before deleting Cemu subfolder created initially by BatchFw
+    
+2018/12/05 V10-7-4 : 
+    - fix error displayed due to M&SRio2016 graphic packs (& is not allowed for dos expansion)
+      Add antRenamer to be used for renaming graphic packs to avoid such issue
+
+2018/12/02 V10-7-3 : 
+    - handle mods for games : 
+        - save your mods for each game under %GAME_FOLDER_PATH%\Cemu\mods they will be linked as graphic packs
+        - junction link's name in %GAME_FOLDER_PATH%\Cemu\graphicPacks is prefixed with _mod_
+    - optimize the createGameGraphicPack script (parallelizing using a new script createV2graphicPacks.bat)
+    - launching transferrable cache copy asynchronally and wait its end before launching CEMU (as done for the 
+      game's update graphic pack process)
+    - add FPS value in the CEMU version's compatibility reports
+
+2018/11/28 V10-7-2 : 
+    - fixed : update process broke BatchFw's V3 graphic packs (games not still supported in Slashiee's repo)
+
+2018/11/25 V10-7-1 : 
+    - fixed : graphic packs not show in the wizardFirstRun
+
+2018/11/24 V10-7 : 
+    - separate V2 and V3 graphic packs to avoid names conflicts and use links instead of duplicate graphic packs for each games
+      in %GAME_FOLDER_PATH%\Cemu\graphicPacks (V2 graphic packs links are prefixed with V2_). Delete automatically brokens links 
+      and update them in case of a changing drive letter (if you have your games library on an USB drive).
+    - enhance defaults graphic packs filters V2 & V3
+    - trace the last graphic pack version used for the game's (extra) graphic pack creation in the games library log's file
+	- fix patching shader files from V2 graphic pack when native resolution of the game is 1080p
+    - when launching a game, if no V3 graphic pack found for the game (game not supported in Slashiee repo) launching 
+      createGameGraphicPack.bat If at least one V3 pack is found retreive his build version from games library's log file and 
+      compare it to the last version downloaded. If different, call createExtraGraphicPacks.bat, delete all broken links under 
+      %GAME_FOLDER_PATH%\Cemu\graphicPacks and recreate links on newer packs
+	- set no to default choice timeout for updating graphic pack folder
+    - in setup.bat on the first launch (when BatchFW_readme.txt does not exist), update existing BatchFw tree in game's folder (looking 
+      for shaderCache and inGameSaves folder and propose to move it/overwrite in a Cemu subfolder or delete it)
+    - added documentation on graphic packs handling
+      
+2018/11/09 V10-6 : 
+    - extend filters number in V3 graphic packs
+
+2018/11/09 V10-5 : 
+    - create also extra graphic packs V3 with rounded resolutions taken into account and avoiding videos scenes
+
+2018/11/09 V10-4 : 
+    - create new graphic packs V3 with rounded resolutions taken into account and avoiding videos scenes
+    - new graphic packs (that not exist in Shlashiee repository yet) are now created with a list of titleId (not only yours)
+    - don't create V3 FPS CAP anymore if an FPS++ gp is found (new FPS++ graphic pack define vsync value)
+
+2018/11/06 V10-3 : 
+    - add last V2 graphic packs (v100) and v165 v3 ones in _BatchFW_Graphic_Packs.rar
+    - move updateMySavedGraphicPacks.bat's call in updateGraphicPacksFolder.bat
+    - flush all V3 graphic packs in _BatchFW_Graphic_Packs before updating (as recommended on Slashiee's website) 
+    
+2018/11/01 V10-2 : 
+    - as V3 graphic pack update consist now in overwrite the file (not only replace stock GP as for V2 ones), forcing extra
+      graphic pack creation when updating the graphic packs saved for a game (before updating)
+    - remove V111 V3 graphic pack from batchFw files
+    - "Wii-U Games\BatchFW\Register CEMU installs" shortcut (that call setup.bat in slient mode) also now ask (if needed) to update
+      _BatchFW_Graphic_Packs folder
+    
+2018/10/31 V10-1 : 
+    - update graphic pack's URL for auto update process
+
+2018/10/31 V10 : 
+    - new saved data architecture : only one "Cemu" folder in game's folder
+        -> settings are saved with the relative path Cemu\Settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!
+        -> graphicPacks, controllerProfiles are not saved per version of CEMU anymore. Folders are created in 
+           Cemu game's sublfolder
+    - create extra graphic packs only when launching the wizardFirstSaving.bat 
+    - now save graphic packs for a game (not per version of CEMU anymore)
+    - update those game's graphic packs folders silently each time you update the _BatchFW_Graphic_Packs folder
+    - re-check all scripts, remove regressions issues
+    - add V111 v3 graphic packs release in resources/_BatchFW_Graphic_Packs.rar 
+    
+2018/10/28 V9-12 : 
+    - remove pause in restoreTransferableCache + delete ShaderCache folder after moving transferable folder
+    - redirect std_out & std_err of updateGP.ps1
+    - fix settings not saved (add settings.xml in the saved files list : settings were move form bin to xml files)
+    - add GAME_FOLDER_PATH as second argument to updateMySavedGraphicPacks.bat to update only for one game
+    - force to update saved graphic pack for the game after automatic settings import
+    - force to update saved graphic pack after each graphic packs update
+
+2018/10/27 V9-11 : 
+    - remove default choices and timeout in setup.bat (and set longer times in createShortcuts.bat)
+    - fix non creation of V3 graphic pack for a game supported in V2 but absent from V3 slashiee packages (means that you
+      can create V3 graphic packs for games that does not have V3 graphic packs yet and so that you're not be able to 
+      play on 1.14 at a different resolution than the native one)
+    - fix non working disabling precompiled shader patch in game's profile
+
+2018/10/26 V9-10 : 
+    - pre launch optimizations :
+        -> ask if more than one user have to be handled in the setup.bat (on the first run only) : it avoid removing save and wait after 
+           uncompressing the current user's saves archive
+        -> use symbolic links for graphicPacks and shaderCache\transferable CEMU's subfolders (handling the presence of unexpected links
+           that could left after closing batchFW's console accidentally as there is no signals handling in batch scripting...)
+    - in wizardFirstSaving.bat : fill the graphicPacks subfolder of settings folder with only the 16/9 and user defined ratios graphic packs    
+    - move extra graphic pack creation in wizardFirstSaving.bat and keep a createExtraGraphicPacks.bat call in launchGame.bat in the 
+      automatic import settings code, to create (if needed) new extra graphic pack in case of new "stocks" graphic packs
+      were added in Slashiee repository
+    - fix a bug in convertIconsForAllGames.bat           
+    - timeout 3sec for forceproiority.bat           
+    - fix presets order in V3 graphic packs
+	- automatic import mode disabled by default
+    - the graphic packs used and stored in settings folder are now filtered with only the desired aspect ratios
+    - update documentation : 
+        -> remove references to executables ouputs, 
+        -> precise import settings limitation and workaround in case of issue
+        -> graphic pack creation, use in batchFW
+    - in uninstall.bat : 
+        -> if at least one mlc01 folder is found in games library, ask to remove all mlc01 game's subfolders (No by default)    
+        -> if at least one shaderCache folder is found in games library, ask to remove all shaderCache game's subfolders (No by default)  
+
+
+2018/10/16 V9-9 : 
+    - support for V3 graphic packs : 
+        -> gathering V2 & V3 graphic packs for the game
+        -> complete/create resolutions and CAP FPS graphic packs (V2 and V3)
+    - add a control in launchGame.bat that check if it is not already launched
+    - when settings are imported, patching files for disabling precompiled cache before launching winMerge
+    - modify CEMU's log shortcut (does not open notepad.exe anymore) : link directly to the file and so it will be openned with your text 
+      editor and you can access to cemu's install folder with a right click / open containing folder
+    - ask screen mode during setup.bat (default after timeout is fullscreen)
+    - reduce pre and post processings times :
+        -> parallelize treatments
+        -> use fnr.exe also for patching game's profile and cemuhook.ini (instead of using powershell script for replacing in files)	
+    - create restoreTransShadersForAllGames.bat and add a shortcut to it in Wii-U Games\BatchFW\Tools\Shaders Caches
+    - uninstall.bat : add a call to restoreTransShadersForAllGames.bat    
+    - add icons for Angry Birds Trilogy, Assassin's Creed IV Black Flag, BIT.TRIP Presents... Runner2 Future Legend of Rhythm Alien, Hurry Up Bird Hunter
+
+2018/10/02 V9-8 :    
+    - add an argument to createExtraGraphicPacks.bat to be launched per game.
+    - modify fps cap graphic pack creation : 
+        - for a 30FPS native game with a FPS++ pack provided, only create 150, 200% graphic pack (to speed-up menus for those games)    
+        - for a 30FPS native games without FPS++ provided : 110, 120 and 150% cap graphic packs     
+        - for a 60FPS native games : 105, 110 and 120 % cap graphic packs     
+    - activate the extra graphic pack creation in launchGame.bat (wizardFirstSaving.bat and also when automatic
+      import settings is enabled)
+    - add shortcuts to CEMU's log.txt for each version used.
+    
+2018/09/29 V9-7 :    
+    - FPS cap graphic pack : sync value computed in function of native FPS and presence of a FPS++ pack
+	
+2018/09/28 V9-6 :    
+    - re-write new game graphic pack creation (using native resolution)
+    - create 105% 110% 120% and 200%(menu) cap graphic packs using native FPS of the game 
+    - ask for the output display ratio during setup and complete Slashiee package 
+    - supress executables creation until STEAM works again
+    
+2018/09/12 V9-5 :    
+    - auto-update now to the complete package of slashiee graphic packs (Uncommon)
+    
+2018/09/07 V9-4 :    
+    - modify create graphic pack creation
+    - script to create 16/10 full screen in windowed mode graphic pack now create 1050p and 1200p
+
+2018/08/27 V9-3 :    
+    - fix invisible 16-10 graphic packs due to an unexpected encoded format of the files created
+    
+2018/08/20 V9-2 :    
+    - check if a graphic packs update is available 
+    - add a script to create 16/10 full screen in windowed mode graphic packs 
+    - fix the createGraphicPack error when launched from shortcut
+    - graphic packs detection in wizardFirstSaving wasn't done correctly
+
+2018/08/18 V9-1 :    
+    - replace all more commands with type one (efegue bug)
+    - fix working directory when using shortcut "Create CEMU's executables for selected games"
+
+
+2018/08/16 V9 :
+    - can now ouput executables that can be “shortcuted” by STEAM and so you can use all BatchFW features with launching from STEAM
+    - automatic graphic pack update
+    - auto-import settings from last version reset by default with comparing the two game’s profiles lines side by side (if needed)
+    - fix openGL Cache backup for AMD users (looking for a folder and nor for files in the GLCache folder)
+
+2018/07/03 V8-6 :
+    - secure game saves and transferable cache restore/save process in case of CEMU corrupts files
+    - add winmerge in batchFW's ressources
+    - in wizardFirstSaving : add the option to compare/edit/modify game's profile to an existant
+    - update graphic pack (62)
+
+2018/06/10 V8-5 :
+    - remove the "EQU" message that appears when creating shortcuts with createShortcuts.bat
+    - fix : when creating a new profile file (missing in CEMU), it was not deliver correctly to all version's of CEMU
+    - fix an issue of transferrable cache backup when switching shader type (conventional/separable) for a same game on the same host
+    
+2018/06/07 V8-4 : 
+    - ignore precompiled shader cache is now only proposed to NVIDIA's GPU users
+        - update for CEMU 1.12.1
+        - patch cemuHook.ini AND game's profile using a replace in file powershell command
+    - propose to add -nolegacy option to cemu.exe for iGPU (Intel). Shortcuts created are named with a 'noLegacy' suffix.
+    - updateMySavedGraphicPacks.bat : now also complete the graphic packs list with new ones found _BatchFW_Graphic_Packs
+    - fix : optimized graphic packs detection/import for games that haven't a 1080p graphic pack folder failed. (now based on 540p pattern)
+    - add icons for : Aqua Moto Racing Utopia, Mario Golf Advance Tour 
+    - update graphics packs to v45
+    - fix : switching between 2 hosts using differents shader mode conventional/separable
+    
+2018/05/25 V8-3 : 
+    - improve forbidden characters detection : 
+        - restrict the forbidden characters list to reserved characters for delayed variable expansion : &,!,%
+        - detect and identify unexpected characters not handled by your system's charset (for example japeneese... characters)
+    - improve renaming process (when possible)
+    - check if cemu.exe is not still running in the background (can happen with crash) to avoid GLCache corruption issues
+
+2018/05/23 V8-2 : 
+    - improve detection of forbidden characters in game's folder during setup.bat
+    
+2018/05/21 V8-1 : 
+    - fix automatic import settings always enabled
+
+2018/05/17 V8 : 
+    - save one openGL cache per game under C:\Users\%USERNAME%\AppData\Local^|Roaming\NVIDIA^|AMD\_BatchFW_CemuGLCache\GPU_VENDOR@DRIVERS_VERSION\!GAME_TITLE! 
+      as they are drivers dependants, leave them in this folder (erased when doing a full install)
+    - ignore precompiled shader cache by default (after timeout)
+    - if you chosen a partial drivers install (NVidia), detection of drivers upgrade (using GPU_VENDOR@DRIVERS_VERSION folder'a name)
+    - breaking support for versions of CEMU earlier than 1.11 (before -mlc options). 
+      these specifics versions might be duplicated for each games you launch with.
+      so assume that the version of cemuHook installed is at least 0.5.6.1 (ignoring precompiled shader cache feature is available)  
+    - fix a bug when using batchFW without moving mlc01 data in game's folder (game was not launched)
+    - update external graphic packs folder to 2-894
+    
+2018/05/08 V7-3 : 
+    - minimized all windows before launching CEMU in order to open it in foreground
+    - use only ONE openGL cache for ALL versions of CEMU under C:\Users\%USERNAME%\AppData\Local^|Roaming\NVIDIA^|AMD\_BatchFW_CemuGLCache
+    - add the ignore precompiled shader cache option for each version of CEMU you install (dispatch to all games you play with) 
+    - delete deleteAllMyGLCacheBackup.bat, modifiy shortcut in createShortcuts.bat
+    - when a CEMU path is no more valid, also delete the shortcut Delete my cemu_X.Y.Z's settings in Wii-U Games\BatchFW\Tools
+    - update external graphic packs folder to 2-877
+
+2018/05/03 V7-2 : 
+    - now check if cemu.exe is not already running in the background (open taskmanager and cancel launching game)
+    - delete /b in start call for launching CEMU (foreground)
+
+2018/05/02 V7-1 : 
+    - fix a bug that disable compatibility reports update
+    - add a default value to "yes" with 6s timeout for flushing the GLCahe in createShortcuts.bat
+
+2018/04/29 V7 : 
+    - automatic import is now disable by default
+    - add support for 4 languages (ENG/GER/SPA/FR) by getting locale for host (used to set default answer to the "terminate process" 
+      question when closing a cmd windows with the mouse)
+    - update external graphic packs folder to 2-873
+    - GLCache saving for each CEMU install for AMD, NVIDIA,... GPU : 
+        - OpenGL cache is searched as the first last modified GLCache folder from %USERPROFILE%\appData. So the folder's switches Local/Roaming and AMD/NVidia are handled. 
+        - OpenGL cache will be saved under CEMU_FOLDER\_BatchFW_GLCache\GLCache[GPU_VENDOR@DRIVERS_VERSION]\OGLCacheId after CEMU close
+        - On launching a game, BacthFW check if a display drivers update was done (comparing versions) : 
+            - if a drivers's update is detected, you'll get a popup notification to warn you that BatchFW will try all the same the backup and recommend you to delete all GLCache saved for all version using the new shortcut created for that, if CEMU rebuild also its cache entirely.
+            - creation of a link (junction) in %USERPROFILE%\appData\Local|roaming\Nvidia|AMD\GLCache\OGLCacheId to CEMU_FOLDER\_BatchFW_GLCache\GLCache[GPU_VENDOR@DRIVERS_VERSION]\OGLCacheId
+        - On closing game : diff the GLCacheId 
+            - batchFW get the newOGLCacheId as last modified folder under GLCache.
+            - if OGLCacheId changed, batchFW delete the backup in CEMU_FOLDER and save the new cache
+            - unlinking junction
+    - add a script and a shortcut to delete all GLCache saved : deleteAllMyGLCacheBackup.bat (also called by uninstall.bat)
+    - add a script and a shortcut to delete GPU OpenGL Cache.
+    - add a script and a shortcut to get all caches's folders sizes of all your CEMU installs.
+    - optimize moves : check if data are located on the same drive. If they are, use move command instead of robocopy /MOVE
+    - change the way log files are filled : 
+            - hostLogFile : removing double quotes in path, enabling its parsing
+            - gameLibraryLogFile : always sorted by name (first string in a line is GAME_TITLE)
+    - Host's log is now parse to get paths in
+    - auto-delete invalid shortcuts that point to non existant CEMU_FOLDER path
+    - CEMU_VERSION games compatbility report : add a column containing the row entry format expected when editing "Testing" section for a game @http://compat.cemu.info/
+
+2018/04/19 V6-3 :
+    - support conventionnal shaders
+    - now synchronised controller for CEMU_VERSION when importing settings fro a game
+    - restoreMlc01DataForAllGames.bat mlc01 level fix
+    - updateMySavedGraphicPacks.bat fix
+    
+2018/04/09 V6-2 : 
+    - CEMU graphic pack folder was not clear after closing CEMU
+    - create a sortcut to example.ini file for each version
+    - now systematically update saves graphic packs with external one (not only when import existing settings)
+
+
+2018/04/09 V6-1 : 
+    - update graphic packs to 2-862 
+    - add an argument to setup.bat and a create its shorcut
+    - propose to open CEMU's version example.ini file in wizardFirstSaving to set game profile
+    - Compatibility reports : fill additionnals notes with game version, dlc, and mostly settings defined in game's profile
+    - fix a bug when calling ./tools/getTitleDataFromLibrary.bat directly
+
+2018/04/08 V6 : 
+    - update documentation
+    - add a systematic saving of emulatorSave files (old saves format) in order to avoid loosing them if you try to play a game (that you used to play on an old version) on a CEMU version newer than 1.11. To revert to your old CEMU version extract the saved file in your original folder (CEMU install one).
+    - protect files on read only (to prevent some file editor from changing the encodeing format of files)
+
+2018/04/06 V5-2 : minor fix
+    - failed to save game saves and report comptability when not having mlc01 in the game's folder
+    - add a subfolder USERDOMAIN in reports folder. Create a folder instead of shortcut for consult report.
+
+2018/04/05 V5-1 : minor fix
+    - game profile's shortcut creation was misplaced (move from createShortcuts.bat to launchGame.bat)
+      That affect only missing game's profiles in CEMU subfolder. 
+    - add a script restoreMlc01DataForAllGames.bat to revert mlc01 data move (usefull only i have moved and not copied mlc01 data)
+    - add an uninstall.bat script (calling restoreMlc01DataForAllGames.bat, deleteAllInGameSaves.bat and deleteAllMySettings.bat)
+    - rename BatchFW folders (as graphic packs created, with _BatchFW prefix)
+    - now synchronised controller Profiles folder between CEMU's version and _BatchFW_Controller_Profiles\USERDOMAIN (host depdendant)
+    
+    
+2018/04/04 V5 : Install Icons automatically, open dialog boxes
+    - now only the following characters are forbiden in paths : (,),&,%,£,! and ^
+    - improved specials characters support by : 
+        getting and setting the char code set of the host
+        delay expansion in all code and closing variables visibility
+    - open folder browsing dialog boxes
+    - save / share controller profiles between all CEMU's version
+    - add log files (one for games library and one by host)
+    - add shortcuts to edit game's profiles of your games for each versions
+    - missings games profiles created by BatchFW are shared by all CEMU's version in a _Missing_Games_Profiles subfolder
+    - BatchFW no longer save game profile, for earlier versions than 1.16, new settings (GPU, CPU) are saved throught the settings.bin file
+    - install icons automatically for 115 games (no matter the region is)
+    - add a setup.bat that display documentation only one time and build BatchFW_readme.txt
+
+
+2018/03/04 V4 : transferable shader cache moved to game folder to be shared by all host
+    - analyse CEMU log after the first launch of the game following the first saving wizard for the game to get its shaderCache Id
+    - addvShaderCacheId to the game's description file located under the game's folder
+    - handle games's saves for CEMU version earlier of 1.11 (under mlc01/emulatorSave/shaderCacheId)
+    - save transferable cache in game folder, checking its name and size :
+        After CEMU stop, 4 cases are possibles :  
+
+        When CEMU's transferable cache file and saved cache file have the same name
+            1) CEMU's transferable cache file size > saved cache file size : nominal case, overwrite saved by moving CEMU file
+            2) saved cache file size > CEMU's transferable cache file size : import a transferable shader file right named (shaderCacheId.bin) 
+               or broken compatibility (its what happen if for example you try to import a cache file created with a CEMU version before 1.8 on a 
+               newer version)
+        CEMU's transferable cache file and saved cache file have differents names : 
+            3) CEMU's transferable cache file size > saved cache file size : rename the saved old one, move CEMU file for saving this one
+            4) saved cache file size > CEMU's transferable cache file size : case of upgrading a transferable shader file wrong named (its what 
+            happen if for example you try to import a cache file created from game with another region), or CEMU\_VERSION change the shaderCacheId
+
+        you'll get a user notification for cases 2, 3 and 4. 
+        Files are automatically renamed before backup them.
+        A log file indicating DATE, USER, and HOST, CEMU\_VERSION old and new ShaderCache Id ... is created.
+    - search now games recursively (you can tidy your data the way you want in a game's folder)
+    
+2018/03/04 V3-1 : 
+    - fix no titleID found on game with name containing '.' 
+    - add tutorial video in archive
+
+2018/02/25 V3 : 
+    - get GAME version in %MLC01_FOLDER_PATH%\usr\title\%beginTitleId%\%endTitleId%\meta\meta.xml else in %GAME_FOLDER_PATH%\meta\meta.xml
+    - search if a DLC is installed for the game
+    - analyse CEMU return code to set a CEMU_STATUS for the game (only 2 states : "Unplayable" cr != 0, "Loads" otherwise)
+    - create/update automatically your own working games database %GAMES_FOLDER%\_Games_Compatibility_Reports\%USERDOMAIN%_working_games_list.csv containing a row per game with :
+      Game Title;Cemu Version;OS Version;Region;CPU;GPU;Tester;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library.csv;Game Version;DLC installed;Saves found
+    - create/update automatically a %CEMU_VERSION% working games compatibility report %GAMES_FOLDER%\_Games_Compatibility_Reports\%USERDOMAIN%_%CEMU_VERSION%_games_compatibility_list containing a row per game with :
+      Game Title;Cemu Version;OS Version;Region;CPU;GPU;Tester;FPS;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library.csv;Game Version;DLC installed;Settings Saved;Saved found
+    - those 2 files can be import in Excel and save as xls file to be filtered on each item. 
+      Columns 2-10 are those required for [official CEMU's game compatibility list](http://compat.cemu.info/)
+      To update a game row in, simply delete the game's row
+    - speed up saving game's saves process (launched now in backgrond without waiting after)
+      
+
+2018/02/20 V2-1 : fix and improve robustness with forbidden characters 
+2018/02/18 V2 : 
+    - insure CEMU's thread safing for BatchFW launches using a lock file created in CEMU's folder containing date, user and last game launched
+    - add multi-user game's save support : using windows login : %USERNAME%
+      assuming every user share all CEMU's settings
+        * add backupAllInGameSaves.bat (replace backupInGameSaves.bat that now is called systematically by launchCemuGame.bat 
+          to update %GAME_FOLDER_PATH%\inGameSaves\%GAME_TITLE%_%USERNAME%.zip after closing CEMU)
+        * when launching game, %GAME_TITLE%_%USERNAME%.zip is extracted into %MLC01_FOLDER_PATH%
+        * backupAllInGameSaves.bat simply copy inGameSaves\%GAME_TITLE%_%USERNAME%.zip to inGameSaves\%GAME_TITLE%_%USERNAME%_%DATE%.zip
+    - add updateMySavedGraphicPacks.bat to update graphic packs stored in CEMU settings of each game with _Graphic_Packs content
+      (graphic packs are updated only if they're found in the 2 folders)
+    - launchCemuGame.bat also update graphic packs saved in the settings folder for the game when importing existing 
+      settings from an other CEMU's version (older one generally)
+    - add GPUBufferCacheAccuracy in the game profile if not found (otherwise saving GPUBufferCacheAccuracy won't work)
+    - FIX a bug in backupInGameSaves.bat : compression was made not recursively (missing 'r' argument to rar.exe)
+    - add titleId troubles handling in getTitleDataFromLibrary.bat and createGraphicPacks.bat : 
+      if no meta.xml file is found CEMU give a titleId BEGINNING with ffffffff
+      if titleId found in meta.xml is not corresponding with the CEMU's one (what happen when overwriting game's file with a DLC 
+      instead of installing it at the right place in the mlc01 folder) CEMU give a titleId ENDING with ffffffff
+    - tidy BatchFW shortcuts by category
+
+2018/02/13 V1-2 : 
+    - add a script to create commonly used CEMU's graphic packs for a game given its titleId (can be used alone)
+      Each graphic pack created define many filters in order to work for all games (because every game might have 
+      a different native resolution)
+    - wizardFirstSaving (called only the first time to create settings for a game) now list
+      availables graphic packs OR create missing ones automatically (after asking you to update them 
+      from https://slashiee.github.io/cemu_graphic_packs/)
+    - in order to reduce CEMU's loading time (>30s), handle an external graphic pack folder under _Graphic_Packs
+      scripts work also if you decide to keep yout graphic pack under CEMU's folder.
+    - move files to a _CEMU_Batch_Framework subfolder
+    - move shortcuts created for BATCH framework in BatchFW subfolders
+    - create shortcuts for BATCH framework'tools : 
+        copyMlc01DataForAllGames.bat
+        createGraphicPacks.bat
+        deleteAllInGameSaves.bat
+        deleteAllMySettings.bat
+        getTitleDataFromLibrary.bat
+        moveMlc01DataForAllGames.bat            
+    
+2018/02/09 V1-1-1 : 
+    - add a script to get game's data (such as description, productCode, companyCode but mostly REGION of game) 
+      from internal resource database using its titleId. Called in wizardFirstSaving.bat (that now save a text file 
+      with game name in the game's folder containing those informations) and can be used alone (get user input throught 
+      DOS console in this case)
+
+2018/02/07 V1-1 : 
+    - change icons
+    - relative paths in zip files (inGameSaves)
+    - convertIconsForAllGames.bat rename JPG file with GAME_TITLE
+
+2018/02/05 V1-0-1 : 
+
+    - fix a bug on mlc01 folder handling. Now uses /mlc01/usr/*/*/titleid
+    - add backupInGameSaves.bat
+
+2018/02/01 V1-0   : First packaged version
+

@@ -1,0 +1,19 @@
+Command line reference
+Quick Any2Ico can be used to create ICO/PNG files from the command line or a batch script. The supported command line switches are:
+Quick_Any2Ico.exe "-img=Source image" "-icon=Dest. icon/png" -formats=IconFormats -pngc -crop -stretch
+OR
+Quick_Any2Ico.exe "-res=Resource file" "-icon=Dest. icon/png" -formats=IconFormats -pngc -crop -stretch
+"-img=Source image" : This switch specifies the image file to convert. If the image file path or name has white spaces, you must enclose the entire switch with double quotes. Example: "-img=C:\My picture.png" or -img=C:\MyPic.png.
+"-icon=Dest. icon/png" : This switch specifies the destination ICO or PNG file. If the icon file path or name has white spaces, you must enclose the entire switch with double quotes. Example: "-icon=C:\My icon.ico" or -icon=C:\MyIcon.png.
+-formats=IconFormats : (Optional) This switch specifies the image fomats for the icon file. Several formats must be coma separated and there must be no white spaces between the characters. Valid values are 16,24,32,48,64,72,96,128,256,512. If this parameter is not specified, the default sizes are applied: 16,32,48,256.
+-pngc : (Optional) This switch specifies that large formats should be PNG compressed. Not valid fot PNG destination files.
+-crop : (Optional) This switch specifies that if the source image is not squared, it should be cropped to fill the icon's square.
+-stretch : (Optional) This switch specifies that if the source image is not squared, it should be stretched to fill the icon's square.
+If neither -crop or -stretch are specified, the image is centered.
+"-res=Resource file" : This switch specifies the resource file that contains the icon to be extracted. If the resource file path or name has white spaces, you must enclose the entire switch with double quotes. To specify the index of the icon to be extracted, append a coma and the zero based index of the icon. Example: -res=Shell32.dll,17 or "-res=C:\My program.exe,2".
+Obviously you can't specify both "-img=Source image" and "-res=Resource file". If you do, "-res=Resource file" will be used.
+The quick examples below will hopefully ilustrate more accurately how the command line switches work.
+The command below will extract the 15th icon from shell32.dll with PNG compression and the formats 32x32, 48x48 and 256x256.
+Quick_Any2Ico.exe -res=Shell32.dll,14 -icon=Shell32.ico -formats=32,48,256 -pngc
+The command below will convert the C:\My image.png picture to C:\My Icon.ico with the default formats and crop it to fit the icon's square.
+Quick_Any2Ico.exe "-img=C:\My image.png" "icon=C:\My Icon.ico" -crop

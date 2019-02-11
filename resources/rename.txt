@@ -1,0 +1,1 @@
+Renamer.exe -b "D:\Jeux\Roms\WII-U\_BatchFW_Install\resources\rename.arb" -aF "D:\Jeux\Roms\WII-U\_BatchFW_Graphic_Packs\*.*" -g -x

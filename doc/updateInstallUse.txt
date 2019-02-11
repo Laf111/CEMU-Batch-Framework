@@ -1,0 +1,78 @@
+=========================================================
+INSTALL-UPDATE-USE : 
+=========================================================
+
+INSTALL : 
+
+    Extract archive contains in your loadiine's games parent folder, go in _BatchFW_Install and launch Setup.bat
+    
+    On the first install, all the documentation is displayed and the BatchFW_readme.txt file is built.
+    Setup.bat will run in SILENT mode if BatchFW_readme.txt exist. It means that it will be less interactive
+    When answering questions in setup.bat, the log file for your current host is created under _BatchFW_Install.
+    Never delete this file ! It contains your Host's settings (fullscreen mode, desired aspect ratio, GLCache path...)
+    
+    During the setup, you'll defined sortcut's target and CEMU's installs to be registered but also : 
+        - if an graphic pack update is available, ask you if you want to update the _BatchFW_Graphic_Packs folder
+        - if you want to run CEMU in fullscreen or in windowed mode
+        - the desired aspect ratios (to create and select only the usefull graphic packs)
+        - if only one windows profile (user) is to handle (gain in pre treatments time before launching CEMU)
+        - ask if you want to move mlc01 data to game's folder (advanced use) and so you can switch from one CEMU's version to another easily
+    
+    Once the setup finished, you'll get all the windows shortcuts for all your games and all your registered versions of CEMU    
+    Setup.bat call createShortcuts.bat for each CEMU's version
+    
+    To be fully functional BatchFw need that you register the last(s) version(s) of CEMU you use to play your games.        
+    
+    If you 're using more the one CEMU's version (per game for example) register all installations and select the games concerned.
+    
+    Once your shortcuts created, launch all your games one time to let BatchFw copy the transferable cache into the game's folder
+             
+    If you 're using the same CEMU's version for many players : register this version with one user, and use the shortcut 
+    Wii-U Games\BatchFW\Tools\Games's saves\Import Saves to import saves for other users afterwhile.    
+    
+UPDATE : 
+
+    Delete _BatchFW_Graphic_Packs only
+    Extract archive contains in your loadiine's games parent folder (same process as install), overwrite _BatchFW_Install with newer files.
+
+USE : 
+    
+    Create your games shortcut when launching the setup.bat the first time (when installing BatchFW)
+    Then you'll not have to come back to the _BatchFW_Install folder. 
+    You shall use now the BatchFW shortcut's group created near your games's shortcuts:
+    
+    - "Register CEMU installs"                      : to install more than one version of CEMU and create all shortcuts (for all your game) = setup.bat in silent mode
+    - "Create CEMU's Shortcuts for selected games"  : to install one version of CEMU and choose which game you want to create a shortcut for. 
+    
+    BatchFW come with an external graphic pack folder _BatchFW_Graphic_Packs created during setup.bat
+    It auto-update and check graphic packs update availability (Slashiee graphic packs)
+    Only graphic packs of the game are use for CEMU (that heavily speed CEMU's openning time)
+    A specific documentation was written for graphic packs handling in BatchFW.
+    
+    Open GLCache is backuped under %USERPROFILE%\AppData\Roaming OR local\%GPU_VENDOR%\_BatchFW_CemuGLCache for all your game and for all GPU.
+    If you run an NVIDIA GPU, you can choose to disable automatically the precompiled cache for all your games (patching CemuHook files and CEMU's game profile)
+    So you go only with your GPU cache, saving space on your device by not duplicating the compiled shaders cache and making it compatible with all version of CEMU
+    This cache is valid unless you update your display's drivers : no need to fully recompile each cache for each game on each CEMU's version)
+    When you update your drivers, batchFW will automically detect the new cache to backup and remove the old one.
+
+    Disabling precompiled cache is not proposed to AMD's GPU because of their 64Mo size cache limitation
+    If you run an iGPU (Intel graphics), you will be asked to use the -noLegacy CEMU's option.
+
+    AUTOMATIC_IMPORT : 
+    When launching shortcut creation, you'll be asked to enable or not automatic settings import. 
+    In this mode, you 'll not have to reset your settings when updating CEMU.
+    This settings is disabled by default. Enable it only when you know that no settings modification were done since the last version you used to play the game with.
+    If you don't know, leave it at disabled (default).
+    
+    If you enable automatic import and have the single issue (for example graphic pack selection not imported), delete the shortcut and recreate it whith disabling the automatic import before report any issue on CEMU's reddit or discord
+
+    If you install updates and DLC manually after copying the new game's folder in your games library : use the shortcut 
+    Wii-U Games\BatchFW\Tools\mlc01 folder handling\Prepare Games to emulation.lnk to create mlc01 tree where to put 
+     - update (mlc01\usr\title\titleId[0:7]\titleId[8:15]
+     - and DLC (mlc01\usr\title\titleId[0:7]\titleId[8:15]\aoc
+    
+    
+UNINSTALL : 
+
+    Launch uninstall.bat from your desktop : "BatchFW\Uninstall BatchFW"
+    
