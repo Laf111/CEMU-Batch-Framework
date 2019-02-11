@@ -66,10 +66,8 @@ USE :
     
     If you enable automatic import and have the single issue (for example graphic pack selection not imported), delete the shortcut and recreate it whith disabling the automatic import before report any issue on CEMU's reddit or discord
 
-    If you install updates and DLC manually after copying the new game's folder in your games library : use the shortcut 
-    Wii-U Games\BatchFW\Tools\mlc01 folder handling\Prepare Games to emulation.lnk to create mlc01 tree where to put 
-     - update (mlc01\usr\title\titleId[0:7]\titleId[8:15]
-     - and DLC (mlc01\usr\title\titleId[0:7]\titleId[8:15]\aoc
+    WARNING : Do not delete log files created under ./logs 
+    If you need to reset BatchFw to default, use the shortcut "Wii-U Games\BatchFW\Reset BatchFw.lnk"
     
     
 UNINSTALL : 
