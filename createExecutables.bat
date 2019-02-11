@@ -1111,7 +1111,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
-    :userGameShortcut
+    :userGameExe
         set "user=%~1"
 
         REM : Creating shortcut to launch game

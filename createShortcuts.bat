@@ -10,6 +10,7 @@ REM : main
     set "WORKINGDIR="!CD!""
 
     set "THIS_SCRIPT=%~0"
+    title !THIS_SCRIPT!
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -272,7 +273,7 @@ REM : main
     REM : flush logFile of SCREEN_MODE
     call:cleanHostLogFile SCREEN_MODE
 
-    choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y^, n)? : "
+    choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y, n)? : "
     if !ERRORLEVEL! EQU 1 goto:checkInstall
 
     set "msg="SCREEN_MODE=windowed""
@@ -348,7 +349,7 @@ REM : main
 
     REM : importMode
     set "IMPORT_MODE=DISABLED"
-    call:getUserInput "Enable automatic settings import? (y^, n) : " "n,y" ANSWER
+    call:getUserInput "Enable automatic settings import? (y, n) : " "n,y" ANSWER
     if [!ANSWER!] == ["y"] set "IMPORT_MODE=ENABLED"
 
     set "msg="!CEMU_FOLDER_NAME! install with automatic import=!IMPORT_MODE:"=!""
@@ -385,7 +386,7 @@ REM : main
             @echo   no need to fully compile shaders for each version of CEMU^,
             @echo   GLCache is shared by all installs
             @echo.
-        call:getUserInput "Ignore precompiled shader cache for all games? (y^, n) : " "y,n" ANSWER
+        call:getUserInput "Ignore precompiled shader cache for all games? (y, n) : " "y,n" ANSWER
         if [!ANSWER!] == ["y"] set "IGNORE_PRECOMP=ENABLED"
 
         set "msg="!CEMU_FOLDER_NAME:"=! install with ignoring precompiled shader cache=!IGNORE_PRECOMP:"=!""
@@ -399,14 +400,14 @@ REM : main
         @echo ---------------------------------------------------------
         REM : CEMU < 1.15.1
         if %post1151% EQU 0 (
-            call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y^, n) : " "n,y" ANSWER
+            call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y, n) : " "n,y" ANSWER
             if [!ANSWER!] == ["n"] goto:scanGamesFolder
             set "argLeg=-noLegacy"
             goto:scanGamesFolder
         )
         REM : CEMU >= 1.15.1
         if %post1151% EQU 1 (
-            call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y^, n) : " "n,y" ANSWER
+            call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y, n) : " "n,y" ANSWER
             if [!ANSWER!] == ["n"] goto:scanGamesFolder
             set "argLeg=-Legacy"
             goto:scanGamesFolder
@@ -477,7 +478,7 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
-            call:getUserInput "Renaming folder for you? (y^, n) : " "y,n" ANSWER
+            call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
@@ -533,7 +534,9 @@ REM : main
     if !QUIET_MODE! EQU 0 @echo Waiting the end of all child processes before ending^.^.^.
 
     if %nbArgs% EQU 0 endlocal
-    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+    exit /b 0
+
     goto:eof
 
     REM : ------------------------------------------------------------------
@@ -547,7 +550,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:Â£=!"
+        set "str=!str:£=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1015,7 +1018,7 @@ REM : functions
 
             if [!defaultBrowser!] == ["NOT_FOUND"] (
                 @echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\code
-                @echo ^(no need to rename it^) then use the sortcut
+                @echo ^(no need to rename it^) then use the shortcut
                 @echo Wii-U Games^\BatchFW^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
                 goto:icoSet
             )
@@ -1282,7 +1285,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
-        REM detect (,),&,%,Â£ and ^
+        REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
         set "str=!str:\"=!"
