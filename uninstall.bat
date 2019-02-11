@@ -15,7 +15,11 @@ REM : main
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
 
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     
     
@@ -72,7 +76,6 @@ REM : main
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""
 
-    set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
 
     @echo =========================================================
     @echo         CEMU^'s Batch Framework !bfwVersion! uninstaller
@@ -143,9 +146,8 @@ REM : main
     :getMlc01Target
 
     call:getFolderPath "Please enter mlc01 target folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER
-
-    set "psCommand="Start-Process -FilePath 'restoreMlc01DataForAllGames.bat' -ArgumentList '!MLC01_FOLDER:"=\"!' -WorkingDirectory '!BFW_TOOLS_PATH:"=!' -wait""
-    powershell !psCommand!
+    set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
+    wscript /nologo !StartWait! !script! !MLC01_FOLDER!
     set cr=!ERRORLEVEL!
     if %cr% NEQ 0 (
         @echo Error in restoreMlc01DataForAllGames^.bat for !MLC01_FOLDER!
@@ -165,15 +167,10 @@ REM : main
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
-    call:getFolderPath "Please enter a CEMU target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
-    REM : check that cemu.exe exist in
-    set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
-        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
-        goto:askCemuFolder
-    )
-    set "psCommand="Start-Process -FilePath 'restoreTransShadersForAllGames.bat' -ArgumentList '!CEMU_FOLDER:"=\"!' -WorkingDirectory '!BFW_TOOLS_PATH:"=!' -wait""
-    powershell !psCommand!    
+    call:getFolderPath "Please enter a target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
+    
+    set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
+    wscript /nologo !StartWait! !script! !CEMU_FOLDER!
     set cr=!ERRORLEVEL!
     if %cr% NEQ 0 (
         @echo Error in restoreTransShadersForAllGames^.bat for !CEMU_FOLDER!
