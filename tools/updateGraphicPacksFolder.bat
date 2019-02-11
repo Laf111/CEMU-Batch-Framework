@@ -74,7 +74,7 @@ REM : main
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
 
     if exist !zipLogFile! (
-        @echo No new graphic Packs update available, last version is still !zipFile!
+        @echo No new graphics packs update(s) available, last version is still !zipFile!
         timeout /T 4 > NUL
         exit /b 20
     )
@@ -95,7 +95,7 @@ REM : main
 
     REM : launch graphic pack update
     @echo =========================================================
-    @echo Update BatchFW^'s graphic packs
+    @echo Updating BatchFW^'s graphic packs
     @echo ---------------------------------------------------------
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
