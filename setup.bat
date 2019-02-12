@@ -219,10 +219,9 @@ REM : main
         @echo ---------------------------------------------------------
         call:getUserInput "Read the goals of BatchFW? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:goalsOK
-        @echo ---------------------------------------------------------
 
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
-         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :goalsOK
         call:getUserInput "Read informations on CEMU interfaces history? (y,n)" "y,n" ANSWER
@@ -264,7 +263,7 @@ REM : main
 
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    wscript /nologo !StartHidden! !script!    
+    wscript /nologo !StartHiddenWait! !script!    
     
     @echo ^> Graphic packs installed from archive
 
@@ -608,6 +607,7 @@ REM : main
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe""
     if /I not exist !cemuExe! (
         @echo ERROR No Cemu.exe file found under !CEMU_FOLDER! ^^!
+        set /A "NBCV-=1"
         goto:getCemuFolder
     )
     REM : basename of CEMU_FOLDER to get CEMU version

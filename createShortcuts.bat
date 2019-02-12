@@ -10,7 +10,6 @@ REM : main
     set "WORKINGDIR="!CD!""
 
     set "THIS_SCRIPT=%~0"
-    title !THIS_SCRIPT!
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -72,11 +71,13 @@ REM : main
     REM : Intel legacy options
     set "argLeg="
 
-    if %nbArgs% NEQ 0 goto:getArgsValue
-
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
 
+    if %nbArgs% NEQ 0 goto:getArgsValue
+
+    title !THIS_SCRIPT!
+    
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""

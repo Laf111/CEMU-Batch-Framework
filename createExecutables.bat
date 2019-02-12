@@ -10,7 +10,6 @@ REM : main
     set "WORKINGDIR="!CD!""
 
     set "THIS_SCRIPT=%~0"
-    title !THIS_SCRIPT!
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -73,6 +72,8 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
+    title !THIS_SCRIPT!
+    
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
 

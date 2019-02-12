@@ -30,6 +30,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
@@ -186,13 +187,13 @@ REM : main
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     if not exist !exampleFile! goto:openProfileFile
 
-    choice /C yn /CS /N /M "Do you want to open !exampleFile:"=! to see all settings you can set ? (y, n) : "
+    choice /C yn /CS /N /M "Do you want to open !exampleFile:"=! to see all settings you can set? (y, n) : "
     if !ERRORLEVEL! EQU 2  goto:diffProfileFile
 
-    wscript /nologo !StartWait! !exampleFile!
+    wscript /nologo !Start! !exampleFile!
 
     :diffProfileFile
-    choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file ? (y, n) : "
+    choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2  goto:openProfileFile
 
     :askRefCemuFolder
@@ -243,7 +244,12 @@ REM : main
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    choice /C yn /CS /N /M "Do you need to reopen profile file to modify overrided settings ? (y, n) : "
+    choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game^'s profile? (y, n) : "
+    if !ERRORLEVEL! EQU 2  goto:reopen
+
+    wscript /nologo !Start! !exampleFile!
+    :reopen
+    choice /C yn /CS /N /M "Do you need to reopen profile file to modify overrided settings? (y, n) : "
     if !ERRORLEVEL! EQU 1  goto:openProfileFile
 
     REM : waiting updateGamesGraphicPacks processes ending
@@ -380,7 +386,7 @@ REM : main
     )
     if [!OTHER_SAVE!] == ["NONE"] goto:done
 
-    choice /C yn /N /M "Do you want to use this one : !OTHER_SAVE:"=! (y, n) ?"
+    choice /C yn /N /M "Do you want to use this one : !OTHER_SAVE:"=! (y, n)?"
     if !ERRORLEVEL! EQU 2 goto:done
 
     @echo Import save from !OTHER_SAVE:"=!
@@ -567,7 +573,7 @@ REM : functions
     :importSaves
         set fileFound=%~1
 
-        choice /C yn /N /M "Do you want to use this one : %fileFound% (y, n) ?"
+        choice /C yn /N /M "Do you want to use this one : %fileFound% (y, n)?"
         if [!ERRORLEVEL!] == [1] set SAVE_FILE=%fileFound%
 
     goto:eof

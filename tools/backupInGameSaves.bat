@@ -74,15 +74,6 @@ REM : main
         pause
         exit /b 1
     )
-    REM : check if folder name contains forbiden character for !GAME_FOLDER_PATH!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !GAME_FOLDER_PATH!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !GAME_FOLDER_PATH! path to be DOS compatible ^!^, exiting
-        pause
-        exit /b 2
-    )
 
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[1]!"
@@ -95,15 +86,6 @@ REM : main
     set "user=!args[2]!"
     set "user=!user:"=!"
 
-    REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !MLC01_FOLDER_PATH!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !MLC01_FOLDER_PATH! path to be DOS compatible ^!^, exiting
-        pause
-        exit /b 4
-    )
 
     REM : No need to handles saves in function of their nature :
     REM : CEMU version earlier than 1.10 : mlc01/emulatorSave in CEMU_FOLDER

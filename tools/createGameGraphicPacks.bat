@@ -129,15 +129,6 @@ REM : main
 
     :inputsAvailables
 
-    REM : check if folder name contains forbiden character for !BFW_GP_FOLDER!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !BFW_GP_FOLDER!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !BFW_GP_FOLDER! path to be DOS compatible ^!^, exiting
-        pause
-        exit /b 2
-    )
     REM : check if game is recognized
     call:checkValidity %titleId%
 
@@ -748,13 +739,8 @@ REM : functions
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         set "ARLIST="
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
-
-        if ["!ARLIST!"] == [""] (
-            @echo Unable to get desired aspect ratio ^(choosen during setup^) from !logFile! ^?
-            @echo Delete the whole shortcuts folder ^(Wii-U Games^) and relaunch
-            pause
-            exit /b 4
-        )
+        REM : if not defined, here fix it to 16/9
+        if ["!ARLIST!"] == [""] set "ARLIST=169"
         
         REM : initialize V3 graphic pack               
         set "gpv3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""

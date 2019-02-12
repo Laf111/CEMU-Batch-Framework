@@ -165,17 +165,6 @@ REM : main
         exit 3
     )
 
-    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
-    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !OUTPUT_FOLDER!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !OUTPUT_FOLDER! path to be DOS compatible ^!^, exiting >> !batchFwLog!
-        @echo Please rename !OUTPUT_FOLDER! path to be DOS compatible ^!^, exiting
-        timeout /t 8 > NUL
-        exit 2
-    )
-
     REM : create shortcut to logFile
     call:createBatchFwLogShorcut    
     
@@ -292,17 +281,6 @@ REM : main
         exit 20
     )
 
-    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
-    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !CEMU_FOLDER!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !CEMU_FOLDER! path to be DOS compatible ^!^, exiting >> !batchFwLog!
-        @echo Please rename !CEMU_FOLDER! path to be DOS compatible ^!^, exiting
-        timeout /t 8 > NUL
-        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
-        exit 2
-    )
 
     REM : get and check ICO_FILE_PATH
     set "ICO_PATH=!args[3]!"
@@ -324,17 +302,6 @@ REM : main
         exit 5
     )
 
-    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
-    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !MLC01_FOLDER_PATH!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !MLC01_FOLDER_PATH! path to be DOS compatible ^!^, exiting >> !batchFwLog!
-        @echo Please rename !MLC01_FOLDER_PATH! path to be DOS compatible ^!^, exiting
-        timeout /t 8 > NUL
-        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
-        exit 2
-    )
 
     @echo Don^'t close this windows^, it will stop CEMU ^! >> !batchFwLog!
     @echo It will be closed automatically after closing CEMU >> !batchFwLog!

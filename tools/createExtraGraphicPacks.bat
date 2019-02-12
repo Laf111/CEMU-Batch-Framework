@@ -153,15 +153,7 @@ REM : main
 
     :inputsAvailables
 
-    REM : check if folder name contains forbiden character for !BFW_GP_FOLDER!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !BFW_GP_FOLDER!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !BFW_GP_FOLDER! path to be DOS compatible ^!^, exiting
-        
-        exit /b 2
-    )
+
     REM : check if game is recognized
     call:checkValidity %titleId%
 

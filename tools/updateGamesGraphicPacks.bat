@@ -98,15 +98,6 @@ REM : main
         
         exit /b 2
     )
-    REM : check if folder name contains forbiden character for !GAME_FOLDER_PATH!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !GAME_FOLDER_PATH!
-    set cr=!ERRORLEVEL!
-    if %cr% NEQ 0 (
-        @echo Please rename !GAME_FOLDER_PATH! path to be DOS compatible ^!^, exiting >> !myLog!
-        
-        exit /b 3
-    )
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
