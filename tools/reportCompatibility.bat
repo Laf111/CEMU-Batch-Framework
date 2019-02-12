@@ -120,7 +120,7 @@ REM : main
 
     if not [!libFileLine!] == ["NONE"]  (
         set EXIST_IN_DATABASE=yes
-        set REGION=%libFileLine:~18,3%
+        set REGION=%libFileLine:~20,3%
     )
 
     set "beginTitleId=%titleId:~0,8%"
