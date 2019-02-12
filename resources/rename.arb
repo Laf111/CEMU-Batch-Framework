@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<AntRenamer Version="2.10.0" Date="05/12/2018">
- <Batch>
-  <StrRepl Search="!" Repl="" AllOccurences="-1" CaseSensitive="0" IncludeExt="-1" OnlyExt="0"/>
-  <StrRepl Search="&#38;" Repl="" AllOccurences="-1" CaseSensitive="0" IncludeExt="-1" OnlyExt="0"/>
-  <StrRepl Search="." Repl="-" AllOccurences="-1" CaseSensitive="0" IncludeExt="-1" OnlyExt="0"/>
- </Batch>
-</AntRenamer>
