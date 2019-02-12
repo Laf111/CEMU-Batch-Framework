@@ -302,7 +302,7 @@ REM : main
     @echo Download and extract CemuHook in !CEMU_FOLDER!
 
     timeout /T 2 > NUL
-    wscript /nologo !Start! !StartWait! "%windir%\explorer.exe" !CEMU_FOLDER!
+    wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
     choice /C y /N /M "If CemuHook is installed, continue? (y) : "
 
@@ -845,14 +845,14 @@ REM : functions
         )
 
         REM : create a shortcut to createExecutables.bat (if needed)
-        REM set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's executables for selected games.lnk""
-        REM set "LINK_DESCRIPTION="Create missing CEMU's executables for selected games given a version of CEMU""
-        REM set "TARGET_PATH="!BFW_PATH:"=!\createExecutables.bat""
-        REM set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createExecutables.ico""
-        REM if not exist !LINK_PATH! (
-            REM if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to createExecutables^.bat
-            REM call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
-        REM )
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's executables for selected games.lnk""
+        set "LINK_DESCRIPTION="Create missing CEMU's executables for selected games given a version of CEMU""
+        set "TARGET_PATH="!BFW_PATH:"=!\createExecutables.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createExecutables.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to createExecutables^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
+        )
 
         REM : create a shortcut to updateGraphicPacksFolder.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update my graphic packs to latest.lnk""

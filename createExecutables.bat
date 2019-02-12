@@ -31,7 +31,6 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -301,7 +300,7 @@ REM : main
     @echo Download and extract CemuHook in !CEMU_FOLDER!
 
     timeout /T 2 > NUL
-    wscript /nologo !Start! !StartWait! "%windir%\explorer.exe" !CEMU_FOLDER!
+    wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
     choice /C y /N /M "If CemuHook is installed, continue? (y) : "
 
@@ -849,14 +848,14 @@ REM : functions
         )
         
         REM : create a shortcut to this script (if needed)
-        REM set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's shortcuts for selected games.lnk""
-        REM set "LINK_DESCRIPTION="Create missing CEMU's shortcuts for selected games given a version of CEMU""
-        REM set "TARGET_PATH="!THIS_SCRIPT!""
-        REM set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createShortcuts.ico""
-        REM if not exist !LINK_PATH! (
-            REM if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to this script
-            REM call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
-        REM )
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's shortcuts for selected games.lnk""
+        set "LINK_DESCRIPTION="Create missing CEMU's shortcuts for selected games given a version of CEMU""
+        set "TARGET_PATH="!BFW_PATH:"=!\createShortcuts.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createShortcuts.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to this script
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
+        )
 
         REM : create a shortcut to updateGraphicPacksFolder.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update my graphic packs to latest.lnk""
@@ -1182,8 +1181,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         @echo setlocal EnableExtensions>> !BATCH_FILE!
         @echo chcp %CHARSET% ^> NUL>> !BATCH_FILE!
         @echo pushd !TOOLS_PATH!>> !BATCH_FILE!
-REM        @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
-        @echo wscript !StartMaximized! !BatchFwCall!>> !BATCH_FILE!
+        @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
         @echo exit %%ERRORLEVEL%%>> !BATCH_FILE!
 
         REM : get batch version from log file
@@ -1198,7 +1196,7 @@ REM        @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
         wscript /nologo !StartHiddenWait! !bec! !ARGS! > NUL 2>&1
 
         pushd !GAMES_FOLDER!
-        @echo - Executable for !user! created ^^!
+        if !QUIET_MODE! EQU 0 @echo - Executable for !user! created ^^!
 
         set /A NB_GAMES_TREATED+=1
     goto:eof

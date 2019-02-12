@@ -669,7 +669,7 @@ REM : main
     timeout /T 4 > NUL
 
     set "folder="!OUTPUT_FOLDER:"=!\Wii-U Games""
-    wscript /nologo !Start! !StartWait! "%windir%\explorer.exe" !folder!
+    wscript /nologo !Start! "%windir%\explorer.exe" !folder!
     @echo =========================================================
     @echo This windows will close automatically in 15s
     @echo     ^(n^)^: don^'t close^, i want to read history log first
@@ -763,7 +763,7 @@ REM : functions
         @echo Download and extract CemuHook in !CEMU_FOLDER!
     
         timeout /T 2 > NUL
-        wscript /nologo !Start! !StartWait! "%windir%\explorer.exe" !CEMU_FOLDER!
+        wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
 
