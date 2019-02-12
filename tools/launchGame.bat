@@ -203,6 +203,9 @@ REM : main
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
 
     title Launching !GAME_TITLE! with !CEMU_FOLDER_NAME!
+    
+    REM : log CEMU
+    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
 
     REM : BatchFW graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
@@ -215,21 +218,15 @@ REM : main
     )
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
 
-    REM : check if BatchFw have to complete graphic packs for this game
-    set "completeGP="NONE""
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "COMPLETE_GP" 2^>NUL') do set "completeGP="YES""
-
-    REM : log CEMU
-    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
-
-    if [!completeGP!] == ["NONE"] goto:getFullScreenMode
-
     REM : launching user's software
     call:launchUserSoftware
+
+    REM : check a graphic pack update
+    set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
+    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script! -silent   
     
     REM : flag to create legacy packs
     set "createLegacyPacks=true"
-
 
     if not exist !cemuLog! goto:updateGameGraphicPack
 
@@ -683,7 +680,7 @@ REM : main
     :moveGl
     call:moveFolder !GlCacheSaved! !GlCache! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR ^: when moving openGL save^, close all explorer^.exe that might interfer ^!" 4117
+        cscript /nologo !MessageBox! "ERROR While moving openGL save^, close all explorer^.exe that might interfer ^!" 4117
         if !ERROLRLEVEL! EQU 4 goto:moveGl
     )
 
@@ -946,7 +943,7 @@ REM : main
     if [!GlCache!] == ["NOT_FOUND"] goto:analyseCemuLog
     if exist !GlCache! call:moveFolder !GlCache! !GlCacheSaved! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR ^: when moving back GLCache save^, please close all explorer^.exe open in openGL cache folder" 4117
+        cscript /nologo !MessageBox! "ERROR While moving back GLCache save^, please close all explorer^.exe open in openGL cache folder" 4117
         if !ERROLEVEL! EQU 4 goto:moveBack
         cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GLCache is backup sucessfully^, if it persists close your session and retry" 4144
     )
@@ -1121,7 +1118,10 @@ REM : main
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
     @echo =========================================================
     @echo Waiting the end of all child processes before ending ^.^.^.
+    
     exit !ERRORLEVEL!
+    
+    goto:eof
     REM : ------------------------------------------------------------------
 
 

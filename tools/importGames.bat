@@ -30,10 +30,8 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
-    set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
-    set "antRenamerPath="!BFW_RESOURCES_PATH:"=!\Renamer.exe""
-    set "antRenamerBatch="!BFW_RESOURCES_PATH:"=!\rename.arb""
-    
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     
@@ -93,9 +91,8 @@ REM : main
     )
     pushd !INPUT_FOLDER!
 
-    REM : rename folders that contains forbiden characters : & !
-    set "pat="!INPUT_FOLDER:"=!\*.*""
-    wscript /nologo !StartMinimizedWait! !antRenamerPath! !antRenamerBatch! -aF !pat! -g -x
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
     
     :scanGamesFolder
     cls
@@ -301,10 +298,7 @@ REM : functions
         :moveGame
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            echo !cr!
-            echo cscript /nologo !MessageBox! "ERROR ^: when moving !GAME_TITLE!, close all explorer^.exe that might interfer ^!" 4112
-            cscript /nologo !MessageBox! "ERROR ^: when moving game, close all explorer^.exe that might interfer ^!" 4112
-            pause
+            cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4112
             if !ERROLRLEVEL! EQU 4 goto:moveGame
         )
         
@@ -363,7 +357,7 @@ REM : functions
         :moveUpdate
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR ^: when moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4112
+            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4112
             if !ERROLRLEVEL! EQU 4 goto:moveUpdate
         )
         @echo - update installed
@@ -404,7 +398,7 @@ REM : functions
         :moveDlc
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR ^: when moving !GAME_TITLE!^'s DLC ^, close all explorer^.exe that might interfer ^!" 4112
+            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC ^, close all explorer^.exe that might interfer ^!" 4112
             if !ERROLRLEVEL! EQU 4 goto:moveDlc
         )
 

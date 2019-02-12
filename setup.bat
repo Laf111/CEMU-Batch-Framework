@@ -261,6 +261,10 @@ REM : main
         exit /b 1
     )
 
+    REM : filter graphic pack folder
+    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
+    wscript /nologo !StartHidden! !script!    
+    
     @echo ^> Graphic packs installed from archive
 
    :updateGp

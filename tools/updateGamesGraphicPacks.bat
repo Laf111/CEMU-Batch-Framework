@@ -114,6 +114,10 @@ REM : main
     @echo Update all graphic packs for !GAME_TITLE! >> !myLog!
     @echo ========================================================= >> !myLog!
 
+    REM : check if BatchFw have to complete graphic packs for this game
+    set "completeGP="NONE""
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "COMPLETE_GP" 2^>NUL') do set "completeGP="YES""
+
     REM : get the last version used
     set "newVersion=NOT_FOUND"
 
@@ -317,7 +321,7 @@ REM : functions
         REM : if V3 GP found, get the last update version
         if %v3Gpfound% EQU 1 goto:checkRecentUpdate
 
-        @echo Create BatchFW graphic packs for this game ^.^.^.
+        @echo Create BatchFW graphic packs for this game ^.^.^.        
         REM : Create game's graphic pack
         set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
@@ -333,7 +337,8 @@ REM : functions
         @echo Extra graphic packs for this game was built using !lastVersion!^, !newVersion! is the last downloaded
 
         :createExtraGP
-
+        if [!completeGP!] == ["NONE"] goto:eof
+        
         if ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
         if not ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
 

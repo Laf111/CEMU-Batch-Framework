@@ -26,14 +26,15 @@ REM : main
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "antRenamerPath="!BFW_RESOURCES_PATH:"=!\Renamer.exe""
-    set "antRenamerBatch="!BFW_RESOURCES_PATH:"=!\rename.arb""
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     REM : checking GAMES_FOLDER folder
@@ -42,6 +43,20 @@ REM : main
     REM : set current char codeset
     call:setCharSetAndLocale
 
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
+    
+    REM : silent mode
+    set /A "QUIET_MODE=0"
+    if !nbArgs! NEQ 0 set /A "QUIET_MODE=1"
+    
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
@@ -65,36 +80,43 @@ REM : main
     if !ERROLEVEL! NEQ 0 (
         @echo Failed to get the last graphic Packs update available 
         type !lgpvLog!
-        timeout /T 4 > NUL
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
         exit /b 10
     )
     for /F %%i in ('type !lgpvLog!') do set "zipFile=%%i"
 
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
     if exist !zipLogFile! (
-        @echo No new graphics packs update^(s^) available^, last version is still !zipFile!
-        timeout /T 4 > NUL
+        @echo No new graphics packs update^(s^) available^, last version is still !zipFile:.zip=!
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
         exit /b 20
     )
     if ["!zipFile!"] == ["graphicPacks.zip"] (
         @echo Searching for a new graphic packs release failed ^!
         @echo Network connection was refused^, please check you powerscript policy
-        timeout /T 4 > NUL
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
         exit /b 30
     )
-
-    @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile! ^?
+    if !QUIET_MODE! EQU 1 goto:msgBox 
+    @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
     call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
         timeout /T 4 > NUL
         exit /b 40
     )
+    goto:updateGP
+    
+    :msgBox    
+    cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
+    if !ERRORLEVEL! EQU 2 exit 0
+    
+    :updateGP    
 
     REM : launch graphic pack update
-    @echo =========================================================
-    @echo Updating BatchFW^'s graphic packs
-    @echo ---------------------------------------------------------
+    if !QUIET_MODE! EQU 0 @echo =========================================================
+    if !QUIET_MODE! EQU 0 @echo Updating BatchFW^'s graphic packs
+    if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
     set "pws_target="!BFW_GP_FOLDER:"=!\updateGP.ps1""
@@ -106,37 +128,34 @@ REM : main
         exit /b 9
     )
 
-    @echo Launching update to !zipFile!^.^.^.
+    @echo Launching graphic pack update to !zipFile!^.^.^.
+    
     pushd !BFW_GP_FOLDER!
 
-    REM : delete all V3 gp
-
-    call:deleteV3gp
-
-    REM : delete all previous update log files
+    REM : delete all V3 gp under BFW_GP_FOLDER
+    call:deleteV3gp  
+    REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat=!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete"
-    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
-
-    REM : launching powerShell script
+    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"    
+    
+    REM : launching powerShell script to downaload and extract GFX archive
     Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
     set /A "cr=!ERRORLEVEL!"
-
-    REM : rename folders that contains forbiden characters : & !
-    set "pat="!BFW_GP_FOLDER:"=!\*.*""
-    wscript /nologo !StartMinimized! !antRenamerPath! !antRenamerBatch! -aF !pat! -g -x
-
-    pushd !GAMES_FOLDER!
-
-    :waitingLoopProcesses
-    for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "Renamer.exe" ^| find /V "find"') do (
-        goto:waitingLoopProcesses
-    )
-
     if !cr! NEQ 0 (
-        @echo ERROR : While updating graphic packs folder ^!
-        pause
+        @echo ERROR While getting and extracting graphic packs folder ^!
+        if !QUIET_MODE! EQU 0 pause
         exit /b !cr!
     )
+    
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    
+    REM : filter graphic pack folder
+    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
+    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!    
+    if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!    
+  
+    pushd !GAMES_FOLDER!
 
     exit /b 0
     goto:eof
@@ -146,6 +165,55 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : ------------------------------------------------------------------ 
+    REM : function to optimize a folder move (move if same drive letter much type faster)
+    :moveFolder
+
+        REM arg1 source
+        set "source="%~1""
+        REM arg2 target
+        set "target="%~2""
+        REM arg3 = return code
+
+        if not exist !source! goto:eof
+        
+        if not exist !target! mkdir !target!
+
+        REM : source drive
+        for %%a in (!source!) do set "sourceDrive=%%~da"
+
+        REM : target drive
+        for %%a in (!target!) do set "targetDrive=%%~da"
+
+        REM : if folders are on the same drive
+        if ["!sourceDrive!"] == ["!targetDrive!"] (
+            for %%a in (!target!) do set "parentFolder="%%~dpa""
+            set "parentFolder=!parentFolder:~0,-2!""
+            if exist !target! rmdir /Q /S !target! 2>NUL
+
+            REM : use move command (much type faster)
+            move /Y !source! !target! > NUL
+            set /A "cr=!ERRORLEVEL!"
+            if !cr! EQU 1 (
+                set /A "%3=1"
+            ) else (
+                set /A "%3=0"
+            )
+
+           goto:eof
+        )
+
+        REM : else robocopy
+        robocopy !source! !target! /S /MOVE /IS /IT > NUL
+        set /A "cr=!ERRORLEVEL!"
+
+        if !cr! GTR 7 set /A "%3=1"
+        if !cr! GEQ 0 set /A "%3=0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------    
+    
+    
     REM : ------------------------------------------------------------------
     :deleteV3gp
         set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
