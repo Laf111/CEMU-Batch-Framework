@@ -43,6 +43,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
     

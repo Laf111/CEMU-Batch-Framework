@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    title !THIS_SCRIPT!
+    
     REM : directory of this script
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
 
