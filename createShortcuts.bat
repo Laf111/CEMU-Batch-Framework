@@ -76,7 +76,7 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title !THIS_SCRIPT!
+    title Create CEMU^'s shortcuts for selected games
     
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
