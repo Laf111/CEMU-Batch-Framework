@@ -14,7 +14,7 @@ REM : main
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
+        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
         exit 1
     )
@@ -60,8 +60,8 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 3 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
+        @echo ERROR on arguments passed^!
+        @echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
         @echo given {%*}
         pause
         exit /b 99
@@ -70,7 +70,7 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "GAME_FOLDER_PATH=!args[0]!"
     if not exist !GAME_FOLDER_PATH! (
-        @echo ERROR ^: game^'s folder !GAME_FOLDER_PATH! does not exist ^!
+        @echo ERROR^: game^'s folder !GAME_FOLDER_PATH! does not exist^!
         pause
         exit /b 1
     )
@@ -78,7 +78,7 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[1]!"
     if not exist !MLC01_FOLDER_PATH! (
-        @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^!
+        @echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
         pause
         exit /b 3
     )
@@ -101,7 +101,7 @@ REM : main
 
     set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
     if not exist !META_FILE! (
-        @echo No meta folder not found under game folder ^?^, aborting ^^!
+        @echo No meta folder not found under game folder^?^, aborting ^^!
         goto:metaFix
     )
 
@@ -110,9 +110,9 @@ REM : main
     set "titleLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
     if [!titleLine!] == ["NONE"] (
-        @echo No titleId found in the meta^.xml file ^?
+        @echo No titleId found in the meta^.xml file
         :metafix
-        @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
+        @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
         if not exist !metaFolder! mkdir !metaFolder! > NUL
         @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
@@ -214,7 +214,7 @@ REM : functions
         for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            @echo Host char codeSet not found^?^, exiting 1
             pause
             exit /b 9
         )
@@ -257,7 +257,7 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            @echo Remove specials characters from %1 ^(such as ^&, ^(,^), ^!^)^, exiting 13
             exit /b 13
         )
 
