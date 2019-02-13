@@ -64,16 +64,28 @@ UPDATE :
 USE : 
 ---------------------------------------------------------
     
-    Create your games shortcuts or executables when launching the setup.bat the first time (when installing BatchFW)
-    Then you'll not have to go back to the _BatchFW_Install folder anymore. 
-    Don't launch the scripts from the command line.
-    
-    You shall use now the BatchFW shortcut's group created near your games's shortcuts:
-    
-    - "Set BatchFw settings and register CEMU installs"
-      > define BatchFw settings and install many versions of CEMU (create all shortcuts for all your game) = setup.bat in silent mode
-    - "Create CEMU's Shortcuts for selected games"
-      > install one version of CEMU and choose which game you want to launch with this version. 
+    You don't need to manually open CEMU UI to play your game anymore. 
+    Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts 
+    on your desktop (Or your shortcuts folder).
+
+    You want to create shortcuts to all your games for versions of CEMU using the ones created after the installation on your desktop?:
+
+        "Wii-U Games\BatchFW\Create CEMU's shortcuts for selected games.lnk" for a single CEMU version;
+        "Wii-U Games\BatchFW\Set BatchFw settings and register CEMU installs.lnk" for more than one version (call setup.bat 
+        in silent mode);
+
+    You want to :
+        - change the way how Cemu is launched?: delete the shortcuts and re-create them;
+        - delete your settings for version X.Y.Z or you want to recreate them?: use "Wii-U Games\CEMU\cemu_X.Y.Z\Delete my cemu_X.Y.Z's settings.lnk";
+        - add a game?: 
+            * use "Wii-U Games\Import Games with updates and DLC.lnk" to browse to a folder that contains games, updates and DLC
+              BatchFW will ties all new games in your games folder with installing their updates and DLC in each game's folder
+            * once new games copied in your games folder, create shortcuts for those games
+        - remove a game from your library?: simply delete its created shortcut (BatchFw's broken shortcuts appear as the others ones, but without icon);
+
+    With BatchFw, to backup fully a game (saves + update + DLC + transferable cache + controller settings...) just compress your game's folder
+        
+    Since V11, "how to" informations are displayed in the console when creating shortcuts.
     
     BatchFW come with an embeded graphic pack folder (_BatchFW_Graphic_Packs) created during setup.bat
     It checks for a graphic packs update availability (on eSlashiee repository) and update its packs  
