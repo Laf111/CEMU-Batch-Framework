@@ -216,7 +216,7 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            @echo Remove special characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
