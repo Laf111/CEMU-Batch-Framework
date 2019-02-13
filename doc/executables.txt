@@ -2,10 +2,10 @@
 USING EXECUTABLES : 
 =========================================================
 
-There's a limitation on specials characters allowed in the paths due to the conversion process from batch to exe.
+There’s a limitation on specials characters allowed in the paths due to the conversion process from batch to exe.
 For compatibility purpose, the converter is limited by using only the charset code 850.
-(not even the ANSI~=1252 one). 
+(not even the ASCII~=1252 one). 
 
 If you get an error in the console when launching a game that indicates that RPX_FILE_PATH was not found, you can identify the 
-unsupported characters in the path displayed; they will be substituted with a ï?ï character by the system.
+unsupported characters in the path displayed; they will be substituted by the system with the character '?'.
 

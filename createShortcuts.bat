@@ -382,8 +382,6 @@ REM : main
             @echo   and encounter slow shaders compilation time after the first time^,
             @echo   your display drivers are corrupt^!
             @echo   do a clean uninstall using DDU and re-install it
-            @echo   There's need to fully compile shaders for each version of CEMU^,
-            @echo   GLCache is shared by all installs
             @echo.
         call:getUserInput "Ignore precompiled shader cache for all games? (y, n) : " "y,n" ANSWER
         if [!ANSWER!] == ["y"] set "IGNORE_PRECOMP=ENABLED"
