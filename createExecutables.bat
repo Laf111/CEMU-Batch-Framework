@@ -72,7 +72,7 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Create CEMU^'s executables for selected games
+    title Create CEMU executables for selected games
     
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"

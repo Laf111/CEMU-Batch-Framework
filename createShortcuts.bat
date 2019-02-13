@@ -76,7 +76,7 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Create CEMU^'s shortcuts for selected games
+    title Create CEMU shortcuts for selected games
     
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
@@ -102,7 +102,7 @@ REM : main
     REM : if called with shortcut, OUTPUT_FOLDER already set, goto:inputsAvailables
     if not [!WORKINGDIR!] == [!BFW_PATH!] goto:inputsAvailables
 
-    @echo Please define where to create shortcuts^? ^(a Wii-U Games subfolder will be created^)
+    @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     call:getFolderPath "Where to create shortcuts? (a Wii-U Games subfolder will be created)" "0" OUTPUT_FOLDER
 
     goto:inputsAvailables
@@ -111,7 +111,7 @@ REM : main
     if %nbArgs% GTR 5 (
         @echo ERROR on arguments passed ^(%nbArgs%^)
         @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
+        @echo ^(^* for optional^ argument^)
         @echo given {%*}
         pause
         exit /b 9
@@ -120,7 +120,7 @@ REM : main
     if %nbArgs% LSS 2 (
         @echo ERROR on arguments passed ^^!
         @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
+        @echo ^(^* for optional^ argument^)
         @echo given {%*}
         pause
         exit /b 99
@@ -218,13 +218,11 @@ REM : main
     @echo ---------------------------------------------------------
 
     if !cr! NEQ 0 (
-        @echo ERROR Graphic pack folder update failed^!
+        @echo ERROR Graphics packs folder update failed^!
     )
     cls
     @echo =========================================================
-    @echo Creating CEMU shortcuts handling Cemu options for^:
-    @echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
-    @echo  - Create shortcuts in !OUTPUT_FOLDER:"=!\Wii-U Games
+    @echo Creating CEMU shortcuts
     @echo =========================================================
 
 
@@ -290,14 +288,14 @@ REM : main
     @echo CemuHook was not found^. It is required to
     @echo - play videos
     @echo - enable FPS^+^+ packs
-    @echo - to enable controller^'s motions
+    @echo - enable controller motion sensors
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         @echo No active connection was found^, unable to open "https://cemuhook.sshnuke.net/#Downloads"
         goto:openCemuAFirstTime
     )
     if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
-    @echo Openning CemuHook download page^.^.^.
+    @echo Opening CemuHook download page^.^.^.
 
     wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
     @echo Download and extract CemuHook in !CEMU_FOLDER!
@@ -316,7 +314,7 @@ REM : main
     :openCemuAFirstTime
 
     @echo ---------------------------------------------------------
-    @echo Openning CEMU^.^.^.
+    @echo Opening CEMU^.^.^.
     @echo Set your REGION^,language
     @echo And finally download sharedFonts using Cemuhook button
     @echo Then close CEMU to continue
@@ -343,7 +341,7 @@ REM : main
     @echo.
     @echo Do you want to enable automatic settings import between versions of CEMU^?
     @echo y^: Using settings of the last version of CEMU used to play this game
-    @echo n^: Will launch the wizard script to collect settings for each game
+    @echo n^: BatchFW will launch the wizard script to collect settings for each game
     @echo.
     @echo If a game shortcut already exists skip this game
     @echo.
@@ -384,7 +382,7 @@ REM : main
             @echo   and encounter slow shaders compilation time after the first time^,
             @echo   your display drivers are corrupt^!
             @echo   do a clean uninstall using DDU and re-install it
-            @echo   no need to fully compile shaders for each version of CEMU^,
+            @echo   There's need to fully compile shaders for each version of CEMU^,
             @echo   GLCache is shared by all installs
             @echo.
         call:getUserInput "Ignore precompiled shader cache for all games? (y, n) : " "y,n" ANSWER
@@ -464,7 +462,7 @@ REM : main
 
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            @echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -483,7 +481,7 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -499,7 +497,7 @@ REM : main
     @echo If you want to change CEMU^'s settings you^'ve just entered here^:
     @echo ---------------------------------------------------------
     @echo ^> simply delete the shortcuts for this version and recreate them using
-    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk to
+    @echo ^'Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk^' to
     @echo register a SINGLE version of CEMU
     @echo ---------------------------------------------------------
     pause
@@ -1024,7 +1022,7 @@ REM : functions
                 goto:icoSet
             )
             @echo.
-            @echo.Open a google search^.^.^.
+            @echo. Opening up a google search^.^.^.
             REM : open a google search
             wscript /nologo !StartWait! !defaultBrowser! "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
             @echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\code
@@ -1116,12 +1114,12 @@ REM : functions
             @echo - !GAME_TITLE!
             @echo ---------------------------------------------------------
             @echo -
-            @echo - Creating a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
+            @echo - Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
             @echo     ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
-            @echo     ^(y^)^: default value after 3s timeout
+            @echo     ^(y^)^: default value after 8s timeout
             @echo -
 
-            call:getUserInput "- Enter your choice? : " "y,n" ANSWER 3
+            call:getUserInput "- Enter your choice? : " "y,n" ANSWER 8
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
