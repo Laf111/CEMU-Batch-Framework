@@ -12,33 +12,33 @@ INSTALL :
     Then setup.bat will run in SILENT mode. 
     
     When answering questions in setup.bat, a log file for your current host is created under _BatchFW_Install.
-    Never delete this file ! It contains your host's settings (fullscreen mode, desired aspect ratio, GLCache path...)
+    Never delete this file! It contains your host's settings (fullscreen mode, desired aspect ratio, GLCache path...)
     
-    During the setup, you'll define ouput (shortcut or executables) folder and all the CEMU's installs to use but also : 
-        - check and update _BatchFW_Graphic_Packs folder
-        - browse to a folder containing mods for your games and so they will be tidy under each game's folder
-        - if you want to run CEMU in fullscreen or in windowed mode
-        - if you let BatchFw completes your graphic packs (GFX) presets (V3) or creates intermediates packs (V2)
-        - your desired diplay aspect ratios (aske only if you ahd chosen the previous option)
-        - the number of users to create (each user uses his own saves when launching his shortcut)
+    During the setup, you'll define an ouput (shortcut or executables) folder for all the CEMU's installs to use but also: 
+        - check and update _BatchFW_Graphic_Packs folder;
+        - browse to a folder containing mods for your games so they will be copied under each game's folder;
+        - if you want to run CEMU in fullscreen or in windowed mode;
+        - if you let BatchFw completes your graphic packs (GFX) presets (V3) or create intermediates packs (V2);
+        - your desired diplay aspect ratios (only if you has chosen the previous option);
+        - the number of users to create (each user uses his own saves when launching his shortcut);
         - to define an ordered list of third party software (DS4windows, CemuGyro, SepeedHack...) to launch before CEMU in 
-          the order define after checking if the program is not already runnning
-        - use externals mlc01 paths to tidy saves, updates and DLC under each game's folder 
-        - use your CEMU's mlc01 subfolder as well 
+          the order defined after checking if the program is not already running;
+        - use externals mlc01 paths to copy/move saves, updates and DLC under each game's folder;
+        - use your CEMU's mlc01 subfolder as well;
     
-    Once the setup finished, the output folder is open in a windows explorer. 
-    It contains  :
-        - shortcuts to BatchFw log, readme and tools 
-        - a CEMU folder that contains a subfolder for each version registered containing :
-            * a shorctut for editing the log of this version (log of the last launch)
-            * shortcut to the script that delete your settings for this version and each games (selected)
+    Once the setup is finished, the output folder is opened in a windows explorer. 
+    It contains:
+        - shortcuts to BatchFw logs, readmes and tools ;
+        - a CEMU folder that contains a subfolder for each version registered containing:
+            * a shorctut for editing the log of this version (log of the last launch);
+            * a shortcut to the script that deletes your settings for this version and each games (selected);
             * a gameProfiles sufolder containing shortcuts to edit example.ini and the profile files of your games
           and also a shortcut to delete settings for all your games and for all versions of CEMU you have registered.    
     
-    Note : this folder contains only links or useless data and can be deleted to be fully recreated)
+    Note: this folder contains only links or useless data and can be deleted to be fully recreated).
     
     
-    RECOMMENDATIONS : 
+    RECOMMENDATIONS: 
     
     To be fully functional BatchFw needs that you register the last(s) version(s) of CEMU you used to play your games.            
     If you're using more the one version of CEMU (on version per game for example) register all installations and select 

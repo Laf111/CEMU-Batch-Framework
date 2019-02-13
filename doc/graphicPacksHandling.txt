@@ -2,31 +2,32 @@
 GRAPHIC_PACKS :
 =========================================================
 
-BatchFw have an auto-update process of its graphic packs folder (_BatchFW_Graphic_Packs) and check
-update availability. You can force this detection/update by using the created shortcut : "Wii-U Games\Update my graphic packs to latest.lnk"
-Or also force it to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk"
+BatchFw haa an auto-update process for its graphic packs folder (_BatchFW_Graphic_Packs) and therefore autmoatically checks
+updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
+or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
-If a game is not supported in the Slashiee's repository, BatchFW create a generic one (only resolution scaling).
+If a game is not supported in the Slashiee's repository, BatchFW creates a generic one for resolution scaling.
 
-Those graphic packs are very simple ones compared to Slashiee's ones (only scale without tweaking shaders). 
-Except if V2 graphic packs exist (using shader files). In this case, the v3 graphic packs will import those 
-files and upgrade them to the V3 syntax (import the double native resolution graphic pack V2 and replace 
+Those graphics packs are very simple compared to Slashiee's ones since they only scale without tweaking shaders. 
+If V2 graphics packs already exist BatchFW will import those 
+graphics packs and upgrade them to the V3 syntax (import the double native resolution graphic pack of V2 and replace 
+    
     res(X|Y|)Scale = 2.0 by res(X|Y|)Scale = ($width/($gameWidth|gameHeight))
 
-When comes out an official pack, batchFw replace his packs with the official ones automatically 
-(during the graphic pack folder auto-update process) and define missing presets for your desired 
-aspect ratios (16/10 for example)
+When an official pack comes out BatchFW will replace its packs with the official ones automatically 
+(during the graphics packs folder auto-update process) and define missing presets for your desired 
+aspect ratios (16/10 for example);
 
-If you check on a new game and if the graphic pack is not applied or if you have any issue, the native resolution 
-in the BatchFW's internal database might be wrong for this game. Get the true native resolution 
-using CEMU UI's feature "/ Debug / View texture cache info" and update the BatchFW's database. 
+If on a new game graphics packs are not applied or if you have any issue, the native resolution 
+in BatchFW's internal database might be wrong for this game. Get the actual native resolution 
+using CEMU's feature in the "/ Debug / View texture cache info" menu and update BatchFW's database. 
 Also check if the cemu FPS value is correct (speed adjustement (FPS CAP) graphic packs)
 
-If you have to customized a graphic pack (create an user defined one), create it under %GAME_FOLDER_PATH%\Cemu\graphicPacks (but as a folder !)
+If you have customized graphics pack import them (or create them) under %GAME_FOLDER_PATH%\Cemu\graphicPacks.
 
-BatchFW use this folder to gather all graphic packs available for a game (V2 + V3, V2 are prefixed with V2_). It creates links (junction)
+BatchFW uses this folder to gather all graphics packs available for a game (V2 + V3, V2 are prefixed with V2_). Then creates links (junction)
 to its graphic packs folder (_BatchFW_Graphic_Packs). 
 
-Those links are automatically updated (if drive letter change), deleted (broken links) and recreated each time you launch the game.
+Those links are automatically updated (if drive letter changes), deleted (broken links) and recreated each time you launch the game.
 This to ensure your games library portability as WINDOWS links does not truly handle relative path for the target 
 (the drive letter might change if you have your games on an external USB drive)

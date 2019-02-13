@@ -4,77 +4,77 @@ HOW IT WORKS :
 
 Assuming that all users (windows user profile) share the same settings on a given rig (host).
 
-When creating shortcuts for a CEMU's version : 
+When creating shortcuts for a CEMU version : 
 
-    - controller profiles are copied in CEMU's subfolder
-    - if a mlc01 subfolder does not exist in game's folder, create one. If you want to run version earlier than
-      1.10 just copy your mlc01 folder in the Cemu one (use a specific install folder for this game)
+    - controller profiles are copied in CEMU's subfolder;
+    - if a mlc01 subfolder does not exist in game's folder, create one. If you want to run a version earlier than
+      1.10 just copy your mlc01 folder in the Cemu one (use a specific install folder for this game);
 
-The first time you launch a game for a given CEMU's version, you 'll have to follow a wizard that help you to create your settings for this game :
+The first time you launch a game for a given CEMU version, you'll have to follow a wizard that helps you create your settings for that game:
 
-    - if a meta\meta.xml is missing, it will help you to create one
-    - if game profile is missing in CEMU, create one for you and save a copy in a _BatchFW_Missing_Profiles folder to give it to the others CEMU installs 
-    - if no graphic packs was found, create one for you (V2 and V3 graphic packs). Save it in external graphic pack folder _BatchFW_Graphic_Packs  
-    - get game's data from an internal wii-u title database and complete them with game's update version and DLC presence before saving them in a text file under game's folder
-    - launch CEMU alone to ask you to set CPU Mode/timer, graphic packs, all controller profiles for each players to this game
-    - save the settings under game's folder for the current rig (host) as CEMU_VERSION\Settings_HOSTNAME
+    - if a meta\meta.xml is missing, it will help you to create one;
+    - if game profile is missing in CEMU, create one for you and save a copy in a _BatchFW_Missing_Profiles folder to send it to the others CEMU installs; 
+    - if no graphics packs were found, create one for you (V2 and V3 graphics packs). Save it in external graphics pack folder _BatchFW_Graphic_Packs;
+    - get game's data from an internal wii-u title database and complete them with game's update version and DLC presence before saving them in a text file under the game's folder;
+    - launch CEMU alone to ask you to set CPU Mode/timer, graphics packs, all controller profiles for each players to this game;
+    - save settings under game's folder for the current rig (host) as CEMU_VERSION\Settings_HOSTNAME;
 
         
-After complete this wizard for a game, all actions are done silently. When launching a game from its shortcut, launchGame.bat script will :
+After the completion of this wizard for a game, all actions are done silently. When launching a game from its shortcut, launchGame.bat script will:
 
-    - copy saved settings to CEMU_FOLDER including only the graphic packs needed
-    - if available, load game's saves for current user from inGameSaves subfolder in game's folder. Propose you to import one from other user if found.
-    - systematically create a backup of game's saves (in case of CEMU corruption)
-    - update graphic pack stored in settings from _BatchFW_Graphic_Packs folder
-    - create a link (junction) for graphic packs stored in the CEMU_VERSION\Settings_HOSTNAME\graphicPacks
-    - copy transferable shader cache from game's folder to CEMU install
-    - systematically create a backup of transferable shader cache (in case of CEMU corruption)
-    - retore OpenGL Cache of the game
-    - create a lock file in CEMU_FOLDER, launch CEMU with high priority and affinity to all cores and using a game's mlc01 folder (if found under game's folder)
-    - when closing CEMU : remove lock file and analyse return code to initialize CEMU_STATUS for the game and this CEMU's version
-    - if CEMU return 0, search in report for current rig (host) if a row already exist, create a new one otherwize
-    - search in CEMU's version report for current rig (host) if a row already exist, create a new one otherwize
-    - save settings under game's folder for the current rig (hosts) as CEMU_VERSION_Settings_HOSTNAME
-    - delete CEMU's GraphicPacks subfolder content
-    - save games's saves for the current user.
-    - save transferable cache.
-    - analyse OpenGL Cache Id, backup the GLCache.
+    - copy saved settings to CEMU_FOLDER including only the graphics packs for your game;
+    - if available, load game's saves for current user from inGameSaves subfolder in game's folder. Propose you to import one from other users if found;
+    - systematically create a backup of game's saves (in case of CEMU corruption);
+    - update graphics pack stored in settings from _BatchFW_Graphic_Packs folder;
+    - create a link (junction) for graphics packs stored in the CEMU_VERSION\Settings_HOSTNAME\graphicPacks;
+    - copy transferable shader cache from game's folder to CEMU install;
+    - systematically create a backup of transferable shader cache (in case of CEMU corruption);
+    - retore OpenGL Cache of the game;
+    - create a lock file in CEMU_FOLDER, launch CEMU with high priority and affinity to all cores and using a game's mlc01 folder (if found under game's folder);
+    - when closing CEMU: remove lock file and analyse return code to initialize CEMU_STATUS for the game and this CEMU version;
+    - if CEMU returns 0, search in report for current rig (host) if a row already exist, create a new one otherwise;
+    - search in CEMU version report for current rig (host) if a row already exist, create a new one otherwise;
+    - save settings under game's folder for the current rig (hosts) as CEMU_VERSION_Settings_HOSTNAME;
+    - delete CEMU's GraphicPacks subfolder content;
+    - save games's saves for the current user;
+    - save transferable cache;
+    - analyze OpenGL Cache Id, and backup the GLCache.;
 
-Compatibility reports are available throught a shorcut created in the BatchFW's folder one (in Wii-U Games under your desktop by default). 
-There are saved on your disk, in your games 's parent folder under a _BatchFW_Games_Compatibility_Reports subfolder.
+Compatibility reports are available through a shorcut created in the BatchFW's folder (in Wii-U Games under your specified shortcut folder). 
+They are saved on your disk, in your games's parent folder under a _BatchFW_Games_Compatibility_Reports subfolder.
 
-Settings are automatically import from another CEMU's version (when an existing folder exist under game's folder for the same host). 
+Settings are automatically imported from another CEMU version (when an existing folder exist under game's folder for the same host). 
 In this case, only a notification is shown.
 
-That means that you 'll have to set your controller profiles for each game only one time.
+That means that you'll have to set your controller profiles for each game only one time.
 
 Since CEMU 1.11.6, CPUMode is fixed in game's profile (to avoid some games crashing in multi-core set).
 
 BatchFW does not backup game's profile anymore.
 
-For versions after CEMU 1.11.6 CPUMode is set throuhgt game's profiles and for earlier versions, it will be saved throught settings.bin
+For versions after CEMU 1.11.6 CPUMode is set throuhg game's profiles and for earlier versions, it will be saved throught settings.bin.
 
-Missings games profiles created by BatchFW are shared by all CEMU's versions (they are stored in a _BatchFW_Missing_Games_Profiles subfolder in games 's folder) until comes out a version that provide a profile for this game.
+Missings games profiles created by BatchFW are shared by all CEMU versions (they are stored in a _BatchFW_Missing_Games_Profiles subfolder in games's folder) until a version that provides a profile for this game comes out.
 
-So now when you launch a game for a given CEMU's version, a folder CEMU\VERSION is created where you'll found a shortcut to edit profile files of all your games.
+So now when you launch a game for a given CEMU version, a folder CEMU\VERSION is created where you'll found a shortcut to edit profile files of all your games.
 
 
-BatchFW create logs under_BatchFW_install\logs for your games library and every hosts.
-Do not delete this log, it also contain your settings 
+BatchFW creates logs under_BatchFW_install\logs for your games library and every host.
+Do not delete these logs, it also contains your settings 
 
-With using the tools provided to copy/move mlc01 folder's data for all your games in theirs respectives folders, with versions of CEMU newer 
-than 1.11 your CEMU folder will finally contains only its precompiled cache shader (host dependant). 
+Uses the tools provided to copy/move mlc01 folder's data for all your games in theirs respectives folders, with versions of CEMU newer 
+than 1.11 your CEMU folder will finally contain only its precompiled cache shader (host dependant). 
 All game's data (saves, updates, DLC, settings and transferable cache) are in the game's folder.
 
 Controller profiles are saved under a _BatchFW_Controller_Profiles\USERDOMAIN (USERDOMAIN=host name) and delivered to each CEMU version 
-you created at least a shortcut for.
+for which you created at least a shortcut.
 
 So, you'll only have to install CEMU and CemuHook.
 
 Then, you can switch from one version to another by using the shortcuts you created before to launch the game with. Also, when moving your 
-game on another host, you'll keep as well :
+game on another host, you'll keep as well:
 
     - your extra files for each games (updates, dlc)
-    - your saved settings including graphic packs, controllers profiles for each players
+    - your saved settings including graphics packs, controllers profiles for each players
     - your games's saves and transferable cache associated to your game's progression.
 
