@@ -1,11 +1,10 @@
 =========================================================
-CEMU_INTERFACES_HISTORY :
+CEMU INTERFACES HISTORY :
 =========================================================
 
 First of all, you need to be aware of the following about CEMU history :
 
     CEMU 1.8    broke shader cache compatibility -> if you try to import a shader cache on earlier version, it will be erase/reset by CEMU
-
     CEMU 1.10   add -mlc argument to customize path for mlc01 directory -> in earlier version, all games's data are mixed in mlc01 subfolder in CEMU
 
     CEMU 1.11   modifying saving process and location : broken compatibility on saves -> use Cemu 1.11 to import/format your saves from previous versions
@@ -13,21 +12,19 @@ First of all, you need to be aware of the following about CEMU history :
     CEMU 1.13   add -mlc settings in UI to customize path for mlc01 directory
     CEMU 1.14   introduce V3 graphic packs
 
-Before 1.11 saves are in mlc01/emulatorSave/ShaderCacheId and updates and DLC are applied by overwriting files.
+Before 1.11, saves are in mlc01/emulatorSave/ShaderCacheId and updates and DLC are applied by overwriting files.
 After 1.11, they are stored in mlc01/usr/save/titleId[0:7]/titleId[8:15]/* (where titleId is the 16 characters id of your game (cf http://wiiubrew.org/wiki/Title_database )), 
-updates in mlc01/usr/title/titleId[0:7]/titleId[8:15] 
-and DLC in mlc01/usr/title/titleId[0:7]/titleId[8:15]/aoc
+updates are in mlc01/usr/title/titleId[0:7]/titleId[8:15] 
+and DLC are in mlc01/usr/title/titleId[0:7]/titleId[8:15]/aoc
 
-Recommended versions for BatchFw are >=1.11 (to avoid save format issues).
-If you want to run a game on a version earlier than 1.10 : copy the mlc01 subfolder from the game's folder in Cemu's install folder. (but you'll cannot import your saves if they were created with a version >= 1.11)
-
-Anyway, if you want to use a version erarlier than 1.11, you'd better have a specific Cemu install per games.
+Recommended versions for BatchFw are >=1.11 (to avoid down side save format conversion issues).
+Anyway, if you want to use a version erarlier than 1.11, you'd better have a specific Cemu install for those games.
 
 Concerning CemuHook : 
 ---------------------
 
-Since Cemu hook 0.5.6.0 for 1.8.1-1.11.3, appear a new option in Debug menu : 
-Precompiled shader cache On/Off, in case you want to use only your GPU vendor's GLCache.
+Since CemuHook 0.5.6.0 for 1.8.1-1.11.3, appears a new option in Debug menu : 
+    - Precompiled shader cache On/Off, in case you want to use only your GLCache (GPU OpenGL cache).
 
 On newer versions (>=1.15), the GLCache is not protected in CEMU's folder under shaderCahce/driver/nvidia
 
