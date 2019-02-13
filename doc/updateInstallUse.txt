@@ -32,8 +32,8 @@ INSTALL :
     
 UPDATE : 
 
-    Delete _BatchFW_Graphic_Packs only
-    Extract archive contains in your loadiine's games parent folder (same process as install), overwrite _BatchFW_Install with newer files.
+    Delete _BatchFW_Graphic_Packs & _BatchFW_Install only
+    Extract archive contains in your loadiine's games parent folder (same process as install)
 
 USE : 
     

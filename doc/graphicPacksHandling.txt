@@ -3,8 +3,8 @@ GRAPHIC_PACKS :
 =========================================================
 
 BatchFw have an auto-update process of its graphic packs folder (_BatchFW_Graphic_Packs) and check
-update availability (when registering new CEMU install). You can force this detection/update by using
-the created shortcut : "Wii-U Games\Update my graphic packs to latest.lnk"
+update availability. You can force this detection/update by using the created shortcut : "Wii-U Games\Update my graphic packs to latest.lnk"
+Or also force it to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk"
 
 If a game is not supported in the Slashiee's repository, BatchFW create a generic one (only resolution scaling).
 
@@ -26,4 +26,7 @@ If you have to customized a graphic pack (create an user defined one), create it
 
 BatchFW use this folder to gather all graphic packs available for a game (V2 + V3, V2 are prefixed with V2_). It creates links (junction)
 to its graphic packs folder (_BatchFW_Graphic_Packs). 
+
 Those links are automatically updated (if drive letter change), deleted (broken links) and recreated each time you launch the game.
+This to ensure your games library portability as WINDOWS links does not truly handle relative path for the target 
+(the drive letter might change if you have your games on an external USB drive)

@@ -260,10 +260,6 @@ REM : main
         pause
         exit /b 1
     )
-
-    REM : filter graphic pack folder
-    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    wscript /nologo !StartHiddenWait! !script!    
     
     @echo ^> Graphic packs installed from archive
 
@@ -272,7 +268,7 @@ REM : main
     set "ACTIVE_ADAPTER=NOT_FOUND"
     for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
-    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:importModForGames
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:filterGfxFolder
 
     @echo ---------------------------------------------------------
     @echo Downloading latest graphics packs^.^.^.
@@ -283,6 +279,16 @@ REM : main
     call !ugp!
     set cr=!ERRORLEVEL!
 
+   :filterGfxFolder 
+    if %QUIET_MODE% EQU 1 goto:importModForGames
+    REM : filter only on first run and if no update was done
+    REM : filter GFX is done also in updateGraphicPacksFolder
+    if !cr! NEQ 0 (
+        REM : filter graphic pack folder
+        set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
+        wscript /nologo !StartHidden! !script!    
+    )
+    
    :importModForGames
     cls
     @echo ---------------------------------------------------------
@@ -705,7 +711,8 @@ REM : functions
         type !tmpFile! >> !readme!
         set "tmpFile="!BFW_PATH:"=!\doc\mlc01data.txt""
         type !tmpFile! >> !readme!
-
+        set "tmpFile="!BFW_PATH:"=!\doc\contributors.txt""
+        type !tmpFile! >> !readme!
     goto:eof
     REM : ------------------------------------------------------------------
 

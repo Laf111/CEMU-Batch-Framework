@@ -5,13 +5,13 @@ GOAL :
 
 BatchFW is a DOS scripts (batch files) FrameWork to create automatically (by lot) windows shortcuts for all your loadiines games (rpx) with providing game's icons (for more than one hundred games) to launch all your differents versions of CEMU >=1.11 with :
 
-    launching the game in full screen or windowed mode, with high priority mode (realtime if you launch as Admin) and affinity to all cores after checking if an instance is not already running
+    launching the game in full screen or windowed mode, with high priority mode (realtime if you launch as Admin) and after checking if an instance is not already running
 
     using a lock file to be thread safe
 
     creating V2 and V3 missing graphic packs resolution and speed (FPS cap) using FPS++ presence, native resolution and FPS of the game (including games that not exist in Slashiee package yet)
 
-    launch CEMU with only the game's graphic packs needed (only one external graphic pack folder for all versions of CEMU that is automatically updated)
+    launch CEMU with only the game's graphic packs needed (only one external graphic pack folder for all versions of CEMU that is automatically updated only for your games)
 
     using -noLegacy option only if you're running an Intel integrated GPU (iGPU) and if you choose to activated it
 
@@ -25,7 +25,7 @@ BatchFW is a DOS scripts (batch files) FrameWork to create automatically (by lot
 
     analysing cemu return code and check that CEMU is not still running in background
 
-Saves all settings (including controllers profiles) per game and pass it to all versions registered in BatchFW :
+Saves all settings (including controllers profiles for all players) per game and pass it to all versions registered in BatchFW :
 
     emulation parameters that are not still handled in game's profile (because game’s profiles are left in each version’s folder as they could be specifics to one version and might be updated by the CEMU dev)
 
