@@ -80,7 +80,7 @@ REM : main
         call:checkGp
         if ["!found!"] == ["0"] (
             for /F %%j in (!rulesFile!) do set "folder=%%~dpj"
-            rmdir /Q /S !folder! > NUL         
+            echo !folder! | find /I "_BatchFW_Graphic_Packs" > NUL && rmdir /Q /S !folder! > NUL         
         )
     )
         
