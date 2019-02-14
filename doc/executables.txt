@@ -9,3 +9,4 @@ For compatibility purpose, the converter is limited by using only the charset co
 If you get an error in the console when launching a game that indicates that RPX_FILE_PATH was not found, you can identify the 
 unsupported characters in the path displayed; they will be substituted by the system with the character '?'.
 
+

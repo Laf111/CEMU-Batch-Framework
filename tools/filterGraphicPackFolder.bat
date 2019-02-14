@@ -38,9 +38,11 @@ REM : main
     REM : set current char codeset
     call:setCharSetAndLocale
 
+    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""    
+    if not exist !BFW_GP_TMP! exit 10
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
-    if not exist !BFW_GP_FOLDER! exit 100
-
+    if not exist !BFW_GP_FOLDER! exit 20
+    
     REM create a log file containing all your games titleId
     set "tidLog="!BFW_LOGS:"=!\myTitleIds.log""
     
@@ -54,6 +56,7 @@ REM : main
     REM : launching the search
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask meta.xml --includeSubDirectories --find title_id --logFile !fnrLogfgp!
     
+    set /A "NB_GAMES=0"
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogfgp! ^| find /V "^!" ^| find /V "mlc01" ^| find "File:"') do (
     
         REM : meta.xml
@@ -62,29 +65,38 @@ REM : main
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do echo %%i >> !tidLog!
+        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !tidLog!
     )    
     
-    :scanGfxFolder
-    cls
+    if !NB_GAMES! EQU 0 exit 30
     
     REM : cd to BFW_GP_FOLDER
-    pushd !BFW_GP_FOLDER!
+    pushd !BFW_GP_TMP!
+    if exist _graphicPacksV2 move /Y _graphicPacksV2 !BFW_GP_FOLDER! > NUL
     
     REM : loop on the gfx folders found
-    for /F "delims=" %%i in ('dir /b /o:n /s rules.txt ^| find /V "_graphicPacksV2" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /s rules.txt 2^>NUL') do (
 
         set "rulesFile="%%i""
         
         set /A "found=0"
         call:checkGp
-        if ["!found!"] == ["0"] (
-            for /F %%j in (!rulesFile!) do set "folder=%%~dpj"
-            echo !folder! | find /I "_BatchFW_Graphic_Packs" > NUL && rmdir /Q /S !folder! > NUL         
+        if ["!found!"] == ["1"] (
+            for /F %%j in (!rulesFile!) do set "parentFolder="%%~dpj""
+            set "folder=!parentFolder:~0,-2!""
+
+            move /Y !folder! !BFW_GP_FOLDER! > NUL
+            set /A "cr=!ERRORLEVEL!"
         )
     )
-        
-    if !ERRORLEVEL! NEQ 0 exit !ERRORLEVEL!
+    
+    set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
+    move !pat! !BFW_GP_FOLDER! > NUL
+    
+    pushd !GAMES_FOLDER!
+    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
+    
+    if !cr! NEQ 0 exit !cr!
     exit 0
 
     goto:eof

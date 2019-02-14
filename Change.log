@@ -24,6 +24,7 @@
 - check now if an update is available when launching a game
 - BatchFw only install/update the GFX you need (for your games only)
 - replace antrenamer with BRC64
+- update embeded GFX packs to v367
 
 
 

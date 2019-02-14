@@ -130,4 +130,4 @@ UNINSTALL :
 ---------------------------------------------------------
 
     Launch uninstall.bat from your desktop : "Wii-U Games\BatchFW\Uninstall BatchFW"
-    
+

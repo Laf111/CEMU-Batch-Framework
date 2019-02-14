@@ -66,3 +66,5 @@ All game's data (saves, updates, DLC, settings and transferable cache) are in th
 
 Your controller profiles are saved under a _BatchFW_Controller_Profiles\USERDOMAIN (USERDOMAIN=host name) and delivered to each version of
 CEMU.
+
+

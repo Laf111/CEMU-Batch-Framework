@@ -77,7 +77,7 @@ REM : main
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
-    if !ERROLEVEL! NEQ 0 (
+    if !ERRORLEVEL! NEQ 0 (
         @echo Failed to get the last graphic Packs update available 
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
@@ -119,7 +119,12 @@ REM : main
     if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
-    set "pws_target="!BFW_GP_FOLDER:"=!\updateGP.ps1""
+    
+    REM : temporary folder
+    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
+    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP!
+    
+    set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
 
     copy /Y !pws_src! !pws_target! > NUL
     set /A "cr=!ERRORLEVEL!"
@@ -130,33 +135,37 @@ REM : main
 
     @echo Launching graphic pack update to !zipFile!^.^.^.
     
-    pushd !BFW_GP_FOLDER!
+    pushd !BFW_GP_TMP!
 
-    REM : delete all V3 gp under BFW_GP_FOLDER
-    call:deleteV3gp  
-    REM : delete all previous update log files in BFW_GP_FOLDER
-    set "pat=!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete"
-    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"    
-    
     REM : launching powerShell script to downaload and extract GFX archive
     Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo ERROR While getting and extracting graphic packs folder ^!
         if !QUIET_MODE! EQU 0 pause
+        pushd !GAMES_FOLDER!
+        rmdir /Q /S !BFW_GP_TMP! > NUL
         exit /b !cr!
     )
-    
+
     REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_TMP! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+
+    pushd !GAMES_FOLDER!
+    
+    REM : delete all V3 gp under BFW_GP_FOLDER
+    call:deleteV3gp  
+    REM : delete all previous update log files in BFW_GP_FOLDER
+    set "pat=!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete"
+    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"    
     
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
     if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!    
-    if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!    
-  
-    pushd !GAMES_FOLDER!
-
+    if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!
+    
+    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
+    
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------

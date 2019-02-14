@@ -245,15 +245,19 @@ REM : main
     if %QUIET_MODE% EQU 1 goto:updateGp
     REM : first launch of setup.bat
     if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! > NUL
-
+    mkdir !BFW_GP_FOLDER!
+    
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Extracting graphics packs^.^.^.
-    @echo ---------------------------------------------------------
+    @echo ---------------------------------------------------------    
     REM : extract "!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar" in !GAMES_FOLDER!
     set "rarFile="!BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs.rar""
     set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !GAMES_FOLDER! > NUL
+    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
+    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP! > NUL
+
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting !BFW_PATH:"=!\resources\_BatchFW_Graphic_Packs^.rar, exiting 1
@@ -262,7 +266,9 @@ REM : main
     )
     
     @echo ^> Graphic packs installed from archive
-
+    set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
+    move !pat! !BFW_GP_FOLDER! > NUL
+    
    :updateGp
     REM : check if an internet connection is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
