@@ -911,7 +911,7 @@ REM : main
     if exist !GlCache! call:moveFolder !GlCache! !GlCacheSaved! cr
     if !cr! NEQ 0 (
         cscript /nologo !MessageBox! "ERROR While moving back GLCache save^, please close all explorer^.exe open in openGL cache folder" 4117
-        if !ERROLEVEL! EQU 4 goto:moveBack
+        if !ERRORLEVEL! EQU 4 goto:moveBack
         cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GLCache is backup sucessfully^, if it persists close your session and retry" 4144
     )
 
