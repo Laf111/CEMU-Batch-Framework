@@ -212,7 +212,7 @@ REM : main
     cls
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
-    call !ugp!
+    call !ugp! -silent
     set cr=!ERRORLEVEL!
     @echo ---------------------------------------------------------
 
