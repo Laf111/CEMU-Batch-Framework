@@ -1160,12 +1160,11 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 
         if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
+            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH! newPath = !newPath!
             goto:askForFolder
         )
 
