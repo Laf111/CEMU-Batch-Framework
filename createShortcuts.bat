@@ -352,7 +352,7 @@ REM : main
 
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
-    
+
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
@@ -360,7 +360,7 @@ REM : main
         pause
         exit /b 21
     )
-   
+    timeout /T 3 > NUL   
    :autoImportMode
     @echo ---------------------------------------------------------
     @echo.
