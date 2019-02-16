@@ -15,7 +15,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit 100
     )
 
     REM : directory of this script
@@ -24,7 +24,10 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
 
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
@@ -77,7 +80,7 @@ REM : main
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
-    if !ERRORLEVEL! NEQ 0 (
+    if !ERRORLEVEL! EQU 1 (
         @echo Failed to get the last graphic Packs update available 
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
@@ -89,7 +92,7 @@ REM : main
     if exist !zipLogFile! (
         @echo No new graphics packs update^(s^) available^, last version is still !zipFile:.zip=!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
-        exit /b 20
+        exit /b 0
     )
     if ["!zipFile!"] == ["graphicPacks.zip"] (
         @echo Searching for a new graphic packs release failed ^!

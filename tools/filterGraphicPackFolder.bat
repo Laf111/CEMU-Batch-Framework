@@ -24,7 +24,10 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
@@ -49,30 +52,24 @@ REM : main
     if exist !tidLog! del /F !tidLog!
     
     pushd !GAMES_FOLDER!
-    REM : find all meta.xml files in games library using fnr
-    set "fnrLogfgp="!BFW_PATH:"=!\logs\fnr_filterGraphicPackFolder.log""
-    if exist !fnrLogfgp! del /F !fnrLogfgp!
+    
+    REM : searching for code folder to find in only one rpx file (the bigger one)
+    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /V "\mlc01" 2^> NUL') do (
 
-    REM : launching the search
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask meta.xml --includeSubDirectories --find title_id --logFile !fnrLogfgp!
-    
-    set /A "NB_GAMES=0"
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogfgp! ^| find /V "^!" ^| find /V "mlc01" ^| find "File:"') do (
-    
         REM : meta.xml
-        set "META_FILE="!GAMES_FOLDER:"=!%%i.%%j""
-        
+        set "META_FILE="%%i""
+    
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
         for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !tidLog!
+    
     )    
     
     if !NB_GAMES! EQU 0 exit 30
     
     REM : cd to BFW_GP_FOLDER
     pushd !BFW_GP_TMP!
-    if exist _graphicPacksV2 move /Y _graphicPacksV2 !BFW_GP_FOLDER! > NUL
     
     REM : loop on the gfx folders found
     for /F "delims=" %%i in ('dir /b /o:n /s rules.txt 2^>NUL') do (

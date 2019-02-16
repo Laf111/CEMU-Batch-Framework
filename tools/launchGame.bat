@@ -16,7 +16,10 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -212,7 +215,7 @@ REM : main
 
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
-    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script! -silent   
+    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!
     
     REM : flag to create legacy packs
     set "createLegacyPacks=true"

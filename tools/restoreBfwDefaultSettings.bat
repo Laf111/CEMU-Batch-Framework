@@ -30,7 +30,10 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""

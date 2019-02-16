@@ -66,13 +66,6 @@ REM : main
         exit /b 3
     )
 
-    for %%a in (!FOLDER_PATH!) do set "folderName=%%~nxa"
-
-    if ["!folderName!"] == [""] (
-        @echo This folder !FOLDER_PATH! is not compatible with DOS^. Remove all specials characters from this path.
-        exit /b 4
-    )
-
     for %%a in (!FOLDER_PATH!) do set "drive=%%~da"
 
     set "_path=!FOLDER_PATH!"

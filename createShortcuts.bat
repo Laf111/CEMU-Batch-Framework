@@ -22,12 +22,18 @@ REM : main
     REM : directory of this script
     pushd "%~dp0" >NUL && set "BFW_PATH="!CD!"" && popd >NUL
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+    
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
@@ -252,8 +258,8 @@ REM : main
     for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
     )
 
     if !QUIET_MODE! EQU 0 (
@@ -330,13 +336,32 @@ REM : main
     set "version=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "version=%%e"
 
-    if ["%version%"] == ["NOT_FOUND"] goto:autoImportMode
+    if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
 
     set "str=%version:.=%"
     set "n=%str:~0,4%"
     if %n% LSS 1151 set /A "post1151=0"
+    if %n% GEQ 1140 goto:autoImportMode
 
-    :autoImportMode
+   :extractV2Packs 
+    set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
+    if exist !gfxv2! goto:autoImportMode
+   
+    mkdir !gfxv2! > NUL        
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
+
+    @echo ---------------------------------------------------------
+    @echo graphic pack V2 are needed for this version^, extracting^.^.^.
+    
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
+    set /A cr=!ERRORLEVEL!
+    if !cr! GTR 1 (
+        @echo ERROR while extracting V2_GFX_Packs, exiting 1
+        pause
+        exit /b 21
+    )
+   
+   :autoImportMode
     @echo ---------------------------------------------------------
     @echo.
     @echo Do you want to enable automatic settings import between versions of CEMU^?
