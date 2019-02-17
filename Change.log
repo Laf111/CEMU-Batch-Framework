@@ -26,7 +26,7 @@
 - replace antrenamer with BRC64
 - update embeded GFX packs to v367
 - use now separate archives for V2 and V3 GFX packs
-- install V2 GFX packs the first time a version < 1.14 is deteceted 
+- install V2 GFX packs the first time a version < 1.14 is detected 
 - setup.bat : Extract embeded V3 GFX packs archive only if no active connection is found or if the update GFX 
   process failed
 

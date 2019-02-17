@@ -58,7 +58,11 @@ REM : main
     
     REM : silent mode
     set /A "QUIET_MODE=0"
-    if !nbArgs! NEQ 0 set /A "QUIET_MODE=1"
+    set /A "FORCED_MODE=0"
+    if !nbArgs! NEQ 0 (
+        if [!args[0]!] == ["-silent"] set /A "QUIET_MODE=1"
+        if [!args[0]!] == ["-forced"] set /A "FORCED_MODE=1"
+    )
     
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -100,6 +104,7 @@ REM : main
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
         exit /b 30
     )
+    if !FORCED_MODE! EQU 1 goto:noMsg 
     if !QUIET_MODE! EQU 1 goto:msgBox 
     @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
     call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
@@ -120,6 +125,9 @@ REM : main
     if !QUIET_MODE! EQU 0 @echo =========================================================
     if !QUIET_MODE! EQU 0 @echo Updating BatchFW^'s graphic packs
     if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
+    
+    
+    :noMsg
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
     
@@ -136,7 +144,8 @@ REM : main
         exit /b 9
     )
 
-    @echo Launching graphic pack update to !zipFile!^.^.^.
+    if !FORCED_MODE! EQU 0 @echo Launching graphic pack update to !zipFile!^.^.^.
+    if !FORCED_MODE! EQU 1 @echo Installing !zipFile!^.^.^.
     
     pushd !BFW_GP_TMP!
 
