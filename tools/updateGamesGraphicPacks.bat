@@ -82,6 +82,8 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !myLog!
@@ -116,7 +118,6 @@ REM : main
     set "newVersion=NOT_FOUND"
 
     set "pat="!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete""
-    set "pat=!pat:\\=\!"
     
     set "gpl="NOT_FOUND""
     for /F %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
@@ -145,7 +146,9 @@ REM : main
     set "newVersion=!newVersion: =!"
 
     :treatOneGame
+    
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
+ 
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -187,6 +190,8 @@ REM : functions
 
     :updateGraphicPacks
 
+        set "codeFullPath=!codeFullPath:\\=\!"
+    
         REM : not game folder, skip
         if not exist !codeFullPath! goto:eof
 
@@ -194,10 +199,9 @@ REM : functions
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
         for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do set "RPX_FILE="%%i""
-
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
-
+        
         REM : update game's graphic packs
         set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
         if not exist !ggp! mkdir !ggp! > NUL
@@ -233,7 +237,7 @@ REM : functions
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-           
+      
         REM : check if V3 gp exist for this game
         for /F "delims=" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find "_Resolution" 2^>NUL') do (
 
@@ -341,6 +345,7 @@ REM : functions
         set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
+     
         call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile!
 
         :createCapGP
