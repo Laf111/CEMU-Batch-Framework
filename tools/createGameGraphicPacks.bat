@@ -762,9 +762,7 @@ REM : functions
         
         REM : waiting all children processes ending
         call:waitChildrenProcessesEnd
-echo before create1610
-pause
-        
+
         for %%a in (!ARLIST!) do (
             if ["%%a"] == ["1610"] call:create1610
             REM : waiting all children processes ending
@@ -779,8 +777,7 @@ pause
             REM : waiting all children processes ending
             call:waitChildrenProcessesEnd
         )
-echo before finalizeResV3GP
-pause
+
         call:finalizeResV3GP
 
     goto:eof
