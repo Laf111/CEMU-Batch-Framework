@@ -170,7 +170,7 @@ REM : main
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
-    call:getFolderPath "Please enter a target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
+    call:getFolderPath "Please enter a Cemu's target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
     
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
@@ -261,7 +261,13 @@ REM : main
     pushd !GAMES_FOLDER!
     
     REM : remove shortcut folder
+    REM : if not called from this folder
+    if [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+    REM : get the last location from logFile
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+    )
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+    
         rmdir /Q /S !WIIU_GAMES_FOLDER! 2>NUL
         @echo ^> !WIIU_GAMES_FOLDER! deleted ^!
         @echo ---------------------------------------------------------
