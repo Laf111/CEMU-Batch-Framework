@@ -133,7 +133,7 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
-
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     if not exist !BFW_GP_FOLDER! (
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
         
