@@ -25,9 +25,6 @@ REM : main
     set "BFW_PATH=!basename:~0,-2!""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
-    REM : set current char codeset
-    call:setCharSetAndLocale
 
     REM : initialize return code to 0 (no problemn encountered)
     set cr=0
@@ -201,48 +198,5 @@ REM : main
             )
             set /A j+=1
         )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to get char set code for current host
-    :setCharSetAndLocale
-
-        REM : get charset code for current HOST
-        set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
-
-        if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
-            exit /b 9
-        )
-        REM : set char code set, output to host log file
-
-        chcp %CHARSET% > NUL
-
-        REM : get locale for current HOST
-        set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
-
-        REM : set YES/NO according to locale (used to protect cmd windows when closing then with mouse)
-        REM : default = ENG
-        set "yes=y"
-        set "no=n"
-
-        if ["%L0CALE_CODE%"] == ["0407"] (
-            REM : locale = GER
-            set "yes=j"
-            set "no=n"
-        )
-        if ["%L0CALE_CODE%"] == ["0C0a"] (
-            REM : locale = SPA
-            set "yes=s"
-            set "no=n"
-        )
-        if ["%L0CALE_CODE%"] == ["040c"] (
-            REM : locale = FRA
-            set "yes=o"
-            set "no=n"
-        )
-
     goto:eof
     REM : ------------------------------------------------------------------

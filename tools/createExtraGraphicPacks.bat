@@ -40,9 +40,6 @@ REM : main
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
-    REM : set current char codeset
-    call:setCharSetAndLocale
-
     REM : game's name 
     set "gameName=NONE"
 
@@ -1372,52 +1369,6 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    REM : function to get char set code for current host
-    :setCharSetAndLocale
-
-        REM : get charset code for current HOST
-        set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
-
-        if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
-            
-            exit /b 9
-        )
-        REM : set char code set, output to host log file
-
-        chcp %CHARSET% > NUL
-        call:log2HostFile "charCodeSet=%CHARSET%"
-
-        REM : get locale for current HOST
-        set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
-
-        REM : set YES/NO according to locale (used to protect cmd windows when closing then with mouse)
-        REM : default = ENG
-        set "yes=y"
-        set "no=n"
-
-        if ["%L0CALE_CODE%"] == ["0407"] (
-            REM : locale = GER
-            set "yes=j"
-            set "no=n"
-        )
-        if ["%L0CALE_CODE%"] == ["0C0a"] (
-            REM : locale = SPA
-            set "yes=s"
-            set "no=n"
-        )
-        if ["%L0CALE_CODE%"] == ["040c"] (
-            REM : locale = FRA
-            set "yes=o"
-            set "no=n"
-        )
-
     goto:eof
     REM : ------------------------------------------------------------------
 
