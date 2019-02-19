@@ -6,7 +6,7 @@ $latestRelease = Invoke-WebRequest -UseBasicParsing https://github.com/Laf111/CE
 $json = $latestRelease.Content | ConvertFrom-Json
 $latestVersion = $json.tag_name
 
-$url = "https://github.com/Laf111/CEMU-Batch-Framework/archive/" + $latestVersion + ".zip"
+$url = "https://github.com/Laf111/CEMU-Batch-Framework/releases/download/" + $latestVersion + "/CEMU_BatchFW_" + $latestVersion + ".zip"
 
 # --- Download the file to the current location
 $OutputPath = "$((Get-Location).Path)\CEMU_BatchFW_" + $latestVersion + ".zip"
