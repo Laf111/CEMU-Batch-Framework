@@ -124,7 +124,8 @@ REM : main
         if %QUIET_MODE% EQU 0 (
             @echo ---------------------------------------------------------
             @echo BatchFw is a batch framework created to launch easily all
-            @echo your RPX games ^(loadiines format^) using many versions of CEMU^.
+            @echo your RPX games ^(loadiines format^) using many versions of 
+            @echo CEMU^.
             @echo.
             @echo It is now limited only to CEMU's versions ^>=1^.11 that^:
             @echo -support the -mlc argument
