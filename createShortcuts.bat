@@ -60,7 +60,7 @@ REM : main
     pushd !GAMES_FOLDER!
 
     REM : update graphic packs
-    set "ubw="!BFW_PATH:"=!\tools\updateBatchFw.bat""
+    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
     set cr=!ERRORLEVEL!    
     if !cr! EQU 0 (
