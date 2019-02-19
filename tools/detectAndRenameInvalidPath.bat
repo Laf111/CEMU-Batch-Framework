@@ -25,6 +25,9 @@ REM : main
     set "BFW_PATH=!basename:~0,-2!""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    
+    REM : set current char codeset
+    call:setCharSet
 
     REM : initialize return code to 0 (no problemn encountered)
     set cr=0
@@ -198,5 +201,23 @@ REM : main
             )
             set /A j+=1
         )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : function to get and set char set code for current host
+    :setCharSet
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            @echo Host char codeSet not found ^?^, exiting 1
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL
+
     goto:eof
     REM : ------------------------------------------------------------------

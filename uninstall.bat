@@ -31,6 +31,9 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
+    REM : set current char codeset
+    call:setCharSet
+
     REM : get batch version from log file
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
@@ -409,3 +412,21 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to get and set char set code for current host
+    :setCharSet
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            @echo Host char codeSet not found ^?^, exiting 1
+            pause
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL
+
+    goto:eof
+    REM : ------------------------------------------------------------------

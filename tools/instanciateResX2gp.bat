@@ -30,6 +30,9 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
+    REM : set current char codeset
+    call:setCharSet
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -329,6 +332,25 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
+    REM : function to get and set char set code for current host
+    :setCharSet
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            @echo Host char codeSet not found ^?^, exiting 1
+            pause
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL
+        call:log2HostFile "charCodeSet=%CHARSET%"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to log info for current host
     :log2HostFile

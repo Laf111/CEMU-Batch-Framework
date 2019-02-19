@@ -94,7 +94,7 @@ REM : main
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw! !BFW_VERSION!
-    set cr=!ERRORLEVEL!    
+    set /A "cr=!ERRORLEVEL!"    
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         exit 50
@@ -103,6 +103,8 @@ REM : main
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
     
+    REM : set current char codeset
+    call:setCharSet
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""
@@ -181,7 +183,7 @@ REM : main
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
-            set cr=!ERRORLEVEL!
+            set /A "cr=!ERRORLEVEL!"
 
             if !cr! GTR 1 @echo Please rename the game^'s folder to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
@@ -271,7 +273,8 @@ REM : main
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp! -forced
-    set cr=!ERRORLEVEL!    
+    set /A "cr=!ERRORLEVEL!"    
+
     if !cr! EQU 0 goto:importModForGames
 
    :extractV3pack
@@ -291,7 +294,7 @@ REM : main
     if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP! > NUL
 
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL
-    set /A cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo ERROR while extracting V3_GFX_Packs^.rar, exiting 1
         pause
@@ -487,12 +490,12 @@ REM : main
 
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         
         if !cr! EQU 2 set "script="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
        :getExtMlc01
         wscript /nologo !StartWait! !script! 
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             @echo ERROR in !script!^, cr=!cr!
             pause
@@ -542,7 +545,7 @@ REM : main
     REM : check if folder name contains forbiden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !OUTPUT_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo Please rename !OUTPUT_FOLDER! to be DOS compatible^!^, exiting
         pause
@@ -614,7 +617,7 @@ REM : main
     REM : check if folder name contains forbiden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !CEMU_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo Please rename !GAMES_FOLDER! to be DOS compatible^!^, exiting
         pause
@@ -753,7 +756,7 @@ REM : functions
         if !ERRORLEVEL! EQU 2 goto:createShortcuts
 
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set "mlc01="!CEMU_FOLDER:"=!\mlc01""
 
@@ -834,7 +837,7 @@ REM : functions
         @echo graphic pack V2 are needed for this version^, extracting^.^.^.
         
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
-        set /A cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             @echo ERROR while extracting V2_GFX_Packs, exiting 1
             pause
@@ -923,7 +926,7 @@ REM : functions
         REM : calling createShortcuts.bat
         set "tobeLaunch="!BFW_PATH:"=!\createShortcuts.bat""
         call !tobeLaunch! !CEMU_FOLDER! !OUTPUT_FOLDER! %argOpt%
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         if !cr! NEQ 0 (
             @echo ERROR in createShortcuts^, cr=!cr!
@@ -937,7 +940,7 @@ REM : functions
         REM : calling createExecutables.bat
         set "tobeLaunch="!BFW_PATH:"=!\createExecutables.bat""
         call !tobeLaunch! !CEMU_FOLDER! !OUTPUT_FOLDER! %argOpt%
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         if !cr! NEQ 0 (
             @echo ERROR in createCemuLancherExecutables^, cr=!cr!
@@ -980,7 +983,7 @@ REM : functions
    :move
         set "ms="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !ms! !mlc01!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         if !cr! NEQ 0 (
             @echo ERROR in moveMlc01DataForAllGames^, cr=!cr!
@@ -994,7 +997,7 @@ REM : functions
    :copy
         set "cs="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !cs! !mlc01!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         if !cr! NEQ 0 (
             @echo ERROR in moveMlc01DataForAllGames^, cr=!cr!
@@ -1188,7 +1191,7 @@ REM : functions
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         set j=1
         for %%i in ("%valuesList:,=" "%") do (
 
@@ -1204,7 +1207,25 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to get and set char set code for current host
+    :setCharSet
 
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            @echo Host char codeSet not found ^?^, exiting 1
+            pause
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL
+        call:log2HostFile "charCodeSet=%CHARSET%"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to log info for current host
    :log2HostFile

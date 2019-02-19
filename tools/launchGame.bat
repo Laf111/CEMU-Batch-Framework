@@ -59,6 +59,9 @@ REM : main
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
 
+    REM : set current char codeset
+    call:setCharSet
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -2084,6 +2087,32 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
         exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
+
+
+    REM : function to get and set char set code for current host
+    :setCharSet
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
+            @echo Host char codeSet not found ^?^, exiting 1
+            timeout /t 8 > NUL
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL
+
+        REM : get locale for current HOST
+        set "L0CALE_CODE=NOT_FOUND"
+        for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     REM : function to log info for current host
     :log2HostFile
