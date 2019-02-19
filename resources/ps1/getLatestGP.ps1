@@ -1,4 +1,3 @@
-
 # This script output the latest release file
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 

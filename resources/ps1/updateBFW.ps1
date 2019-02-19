@@ -9,7 +9,7 @@ $latestVersion = $json.tag_name
 $url = "https://github.com/Laf111/CEMU-Batch-Framework/archive/" + $latestVersion + ".zip"
 
 # --- Download the file to the current location
-$OutputPath = "$((Get-Location).Path)\CEMU'sBatchFW_" + $latestVersion + ".zip"
+$OutputPath = "$((Get-Location).Path)\CEMU_BatchFW_" + $latestVersion + ".zip"
 
 try {
     Invoke-RestMethod -Method Get -Uri $url -OutFile $OutputPath
