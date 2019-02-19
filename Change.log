@@ -1,4 +1,4 @@
-16/02/2019 V13 : 
+19/02/2019 V13 : 
 - fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
@@ -29,8 +29,7 @@
 - install V2 GFX packs the first time a version < 1.14 is detected 
 - setup.bat : Extract embeded V3 GFX packs archive only if no active connection is found or if the update GFX 
   process failed
-
-
+- auto-update process added
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat

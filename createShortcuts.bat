@@ -59,6 +59,15 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
+    REM : update graphic packs
+    set "ubw="!BFW_PATH:"=!\tools\updateBatchFw.bat""
+    call !ubw!
+    set cr=!ERRORLEVEL!    
+    if !cr! EQU 0 (
+        @echo BatchFw updated^, please relaunch
+        exit 50
+    )    
+    
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -182,6 +191,7 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+    
     cls
     REM : check if folder name contains forbidden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""

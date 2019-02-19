@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set BFW_VERSION=V20
+    set BFW_VERSION=V13
 
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
@@ -107,6 +107,16 @@ REM : main
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
 
+   
+    REM : update graphic packs
+    set "ubw="!BFW_PATH:"=!\tools\updateBatchFw.bat""
+    call !ubw!
+    set cr=!ERRORLEVEL!    
+    if !cr! EQU 0 (
+        @echo BatchFw updated^, please relaunch
+        exit 50
+    )    
+   
     cls
     if %nbArgs% EQU 0 (
         @echo =========================================================

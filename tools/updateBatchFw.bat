@@ -56,14 +56,6 @@ REM : main
         goto:continue
     :end
     
-    REM : silent mode
-    set /A "QUIET_MODE=0"
-    set /A "FORCED_MODE=0"
-    if !nbArgs! NEQ 0 (
-        if [!args[0]!] == ["-silent"] set /A "QUIET_MODE=1"
-        if [!args[0]!] == ["-forced"] set /A "FORCED_MODE=1"
-    )
-    
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
@@ -74,110 +66,78 @@ REM : main
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         @echo No active connection was found, cancel updating
-        exit /b 20
+        exit /b 1
     )
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
 
     REM : powerShell script in _BatchFW_Graphic_Packs
-    set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestGP.ps1""
-
-    set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
-
-    Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
+    set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestBFW.ps1""
+    
+    set "bfwVR=NONE"
+    for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do (
+        set "bfwVR=%%i"
+    )
     if !ERRORLEVEL! EQU 1 (
-        @echo Failed to get the last graphic Packs update available 
-        type !lgpvLog!
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
-        exit /b 10
+        @echo Failed to get the last BatchFw version available 
+        exit /b 2
     )
-    for /F %%i in ('type !lgpvLog!') do set "zipFile=%%i"
-
-    set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
-    if exist !zipLogFile! (
-        @echo No new graphics packs update^(s^) available^, last version is still !zipFile:.zip=!
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
-        exit /b 0
+    
+    if ["!bfwVR!"] == ["NONE"] (
+        @echo Failed to get the last BatchFw version available 
+        exit /b 3
     )
-    if ["!zipFile!"] == ["graphicPacks.zip"] (
-        @echo Searching for a new graphic packs release failed ^!
-        @echo Network connection was refused^, please check you powerscript policy
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
-        exit /b 30
+    
+    REM : get the current version from the log file
+    set "BFW_VERSION=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
+    
+    if ["!BFW_VERSION!"] == ["!bfwVR!"] (
+        @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!
+        exit /b 4    
     )
-    if !FORCED_MODE! EQU 1 goto:noMsg 
-    if !QUIET_MODE! EQU 1 goto:msgBox 
-    @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
+    
+    @echo New version available, do you want to update BatchFW to !bfwVR!^?
     call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
         timeout /T 4 > NUL
-        exit /b 40
+        exit /b 5
     )
-    goto:updateGP
-    
-    :msgBox    
-    cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
-    if !ERRORLEVEL! EQU 2 exit 0
-    
-    :updateGP    
 
     REM : launch graphic pack update
-    if !QUIET_MODE! EQU 0 @echo =========================================================
-    if !QUIET_MODE! EQU 0 @echo Updating BatchFW^'s graphic packs
-    if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
+    @echo =========================================================
+    @echo Updating BatchFW to !bfwVR!^.^.^.
+    @echo ---------------------------------------------------------
     
-    
-    :noMsg
     REM : copy powerShell script in _BatchFW_Graphic_Packs
-    set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
+    set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateBFW.ps1""
     
-    REM : temporary folder
-    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP!
-    
-    set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
+    set "pws_target="!GAMES_FOLDER:"=!\updateBFW.ps1""
 
     copy /Y !pws_src! !pws_target! > NUL
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo Error when copying !pws_src!
-        exit /b 9
+        exit /b 6
     )
-
-    if !FORCED_MODE! EQU 0 @echo Launching graphic pack update to !zipFile!^.^.^.
-    if !FORCED_MODE! EQU 1 @echo Installing !zipFile!^.^.^.
-    
-    pushd !BFW_GP_TMP!
-
-    REM : launching powerShell script to downaload and extract GFX archive
-    Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo ERROR While getting and extracting graphic packs folder ^!
-        if !QUIET_MODE! EQU 0 pause
-        pushd !GAMES_FOLDER!
-        rmdir /Q /S !BFW_GP_TMP! > NUL
-        exit /b !cr!
-    )
-
-    REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_TMP! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     pushd !GAMES_FOLDER!
+
+    REM : launching powerShell script to downaload and extract GFX archive
+    Powershell -executionpolicy remotesigned -File updateBFW.ps1 *> updateBFW.log
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! NEQ 0 (
+        @echo ERROR While getting and extracting batchFw !bfwVR! ^!
+        if exist !pws_target! del /F !pws_target! > NUL
+        if exist updateBFW.log del /F updateBFW.log > NUL
+        exit /b 7
+    )
+
+
+    if not ["!BFW_VERSION!"] == ["NONE"] call:cleanHostLogFile BFW_VERSION    
+    echo BFW_VERSION=!bfwVR! >> !logFile!
     
-    REM : delete all V3 gp under BFW_GP_FOLDER
-    call:deleteV3gp  
-    REM : delete all previous update log files in BFW_GP_FOLDER
-    set "pat=!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete"
-    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"    
-    
-    REM : filter graphic pack folder
-    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!    
-    if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!
-    
-    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
-    
+    if exist !pws_target! del /F !pws_target! > NUL
+    if exist updateBFW.log del /F updateBFW.log > NUL
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -186,26 +146,17 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    
-    REM : ------------------------------------------------------------------
-    :deleteV3gp
-        set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-        if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
 
-        set "fnrLogDV3gp="!BFW_PATH:"=!\logs\fnr_deleteV3gp.log""
-        if exist !fnrLogDV3gp! del /F !fnrLogDV3gp!
+   :cleanHostLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!logFile:"=!.tmp""
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find "version = 3" --logFile !fnrLogDV3gp!
+        type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
+        del /F /S !logFile! > NUL
+        move /Y !logFileTmp! !logFile! > NUL
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogDV3gp! ^| find "File:" ^| find /V "^!" 2^>NUL') do (
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-            set "gp=!rulesFile:\rules.txt=!"
-
-            rmdir /Q /S !gp! 2>NUL
-        )
-
-        if exist !fnrLogDV3gp! del /F !fnrLogDV3gp!
     goto:eof
     REM : ------------------------------------------------------------------
 

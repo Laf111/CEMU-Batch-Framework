@@ -116,6 +116,7 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"    
     set "titleId=%titleId:"=%"
 
     if not exist !BFW_GP_FOLDER! (
@@ -761,7 +762,7 @@ REM : functions
         
         REM : waiting all children processes ending
         call:waitChildrenProcessesEnd
-        
+
         for %%a in (!ARLIST!) do (
             if ["%%a"] == ["1610"] call:create1610
             REM : waiting all children processes ending
@@ -776,7 +777,7 @@ REM : functions
             REM : waiting all children processes ending
             call:waitChildrenProcessesEnd
         )
-        
+
         call:finalizeResV3GP
 
     goto:eof
