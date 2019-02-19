@@ -96,8 +96,6 @@ REM : main
         exit /b 3
     )
     
-echo     if ["!BFW_VERSION!"] == ["!bfwVR!"] 
-pause
     if ["!BFW_VERSION!"] == ["!bfwVR!"] (
         @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!
         exit /b 4    
