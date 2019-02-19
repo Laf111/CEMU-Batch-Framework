@@ -93,7 +93,7 @@ REM : main
    
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw!
+    call !ubw! !BFW_VERSION!
     set cr=!ERRORLEVEL!    
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
