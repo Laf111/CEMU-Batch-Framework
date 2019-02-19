@@ -89,6 +89,16 @@ REM : main
    :beginSetup
     REM : initialize log file for current host (if needed)
     call:initLogForHost
+    
+   
+    REM : update graphic packs
+    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
+    call !ubw!
+    set cr=!ERRORLEVEL!    
+    if !cr! EQU 0 (
+        @echo BatchFw updated^, please relaunch
+        exit 50
+    )        
 
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
@@ -107,15 +117,6 @@ REM : main
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
 
-   
-    REM : update graphic packs
-    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw!
-    set cr=!ERRORLEVEL!    
-    if !cr! EQU 0 (
-        @echo BatchFw updated^, please relaunch
-        exit 50
-    )    
    
     cls
     if %nbArgs% EQU 0 (
