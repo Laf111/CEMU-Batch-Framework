@@ -42,6 +42,10 @@ Other features:
 
 - Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8) and not only...
 
+- Automatic graphic packs update (check availability)
+
+- Automatic update (check availability)
+
     ect...
 
 
