@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -29,14 +29,14 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    
+
     set "createV2GraphicPacks="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
-    
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""    
-    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""    
+
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -116,7 +116,7 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
-    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"    
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     set "titleId=%titleId:"=%"
 
     if not exist !BFW_GP_FOLDER! (
@@ -175,11 +175,11 @@ REM : main
 
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =%"
-    
+
     REM get all title Id for this game
     set "titleIdList="
     call:getAllTitleIds
-        
+
     if !QUIET_MODE! EQU 1 goto:begin
     @echo =========================================================
     @echo Create graphic packs for !GAME_TITLE!
@@ -196,20 +196,20 @@ REM : main
     )
     cls
     :begin
-    
+
     REM compute native width (16/9 = 1.7777777)
     call:mulfloat "%nativeHeight%.000" "1.777" 3 nativeWidth
-    
+
     REM : get the SCREEN_MODE from logHOSTNAME file
     set "screenMode=fullscreen"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%i"
-    
+
     REM : create resolution graphic packs
     call:createResGP
 
     REM : waiting all children processes ending
     call:waitChildrenProcessesEnd
-    
+
     if %nbArgs% EQU 0 endlocal && pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -227,13 +227,13 @@ REM : functions
         REM : waiting all children processes ending
         :waitingLoop
         for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /V "find"') do (
-            timeout /T 1 > NUL            
+            timeout /T 1 > NUL
             goto:waitingLoop
         )
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
 
     :initV3ResGraphicPack
 
@@ -260,7 +260,7 @@ REM : functions
         set "overwriteWidth=%~1"
         set "overwriteHeight=%~2"
         set "desc=%~3"
-    
+
         @echo [Preset] >> !rulesFileV3!
         @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !rulesFileV3!
         @echo $width = %overwriteWidth% >> !rulesFileV3!
@@ -268,16 +268,16 @@ REM : functions
         @echo $gameWidth = %nativeWidth% >> !rulesFileV3!
         @echo $gameHeight = %nativeHeight% >> !rulesFileV3!
         @echo # >> !rulesFileV3!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :finalizeResV3GP
-   
-   
+
+
         REM : res ratios instructions ------------------------------------------------------
         set /A "resRatio=1"
-        
+
         :beginLoopRes
         set /A "result=0"
         call:divfloat %nativeHeight% !resRatio! 1 result
@@ -291,19 +291,19 @@ REM : functions
 
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
         call:writeRoundedV3Filters >> !rulesFileV3!
-    
+
         if !targetHeight! LEQ 8 goto:formatUtf8
-        if !resRatio! GEQ 8 goto:formatUtf8 
+        if !resRatio! GEQ 8 goto:formatUtf8
         set /A "resRatio+=1"
         goto:beginLoopRes
-   
+
         :formatUtf8
-        
+
         REM : add commonly used 16/9 res filters
         @echo # add commonly used 16/9 res filters >> !rulesFileV3!
         @echo #  >> !rulesFileV3!
         @echo #  >> !rulesFileV3!
-        
+
         if %nativeHeight% EQU 720 (
             REM : (1080/2 = 540, for 1080 treated when resRatio = 2)
 
@@ -327,7 +327,7 @@ REM : functions
             @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !rulesFileV3!
             @echo #  >> !rulesFileV3!
         )
-        
+
         @echo # 1137 x 640 Res >> !rulesFileV3!
         @echo [TextureRedefine] >> !rulesFileV3!
         @echo width = 1137 >> !rulesFileV3!
@@ -337,7 +337,7 @@ REM : functions
         @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !rulesFileV3!
         @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
         @echo #  >> !rulesFileV3!
-        
+
         @echo # 1152 x 640 Res >> !rulesFileV3!
         @echo [TextureRedefine] >> !rulesFileV3!
         @echo width = 1152 >> !rulesFileV3!
@@ -347,7 +347,7 @@ REM : functions
         @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !rulesFileV3!
         @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
         @echo #  >> !rulesFileV3!
-            
+
         @echo # 896 x 504 Res >> !rulesFileV3!
         @echo [TextureRedefine] >> !rulesFileV3!
         @echo width = 896 >> !rulesFileV3!
@@ -375,27 +375,27 @@ REM : functions
         @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
         @echo formatsExcluded = 0x431 >> !rulesFileV3!
         @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !rulesFileV3!   
-        
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !rulesFileV3!
+
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
         copy /Y !rulesFileV3! !utf8! > NUL
         type !utf8! > !rulesFileV3!
         del /F !utf8! > NUL
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :writeRoundedV3Filters
-        
-        REM : loop on -8,-4,0,4,12 (rounded values)        
-        set /A "rh=0"        
+
+        REM : loop on -8,-4,0,4,12 (rounded values)
+        set /A "rh=0"
         for /L %%i in (-8,4,12) do (
-        
+
             @echo # 1/!resRatio! Res rounded at %%i
             @echo [TextureRedefine]
             @echo width = !targetWidth!
-            
+
             set /A "rh=!targetHeight!+%%i"
             @echo height = !rh!
             @echo tileModesExcluded = 0x001 # For Video Playback
@@ -405,11 +405,11 @@ REM : functions
             @echo #
         )
         @echo #
-        
-    goto:eof    
+
+    goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     REM : function for multiplying integers
     :mulfloat
 
@@ -464,19 +464,19 @@ REM : functions
 
     REM : function for dividing integers
     :divfloat
-    
+
         REM : get a
         set "numA=%~1"
         REM : get b
         set "numB=%~2"
-        
+
         set "fpA=%numA:.=%"
         set "fpB=%numB:.=%"
-        
+
         REM : get nbDecimals
         set /A "decimals=%~3"
         set /A "scale=%decimals%"
-        
+
         set /A "one=1"
         if %decimals% EQU 1 (
             set /A "one=10"
@@ -484,10 +484,10 @@ REM : functions
         )
         call:strLen fpA strLenA
         call:strLen fpB strLenB
-      
+
         set /A "nlA=!strLenA!"
-        set /A "nlB=!strLenB!" 
-        
+        set /A "nlB=!strLenB!"
+
         set /A "max=%nlA%"
         if %nlB% GTR %nlA% set /A "max=%nlB%"
         set /A "decimals=9-%max%"
@@ -500,11 +500,11 @@ REM : functions
         set "intPart="!div:~0,-%decimals%!""
         if [%intPart%] == [""] set "intPart=0"
         set "intPart=%intPart:"=%"
-        
-        set "decPart=!div:~-%decimals%!"      
-        
+
+        set "decPart=!div:~-%decimals%!"
+
         set "result=%intPart%.%decPart%"
-   
+
         if %scale% EQU 0 set /A "result=%intPart%"
 
         REM : output
@@ -519,7 +519,7 @@ REM : functions
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowed
-        
+
         REM : 16/10 full screen graphic packs
         set /A "h=360"
         set /A "w=576"
@@ -528,15 +528,15 @@ REM : functions
         for /L %%p in (1,1,31) do (
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p1610" !GAME_TITLE! "(16:10)"
             call:fillResV3GP !w! !h! "^(16^:10^)"
-           
+
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-       
+
         @echo 16^/10 fullscreen graphic packs created ^^!
 
         goto:eof
-        
+
         :1610_windowed
         REM : 16/10 windowed graphic packs
         set /A "h=360"
@@ -559,7 +559,7 @@ REM : functions
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:219_windowed
-        
+
         REM : 21/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=840"
@@ -576,7 +576,7 @@ REM : functions
         @echo 21^/9 graphic packs created ^^!
 
         goto:eof
-        
+
         :219_windowed
         REM : 21/9 windowed graphic packs
         set /A "h=360"
@@ -591,7 +591,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
         @echo 21^/9 windowed graphic packs created ^^!
-       
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -603,7 +603,7 @@ REM : functions
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
         echo !ARLIST! | find /V "169" > NUL && goto:eof
-        
+
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=640"
@@ -619,12 +619,12 @@ REM : functions
 
         @echo 16^/9 graphic packs created ^^!
         goto:eof
-        
+
         :169_windowed
-        
+
         REM : create windowed packs only if user chosen it during setup
         echo !ARLIST! | find /V "169" > NUL && goto:eof
-       
+
         REM : 16/9 windowed graphic packs
         set /A "h=360"
         set /A "w=694"
@@ -638,7 +638,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
         @echo 16^/9 windowed graphic packs created ^^!
-       
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -663,7 +663,7 @@ REM : functions
 
         @echo 4^/3 graphic packs created ^^!
         goto:eof
-        
+
         :43_windowed
         REM : 4/3 windowed graphic packs
         set /A "h=360"
@@ -678,7 +678,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
         @echo 4^/3 windowed graphic packs created ^^!
-       
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -688,7 +688,7 @@ REM : functions
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:489_windowed
-        
+
         REM : 48/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=1920"
@@ -703,9 +703,9 @@ REM : functions
         )
 
         @echo 48^/9 graphic packs created ^^!
-       
+
         goto:eof
-        
+
         :489_windowed
         REM : 48/9 windowed graphic packs
         set /A "h=360"
@@ -720,22 +720,22 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
         @echo 48^/9 windowed graphic packs created ^^!
-       
+
     goto:eof
     REM : ------------------------------------------------------------------
 
     :getAllTitleIds
-   
+
         REM now searching using icoId
         set "line="NONE""
-        
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do ( 
-            for /F "tokens=1-11 delims=;" %%a in ("%%i") do (            
+
+        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do (
+            for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
-             )        
+             )
         )
-        set "titleIdList=!titleIdList:~1!" 
+        set "titleIdList=!titleIdList:~1!"
     goto:eof
 
     :createResGP
@@ -745,8 +745,8 @@ REM : functions
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
         REM : if not defined, here fix it to 16/9
         if ["!ARLIST!"] == [""] set "ARLIST=169"
-        
-        REM : initialize V3 graphic pack               
+
+        REM : initialize V3 graphic pack
         set "gpv3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""
         if exist !gpv3! (
             @echo ^^! !GAME_TITLE! already exist, skipped ^^!
@@ -754,12 +754,12 @@ REM : functions
         )
         if not exist !gpv3! mkdir !gpv3! > NUL
         set "rulesFileV3="!gpv3:"=!\rules.txt""
-        
+
         call:initV3ResGraphicPack %nativeHeight% %nativeWidth% !GAME_TITLE!
 
         REM : create 16/9 fullscreen graphic packs
         call:create169
-        
+
         REM : waiting all children processes ending
         call:waitChildrenProcessesEnd
 

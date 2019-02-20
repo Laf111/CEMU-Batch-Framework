@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -29,7 +29,7 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : checking GAMES_FOLDER folder
@@ -254,18 +254,18 @@ REM : functions
             REM : skip this game
             echo Skip this GAME
             goto:eof
-        )        
+        )
         @echo ---------------------------------------------------------
 
-        
+
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
         if not exist !sf! (
             @echo Nothing to do for !GAME_TITLE!
             goto:eof
         )
-        
+
         set "target="!CEMU_FOLDER:"=!\ShaderCache\transferable""
-     
+
         call:moveFolder !sf! !target! cr
         if !cr! NEQ 0 (
             @echo - ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!

@@ -120,7 +120,7 @@ REM : main
         if not exist !metaFolder! mkdir !metaFolder! > NUL
         @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
         @echo "Then close notepad to continue"
-        
+
         set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
 

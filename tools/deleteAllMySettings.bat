@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -31,7 +31,7 @@ REM : main
 
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -67,7 +67,7 @@ REM : main
 
     REM : initialize for every version
     set "CEMU_FOLDER_NAME=*"
-    
+
     if %nbArgs% EQU 0 (
         @echo Delete all my settings for each game ^(for all CEMU versions^) saved for all host
         goto:del
@@ -97,7 +97,7 @@ REM : main
         set "CEMU_FOLDER_NAME=!args[1]!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME: =!"
-        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved for host !HOST! 
+        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved for host !HOST!
     )
 
 
@@ -136,7 +136,7 @@ REM : main
         pause
         goto:eof
     )
-    
+
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
@@ -156,7 +156,7 @@ REM : main
 
             if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
-     
+
             call:delSettingsIn
 
         ) else (
@@ -235,13 +235,13 @@ REM : functions
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
- 
+
         if ["!HOST!"] == ["*"] goto:removeAllHost
-        
+
         set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!HOST!""
         if not exist !rootDir! goto:eof
         pushd !rootDir!
-       
+
         if ["!CEMU_FOLDER_NAME!"] == ["*"] goto:removeAllSettings
 
         set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!HOST!\!CEMU_FOLDER_NAME!""
@@ -258,7 +258,7 @@ REM : functions
             REM : skip this game
             echo Skip this GAME
             goto:eof
-        )       
+        )
 
         for /F "delims=" %%j in ('dir /o:n /a:d /b * ^| find "!CEMU_FOLDER_NAME!" 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
@@ -279,17 +279,17 @@ REM : functions
             REM : skip this game
             echo Skip this GAME
             goto:eof
-        )       
+        )
         for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
             @echo - "%%j" deleted ^^!
         )
-        goto:endTreatment        
-        
+        goto:endTreatment
+
         :removeAllHost
 
         REM : all Hosts, all settings
-        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings""        
+        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings""
         if not exist !rootDir! goto:eof
         @echo =========================================================
         @echo - !GAME_TITLE!
@@ -303,10 +303,10 @@ REM : functions
             REM : skip this game
             echo Skip this GAME
             goto:eof
-        )        
-        
-        pushd !rootDir!     
-        for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (           
+        )
+
+        pushd !rootDir!
+        for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
             @echo - "%%j" deleted ^^!
         )

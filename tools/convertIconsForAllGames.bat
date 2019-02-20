@@ -8,7 +8,7 @@ REM : main
 
     color 4F
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -28,14 +28,14 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""    
-    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""   
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
-    
+
     set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -70,7 +70,7 @@ REM : main
         pause
         exit /b 99
     )
-    
+
     REM : get and check GAME_FOLDER_PATH
     set GAME_FOLDER_PATH=!args[0]!
     if not exist !GAME_FOLDER_PATH! (
@@ -78,11 +78,11 @@ REM : main
         pause
         exit /b 1
     )
-    
+
     :createIcons
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
     @echo =========================================================
-    
+
     @echo Launching in 12s
     @echo     ^(y^)^: launch now
     @echo     ^(n^)^: cancel
@@ -113,11 +113,11 @@ REM : main
         pause
         goto:eof
     )
-    
+
     set /A NB_GAMES_TREATED=0
 
     if %nbArgs% EQU 1 goto:treatOneGame
-    
+
     REM : loop on game's code folders found
     for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
 
@@ -145,7 +145,7 @@ REM : main
             @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
-            REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion 
+            REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
             set "str="!folderName!""
             set "str=!str:&=!"
             set "str=!str:\!=!"
@@ -165,10 +165,10 @@ REM : main
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
-    goto:ending 
-    
+    goto:ending
+
     :treatOneGame
-    
+
     REM : check path
     call:checkPathForDos !GAME_FOLDER_PATH! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -183,10 +183,10 @@ REM : main
         if !cr! EQU 1 goto:treatOneGame
         call:jpg2Ico
     )
-    
+
     :ending
     if !QUIET_MODE! EQU 1 goto::exiting
-    
+
     @echo =========================================================
     @echo Treated !NB_GAMES_TREATED! games
     @echo #########################################################
@@ -199,7 +199,7 @@ REM : main
         REM Waiting before exiting
         pause
     )
-    
+
     :exiting
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
@@ -289,13 +289,13 @@ REM : functions
         for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
-        
+
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
-        
+
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-        
+
         REM : path to meta.xml file
         set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
         if not exist !META_FILE! goto:searchJpgFile
@@ -306,7 +306,7 @@ REM : functions
         if [!titleLine!] == ["NONE"] goto:searchJpgFile
 
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-        
+
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
         for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
@@ -318,7 +318,7 @@ REM : functions
              echo ^'%titleId%^'^;!GAME_TITLE: =!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;1080^;60 >> !wiiuLibFile!
              goto:searchJpgFile
         )
-        
+
         REM : strip line to get data
         for /F "tokens=1-10 delims=;" %%a in (!libFileLine!) do (
            set "titleId=%%a"
@@ -332,28 +332,28 @@ REM : functions
            set "icoId=%%i"
         )
         set "titleId=%titleId:'=%"
-        set "titleIdIco=%icoId:'=%"      
-        
+        set "titleIdIco=%icoId:'=%"
+
         REM : looking for ico file close to rpx file
         set "ICO_FILE="NONE""
         set "pat="!codeFullPath:"=!\*.ico""
         for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
-     
+
         if [!ICO_FILE!] == ["NONE"] goto:searchJpgFile
-               
+
         set "NEW_ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
         if [!ICO_FILE!] == ["%titleIdIco%.ico"] goto:checkDataBase
-        
+
         set "OLD_ICO_PATH="!codeFullPath:"=!\!ICO_FILE:"=!""
-        
-        REM : renaming ico file with title Id 
+
+        REM : renaming ico file with title Id
         move /Y !OLD_ICO_PATH! !NEW_ICO_PATH! > NUL
 
         :checkDataBase
         set "dataBaseIco="!BFW_PATH:"=!\resources\gamesIcons\%titleIdIco%.ico""
         REM : copy ico to dadabase if needed
         if not exist !dataBaseIco! copy /Y !NEW_ICO_PATH! !dataBaseIco! > NUL
-        
+
         goto:eof
 
         :searchJpgFile
@@ -398,7 +398,7 @@ REM : functions
         set "dataBaseIco="!BFW_PATH:"=!\resources\gamesIcons\%titleIdIco%.ico""
         REM : copy ico to dadabase if needed
         if not exist !dataBaseIco! copy /Y !ICO_PATH! !dataBaseIco! > NUL
-        
+
         @echo -
 
     goto:eof

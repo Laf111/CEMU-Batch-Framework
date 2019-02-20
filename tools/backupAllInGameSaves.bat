@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -45,7 +45,7 @@ REM : main
         pause
         exit /b 9
     )
-    
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
@@ -159,7 +159,7 @@ REM : main
         pause
         goto:eof
     )
-    
+
     set /A NB_SAVES_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
@@ -269,11 +269,11 @@ REM : functions
         @echo ---------------------------------------------------------
 
         for %%a in (!USERSLIST!) do (
-        
+
             set rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_%%a.rar"
 
             if not exist !rarFile! goto:skipUser
-            
+
             REM : ELSE copy inGameSaves\!USERNAME!.rar to !GAME_TITLE!_%%a_%DATE%.rar
             set "str=!rarFile:"=!"
             set backup="!str:.rar=!_%DATE%.rar"
@@ -287,8 +287,8 @@ REM : functions
             )
             :skipUser
             echo. > NUL
-        )    
-        
+        )
+
         set /A NB_SAVES_TREATED+=1
         )
 
@@ -375,7 +375,7 @@ REM : functions
         REM : in case of DOS characters substitution (might never arrive)
         if not exist !folderSelected! call:runPsCmd %1 %2
         set "%3=!folderSelected!"
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 

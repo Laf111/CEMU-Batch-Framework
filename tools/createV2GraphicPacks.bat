@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : directory of this script
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
 
@@ -59,7 +59,7 @@ REM : main
 
     set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
     if not exist !bfwgpv2! exit 10
-    
+
     set "gp="!bfwgpv2:"=!\_BatchFW %description%""
     if exist !gp! (
         @echo ^^! _BatchFW %description% already exist, skipped ^^!
@@ -76,12 +76,12 @@ REM : main
     @echo version = 2 >> !rulesFileV2!
     @echo # >> !rulesFileV2!
 
-    
+
     REM : res ratios instructions ------------------------------------------------------
     set /A "resRatioV2=1"
-    
+
     :beginLoopResV2
-    
+
     set /A "resultV2=0"
     call:divfloat %nativeHeight% !resRatioV2! 1 resultV2
 
@@ -89,21 +89,21 @@ REM : main
     for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" && goto:beginLoopResV2
     set "targetHeightV2=!resultV2:.0=!"
 
-    
+
     REM compute targetWidth (16/9 = 1.7777777)
     call:mulfloat "!targetHeightV2!.000" "1.777" 3 targetWidthV2
-   
+
 
     call:divfloat2int "%overwriteWidth%.0" "!resRatioV2!.0" 1 widthV2
     call:divfloat2int "%overwriteHeight%.0" "!resRatioV2!.0" 1 heightV2
-    
+
 
     REM 1^/%resRatioV2% res : %targetWidth%x%targetHeight%
     call:writeV2Filters >> !rulesFileV2!
-   
-    
+
+
     if !heightV2! LEQ 8 goto:formatrV2Utf8
-    if !resRatioV2! GEQ 9 goto:formatrV2Utf8         
+    if !resRatioV2! GEQ 9 goto:formatrV2Utf8
     set /A "resRatioV2+=1"
     goto:beginLoopResV2
 
@@ -113,7 +113,7 @@ REM : main
     copy /Y !rulesFileV2! !utf8v2! > NUL
     type !utf8v2! > !rulesFileV2!
     del /F !utf8v2! > NUL
-  
+
     if %ERRORLEVEL% NEQ 0 exit %ERRORLEVEL%
     exit 0
     goto:eof
@@ -122,22 +122,22 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-    
+
     :writeV2Filters
-        
+
         @echo # 1/!resRatioV2! Res
         @echo [TextureRedefine]
         @echo width = !targetWidthV2!
         @echo height = !targetHeightV2!
         @echo tileModesExcluded = 0x001 # For Video Playback
         @echo formatsExcluded = 0x431
-        @echo overwriteWidth = !widthV2!                
+        @echo overwriteWidth = !widthV2!
         @echo overwriteHeight = !heightV2!
         @echo #
         @echo #
-        
-    goto:eof    
-    
+
+    goto:eof
+
     REM : function for multiplying integers
     :mulfloat
 
@@ -192,19 +192,19 @@ REM : functions
 
     REM : function for dividing integers
     :divfloat
-    
+
         REM : get a
         set "numA=%~1"
         REM : get b
         set "numB=%~2"
-        
+
         set "fpA=%numA:.=%"
         set "fpB=%numB:.=%"
-        
+
         REM : get nbDecimals
         set /A "decimals=%~3"
         set /A "scale=%decimals%"
-        
+
         set /A "one=1"
         if %decimals% EQU 1 (
             set /A "one=10"
@@ -212,10 +212,10 @@ REM : functions
         )
         call:strLen fpA strLenA
         call:strLen fpB strLenB
-      
+
         set /A "nlA=!strLenA!"
-        set /A "nlB=!strLenB!" 
-        
+        set /A "nlB=!strLenB!"
+
         set /A "max=%nlA%"
         if %nlB% GTR %nlA% set /A "max=%nlB%"
         set /A "decimals=9-%max%"
@@ -228,11 +228,11 @@ REM : functions
         set "intPart="!div:~0,-%decimals%!""
         if [%intPart%] == [""] set "intPart=0"
         set "intPart=%intPart:"=%"
-        
-        set "decPart=!div:~-%decimals%!"      
-        
+
+        set "decPart=!div:~-%decimals%!"
+
         set "result=%intPart%.%decPart%"
-   
+
         if %scale% EQU 0 set /A "result=%intPart%"
 
         REM : output
@@ -241,7 +241,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+
     REM : function for dividing integers returning an int
     :divfloat2int
 

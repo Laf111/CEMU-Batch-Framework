@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -28,22 +28,22 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""    
-    
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""    
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""    
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
     REM : set current char codeset
     call:setCharSet
 
-    REM : game's name 
+    REM : game's name
     set "gameName=NONE"
-        
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -164,7 +164,7 @@ REM : main
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
     for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%ftid%';"') do set "libFileLine="%%i""
-    
+
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
@@ -196,11 +196,11 @@ REM : main
 
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =_%"
-        
+
     REM get all title Id for this game (in case of a new V3 res gp creation)
     set "titleIdList="
     call:getAllTitleIds
-  
+
 
     REM : create FPS CAP graphic packs
     if not ["!gameName!"] == ["NONE"] set "GAME_TITLE=!gameName!"
@@ -224,27 +224,27 @@ REM : main
     REM : FPS++ found flag
     set /A "fpsPP=0"
     set /A "fpsPPV3=0"
-    
-    REM : initialize V3 graphic pack               
-    set "gpV3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed"" 
-    
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""     
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL    
-           
+
+    REM : initialize V3 graphic pack
+    set "gpV3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
+
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
+
     set "rulesFileV3="!gpV3:"=!\rules.txt""
     set "v3ExistFlag=1"
-    
+
     if not exist !gpV3! (
         set "v3ExistFlag=0"
         mkdir !gpV3! > NUL
         call:initV3CapGP
-    ) 
-    
+    )
+
     REM : create FPS cap graphic packs
     call:createCapGP
-    
+
     REM : finalize V3 graphic packs if a FPS++ pack was not found
-    if !fpsPPV3! EQU 1 rmdir /Q /S !gpV3! 2>NUL && set "v3ExistFlag=1"  
+    if !fpsPPV3! EQU 1 rmdir /Q /S !gpV3! 2>NUL && set "v3ExistFlag=1"
     if %v3ExistFlag% EQU 0 call:finalizeV3CapGP
 
     if %nbArgs% EQU 0 endlocal && pause
@@ -261,19 +261,19 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :getAllTitleIds
-   
+
         REM now searching using icoId
         set "line="NONE""
-        
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do ( 
-            for /F "tokens=1-11 delims=;" %%a in ("%%i") do (            
+
+        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do (
+            for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
-             )        
+             )
         )
-        set "titleIdList=!titleIdList:~1!" 
+        set "titleIdList=!titleIdList:~1!"
     goto:eof
-    
+
     REM : ------------------------------------------------------------------
 
     REM : function for multiplying integers
@@ -319,9 +319,9 @@ REM : functions
         exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :initV3CapGP
-    
+
         @echo [Definition] > !rulesFileV3!
         @echo titleIds = !titleIdList! >> !rulesFileV3!
 
@@ -334,60 +334,60 @@ REM : functions
         @echo name = 100%% Speed ^(Default^) >> !rulesFileV3!
         @echo $FPS = %nativeFps% >> !rulesFileV3!
         @echo # >> !rulesFileV3!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :fillCapV3GP
-            
+
         set "desc1=%~1"
         set "desc2=%~2"
-        
+
         set "desc=!desc1!%% !desc2!"
-        if %v3ExistFlag% EQU 0 ( 
-        
+        if %v3ExistFlag% EQU 0 (
+
             @echo [Preset] >> !rulesFileV3!
             @echo name = !desc! >> !rulesFileV3!
             @echo $FPS = %fps% >> !rulesFileV3!
             @echo # >> !rulesFileV3!
             goto:eof
         )
-        
+
         REM : search for "!desc1!" in rulesFile: if found exit
         for /F "delims=" %%i in ('type !rulesFileV3! ^| find /V "#" ^| find /I "!desc1!"') do goto:eof
-    
-        REM : not found add it by replacing a [Preset] bloc 
+
+        REM : not found add it by replacing a [Preset] bloc
 
         REM : Adding !fps! preset in rules.txt
         set "logFileV3="!fnrLogFolder:"=!\!gameName:"=!-V3_!fps!cap.log""
         if exist !logFileV3! del /F !logFileV3!
-    
+
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileV3!
-        
-         
-        
+
+
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :finalizeV3CapGP
 
         @echo [Control] >> !rulesFileV3!
         @echo vsyncFrequency = $FPS >> !rulesFileV3!
-        
+
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
         copy /Y !rulesFileV3! !utf8! > NUL
         type !utf8! > !rulesFileV3!
         del /F !utf8! > NUL
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-        
+
     :createCapV2GP
 
         set "syncValue=%~1"
         set "description=%~2"
-        
+
         set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
         if not exist !bfwgpv2! goto:eof
         set "gp="!bfwgpv2:"=!\_BatchFW_%description: =_%""
@@ -437,7 +437,7 @@ REM : functions
             set /A "nativeFps=%nativeFps%*2"
 
             REM : graphic pack created by BatchFw : gameName=NONE no FPS++
-            if [!gameName!] == ["NONE"] goto:create            
+            if [!gameName!] == ["NONE"] goto:create
 
             REM : search V3 FPS++ graphic pack or patch for this game
             set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*FPS++*""
@@ -451,17 +451,17 @@ REM : functions
             REM : search V2 FPS++ graphic pack or patch for this game
             set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
             if not exist !bfwgpv2! goto::checkV3FPSpp
-        
-            set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""            
+
+            set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
             for /F "delims=" %%d in ('dir /B !pat! 2^>NUL') do (
                 set /A "fpsPP=1"
                 goto:create
             )
             REM : else = 30 FPS native games without FPS++ : double vsyncValue to cap at target FPS
-            set /A "factor=2"            
+            set /A "factor=2"
         )
 
-        
+
         :create
        if %fpsPP% EQU 1 goto:capMenu
 

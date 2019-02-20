@@ -7,9 +7,9 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-    
+
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -22,9 +22,9 @@ REM : main
     set "WORKINGDIR="!CD!""
     for %%a in (!WORKINGDIR!) do set "parentFolder="%%~dpa""
     set "WIIUG=!parentFolder:~0,-2!""
-    set "CEMU_SHORTCUTS="!WIIUG:"=!\CEMU""    
+    set "CEMU_SHORTCUTS="!WIIUG:"=!\CEMU""
     REM : directory of this script
-    
+
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
@@ -37,7 +37,7 @@ REM : main
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -63,40 +63,40 @@ REM : main
     )
     cls
     @echo ^> Delete all logs under !BFW_LOGS! ^.^.^.
-    
-    pushd !BFW_LOGS!    
+
+    pushd !BFW_LOGS!
     del /F /S *.log > NUL
-    
+
     pushd !GAMES_FOLDER!
-    
+
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         rmdir /Q /S !BFW_GP_FOLDER!
         @echo ---------------------------------------------------------
         @echo ^> Delete graphic pack folder !BFW_GP_FOLDER! ^.^.^.
-        
+
     )
-   
+
     if exist !CEMU_SHORTCUTS! (
         rmdir /Q /S !CEMU_SHORTCUTS!
         @echo ---------------------------------------------------------
         @echo ^> Delete shortcuts created for all versions of CEMU ^.^.^.
     )
-    
-    
+
+
     set "bfrf="!BFW_PATH:"=!\BatchFW_readme.txt""
     if exist !bfrf! (
         @echo ---------------------------------------------------------
         @echo ^> Delete BatchFW_readme.txt ^.^.^.
-        del /F !bfrf! > NUL    
+        del /F !bfrf! > NUL
     )
     set "bfrl="!WORKINGDIR:"=!\BatchFW_readme.lnk""
     if exist !bfrl! (
         @echo ---------------------------------------------------------
         @echo ^> Delete BatchFW_readme.txt shortcut ^.^.^.
-        del /F !bfrl! > NUL    
+        del /F !bfrl! > NUL
     )
-    
+
     @echo =========================================================
     @echo Done
     @echo #########################################################

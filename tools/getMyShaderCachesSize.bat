@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -26,7 +26,7 @@ REM : main
     set "BFW_PATH=!parentFolder:~0,-2!""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : set current char codeset
     call:setCharSet
 
@@ -55,7 +55,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
 
     if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:glCacheFound
-    
+
     REM : else search it
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
@@ -67,7 +67,7 @@ REM : main
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
         @echo Unable to find your GPU GLCache folder ^? cancelling
         goto:eof
-    )    
+    )
     REM : save path to log file
     set "msg="OPENGL_CACHE=!OPENGL_CACHE:"=!""
     call:log2HostFile !msg!

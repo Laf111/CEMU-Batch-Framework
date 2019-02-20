@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -36,16 +36,16 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
-    
+
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
-    
+
     REM : set current char codeset
     call:setCharSet
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -55,19 +55,19 @@ REM : main
         shift
         goto:continue
     :end
-    
+
     if %nbArgs% EQU 1 (
         set "BFW_VERSION=!args[0]!"
         set "BFW_VERSION=!BFW_VERSION:"=!"
         goto:begin
     )
-    
+
     set "BFW_VERSION=!args[0]!"
-    
+
     REM : get the current version from the log file
     set "BFW_VERSION=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
-    
+
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -84,26 +84,26 @@ REM : main
 
     REM : powerShell script in _BatchFW_Graphic_Packs
     set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestBFW.ps1""
-    
+
     set "bfwVR=NONE"
     for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do (
         set "bfwVR=%%i"
     )
     if !ERRORLEVEL! EQU 1 (
-        @echo Failed to get the last BatchFw version available 
+        @echo Failed to get the last BatchFw version available
         exit /b 11
     )
-    
+
     if ["!bfwVR!"] == ["NONE"] (
-        @echo Failed to get the last BatchFw version available 
+        @echo Failed to get the last BatchFw version available
         exit /b 12
     )
-    
+
     if ["!BFW_VERSION!"] == ["!bfwVR!"] (
         @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!
-        exit /b 13  
+        exit /b 13
     )
-    
+
     @echo New version available, do you want to update BatchFW to !bfwVR!^?
     call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
     if [!ANSWER!] == ["n"] (
@@ -116,10 +116,10 @@ REM : main
     @echo =========================================================
     @echo Updating BatchFW to !bfwVR!^.^.^.
     @echo ---------------------------------------------------------
-    
+
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateBFW.ps1""
-    
+
     set "pws_target="!GAMES_FOLDER:"=!\updateBFW.ps1""
 
     copy /Y !pws_src! !pws_target! > NUL
@@ -142,9 +142,9 @@ REM : main
     )
 
 
-    if not ["!BFW_VERSION!"] == ["NONE"] call:cleanHostLogFile BFW_VERSION    
+    if not ["!BFW_VERSION!"] == ["NONE"] call:cleanHostLogFile BFW_VERSION
     echo BFW_VERSION=!bfwVR! >> !logFile!
-    
+
     if exist !pws_target! del /F !pws_target! > NUL
     if exist updateBFW.log del /F updateBFW.log > NUL
     exit /b 0

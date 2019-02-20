@@ -6,7 +6,7 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-    
+
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
 
@@ -22,10 +22,10 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
-    
+
+
     REM : get current date
     for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -38,7 +38,7 @@ REM : main
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
-    
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
@@ -128,11 +128,11 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
 
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] goto:restoreMlc01
-    
+
     REM : openGL cache location
     :cleanBfwGlCache
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
-    
+
     if not exist !GLCacheSavesFolder! goto:restoreMlc01
     rmdir /Q /S !GLCacheSavesFolder! 2>NUL
 
@@ -143,7 +143,7 @@ REM : main
     set "mlc01Restored=0"
     call:getUserInput "Restore mlc01 data of each games ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:restoreTransShaderCache
-    
+
     :getMlc01Target
 
     call:getFolderPath "Please enter mlc01 target folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER
@@ -155,7 +155,7 @@ REM : main
         pause
     )
     if %cr% EQU 0 set "mlc01Restored=1"
-    
+
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:getMlc01Target
 
@@ -169,7 +169,7 @@ REM : main
 
     :askCemuFolder
     call:getFolderPath "Please enter a Cemu's target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
-    
+
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
@@ -178,10 +178,10 @@ REM : main
         pause
     )
     if %cr% EQU 0 set "TransShaderCacheRestored=1"
-    @echo ^> transferable shader caches restored   
+    @echo ^> transferable shader caches restored
     @echo ---------------------------------------------------------
-    
-   
+
+
     :removeExtraFolders
 
     for /F "delims=" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
@@ -199,7 +199,7 @@ REM : main
     for /F "delims=" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
         rmdir /Q /S "%%x" 2>NUL
     )
-    
+
     :removeShaderCache
     for /F "delims=" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
         @echo At least one shaderCache subfolder still exist in your games library^.
@@ -220,8 +220,8 @@ REM : main
     @echo Do you want to remove all Cemu extra subfolders created^^?
     @echo That^'s included ^:
     @echo - all compressed saves for all users
-    @echo - all controllers profiles 
-    @echo - all CEMU saved settings  
+    @echo - all controllers profiles
+    @echo - all CEMU saved settings
     @echo - your own graphic packs if created ones in Cemu game^'s subfolder
     @echo That^'s excluded ^:
     @echo - mods ^(founded ones will be moved in the game^'s folder before deleting Cemu subfolder^)
@@ -243,21 +243,21 @@ REM : main
 
         move /Y "%%i" !GAME_FOLDER! > NUL 2>&1
     )
-    
+
     for /F "delims=" %%x in ('dir /b /a:d /s code 2^>NUL') do (
-    
+
         set "cf="%%x""
         for %%a in (!cf!) do set "parentFolder="%%~dpa""
         set "gf=!parentFolder:~0,-2!""
         set "cemuFolder="!gf:"=!\Cemu""
         rmdir /Q /S !cemuFolder! 2>NUL
     )
-    @echo ^> Batch FW^'s extra files and folders were removed  
+    @echo ^> Batch FW^'s extra files and folders were removed
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     :removeShortcuts
     pushd !GAMES_FOLDER!
-    
+
     REM : remove shortcut folder
     REM : if not called from this folder
     if [!WIIU_GAMES_FOLDER!] == ["NONE"] (
@@ -265,7 +265,7 @@ REM : main
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
     )
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
-    
+
         rmdir /Q /S !WIIU_GAMES_FOLDER! 2>NUL
         @echo ^> !WIIU_GAMES_FOLDER! deleted ^!
         @echo ---------------------------------------------------------
@@ -368,7 +368,7 @@ REM : functions
         REM : in case of DOS characters substitution (might never arrive)
         if not exist !folderSelected! call:runPsCmd %1 %2
         set "%3=!folderSelected!"
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 

@@ -14,7 +14,7 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        
+
         exit 1
     )
 
@@ -37,7 +37,7 @@ REM : main
     set "GAME_FOLDER_PATH="NONE""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
 
     REM : checking GAMES_FOLDER folder
@@ -66,9 +66,9 @@ REM : main
     for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
-    
+
     @echo ========================================================= > !myLog!
-    
+
     if %nbArgs% NEQ 2 (
         @echo ERROR ^: on arguments passed ^!  >> !myLog!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CREATE_LEGACY GAME_FOLDER_PATH  >> !myLog!
@@ -76,13 +76,13 @@ REM : main
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CREATE_LEGACY GAME_FOLDER_PATH
 
         @echo given {%*}
-        
+
         exit /b 99
     )
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
-    
+
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
@@ -94,13 +94,13 @@ REM : main
 
     set "createLegacyPacks=!args[0]!"
     set "createLegacyPacks=%createLegacyPacks:"=%"
-    
+
     REM : get and check BFW_GP_FOLDER
     set "GAME_FOLDER_PATH=!args[1]!"
 
     if not exist !GAME_FOLDER_PATH! (
         @echo ERROR ^: !GAME_FOLDER_PATH! does not exist ^!
-        
+
         exit /b 2
     )
 
@@ -118,7 +118,7 @@ REM : main
     set "newVersion=NOT_FOUND"
 
     set "pat="!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete""
-    
+
     set "gpl="NOT_FOUND""
     for /F %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
     if not [!gpl!] == ["NOT_FOUND"] set "zipLogFile="!BFW_GP_FOLDER:"=!\!gpl:"=!""
@@ -146,9 +146,9 @@ REM : main
     set "newVersion=!newVersion: =!"
 
     :treatOneGame
-    
+
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
- 
+
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -191,7 +191,7 @@ REM : functions
     :updateGraphicPacks
 
         set "codeFullPath=!codeFullPath:\\=\!"
-    
+
         REM : not game folder, skip
         if not exist !codeFullPath! goto:eof
 
@@ -201,7 +201,7 @@ REM : functions
         for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do set "RPX_FILE="%%i""
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
-        
+
         REM : update game's graphic packs
         set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
         if not exist !ggp! mkdir !ggp! > NUL
@@ -237,7 +237,7 @@ REM : functions
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-      
+
         REM : check if V3 gp exist for this game
         for /F "delims=" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find "_Resolution" 2^>NUL') do (
 
@@ -265,7 +265,7 @@ REM : functions
 
         set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
         if exist !fnrLogUggp! del /F !fnrLogUggp!
-   
+
         REM : launching the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogUggp!
 
@@ -311,17 +311,17 @@ REM : functions
 
         REM : no V3 Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
-        
+
         echo titleId=!titleId! >> !myLog!
         echo gpfound=!gpfound! >> !myLog!
         echo v3Gpfound=!v3Gpfound! >> !myLog!
         echo createLegacyPacks=%createLegacyPacks% >> !myLog!
-        
+
         if %gpfound% EQU 1 if %v3Gpfound% EQU 1 goto:createExtraGP
         REM : if V3 GP found, get the last update version
         if %v3Gpfound% EQU 1 goto:checkRecentUpdate
 
-        @echo Create BatchFW graphic packs for this game ^.^.^.        
+        @echo Create BatchFW graphic packs for this game ^.^.^.
         REM : Create game's graphic pack
         set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
@@ -338,14 +338,14 @@ REM : functions
 
         :createExtraGP
         if [!completeGP!] == ["NONE"] goto:eof
-        
+
         if ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
         if not ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
 
         set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-     
+
         call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile!
 
         :createCapGP

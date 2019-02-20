@@ -28,9 +28,9 @@ REM : main
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-    
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -57,8 +57,8 @@ REM : main
     )
 
     REM : cd to GAMES_FOLDER
-    pushd !GAMES_FOLDER!  
-    
+    pushd !GAMES_FOLDER!
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -81,17 +81,17 @@ REM : main
     set /A "QUIET_MODE=0"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    
+
     title Create CEMU shortcuts for selected games
 
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
-    set /A "cr=!ERRORLEVEL!"    
+    set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         exit 50
-    )  
+    )
     cls
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
@@ -191,7 +191,7 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
-    
+
     cls
     REM : check if folder name contains forbidden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
@@ -353,11 +353,11 @@ REM : main
     if %n% LSS 1151 set /A "post1151=0"
     if %n% GEQ 1140 goto:autoImportMode
 
-   :extractV2Packs 
+   :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:autoImportMode
-   
-    mkdir !gfxv2! > NUL        
+
+    mkdir !gfxv2! > NUL
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
     @echo ---------------------------------------------------------
@@ -370,7 +370,7 @@ REM : main
         pause
         exit /b 21
     )
-    timeout /T 3 > NUL   
+    timeout /T 3 > NUL
    :autoImportMode
     @echo ---------------------------------------------------------
     @echo.
@@ -1163,7 +1163,7 @@ REM : functions
         )
         REM : first user already skipped the game
         if !gameDisplayed! EQU 2 goto:eof
-                
+
         call:createFolder !userFolder!
 
         REM : set mlc01 path

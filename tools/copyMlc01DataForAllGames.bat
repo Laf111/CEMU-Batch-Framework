@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -29,9 +29,9 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""    
-    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""    
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -305,7 +305,7 @@ REM : functions
             if not exist !metaFolder! mkdir !metaFolder! > NUL
             @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
             @echo "Then close notepad to continue"
-            
+
             set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
             wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
             REM : create the meta.xml file
@@ -473,7 +473,7 @@ REM : functions
         REM : in case of DOS characters substitution (might never arrive)
         if not exist !folderSelected! call:runPsCmd %1 %2
         set "%3=!folderSelected!"
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 

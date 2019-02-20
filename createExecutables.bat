@@ -28,9 +28,9 @@ REM : main
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-    
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -82,12 +82,12 @@ REM : main
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
-    set /A "cr=!ERRORLEVEL!"    
+    set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         exit 50
-    ) 
-    cls    
+    )
+    cls
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
 
@@ -351,16 +351,16 @@ REM : main
     if %n% LSS 1151 set /A "post1151=0"
     if %n% GEQ 1140 goto:autoImportMode
 
-   :extractV2Packs 
+   :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:autoImportMode
-   
-    mkdir !gfxv2! > NUL        
+
+    mkdir !gfxv2! > NUL
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
- 
+
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
@@ -368,7 +368,7 @@ REM : main
         pause
         exit /b 21
     )
-    timeout /T 3 > NUL      
+    timeout /T 3 > NUL
    :autoImportMode
     @echo ---------------------------------------------------------
     @echo.
@@ -522,8 +522,8 @@ REM : main
         )
     )
     rmdir /S /Q  !launchersFolder! > NUL
-    
-    
+
+
     if !QUIET_MODE! EQU 1 goto:log
     @echo =========================================================
 
@@ -880,7 +880,7 @@ REM : functions
             if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to restoreBfwDefaultSettings^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
-        
+
         REM : create a shortcut to this script (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's shortcuts for selected games.lnk""
         set "LINK_DESCRIPTION="Create missing CEMU's shortcuts for selected games given a version of CEMU""
@@ -1035,7 +1035,7 @@ REM : functions
 
         REM : icon dl flag
         set "icoUpdate=false"
-        
+
         REM : looking for ico file close to rpx file
         set "ICO_PATH="NONE""
         set "ICO_FILE="NONE""
@@ -1173,7 +1173,7 @@ REM : functions
         if !gameDisplayed! EQU 2 goto:eof
 
         call:createFolder !userFolder!
-        
+
         REM paths to batch and executable files
         set "BATCH_FILE="!launchersFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!].bat""
 

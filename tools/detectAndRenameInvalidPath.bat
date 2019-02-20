@@ -25,7 +25,7 @@ REM : main
     set "BFW_PATH=!basename:~0,-2!""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : set current char codeset
     call:setCharSet
 

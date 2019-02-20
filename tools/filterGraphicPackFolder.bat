@@ -6,9 +6,9 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-    
+
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -17,7 +17,7 @@ REM : main
         pause
         exit 1
     )
-  
+
     REM : directory of this script
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
 
@@ -34,44 +34,44 @@ REM : main
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
     REM : set current char codeset
     call:setCharSet
 
-    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""    
+    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
     if not exist !BFW_GP_TMP! exit 10
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
     if not exist !BFW_GP_FOLDER! exit 20
-    
+
     REM create a log file containing all your games titleId
     set "tidLog="!BFW_LOGS:"=!\myTitleIds.log""
-    
+
     if exist !tidLog! del /F !tidLog!
-    
+
     pushd !GAMES_FOLDER!
-    
+
     REM : searching for code folder to find in only one rpx file (the bigger one)
     for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
         set "META_FILE="%%i""
-    
+
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
         for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !tidLog!
-    
-    )    
-    
+
+    )
+
     if !NB_GAMES! EQU 0 exit 30
-    
+
     for /F "delims=~=" %%i in ('type !tidLog! 2^>NUL') do call:checkGP %%i
 
     if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
-    
+
     if !cr! NEQ 0 exit !cr!
     exit 0
 
@@ -83,13 +83,13 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :checkGp 
+    :checkGp
         set "titleId=%~1"
         set "titleId=%titleId: =%"
 
         set "fnrLogfgf="!BFW_PATH:"=!\logs\fnr_filterGraphicPackFolder.log""
         if exist !fnrLogfgf! del /F !fnrLogfgf!
-        
+
         REM : launching the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_TMP! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogfgf!
 
@@ -98,7 +98,7 @@ REM : functions
             set "str=%%j"
             set "gp=!str:rules=!"
             set "gp="!BFW_GP_TMP:"=!\!gp:\=!""
-           
+
             move /Y !gp! !BFW_GP_FOLDER! > NUL
             set /A "cr=!ERRORLEVEL!"
         )

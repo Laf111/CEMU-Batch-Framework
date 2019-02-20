@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -262,7 +262,7 @@ REM : main
         if !disp! EQU 0 (
             @echo ---------------------------------------------------------
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
-            
+
         )
         timeout /T 1 > NUL
         goto:waitingLoop
@@ -345,7 +345,7 @@ REM : main
 
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
- 
+
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
 
@@ -473,7 +473,7 @@ REM : functions
                 @echo one ^(RDTSC^) is not disabled in the game^'s profile
                 @echo Be aware that might cause crash for some games since 1^.14
                 @echo.
-                @echo If you really want to use a custom timer^, You^'d better 
+                @echo If you really want to use a custom timer^, You^'d better
                 @echo had the following lines in the game^'s profile
                 @echo.
                 @echo [General]

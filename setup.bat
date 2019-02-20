@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set BFW_VERSION=V13
+    set BFW_VERSION=V13RC1
 
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
@@ -28,7 +28,7 @@ REM : main
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
-    
+
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     REM : check if
@@ -45,16 +45,16 @@ REM : main
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
-    
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
-    
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
    :continue
@@ -64,7 +64,7 @@ REM : main
         shift
         goto:continue
    :end
-    
+
     if %nbArgs% EQU 0 (
         title -= Install BatchFw %BFW_VERSION% =-
         goto:beginSetup
@@ -84,20 +84,20 @@ REM : main
    :beginSetup
     REM : initialize log file for current host (if needed)
     call:initLogForHost
-    
+
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw! !BFW_VERSION!
-    set /A "cr=!ERRORLEVEL!"    
+    set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         timeout /t 4 > NUL
         exit 50
-    )        
+    )
 
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
-    
+
     REM : set current char codeset
     call:setCharSet
     REM set Shell.BrowseForFolder arg vRootFolder
@@ -108,7 +108,7 @@ REM : main
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
-   
+
     cls
     if %nbArgs% EQU 0 (
         @echo =========================================================
@@ -136,7 +136,7 @@ REM : main
     )
 
    :validateGamesLibrary
-   
+
     if %nbArgs% EQU 1 goto:externalGP
 
     @echo ---------------------------------------------------------
@@ -161,19 +161,19 @@ REM : main
     )
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
-    
+
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
     for /F "delims=" %%i in ('dir /B /S /A:D code ^| find /V "\mlc01" 2^> NUL') do (
- 
+
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
-        
+
         REM : check path
-        call:checkPathForDos !GAME_FOLDER_PATH! > NUL 2>&1        
+        call:checkPathForDos !GAME_FOLDER_PATH! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
-        
+
         if !cr! EQU 0 (
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
@@ -252,7 +252,7 @@ REM : main
    :externalGP
     REM : check if GAMES_FOLDER\_BatchFW_Graphic_Packs exist
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
-    
+
     if not exist !BFW_GP_FOLDER!  mkdir !BFW_GP_FOLDER! > NUL
 
     REM : check if an internet connection is active
@@ -267,20 +267,20 @@ REM : main
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp! -forced
-    set /A "cr=!ERRORLEVEL!"    
+    set /A "cr=!ERRORLEVEL!"
 
     if !cr! EQU 0 goto:importModForGames
 
    :extractV3pack
     if %QUIET_MODE% EQU 1 goto:importModForGames
-    
+
     REM : first launch of setup.bat
     if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! 2> NUL
     mkdir !BFW_GP_FOLDER!
-    
+
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Extracting graphics packs^.^.^.
-    @echo ---------------------------------------------------------    
+    @echo ---------------------------------------------------------
     REM : extract embeded V3 packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
 
@@ -294,15 +294,15 @@ REM : main
         pause
         exit /b 1
     )
-    
+
     @echo ^> Graphic packs installed from archive
     set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
     move !pat! !BFW_GP_FOLDER! > NUL
 
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    wscript /nologo !StartHidden! !script!    
-    
+    wscript /nologo !StartHidden! !script!
+
    :importModForGames
     cls
     @echo ---------------------------------------------------------
@@ -435,8 +435,8 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
 
     if not ["%softwareList%"] == ["EMPTY"] goto:handleSoftware
-    @echo Do you want BatchFw to launch a third party software 
-    @echo before launching CEMU^? 
+    @echo Do you want BatchFw to launch a third party software
+    @echo before launching CEMU^?
     @echo ^(E^.G^. DS4Windows^, cemuGyro^, a speed hack^.^.^.^)
     @echo.
     @echo They will be launched in the order you will enter here^.
@@ -444,16 +444,16 @@ REM : main
     choice /C ny /N /M "Register a third party software? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
-    @echo.    
-    @echo You^ll be asked to enter the full command line to 
+    @echo.
+    @echo You^ll be asked to enter the full command line to
     @echo the software and its arguments^.
-    @echo Use the file^'s absolute path and be sure that the 
+    @echo Use the file^'s absolute path and be sure that the
     @echo command works by checking it in a cmd prompt before^!
-    @echo.    
+    @echo.
    :handleSoftware
     if ["%softwareList%"] == ["EMPTY"] goto:getSpath
 
-    set "softwareList=!softwareList:EMPTY=!"    
+    set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
     choice /C ny /N /M "Edit this list? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
@@ -474,10 +474,10 @@ REM : main
     call:log2HostFile !msg! 2>NUL
 
     choice /C yn /N /M "Add another third party software? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getSpath    
+    if !ERRORLEVEL! EQU 1 goto:getSpath
 
    :askExtMlC01Folders
-    if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (        
+    if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
         @echo ---------------------------------------------------------
         choice /C ny /N /M "Do you use an external mlc01 folder you wish to import? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getOuptutsType
@@ -485,27 +485,27 @@ REM : main
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
         set /A "cr=!ERRORLEVEL!"
-        
+
         if !cr! EQU 2 set "script="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
        :getExtMlc01
-        wscript /nologo !StartWait! !script! 
+        wscript /nologo !StartWait! !script!
         set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             @echo ERROR in !script!^, cr=!cr!
             pause
         )
         choice /C yn /N /M "Add another external mlc01 folder? (y,n): "
-        if !ERRORLEVEL! EQU 1 goto:getExtMlc01    
-        
+        if !ERRORLEVEL! EQU 1 goto:getExtMlc01
+
         @echo ^> External mlc01 data was imported^!
         @echo.
         @echo Next time use the shortcuts in
         @echo Wii-U Games^\BatchFW^\Tools^\Mlc01 folder handling
         @echo.
         pause
-        
+
     )
-    
+
    :getOuptutsType
     cls
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -668,7 +668,7 @@ REM : main
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when collecting 
+    @echo If you encounter any issues or have made a mistake when collecting
     @echo settings for a game^:
     @echo ---------------------------------------------------------
     @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using the shortcut
@@ -774,12 +774,12 @@ REM : functions
         for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
-        
+
         @echo Opening CemuHook download page^.^.^.
 
         wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
         @echo Download and extract CemuHook in !CEMU_FOLDER!
-    
+
         timeout /T 2 > NUL
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
@@ -798,10 +798,10 @@ REM : functions
         @echo Set your REGION^, language
         @echo And finally download sharedFonts using Cemuhook button
         @echo Then close CEMU to continue
-  
+
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
-    
+
        :getCemuVersion
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
@@ -820,16 +820,16 @@ REM : functions
         if %n% LSS 1151 set /A "post1151=0"
         if %n% GEQ 1140 goto:autoImportMode
 
-       :extractV2Packs 
+       :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:autoImportMode
-       
-        mkdir !gfxv2! > NUL        
+
+        mkdir !gfxv2! > NUL
         set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
         @echo ---------------------------------------------------------
         @echo graphic pack V2 are needed for this version^, extracting^.^.^.
-        
+
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
@@ -837,7 +837,7 @@ REM : functions
             pause
             exit /b 21
         )
-       
+
        :autoImportMode
         @echo ---------------------------------------------------------
         if %cemuNumber% EQU 1  (
@@ -1008,7 +1008,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        
+
         for /F "delims=" %%j in ('dir /B /O:S !pat! 2^> NUL') do (
             set "RPX_FILE="%%j""
         )

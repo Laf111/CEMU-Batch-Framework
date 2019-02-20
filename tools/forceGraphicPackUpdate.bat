@@ -7,9 +7,9 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-    
+
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -18,7 +18,7 @@ REM : main
         pause
         exit 1
     )
-  
+
     REM : directory of this script
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
 
@@ -32,7 +32,7 @@ REM : main
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
-    
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -45,7 +45,7 @@ REM : main
     @echo =========================================================
     @echo Force graphic packs update ^?
     @echo.
-    @echo Note that : 
+    @echo Note that :
     @echo     - V2 graphic packs will be untouched
     @echo     - If you^'ve chosen to let BatchFw complete your GFX
     @echo       It will rebuild all of them for all games
@@ -62,14 +62,14 @@ REM : main
         goto:eof
     )
     cls
-    
+
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
-    
+
         REM : delete the graphicPacks*.doNotDelete file
         set "pat="!BFW_GP_FOLDER:"=!\*.doNotDelete""
         del /F /S !pat! 2>NUL
-        
+
         REM : update graphic packs
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         call !ugp! -forced
@@ -81,11 +81,11 @@ REM : main
         )
         set "BFW_LOGS="!BFW_PATH:"=!\logs""
         set "GLFile="!BFW_LOGS:"=!\GamesLibrary.log""
-        
+
         REM : flush GamesLibrary log
-        call:cleanGameLibFile "graphic packs version=graphicPacks"      
+        call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
-    
+
     @echo =========================================================
     @echo Done
     @echo #########################################################

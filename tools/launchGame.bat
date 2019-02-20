@@ -43,8 +43,8 @@ REM : main
         cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^, please kill it and relaunch"
         if !ERRORLEVEL! EQU 2 goto:eof
         goto:getDate
-    )    
-    
+    )
+
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -55,7 +55,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
     @echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     @echo ========================================================= >> !batchFwLog!
-    
+
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
 
@@ -82,7 +82,7 @@ REM : main
 
     REM : flag importing settings
     set /A "settingsImported=0"
-    
+
     REM : cd to GAMES_FOLDER
     pushd !BFW_TOOLS_PATH!
 
@@ -169,12 +169,12 @@ REM : main
     )
 
     REM : create shortcut to logFile
-    call:createBatchFwLogShorcut    
-    
+    call:createBatchFwLogShorcut
+
     REM : check RPX_FILE_PATH
     if not exist !RPX_FILE_PATH! (
         @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable >> !batchFwLog!
-        @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable 
+        @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable
         timeout /t 8 > NUL
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 2
@@ -195,7 +195,7 @@ REM : main
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
 
     title Launching !GAME_TITLE! with !CEMU_FOLDER_NAME!
-    
+
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
 
@@ -211,7 +211,7 @@ REM : main
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!
-    
+
     REM : GFX type to provide
     set "gfxType=V2"
 
@@ -390,14 +390,14 @@ REM : main
         if not exist !OPENGL_CACHE_PATH! mkdir !OPENGL_CACHE_PATH!
 
     )
-    
+
     REM also create default folder (not exist when you've just upadte your display drivers)
     set "folder="%LOCALAPPDATA%\%gpuType%\GLCache""
     if not exist !folder! mkdir !folder! > NUL
     REM : also in APPDATA
     set "folder="%APPDATA%\%gpuType%\GLCache""
     if not exist !folder! mkdir !folder! > NUL
-    
+
     REM : Settings folder for CEMU_FOLDER_NAME
     set "SETTINGS_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
 
@@ -476,7 +476,7 @@ REM : main
         cscript /nologo !MessageBox! "ERROR ^: old transferable cache backup is greater than new one, please check what happened ^!" 4112
         exit 30
     )
-    
+
     REM : build OLD_SHADER_CACHE_ID without _j.bin
     set OLD_SHADER_CACHE_ID=!cacheFile:_j=!
     set OLD_SHADER_CACHE_ID=!cacheFile:.bin=!
@@ -678,14 +678,14 @@ REM : main
     @echo Load graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
-    
+
     REM : remove all links
     REM : clean links in game's graphic pack folder
     if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q /S !gpLink! 2>NUL
     )
-    
+
     call:importGraphicPacks > NUL
 
     REM : get user defined ratios list
@@ -721,7 +721,7 @@ REM : main
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
 
-    
+
     if [!MLC01_FOLDER_PATH!] == [!cml01!] (
         @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg! >> !batchFwLog!
         @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg!
@@ -755,12 +755,12 @@ REM : main
     if %cr_cemu% NEQ 0 (
         @echo !CEMU_FOLDER_NAME! failed^, return code ^: %cr_cemu% >> !batchFwLog!
         @echo !CEMU_FOLDER_NAME! failed^, return code ^: %cr_cemu%
-        
+
         REM : is settingsImported = 1, delete shortcut and msbBox
         if !settingsImported! EQU 1 (
-            
+
             REM : basename of previousSettingsFolder to get version of CEMU used to import settings
-            for /F "delims=" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"   
+            for /F "delims=" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed with settings imported from !CEMU_IMPORTED! ^(last version used to run the game^)^. ^
                             Launch 'Wii-U Games\CEMU\%CEMU_FOLDER_NAME%\Delete my %CEMU_FOLDER_NAME%^'s settings' and recreate your shortcuts without ^
                             automatic import^, to be sure that is not related^." 4144
@@ -773,7 +773,7 @@ REM : main
         )
         REM : set status to unplayable
         set "CEMU_STATUS=Unplayable"
-        
+
     ) else (
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu%
@@ -1091,9 +1091,9 @@ REM : main
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
     @echo =========================================================
     @echo Waiting the end of all child processes before ending ^.^.^.
-    
+
     exit !ERRORLEVEL!
-    
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1109,35 +1109,35 @@ REM : functions
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
             REM : resolve venv for search
             for /F "delims==" %%f in ('echo %%i') do set "command=%%f"
-            
+
             REM : if not exist anymore, flush log
             if not exist !command! (
                 call:cleanHostLogFile !command!
                 cscript /nologo !MessageBox! "WARNING ^: !command! does not exist anymore in software to launch before CEMU^, delete this entry^!" 4144
                 set /A "nbIs=99"
                 goto:checkInstanceNumber
-            ) 
+            )
             REM : get program and its first arg
             set "soft=!command:"='!"
             set "firstArg=NONE"
             for /F "tokens=1-3 delims='" %%j in ("!soft!") do set "prog=%%j" && set "firstArg=%%l"
-            
+
             REM : count number of running instances
             if ["!firstArg!"] == ["NONE"] (
                 for /F "delims==" %%n in ('wmic process get Commandline ^| find "!prog!" ^| find /V "find" /C') do set /A "nbIs=%%n"
             ) else (
                 for /F "delims==" %%n in ('wmic process get Commandline ^| find "!prog!" ^| find "!firstArg!" ^| find /V "find" /C') do set /A "nbIs=%%n"
             )
-            :checkInstanceNumber   
+            :checkInstanceNumber
             REM : start the program if it is not already running
             if !nbIs! EQU 0 wscript /nologo !Start! !command!
-        ) 
-        
+        )
+
     goto:eof
     REM : ------------------------------------------------------------------
 
     :cleanHostLogFile
-    
+
         REM : pattern to ignore in log file
         set "pat=%~1"
         set "logFileTmp="!logFile:"=!.tmp""
@@ -1197,13 +1197,13 @@ REM : functions
             set "gp=!gp:\=!"
 
             set "tName=!gp:_graphicPacksV2=!"
-            
+
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-            
+
             if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
             if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
         )
@@ -1225,10 +1225,10 @@ REM : functions
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-            
+
             if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
             if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
-            
+
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1437,8 +1437,8 @@ REM : functions
         @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
         @echo Import settings from !previousSettingsFolder:"=! >> !batchFwLog!
-        @echo Import settings from !previousSettingsFolder:"=! 
-        
+        @echo Import settings from !previousSettingsFolder:"=!
+
         set /A "settingsImported=1"
         robocopy !previousSettingsFolder! !nsf! /S > NUL
 
@@ -1761,8 +1761,8 @@ REM : functions
         del /F  !TMP_VBS_FILE!
 
     goto:eof
-    
-    
+
+
     :createBatchFwLogShorcut
 
         REM : add a shortcut in Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles to edit game's profile
@@ -1840,7 +1840,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             goto:firstOcShaderCache
         )
 
-        
+
         :firstOcShaderCache
 
         if ["!strTmp!"] == ["NONE"] (
@@ -1852,7 +1852,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
         set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%.bin"
 
         set "OLD_TRANS_SHADER=%OLD_SHADER_CACHE_ID%.bin"
-        
+
         if ["!SHADER_MODE!"] == ["CONVENTIONAL"] (
             set "OLD_TRANS_SHADER=%OLD_SHADER_CACHE_ID%_j.bin"
             set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%_j.bin"

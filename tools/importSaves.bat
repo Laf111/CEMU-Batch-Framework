@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -317,7 +317,7 @@ REM : functions
 
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
         if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL
-        
+
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
 
         if exist !rarFile! (
@@ -325,7 +325,7 @@ REM : functions
             if !ERRORLEVEL! EQU 2 @echo Cancel^! && goto:eof
         )
         @echo.
-        
+
         pushd !inGameSavesFolder!
         wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul !rarFile! !save!
         pushd !GAMES_FOLDER!
