@@ -217,25 +217,25 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!
     
-    REM : flag to create legacy packs
-    set "createLegacyPacks=true"
+    REM : GFX type to provide
+    set "gfxType=V2"
 
     if not exist !cemuLog! goto:updateGameGraphicPack
 
-    REM set "version=NOT_FOUND"
+    set "version=NOT_FOUND"
 
-    REM for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "version=%%e"
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "version=%%e"
 
-    REM if ["%version%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+    if ["%version%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
 
-    REM set "str=%version:.=%"
-    REM set "n=%str:~0,4%"
-    REM if %n% GEQ 1140 set "createLegacyPacks=false"
+    set "str=%version:.=%"
+    set "n=%str:~0,4%"
+    if %n% GEQ 1140 set "gfxType=V3"
 
     :updateGameGraphicPack
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-    wscript /nologo !StartHidden! !ugp! !createLegacyPacks! !GAME_FOLDER_PATH!
+    wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
 
     :getFullScreenMode
 
@@ -524,7 +524,7 @@ REM : main
         @echo ---------------------------------------------------------
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
-        cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(openned session^) is running CEMU ^: delete-it" 4112
+        cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it" 4112
         goto:searchLockFile
     )
 
@@ -683,6 +683,7 @@ REM : main
     @echo Load graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
+
     call:importGraphicPacks > NUL
 
     REM : get user defined ratios list
@@ -1193,18 +1194,16 @@ REM : functions
             set "gp=!str:rules=!"
             set "gp=!gp:\=!"
 
-            set "tName=!gp:_graphicPacksV2=V2_!"
-            set "tName=!tName:V2__=V2_!"
-
+            set "tName=!gp:_graphicPacksV2=!"
+            
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
-
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            mklink /J /D !linkPath! !targetPath!
-
+            
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1217,17 +1216,17 @@ REM : functions
             set "gp=!str:rules=!"
             set "gp=!gp:\=!"
 
-            set "tName=!gp:_graphicPacksV2=V2_!"
-            set "tName=!tName:V2__=V2_!"
+            set "tName=!gp:_graphicPacksV2=!"
 
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
-
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            mklink /J /D !linkPath! !targetPath! > NUL
+            
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
+            
         )
     goto:eof
     REM : ------------------------------------------------------------------
