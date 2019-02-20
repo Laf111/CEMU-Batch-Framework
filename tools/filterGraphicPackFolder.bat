@@ -68,29 +68,8 @@ REM : main
     
     if !NB_GAMES! EQU 0 exit 30
     
-    REM : cd to BFW_GP_FOLDER
-    pushd !BFW_GP_TMP!
-    
-    REM : loop on the gfx folders found
-    for /F "delims=" %%i in ('dir /b /o:n /s rules.txt 2^>NUL') do (
+    for /F "delims=~=" %%i in ('type !tidLog! 2^>NUL') do call:checkGP %%i
 
-        set "rulesFile="%%i""
-        
-        set /A "found=0"
-        call:checkGp
-        if ["!found!"] == ["1"] (
-            for /F %%j in (!rulesFile!) do set "parentFolder="%%~dpj""
-            set "folder=!parentFolder:~0,-2!""
-
-            move /Y !folder! !BFW_GP_FOLDER! > NUL
-            set /A "cr=!ERRORLEVEL!"
-        )
-    )
-    
-    set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
-    move !pat! !BFW_GP_FOLDER! > NUL
-    
-    pushd !GAMES_FOLDER!
     if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
     
     if !cr! NEQ 0 exit !cr!
@@ -105,22 +84,24 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :checkGp 
+        set "titleId=%~1"
+        set "titleId=%titleId: =%"
 
-
-        set "titleLine="NONE""
-        for /F "tokens=1-2 delims==" %%i in ('type !rulesFile! ^| find "titleIds"') do set "titleLine=%%j"
-        if [!titleLine!] == ["NONE"] goto:eof
-        set "titleLine=!titleLine:,= !"
+        set "fnrLogfgf="!BFW_PATH:"=!\logs\fnr_filterGraphicPackFolder.log""
+        if exist !fnrLogfgf! del /F !fnrLogfgf!
         
-        REM : loop on titleId for this game
-        for %%a in (!titleLine!) do (
-            set "tid=%%a"
-            set "tid=!tid: =!"
-            
-            type !tidLog! | find /I "!tid!" > NUL && set /A "found=1" && goto:eof
-        )
-        set /A "found=0"
+        REM : launching the search
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_TMP! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogfgf!
 
+        for /F "tokens=2-3 delims=." %%j in ('type !fnrLogfgf! ^| find "File:"') do (
+
+            set "str=%%j"
+            set "gp=!str:rules=!"
+            set "gp="!BFW_GP_TMP:"=!\!gp:\=!""
+           
+            move /Y !gp! !BFW_GP_FOLDER! > NUL
+            set /A "cr=!ERRORLEVEL!"
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
