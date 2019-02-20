@@ -93,7 +93,7 @@ REM : main
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
-            set cr=!ERRORLEVEL!
+            set /A "cr=!ERRORLEVEL!"
 
             if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
@@ -258,7 +258,7 @@ REM : functions
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set j=1
         for %%i in ("%valuesList:,=" "%") do (

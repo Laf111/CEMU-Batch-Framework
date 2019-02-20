@@ -2041,7 +2041,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set j=1
         for %%i in ("%valuesList:,=" "%") do (

@@ -73,7 +73,7 @@ REM : main
         REM : update graphic packs
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         call !ugp! -forced
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         @echo ---------------------------------------------------------
 
         if !cr! NEQ 0 (
@@ -168,7 +168,7 @@ REM : functions
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set j=1
         for %%i in ("%valuesList:,=" "%") do (

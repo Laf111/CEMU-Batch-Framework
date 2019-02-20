@@ -189,7 +189,7 @@ REM : main
 
         REM : launching and get return code
         call !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set j=1
         for %%i in ("%valuesList:,=" "%") do (

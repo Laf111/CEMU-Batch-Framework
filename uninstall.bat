@@ -149,7 +149,7 @@ REM : main
     call:getFolderPath "Please enter mlc01 target folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartWait! !script! !MLC01_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if %cr% NEQ 0 (
         @echo Error in restoreMlc01DataForAllGames^.bat for !MLC01_FOLDER!
         pause
@@ -172,7 +172,7 @@ REM : main
     
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if %cr% NEQ 0 (
         @echo Error in restoreTransShadersForAllGames^.bat for !CEMU_FOLDER!
         pause
@@ -395,7 +395,7 @@ REM : functions
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
 
         set j=1
         for %%i in ("%valuesList:,=" "%") do (

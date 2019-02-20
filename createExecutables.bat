@@ -60,7 +60,7 @@ REM : main
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
-    set cr=!ERRORLEVEL!    
+    set /A "cr=!ERRORLEVEL!"    
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         exit 50
@@ -193,7 +193,7 @@ REM : main
     REM : check if folder name contains forbidden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !BFW_PATH!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if %cr% NEQ 0 (
         @echo Please rename !BFW_PATH:"=! to be DOS compatible ^^!^, exiting
         pause
@@ -202,7 +202,7 @@ REM : main
 
     REM : check if folder name contains forbidden character for batch file
     call !tobeLaunch! !CEMU_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if %cr% NEQ 0 (
         @echo Please rename !CEMU_FOLDER:"=! to be DOS compatible ^^!^, exiting
         pause
@@ -211,7 +211,7 @@ REM : main
 
     REM : check if folder name contains forbidden character for batch file
     call !tobeLaunch! !OUTPUT_FOLDER!
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if %cr% NEQ 0 (
         @echo Please rename !OUTPUT_FOLDER:"=! to be DOS compatible ^^!^, exiting
         pause
@@ -227,7 +227,7 @@ REM : main
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp! -silent
-    set cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     @echo ---------------------------------------------------------
 
     if !cr! NEQ 0 (
@@ -489,7 +489,7 @@ REM : main
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
-            set cr=!ERRORLEVEL!
+            set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:gameExecutable
@@ -1390,7 +1390,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         REM : launching and get return code
         !choiceCmd!
-        set cr=!ERRORLEVEL!
+        set /A "cr=!ERRORLEVEL!"
         set j=1
         for %%i in ("%valuesList:,=" "%") do (
 
