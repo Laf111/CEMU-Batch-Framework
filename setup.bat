@@ -64,11 +64,6 @@ REM : main
         shift
         goto:continue
    :end
-   
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
     
     if %nbArgs% EQU 0 (
         title -= Install BatchFw %BFW_VERSION% =-
@@ -90,13 +85,13 @@ REM : main
     REM : initialize log file for current host (if needed)
     call:initLogForHost
     
-   
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw! !BFW_VERSION!
     set /A "cr=!ERRORLEVEL!"    
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
+        timeout /t 4 > NUL
         exit 50
     )        
 
@@ -113,7 +108,6 @@ REM : main
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
-
    
     cls
     if %nbArgs% EQU 0 (
@@ -142,7 +136,8 @@ REM : main
     )
 
    :validateGamesLibrary
-    if %nbArgs% EQU 1 goto:updateGp
+   
+    if %nbArgs% EQU 1 goto:externalGP
 
     @echo ---------------------------------------------------------
     @echo Scanning your games library^.^.^.
@@ -267,8 +262,7 @@ REM : main
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
 
     @echo ---------------------------------------------------------
-    @echo Downloading latest graphics packs^.^.^.
-    @echo ---------------------------------------------------------
+    @echo Downloading latest graphics packs
 
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""

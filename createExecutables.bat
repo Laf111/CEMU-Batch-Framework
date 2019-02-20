@@ -1164,6 +1164,7 @@ REM : functions
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
+                set /A "gameDisplayed=1"
                 goto:eof
             )
             set /A "gameDisplayed=1"

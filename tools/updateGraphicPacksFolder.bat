@@ -40,6 +40,11 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
+    REM : get current date
+    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "DATE=%ldt%"
+    
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
     REM : set current char codeset
@@ -166,8 +171,11 @@ REM : main
     
     REM : delete all V3 gp under BFW_GP_FOLDER
     call:deleteV3gp  
+    
+    pushd !BFW_GP_FOLDER!
+
     REM : delete all previous update log files in BFW_GP_FOLDER
-    set "pat=!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete"
+    set "pat=graphicPacks*.doNotDelete"
     for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"    
     
     REM : filter graphic pack folder
@@ -175,6 +183,10 @@ REM : main
     if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!    
     if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!
     
+    
+    set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"
+    echo !DATE! ^: !USERNAME! on !USERDOMAIN! > !noDelFile!
+ 
     if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
     
     exit /b 0

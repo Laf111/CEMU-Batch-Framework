@@ -79,7 +79,7 @@ REM : main
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         @echo No active connection was found, cancel updating
-        exit /b 1
+        exit /b 10
     )
 
     REM : powerShell script in _BatchFW_Graphic_Packs
@@ -91,17 +91,17 @@ REM : main
     )
     if !ERRORLEVEL! EQU 1 (
         @echo Failed to get the last BatchFw version available 
-        exit /b 2
+        exit /b 11
     )
     
     if ["!bfwVR!"] == ["NONE"] (
         @echo Failed to get the last BatchFw version available 
-        exit /b 3
+        exit /b 12
     )
     
     if ["!BFW_VERSION!"] == ["!bfwVR!"] (
         @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!
-        exit /b 4    
+        exit /b 13  
     )
     
     @echo New version available, do you want to update BatchFW to !bfwVR!^?
@@ -109,7 +109,7 @@ REM : main
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
         timeout /T 4 > NUL
-        exit /b 5
+        exit /b 14
     )
 
     REM : launch graphic pack update
