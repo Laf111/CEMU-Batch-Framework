@@ -203,11 +203,6 @@ REM : main
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
-    REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
-        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        rmdir /Q /S !gpLink! 2>NUL
-    )
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
 
     REM : launching user's software
@@ -683,7 +678,14 @@ REM : main
     @echo Load graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
-
+    
+    REM : remove all links
+    REM : clean links in game's graphic pack folder
+    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
+        rmdir /Q /S !gpLink! 2>NUL
+    )
+    
     call:importGraphicPacks > NUL
 
     REM : get user defined ratios list
