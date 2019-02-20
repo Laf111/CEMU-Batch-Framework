@@ -1,5 +1,6 @@
 # CEMU's Batch FrameWork
 
+BatchFw is framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
 
 The main purpose of BatchFW is:
 
