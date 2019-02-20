@@ -57,16 +57,7 @@ REM : main
     )
 
     REM : cd to GAMES_FOLDER
-    pushd !GAMES_FOLDER!
-
-    REM : update graphic packs
-    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw!
-    set /A "cr=!ERRORLEVEL!"    
-    if !cr! EQU 0 (
-        @echo BatchFw updated^, please relaunch
-        exit 50
-    )    
+    pushd !GAMES_FOLDER!  
     
     REM : checking arguments
     set /A "nbArgs=0"
@@ -90,9 +81,18 @@ REM : main
     set /A "QUIET_MODE=0"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-
-    title Create CEMU shortcuts for selected games
     
+    title Create CEMU shortcuts for selected games
+
+    REM : update graphic packs
+    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
+    call !ubw!
+    set /A "cr=!ERRORLEVEL!"    
+    if !cr! EQU 0 (
+        @echo BatchFw updated^, please relaunch
+        exit 50
+    )  
+    cls
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""

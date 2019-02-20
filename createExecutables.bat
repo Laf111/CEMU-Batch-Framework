@@ -57,15 +57,6 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    REM : update graphic packs
-    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw!
-    set /A "cr=!ERRORLEVEL!"    
-    if !cr! EQU 0 (
-        @echo BatchFw updated^, please relaunch
-        exit 50
-    ) 
-    
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -87,7 +78,16 @@ REM : main
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     title Create CEMU executables for selected games
-    
+
+    REM : update graphic packs
+    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
+    call !ubw!
+    set /A "cr=!ERRORLEVEL!"    
+    if !cr! EQU 0 (
+        @echo BatchFw updated^, please relaunch
+        exit 50
+    ) 
+    cls    
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
 
