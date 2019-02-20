@@ -1156,12 +1156,14 @@ REM : functions
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
-                set /A "gameDisplayed=1"
+                set /A "gameDisplayed=2"
                 goto:eof
             )
             set /A "gameDisplayed=1"
         )
-
+        REM : first user already skipped the game
+        if !gameDisplayed! EQU 2 goto:eof
+                
         call:createFolder !userFolder!
 
         REM : set mlc01 path
