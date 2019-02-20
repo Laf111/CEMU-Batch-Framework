@@ -5,7 +5,7 @@
 '0005000010101800';singparty;wup-n-aswe;-;-;v0;usa;yes;'0005000010101800';720;60
 '0005000010101900';singparty;wup-p-aswp;-;-;v0;eur;yes;'0005000010101800';720;60
 '0005000010101A00';legocityundercover;wup-n-aple;-;-;v0;usa;yes;'0005000010101A00';720;30
-'0005000010101B00';legocityundercover;wup-p-aplp;1;-;v16;eur;yes;0005000010101A00';720;30
+'0005000010101B00';legocityundercover;wup-p-aplp;1;-;v16;eur;yes;'0005000010101A00';720;30
 '0005000010101C00';newsupermariobros.u;wup-p-arpj;-;-;v16;jpn;yes;'0005000010101D00';720;60
 '0005000010101C00';newu;wup-n-arpj;1;-;v16,v65[didthiseverexist];jap;yes;'0005000010101C00';720;60
 '0005000010101D00';newsupermariobros.u;wup-n-arpe;1;-;v64;usa;yes;'0005000010101D00';720;60
@@ -130,10 +130,10 @@
 '0005000010111000';ben10omniverse;wup-p-abep;00af;-;v0;eur;yes;'000500001010AC00';720;60
 '0005000010111100';jeopardy;wup-n-ajpe;-;-;v0;usa;yes;'0005000010111100';720;60
 '0005000010111200';wheeloffortune;wup-n-awfe;-;-;v0;usa;yes;'0005000010111200';720;60
-'0005000010111300';batmanarkhamcity-armourededition;wup-p-abtp;-;-;v16;eur;yes;0005000010111300';720;30
+'0005000010111300';batmanarkhamcity-armourededition;wup-p-abtp;-;-;v16;eur;yes;'0005000010111300';720;30
 '0005000010111400';raymanlegends;wup-p-armp;41;-;v0;eur;yes;'0005000010111400';1080;60
 '0005000010111600';fastfurious-showdown;wup-p-af6e;-;-;v0;usa;notmd;'0005000010111600';720;60
-'0005000010111700';injustice-godsamongus;wup-n-ajse;00wr;-;v16;usa;yes;0005000010111700';720;60
+'0005000010111700';injustice-godsamongus;wup-n-ajse;00wr;-;v16;usa;yes;'0005000010111700';720;60
 '0005000010111A00';injustice-godsamongus;wup-p-ajsp;00wr;-;v16;eur;yes;'0005000010111700';720;60
 '0005000010111B00';3ds3g;wup-n-wlyj;-;-;v32;jap;yes;'0005000010111B00';720;60
 '0005000010111D00';sportsconnection;wup-p-aspp;41;-;v16;eur;yes;'0005000010111D00';720;60
@@ -201,8 +201,8 @@
 '000500001011A400';superstreetfighterii-thenewchallengers;wup-n-jave;-;-;v0;usa;yes;'000500001011A400';720;60
 '000500001011A500';superstreetfighter-thenewchallengers;wup-n-javp;-;-;v0;eur;yes;'000500001011A500';720;60
 '000500001011A600';dangeroushunts2013;-;-;-;v0;eur;notmd;'000500001011A600';720;60
-'000500001011A700';zombiu;wup-p-azud;41;-;v32;eur;yes;000500001011A700';720;30
-'000500001011A800';wiipartyu;wup-n-anxj;-;-;v1;jap;yes;000500001011A800';720;60
+'000500001011A700';zombiu;wup-p-azud;41;-;v32;eur;yes;'000500001011A700';720;30
+'000500001011A800';wiipartyu;wup-n-anxj;-;-;v1;jap;yes;'000500001011A800';720;60
 '000500001011A900';spelunker;wup-n-fase;-;-;v16;usa;yes;'000500001011A900';720;60
 '000500001011AA00';spelunker;wup-n-fasp;-;-;v0;eur;yes;'000500001011A900';720;60
 '000500001011AC00';loderunner;wup-n-fave;-;-;v0;usa;yes;'000500001011AC00';720;60
@@ -355,7 +355,7 @@
 '0005000010135100';dartsup;wup-n-wdue;-;-;v0;usa;yes;'0005000010135100';720;60
 '0005000010135200';starwarspinball;wup-n-wa2e;00y4;-;v33;usa;yes;'0005000010132A00';720;60
 '0005000010135300';thewonderful101;wup-p-acmp;1;-;v16;eur;yes;'0005000010135300';720;60
-'0005000010135500';legobatman2-dcsuperheroes;wup-p-albp;-;-;v0;eur;yes;0005000010135500';720;30
+'0005000010135500';legobatman2-dcsuperheroes;wup-p-albp;-;-;v0;eur;yes;'0005000010135500';720;30
 '0005000010135600';thecave;wup-n-wcvj;-;-;v0;jap;yes;'0005000010135600';720;60
 '0005000010135E00';legobatman2-dcsuperheroes;wup-n-albe;00wr;-;v0;usa;yes;'0005000010135500';720;30
 '0005000010136000';romanceofthethreekingdomsivwalloffire;wup-n-jbcp;-;-;v0;eur;yes;'0005000010134700';720;60
@@ -725,7 +725,7 @@
 '000500001016DE00';supertoycars;wup-n-wcte;009y;-;v16;usa;yes;'000500001016D500';720;60
 '000500001016DF00';batman-arkhamoriginsblackgate-deluxeedition;wup-n-wbme;-;-;v16;usa;yes;'0005000C10136C00';720;30
 '000500001016E000';stickittotheman;wup-n-wmne;-;-;v0;usa;yes;'000500001016D400';720;60
-'000500001016E100';shovelknight;wup-n-wkne;00ay;-;v48;usa;yes;000500001016E100';1080;60
+'000500001016E100';shovelknight;wup-n-wkne;00ay;-;v48;usa;yes;'000500001016E100';1080;60
 '000500001016E200';xtypeplus;wup-p-wexp;-;-;v32;eur;yes;'000500001016E200';720;60
 '000500001016E300';gravblocks+;wup-n-wgre;008s;-;v16;usa;yes;'000500001016E300';720;60
 '000500001016E500';blokdropu;wup-n-wbue;-;-;v16;usa;yes;'000500001016E500';720;60
@@ -1653,7 +1653,7 @@
 '00050000101D6F00';cutieclash;wup-n-bc8e;-;-;-;usa;yes;'00050000101D6F00';720;60
 '00050000101D7300';mollymaggot;wup-n-am5e;-;-;-;usa;yes;'00050000101D7300';720;60
 '00050000101D7400';totemtopple;wup-p-attp;-;-;v0;eur;yes;'00050000101BAA00';720;60
-'00050000101D7500';minecraft-wiiuedition;wup-p-aump;00du;-;v16;eur;yes;00050000101D7500';720;60
+'00050000101D7500';minecraft-wiiuedition;wup-p-aump;00du;-;v16;eur;yes;'00050000101D7500';720;60
 '00050000101D7600';slots-pharaoh'sriches;wup-n-bp3e;-;-;-;usa;yes;'00050000101D7600';720;60
 '00050000101D7700';explodybomb;wup-n-aexe;-;-;v0;usa;yes;'00050000101D7700';720;60
 '00050000101D7800';holdyourfire-agameaboutresponsibility;wup-n-ahge;-;-;v1;usa;yes;'00050000101D7800';720;60
