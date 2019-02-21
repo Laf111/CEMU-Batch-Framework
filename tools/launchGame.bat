@@ -488,11 +488,13 @@ REM : main
     wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.old /XF *emu* /XF *.rar
 
     :loadOptions
-    @echo Search and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-    @echo Search and load mods found for !GAME_TITLE! ^.^.^.
-    REM : import mods for the game as graphic packs
-    call:importMods > NUL
-
+    
+    if ["!gfxType!"] == ["V3"] (
+        @echo Search and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+        @echo Search and load mods found for !GAME_TITLE! ^.^.^.
+        REM : import mods for the game as graphic packs
+        call:importMods > NUL
+    )
     REM : load Cemu's options
     call:loadCemuOptions
 
