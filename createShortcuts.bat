@@ -90,7 +90,8 @@ REM : main
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
     
-    REM : update graphic packs
+    @echo Checking for update ^.^.^.
+    REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
     set /A "cr=!ERRORLEVEL!"
@@ -98,6 +99,7 @@ REM : main
         @echo BatchFw updated^, please relaunch
         exit 50
     )
+
     cls
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
@@ -533,19 +535,21 @@ REM : main
     @echo Treated !NB_GAMES_TREATED! games
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you want to change CEMU^'s settings you^'ve just entered here^:
+    @echo If you want to change global CEMU^'s settings you^'ve just 
+    @echo entered here^:
     @echo ---------------------------------------------------------
-    @echo ^> simply delete the shortcuts for this version and recreate them using
-    @echo ^'Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk^' to
-    @echo register a SINGLE version of CEMU
+    @echo ^> simply delete the shortcuts and recreate them using
+    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
+    @echo to register a SINGLE version of CEMU
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when collecting settings
-    @echo for a game^:
+    @echo If you encounter any issues or have made a mistake when 
+    @echo collecting settings for a game^:
     @echo ---------------------------------------------------------
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using the shortcut
-    @echo Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
+    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using 
+    @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
+    @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1121,8 +1125,8 @@ REM : functions
 
             REM : if shortcut exist and import mode enabled : if shortcut exist skip this game
             if exist !SHORCTUT_PATH! (
-                if !QUIET_MODE! EQU 1 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 1 @echo Shortcut for !user! already exist^, skipped
+                if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
+                if !QUIET_MODE! EQU 0 @echo Shortcut for !user! already exist^, skipped
             ) else (
                 call:userGameShortcut !user!
             )

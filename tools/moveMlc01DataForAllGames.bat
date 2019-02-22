@@ -69,7 +69,7 @@ REM : main
 
     @echo Please select mlc01 source folder
     :askMlc01Folder
-    call:getFolderPath "Please select mlc01 source folder !DIALOG_ROOT_FOLDER! MLC01_FOLDER_PATH
+    call:getFolderPath "Please select mlc01 source folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER_PATH
 
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"

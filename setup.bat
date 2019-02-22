@@ -97,8 +97,8 @@ REM : main
     set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
 
    :beginSetup
-
-    REM : update graphic packs
+    @echo Checking for update ^.^.^.
+    REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw! !BFW_VERSION!
     set /A "cr=!ERRORLEVEL!"
@@ -292,7 +292,7 @@ REM : main
     mkdir !BFW_GP_FOLDER!
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Extracting graphics packs^.^.^.
+    @echo Extracting integrated graphics packs^.^.^.
     @echo ---------------------------------------------------------
     REM : extract embeded V3 packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
@@ -338,7 +338,7 @@ REM : main
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
 
-    choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n)  "
+    choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n):"
     if !ERRORLEVEL! EQU 1 (
         set /A "ERRORLEVEL=0" 
         set "msg="COMPLETE_GP=YES""
@@ -398,7 +398,7 @@ REM : main
     REM : flush logFile of SCREEN_MODE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
 
-    choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n)  "
+    choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n):"
     if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getUserMode
 
     set "msg="SCREEN_MODE=windowed""
@@ -416,7 +416,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do set "usersList=!usersList! %%i"
 
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
-    choice /C ny /N /M "Do you want to add more than one user? (y,n)  "
+    choice /C ny /N /M "Do you want to add more than one user? (y,n):"
     if !ERRORLEVEL! EQU 1 (
         set /A "ERRORLEVEL=0" 
         set "msg="USER_REGISTERED=%USERNAME%""
@@ -615,9 +615,12 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Please^, define your CEMU^'s installations paths
     @echo ---------------------------------------------------------
-    @echo ^(note that if you install CEMU^>=1^.15^.1^, you^'d better have it
+    @echo ^> No need to have cemuHook installed ^(you^'ll be asked 
+    @echo    to do install it^)
+    @echo ^> If you install CEMU^>=1^.15^.1^, you^'d better have it
     @echo installed on C^: to avoid a long copy of your GLCache into
-    @echo CEMU^'s install folder^)
+    @echo CEMU^'s install folder^
+    
     @echo ---------------------------------------------------------
 
     REM : intialize Number of Cemu Version beginning from 0
@@ -680,24 +683,27 @@ REM : main
         call:buildDoc
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     )
-    @echo If you want to change global CEMU^'s settings you^'ve just entered here^:
+    @echo If you want to change global CEMU^'s settings you^'ve just 
+    @echo entered here^:
     @echo ---------------------------------------------------------
     @echo ^> simply delete the shortcuts and recreate them using
-    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk to
-    @echo register a SINGLE version of CEMU
+    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
+    @echo to register a SINGLE version of CEMU
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when collecting
-    @echo settings for a game^:
+    @echo If you encounter any issues or have made a mistake when 
+    @echo collecting settings for a game^:
     @echo ---------------------------------------------------------
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using the shortcut
-    @echo Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
+    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using 
+    @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
+    @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you want to change Batch^'s settings ^(such as graphic pack completion^,
-    @echo aspects ratios^) and^/or^register more than one version of CEMU^:
+    @echo If you want to change Batch^'s settings ^(such as graphic 
+    @echo pack completion^, aspects ratios^) and^/or^register more 
+    @echo than one version of CEMU^:
     @echo ---------------------------------------------------------
     @echo ^> relaunch this script from its shortcut
     @echo Wii-U Games^\Register CEMU installs^.lnk
@@ -797,7 +803,7 @@ REM : functions
             if %QUIET_MODE% EQU 0  wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
         )
 
-        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y,n)  "
+        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y,n):"
         if !ERRORLEVEL! EQU 2 goto:createShortcuts
 
         choice /C mc /CS /N /M "Move (m) or copy (c)?"

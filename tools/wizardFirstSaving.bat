@@ -404,10 +404,11 @@ REM : main
     @echo ---------------------------------------------------------
     @echo - From now^, if you modify your settings during the game they will be saved when closing CEMU^.
     @echo ---------------------------------------------------------
-    @echo If you encounter any issues or have made a mistake when collecting settings
-    @echo for this game ^:
-    @echo ^> delete its settings saved for !CEMU_FOLDER_NAME! using the shortcut
-    @echo Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
+    @echo If you encounter any issues or have made a mistake when 
+    @echo collecting settings for a game^:
+    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using 
+    @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
+    @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     @echo ^> or delete !SETTINGS_FOLDER:"=! manually
     @echo ---------------------------------------------------------
     pause
