@@ -1,4 +1,4 @@
-20/02/2019 V13 : 
+22/02/2019 V13 : 
 - fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
@@ -26,10 +26,13 @@
 - replace antrenamer with BRC64
 - update embeded GFX packs to v367
 - use now separate archives for V2 and V3 GFX packs
+- do not mix links to V2 and V3 grapic packs anymore. Use only the suitable ones
 - install V2 GFX packs the first time a version < 1.14 is detected 
 - setup.bat : Extract embeded V3 GFX packs archive only if no active connection is found or if the update GFX 
   process failed
 - auto-update process added
+- if DLC and update folder are found in your games folder, BatchFw will prepare the game for the emulation
+  (ties DLC and UPDATE DATA in the game's folder)
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat
