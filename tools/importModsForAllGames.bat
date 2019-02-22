@@ -3,9 +3,7 @@ setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
 
-
     setlocal EnableDelayedExpansion
-
     color 4F
 
     set "THIS_SCRIPT=%~0"
@@ -33,7 +31,8 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -61,12 +60,14 @@ REM : main
     :askModFolder
     call:getFolderPath "Please select mods source folder" !DIALOG_ROOT_FOLDER! MODS_FOLDER_PATH
 
-
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    
     REM : check if folder name contains forbiden character for !MODS_FOLDER_PATH!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !MODS_FOLDER_PATH!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !MODS_FOLDER_PATH! path to be DOS compatible ^!^, exiting
         pause
         exit /b 2
@@ -110,7 +111,7 @@ REM : main
     )
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -314,7 +315,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -346,9 +347,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -385,7 +386,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

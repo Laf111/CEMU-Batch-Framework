@@ -216,6 +216,7 @@ REM : main
     @echo ---------------------------------------------------------
     choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
+        set /A "ERRORLEVEL=0" 
         @echo Cancelled by user ^!
         goto:eof
     )
@@ -522,8 +523,8 @@ REM : functions
     :check8hexValue
         set "halfId=%~1"
 
-        if x%halfId:ffffffff=%==x%halfId% goto:eof
-        if x%halfId:FFFFFFFF=%==x%halfId% goto:eof
+        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
+        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
         @echo Ooops it look like your game have a problem ^:
         @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
@@ -580,7 +581,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -612,9 +613,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

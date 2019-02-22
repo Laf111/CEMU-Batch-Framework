@@ -122,7 +122,7 @@ REM : main
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !MLC01_FOLDER_PATH!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !MLC01_FOLDER_PATH! path to be DOS compatible ^!^, exiting
         pause
         exit /b 2
@@ -155,7 +155,7 @@ REM : main
 
     set /A NB_SAVES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -310,7 +310,7 @@ REM : functions
         )
         @echo.
         choice /C !cargs! /N /M "Enter the user id (number above) : "
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         set "user=NONE"
         set /A "index=!cr!-1"
         set "user=!users[%index%]!"
@@ -379,7 +379,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -411,9 +411,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -450,7 +450,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

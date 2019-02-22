@@ -12,12 +12,12 @@ REM : main
 
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
-
+    
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        echo ERROR Remove DOS reserved characters from the path "!THIS_SCRIPT!"^(such as ^&^, %% or ^^!^)^, cr=!cr!
+        @echo ERROR Remove DOS reserved characters from the path "!THIS_SCRIPT!"^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
         exit 1
     )
@@ -34,27 +34,41 @@ REM : main
     REM : check if
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /V "NTFS"') do (
 
-        echo This volume is not an NTFS one^^!
-        echo BatchFw use Symlinks and need to be installed on a NTFS volume
+        @echo This volume is not an NTFS one^^!
+        @echo BatchFw use Symlinks and need to be installed on a NTFS volume
         pause
         exit 2
     )
 
-    REM : log file for current host
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
-
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
+    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    
+    REM : initialize log file for current host (if needed)
+    call:initLogForHost
+    
+    REM : set current char codeset
+    call:setCharSet
+    
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
+    
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
+    REM : check if DLC and update folders are presents (some games need to be prepared)
+    call:checkGamesToBePrepared
+    
     REM : checking arguments
     set /A "nbArgs=0"
    :continue
@@ -80,10 +94,9 @@ REM : main
 
     REM : get and check OUTPUT_FOLDER
     set OUTPUT_FOLDER=!args[0]!
+    set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
 
    :beginSetup
-    REM : initialize log file for current host (if needed)
-    call:initLogForHost
 
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
@@ -98,8 +111,7 @@ REM : main
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
 
-    REM : set current char codeset
-    call:setCharSet
+
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""
@@ -118,7 +130,8 @@ REM : main
         if %QUIET_MODE% EQU 0 (
             @echo ---------------------------------------------------------
             @echo BatchFw is a batch framework created to launch easily all
-            @echo your RPX games ^(loadiines format^) using many versions of CEMU^.
+            @echo your RPX games ^(loadiines format^) using many versions of
+            @echo CEMU^.
             @echo.
             @echo It is now limited only to CEMU's versions ^>=1^.11 that^:
             @echo -support the -mlc argument
@@ -327,6 +340,7 @@ REM : main
 
     choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n)  "
     if !ERRORLEVEL! EQU 1 (
+        set /A "ERRORLEVEL=0" 
         set "msg="COMPLETE_GP=YES""
         call:log2HostFile !msg!
         goto:askRatios
@@ -352,27 +366,32 @@ REM : main
    :askRatioAgain
     choice /C 12345c /N /M "Enter your choice: "
     if !ERRORLEVEL! EQU 1 (
+        set /A "ERRORLEVEL=0" 
         set "msg="DESIRED_ASPECT_RATIO=169""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 2 (
+        set /A "ERRORLEVEL=0" 
         set "msg="DESIRED_ASPECT_RATIO=1610""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 3 (
+        set /A "ERRORLEVEL=0" 
         set "msg="DESIRED_ASPECT_RATIO=219""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 4 (
+        set /A "ERRORLEVEL=0" 
         set "msg="DESIRED_ASPECT_RATIO=43""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 5 (
+        set /A "ERRORLEVEL=0" 
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
     choice /C yn /N /M "Add another ratio? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:askRatioAgain
+    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:askRatioAgain
 
    :askScreenMode
     @echo ---------------------------------------------------------
@@ -380,7 +399,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n)  "
-    if !ERRORLEVEL! EQU 1 goto:getUserMode
+    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getUserMode
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
@@ -399,6 +418,7 @@ REM : main
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n)  "
     if !ERRORLEVEL! EQU 1 (
+        set /A "ERRORLEVEL=0" 
         set "msg="USER_REGISTERED=%USERNAME%""
         call:log2HostFile !msg!
         goto:getSoftware
@@ -409,7 +429,7 @@ REM : main
     set "usersList=!usersList:EMPTY=!"
     @echo Users already registered in BatchFW: !usersList!
     choice /C ny /N /M "Edit this list? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getSoftware
+    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getSoftware
 
     REM : flush logFile of USER_REGISTERED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do call:cleanHostLogFile USER_REGISTERED
@@ -435,9 +455,9 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
 
     if not ["%softwareList%"] == ["EMPTY"] goto:handleSoftware
-    @echo Do you want BatchFw to launch a third party software
-    @echo before launching CEMU^?
-    @echo ^(E^.G^. DS4Windows^, cemuGyro^, a speed hack^.^.^.^)
+    @echo Do you want BatchFw to launch a third party software before
+    @echo launching CEMU^?
+    @echo ^(E^.G^. DS4Windows^, wiimoteHook^, cemuGyro^, a speed hack^.^.^.^)
     @echo.
     @echo They will be launched in the order you will enter here^.
     @echo.
@@ -474,7 +494,7 @@ REM : main
     call:log2HostFile !msg! 2>NUL
 
     choice /C yn /N /M "Add another third party software? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getSpath
+    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getSpath
 
    :askExtMlC01Folders
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
@@ -711,6 +731,37 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : check if (DLC) or (UPDATE DATA) folders exist
+   :checkGamesToBePrepared
+   
+        REM : already pushed to GAMES_FOLDER
+        set /A "needImport=0"
+        
+        set "pat=*(DLC)*"
+        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        set "pat=*(UPDATE DATA)*"
+        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+
+        REM : if need call import script and wait
+        if !needImport! EQU 0 goto:eof
+        
+        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found 
+        @echo Preparing those games for emulation^.^.^.
+        timeout /T 5 > NUL
+        
+        REM : calling createShortcuts.bat
+        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat"" 
+        call !tobeLaunch! !GAMES_FOLDER!
+        set /A "cr=!ERRORLEVEL!"
+
+        @echo ^> Games ready for emulation 
+        timeout /T 5 > NUL
+        cls
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
+    
     REM : build doc
    :buildDoc
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
@@ -1120,7 +1171,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -1151,9 +1202,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -1192,7 +1243,7 @@ REM : functions
             if [!cr!] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
@@ -1225,7 +1276,6 @@ REM : functions
    :log2HostFile
         REM : arg1 = msg
         set "msg=%~1"
-
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

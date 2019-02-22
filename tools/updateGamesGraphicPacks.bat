@@ -402,7 +402,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -434,9 +434,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -473,7 +473,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

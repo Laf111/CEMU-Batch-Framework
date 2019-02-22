@@ -5,7 +5,6 @@ REM : main
 
 
     setlocal EnableDelayedExpansion
-
     color 4F
 
     set "THIS_SCRIPT=%~0"
@@ -104,7 +103,7 @@ REM : main
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !CEMU_FOLDER! path to be DOS compatible ^!^, exiting
         pause
         exit /b 2
@@ -150,7 +149,7 @@ REM : main
     )
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -215,6 +214,10 @@ REM : main
         pause
     )
     :exiting
+    
+    echo ERRORLEVEL=!ERRORLEVEL!
+    pause
+    
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -244,7 +247,7 @@ REM : functions
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
 
-        @echo - Moving game^'s data to !CEMU_FOLDER! ^?
+        @echo - Moving transferable cache to !CEMU_FOLDER! ^?
         @echo     ^(n^) ^: no^, skip
         @echo     ^(y^) ^: yes ^(default value after 8s timeout^)
         @echo -
@@ -273,8 +276,7 @@ REM : functions
         ) else (
             echo - Moving !sf!
         )
-        rmdir /Q /S "!GAME_FOLDER_PATH:"=!\Cemu\shaderCache" 2>NUL
-
+        
         :logInfos
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! restore transferable shader cache for !GAME_TITLE! in=!CEMU_FOLDER:"=!""
@@ -319,7 +321,6 @@ REM : functions
             ) else (
                 set /A "%3=0"
             )
-
            goto:eof
         )
 
@@ -373,7 +374,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -405,9 +406,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -444,7 +445,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

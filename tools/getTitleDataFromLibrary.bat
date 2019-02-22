@@ -180,8 +180,8 @@ REM : functions
     :check8hexValue
         set "halfId=%~1"
 
-        if x%halfId:ffffffff=%==x%halfId% goto:eof
-        if x%halfId:FFFFFFFF=%==x%halfId% goto:eof
+        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
+        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
         @echo Ooops it look like your game have a problem ^:
         @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff

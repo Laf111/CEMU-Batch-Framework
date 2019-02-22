@@ -150,11 +150,11 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartWait! !script! !MLC01_FOLDER!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
-        @echo Error in restoreMlc01DataForAllGames^.bat for !MLC01_FOLDER!
+    if !cr! NEQ 0 (
+        @echo Error in restoreMlc01DataForAllGames^.bat for !MLC01_FOLDER!^, cr=!cr!
         pause
     )
-    if %cr% EQU 0 set "mlc01Restored=1"
+    if !cr! EQU 0 set "mlc01Restored=1"
 
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:getMlc01Target
@@ -164,20 +164,22 @@ REM : main
 
     :restoreTransShaderCache
     set "TransShaderCacheRestored=0"
-    call:getUserInput "Restore all transferable shader cache ? (y, n)" "y,n" ANSWER
+    call:getUserInput "Restore all transferable shader cache to a Cemu folder ? (y, n)" "y,n" ANSWER
+  
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
-    call:getFolderPath "Please enter a Cemu's target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
-
+    
+    call:getFolderPath "Please enter a Cemu target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
+  
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
-        @echo Error in restoreTransShadersForAllGames^.bat for !CEMU_FOLDER!
+    if !cr! NEQ 0 (
+        @echo Error in restoreTransShadersForAllGames^.bat for !CEMU_FOLDER!^, cr=!cr!
         pause
     )
-    if %cr% EQU 0 set "TransShaderCacheRestored=1"
+    if !cr! EQU 0 set "TransShaderCacheRestored=1"
     @echo ^> transferable shader caches restored
     @echo ---------------------------------------------------------
 
@@ -332,7 +334,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -359,14 +361,14 @@ REM : functions
     REM : launch ps script to open dialog box
     :runPsCmd
         set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
+      
         set "folderSelected="NONE""
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH 
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -403,7 +405,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

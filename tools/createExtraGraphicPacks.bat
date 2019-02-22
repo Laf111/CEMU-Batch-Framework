@@ -86,7 +86,7 @@ REM : main
 
     REM : ask for legacy packs creation
     choice /C yn /N /M "Do you want to create legacy graphic packs ? (y, n) : "
-    if !ERRORLEVEL!=2 set "createLegacyPacks=false"
+    if !ERRORLEVEL!=2 set /A "ERRORLEVEL=0" & set "createLegacyPacks=false"
 
     :getTitleId
     set "checkLenght="
@@ -353,8 +353,8 @@ REM : functions
     :check8hexValue
         set "halfId=%~1"
 
-        if x%halfId:ffffffff=%==x%halfId% goto:eof
-        if x%halfId:FFFFFFFF=%==x%halfId% goto:eof
+        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
+        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
         @echo Ooops it look like your game have a problem ^:
         @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff

@@ -4,12 +4,11 @@ REM : ------------------------------------------------------------------
 REM : main
 
     setlocal EnableDelayedExpansion
-
     color 4F
 
     set "WORKINGDIR="!CD!""
-
     set "THIS_SCRIPT=%~0"
+    
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -30,17 +29,22 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
-
+        
+    REM : check if DLC and update folders are presents (some games need to be prepared)
+    call:checkGamesToBePrepared
+    
     set "USERSLIST="
     set /A "nbUsers=0"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
@@ -79,6 +83,12 @@ REM : main
 
     title Create CEMU executables for selected games
 
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+
+    REM : check if DLC and update folders are presents (some games need to be prepared)
+    call:checkGamesToBePrepared
+        
     REM : update graphic packs
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
@@ -194,7 +204,7 @@ REM : main
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !BFW_PATH!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !BFW_PATH:"=! to be DOS compatible ^^!^, exiting
         pause
         exit /b 3
@@ -203,7 +213,7 @@ REM : main
     REM : check if folder name contains forbidden character for batch file
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !CEMU_FOLDER:"=! to be DOS compatible ^^!^, exiting
         pause
         exit /b 4
@@ -212,7 +222,7 @@ REM : main
     REM : check if folder name contains forbidden character for batch file
     call !tobeLaunch! !OUTPUT_FOLDER!
     set /A "cr=!ERRORLEVEL!"
-    if %cr% NEQ 0 (
+    if !cr! NEQ 0 (
         @echo Please rename !OUTPUT_FOLDER:"=! to be DOS compatible ^^!^, exiting
         pause
         exit /b ()
@@ -287,7 +297,7 @@ REM : main
     call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y, n)? : "
-    if !ERRORLEVEL! EQU 1 goto:checkInstall
+    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:checkInstall
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
@@ -476,7 +486,7 @@ REM : main
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -582,6 +592,36 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : check if (DLC) or (UPDATE DATA) folders exist
+   :checkGamesToBePrepared
+   
+        REM : already pushed to GAMES_FOLDER
+        set /A "needImport=0"
+        
+        set "pat=*(DLC)*"
+        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        set "pat=*(UPDATE DATA)*"
+        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+
+        REM : if need call import script and wait
+        if !needImport! EQU 0 goto:eof
+        
+        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found 
+        @echo Preparing those games for emulation^.^.^.
+        timeout /T 5 > NUL
+        
+        REM : calling createShortcuts.bat
+        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat"" 
+        call !tobeLaunch! !GAMES_FOLDER!
+        set /A "cr=!ERRORLEVEL!"
+
+        @echo ^> Games ready for emulation 
+        timeout /T 5 > NUL
+        cls
+                
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : remove DOS forbiden character from a string
     :secureStringPathForDos
 
@@ -1330,7 +1370,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,� and ^
@@ -1362,9 +1402,9 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -1399,7 +1439,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
             if [!cr!] == [!j!] (
                 REM : value found , return function value
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1

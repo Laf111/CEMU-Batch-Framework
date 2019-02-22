@@ -47,55 +47,77 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    @echo =========================================================
-    @echo Import new games in your library and prepare them for
-    @echo emulation with CEMU using BatchFw^.
-    @echo.
-    @echo If folders ^(DLC^) and ^(UPDATE^) are found^, batchFw will
-    @echo install them in each game^'s folder^.
-    @echo.
-    @echo If DLC or UPDATE folders are found without the game in the
-    @echo folder^, they will be skipped^.
-    @echo In this case BatchFw has already built the mlc01 folder
-    @echo structure^, just move their content to the right place^:
-    @echo.
-    @echo - update in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]
-    @echo - dlc    in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]/aoc
-    @echo.
-    @echo =========================================================
+    REM : checking arguments
+    set /A "nbArgs=0"
+   :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+   :end
 
-    @echo Launching in 20s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 20
-    if [!ANSWER!] == ["n"] (
-        REM : Cancelling
-        choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
-        goto:eof
+    if %nbArgs% EQU 0 (
+        title Import Games with updates and DLC
+        
+        @echo =========================================================
+        @echo Import new games in your library and prepare them for
+        @echo emulation with CEMU using BatchFw^.
+        @echo.
+        @echo If folders ^(DLC^) and ^(UPDATE^) are found^, batchFw will
+        @echo install them in each game^'s folder^.
+        @echo.
+        @echo If DLC or UPDATE folders are found without the game in the
+        @echo folder^, they will be skipped^.
+        @echo In this case BatchFw has already built the mlc01 folder
+        @echo structure^, just move their content to the right place^:
+        @echo.
+        @echo - update in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]
+        @echo - dlc    in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]/aoc
+        @echo.
+        @echo =========================================================
+
+        @echo Launching in 20s
+        @echo     ^(y^) ^: launch now
+        @echo     ^(n^) ^: cancel
+        @echo ---------------------------------------------------------
+        call:getUserInput "Enter your choice ? : " "y,n" ANSWER 20
+        if [!ANSWER!] == ["n"] (
+            REM : Cancelling
+            choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
+            goto:eof
+        )
+        
+        goto:begin
     )
 
+    if %nbArgs% NEQ 1 (
+        @echo ERROR on arguments passed^(%nbArgs%^)
+        @echo SYNTAXE^: "!THIS_SCRIPT!" INPUT_FOLDER
+        @echo given {%*}
+        pause
+        exit 9
+    )
+
+    REM : get and check INPUT_FOLDER
+    set INPUT_FOLDER=!args[0]!
+    set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"   
+    
+    goto:inputsAvailable
+    
+    :begin
     cls
 
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""
     call:getFolderPath "Browse to you extracted WII-U USB Helper folder or your dump folder" !DIALOG_ROOT_FOLDER! INPUT_FOLDER
-
-    if [!INPUT_FOLDER!] == [!GAMES_FOLDER!] (
-        @echo You cannot use your games folder as source for importing ^!
-        @echo.
-        @echo If you had dump your game^(s^) directlty in your games folder
-        @echo No need to use this script^. BatchFw will create the mlc01
-        @echo folders structure when creating a shortcut for this game^.
-        @echo ---------------------------------------------------------
-        pause
-        goto:eof
-    )
+    
+    :inputsAvailable
     pushd !INPUT_FOLDER!
 
     REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    if %nbArgs% EQU 0 wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     :scanGamesFolder
     cls
@@ -117,24 +139,26 @@ REM : main
         pause
         goto:eof
     )
-
+    
     set /A NB_GAMES_TREATED=0
 
     REM using the sort /V, first come the game, then update and DLC (if availables)
 
-    REM initialize a titleId varaible here so it will be visible in all functions (installDlc, installUpdate)
-    set "titleId="NONE"
+    REM initialize a endTitleId variable here so it will be visible in all functions (installDlc, installUpdate)
+    set "endTitleId=NONE"
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d * ^| sort /R  2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" ^| sort /R 2^>NUL') do (
 
-        set "GAME_FOLDER_PATH="!INPUT_FOLDER:"=!\%%i""
+        set "codeFullPath="%%i""
+        set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check path
         call:checkPathForDos !GAME_FOLDER_PATH! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! EQU 0 (
+                
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
@@ -177,7 +201,8 @@ REM : main
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
-
+    if %nbArgs% EQU 1 goto:exiting
+    
     @echo =========================================================
     @echo Treated !NB_GAMES_TREATED! games
     @echo #########################################################
@@ -192,6 +217,8 @@ REM : main
         REM : Waiting before exiting
         pause
     )
+    
+    :exiting
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -217,7 +244,7 @@ REM : functions
 
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
-        set "cr=!ERRORLEVEL!"
+        set /A "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 goto:eof
 
         REM detect (,),&,%,£ and ^
@@ -249,9 +276,9 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2
+        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -270,8 +297,11 @@ REM : functions
 
         set "GAME_TITLE=!GAME_FOLDER_NAME!"
         REM : if USB Helper output : NAME[Id], get only the name
-        echo "!GAME_FOLDER_PATH!" | find "[" > NUL && for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-
+        echo "!GAME_FOLDER_PATH!" | find "[" > NUL && for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"      
+        
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+        if exist !target! goto:eof
+        
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
@@ -291,11 +321,11 @@ REM : functions
         if [!titleLine!] == ["NONE"] goto:eof
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
+        set "endTitleId=%titleId:~8,8%"
+            
         REM : moving game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
-        if not exist !target! mkdir !target! > NUL
-        set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
 
+        set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
         move /Y !GAME_FOLDER_PATH! !source! > NUL
 
         :moveGame
@@ -312,13 +342,13 @@ REM : functions
             @echo - Creating system save^'s folder
             mkdir !sysFolder! > NUL
         )
-        set "saveFolder="!target:"=!\mlc01\usr\save\00050000\%titleId:00050000=%""
+        set "saveFolder="!target:"=!\mlc01\usr\save\00050000\%endTitleId%""
 
         if not exist !saveFolder! (
             @echo - Creating saves folder
             mkdir !saveFolder! > NUL
         )
-        set "dlcFolder="!target:"=!\mlc01\usr\title\00050000\%titleId:00050000=%\aoc""
+        set "dlcFolder="!target:"=!\mlc01\usr\title\00050000\%endTitleId%\aoc""
 
         if not exist !dlcFolder! (
             @echo - Creating dlc^'s folder
@@ -332,6 +362,9 @@ REM : functions
 
     :installUpdate
 
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+        if exist !target! goto:eof
+        
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
             @echo No meta folder not found under update folder !GAME_FOLDER_NAME! ^?^, skipping ^!
@@ -345,15 +378,17 @@ REM : functions
         if [!titleLine!] == ["NONE"] goto:eof
         for /F "delims=<" %%i in (!titleLine!) do set "titleIdU=%%i"
 
-        if not ["!titleIdU!"] == ["!titleId!"] (
+        set "endTitleIdU=%titleIdU:~8,8%"
+        
+        if not ["!endTitleIdU!"] == ["!endTitleId!"] (
             @echo This update is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
             @echo ---------------------------------------------------------
             goto:eof
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%titleId:00050000=%""
-        set "source="!INPUT_FOLDER:"=!\%titleId:00050000=%""
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%""
+        set "source="!INPUT_FOLDER:"=!\%endTitleId%""
 
         move /Y !GAME_FOLDER_PATH! !source! > NUL
 
@@ -370,6 +405,9 @@ REM : functions
 
     :installDlc
 
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+        if exist !target! goto:eof
+        
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
             @echo No meta folder not found under DLC folder !GAME_FOLDER_NAME! ^?^, skipping ^!
@@ -383,8 +421,7 @@ REM : functions
         if [!titleLine!] == ["NONE"] goto:eof
         for /F "delims=<" %%i in (!titleLine!) do set "titleIdDlc=%%i"
 
-        set "endTitleIdDlc=!titleIdDlc:~9,16!"
-        set "endTitleId=!titleId:~9,16!"
+        set "endTitleIdDlc=!titleIdDlc:~8,8!"
 
         if not ["!endTitleIdDlc!"] == ["!endTitleId!"] (
             @echo this DLC is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
@@ -393,8 +430,8 @@ REM : functions
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%titleId:00050000=%\%titleId:00050000=%_aoc""
-        set "source="!INPUT_FOLDER:"=!\%titleId:00050000=%_aoc""
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%\%endTitleId%_aoc""
+        set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
 
         move /Y !GAME_FOLDER_PATH! !source! > NUL
 
@@ -405,7 +442,7 @@ REM : functions
             if !ERROLRLEVEL! EQU 4 goto:moveDlc
         )
 
-        move /Y !target! !target:%titleId:00050000=%_=! > NUL
+        move /Y !target! !target:%endTitleId%_=! > NUL
         @echo - DLC installed
 
     goto:eof
@@ -517,7 +554,7 @@ REM : functions
             if [%cr%] == [!j!] (
                 REM : value found , return function value
 
-                set "%3=%%i"
+                set /A "ERRORLEVEL=0" & set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
