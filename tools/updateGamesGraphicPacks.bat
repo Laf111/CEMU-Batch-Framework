@@ -82,7 +82,6 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
-
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
@@ -408,7 +407,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 
@@ -477,7 +475,7 @@ REM : functions
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
 
     goto:eof
     REM : ------------------------------------------------------------------

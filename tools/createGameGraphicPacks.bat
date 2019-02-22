@@ -116,8 +116,6 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
-    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
-    set "titleId=%titleId:"=%"
 
     if not exist !BFW_GP_FOLDER! (
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
@@ -126,13 +124,14 @@ REM : main
     )
     REM : get titleId
     set "titleId=!args[1]!"
-    set "titleId=%titleId:"=%"
 
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
-
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
+    set "titleId=%titleId:"=%"
+    
     REM : check if game is recognized
     call:checkValidity %titleId%
 
@@ -191,7 +190,7 @@ REM : main
     @echo ---------------------------------------------------------
     choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
-        set /A "ERRORLEVEL=0" 
+         
         @echo Cancelled by user ^!
         goto:eof
     )
@@ -863,7 +862,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 

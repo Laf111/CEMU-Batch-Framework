@@ -443,8 +443,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
-        set "str=!str:^=!"
         set "newPath="!str:"=!""
 
         if not [!FOLDER_PATH!] == [!newPath!] (
@@ -512,7 +510,7 @@ REM : functions
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
 
     goto:eof
     REM : ------------------------------------------------------------------

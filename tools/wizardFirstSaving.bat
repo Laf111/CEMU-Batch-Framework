@@ -191,13 +191,13 @@ REM : main
     if not exist !exampleFile! goto:openProfileFile
 
     choice /C yn /CS /N /M "Do you want to open !exampleFile:"=! to see all settings you can set? (y, n) : "
-    if !ERRORLEVEL! EQU 2 set /A "ERRORLEVEL=0" & goto:diffProfileFile
+    if !ERRORLEVEL! EQU 2 goto:diffProfileFile
 
     wscript /nologo !Start! !exampleFile!
 
     :diffProfileFile
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
-    if !ERRORLEVEL! EQU 2 set /A "ERRORLEVEL=0" & goto:openProfileFile
+    if !ERRORLEVEL! EQU 2 goto:openProfileFile
 
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
@@ -248,12 +248,12 @@ REM : main
     call:checkCemuSettings
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game^'s profile? (y, n) : "
-    if !ERRORLEVEL! EQU 2 set /A "ERRORLEVEL=0" & goto:reopen
+    if !ERRORLEVEL! EQU 2 goto:reopen
 
     wscript /nologo !Start! !exampleFile!
     :reopen
     choice /C yn /CS /N /M "Do you need to reopen profile file to modify overrided settings? (y, n) : "
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:openProfileFile
+    if !ERRORLEVEL! EQU 1 goto:openProfileFile
 
     REM : waiting updateGamesGraphicPacks processes ending
     set "disp=0"
@@ -390,7 +390,7 @@ REM : main
     if [!OTHER_SAVE!] == ["NONE"] goto:done
 
     choice /C yn /N /M "Do you want to use this one : !OTHER_SAVE:"=! (y, n)?"
-    if !ERRORLEVEL! EQU 2 set /A "ERRORLEVEL=0" & goto:done
+    if !ERRORLEVEL! EQU 2 goto:done
 
     @echo Import save from !OTHER_SAVE:"=!
     set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
@@ -630,7 +630,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 

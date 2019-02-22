@@ -100,8 +100,7 @@ REM : main
     )
 
     REM : get and check INPUT_FOLDER
-    set INPUT_FOLDER=!args[0]!
-    set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"   
+    set INPUT_FOLDER=!args[0]!  
     
     goto:inputsAvailable
     
@@ -114,6 +113,8 @@ REM : main
     call:getFolderPath "Browse to you extracted WII-U USB Helper folder or your dump folder" !DIALOG_ROOT_FOLDER! INPUT_FOLDER
     
     :inputsAvailable
+    set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"     
+
     pushd !INPUT_FOLDER!
 
     REM : rename folders that contains forbiden characters : & ! .
@@ -158,7 +159,7 @@ REM : main
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! EQU 0 (
-                
+
             REM : check if folder name contains forbiden character for batch file
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
@@ -169,7 +170,7 @@ REM : main
 
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
             for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
-
+         
             echo !GAME_FOLDER_PATH! | find /V "(DLC)" | find /V "(UPDATE DATA)" > NUL && call:prepareGame
             echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL && call:installUpdate
             echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL && call:installDlc
@@ -250,7 +251,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 
@@ -298,8 +298,9 @@ REM : functions
         set "GAME_TITLE=!GAME_FOLDER_NAME!"
         REM : if USB Helper output : NAME[Id], get only the name
         echo "!GAME_FOLDER_PATH!" | find "[" > NUL && for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"      
-        
+ 
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+
         if exist !target! goto:eof
         
         @echo =========================================================
@@ -326,8 +327,9 @@ REM : functions
         REM : moving game's folder
 
         set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
-        move /Y !GAME_FOLDER_PATH! !source! > NUL
 
+        move /Y !GAME_FOLDER_PATH! !source! > NUL
+        
         :moveGame
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
@@ -348,12 +350,7 @@ REM : functions
             @echo - Creating saves folder
             mkdir !saveFolder! > NUL
         )
-        set "dlcFolder="!target:"=!\mlc01\usr\title\00050000\%endTitleId%\aoc""
 
-        if not exist !dlcFolder! (
-            @echo - Creating dlc^'s folder
-            mkdir !dlcFolder! > NUL
-        )
         set /A NB_GAMES_TREATED+=1
         @echo -
 
@@ -361,9 +358,6 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :installUpdate
-
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
-        if exist !target! goto:eof
         
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
@@ -385,9 +379,14 @@ REM : functions
             @echo ---------------------------------------------------------
             goto:eof
         )
-
+        
         REM : moving to game's folder
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%""
+        
+        if not exist !target! (
+            @echo - Creating update^'s folder
+            mkdir !target! > NUL
+        )        
         set "source="!INPUT_FOLDER:"=!\%endTitleId%""
 
         move /Y !GAME_FOLDER_PATH! !source! > NUL
@@ -404,9 +403,6 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :installDlc
-
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
-        if exist !target! goto:eof
         
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
@@ -457,11 +453,14 @@ REM : functions
         REM arg2 target
         set "target="%~2""
         REM arg3 = return code
-
+        
+        set "source=!source:\\=\!"
+        set "target=!target:\\=\!"
+      
         if not exist !source! goto:eof
-
+        if [!source!] == [!target!] if exist !target! goto:eof
         if not exist !target! mkdir !target!
-
+        
         REM : source drive
         for %%a in (!source!) do set "sourceDrive=%%~da"
 
@@ -470,20 +469,15 @@ REM : functions
 
         REM : if folders are on the same drive
         if ["!sourceDrive!"] == ["!targetDrive!"] (
-            for %%a in (!target!) do set "parentFolder="%%~dpa""
-            set "parentFolder=!parentFolder:~0,-2!""
-            if exist !target! rmdir /Q /S !target! 2>NUL
-
-            REM : use move command (much type faster)
-            move /Y !source! !target! > NUL
+            if exist !target! rmdir /Q /S !target!
+            move /Y !source! !target! > NUL            
             set /A "cr=!ERRORLEVEL!"
             if !cr! EQU 1 (
                 set /A "%3=1"
             ) else (
                 set /A "%3=0"
             )
-
-           goto:eof
+            goto:eof
         )
 
         REM : else robocopy
@@ -495,6 +489,7 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
+
 
     :checkPathForDos
 
@@ -558,7 +553,7 @@ REM : functions
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -401,9 +401,13 @@ REM : functions
         set "target="%~2""
         REM arg3 = return code
 
-        if not exist !source! goto:eof
-        if not exist !target! mkdir !target!
+        set "source=!source:\\=\!"
+        set "target=!target:\\=\!"
 
+        if not exist !source! goto:eof
+        if [!source!] == [!target!] if exist !target! goto:eof
+        if not exist !target! mkdir !target!
+        
         REM : source drive
         for %%a in (!source!) do set "sourceDrive=%%~da"
 
@@ -413,8 +417,7 @@ REM : functions
         REM : if folders are on the same drive
         if ["!sourceDrive!"] == ["!targetDrive!"] (
 
-            for %%a in (!target!) do set "parentFolder="%%~dpa""
-            set "parentFolder=!parentFolder:~0,-2!""
+            
             if exist !target! rmdir /Q /S !target! 2>NUL
 
             REM : use move command (much type faster)
@@ -486,7 +489,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 
@@ -555,7 +557,7 @@ REM : functions
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
 
     goto:eof
     REM : ------------------------------------------------------------------

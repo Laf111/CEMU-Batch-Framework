@@ -299,7 +299,7 @@ REM : main
     call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:checkInstall
+    if !ERRORLEVEL! EQU 1 goto:checkInstall
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
@@ -1380,7 +1380,6 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         REM detect (,),&,%,� and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:\"=!"
         set "str=!str:^=!"
         set "newPath="!str:"=!""
 
@@ -1447,7 +1446,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
     goto:eof
     REM : ------------------------------------------------------------------
 

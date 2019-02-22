@@ -86,7 +86,7 @@ REM : main
 
     REM : ask for legacy packs creation
     choice /C yn /N /M "Do you want to create legacy graphic packs ? (y, n) : "
-    if !ERRORLEVEL!=2 set /A "ERRORLEVEL=0" & set "createLegacyPacks=false"
+    if !ERRORLEVEL!=2 set "createLegacyPacks=false"
 
     :getTitleId
     set "checkLenght="
@@ -133,7 +133,6 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
-    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     if not exist !BFW_GP_FOLDER! (
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
 
@@ -141,10 +140,8 @@ REM : main
     )
     REM : get titleId
     set "titleId=!args[1]!"
-    set "titleId=%titleId:"=%"
 
     set "createLegacyPacks=!args[2]!"
-    set "createLegacyPacks=%createLegacyPacks:"=%"
 
     if %nbArgs% EQU 4 (
         set "str=!args[3]!"
@@ -155,7 +152,9 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
-
+    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
+    set "titleId=%titleId:"=%"
+    set "createLegacyPacks=%createLegacyPacks:"=%"
 
     REM : check if game is recognized
     call:checkValidity %titleId%

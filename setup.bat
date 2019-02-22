@@ -94,7 +94,7 @@ REM : main
 
     REM : get and check OUTPUT_FOLDER
     set OUTPUT_FOLDER=!args[0]!
-    set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
+
 
    :beginSetup
     @echo Checking for update ^.^.^.
@@ -120,7 +120,7 @@ REM : main
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
    :scanGamesFolder
-
+    set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
     cls
     if %nbArgs% EQU 0 (
         @echo =========================================================
@@ -340,7 +340,7 @@ REM : main
 
     choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n):"
     if !ERRORLEVEL! EQU 1 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="COMPLETE_GP=YES""
         call:log2HostFile !msg!
         goto:askRatios
@@ -366,32 +366,32 @@ REM : main
    :askRatioAgain
     choice /C 12345c /N /M "Enter your choice: "
     if !ERRORLEVEL! EQU 1 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="DESIRED_ASPECT_RATIO=169""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 2 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="DESIRED_ASPECT_RATIO=1610""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 3 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="DESIRED_ASPECT_RATIO=219""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 4 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="DESIRED_ASPECT_RATIO=43""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 5 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
     choice /C yn /N /M "Add another ratio? (y,n): "
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:askRatioAgain
+    if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
    :askScreenMode
     @echo ---------------------------------------------------------
@@ -399,7 +399,7 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n):"
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getUserMode
+    if !ERRORLEVEL! EQU 1 goto:getUserMode
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
@@ -418,7 +418,7 @@ REM : main
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n):"
     if !ERRORLEVEL! EQU 1 (
-        set /A "ERRORLEVEL=0" 
+         
         set "msg="USER_REGISTERED=%USERNAME%""
         call:log2HostFile !msg!
         goto:getSoftware
@@ -429,7 +429,7 @@ REM : main
     set "usersList=!usersList:EMPTY=!"
     @echo Users already registered in BatchFW: !usersList!
     choice /C ny /N /M "Edit this list? (y,n): "
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getSoftware
+    if !ERRORLEVEL! EQU 1 goto:getSoftware
 
     REM : flush logFile of USER_REGISTERED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do call:cleanHostLogFile USER_REGISTERED
@@ -444,7 +444,7 @@ REM : main
     call:log2HostFile !msg!
 
     choice /C yn /N /M "Add another user? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getUsers
+    if !ERRORLEVEL! EQU 1  goto:getUsers
 
    :getSoftware
     cls
@@ -462,7 +462,8 @@ REM : main
     @echo They will be launched in the order you will enter here^.
     @echo.
     choice /C ny /N /M "Register a third party software? (y,n) "
-    if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
+
+    if !ERRORLEVEL! EQU 1  goto:askExtMlC01Folders
 
     @echo.
     @echo You^ll be asked to enter the full command line to
@@ -494,7 +495,7 @@ REM : main
     call:log2HostFile !msg! 2>NUL
 
     choice /C yn /N /M "Add another third party software? (y,n): "
-    if !ERRORLEVEL! EQU 1 set /A "ERRORLEVEL=0" & goto:getSpath
+    if !ERRORLEVEL! EQU 1 goto:getSpath
 
    :askExtMlC01Folders
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
@@ -1253,7 +1254,7 @@ REM : functions
             )
             set /A j+=1
         )
-        set /A "ERRORLEVEL=0"
+        
 
     goto:eof
     REM : ------------------------------------------------------------------
