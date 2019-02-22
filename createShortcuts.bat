@@ -1422,11 +1422,12 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
             if [!cr!] == [!j!] (
                 REM : value found , return function value
-                set /A "ERRORLEVEL=0" & set "%3=%%i"
+                set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
+        set /A "ERRORLEVEL=0"
 
     goto:eof
     REM : ------------------------------------------------------------------
