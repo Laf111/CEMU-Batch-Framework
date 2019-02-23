@@ -171,7 +171,7 @@ REM : main
 
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId%^, check your entry or if you sure^, add a row for this game in !wiiuLibFile!" 16
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId%^, check your entry or if you sure^, add a row for this game in !wiiuLibFile!" 4112
         exit /b 3
     )
     @echo Unable to get informations on the game for titleId %titleId% ^?
