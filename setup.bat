@@ -607,7 +607,7 @@ REM : main
     @echo Please^, define your CEMU^'s installations paths
     @echo ---------------------------------------------------------
     @echo ^> No need to have cemuHook installed ^(you^'ll be asked 
-    @echo    to do install it^)
+    @echo    to install it^)
     @echo ^> If you install CEMU^>=1^.15^.1^, you^'d better have it
     @echo installed on C^: to avoid a long copy of your GLCache into
     @echo CEMU^'s install folder^
