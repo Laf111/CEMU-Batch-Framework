@@ -31,7 +31,8 @@ REM : main
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    
     set "instanciateResX2gp="!BFW_TOOLS_PATH:"=!\instanciateResX2gp.bat""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -170,9 +171,7 @@ REM : main
 
 
     if !QUIET_MODE! EQU 1 (
-        @echo Unable to get informations on the game for titleId %titleId% ^?
-        @echo Check your entry or if you sure, add a row for this game in !wiiuLibFile!
-
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId%^, check your entry or if you sure^, add a row for this game in !wiiuLibFile!" 16
         exit /b 3
     )
     @echo Unable to get informations on the game for titleId %titleId% ^?
@@ -1384,7 +1383,6 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1
-            pause
             exit /b 9
         )
         REM : set char code set, output to host log file

@@ -40,7 +40,7 @@ REM : main
 
         wscript /nologo !Start! "%windir%\System32\taskmgr.exe"
 
-        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^, please kill it and relaunch"
+        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^, please kill it and relaunch" 16
         if !ERRORLEVEL! EQU 2 goto:eof
         goto:getDate
     )
@@ -235,7 +235,7 @@ REM : main
     for /F "delims==" %%f in ('wmic process get Commandline ^| find "launchGame.bat" ^| find /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GTR 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 4112
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 16
             exit 20
         )
     )    
