@@ -252,7 +252,7 @@ REM : main
 
     wscript /nologo !Start! !exampleFile!
     :reopen
-    choice /C yn /CS /N /M "Do you need to reopen profile file to modify overrided settings? (y, n) : "
+    choice /C yn /CS /N /M "Do you need to re-open profile file to modify overrided settings? (y, n) : "
     if !ERRORLEVEL! EQU 1 goto:openProfileFile
 
     REM : waiting updateGamesGraphicPacks processes ending
@@ -260,9 +260,7 @@ REM : main
     :waitingLoop
     for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "updateGamesGraphicPacks.bat" ^| find /V "find"') do (
         if !disp! EQU 0 (
-            @echo ---------------------------------------------------------
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
-
         )
         timeout /T 1 > NUL
         goto:waitingLoop
