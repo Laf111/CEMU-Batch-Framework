@@ -74,17 +74,16 @@ REM : main
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
-        @echo !usrTitle! not found ^?
+        @echo !usrTitle! not found
         goto:askMlc01Folder
     )
-
     cls
     goto:inputsAvailables
 
     :getArgsValue
     if %nbArgs% NEQ 1 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
+        @echo ERROR on arguments passed^!
+        @echo SYNTAX^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
         @echo given {%*}
         pause
         exit /b 99
@@ -92,7 +91,7 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[0]!"
     if not exist !MLC01_FOLDER_PATH! (
-        @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^!
+        @echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
         pause
         exit /b 1
     )
@@ -105,7 +104,7 @@ REM : main
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
-        @echo !usrTitle! not found ^?
+        @echo !usrTitle! not found
         goto:askMlc01Folder
     )
 
@@ -131,10 +130,9 @@ REM : main
     @echo  - source mlc01 folder ^: !MLC01_FOLDER_PATH!
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
-
     @echo Launching in 12s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
+    @echo     ^(y^)^: launch now
+    @echo     ^(n^)^: cancel
     @echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
     if [!ANSWER!] == ["n"] (
@@ -144,6 +142,7 @@ REM : main
     )
     cls
     :scanGamesFolder
+    cls
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -156,7 +155,7 @@ REM : main
         type !tmpFile! | find "?"
         del /F !tmpFile!
         @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by ^?
+        @echo Fix-it by removing characters here replaced in the folder^'s name
         @echo Exiting until you rename or move those folders
         @echo =========================================================
         pause
@@ -187,7 +186,7 @@ REM : main
 
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -195,7 +194,6 @@ REM : main
             set "str=!str:&=!"
             set "str=!str:\!=!"
             set "str=!str:%%=!"
-            set "str=!str:.=!"
             set "str=!str:?=!"
             set "str=!str:\"=!"
             set "str=!str:^=!"
@@ -206,7 +204,7 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -216,7 +214,7 @@ REM : main
     @echo #########################################################
     if ["%QUIET_MODE%"] == ["1"] goto:exiting
     @echo ---------------------------------------------------------
-    @echo Delete and recreate shortcut for the treated games
+    @echo Delete and recreate shortcuts for the treated games
     @echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
     @echo ---------------------------------------------------------
     @echo This windows will close automatically in 12s
@@ -287,7 +285,7 @@ REM : functions
         @echo ---------------------------------------------------------
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
-            @echo No meta folder not found under game folder ^?^, aborting ^^!
+            @echo No meta folder found under game folder^, aborting^!
             goto:metaFix
         )
 
@@ -489,7 +487,6 @@ REM : functions
         REM detect (,),&,%,£ and ^
         set "str=!FOLDER_PATH!"
         set "str=!str:?=!"
-        set "str=!str:^=!"
         set "newPath="!str:"=!""
 
         if not [!FOLDER_PATH!] == [!newPath!] (
@@ -563,7 +560,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
-    REM : function to get char set code for current host
+    REM : function to get and set char set code for current host
     :setCharSet
 
         REM : get charset code for current HOST

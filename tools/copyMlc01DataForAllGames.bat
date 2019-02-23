@@ -196,7 +196,6 @@ REM : main
             set "str=!str:&=!"
             set "str=!str:\!=!"
             set "str=!str:%%=!"
-            set "str=!str:.=!"
             set "str=!str:?=!"
             set "str=!str:\"=!"
             set "str=!str:^=!"

@@ -100,8 +100,8 @@ REM : main
     )
 
     REM : get and check INPUT_FOLDER
-    set INPUT_FOLDER=!args[0]!  
-    
+    set "INPUT_FOLDER=!args[0]!"
+
     goto:inputsAvailable
     
     :begin

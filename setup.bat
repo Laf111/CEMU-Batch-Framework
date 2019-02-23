@@ -93,8 +93,9 @@ REM : main
     )
 
     REM : get and check OUTPUT_FOLDER
-    set OUTPUT_FOLDER=!args[0]!
-
+    set "OUTPUT_FOLDER=!args[0]!"
+    for %%a in (!OUTPUT_FOLDER!) do set "drive=%%~da"
+    if [!OUTPUT_FOLDER!] == ["!drive!\"] set "OUTPUT_FOLDER="!drive!""
 
    :beginSetup
     @echo Checking for update ^.^.^.
@@ -119,6 +120,7 @@ REM : main
     set "readme="!BFW_PATH:"=!\BatchFW_readme.txt""
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
+    
    :scanGamesFolder
     set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
     cls
@@ -761,6 +763,7 @@ REM : functions
         call !tobeLaunch! !GAMES_FOLDER!
         set /A "cr=!ERRORLEVEL!"
 
+        @echo ---------------------------------------------------------
         @echo ^> Games ready for emulation 
         timeout /T 5 > NUL
         cls
