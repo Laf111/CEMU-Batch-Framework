@@ -530,7 +530,7 @@ REM : main
         @echo ---------------------------------------------------------
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
-        cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it" 4112
+        cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it then close this windows" 4112
         goto:searchLockFile
     )
 
