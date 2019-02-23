@@ -217,7 +217,6 @@ REM : main
     @echo ---------------------------------------------------------
     choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
-         
         @echo Cancelled by user ^!
         goto:eof
     )

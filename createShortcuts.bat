@@ -1430,7 +1430,6 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
             )
             set /A j+=1
         )
-        
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -1,4 +1,4 @@
-22/02/2019 V13 : 
+23/02/2019 V13 : 
 - fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)

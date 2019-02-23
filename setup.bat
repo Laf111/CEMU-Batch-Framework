@@ -342,7 +342,6 @@ REM : main
 
     choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n):"
     if !ERRORLEVEL! EQU 1 (
-         
         set "msg="COMPLETE_GP=YES""
         call:log2HostFile !msg!
         goto:askRatios
@@ -368,27 +367,22 @@ REM : main
    :askRatioAgain
     choice /C 12345c /N /M "Enter your choice: "
     if !ERRORLEVEL! EQU 1 (
-         
         set "msg="DESIRED_ASPECT_RATIO=169""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 2 (
-         
         set "msg="DESIRED_ASPECT_RATIO=1610""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 3 (
-         
         set "msg="DESIRED_ASPECT_RATIO=219""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 4 (
-         
         set "msg="DESIRED_ASPECT_RATIO=43""
         call:log2HostFile !msg!
     )
     if !ERRORLEVEL! EQU 5 (
-         
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
@@ -420,7 +414,6 @@ REM : main
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n):"
     if !ERRORLEVEL! EQU 1 (
-         
         set "msg="USER_REGISTERED=%USERNAME%""
         call:log2HostFile !msg!
         goto:getSoftware
@@ -464,8 +457,7 @@ REM : main
     @echo They will be launched in the order you will enter here^.
     @echo.
     choice /C ny /N /M "Register a third party software? (y,n) "
-
-    if !ERRORLEVEL! EQU 1  goto:askExtMlC01Folders
+    if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     @echo.
     @echo You^ll be asked to enter the full command line to
@@ -512,11 +504,7 @@ REM : main
         if !cr! EQU 2 set "script="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
        :getExtMlc01
         wscript /nologo !StartWait! !script!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 (
-            @echo ERROR in !script!^, cr=!cr!
-            pause
-        )
+
         choice /C yn /N /M "Add another external mlc01 folder? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getExtMlc01
 
@@ -761,7 +749,6 @@ REM : functions
         REM : calling createShortcuts.bat
         set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat"" 
         call !tobeLaunch! !GAMES_FOLDER!
-        set /A "cr=!ERRORLEVEL!"
 
         @echo ---------------------------------------------------------
         @echo ^> Games ready for emulation 
@@ -1038,13 +1025,7 @@ REM : functions
    :move
         set "ms="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !ms! !mlc01!
-        set /A "cr=!ERRORLEVEL!"
 
-        if !cr! NEQ 0 (
-            @echo ERROR in moveMlc01DataForAllGames^, cr=!cr!
-            pause
-            exit /b 6
-        )
         @echo ^> Game^'s data from !mlc01! moved
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1052,13 +1033,7 @@ REM : functions
    :copy
         set "cs="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !cs! !mlc01!
-        set /A "cr=!ERRORLEVEL!"
 
-        if !cr! NEQ 0 (
-            @echo ERROR in moveMlc01DataForAllGames^, cr=!cr!
-            pause
-            exit /b 6
-        )
         @echo ^> Game^'s data from !mlc01! copied
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1252,12 +1227,12 @@ REM : functions
 
             if [!cr!] == [!j!] (
                 REM : value found , return function value
+
                 set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
-        
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1286,6 +1261,7 @@ REM : functions
    :log2HostFile
         REM : arg1 = msg
         set "msg=%~1"
+
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

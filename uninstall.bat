@@ -149,12 +149,7 @@ REM : main
     call:getFolderPath "Please enter mlc01 target folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartWait! !script! !MLC01_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Error in restoreMlc01DataForAllGames^.bat for !MLC01_FOLDER!^, cr=!cr!
-        pause
-    )
-    if !cr! EQU 0 set "mlc01Restored=1"
+    set "mlc01Restored=1"
 
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:getMlc01Target
@@ -174,12 +169,7 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
   
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Error in restoreTransShadersForAllGames^.bat for !CEMU_FOLDER!^, cr=!cr!
-        pause
-    )
-    if !cr! EQU 0 set "TransShaderCacheRestored=1"
+    set "TransShaderCacheRestored=1"
     @echo ^> transferable shader caches restored
     @echo ---------------------------------------------------------
 
@@ -403,12 +393,12 @@ REM : functions
 
             if [%cr%] == [!j!] (
                 REM : value found , return function value
+
                 set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
-        
 
     goto:eof
     REM : ------------------------------------------------------------------

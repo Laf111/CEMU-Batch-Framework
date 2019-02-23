@@ -655,7 +655,7 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] goto:eof
+        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
         REM : in case of DOS characters substitution (might never arrive)
         if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"

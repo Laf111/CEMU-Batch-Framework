@@ -548,12 +548,12 @@ REM : functions
 
             if [%cr%] == [!j!] (
                 REM : value found , return function value
+
                 set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
-        
 
     goto:eof
     REM : ------------------------------------------------------------------
