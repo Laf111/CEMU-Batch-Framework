@@ -14,7 +14,6 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
         exit 1
     )
 
@@ -29,6 +28,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
@@ -110,14 +110,12 @@ REM : main
         @echo ERROR ^: on arguments passed ^!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GPV3_NAME^*
         @echo given {%*}
-        pause
         exit /b 99
     )
     if %nbArgs% LSS 2 (
         @echo ERROR ^: on arguments passed ^!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GPV3_NAME^*
         @echo given {%*}
-        pause
         exit /b 99
     )
 
@@ -126,7 +124,6 @@ REM : main
 
     if not exist !BFW_GP_FOLDER! (
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
-        pause
         exit /b 1
     )
     REM : get titleId
@@ -151,7 +148,6 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo Please rename !BFW_GP_FOLDER! path to be DOS compatible ^!^, exiting
-        pause
         exit /b 2
     )
     set titleId=%titleId:"=%
@@ -169,12 +165,10 @@ REM : main
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        @echo Unable to get informations on the game for titleId %ftid% ^?
-        @echo Check your entry or if you sure, add a row for this game in !wiiuLibFile!
-        pause
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiuLibFile!" 4112
         exit /b 3
     )
-    @echo Unable to get informations on the game for titleId %ftid% ^?
+    @echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
     @echo Check your entry or if you sure^, add a row for this game in !wiiuLibFile!
 
     goto:getTitleId
@@ -293,13 +287,11 @@ REM : functions
 
         if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
             echo ERROR ^: the number %numA% does not have %decimals% decimals
-            pause
             exit /b 1
         )
 
         if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
             echo ERROR ^: the number %numB% does not have %decimals% decimals
-            pause
             exit /b 2
         )
 
@@ -506,8 +498,6 @@ REM : functions
 
     :create
 
-
-
     REM : function to check unrecognized game
     :checkValidity
         set "id=%~1"
@@ -534,7 +524,6 @@ REM : functions
         @echo   you might have made a mistake when applying a DLC over game^'s files
         @echo   to fix^, overwrite game^'s file with its last update or if no update
         @echo   are available^, re-dump the game ^!
-        pause
         exit /b 2
     goto:eof
     REM : ------------------------------------------------------------------
@@ -629,7 +618,6 @@ REM : functions
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1
-            pause
             exit /b 9
         )
         REM : set char code set, output to host log file

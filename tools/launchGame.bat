@@ -186,35 +186,6 @@ REM : main
 
     for /F "delims=" %%i in (!codeFolder!) do set "strTmp="%%~dpi""
     set "GAME_FOLDER_PATH=!strTmp:~0,-2!""
-
-    REM : META.XML file
-    set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
-    if not exist !META_FILE! (
-        echo Warning ^: meta file not found under in a meta subfolder of game^'s folder ^! >> !batchFwLog!
-        echo Warning ^: meta file not found under in a meta subfolder of game^'s folder ^!
-    )
-
-    REM : get Title Id from meta.xml
-    set "titleLine="NONE""
-    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-    if [!titleLine!] == ["NONE"] (
-        cscript /nologo !MessageBox! "ERROR ^: unable to find titleId from meta.xml, please check ^!" 4112
-        timeout /t 3 > NUL
-        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
-        exit 25
-    )
-    for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-
-    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-    
-    REM : get information on game using WiiU Library File
-    set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
-
-    if [!libFileLine!] == ["NONE"] (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId%^, check your entry or if you sure^, add a row for this game in !wiiuLibFile!^. Aborting^.^.^." 4112
-        exit /b 55
-    )
     
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
@@ -256,6 +227,25 @@ REM : main
     set "n=%str:~0,4%"
     if %n% GEQ 1140 set "gfxType=V3"
 
+    REM : META.XML file
+    set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
+    
+    if not exist !META_FILE! goto:getScreenMode
+
+    REM : get Title Id from meta.xml
+    set "titleLine="NONE""
+    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
+    if [!titleLine!] == ["NONE"] goto:getScreenMode
+    for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
+
+    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    
+    REM : get information on game using WiiU Library File
+    set "libFileLine="NONE""
+    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+
+    if [!libFileLine!] == ["NONE"] goto:getScreenMode
+    
     :updateGameGraphicPack
     
     REM : search if this script is not already running (nb of search results)
@@ -273,6 +263,7 @@ REM : main
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
 
+    :getScreenMode
     REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
     set "screenMode=-f"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
@@ -329,8 +320,8 @@ REM : main
     )
 
 
-    @echo Don^'t close this windows^, it will stop CEMU ^! >> !batchFwLog!
-    @echo It will be closed automatically after closing CEMU >> !batchFwLog!
+    @echo Don^'t close this windows^, it will stop CEMU ^!
+    @echo It will be closed automatically after closing CEMU
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     @echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
     @echo Don^'t close this windows^, it will stop CEMU ^!

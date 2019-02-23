@@ -108,7 +108,8 @@ REM : main
     :checkGameProfile
     REM : Get Game information using titleId
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
-
+    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    
     if not exist !META_FILE! (
         @echo No meta^/meta^.xml file exist under game^'s folder ^!
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
@@ -116,8 +117,8 @@ REM : main
         @echo Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv
         @echo ^(if the game is not listed^, search internet to get its title Id and add a row in WiiU-Titles-Library^.csv^)
         @echo Then close notepad to continue
-        set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
+
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiuLibFile!
         @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
         @echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
         @echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
@@ -139,11 +140,42 @@ REM : main
         goto:eof
     )
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-
-    set "endTitleId=%titleId:~8,8%"
     REM : In case of non saving
     if ["%titleId%"] == ["################"] goto:checkGameProfile
 
+    if ["%titleId:ffffffff=%"] == ["%titleId%"] goto:getTitleFromDataBase
+    if ["%titleId:FFFFFFFF=%"] == ["%titleId%"] goto:getTitleFromDataBase
+    
+    REM : check if game is recognized
+    call:checkValidity %titleId%
+    
+    :getTitleFromDataBase
+    
+    set "endTitleId=%titleId:~8,8%"
+    
+    REM : get information on game using WiiU Library File
+    set "libFileLine="NONE""
+    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+
+    if [!libFileLine!] == ["NONE"] (
+        @echo ---------------------------------------------------------
+        @echo No informations found on the game with a titleId %titleId%
+        @echo Adding this game in the data base !wiiuLibFile! ^(720p^,60FPS^)
+        @echo '%titleId%';!GAME_TITLE: =!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiuLibFile!
+
+        REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
+        set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
+        wscript /nologo !StartHiddenWait! !ugp! true !GAME_FOLDER_PATH!
+        
+        @echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
+        @echo and if 60FPS is the FPS when playing the game
+        @echo Edit and fix !wiiuLibFile! if needed
+        @echo ---------------------------------------------------------
+        
+    
+        pause
+    )
+    
     REM : _BatchFW_Missing_Games_Profiles folder to store missing games profiles in CEMU_FOLDER\GamesProfiles
     set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles""
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
@@ -237,6 +269,7 @@ REM : main
         set "gt="!BFW_TOOLS_PATH:"=!\getTitleDataFromLibrary.bat""
         wscript /nologo !StartHiddenWait! !gt! "%titleId%" > !gameInfoFile!
     )
+
     type !gameInfoFile!
 
     :step2
@@ -422,6 +455,37 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : function to check unrecognized game
+    :checkValidity
+        set "id=%~1"
+
+        REM : check if titleId correspond to a game wihtout meta\meta.xml file
+        set "begin=%id:~0,8%"
+        call:check8hexValue %begin%
+        set "end=%id:~8,8%"
+        call:check8hexValue %end%
+
+    goto:eof
+
+    :check8hexValue
+        set "halfId=%~1"
+
+        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
+        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
+
+        @echo Ooops it look like your game have a problem ^:
+        @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
+        @echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
+        @echo   will help you to create one^.
+        @echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
+        @echo   you might have made a mistake when applying a DLC over game^'s files
+        @echo   to fix^, overwrite game^'s file with its last update or if no update
+        @echo   are available^, re-dump the game ^!
+        pause
+        exit /b 2
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     :checkCemuSettings
 
         REM : check CEMU options (and controollers settings)

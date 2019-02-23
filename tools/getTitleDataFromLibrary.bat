@@ -28,6 +28,8 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -104,7 +106,7 @@ REM : main
     REM : check if game is recognized
     call:checkValidity %titleId%
 
-    set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
@@ -113,13 +115,12 @@ REM : main
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        @echo Unable to get informations on the game for titleId %titleId% ^?
-        @echo Check your entry or if you sure, add a row for this game in !wiiuLibFile!
-        pause
+        cscript /nologo !MessageBox! "Unable to get those informations on the game for titleId %titleId% in !wiiuLibFile!" 4112
         exit /b 3
+    ) else (
+        @echo getTitleDataFromLibrary ^: unable to get informations on the game for titleId %titleId% ^?
+        exit 3
     )
-    @echo Unable to get informations on the game for titleId %titleId% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiuLibFile!
 
     goto:getTitleId
 
@@ -156,7 +157,6 @@ REM : main
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
-    exit /b 0
     goto:eof
 
     REM : ------------------------------------------------------------------

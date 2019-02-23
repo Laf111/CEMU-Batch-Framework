@@ -59,15 +59,15 @@ REM : main
     if %nbArgs% EQU 1 (
         set "BFW_VERSION=!args[0]!"
         set "BFW_VERSION=!BFW_VERSION:"=!"
+        set "BFW_VERSION=!BFW_VERSION: =!"
         goto:begin
     )
-
-    set "BFW_VERSION=!args[0]!"
 
     REM : get the current version from the log file
     set "BFW_VERSION=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
-
+    set "BFW_VERSION=!BFW_VERSION: =!"
+    
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -86,18 +86,16 @@ REM : main
     set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestBFW.ps1""
 
     set "bfwVR=NONE"
-    for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do (
-        set "bfwVR=%%i"
-    )
+    for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do set "bfwVR=%%i"
     if !ERRORLEVEL! EQU 1 (
         @echo Failed to get the last BatchFw version available
         exit /b 11
     )
-
     if ["!bfwVR!"] == ["NONE"] (
         @echo Failed to get the last BatchFw version available
         exit /b 12
     )
+    set "bfwVR=!bfwVR: =!"
 
     if ["!BFW_VERSION!"] == ["!bfwVR!"] (
         @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!

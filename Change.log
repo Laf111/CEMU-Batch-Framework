@@ -33,6 +33,7 @@
 - auto-update process added
 - if DLC and update folder are found in your games folder, BatchFw will prepare the game for the emulation
   (ties DLC and UPDATE DATA in the game's folder)
+- when a game is not listed in the database, add it to the database
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat
