@@ -228,16 +228,7 @@ REM : main
     if %n% GEQ 1140 set "gfxType=V3"
 
     :updateGameGraphicPack
-    REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
-    set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-    wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
-
-    :getFullScreenMode
-
-    REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
-    set "screenMode=-f"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
-
+    
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
@@ -247,7 +238,15 @@ REM : main
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 4112
             exit 20
         )
-    )
+    )    
+    
+    REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
+    set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
+    wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
+
+    REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
+    set "screenMode=-f"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
 
     REM : shortcut path
     set "gameShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\!user!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user!.lnk""
