@@ -455,7 +455,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! wscript /nologo !StartHidden! "%windir%\System32\cmd.exe" /C copy /Y !backup! !lastValid!
+    if exist !backup! copy /Y !backup! !lastValid! > NUL
 
     wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
@@ -1326,10 +1326,10 @@ REM : functions
         REM : add a supplementary level of backup because the launch following the crash that have corrupt file
         REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
         REM : on this run
-        set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!""
-
-        if exist !backup! wscript /nologo !StartHidden! "%windir%\System32\cmd.exe" /C copy /Y !backup! !lastValid!
-        wscript /nologo !StartHidden! "%windir%\System32\cmd.exe" /C copy /Y !rarFile! !backup!
+        set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
+        
+        if exist !backup! copy /Y !backup! !lastValid! > NUL
+        copy /Y !rarFile! !backup! > NUL
 
         :deleteSave
         REM : delete current saves in mlc01
@@ -1398,6 +1398,9 @@ REM : functions
             REM : PROFILE_FILE for game that still not exist in CEMU folder = NOT_FOUND (first run on a given host)
 
             set "ws="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
+            
+echo  wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! !GAME_TITLE! !PROFILE_FILE! !SETTINGS_FOLDER! !user! >> !batchFwLog!
+            
             wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
             goto:beforeLoad
         )
