@@ -469,11 +469,9 @@ REM : functions
 
         REM : if folders are on the same drive
         if ["!sourceDrive!"] == ["!targetDrive!"] (
-            for %%a in (!target!) do set "parentFolder="%%~dpa""
-            set "parentFolder=!parentFolder:~0,-2!""
             
             if exist !target! rmdir /Q /S !target!
-            move /Y !source! !parentFolder! > NUL            
+            move /Y !source! !target! > NUL            
             set /A "cr=!ERRORLEVEL!"
             if !cr! EQU 1 (
                 set /A "%3=1"
