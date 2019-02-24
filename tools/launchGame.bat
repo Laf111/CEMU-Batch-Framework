@@ -1398,9 +1398,6 @@ REM : functions
             REM : PROFILE_FILE for game that still not exist in CEMU folder = NOT_FOUND (first run on a given host)
 
             set "ws="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
-            
-echo  wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! !GAME_TITLE! !PROFILE_FILE! !SETTINGS_FOLDER! !user! >> !batchFwLog!
-            
             wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
             goto:beforeLoad
         )
