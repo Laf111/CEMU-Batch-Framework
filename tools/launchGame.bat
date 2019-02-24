@@ -26,6 +26,7 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
@@ -455,7 +456,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! copy /Y !backup! !lastValid! > NUL
+    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !backup! !lastValid! > NUL
 
     wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
@@ -485,7 +486,7 @@ REM : main
     @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
     @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^.
     REM : copy all *.bin file (2 files if separable and conventionnal)
-    wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.old /XF *emu* /XF *.rar
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.old /XF *emu* /XF *.rar
 
     :loadOptions
     
@@ -1328,8 +1329,8 @@ REM : functions
         REM : on this run
         set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
         
-        if exist !backup! copy /Y !backup! !lastValid! > NUL
-        copy /Y !rarFile! !backup! > NUL
+        if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !backup! !lastValid! > NUL
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !rarFile! !backup! > NUL
 
         :deleteSave
         REM : delete current saves in mlc01
@@ -1375,7 +1376,7 @@ REM : functions
         REM : import from MISSING_PROFILES_FOLDER
         set "PROFILE_FOLDER="!CEMU_FOLDER:"=!\gameProfiles""
 
-        wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !MISSING_PROFILES_FOLDER! !PROFILE_FOLDER! "%titleId%.ini"
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !MISSING_PROFILES_FOLDER! !PROFILE_FOLDER! "%titleId%.ini"
         set "PROFILE_FILE="!PROFILE_FOLDER:"=!\%titleId%.ini""
 
         :isSettingsExist
@@ -1615,7 +1616,7 @@ REM : functions
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!gcp:"=!\%%x"
-            if not exist !ccpf!  wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !gcp! !ccp! "%%x"
+            if not exist !ccpf!  wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gcp! !ccp! "%%x"
         )
 
         pushd !ccp!
@@ -1623,7 +1624,7 @@ REM : functions
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*"
+            if not exist !bcpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*"
         )
 
         :syncWithBatchFW
@@ -1817,7 +1818,7 @@ REM : functions
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "ccp="!CEMU_FOLDER:"=!\controllerProfiles""
-        wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
 
         REM : restore CEMU's graphicPacks subfolder
         set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
@@ -1870,7 +1871,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
         REM :  move CEMU transferable shader cache file to GAME_FOLDER_PATH
         echo move !ctscf! to !gtscf!>> !batchFwLog!
         echo move !ctscf! to !gtscf!
-        wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
         goto:eof
 
         :handleShaderFiles
@@ -1937,7 +1938,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             move /Y !otscf! !otscr! > NUL
             @echo - >> !tscl!
             @echo - Moving CEMU^'s transferable shader cache to game^'s folder >> !tscl!
-            wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
             @echo - >> !tscl!
 
             set "tscrl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_replace_!OLD_SHADER_CACHE_ID!_with_!NEW_SHADER_CACHE_ID!""
@@ -2014,7 +2015,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
             set "NEW_TRANS_SHADER=!NEW_TRANS_SHADER:.bin=_j.bin!"
         )
 
-        wscript /nologo !StartHidden! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL
 
         :delLog
         REM : delete transShaderCache.log (useless)
