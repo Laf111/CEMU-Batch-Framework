@@ -1329,7 +1329,7 @@ REM : functions
         set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!""
 
         if exist !backup! wscript /nologo !StartHidden! "%windir%\System32\cmd.exe" /C copy /Y !backup! !lastValid!
-        wscript /nologo !StartHiddenWait! "%windir%\System32\cmd.exe" /C copy /Y !rarFile! !backup!
+        wscript /nologo !StartHidden! "%windir%\System32\cmd.exe" /C copy /Y !rarFile! !backup!
 
         :deleteSave
         REM : delete current saves in mlc01
