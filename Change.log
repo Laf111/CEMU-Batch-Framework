@@ -1,4 +1,4 @@
-23/02/2019 V13 : 
+25/02/2019 V13 : 
 - fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
@@ -34,6 +34,7 @@
 - if DLC and update folder are found in your games folder, BatchFw will prepare the game for the emulation
   (ties DLC and UPDATE DATA in the game's folder)
 - when a game is not listed in the database, add it to the database
+- add a script to import transferable cache file
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat
