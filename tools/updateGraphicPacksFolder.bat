@@ -115,13 +115,13 @@ REM : main
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
         timeout /T 4 > NUL
-        exit /b 40
+        exit /b 0
     )
     goto:updateGP
 
     :msgBox
     cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
-    if !ERRORLEVEL! EQU 2 exit 0
+    if !ERRORLEVEL! EQU 2 exit /b 0
 
     :updateGP
 

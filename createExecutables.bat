@@ -825,6 +825,16 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to importTransferableCache.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Import transferable cache.lnk""
+        set "LINK_DESCRIPTION="Import transferable cache for a game""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\importTransferableCache.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importTransferableCache.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to importTransferableCache^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
         REM : create a shortcut to deleteMyGpuCache.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Flush my GPU OpenGL cache.lnk""
         set "LINK_DESCRIPTION="Empty my GPU OpenGL cache""
