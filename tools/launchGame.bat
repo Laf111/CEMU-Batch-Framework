@@ -456,7 +456,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !backup! !lastValid! > NUL
+    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
 
     wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
@@ -1329,8 +1329,8 @@ REM : functions
         REM : on this run
         set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
         
-        if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !backup! !lastValid! > NUL
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" copy /Y !rarFile! !backup! > NUL
+        if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL
 
         :deleteSave
         REM : delete current saves in mlc01

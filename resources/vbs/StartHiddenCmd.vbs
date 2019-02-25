@@ -25,6 +25,6 @@ For Each strArg in objArgs
         End If
     End If
 Next
-WScript.Echo strLine
+' WScript.Echo strLine
 intReturn = WshShell.Run(strLine, 0, false)
 WScript.Quit(intReturn)
