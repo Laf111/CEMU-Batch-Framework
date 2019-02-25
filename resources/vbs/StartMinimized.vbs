@@ -14,5 +14,5 @@ For Each strArg in objArgs
         strLine = strLine & " """ & strArg & """"
     End If
 Next
-intReturn = WshShell.Run(strLine, 2, flase)
+intReturn = WshShell.Run(strLine, 2, false)
 WScript.Quit(intReturn)

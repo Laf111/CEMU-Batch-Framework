@@ -12,19 +12,19 @@ For Each strArg in objArgs
             WScript.Quit(99)
         End If
         strLine = """" & strArg & """"
-    End If
-    
-    strLen=Len(strArg)
-    If (strLen >= 2) then
-        If (Mid(strArg,2,1) = ":") then
-             strLine = strLine & " """ & strArg & """"
+    Else    
+        strLen=Len(strArg)
+        If (strLen >= 2) then
+            If (Mid(strArg,2,1) = ":") then
+                 strLine = strLine & " """ & strArg & """"
+            Else
+                 strLine = strLine & " " & strArg
+            End If
         Else
-             strLine = strLine & " " & strArg
+            strLine = strLine & " " & strArg
         End If
-    Else
-        strLine = strLine & " " & strArg
     End If
 Next
-
-intReturn = WshShell.Run(strLine, 0, flase)
+WScript.Echo strLine
+intReturn = WshShell.Run(strLine, 0, false)
 WScript.Quit(intReturn)
