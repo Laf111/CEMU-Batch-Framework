@@ -206,9 +206,21 @@ REM : main
 
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
 
-    REM : launching user's software
-    call:launchUserSoftware
+    REM : search if this script is not already running (nb of search results)
+    set /A "nbI=0"
 
+    for /F "delims==" %%f in ('wmic process get Commandline ^| find "launchGame.bat" ^| find /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
+        if %nbI% GTR 2 (
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 16
+            exit 20
+        )
+    )    
+    
+    REM : start a script that will monitor the execution
+    set "ml="!BFW_TOOLS_PATH:"=!\monitorBatchFw.bat""
+    wscript /nologo !StartHidden! !ml!    
+    
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHiddenWait! !script!
@@ -248,17 +260,6 @@ REM : main
     if [!libFileLine!] == ["NONE"] goto:getScreenMode
     
     :updateGameGraphicPack
-    
-    REM : search if this script is not already running (nb of search results)
-    set /A "nbI=0"
-
-    for /F "delims==" %%f in ('wmic process get Commandline ^| find "launchGame.bat" ^| find /V "find" /C') do set /A "nbI=%%f"
-    if %nbI% NEQ 0 (
-        if %nbI% GTR 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 16
-            exit 20
-        )
-    )    
     
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
@@ -526,6 +527,9 @@ REM : main
         goto:searchLockFile
     )
 
+    REM : launching user's software
+    call:launchUserSoftware
+    
     REM : transShaderCache log
     if not exist !gtscf! mkdir !gtscf! > NUL
     set "tscl="!gtscf:"=!\transShaderCache.log""

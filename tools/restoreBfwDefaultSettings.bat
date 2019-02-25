@@ -18,11 +18,7 @@ REM : main
         pause
         exit 1
     )
-    REM : get calling location (%OUTPUT_FOLDER%\Wii-U Games\BatchFW)
-    set "WORKINGDIR="!CD!""
-    for %%a in (!WORKINGDIR!) do set "parentFolder="%%~dpa""
-    set "WIIUG=!parentFolder:~0,-2!""
-    set "CEMU_SHORTCUTS="!WIIUG:"=!\CEMU""
+
     REM : directory of this script
 
     pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
@@ -62,8 +58,10 @@ REM : main
         goto:eof
     )
     cls
-    @echo ^> Delete all logs under !BFW_LOGS! ^.^.^.
-
+    
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+    
+    @echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
     pushd !BFW_LOGS!
     del /F /S *.log > NUL
 
@@ -74,13 +72,14 @@ REM : main
         rmdir /Q /S !BFW_GP_FOLDER!
         @echo ---------------------------------------------------------
         @echo ^> Delete graphic pack folder !BFW_GP_FOLDER! ^.^.^.
-
     )
 
-    if exist !CEMU_SHORTCUTS! (
-        rmdir /Q /S !CEMU_SHORTCUTS!
+    if exist !WIIU_GAMES_FOLDER! (
+        set "pat=!WIIU_GAMES_FOLDER:"=!/*"
+        del /F /S !pat! > NUL
+        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL
         @echo ---------------------------------------------------------
-        @echo ^> Delete shortcuts created for all versions of CEMU ^.^.^.
+        @echo ^> Delete shortcuts created ^.^.^.
     )
 
 
@@ -89,12 +88,6 @@ REM : main
         @echo ---------------------------------------------------------
         @echo ^> Delete BatchFW_readme.txt ^.^.^.
         del /F !bfrf! > NUL
-    )
-    set "bfrl="!WORKINGDIR:"=!\BatchFW_readme.lnk""
-    if exist !bfrl! (
-        @echo ---------------------------------------------------------
-        @echo ^> Delete BatchFW_readme.txt shortcut ^.^.^.
-        del /F !bfrl! > NUL
     )
 
     @echo =========================================================

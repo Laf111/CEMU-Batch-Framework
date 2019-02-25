@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set BFW_VERSION=V13RC4
+    set BFW_VERSION=V13RC5
 
     set "THIS_SCRIPT=%~0"
     title !THIS_SCRIPT!
