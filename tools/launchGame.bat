@@ -226,7 +226,7 @@ REM : main
     wscript /nologo !StartHiddenWait! !script! -silent
 
     REM : GFX type to provide
-    set "gfxType=V2"
+    set "gfxType=V3"
 
     if not exist !cemuLog! goto:updateGameGraphicPack
 
@@ -238,7 +238,7 @@ REM : main
 
     set "str=%version:.=%"
     set "n=%str:~0,4%"
-    if %n% GEQ 1140 set "gfxType=V3"
+    if %n% LSS 1140 set "gfxType=V2"
         
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -492,6 +492,9 @@ REM : main
 
     :loadOptions
 
+    REM : launching user's software
+    call:launchUserSoftware
+        
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -521,9 +524,6 @@ REM : main
         cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it then close this windows" 4112
         goto:searchLockFile
     )
-
-    REM : launching user's software
-    call:launchUserSoftware
     
     REM : transShaderCache log
     if not exist !gtscf! mkdir !gtscf! > NUL

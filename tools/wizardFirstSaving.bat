@@ -308,6 +308,24 @@ REM : main
     REM : Re launching the search (to get the freshly created packs)
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogWgp!
 
+    REM : GFX type to provide
+    set "gfxType=V3"
+    
+    REM : log CEMU
+    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+    if not exist !cemuLog! goto:getPacks
+
+    set "version=NOT_FOUND"
+
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "version=%%e"
+
+    if ["%version%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+
+    set "str=%version:.=%"
+    set "n=%str:~0,4%"
+    if %n% LSS 1140 set "gfxType=V2"
+    
+    :getPacks
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
     call:importGraphicPacks > NUL
@@ -553,53 +571,48 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
-        set "tName=NOT_FOUND"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
             set "gp=!gp:\=!"
 
-            set "tName=!gp:_graphicPacksV2=V2_!"
-            set "tName=!tName:V2__=V2_!"
+            set "tName=!gp:_graphicPacksV2=!"
 
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
-
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
 
-            mklink /J /D !linkPath! !targetPath!
-
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
         )
     goto:eof
     REM : ------------------------------------------------------------------
 
     :importGraphicPacks
 
-        set "tName=NOT_FOUND"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
             set "gp=!gp:\=!"
 
-            set "tName=!gp:_graphicPacksV2=V2_!"
-            set "tName=!tName:V2__=V2_!"
+            set "tName=!gp:_graphicPacksV2=!"
 
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
-
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
 
-            mklink /J /D !linkPath! !targetPath! > NUL
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
+
         )
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     :createGameProfile
 
