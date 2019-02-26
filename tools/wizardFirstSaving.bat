@@ -163,9 +163,9 @@ REM : main
         @echo Adding this game in the data base !wiiuLibFile! ^(720p^,60FPS^)
         @echo '%titleId%';!GAME_TITLE: =!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiuLibFile!
 
-        REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
+        REM : update Game's Graphic Packs (wasn't launched in LaunchGame.bat in this case)
         set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-        wscript /nologo !StartHiddenWait! !ugp! true !GAME_FOLDER_PATH!
+        wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
         
         @echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
         @echo and if 60FPS is the FPS when playing the game

@@ -239,7 +239,7 @@ REM : main
     set "str=%version:.=%"
     set "n=%str:~0,4%"
     if %n% GEQ 1140 set "gfxType=V3"
-
+        
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
     
@@ -265,7 +265,8 @@ REM : main
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
 
-    :getScreenMode
+    :getScreenMode       
+    
     REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
     set "screenMode=-f"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
@@ -663,33 +664,42 @@ REM : main
         cscript /nologo !MessageBox! "ERROR when creating !LOCK_FILE:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
         exit 3
     )
+    
     REM : waiting all pre requisities are ready
     call:waitProcessesEnd
 
     REM : if wiazrd was launched,  links are already created
-    if %wizardLaunched% EQU 1 goto:minimizeAll
-
-    REM : create links in game's graphic pack folder
-    set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
-    if exist !fnrLogLggp! del /F !fnrLogLggp!
-    REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!
-    
+    if %wizardLaunched% EQU 1 (
+        REM : create links to mods
+        if ["!gfxType!"] == ["V3"] (
+            @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+            @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
+            REM : import mods for the game as graphic packs
+            call:importMods > NUL
+        )    
+        goto:minimizeAll
+    )
     REM : remove all links under GAME_GP_FOLDER
     REM : clean links in game's graphic pack folder
     if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q /S !gpLink! 2>NUL
     )
-    
+
     REM : create links to mods
     if ["!gfxType!"] == ["V3"] (
         @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
         @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
         REM : import mods for the game as graphic packs
         call:importMods > NUL
-    )
+    )    
     
+    REM : create links in game's graphic pack folder
+    set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
+    if exist !fnrLogLggp! del /F !fnrLogLggp!
+    REM : Re launching the search (to get the freshly created packs)
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!
+
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
