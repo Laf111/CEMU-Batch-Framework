@@ -326,7 +326,16 @@ REM : main
     if %n% LSS 1140 set "gfxType=V2"
     
     :getPacks
-    REM : link all missing graphic packs
+    
+    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
+    
+    REM : clean links in game's graphic pack folder
+    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
+        rmdir /Q /S !gpLink! 2>NUL
+    )
+    
     REM : always import 16/9 graphic packs
     call:importGraphicPacks > NUL
 

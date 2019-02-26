@@ -679,7 +679,7 @@ REM : main
         )    
         goto:minimizeAll
     )
-    REM : remove all links under GAME_GP_FOLDER
+    
     REM : clean links in game's graphic pack folder
     if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
