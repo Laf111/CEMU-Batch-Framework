@@ -34,6 +34,9 @@ REM : main
         REM : set BatchFw processes to priority to high
         wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL
     
+        REM : if wizrad is running, don't count
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%wizardFirstSaving.bat%%'" goto:waitingLoopProcesses
+    
         REM : monitor Cemu.exe launch and exit 
         for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do exit 0
         set /A "duration+=1" 
