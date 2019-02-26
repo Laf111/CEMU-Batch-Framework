@@ -223,7 +223,7 @@ REM : main
     
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
-    wscript /nologo !StartHiddenWait! !script!
+    wscript /nologo !StartHiddenWait! !script! -silent
 
     REM : GFX type to provide
     set "gfxType=V2"
@@ -490,7 +490,14 @@ REM : main
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.old /XF *emu* /XF *.rar
 
     :loadOptions
-    
+
+    REM : remove all links
+    REM : clean links in game's graphic pack folder
+    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
+        rmdir /Q /S !gpLink! 2>NUL
+    )
+
     if ["!gfxType!"] == ["V3"] (
         @echo Search and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
         @echo Search and load mods found for !GAME_TITLE! ^.^.^.
@@ -685,13 +692,6 @@ REM : main
     @echo Load graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
-
-    REM : remove all links
-    REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
-        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        rmdir /Q /S !gpLink! 2>NUL
-    )
 
     call:importGraphicPacks > NUL
 

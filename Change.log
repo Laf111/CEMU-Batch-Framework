@@ -35,6 +35,7 @@
   (ties DLC and UPDATE DATA in the game's folder)
 - when a game is not listed in the database, add it to the database
 - add a script to import transferable cache file
+- add a script to monitor BatchFw execution (set launchGame.bat priority to high, define a timeout and propose to kill BatchFw if reached)
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat

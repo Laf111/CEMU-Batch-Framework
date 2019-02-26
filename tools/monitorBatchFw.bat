@@ -33,6 +33,15 @@ REM : main
     :waitingLoopProcesses
     timeout /T 1 > NUL
     for /F "delims=" %%i in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "LaunchGame" ^| find /V "find"') do (
+
+        REM : set launchGame processes priority to high
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%updateGamesGraphicPacks.bat%%'" call setpriority 128 > NUL
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createExtraGraphicPacks.bat%%'" call setpriority 128 > NUL
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createGameGraphicPacks%%'" call setpriority 128 > NUL
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%instanciateResX2gp.bat%%'" call setpriority 128 > NUL
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createV2GraphicPacks.bat%%'" call setpriority 128 > NUL
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%copy%%'" call setpriority 128 > NUL
+    
         REM : monitor Cemu.exe launch and exit 
         for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do exit 0
         set /A "duration+=1" 
