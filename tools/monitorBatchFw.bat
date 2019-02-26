@@ -20,7 +20,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     REM : timeout value in seconds
-    set /A "timeOut=120"
+    set /A "timeOut=260"
 
     REM : duration value in seconds
     set /A "duration=0"
