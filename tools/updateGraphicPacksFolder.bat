@@ -180,8 +180,8 @@ REM : main
 
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    if !QUIET_MODE! EQU 0 wscript /nologo !StartHiddenWait! !script!
-    if !QUIET_MODE! EQU 1 wscript /nologo !StartHidden! !script!
+    if !QUIET_MODE! EQU 1 wscript /nologo !StartHiddenWait! !script!
+    if !QUIET_MODE! EQU 0 wscript /nologo !StartHidden! !script!
 
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"

@@ -491,19 +491,6 @@ REM : main
 
     :loadOptions
 
-    REM : remove all links
-    REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
-        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        rmdir /Q /S !gpLink! 2>NUL
-    )
-
-    if ["!gfxType!"] == ["V3"] (
-        @echo Search and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-        @echo Search and load mods found for !GAME_TITLE! ^.^.^.
-        REM : import mods for the game as graphic packs
-        call:importMods > NUL
-    )
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -687,9 +674,24 @@ REM : main
     if exist !fnrLogLggp! del /F !fnrLogLggp!
     REM : Re launching the search (to get the freshly created packs)
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!
-
-    @echo Load graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-    @echo Load graphic packs for !GAME_TITLE! ^.^.^.
+    
+    REM : remove all links under GAME_GP_FOLDER
+    REM : clean links in game's graphic pack folder
+    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
+        rmdir /Q /S !gpLink! 2>NUL
+    )
+    
+    REM : create links to mods
+    if ["!gfxType!"] == ["V3"] (
+        @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+        @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
+        REM : import mods for the game as graphic packs
+        call:importMods > NUL
+    )
+    
+    @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+    @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
 

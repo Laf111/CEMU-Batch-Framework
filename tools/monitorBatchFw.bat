@@ -19,9 +19,6 @@ REM : main
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
-    REM : set launchGame priority to high
-    wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%launchGame.bat%%'" call setpriority 128 > NUL
-
     REM : timeout value in seconds
     set /A "timeOut=120"
 
@@ -34,20 +31,15 @@ REM : main
     timeout /T 1 > NUL
     for /F "delims=" %%i in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "LaunchGame" ^| find /V "find"') do (
 
-        REM : set launchGame processes priority to high
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%updateGamesGraphicPacks.bat%%'" call setpriority 128 > NUL
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createExtraGraphicPacks.bat%%'" call setpriority 128 > NUL
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createGameGraphicPacks%%'" call setpriority 128 > NUL
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%instanciateResX2gp.bat%%'" call setpriority 128 > NUL
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%createV2GraphicPacks.bat%%'" call setpriority 128 > NUL
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%copy%%'" call setpriority 128 > NUL
+        REM : set BatchFw processes to priority to high
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL
     
         REM : monitor Cemu.exe launch and exit 
         for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do exit 0
         set /A "duration+=1" 
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? or wait a little longer ? (you might if it is building graphic packs, mostly if V2 ones are needed)" 4117
+            cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might if it is building graphic packs, mostly if V2 ones are needed)" 4117
             if !ERRORLEVEL! EQU 4 set /A "duration-=10" && goto:waitingLoopProcesses
 
             wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%launchGame.bat%%'" call terminate
