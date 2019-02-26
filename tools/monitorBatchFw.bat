@@ -20,7 +20,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     REM : timeout value in seconds
-    set /A "timeOut=260"
+    set /A "timeOut=130"
 
     REM : duration value in seconds
     set /A "duration=0"
@@ -42,7 +42,7 @@ REM : main
         set /A "duration+=1" 
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might if it is building graphic packs, mostly if V2 ones are needed)" 4117
+            cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
             if !ERRORLEVEL! EQU 4 set /A "duration-=10" && goto:waitingLoopProcesses
 
             wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%launchGame.bat%%'" call terminate

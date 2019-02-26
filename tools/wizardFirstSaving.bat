@@ -580,7 +580,7 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
@@ -602,7 +602,7 @@ REM : functions
 
     :importGraphicPacks
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
