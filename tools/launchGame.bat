@@ -1491,8 +1491,8 @@ REM : functions
 
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!user!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
-        call:log2HostFile !msg!
-
+        call:log2GamesLibraryFile !msg!
+        
         :beforeLoad
 
         REM : if wizard was launched set PROFILE_FILE because it was not found earlier
@@ -2161,6 +2161,30 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
+        if not exist !logFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL
+        move /Y !gLogFileTmp! !glogFile! > NUL
+
+    goto:eof
+    REM : ------------------------------------------------------------------    
 
     REM : function to log info for current host
     :log2HostFile
