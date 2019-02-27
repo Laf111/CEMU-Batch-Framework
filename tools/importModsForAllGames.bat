@@ -6,6 +6,8 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
+    title Import Mods for my games
+    
     set "THIS_SCRIPT=%~0"
 
     REM : checking THIS_SCRIPT path

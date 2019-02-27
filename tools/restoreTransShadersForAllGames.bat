@@ -56,6 +56,8 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
+    
+    title Restore transferable cache of each games to a CEMU install target folder    
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"

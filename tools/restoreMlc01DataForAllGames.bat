@@ -59,6 +59,8 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
+    
+    title Restore mlc01 data of each games to a target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"

@@ -7,6 +7,8 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
+    
+    title Import a transferable cache for a game
 
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1

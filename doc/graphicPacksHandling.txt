@@ -6,6 +6,8 @@ BatchFw has an auto-update process for its graphic packs folder (_BatchFW_Graphi
 updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
 or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
+Only graphic packs need for your game are installed.
+
 If a game is not supported in the Slashiee's repository, BatchFW creates a generic one for resolution scaling.
 
 Those graphics packs are very simple compared to Slashiee's ones since they only scale without tweaking shaders. 
@@ -25,7 +27,7 @@ Also check if the cemu FPS value is correct (speed adjustement (FPS CAP) graphic
 
 If you have customized graphics pack import them (or create them) under %GAME_FOLDER_PATH%\Cemu\graphicPacks.
 
-BatchFW uses this folder to gather all graphics packs available for a game (V2 + V3, V2 are prefixed with V2_). Then creates links (junction)
+BatchFW uses this folder to gather all graphics packs available for a game (V2 or V3). Then creates links (junction)
 to its graphic packs folder (_BatchFW_Graphic_Packs). 
 
 Those links are automatically updated (if drive letter changes), deleted (broken links) and recreated each time you launch the game.
