@@ -75,8 +75,6 @@ REM : main
     )
 
     if exist !WIIU_GAMES_FOLDER! (
-        set "pat=!WIIU_GAMES_FOLDER:"=!/*"
-        del /F /S !pat! > NUL
         rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL
         @echo ---------------------------------------------------------
         @echo ^> Delete shortcuts created ^.^.^.

@@ -340,7 +340,7 @@ REM : main
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
 
-    choice /C yn /N /M "Do you want BatchFW to complete/create graphic packs? (y,n):"
+    choice /C yn /N /M "Do you want BatchFW to complete graphic packs? (y,n):"
     if !ERRORLEVEL! EQU 1 (
         set "msg="COMPLETE_GP=YES""
         call:log2HostFile !msg!
@@ -423,7 +423,7 @@ REM : main
 
     set "usersList=!usersList:EMPTY=!"
     @echo Users already registered in BatchFW: !usersList!
-    choice /C ny /N /M "Edit this list? (y,n): "
+    choice /C ny /N /M "Change this list? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:getSoftware
 
     REM : flush logFile of USER_REGISTERED
@@ -470,7 +470,7 @@ REM : main
 
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
-    choice /C ny /N /M "Edit this list? (y,n) "
+    choice /C ny /N /M "Change this list? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     REM : flush logFile of TO_BE_LAUNCHED

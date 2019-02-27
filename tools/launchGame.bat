@@ -1087,21 +1087,24 @@ REM : main
     )
 
     :endMain
-    @echo =========================================================>> !batchFwLog!
-    @echo This windows will close automatically in 5s>> !batchFwLog!
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
-    @echo     ^(q^) ^: close it now and quit>> !batchFwLog!
-    @echo --------------------------------------------------------->> !batchFwLog!
-    @echo =========================================================
-    @echo This windows will close automatically in 8s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 8
-    if [!ANSWER!] == ["n"] (
-        REM : Waiting before exiting
-        pause
-    )
+    REM : close third party sofwtare
+    call:closeUserSoftware
+    
+    REM @echo =========================================================>> !batchFwLog!
+    REM @echo This windows will close automatically in 8s>> !batchFwLog!
+    REM @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
+    REM @echo     ^(q^) ^: close it now and quit>> !batchFwLog!
+    REM @echo --------------------------------------------------------->> !batchFwLog!
+    REM @echo =========================================================
+    REM @echo This windows will close automatically in 8s
+    REM @echo     ^(n^) ^: don^'t close^, i want to read history log first
+    REM @echo     ^(q^) ^: close it now and quit
+    REM @echo ---------------------------------------------------------
+    REM call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 8
+    REM if [!ANSWER!] == ["n"] (
+        REM REM : Waiting before exiting
+        REM pause
+    REM )
 
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! 2>NUL
@@ -1132,9 +1135,9 @@ REM : functions
             REM : if not exist anymore, flush log
             if not exist !command! (
                 call:cleanHostLogFile !command!
-                cscript /nologo !MessageBox! "WARNING ^: !command! does not exist anymore in software to launch before CEMU^, delete this entry^!" 4144
+                cscript /nologo !MessageBox! "WARNING ^: !command! does not exist anymore in software to launch before CEMU^, deleting this entry^!" 4144
                 set /A "nbIs=99"
-                goto:checkInstanceNumber
+                goto:instanceNumberchecked
             )
             REM : get program and its first arg
             set "soft=!command:"='!"
@@ -1147,7 +1150,7 @@ REM : functions
             ) else (
                 for /F "delims==" %%n in ('wmic process get Commandline ^| find "!prog!" ^| find "!firstArg!" ^| find /V "find" /C') do set /A "nbIs=%%n"
             )
-            :checkInstanceNumber
+            :instanceNumberchecked
             REM : start the program if it is not already running
             if !nbIs! EQU 0 wscript /nologo !Start! !command!
         )
@@ -1155,6 +1158,29 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :closeUserSoftware
+
+        set /A "nbIs=0"
+        set "SOFTSLIST="
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" ^| sort /R 2^>NUL') do (
+            REM : resolve venv for search
+            for /F "delims==" %%f in ('echo %%i') do set "command=%%f"
+
+            REM : get program and its first arg
+            set "soft=!command:"='!"
+            set "firstArg=NONE"
+            for /F "tokens=1-3 delims='" %%j in ("!soft!") do set "prog=%%j" && set "firstArg=%%l"
+            
+            REM : basename of prog
+            for /F "delims=" %%i in ("!prog!") do set "name=%%~nxi"
+
+            REM : start the program if it is not already running
+            wmic process where Name="!name!" call terminate
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     :cleanHostLogFile
 
         REM : pattern to ignore in log file
