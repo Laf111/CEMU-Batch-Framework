@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -291,7 +291,7 @@ REM : main
     REM : waiting updateGamesGraphicPacks processes ending
     set "disp=0"
     :waitingLoop
-    for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "updateGamesGraphicPacks.bat" ^| find /V "find"') do (
+    for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks.bat" ^| find /I /V "find"') do (
         if !disp! EQU 0 (
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
         )
@@ -544,8 +544,8 @@ REM : functions
             type !cs! | find /I "<api>" | find /I "1" > NUL && echo Audio API used [XAudio]
             for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "^<delay^>" 2^>NUL') do echo Latency set [%%k ms]
             type !cs! | find /I "<TVDevice><" > NUL && echo Audio TV device [OFF] && goto:getVolume
-            type !cs! | find /V "<TVDevice>" | find /I "default" > NUL && echo Audio TV device [main audio device] && goto:getVolume
-            type !cs! | find /V "<TVDevice>" > NUL && echo Audio TV device [use specific user device]
+            type !cs! | find /I /V "<TVDevice>" | find /I "default" > NUL && echo Audio TV device [main audio device] && goto:getVolume
+            type !cs! | find /I /V "<TVDevice>" > NUL && echo Audio TV device [use specific user device]
 
             :getVolume
             for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "<TVVolume>" 2^>NUL') do echo Audio TV Volume set [%%k]
@@ -555,9 +555,9 @@ REM : functions
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             @echo Current CemuHook^'s settings ^:
             @echo ---------------------------------------------------------
-            type !chs! | find /V "#" | find /V "["
-            type !chs! | find /V "#" | find /V "[" | find /I "customTimerMode" | find /V "default" | find /V "none" > NUL && (
-                type !PROFILE_FILE! | find /V "#" | find /I "useRDTSC" | find /I "false" 2> NUL && goto:eof
+            type !chs! | find /I /V "#" | find /I /V "["
+            type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL && (
+                type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" 2> NUL && goto:eof
                 @echo ---------------------------------------------------------
                 @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
                 @echo one ^(RDTSC^) is not disabled in the game^'s profile
@@ -580,7 +580,7 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
@@ -602,7 +602,7 @@ REM : functions
 
     :importGraphicPacks
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
@@ -706,6 +706,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -739,9 +744,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

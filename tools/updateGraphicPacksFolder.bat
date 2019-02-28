@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -211,7 +211,7 @@ REM : functions
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find "version = 3" --logFile !fnrLogDV3gp!
 
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogDV3gp! ^| find "File:" ^| find /V "^!" 2^>NUL') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogDV3gp! ^| find "File:" ^| find /I /V "^!" 2^>NUL') do (
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
             set "gp=!rulesFile:\rules.txt=!"
 

@@ -7,11 +7,10 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
-    set "WORKINGDIR="!CD!""
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -187,7 +186,7 @@ REM : main
 
     for /F "delims=" %%i in (!codeFolder!) do set "strTmp="%%~dpi""
     set "GAME_FOLDER_PATH=!strTmp:~0,-2!""
-    
+
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
@@ -209,18 +208,18 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims==" %%f in ('wmic process get Commandline ^| find "launchGame.bat" ^| find /V "find" /C') do set /A "nbI=%%f"
+    for /F "delims==" %%f in ('wmic process get Commandline ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GTR 2 (
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 16
             exit 20
         )
-    )    
-    
+    )
+
     REM : start a script that will monitor the execution
     set "ml="!BFW_TOOLS_PATH:"=!\monitorBatchFw.bat""
-    wscript /nologo !StartHidden! !ml!    
-    
+    wscript /nologo !StartHidden! !ml!
+
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHiddenWait! !script! -silent
@@ -239,10 +238,10 @@ REM : main
     set "str=%version:.=%"
     set "n=%str:~0,4%"
     if %n% LSS 1140 set "gfxType=V2"
-        
+
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
-    
+
     if not exist !META_FILE! goto:getScreenMode
 
     REM : get Title Id from meta.xml
@@ -252,21 +251,21 @@ REM : main
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
     set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-    
+
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
     for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] goto:getScreenMode
-    
+
     :updateGameGraphicPack
-    
+
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
 
-    :getScreenMode       
-    
+    :getScreenMode
+
     REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
     set "screenMode=-f"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
@@ -493,8 +492,9 @@ REM : main
     :loadOptions
 
     REM : launching user's software
-    call:launchUserSoftware
-        
+    set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
+    wscript /nologo !StartHidden! !launchThirdPartySoftware!
+
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -524,7 +524,7 @@ REM : main
         cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it then close this windows" 4112
         goto:searchLockFile
     )
-    
+
     REM : transShaderCache log
     if not exist !gtscf! mkdir !gtscf! > NUL
     set "tscl="!gtscf:"=!\transShaderCache.log""
@@ -664,7 +664,7 @@ REM : main
         cscript /nologo !MessageBox! "ERROR when creating !LOCK_FILE:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
         exit 3
     )
-    
+
     REM : waiting all pre requisities are ready
     call:waitProcessesEnd
 
@@ -676,10 +676,10 @@ REM : main
             @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
             REM : import mods for the game as graphic packs
             call:importMods > NUL
-        )    
+        )
         goto:minimizeAll
     )
-    
+
     REM : clean links in game's graphic pack folder
     if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
@@ -692,8 +692,8 @@ REM : main
         @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
         REM : import mods for the game as graphic packs
         call:importMods > NUL
-    )    
-    
+    )
+
     REM : create links in game's graphic pack folder
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp!
@@ -1069,6 +1069,12 @@ REM : main
 
     :titleIdChecked
 
+    REM : stoping user's software
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "TO_BE_CLOSED" 2^>NUL') do (
+        set "stopThirdPartySoftware="!BFW_TOOLS_PATH:"=!\stopThirdPartySoftware.bat""
+        wscript /nologo !StartHidden! !stopThirdPartySoftware!
+    )
+    
     REM : if exist, a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
     if exist !tscl! (
         @echo --------------------------------------------------- >> !tscl!
@@ -1087,9 +1093,7 @@ REM : main
     )
 
     :endMain
-    REM : close third party sofwtare
-    call:closeUserSoftware
-    
+
     REM @echo =========================================================>> !batchFwLog!
     REM @echo This windows will close automatically in 8s>> !batchFwLog!
     REM @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
@@ -1123,64 +1127,6 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-
-    :launchUserSoftware
-
-        set /A "nbIs=0"
-        set "SOFTSLIST="
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
-            REM : resolve venv for search
-            for /F "delims==" %%f in ('echo %%i') do set "command=%%f"
-
-            REM : if not exist anymore, flush log
-            if not exist !command! (
-                call:cleanHostLogFile !command!
-                cscript /nologo !MessageBox! "WARNING ^: !command! does not exist anymore in software to launch before CEMU^, deleting this entry^!" 4144
-                set /A "nbIs=99"
-                goto:instanceNumberchecked
-            )
-            REM : get program and its first arg
-            set "soft=!command:"='!"
-            set "firstArg=NONE"
-            for /F "tokens=1-3 delims='" %%j in ("!soft!") do set "prog=%%j" && set "firstArg=%%l"
-
-            REM : count number of running instances
-            if ["!firstArg!"] == ["NONE"] (
-                for /F "delims==" %%n in ('wmic process get Commandline ^| find "!prog!" ^| find /V "find" /C') do set /A "nbIs=%%n"
-            ) else (
-                for /F "delims==" %%n in ('wmic process get Commandline ^| find "!prog!" ^| find "!firstArg!" ^| find /V "find" /C') do set /A "nbIs=%%n"
-            )
-            :instanceNumberchecked
-            REM : start the program if it is not already running
-            if !nbIs! EQU 0 wscript /nologo !Start! !command!
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :closeUserSoftware
-
-        set /A "nbIs=0"
-        set "SOFTSLIST="
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" ^| sort /R 2^>NUL') do (
-            REM : resolve venv for search
-            for /F "delims==" %%f in ('echo %%i') do set "command=%%f"
-
-            REM : get program and its first arg
-            set "soft=!command:"='!"
-            set "firstArg=NONE"
-            for /F "tokens=1-3 delims='" %%j in ("!soft!") do set "prog=%%j" && set "firstArg=%%l"
-            
-            REM : basename of prog
-            for /F "delims=" %%i in ("!prog!") do set "name=%%~nxi"
-
-            REM : start the program if it is not already running
-            wmic process where Name="!name!" call terminate
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-    
     :cleanHostLogFile
 
         REM : pattern to ignore in log file
@@ -1200,10 +1146,10 @@ REM : functions
         set "disp=0"
         :waitingLoopProcesses
         timeout /T 1 > NUL
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /V "find"') do (
+        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
             goto:waitingLoopProcesses
         )
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /V "find"') do (
+        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
@@ -1235,7 +1181,7 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find "p%filter%" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
@@ -1257,7 +1203,7 @@ REM : functions
 
     :importGraphicPacks
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
             set "gp=!str:rules=!"
@@ -1286,10 +1232,10 @@ REM : functions
         REM arg2 target
         set "target="%~2""
         REM arg3 = return code
-        
+
         set "source=!source:\\=\!"
         set "target=!target:\\=\!"
-        
+
         if not exist !source! goto:eof
 
         REM : source drive
@@ -1370,7 +1316,7 @@ REM : functions
         REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
         REM : on this run
         set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
-        
+
         if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL
 
@@ -1492,7 +1438,7 @@ REM : functions
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!user!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
         call:log2GamesLibraryFile !msg!
-        
+
         :beforeLoad
 
         REM : if wizard was launched set PROFILE_FILE because it was not found earlier
@@ -2184,7 +2130,7 @@ rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
         move /Y !gLogFileTmp! !glogFile! > NUL
 
     goto:eof
-    REM : ------------------------------------------------------------------    
+    REM : ------------------------------------------------------------------
 
     REM : function to log info for current host
     :log2HostFile

@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -54,7 +54,7 @@ REM : main
     pushd !GAMES_FOLDER!
 
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /V "\mlc01" 2^> NUL') do (
+    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
         set "META_FILE="%%i""

@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -243,7 +243,7 @@ REM : main
     REM : creating V2 graphic packs by instanciating nativeHeightx2 graphic packs
     set /A "resX2=%nativeHeight%*2"
 
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogCegp! ^| find "File:" ^| find /V "^!" ^| find /V "_Gamepad" ^| find /V "_BatchFW" 2^>NUL') do (
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogCegp! ^| find "File:" ^| find /I /V "^!" ^| find /I /V "_Gamepad" ^| find /I /V "_BatchFW" 2^>NUL') do (
 
         set "rules="!BFW_GP_FOLDER:"=!%%i.%%j""
 
@@ -253,11 +253,11 @@ REM : main
 
         if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL && (
             set "gpName=!gpName:_graphicPacksV2=_graphicPacksV2\!"
-            echo !gpName! | find "_%resX2%p" | find /V "_%resX2%p219" | find /V "_%resX2%p1610" | find /V "_%resX2%p169" | find /V "_%resX2%p43" | find /V "_%resX2%p489" > NUL && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
+            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
         )
 
         REM : creating V3 graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /V "_graphicPacksV2" > NUL && (type !rules! | find "$height" > NUL && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL && (type !rules! | find "$height" > NUL && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
 
     )
     if %gpV3exist% EQU 1 goto:ending
@@ -403,12 +403,12 @@ REM : functions
         set "gpFolderName="%~1""
         set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /V "_Resolution" > NUL && set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!_Resolution""
+        echo !gpv3! | find /I /V "_Resolution" > NUL && set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!_Resolution""
 
         set "rulesFile="!gpV3:"=!\rules.txt""
 
         REM : disable creation for packs introducing unexpected varaiables
-REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "overwriteHeight"| find /V "gameWidth" | find /V "gameHeight" | find /V "width" | find /V "height" > NUL && goto:eof
+REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /V "overwriteHeight"| find /I /V "gameWidth" | find /I /V "gameHeight" | find /I /V "width" | find /I /V "height" > NUL && goto:eof
 
         set /A "heightFixFlag=0"
         type !rulesFile! | find /I "heightfix" > NUL && set /A "heightFixFlag=1"
@@ -626,7 +626,7 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
 
         REM : waiting all children processes ending
         :waitingLoop
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /V "find"') do (
+        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
             timeout /T 1 > NUL
             goto:waitingLoop
         )
@@ -663,7 +663,7 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
         goto:eof
 
         :169_windowedV2
-        echo !ARLIST! | find /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -711,7 +711,7 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
         REM : create windowed presets only if user chosen it during setup
 
         :169_windowed
-        echo !ARLIST! | find /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
 
 
         REM : 16/9 windowed graphic packs
@@ -1150,7 +1150,7 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
         set "fnrLogAddResoV3GP169="!fnrLogFolder:"=!\addResoV3GP169_!w!x!h!.log""
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!" --logFile !fnrLogAddResoV3GP169!
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /V "^!" ^| find "File:"') do goto:eof
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /I /V "^!" ^| find "File:"') do goto:eof
 
         REM : not found add it by replacing a [Preset] bloc
 
@@ -1183,7 +1183,7 @@ REM        type !rulesFile! | find "$" | find /V "overwriteWidth" | find /V "ove
         set "fnrLogAddResoV3GP="!fnrLogFolder:"=!\addResoV3GP_!w!x!h!.log""
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!" --logFile !fnrLogAddResoV3GP!
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /V "^!" ^| find "File:"') do goto:eof
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /I /V "^!" ^| find "File:"') do goto:eof
 
         REM : not found add it by replacing a [Preset] bloc
 

@@ -11,7 +11,7 @@ REM : main
     title !THIS_SCRIPT!
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_PATH="!CD!"" && popd >NUL
+    pushd "%~dp0" >NUL && set "BFW_PATH="%~dp0"" && popd >NUL
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
@@ -322,6 +322,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"

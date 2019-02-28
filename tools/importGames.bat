@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -110,7 +110,7 @@ REM : main
     REM set Shell.BrowseForFolder arg vRootFolder
     REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
     set "DIALOG_ROOT_FOLDER="0""
-    call:getFolderPath "Browse to you extracted WII-U USB Helper folder or your dump folder" !DIALOG_ROOT_FOLDER! INPUT_FOLDER
+    call:getFolderPath "Browse to the folder that contains games with their DLC and updates" !DIALOG_ROOT_FOLDER! INPUT_FOLDER
     
     :inputsAvailable
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"     
@@ -149,7 +149,7 @@ REM : main
     set "endTitleId=NONE"
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" ^| sort /R 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" ^| sort /R 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -171,7 +171,7 @@ REM : main
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
             for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
          
-            echo !GAME_FOLDER_PATH! | find /V "(DLC)" | find /V "(UPDATE DATA)" > NUL && call:prepareGame
+            echo !GAME_FOLDER_PATH! | find /I /V "(DLC)" | find /I /V "(UPDATE DATA)" > NUL && call:prepareGame
             echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL && call:installUpdate
             echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL && call:installDlc
 
@@ -243,6 +243,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -276,9 +281,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

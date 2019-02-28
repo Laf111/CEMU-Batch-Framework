@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -139,7 +139,7 @@ REM : main
 
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"

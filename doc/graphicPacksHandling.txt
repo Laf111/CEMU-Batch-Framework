@@ -6,7 +6,7 @@ BatchFw has an auto-update process for its graphic packs folder (_BatchFW_Graphi
 updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
 or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
-Only graphic packs need for your game are installed.
+Only graphic packs needed for your games are installed.
 
 If a game is not supported in the Slashiee's repository, BatchFW creates a generic one for resolution scaling.
 

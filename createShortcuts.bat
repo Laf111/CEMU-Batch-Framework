@@ -6,7 +6,6 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
-    set "WORKINGDIR="!CD!""
     set "THIS_SCRIPT=%~0"
     
     REM : checking THIS_SCRIPT path
@@ -19,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
@@ -97,7 +96,10 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
-        exit 50
+        set "ChangeLog="!BFW_PATH:"=!\Change.log""
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
+        timeout /t 4 > NUL
+        exit 75
     )
 
     cls
@@ -120,10 +122,16 @@ REM : main
     REM : no arg, check if called from shortcut
 
     REM : initialize OUTPUT_FOLDER
-    set "OUTPUT_FOLDER=!WORKINGDIR!"
+    if not exist !logFile! (
+        @echo ERROR^, No !logFile! file found ^^! reset you BatchFw to default
+        pause 
+        exit /b 51
+    )
+
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
 
     REM : if called with shortcut, OUTPUT_FOLDER already set, goto:inputsAvailables
-    if not [!WORKINGDIR!] == [!BFW_PATH!] goto:inputsAvailables
+    if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     call:getFolderPath "Where to create shortcuts? (a Wii-U Games subfolder will be created)" "0" OUTPUT_FOLDER
@@ -481,7 +489,7 @@ REM : main
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /V "\aoc" ^| find /V "\mlc01" 2^>NUL') do (
+    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -1365,6 +1373,11 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -1398,9 +1411,6 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

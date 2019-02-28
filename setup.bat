@@ -8,11 +8,11 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set BFW_VERSION=V13RC7
+    set BFW_VERSION=V13RC8
 
     set "THIS_SCRIPT=%~0"
-    title !THIS_SCRIPT!
-    
+    title -= BatchFw %BFW_VERSION% setup =-
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -23,7 +23,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
@@ -32,7 +32,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     REM : check if
-    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /V "NTFS"') do (
+    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /I /V "NTFS"') do (
 
         @echo This volume is not an NTFS one^^!
         @echo BatchFw use Symlinks and need to be installed on a NTFS volume
@@ -45,7 +45,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
-    
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -53,22 +53,22 @@ REM : main
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : initialize log file for current host (if needed)
     call:initLogForHost
-    
+
     REM : set current char codeset
     call:setCharSet
-    
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
-    
+
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
    :continue
@@ -106,7 +106,9 @@ REM : main
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
         timeout /t 4 > NUL
-        exit 50
+        set "ChangeLog="!BFW_PATH:"=!\Change.log""
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
+        exit 75
     )
 
     set "msg="BFW_VERSION=%BFW_VERSION%""
@@ -120,7 +122,7 @@ REM : main
     set "readme="!BFW_PATH:"=!\BatchFW_readme.txt""
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
-    
+
    :scanGamesFolder
     set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
     cls
@@ -180,7 +182,7 @@ REM : main
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=" %%i in ('dir /B /S /A:D code ^| find /V "\mlc01" 2^> NUL') do (
+    for /F "delims=" %%i in ('dir /B /S /A:D code ^| find /I /V "\mlc01" 2^> NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -471,7 +473,7 @@ REM : main
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
     choice /C ny /N /M "Change this list? (y,n) "
-    if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
+    if !ERRORLEVEL! EQU 1 goto:getSpath
 
     REM : flush logFile of TO_BE_LAUNCHED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do call:cleanHostLogFile TO_BE_LAUNCHED
@@ -479,17 +481,23 @@ REM : main
     REM : Get BatchFw's users registered with the current windows profile
 
    :getSpath
+    choice /C ny /N /M "Close them (in the reverse order) after Cemu close? (y,n) "
+    if !ERRORLEVEL! EQU 1 goto:askSpath
+    
+    set "msg="TO_BE_CLOSED=ALL""
+    call:log2HostFile !msg!
+
+    
+   :askSpath
     @echo ---------------------------------------------------------
     set /P "spath=Enter the full command line: "
+    set "spath=!spath:"='!"
 
-    REM : build a relative path in case of software is installed also in games folders
-    echo spath=!spath! | find !BFW_PATH! > NUL && set "spath=!spath:%BFW_PATH:"=%=%%BFW_PATH%%!"
-
-    set "msg="TO_BE_LAUNCHED=!spath!""
-    call:log2HostFile !msg! 2>NUL
+    set "msg="TO_BE_LAUNCHED@!spath!""
+    call:log2HostFile !msg!
 
     choice /C yn /N /M "Add another third party software? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getSpath
+    if !ERRORLEVEL! EQU 1 goto:askSpath
 
    :askExtMlC01Folders
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
@@ -606,12 +614,11 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Please^, define your CEMU^'s installations paths
     @echo ---------------------------------------------------------
-    @echo ^> No need to have cemuHook installed ^(you^'ll be asked 
+    @echo ^> No need to have cemuHook installed ^(you^'ll be asked
     @echo    to install it^)
     @echo ^> If you install CEMU^>=1^.15^.1^, you^'d better have it
     @echo installed on C^: to avoid a long copy of your GLCache into
-    @echo CEMU^'s install folder^
-    
+    @echo CEMU^'s install folder
     @echo ---------------------------------------------------------
 
     REM : intialize Number of Cemu Version beginning from 0
@@ -674,7 +681,7 @@ REM : main
         call:buildDoc
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     )
-    @echo If you want to change global CEMU^'s settings you^'ve just 
+    @echo If you want to change global CEMU^'s settings you^'ve just
     @echo entered here^:
     @echo ---------------------------------------------------------
     @echo ^> simply delete the shortcuts and recreate them using
@@ -683,17 +690,17 @@ REM : main
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when 
+    @echo If you encounter any issues or have made a mistake when
     @echo collecting settings for a game^:
     @echo ---------------------------------------------------------
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using 
+    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
     @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
     @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you want to change Batch^'s settings ^(such as graphic 
-    @echo pack completion^, aspects ratios^) and^/or^register more 
+    @echo If you want to change Batch^'s settings ^(such as graphic
+    @echo pack completion^, aspects ratios^) and^/or^register more
     @echo than one version of CEMU^:
     @echo ---------------------------------------------------------
     @echo ^> relaunch this script from its shortcut
@@ -730,10 +737,10 @@ REM : functions
 
     REM : check if (DLC) or (UPDATE DATA) folders exist
    :checkGamesToBePrepared
-   
+
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
-        
+
         set "pat=*(DLC)*"
         for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
         set "pat=*(UPDATE DATA)*"
@@ -741,24 +748,24 @@ REM : functions
 
         REM : if need call import script and wait
         if !needImport! EQU 0 goto:eof
-        
-        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found 
+
+        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found
         @echo Preparing those games for emulation^.^.^.
         timeout /T 5 > NUL
-        
+
         REM : calling createShortcuts.bat
-        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat"" 
+        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
         call !tobeLaunch! !GAMES_FOLDER!
 
         @echo ---------------------------------------------------------
-        @echo ^> Games ready for emulation 
+        @echo ^> Games ready for emulation
         timeout /T 5 > NUL
         cls
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     REM : build doc
    :buildDoc
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
@@ -909,7 +916,7 @@ REM : functions
             set "IMPORT_MODE=ENABLED"
         )
 
-        set "msg="!CEMU_FOLDER_NAME! installed with automatic import =!IMPORT_MODE:"=!""
+        set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
         call:log2HostFile !msg!
 
         REM : GPU is not AMD => ignoring precompiled shaders cache?
@@ -1154,6 +1161,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -1187,9 +1199,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
@@ -1262,6 +1271,8 @@ REM : functions
         REM : arg1 = msg
         set "msg=%~1"
 
+        REM : build a relative path in case of software is installed also in games folders
+        echo msg=!msg! | find %BFW_PATH% > NUL && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -231,6 +231,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -264,9 +269,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -221,7 +221,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /V "find"') do (
+        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
             timeout /T 1 > NUL
             goto:waitingLoop
         )
@@ -595,7 +595,7 @@ REM : functions
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
-        echo !ARLIST! | find /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -616,7 +616,7 @@ REM : functions
         :169_windowed
 
         REM : create windowed packs only if user chosen it during setup
-        echo !ARLIST! | find /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -846,6 +846,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -879,9 +884,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof

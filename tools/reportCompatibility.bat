@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -239,7 +239,7 @@ REM : main
     REM : get region of games and directives in game's profile
     set "profileFile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
 
-    for /F "delims=" %%i in ('type !profileFile! ^| find /V "#" ^| find /V "[" 2^>NUL') do (
+    for /F "delims=" %%i in ('type !profileFile! ^| find /I /V "#" ^| find /I /V "[" 2^>NUL') do (
         set "line=%%i"
         set "line=!line: =!"
         set "ADD_NOTES=!ADD_NOTES!^, !line!"

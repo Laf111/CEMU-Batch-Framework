@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_TOOLS_PATH="!CD!"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -276,13 +276,13 @@ REM : functions
         set "gameName=NONE"
         set "gpV3Res="NONE""
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /V "^!" ^| find /V "p1610" ^| find /V "p219" ^| find /V "p489" ^| find /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
             set "gpfound=1"
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo !rulesFile! | find "_%resX2%p" | find /V "_BatchFW " > NUL && (
+            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL && (
                 REM : V2 graphic pack
                 set "gameName=%%i"
                 set "gameName=!gameName:rules=!"
@@ -400,6 +400,11 @@ REM : functions
         call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
         REM : powershell call always return %ERRORLEVEL%=0
 
+        if [!FOLDER_PATH!] == ["NONE"] (
+                choice /C yn /N /M "Do you want to cancel (y, n)? : "
+                if !ERRORLEVEL! EQU 1 exit 66
+                goto:askForFolder
+        )
         REM : check the path
         call:checkPathForDos !FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
@@ -433,9 +438,6 @@ REM : functions
         for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
             set "folderSelected="%%I""
         )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
         set "%3=!folderSelected!"
 
     goto:eof
