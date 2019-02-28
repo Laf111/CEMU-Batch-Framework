@@ -210,7 +210,7 @@ REM : main
         rmdir /Q /S "%%x" 2>NUL
     )
     :removeFoldersLeft
-    @echo Do you want to remove all Cemu extra subfolders created^^?
+    @echo Do you want to remove all Cemu extra subfolders created^?
     @echo That^'s included ^:
     @echo - all compressed saves for all users
     @echo - all controllers profiles
