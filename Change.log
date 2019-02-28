@@ -1,45 +1,45 @@
 28/02/2019 V13 : 
-- fix : shortcuts doesn't work for windows OS with cmd extension forced to be disabled (even if registry says the reverse...)
+- hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
 - batchFw is now completly silent when launching games and create a log "shortcuted" in Wii-U Games\BatchFW
-  On failure, batchFw's log is displayed. When CEMU's return code is <> 0, the log.txt is displayed.
+  On failure, batchFw's log is displayed. When CEMU's return code is <> 0, its log.txt is displayed.
+- add : script to monitor BatchFw execution, set launchGame.bat (and all its child processes) priority to high, define a timeout 
+  and propose to kill BatchFw if reached.
 - use message box instead of cmd console to display messages
-- add an ordered programs list to launch before CEMU (DS4, CemuGyro, speed hack ..) only if not already running
+- add: ordered programs list to launch before CEMU (DS4, CemuGyro, speed hack ..) only if not already running
   if located in your games library (saving the path using environnement variable to keep portability)
-- add a complementary check for detection cache corruption (backupN must always be greater than backupN-1)
-- importModsForAllGames.bat : enlarge filter for detecting more mods
+- you can ask BatchFw to close the third party software list in the reverse order in the setup.bat if you register at least one
+  third party software
+- add: complementary check for detection cache corruption (backupN must always be greater than backupN-1)
+- fix : enlarge filter for detecting more mods (importModsForAllGames.bat)
+- fix : now you can cancel a folder selection dialog
 - create windowed OR fullscreen packs only (depending of your choice made for launching CEMU) : speed-up graphic pack completion
-- taken into account new variables in graphic packs (internalRes, dither, scaleShader)
-- fix error on ASPECT RATIOS not detected when disabling BatchFw's extra presets/packs creation.
-- add a script to reset BatchFw's settings to default
-- add a script to force graphic update and BatchFw's completion (if enabled)
-- add a script to import new games with theirs updates and dlc (if (update) and (dlc) folders are found, tidy 
+- fix : taken into account new variables in graphic packs (internalRes, dither, scaleShader)
+- add : script to reset BatchFw's settings to default
+- add : script to force graphic update and BatchFw's completion (if enabled)
+- add : script to import new games with theirs updates and dlc (if (update) and (dlc) folders are found, tidy 
   all data under each game's folder to prepare the games for launching with BatchFw)
+- if DLC and update folder are found in your games folder, BatchFw will prepare the game for the emulation
+  (ties DLC and UPDATE DATA in the game's folder)
 - remove useless script createMlc01FolderForNewGames.bat
 - enhance CEMU and CemuHook settings display in wizardFirstLaunch.bat
-- take into account new filters for UpscaleFilter and add DownscaleFilter
-- missing icon creation automatization with an onfly JPG to ICO conversion
-- add the option to import mlc01 data from an external mlc01 folder in setup.bat
-- update text dialogs (thanks to TheMasterSimo for the translations)
-- check now if an update is available when launching a game
+- fix : take into account new filters for UpscaleFilter and add DownscaleFilter
+- add : missing icon creation automatization with an onfly JPG to ICO conversion
+- add : an option to import mlc01 data from an external mlc01 folder in setup.bat
+- fix : update text dialogs (thanks to TheMasterSimo for the translations)
+- add : check now if an graphic pack update is available when launching a game
 - BatchFw only install/update the GFX you need (for your games only)
-- replace antrenamer with BRC64
-- update embeded GFX packs to v367
 - use now separate archives for V2 and V3 GFX packs
 - do not mix links to V2 and V3 grapic packs anymore. Use only the suitable ones
 - install V2 GFX packs the first time a version < 1.14 is detected 
 - setup.bat : Extract embeded V3 GFX packs archive only if no active connection is found or if the update GFX 
   process failed
-- auto-update process added
-- if DLC and update folder are found in your games folder, BatchFw will prepare the game for the emulation
-  (ties DLC and UPDATE DATA in the game's folder)
-- when a game is not listed in the database, add it to the database
-- add a script to import transferable cache file
-- add a script to monitor BatchFw execution (set launchGame.bat priority to high, define a timeout and propose to kill BatchFw if reached)
-- now you can cancel a folder selection dialog
-- close the third party software list in the reverse order if choosen during the setup
-
+- update embeded GFX packs to v367
+- replace antrenamer with BRC64
+- add : auto-update process
+- add : when a game is not listed in the internal database, add it to the database
+- add : script to import transferable cache file
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat

@@ -38,6 +38,7 @@ REM : main
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+    set "bfwVersion=!bfwVersion: =!"
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
