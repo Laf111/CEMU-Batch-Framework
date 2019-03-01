@@ -45,6 +45,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -445,9 +446,10 @@ REM : main
 
     REM : get the software list
     set "softwareList=EMPTY"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
+    for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
 
-    if not ["%softwareList%"] == ["EMPTY"] goto:handleSoftware
+    if not ["!softwareList!"] == ["EMPTY"] goto:handleSoftware
+
     @echo Do you want BatchFw to launch a third party software before
     @echo launching CEMU^?
     @echo ^(E^.G^. DS4Windows^, wiimoteHook^, cemuGyro^, a speed hack^.^.^.^)
@@ -464,7 +466,7 @@ REM : main
     @echo command works by checking it in a cmd prompt before^!
     @echo.
    :handleSoftware
-    if ["%softwareList%"] == ["EMPTY"] goto:getSpath
+    if ["!softwareList!"] == ["EMPTY"] goto:getSpath
 
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
@@ -491,6 +493,16 @@ REM : main
 
     set "msg="TO_BE_LAUNCHED@!spath!""
     call:log2HostFile !msg!
+
+    set "name="NONE""
+    set "program="NONE""
+    set "firstArg="NONE""
+    for /F "tokens=1 delims=~'" %%j in ("!spath!") do set "program="%%j""
+    for /F "delims=" %%i in (!program!) do set "name=%%~nxi"
+    
+    set "icoFile=!name:.exe=.ico!"
+    set "icoPath="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
+    if not exist !icoPath! call !quick_Any2Ico! "-res=!program:"=!" "-icon=!icoPath:"=!" -formats=256
 
     choice /C yn /N /M "Add another third party software? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askSpath
