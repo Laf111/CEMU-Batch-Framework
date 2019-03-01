@@ -32,8 +32,11 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "browseFile="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFileDialog.vbs""
+    
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -56,29 +59,30 @@ REM : main
     @echo =========================================================
     @echo Import a transferable cache file
     @echo =========================================================
-    @echo Launching in 12s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
-    if [!ANSWER!] == ["n"] (
-        REM : Cancelling
-        choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
-        goto:eof
-    )
-    cls
     
     REM : browse to the file
-    
+    :askInputFile
     @echo Please browse to the transferable cache file
-    call:getFilePath TRANSF_CACHE
+
+    for /F %%b in ('cscript /nologo !browseFile!') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
+    if [!TRANSF_CACHE!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askInputFile
+    )    
     
     for %%a in (!TRANSF_CACHE!) do set "folder="%%~dpa""
     set "SOURCE_FOLDER=!folder:~0,-2!""
     
-    :getGameFolder
+    :askGameFolder
     @echo Please browse to the game^'s folder
-    call:getFolderPath "Please select the folder of the game" !drive! GAME_FOLDER_PATH
+
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
+    if [!GAME_FOLDER_PATH!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askGameFolder
+    )    
     
     REM : check if rpx file present under game folder
     set "RPX_FILE="NONE""
@@ -89,7 +93,7 @@ REM : main
     REM : if no rpx file found, ignore GAME
     if [!RPX_FILE!] == ["NONE"] (
         @echo This folder does not contain rpx file under a code subfolder
-        goto:getGameFolder
+        goto:askGameFolder
     )
     
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
@@ -156,7 +160,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -203,77 +207,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to open browse file dialog
-    :getFilePath
-
-        set "psCommand="[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms');$dlg = New-Object System.Windows.Forms.OpenFileDialog; if($dlg.ShowDialog() -eq 'OK'){return $dlg.FileNames}""
-
-        set "filerSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "filerSelected="%%I""       
-        )
-        if [!filerSelected!] == ["NONE"] call:getFilePath FILE_PATH
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !filerSelected! call:getFilePath FILE_PATH
-        set "%1=!filerSelected!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,£ and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        set "%3=!folderSelected!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-    
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput
 

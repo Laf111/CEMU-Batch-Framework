@@ -30,11 +30,12 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -52,15 +53,16 @@ REM : main
     for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
-
-
-    REM set Shell.BrowseForFolder arg vRootFolder
-    REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
-    set "DIALOG_ROOT_FOLDER="0""
-
     @echo Please select your mods source folder
+    
     :askModFolder
-    call:getFolderPath "Please select mods source folder" !DIALOG_ROOT_FOLDER! MODS_FOLDER_PATH
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
+
+    if [!MODS_FOLDER_PATH!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askModFolder
+    )    
 
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
@@ -165,7 +167,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -301,60 +303,6 @@ REM : functions
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,£ and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        set "%3=!folderSelected!"
-
     goto:eof
     REM : ------------------------------------------------------------------
 

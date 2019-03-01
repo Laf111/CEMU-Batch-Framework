@@ -1104,7 +1104,7 @@ REM : main
     REM @echo     ^(n^) ^: don^'t close^, i want to read history log first
     REM @echo     ^(q^) ^: close it now and quit
     REM @echo ---------------------------------------------------------
-    REM call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 8
+    REM call:getUserInput "Enter your choice? : " "q,n" ANSWER 8
     REM if [!ANSWER!] == ["n"] (
         REM REM : Waiting before exiting
         REM pause

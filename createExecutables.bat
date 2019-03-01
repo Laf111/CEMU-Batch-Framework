@@ -35,14 +35,12 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
-
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
-        
-    REM : check if DLC and update folders are presents (some games need to be prepared)
-    call:checkGamesToBePrepared
     
     set "USERSLIST="
     set /A "nbUsers=0"
@@ -78,6 +76,9 @@ REM : main
     REM : Intel legacy options
     set "argLeg="
 
+    REM : with no arguments to this script, activating user inputs
+    set /A "QUIET_MODE=0"
+
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     title Create CEMU executables for selected games
@@ -97,21 +98,20 @@ REM : main
         @echo BatchFw updated^, please relaunch
         set "ChangeLog="!BFW_PATH:"=!\Change.log""
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
+        timeout /t 4 > NUL
         exit 75
     )
 
     cls
-    REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"
-
-    REM set Shell.BrowseForFolder arg vRootFolder
-    REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
-    set "DIALOG_ROOT_FOLDER="0""
-
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    call:getFolderPath "Please select CEMU install folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    if [!CEMU_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askCemuFolder
+    )
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
@@ -135,7 +135,13 @@ REM : main
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
 
     @echo Please define where to create executables^? ^(a Wii-U Games subfolder will be created^)
-    call:getFolderPath "Where to create executables? (a Wii-U Games subfolder will be created)" "0" OUTPUT_FOLDER
+    :askOutputFolder
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    if [!OUTPUT_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askOutputFolder
+    )
 
     goto:inputsAvailables
 
@@ -143,7 +149,7 @@ REM : main
     if %nbArgs% GTR 5 (
         @echo ERROR on arguments passed ^(%nbArgs%^)
         @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
+        @echo ^(^* for optional^ argument^)
         @echo given {%*}
         pause
         exit /b 9
@@ -152,7 +158,7 @@ REM : main
     if %nbArgs% LSS 2 (
         @echo ERROR on arguments passed ^^!
         @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
+        @echo ^(^* for optional^ argument^)
         @echo given {%*}
         pause
         exit /b 99
@@ -250,13 +256,11 @@ REM : main
     @echo ---------------------------------------------------------
 
     if !cr! NEQ 0 (
-        @echo ERROR Graphic pack folder update failed^!
+        @echo ERROR Graphics packs folder update failed^!
     )
     cls
     @echo =========================================================
-    @echo Creating CEMU executables handling Cemu options for^:
-    @echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
-    @echo  - Create executables in !OUTPUT_FOLDER:"=!\Wii-U Games
+    @echo Creating CEMU executables
     @echo =========================================================
 
 
@@ -284,6 +288,7 @@ REM : main
     set "ACTIVE_ADAPTER=NOT_FOUND"
     set "defaultBrowser="NOT_FOUND""
     for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
@@ -321,14 +326,14 @@ REM : main
     @echo CemuHook was not found^. It is required to
     @echo - play videos
     @echo - enable FPS^+^+ packs
-    @echo - to enable controller^'s motions
+    @echo - enable controller motion sensors
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         @echo No active connection was found^, unable to open "https://cemuhook.sshnuke.net/#Downloads"
         goto:openCemuAFirstTime
     )
     if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
-    @echo Openning CemuHook download page^.^.^.
+    @echo Opening CemuHook download page^.^.^.
 
     wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
     @echo Download and extract CemuHook in !CEMU_FOLDER!
@@ -347,7 +352,7 @@ REM : main
     :openCemuAFirstTime
 
     @echo ---------------------------------------------------------
-    @echo Openning CEMU^.^.^.
+    @echo Opening CEMU^.^.^.
     @echo Set your REGION^,language
     @echo And finally download sharedFonts using Cemuhook button
     @echo Then close CEMU to continue
@@ -393,7 +398,7 @@ REM : main
     @echo.
     @echo Do you want to enable automatic settings import between versions of CEMU^?
     @echo y^: Using settings of the last version of CEMU used to play this game
-    @echo n^: Will launch the wizard script to collect settings for each game
+    @echo n^: BatchFW will launch the wizard script to collect settings for each game
     @echo.
     @echo If a game shortcut already exists skip this game
     @echo.
@@ -434,8 +439,6 @@ REM : main
             @echo   and encounter slow shaders compilation time after the first time^,
             @echo   your display drivers are corrupt^!
             @echo   do a clean uninstall using DDU and re-install it
-            @echo   no need to fully compile shaders for each version of CEMU^,
-            @echo   GLCache is shared by all installs
             @echo.
         call:getUserInput "Ignore precompiled shader cache for all games? (y, n) : " "y,n" ANSWER
         if [!ANSWER!] == ["y"] set "IGNORE_PRECOMP=ENABLED"
@@ -492,6 +495,7 @@ REM : main
     @echo =========================================================
     @echo Creating !CEMU_FOLDER_NAME! executables for your games ^:
     @echo =========================================================
+
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
@@ -517,7 +521,7 @@ REM : main
 
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            @echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -536,7 +540,7 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -573,7 +577,7 @@ REM : main
     @echo     ^(n^)^: don^'t close^, i want to read history log first
     @echo     ^(q^)^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice? : " "q,n" ANSWER 15
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
         pause
@@ -638,7 +642,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:�=!"
+        set "str=!str:£=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1122,7 +1126,7 @@ REM : functions
                 goto:icoSet
             )
             @echo.
-            @echo.Open a google search^.^.^.
+            @echo. Opening up a google search^.^.^.
             REM : open a google search
             wscript /nologo !StartWait! !defaultBrowser! "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
             @echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\code
@@ -1159,7 +1163,7 @@ REM : functions
             ) else (
                 call:userGameExe !user!
             )
-    )
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1215,13 +1219,13 @@ REM : functions
             @echo =========================================================
             @echo - !GAME_TITLE!
             @echo ---------------------------------------------------------
-            @echo -
-            @echo - Creating a Executable for !GAME_TITLE! using !CEMU_FOLDER! ^?
-            @echo     ^(n^) ^: skip^, not associating this game with !CEMU_FOLDER_NAME!
-            @echo     ^(y^) ^: default value after 3s timeout
-            @echo -
+            @echo.
+            @echo Creating a Executable for !GAME_TITLE! using !CEMU_FOLDER! ^?
+            @echo   ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
+            @echo   ^(y^)^: default value after 8s timeout
+            @echo. 
 
-            call:getUserInput "- Enter your choice? : " "y,n" ANSWER 3
+            call:getUserInput "Enter your choice? : " "y,n" ANSWER 8
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
@@ -1243,7 +1247,7 @@ REM : functions
         if not exist !MLC01_FOLDER_PATH! (
 
             REM : create mlc01 in game's folder
-            REM : TODO : check if cemu version does not support the -mlc options, what happen ?
+            REM : TODO : check if cemu version does not support the -mlc options, what happen?
             REM : if stops -> limit the versions for BatchFW
             set "sysFolder="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
             call:createFolder !sysFolder!
@@ -1258,7 +1262,6 @@ REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! >
             set "subfolder="!GAME_FOLDER_PATH:"=!\Cemu\mods""
             call:createFolder !subfolder!
         )
-
 
         REM : arguments for LaunchGame.bat
         set "ARGS=!CEMU_FOLDER! !GAME_FILE_PATH! !OUTPUT_FOLDER! !ICO_PATH! !MLC01_FOLDER_PATH! !user!"
@@ -1375,60 +1378,6 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,� and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        set "%3=!folderSelected!"
-
     goto:eof
     REM : ------------------------------------------------------------------
 

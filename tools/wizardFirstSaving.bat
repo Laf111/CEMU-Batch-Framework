@@ -35,6 +35,8 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -233,8 +235,8 @@ REM : main
 
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
-    set "REF_CEMU_FOLDER=NONE"
-    call:getFolderPath "Please select the CEMU install folder that contain the reference profile file" 0 REF_CEMU_FOLDER > NUL
+
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if ["!REF_CEMU_FOLDER!"] == ["NONE"] goto:diffProfileFile
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -692,60 +694,6 @@ REM : functions
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,£ and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        set "%3=!folderSelected!"
-
     goto:eof
     REM : ------------------------------------------------------------------
 

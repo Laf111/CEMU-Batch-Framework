@@ -194,7 +194,7 @@ REM : main
     @echo     ^(n^)^: don^'t close^, i want to read history log first
     @echo     ^(q^)^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 15
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
         pause

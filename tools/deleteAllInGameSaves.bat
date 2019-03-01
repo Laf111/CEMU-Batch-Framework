@@ -133,7 +133,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 15
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
         pause
@@ -179,21 +179,21 @@ REM : functions
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
-        @echo -
+        @echo.
         REM : if no inGameSaves subfolder
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
         if not exist !inGameSavesFolder! (
-            @echo - Nothing to do ^^!
+            @echo Nothing to do ^^!
             goto:eof
         )
 
-        @echo - Deleting all files under !inGameSavesFolder! ^?
-        @echo     ^(n^) ^: skip
-        @echo     ^(y^) ^: default value after 15s timeout
-        @echo -
+        @echo Deleting all files under !inGameSavesFolder! ^?
+        @echo   ^(n^) ^: skip
+        @echo   ^(y^) ^: default value after 15s timeout
+        @echo. 
         @echo ---------------------------------------------------------
-        call:getUserInput "- Enter your choice ? : " "y,n" ANSWER 15
+        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
             REM : skip this game
             echo Skip this GAME

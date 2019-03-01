@@ -33,6 +33,8 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "instanciateResX2gp="!BFW_TOOLS_PATH:"=!\instanciateResX2gp.bat""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -75,16 +77,16 @@ REM : main
     if exist !BFW_GP_FOLDER! (
         goto:getTitleId
     )
-    REM set Shell.BrowseForFolder arg vRootFolder
-    REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
-    set "DIALOG_ROOT_FOLDER="0""
-
     @echo Please select a reference graphicPacks folder
 
-    call:getFolderPath "Please select CEMU install folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
-    REM : set BFW_GP_FOLDER to CEMU_FOLDER GraphicPacks subfolder
-    set "BFW_GP_FOLDER="!CEMU_FOLDER!\GraphicPacks""
-
+    :askGpFolder
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
+    if [!BFW_GP_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askGpFolder
+    )
+    
     REM : ask for legacy packs creation
     choice /C yn /N /M "Do you want to create legacy graphic packs ? (y, n) : "
     if !ERRORLEVEL!=2 set "createLegacyPacks=false"

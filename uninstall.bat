@@ -23,6 +23,8 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
 
@@ -73,12 +75,6 @@ REM : main
     )
 
     :uninstall
-
-    REM set Shell.BrowseForFolder arg vRootFolder
-    REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
-    set "DIALOG_ROOT_FOLDER="0""
-
-
     @echo =========================================================
     @echo         CEMU^'s Batch Framework !bfwVersion! uninstaller
     @echo =========================================================
@@ -145,15 +141,26 @@ REM : main
     call:getUserInput "Restore mlc01 data of each games ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:restoreTransShaderCache
 
-    :getMlc01Target
-
-    call:getFolderPath "Please enter mlc01 target folder" !DIALOG_ROOT_FOLDER! MLC01_FOLDER
+    :askMlc01Folder
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
+    if [!MLC01_FOLDER_PATH!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askMlc01Folder
+    )
+    REM : check if a usr/title exist
+    set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
+    if not exist !usrTitle! (
+        @echo !usrTitle! not found ^?
+        goto:askMlc01Folder
+    )
+    
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartWait! !script! !MLC01_FOLDER!
     set "mlc01Restored=1"
 
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
-    if [!ANSWER!] == ["y"] goto:getMlc01Target
+    if [!ANSWER!] == ["y"] goto:askMlc01Folder
 
     @echo ^> mlc01 data restored
     @echo ---------------------------------------------------------
@@ -165,8 +172,19 @@ REM : main
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    if [!CEMU_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askCemuFolder
+    )
+    REM : check that cemu.exe exist in
+    set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
+    if /I not exist !cemuExe! (
+        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        goto:askCemuFolder
+    )
     
-    call:getFolderPath "Please enter a Cemu target folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
   
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
@@ -309,63 +327,6 @@ REM : functions
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,£ and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-      
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        if [!folderSelected!] == ["NONE"] call:runPsCmd %1 %2 FOLDER_PATH 
-        REM : in case of DOS characters substitution (might never arrive)
-        if not exist !folderSelected! call:runPsCmd %1 %2 FOLDER_PATH
-        set "%3=!folderSelected!"
-
     goto:eof
     REM : ------------------------------------------------------------------
 

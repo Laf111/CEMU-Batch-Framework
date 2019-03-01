@@ -167,7 +167,7 @@ REM : main
     if [!shaderCacheIdLine!] == ["NONE"] goto:done
 
     set "shaderCacheId="NONE""
-    for /F "tokens=1-2 delims==" %%a in (!shaderCacheIdLine!) do set "strTmp="%%b""
+    for /F "tokens=1-2 delims==" %%a in (!shaderCacheIdLine!) do set "strTmp=%%b"
     set "strTmp=!strTmp: =!"
     set "shaderCacheId=!strTmp:"=!"
 

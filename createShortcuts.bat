@@ -37,6 +37,8 @@ REM : main
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
@@ -103,14 +105,15 @@ REM : main
     )
 
     cls
-    REM set Shell.BrowseForFolder arg vRootFolder
-    REM : 0  = ShellSpecialFolderConstants.ssfDESKTOP
-    set "DIALOG_ROOT_FOLDER="0""
-
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    call:getFolderPath "Please select CEMU install folder" !DIALOG_ROOT_FOLDER! CEMU_FOLDER
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    if [!CEMU_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askCemuFolder
+    )
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
@@ -134,8 +137,13 @@ REM : main
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
-    call:getFolderPath "Where to create shortcuts? (a Wii-U Games subfolder will be created)" "0" OUTPUT_FOLDER
-
+    :askOutputFolder
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    if [!OUTPUT_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 exit 75
+        goto:askOutputFolder
+    )
     goto:inputsAvailables
 
     :getArgsValue
@@ -565,7 +573,7 @@ REM : main
     @echo     ^(n^)^: don^'t close^, i want to read history log first
     @echo     ^(q^)^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice? : " "q,n" ANSWER 15
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
         pause
@@ -711,7 +719,7 @@ REM : functions
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
-        if !ERRORLEVEL! EQU 0  del /F !TMP_VBS_FILE!
+        if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE!
 
     goto:eof
 
@@ -1204,13 +1212,13 @@ REM : functions
             @echo =========================================================
             @echo - !GAME_TITLE!
             @echo ---------------------------------------------------------
-            @echo -
-            @echo - Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
-            @echo     ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
-            @echo     ^(y^)^: default value after 8s timeout
-            @echo -
+            @echo.
+            @echo Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
+            @echo   ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
+            @echo   ^(y^)^: default value after 8s timeout
+            @echo. 
 
-            call:getUserInput "- Enter your choice? : " "y,n" ANSWER 8
+            call:getUserInput "Enter your choice? : " "y,n" ANSWER 8
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
@@ -1359,60 +1367,6 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         )
 
         exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to open browse folder dialog and check folder's DOS compatbility
-    :getFolderPath
-
-        set "TITLE="%~1""
-        set "ROOT_FOLDER="%~2""
-
-        :askForFolder
-        REM : open folder browser dialog box
-        call:runPsCmd !TITLE! !ROOT_FOLDER! FOLDER_PATH
-        REM : powershell call always return %ERRORLEVEL%=0
-
-        if [!FOLDER_PATH!] == ["NONE"] (
-                choice /C yn /N /M "Do you want to cancel (y, n)? : "
-                if !ERRORLEVEL! EQU 1 exit 66
-                goto:askForFolder
-        )
-        REM : check the path
-        call:checkPathForDos !FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 goto:eof
-
-        REM detect (,),&,%,£ and ^
-        set "str=!FOLDER_PATH!"
-        set "str=!str:?=!"
-        set "str=!str:^=!"
-        set "newPath="!str:"=!""
-
-        if not [!FOLDER_PATH!] == [!newPath!] (
-            @echo This folder is not compatible with DOS^. Remove special character from !FOLDER_PATH!
-            goto:askForFolder
-        )
-
-        REM : trailing slash? if so remove it
-        set "_path=!FOLDER_PATH:"=!"
-        if [!_path:~-1!] == [\] set "FOLDER_PATH=!FOLDER_PATH:~0,-2!""
-
-        REM : set return value
-        set "%3=!FOLDER_PATH!"
-
-    goto:eof
-
-    REM : launch ps script to open dialog box
-    :runPsCmd
-        set "psCommand="(new-object -COM 'shell.Application')^.BrowseForFolder(0,'%1',0,'%~2').self.path""
-
-        set "folderSelected="NONE""
-        for /F "usebackq delims=" %%I in (`powershell !psCommand!`) do (
-            set "folderSelected="%%I""
-        )
-        set "%3=!folderSelected!"
-
     goto:eof
     REM : ------------------------------------------------------------------
 

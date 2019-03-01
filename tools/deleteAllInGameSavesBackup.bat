@@ -134,7 +134,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "- Enter your choice ? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
         pause
@@ -190,13 +190,13 @@ REM : functions
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
-        @echo -
-        @echo - Deleting all saved backuped under !inGameSavesFolder! ^?
-        @echo     ^(n^) ^: skip
-        @echo     ^(y^) ^: default value after 15s timeout
-        @echo -
+        @echo.
+        @echo Deleting all saved backuped under !inGameSavesFolder! ^?
+        @echo   ^(n^) ^: skip
+        @echo   ^(y^) ^: default value after 15s timeout
+        @echo.
         @echo ---------------------------------------------------------
-        call:getUserInput "- Enter your choice ? : " "y,n" ANSWER 15
+        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
             REM : skip this game
             echo Skip this GAME
@@ -204,7 +204,7 @@ REM : functions
         )
 
         del /F /S !pat! > NUL
-        @echo - !pat! deleted ^^!
+        @echo !pat! deleted ^^!
         set /A NB_SAVES_TREATED+=1
 
     goto:eof
