@@ -2,11 +2,12 @@
 
 BatchFw is framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
 
+CEMU is still under developpement and highly experimental. More than other software (as a reverse-engineered one), it introduces sometimes some regressions and so it is usefull to keep your "working" versions instead of systematically overwrite your install with the the last one.
+
 The main purpose of BatchFW is:
 
-- Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
-
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
+- Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 
 All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
 
