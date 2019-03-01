@@ -369,7 +369,7 @@ REM : functions
         robocopy !sf! !target! /S > NUL
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
-            @echo - ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
+            @echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
             pause
         )
         if !cr! GTR 0 echo - Copying !sf!
@@ -389,7 +389,7 @@ REM : functions
         robocopy !tf! !target! /S > NUL
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
-            @echo - ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
+            @echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
             pause
         )
         if !cr! GTR 0 echo - Copying !tf!

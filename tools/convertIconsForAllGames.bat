@@ -365,11 +365,11 @@ REM : functions
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
-        @echo -
+        @echo.
 
         REM : if a ico file alread exist, exit
         if [!JPG_FILE!] == ["NONE"] (
-            @echo - No jpg file found near the rpx one^, skip this game^!
+            @echo No jpg file found near the rpx one^, skip this game^!
             goto:eof
         )
 
@@ -377,21 +377,21 @@ REM : functions
         set "NEW_JPG_PATH="!codeFullPath:"=!\!GAME_TITLE!.jpg""
         REM : rename JPEG_FILE with GAME_TITLE (if needed)
         if not exist !NEW_JPG_PATH! (
-            @echo - Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
+            @echo Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
             move /Y !OLD_JPG_PATH! !NEW_JPG_PATH! > NUL
         )
         set "ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
 
-        @echo - Converting !GAME_TITLE!^.jpg
+        @echo Converting !GAME_TITLE!^.jpg
         REM : convert-it in ICO centered format
         call !quick_Any2Ico! "-img=!NEW_JPG_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
 
         if !ERRORLEVEL! EQU 0 (
-            @echo - !GAME_TITLE! icon created^!
+            @echo !GAME_TITLE! icon created^!
             del /F !NEW_JPG_PATH! > NUL
             set /A NB_GAMES_TREATED+=1
         ) else (
-            @echo - Error when launching Conversion^!
+            @echo Error when launching Conversion^!
             pause
         )
 
@@ -399,7 +399,7 @@ REM : functions
         REM : copy ico to dadabase if needed
         if not exist !dataBaseIco! copy /Y !ICO_PATH! !dataBaseIco! > NUL
 
-        @echo -
+        @echo.
 
     goto:eof
 

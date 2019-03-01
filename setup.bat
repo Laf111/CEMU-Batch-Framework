@@ -471,7 +471,7 @@ REM : main
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
     choice /C ny /N /M "Change this list? (y,n) "
-    if !ERRORLEVEL! EQU 1 goto:getSpath
+    if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     REM : flush logFile of TO_BE_LAUNCHED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do call:cleanHostLogFile TO_BE_LAUNCHED
@@ -537,10 +537,10 @@ REM : main
     cls
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo What kind of outputs do you want to launch your games^?
-    @echo -
-    @echo - 1: Windows shortcuts
-    @echo - 2: Executables files
-    @echo -
+    @echo.
+    @echo 1: Windows shortcuts
+    @echo 2: Executables files
+    @echo.
     call:getUserInput "Enter your choice?: " "1,2" ANSWER
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 

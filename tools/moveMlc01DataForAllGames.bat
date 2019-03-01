@@ -362,10 +362,10 @@ REM : functions
         set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%~1\%endTitleId%""
         call:moveFolder !sf! !target! cr
         if !cr! NEQ 0 (
-            @echo - ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!
+            @echo ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!
             pause
         ) else (
-            echo - Moving !sf!
+            @echo Moving !sf!
         )
 
     goto:eof
@@ -382,10 +382,10 @@ REM : functions
         set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
         call:moveFolder !tf! !target! cr
         if !cr! NEQ 0 (
-            @echo - ERROR when moving !tf! !target!^, cr=!ERRORLEVEL!
+            @echo ERROR when moving !tf! !target!^, cr=!ERRORLEVEL!
             pause
         ) else (
-            echo - Moving !tf!
+            @echo Moving !tf!
         )
 
     goto:eof

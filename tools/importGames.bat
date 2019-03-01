@@ -257,7 +257,7 @@ REM : functions
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
-        @echo -
+        @echo.
 
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
@@ -292,18 +292,18 @@ REM : functions
         set "sysFolder="!target:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysFolder! (
-            @echo - Creating system save^'s folder
+            @echo Creating system save^'s folder
             mkdir !sysFolder! > NUL
         )
         set "saveFolder="!target:"=!\mlc01\usr\save\00050000\%endTitleId%""
 
         if not exist !saveFolder! (
-            @echo - Creating saves folder
+            @echo Creating saves folder
             mkdir !saveFolder! > NUL
         )
 
         set /A NB_GAMES_TREATED+=1
-        @echo -
+        @echo.
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -335,7 +335,7 @@ REM : functions
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%""
         
         if not exist !target! (
-            @echo - Creating update^'s folder
+            @echo Creating update^'s folder
             mkdir !target! > NUL
         )        
         set "source="!INPUT_FOLDER:"=!\%endTitleId%""
@@ -348,7 +348,7 @@ REM : functions
             cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4112
             if !ERROLRLEVEL! EQU 4 goto:moveUpdate
         )
-        @echo - update installed
+        @echo update installed
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -390,7 +390,7 @@ REM : functions
         )
 
         move /Y !target! !target:%endTitleId%_=! > NUL
-        @echo - DLC installed
+        @echo DLC installed
 
     goto:eof
 

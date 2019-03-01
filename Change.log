@@ -1,4 +1,4 @@
-01/03/2019 V13 : 
+02/03/2019 V13 : 
 - hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
@@ -11,6 +11,7 @@
   if located in your games library (saving the path using environnement variable to keep portability)
 - you can ask BatchFw to close the third party software list in the reverse order in the setup.bat if you register at least one
   third party software
+- also create shortcuts to 3rd Party software
 - add: complementary check for detection cache corruption (backupN must always be greater than backupN-1)
 - fix : enlarge filter for detecting more mods (importModsForAllGames.bat)
 - fix : now you can cancel a folder selection dialog
@@ -40,7 +41,7 @@
 - add : auto-update process
 - add : when a game is not listed in the internal database, add it to the database
 - add : script to import transferable cache file
-- fix : running as admin
+- fix : running as admin (use vbs also for browse dialogs)
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat

@@ -262,7 +262,7 @@ REM : functions
 
         for /F "delims=" %%j in ('dir /o:n /a:d /b * ^| find "!CEMU_FOLDER_NAME!" 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
-            @echo - "%%j" deleted ^^!
+            @echo %%j deleted ^^!
         )
         goto:endTreatment
 
@@ -283,7 +283,7 @@ REM : functions
         )
         for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
-            @echo - "%%j" deleted ^^!
+            @echo %%j deleted ^^!
         )
         goto:endTreatment
 
@@ -309,7 +309,7 @@ REM : functions
         pushd !rootDir!
         for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
             rmdir /S /Q "%%j" 2>NUL
-            @echo - "%%j" deleted ^^!
+            @echo %%j deleted ^^!
         )
 
         :endTreatment

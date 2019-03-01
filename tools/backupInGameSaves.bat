@@ -186,7 +186,7 @@ REM : main
     )
 
     :done
-    @echo - Backup in !rarFile!
+    @echo Backup in !rarFile!
 
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!

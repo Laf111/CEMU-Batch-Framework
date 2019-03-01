@@ -130,6 +130,7 @@ REM : main
     )
 
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
+    set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\Wii-U Games=!"
 
     REM : if called with shortcut, OUTPUT_FOLDER already set, goto:inputsAvailables
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
@@ -726,9 +727,14 @@ REM : functions
         if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE!
 
     goto:eof
-
     REM : ------------------------------------------------------------------
 
+    :resolveVenv
+        set "value="%~1""
+        set "%2=%value%"
+    goto:eof
+    REM : ------------------------------------------------------------------    
+    
     :fwShortcuts
 
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's icons""
@@ -756,13 +762,42 @@ REM : functions
 
         set "ARGS="NONE""
 
+        REM : create shortcut for 3rd party software
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\3rdParty""
+        for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
+
+            if not exist !subfolder! call:createFolder !subfolder!
+        
+            set "command=%%i"
+            for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command            
+
+            set "program="NONE""
+
+            REM : resolve venv for search
+            for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
+            for /F "delims=" %%i in (!program!) do set "name=%%~nxi"
+
+            for %%a in (!program!) do set "parentFolder="%%~dpa""
+            set "WD_FOLDER=!parentFolder:~0,-2!""
+    
+            REM : create a shortcut to convertIconsForAllGames.bat (if needed)
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\3rdParty\!name:.exe=.lnk!""
+            set "LINK_DESCRIPTION="!name:.exe=!""
+            set "TARGET_PATH=!program!"
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\!name:.exe=.ico!""
+            if not exist !LINK_PATH! (
+                    if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !name:.exe=!
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
+            )
+        )
+        
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's icons\Convert all jpg files to centered icons.lnk""
         set "LINK_DESCRIPTION="Convert all jpg files near rpx ones to centered icon in order to be used by createExecutables.bat""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\convertIconsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\convertIconsForAllGames.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to convertIconsForAllGames^.bat
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to convertIconsForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -772,7 +807,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\copyMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\copyMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to copyMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to copyMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -782,7 +817,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\moveMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\moveMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to moveMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to moveMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -792,7 +827,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to restoreMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -802,7 +837,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\backupAllInGameSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\backupAllInGameSaves.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to backupAllInGameSaves^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to backupAllInGameSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -812,7 +847,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllInGameSavesBackup.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllInGameSavesBackup.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to deleteAllInGameSavesBackup^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllInGameSavesBackup^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -822,7 +857,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importSaves.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to importSaves^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -832,7 +867,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getTitleDataFromLibrary.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getTitleDataFromLibrary.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to getTitleDataFromLibrary^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to getTitleDataFromLibrary^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -842,7 +877,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importTransferableCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importTransferableCache.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to importTransferableCache^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importTransferableCache^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -852,7 +887,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteMyGpuCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteMyGpuCache.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to deleteMyGpuCache^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteMyGpuCache^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -862,7 +897,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getMyShaderCachesSize.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getMyShaderCachesSize.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to getMyShaderCachesSize^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to getMyShaderCachesSize^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -872,7 +907,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreTransShadersForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreTransShadersForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to restoreTransShadersForAllGames^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreTransShadersForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -882,7 +917,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\createGameGraphicPacks.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createGameGraphicPacks.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to createGameGraphicPacks^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to createGameGraphicPacks^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -892,7 +927,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\forceGraphicPackUpdate.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to forceGraphicPackUpdate^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to forceGraphicPackUpdate^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -902,7 +937,7 @@ REM : functions
         set "TARGET_PATH="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to !USERDOMAIN! compatibility reports folder
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !USERDOMAIN! compatibility reports folder
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_PATH!
         )
 
@@ -912,7 +947,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\BatchFW_readme.txt""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to BatchFW_readme^.txt
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to BatchFW_readme^.txt
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_PATH!
         )
 
@@ -922,7 +957,7 @@ REM : functions
         set "TARGET_PATH="!THIS_SCRIPT!""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createExecutables.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to this script
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to this script
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -932,7 +967,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to importGames^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -942,7 +977,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreBfwDefaultSettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreBfwDefaultSettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to restoreBfwDefaultSettings^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreBfwDefaultSettings^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -952,7 +987,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\createShortcuts.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createShortcuts.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to this script
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to this script
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -962,7 +997,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\updateGraphicPacksFolder.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to updateGraphicPacksFolder^.bat
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to updateGraphicPacksFolder^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -972,7 +1007,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importModsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importModsForAllGames.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to importModsForAllGames^.bat
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importModsForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -984,7 +1019,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\setup.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\setup.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to setup^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to setup^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
 
@@ -996,7 +1031,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\uninstall.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\uninstall.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to uninstall^.bat
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to uninstall^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
 
@@ -1008,7 +1043,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllMySettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllMySettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to deleteAllMySettings^.bat for all CEMU^'s versions
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllMySettings^.bat for all CEMU^'s versions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1020,7 +1055,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllMySettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllMySettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to deleteAllMySettings^.bat for !CEMU_FOLDER_NAME!^'s versions
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllMySettings^.bat for !CEMU_FOLDER_NAME!^'s versions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1060,7 +1095,7 @@ REM : functions
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo - Creating a shortcut to access to OpenGL caches saves
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to OpenGL caches saves
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
     goto:eof

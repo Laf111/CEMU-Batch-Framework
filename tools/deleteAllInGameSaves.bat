@@ -201,7 +201,7 @@ REM : functions
         )
 
         rmdir /Q /S !inGameSavesFolder! 2>NUL
-        @echo - !inGameSavesFolder! deleted ^^!
+        @echo !inGameSavesFolder! deleted ^^!
         set /A NB_GAMES_TREATED+=1
 
 
