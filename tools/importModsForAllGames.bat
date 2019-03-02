@@ -56,8 +56,7 @@ REM : main
     @echo Please select your mods source folder
     
     :askModFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
-
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "MODS_FOLDER_PATH=!folder:?= !"
     if [!MODS_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

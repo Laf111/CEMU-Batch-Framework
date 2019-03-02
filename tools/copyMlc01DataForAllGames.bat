@@ -69,7 +69,7 @@ REM : main
     set /A "QUIET_MODE=0"    
     @echo Please select mlc01 source folder
     :askMlc01Folder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "MLC01_FOLDER_PATH=!folder:?= !"
     
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "

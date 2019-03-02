@@ -64,7 +64,7 @@ REM : main
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"    @echo Please select CEMU target folder
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "CEMU_FOLDER=!folder:?= !"
 
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""

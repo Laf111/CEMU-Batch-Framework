@@ -142,7 +142,7 @@ REM : main
     if [!ANSWER!] == ["n"] goto:restoreTransShaderCache
 
     :askMlc01Folder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -182,7 +182,7 @@ REM : main
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

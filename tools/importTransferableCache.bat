@@ -77,7 +77,7 @@ REM : main
     :askGameFolder
     @echo Please browse to the game^'s folder
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

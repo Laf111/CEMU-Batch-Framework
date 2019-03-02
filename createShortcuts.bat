@@ -108,7 +108,7 @@ REM : main
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -148,7 +148,7 @@ REM : main
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
