@@ -63,20 +63,19 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askModFolder
     )    
-
-    REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
-    
-    REM : check if folder name contains forbiden character for !MODS_FOLDER_PATH!
+    REM : check if folder name contains forbiden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !MODS_FOLDER_PATH!
     set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !MODS_FOLDER_PATH! path to be DOS compatible ^!^, exiting
+    if !cr! GTR 1 (
+        @echo Path to !MODS_FOLDER_PATH! is not DOS compatible^!^, please choose another location
         pause
-        exit /b 2
+        goto:askModFolder
     )
-
+    
+    REM : rename folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    
     cls
     @echo =========================================================
     @echo Identify and copy each mods to each game^'s folder

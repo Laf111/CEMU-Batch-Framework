@@ -81,6 +81,15 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askGpFolder
     )
+    REM : check if folder name contains forbiden character for batch file
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !BFW_GP_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askGpFolder
+    )    
 
     :getTitleId
     set "checkLenght="
@@ -145,14 +154,6 @@ REM : main
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     set "titleId=%titleId: =%"
     
-    REM : check if folder name contains forbiden character for !BFW_GP_FOLDER!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !BFW_GP_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !BFW_GP_FOLDER! path to be DOS compatible ^!^, exiting
-        exit /b 2
-    )
     set titleId=%titleId:"=%
     set "ftid=%titleId:~0,16%"
 

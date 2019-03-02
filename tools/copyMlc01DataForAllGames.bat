@@ -76,6 +76,16 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askMlc01Folder
     )
+    REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !MLC01_FOLDER_PATH!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askMlc01Folder
+    )
+    
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
@@ -105,23 +115,6 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
-
-    REM : check if a usr/title exist
-    set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
-    if not exist !usrTitle! (
-        @echo !usrTitle! not found
-        goto:askMlc01Folder
-    )
-
-    REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !MLC01_FOLDER_PATH!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !MLC01_FOLDER_PATH! path to be DOS compatible^!^, exiting
-        pause
-        exit /b 2
-    )
 
     REM : basename of MLC01_FOLDER_PATH
     for /F "delims=" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"

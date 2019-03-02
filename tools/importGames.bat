@@ -114,7 +114,18 @@ REM : main
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askInputFolder
-    )    
+    )
+    
+    REM : check if folder name contains forbiden character for batch file
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !INPUT_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !INPUT_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askInputFolder
+    ) 
+    
     :inputsAvailable
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"     
 

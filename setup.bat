@@ -573,11 +573,11 @@ REM : main
     call !tobeLaunch! !OUTPUT_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Please rename !OUTPUT_FOLDER! to be DOS compatible^!^, exiting
+        @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
         pause
-        exit /b 1
+        goto:askOutputFolder
     )
-    if !cr! EQU 1 goto:getOuptutsFolder
+
     set "cemuFolderCheck=!OUTPUT_FOLDER:"=!\Cemu.exe""
 
     if exist !cemuFolderCheck! (
@@ -637,35 +637,35 @@ REM : main
     REM : intialize Number of Cemu Version beginning from 0
     set /A "NBCV=0"
 
-   :getCemuFolder
+   :askCemuFolder
     set /A "NBCV+=1"
 
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
-        goto:getCemuFolder
-    )
-    REM : check that cemu.exe exist in
-    set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
-        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
-        goto:getCemuFolder
+        goto:askCemuFolder
     )
     
-    REM : check if folder name contains forbiden character for batch file
+    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Please rename !GAMES_FOLDER! to be DOS compatible^!^, exiting
+        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
-        exit /b 1
+        goto:askCemuFolder
+    )    
+    REM : check that cemu.exe exist in
+    set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
+    if /I not exist !cemuExe! (
+        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        goto:askCemuFolder
     )
-
+    
     if !cr! EQU 1 (
         set /A "NBCV-=1"
-        goto:getCemuFolder
+        goto:askCemuFolder
     )
 
     REM : basename of CEMU_FOLDER to get CEMU version
@@ -675,7 +675,7 @@ REM : main
 
     @echo ---------------------------------------------------------
     call:getUserInput "Do you want to add another version? (y,n)" "y,n" ANSWER
-    if [!ANSWER!] == ["y"] goto:getCemuFolder
+    if [!ANSWER!] == ["y"] goto:askCemuFolder
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo ^> Done

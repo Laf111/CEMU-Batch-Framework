@@ -114,6 +114,15 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askCemuFolder
     )
+    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !CEMU_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askCemuFolder
+    )    
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
@@ -145,6 +154,16 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askOutputFolder
     )
+    REM : check if folder name contains forbiden character for batch file
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !OUTPUT_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askOutputFolder
+    )    
+    
     goto:inputsAvailables
 
     :getArgsValue
@@ -226,24 +245,6 @@ REM : main
         @echo Please rename !BFW_PATH:"=! to be DOS compatible ^^!^, exiting
         pause
         exit /b 3
-    )
-
-    REM : check if folder name contains forbidden character for batch file
-    call !tobeLaunch! !CEMU_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !CEMU_FOLDER:"=! to be DOS compatible ^^!^, exiting
-        pause
-        exit /b 4
-    )
-
-    REM : check if folder name contains forbidden character for batch file
-    call !tobeLaunch! !OUTPUT_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !OUTPUT_FOLDER:"=! to be DOS compatible ^^!^, exiting
-        pause
-        exit /b ()
     )
 
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)

@@ -83,6 +83,15 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askGameFolder
     )    
+    REM : check if folder name contains forbiden character for batch file
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !GAME_FOLDER_PATH!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !GAME_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askGameFolder
+    )
     
     REM : check if rpx file present under game folder
     set "RPX_FILE="NONE""

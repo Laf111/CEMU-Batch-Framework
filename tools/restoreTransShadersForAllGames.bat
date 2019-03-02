@@ -66,6 +66,16 @@ REM : main
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
 
+    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !CEMU_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askCemuFolder
+    )
+    
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if /I not exist !cemuExe! (
@@ -95,17 +105,6 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
-
-
-    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !CEMU_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        @echo Please rename !CEMU_FOLDER! path to be DOS compatible ^!^, exiting
-        pause
-        exit /b 2
-    )
 
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
 

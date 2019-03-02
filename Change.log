@@ -41,7 +41,8 @@
 - add : auto-update process
 - add : when a game is not listed in the internal database, add it to the database
 - add : script to import transferable cache file
-- fix : running as admin (use vbs also for browse dialogs)
+- fix : running as admin (use vbs also for browse dialogs) in case you want install shortcuts folder in
+  specific location
 
 20/01/2019 V12-1 : 
     - Minor fix : cemuHook settings was not displayed correctlty in wizardFirstLaunch.bat
