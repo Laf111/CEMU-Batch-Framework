@@ -188,9 +188,7 @@ REM : main
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"
     echo !DATE! ^: !USERNAME! on !USERDOMAIN! > !noDelFile!
-
-    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
-
+    
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
