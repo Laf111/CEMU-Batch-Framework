@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set BFW_VERSION=V13RC10
+    set "BFW_VERSION=V13RC11"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -562,7 +562,7 @@ REM : main
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -640,7 +640,7 @@ REM : main
    :askCemuFolder
     set /A "NBCV+=1"
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -868,7 +868,7 @@ REM : functions
         @echo ---------------------------------------------------------
         @echo Openning CEMU^.^.^.
         @echo Set your REGION^, language
-        @echo And finally download sharedFonts using Cemuhook button
+        @echo Download sharedFonts using Cemuhook button^, if they are missing
         @echo Then close CEMU to continue
 
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""

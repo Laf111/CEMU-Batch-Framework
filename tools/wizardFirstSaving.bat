@@ -236,7 +236,7 @@ REM : main
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "REF_CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if ["!REF_CEMU_FOLDER!"] == ["NONE"] goto:diffProfileFile
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""

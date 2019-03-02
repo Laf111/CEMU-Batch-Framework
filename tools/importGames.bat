@@ -109,7 +109,7 @@ REM : main
     :begin
     cls
     :askInputFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "INPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "INPUT_FOLDER=!folder:?= !"
     if [!INPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

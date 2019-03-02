@@ -73,7 +73,7 @@ REM : main
     @echo Please select a reference graphicPacks folder
 
     :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder="%%b"" && set "BFW_GP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
