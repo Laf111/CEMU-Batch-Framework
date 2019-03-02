@@ -16,7 +16,7 @@
 - fix : enlarge filter for detecting more mods (importModsForAllGames.bat)
 - fix : now you can cancel a folder selection dialog
 - create windowed OR fullscreen packs only (depending of your choice made for launching CEMU) : speed-up graphic pack completion
-- fix : taken into account new variables in graphic packs (internalRes, dither, scaleShader)
+- taken into account new variables in graphic packs (internalRes, dither, scaleShader)
 - add : script to reset BatchFw's settings to default
 - add : script to force graphic update and BatchFw's completion (if enabled)
 - add : script to import new games with theirs updates and dlc (if (update) and (dlc) folders are found, tidy 
@@ -25,10 +25,10 @@
   (ties DLC and UPDATE DATA in the game's folder)
 - remove useless script createMlc01FolderForNewGames.bat
 - enhance CEMU and CemuHook settings display in wizardFirstLaunch.bat
-- fix : take into account new filters for UpscaleFilter and add DownscaleFilter
+- take into account new filters for UpscaleFilter and add DownscaleFilter
 - add : missing icon creation automatization with an onfly JPG to ICO conversion
 - add : an option to import mlc01 data from an external mlc01 folder in setup.bat
-- fix : update text dialogs (thanks to TheMasterSimo for the translations)
+- update text dialogs (thanks to TheMasterSimo for the translations)
 - add : check now if an graphic pack update is available when launching a game
 - BatchFw only install/update the GFX you need (for your games only)
 - use now separate archives for V2 and V3 GFX packs
