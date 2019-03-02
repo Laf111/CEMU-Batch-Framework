@@ -114,6 +114,8 @@ REM : main
         exit 75
     )
 
+    call:cleanHostLogFile BFW_VERSION
+    
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
     set "readme="!BFW_PATH:"=!\BatchFW_readme.txt""
