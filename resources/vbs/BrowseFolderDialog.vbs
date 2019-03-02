@@ -4,11 +4,10 @@ Dim strPath
 
 strPath = SelectFolder( "" )
 If strPath = vbNull Then
-    WScript.Echo "NONE"
+    WScript.Echo """NONE"""
 Else
     WScript.Echo """" & Replace(strPath," ","?") & """"
 End If
-
 
 Function SelectFolder( myStartFolder )
 ' This function opens a "Select Folder" dialog and will
