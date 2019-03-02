@@ -114,8 +114,7 @@ REM : main
         if !ERRORLEVEL! EQU 1 exit 75
         goto:askCemuFolder
     )
-    echo CEMU_FOLDER=!CEMU_FOLDER!
-    pause
+
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !CEMU_FOLDER!
