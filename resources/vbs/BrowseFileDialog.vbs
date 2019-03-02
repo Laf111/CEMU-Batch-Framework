@@ -5,11 +5,13 @@ Dim strFile
 strFile = SelectFile( )
 
 If strFile = "" Then
-    WScript.Echo "NONE"
+    WScript.Echo """NONE"""
+    WScript.Quit 1
 Else
     WScript.Echo """" & Replace(strFile," ","?") & """"
+    WScript.Quit 0
 End If
-
+WScript.Quit 2
 
 Function SelectFile( )
     ' File Browser via HTA
