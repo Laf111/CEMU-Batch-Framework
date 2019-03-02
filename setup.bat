@@ -280,7 +280,7 @@ REM : main
 
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
-    call !ugp! -forced
+    call !ugp!
     set /A "cr=!ERRORLEVEL!"
 
     if !cr! EQU 0 goto:importModForGames
