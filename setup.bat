@@ -481,6 +481,7 @@ REM : main
     REM : Get BatchFw's users registered with the current windows profile
 
    :getSpath
+    call:cleanHostLogFile TO_BE_CLOSED
     choice /C ny /N /M "Close them (in the reverse order) after Cemu close? (y,n) "
     if !ERRORLEVEL! EQU 1 goto:askSpath
     
