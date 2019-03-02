@@ -200,15 +200,31 @@ REM : main
         pause
     )
 
-    if !NB_GAMES_TREATED! NEQ 0 (
+    if !NB_GAMES_TREATED! EQU 0 goto:ending
 
-        REM : HOST not given
-        if %nbArgs% GEQ 1 set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all settings stored for all CEMU version""
-        REM : HOST given
-        if %nbArgs% EQU 2 set "msg="!GAME_TITLE!:!DATE!-!HOST! delete all settings stored for !CEMU_FOLDER_NAME!""
-        call:log2GamesLibraryFile !msg!
+    REM : HOST not given
+    if %nbArgs% GEQ 1 set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all settings stored for all CEMU version""
+    REM : HOST given
+    if %nbArgs% EQU 2 (
+        set "msg="!GAME_TITLE!:!DATE!-!HOST! delete all settings stored for !CEMU_FOLDER_NAME!""
+
+        REM : reset Cemu install folder to default
+        set "CEMU_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "!CEMU_FOLDER_NAME! install folder path" 2^>NUL') do set "CEMU_FOLDER="%%i""
+        if [!CEMU_FOLDER!] == ["NONE"] goto:logToGL
+        
+        set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+        if exist !cemuLog! (
+            del /F !cemuLog! > NUL
+        )
+        set "pat="!CEMU_FOLDER:"=!\settings.*""
+        del /F !pat! > NUL
     )
-
+    :logToGL
+    call:log2GamesLibraryFile !msg!
+        
+    
+    :ending
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
