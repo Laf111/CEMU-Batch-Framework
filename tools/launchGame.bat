@@ -1320,7 +1320,6 @@ REM : functions
         if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL
 
-        :deleteSave
         REM : delete current saves in mlc01
         set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
         for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
