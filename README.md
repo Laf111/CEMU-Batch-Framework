@@ -50,6 +50,9 @@ Other features:
 
     ect...
 
+Install : 
+
+Extract in your games folder, launch setup.bat
 
 How to use:
 
