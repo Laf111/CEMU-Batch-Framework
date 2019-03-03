@@ -147,8 +147,8 @@ REM : main
         )
     ) else (
         @echo =========================================================
-        @echo Register more than one CEMU's version
-        @echo and optionally Edit your BatchFW^'s settings
+        @echo Set your BatchFw^'s settings and register more than 
+        @echo one CEMU's version
         @echo =========================================================
         @echo ^(in case of false input close this main window to cancel^)
     )
