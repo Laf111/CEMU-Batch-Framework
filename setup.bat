@@ -540,7 +540,10 @@ REM : main
     @echo 1: Windows shortcuts
     @echo 2: Executables files
     @echo.
-    call:getUserInput "Enter your choice?: " "1,2" ANSWER
+    @echo 3: Cancel^, i just wanted to set BatchFw^'s settings
+    @echo.
+    call:getUserInput "Enter your choice (1,2,3)?: " "1,2,3" ANSWER
+    if [!ANSWER!] == ["3"] exit 70
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
     set "outputType=EXE"
