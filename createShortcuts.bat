@@ -41,6 +41,15 @@ REM : main
     
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
+    REM : check if setup was launched
+    if not exist !logFile! (
+        @echo ERROR^, no !logFile! file found ^^! launching setup.bat
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        wscript /nologo !Start! !setup!
+        timeout /t 4 > NUL
+        exit 51
+    ) 
+    
     REM : set current char codeset
     call:setCharSet
     
@@ -132,14 +141,6 @@ REM : main
         goto:askCemuFolder
     )
 
-    REM : no arg, check if called from shortcut
-
-    REM : initialize OUTPUT_FOLDER
-    if not exist !logFile! (
-        @echo ERROR^, No !logFile! file found ^^! reset you BatchFw to default
-        pause 
-        exit /b 51
-    )
 
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
     set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\Wii-U Games=!"
