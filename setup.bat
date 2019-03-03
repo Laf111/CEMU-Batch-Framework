@@ -465,7 +465,7 @@ REM : main
 
     @echo.
     @echo You^ll be asked to enter the full command line to
-    @echo the software and its arguments^.
+    @echo the software and its arguments all surronded by quotes^.
     @echo Use the file^'s absolute path and be sure that the
     @echo command works by checking it in a cmd prompt before^!
     @echo.
