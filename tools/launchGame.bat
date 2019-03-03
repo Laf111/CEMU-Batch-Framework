@@ -1820,7 +1820,7 @@ REM : functions
 
     :removeSaves
         set "sf="!saveFolder:"=!\%~1\%endTitleId%""
-rem        if exist !sf! rmdir /Q /S !sf! 2>NUL
+        if exist !sf! rmdir /Q /S !sf! 2>NUL
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -62,7 +62,8 @@ REM : main
     title Move all transferable caches to a CEMU install target folder    
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    @echo Please select CEMU target folder
+    set /A "QUIET_MODE=0"    
+    @echo Please select CEMU target folder
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
 

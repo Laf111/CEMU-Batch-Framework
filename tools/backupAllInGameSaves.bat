@@ -74,7 +74,8 @@ REM : main
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    @echo Please select mlc01 source folder
+    set /A "QUIET_MODE=0"    
+    @echo Please select mlc01 source folder
     @echo For each game^, if a mlc01 folder is found under game^'s folder it will be used instead^!
 
     :askMlc01Folder

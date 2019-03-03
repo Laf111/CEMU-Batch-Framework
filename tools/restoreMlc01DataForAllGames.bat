@@ -65,7 +65,8 @@ REM : main
     title Move mlc01 data of all games to a target folder
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    @echo Please select mlc01 target folder
+    set /A "QUIET_MODE=0"    
+    @echo Please select mlc01 target folder
 
     :askMlc01Folder
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
