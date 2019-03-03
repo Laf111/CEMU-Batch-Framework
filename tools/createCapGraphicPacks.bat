@@ -460,7 +460,14 @@ REM : functions
 
 
         :create
-       if %fpsPP% EQU 1 goto:capMenu
+        
+        REM : cap to 100%-1FPS (online compatibility)
+        set /A "fps=%nativeFps%/%factor% - 1"
+        
+        call:createCapV2GP %fps% "!GAME_TITLE!_%fps%FPS_cap"
+        type !rulesFileV3! | find /I /V "FPS = %fps%" > NUL && if %fpsPPV3% EQU 0 call:fillCapV3GP "99" "Speed (%fps%FPS)"
+
+        if %fpsPP% EQU 1 goto:capMenu
 
         if %g30% EQU 1 goto:cap110
         REM : cap to 105%
