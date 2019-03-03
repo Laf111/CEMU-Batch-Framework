@@ -21,39 +21,11 @@ REM : main
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     
-        set /A "nbIs=0"
-        for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
+    set /A "nbIs=0"
+    for /F "tokens=* delims=~" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
 
-            set "command=%%i"
-            for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
-
-            set "program="NONE""
-            set "firstArg="NONE""
-
-            REM : resolve venv for search
-            for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
-            for /F "tokens=3 delims=~'" %%j in (!command!) do set "firstArg="%%j""
-
-            if not [!program!] == ["NONE"]  if not exist !program! (
-                    call:cleanHostLogFile !program!
-                    cscript /nologo !MessageBox! "WARNING software to launch before CEMU !program! does not exist anymore in ^, deleting this entry^!" 4144
-                    set /A "nbIs=99"
-                )
-            if !nbIs! NEQ 99 (
-                REM : count number of running instances
-                if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
-                if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
-
-                REM : basename of GAME FOLDER PATH (used to name shorcut)
-                for /F "delims=" %%i in (!program!) do set "exe=%%~nxi"
-                for /F "delims=" %%i in (!firstArg!) do set "argPiece=%%~nxi"
-              
-                REM : start the program if it is not already running
-                if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate
-                if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate
-
-            )
-        )
+        call:closeSoftware "%%i"
+    )
 
     exit !ERRORLEVEL!
         
@@ -63,12 +35,44 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    
+    :closeSoftware
+    
+        set "line="%~1""
 
-    :resolveVenv
-        set "value="%~1""
-        set "%2=%value%"
+        for /F "tokens=3 delims=~@" %%j in (!line!) do set "whatTodo=%%j"
+       
+        if ["!whatTodo!"] == ["N"] goto:eof
+ 
+        for /F "tokens=2 delims=~@" %%j in (!line!) do set "command="%%j""
+
+
+        set "program="NONE""
+        set "firstArg="NONE""
+
+        REM : resolve venv for search
+        for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
+        for /F "tokens=3 delims=~'" %%j in (!command!) do set "firstArg="%%j""
+
+        if not [!program!] == ["NONE"]  if not exist !program! (
+                call:cleanHostLogFile !program!
+                cscript /nologo !MessageBox! "WARNING software to launch before CEMU !program! does not exist anymore in ^, deleting this entry^!" 4144
+                set /A "nbIs=99"
+            )
+        if !nbIs! NEQ 99 (
+            REM : count number of running instances
+            if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+
+            REM : basename of GAME FOLDER PATH (used to name shorcut)
+            for /F "delims=" %%i in (!program!) do set "exe=%%~nxi"
+            for /F "delims=" %%i in (!firstArg!) do set "argPiece=%%~nxi"
+          
+            REM : start the program if it is not already running
+            if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate
+            if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate
+
+        )    
+
     goto:eof
     REM : ------------------------------------------------------------------
-
-
-
