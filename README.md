@@ -26,6 +26,8 @@ Other features:
 
 - Handle muti users saves (per windows's profile);
 
+- Save all settings including controller profiles for each players per game;
+
 - GLCache backup/restore per game (AMD, NVIDIA);
 
 - Automatic GLCache cleanup when updating display drivers;
