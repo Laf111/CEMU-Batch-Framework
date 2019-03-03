@@ -101,6 +101,12 @@ REM : main
     if [!OUTPUT_FOLDER!] == ["!drive!\"] set "OUTPUT_FOLDER="!drive!""
 
    :beginSetup
+   
+    call:cleanHostLogFile BFW_VERSION
+    
+    set "msg="BFW_VERSION=%BFW_VERSION%""
+    call:log2HostFile !msg!
+    
     @echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
@@ -114,10 +120,6 @@ REM : main
         exit 75
     )
 
-    call:cleanHostLogFile BFW_VERSION
-    
-    set "msg="BFW_VERSION=%BFW_VERSION%""
-    call:log2HostFile !msg!
     set "readme="!BFW_PATH:"=!\BatchFW_readme.txt""
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
@@ -468,7 +470,7 @@ REM : main
     @echo command works by checking it in a cmd prompt before^!
     @echo.
    :handleSoftware
-    if ["!softwareList!"] == ["EMPTY"] goto:getSpath
+    if ["!softwareList!"] == ["EMPTY"] goto:askSpath
 
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
@@ -478,23 +480,17 @@ REM : main
     REM : flush logFile of TO_BE_LAUNCHED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do call:cleanHostLogFile TO_BE_LAUNCHED
 
-    REM : Get BatchFw's users registered with the current windows profile
-
-   :getSpath
-    call:cleanHostLogFile TO_BE_CLOSED
-    choice /C ny /N /M "Close them (in the reverse order) after Cemu close? (y,n) "
-    if !ERRORLEVEL! EQU 1 goto:askSpath
-    
-    set "msg="TO_BE_CLOSED=ALL""
-    call:log2HostFile !msg!
-
-    
    :askSpath
     @echo ---------------------------------------------------------
     set /P "spath=Enter the full command line: "
     set "spath=!spath:"='!"
 
-    set "msg="TO_BE_LAUNCHED@!spath!""
+    set "msg=TO_BE_LAUNCHED@!spath!"
+    
+    choice /C ny /N /M "Do you want BatchFw to close it after Cemu stops? (y,n) "
+    if !ERRORLEVEL! EQU 1  set "msg="!msg!@N""
+    if !ERRORLEVEL! EQU 2  set "msg="!msg!@Y""
+
     call:log2HostFile !msg!
 
     set "name="NONE""
