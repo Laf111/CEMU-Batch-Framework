@@ -8,6 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
+    title Collecting settings
 
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
@@ -27,7 +28,6 @@ REM : main
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
-
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
