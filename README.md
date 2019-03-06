@@ -2,7 +2,7 @@
 
 BatchFw is framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
 
-CEMU is still under development and highly experimental. Therefore, due to its reverse-engineed nature, it tends to introduce regressions more rhan other softwares, and so it's useful to keep your working versions instead of systematically overwrite your install with the last one.
+CEMU is still under development and highly experimental. Therefore, due to its reverse-engineed nature, it might tends to introduce regressions more than other softwares, and so it's useful to keep your working versions instead of systematically overwrite your install with the last one.
 
 The main purpose of BatchFW is:
 
