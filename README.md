@@ -77,7 +77,7 @@ How to use:
 
 - You don't need to manually open CEMU to play. Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts on your desktop (Or your shortcuts folder);
 
-Since V11, "how to" informations are displayed in the console when creating shortcuts.
+"How to" informations are displayed in the console when creating shortcuts.
 
 BatchFW does not need Adminstrator rights unless you need to create shortcuts at specifics locations.
 
