@@ -1305,10 +1305,14 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
-        REM : delete current saves in mlc01
-        set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
-        for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
-
+        REM : remove saves but not before BatchFw first run
+        if exist !gameInfoFile! for /F %%i in ('type !gameInfoFile! ^| find "Last launch with"') do (
+        
+            REM : delete current saves in mlc01
+            set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
+            for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"            
+        )
+        
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
         if not exist !rarFile! goto:savesLoaded
