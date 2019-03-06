@@ -1074,7 +1074,7 @@ REM : main
         set "stopThirdPartySoftware="!BFW_TOOLS_PATH:"=!\stopThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !stopThirdPartySoftware!
     )
-    
+
     REM : if exist, a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
     if exist !tscl! (
         @echo --------------------------------------------------- >> !tscl!
@@ -1305,6 +1305,10 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
+        REM : delete current saves in mlc01
+        set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
+        for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
+
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
         if not exist !rarFile! goto:savesLoaded
@@ -1319,10 +1323,6 @@ REM : functions
 
         if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL
-
-        REM : delete current saves in mlc01
-        set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
-        for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
 
         set "PREVIOUS_SHADER_CACHE_ID=NONE"
 
