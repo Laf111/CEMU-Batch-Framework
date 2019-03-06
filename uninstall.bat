@@ -11,11 +11,12 @@ REM : main
     title !THIS_SCRIPT!
 
     REM : directory of this script
-    pushd "%~dp0" >NUL && set "BFW_PATH="%~dp0"" && popd >NUL
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
+
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
@@ -84,31 +85,35 @@ REM : main
     @echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:eof
 
-    if not exist _BatchFW_Graphic_Packs goto:removeReports
+    set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""   
+    if not exist !BatchFW_Graphic_Packs! goto:removeReports
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeReports
-    rmdir /Q /S _BatchFW_Graphic_Packs  2>NUL
+    rmdir /Q /S !BatchFW_Graphic_Packs!  2>NUL
     @echo ^> _BatchFW_Graphic_Packs deleted ^!
     @echo ---------------------------------------------------------
     :removeReports
-    if not exist _BatchFW_Games_Compatibility_Reports goto:removeMissing
+    set "BatchFW_Games_Compatibility_Reports="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports""
+    if not exist !BatchFW_Games_Compatibility_Reports! goto:removeMissing
     call:getUserInput "Remove _BatchFW_Games_Compatibility_Reports folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeMissing
-    rmdir /Q /S _BatchFW_Games_Compatibility_Reports  2>NUL
+    rmdir /Q /S !BatchFW_Games_Compatibility_Reports!  2>NUL
     @echo ^> _BatchFW_Games_Compatibility_Reports deleted ^!
     @echo ---------------------------------------------------------
     :removeMissing
-    if not exist _BatchFW_Missing_Games_Profiles goto:removeController
+    set "BatchFW_Missing_Games_Profiles="!GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles""
+    if not exist !BatchFW_Missing_Games_Profiles! goto:removeController
     call:getUserInput "Remove _BatchFW_Missing_Games_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeController
-    rmdir /Q /S _BatchFW_Missing_Games_Profiles 2>NUL
+    rmdir /Q /S !BatchFW_Missing_Games_Profiles! 2>NUL
     @echo ^> _BatchFW_Missing_Games_Profiles deleted ^!
     @echo ---------------------------------------------------------
     :removeController
-    if not exist _BatchFW_Controller_Profiles goto:removeGLCache
+    set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles""
+    if not exist !BatchFW_Controller_Profiles! goto:removeGLCache
     call:getUserInput "Remove _BatchFW_Controller_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeGLCache
-    rmdir /Q /S _BatchFW_Controller_Profiles 2>NUL
+    rmdir /Q /S !BatchFW_Controller_Profiles! 2>NUL
     @echo ^> _BatchFW_Controller_Profiles deleted ^!
 
     @echo ---------------------------------------------------------
@@ -306,7 +311,7 @@ REM : main
     @echo =========================================================
     @echo This windows will close automatically in 15s
     timeout /T 4 > NUL
-
+    
     REM remove this folder
     rmdir /Q /S !BFW_PATH! 2>NUL
 
