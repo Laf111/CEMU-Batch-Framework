@@ -32,9 +32,9 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
-    
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "instanciateResX2gp="!BFW_TOOLS_PATH:"=!\instanciateResX2gp.bat""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -94,7 +94,7 @@ REM : main
         @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askGpFolder
-    )    
+    )
     REM : ask for legacy packs creation
     choice /C yn /N /M "Do you want to create legacy graphic packs ? (y, n) : "
     if !ERRORLEVEL!=2 set "createLegacyPacks=false"
@@ -247,6 +247,7 @@ REM : main
     set "gpV3exist=0"
     set "v2Name="NOT_FOUND""
     REM : launching the search
+    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% > !fnrLogCegp!
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogCegp!
 
 
@@ -299,12 +300,15 @@ REM : main
 
     REM : replacing float Scale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resXScale.log""
+    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" > !fnrLogFile!
     wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
 
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resYScale.log""
+    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" > !fnrLogFile!
     wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile!
 
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resScale.log""
+    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" > !fnrLogFile!
     wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
 
 
@@ -662,7 +666,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p""
-            if !h! NEQ %nativeHeight% if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h!
+            if !h! NEQ %nativeHeight% if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h!
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -683,7 +687,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p169_windowed""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (16:9) windowed"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! " (16:9) windowed"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -752,7 +756,6 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set "description= (21:9)"
 
         REM : search for resX2p219
-
         set "gpResX2p_219="!gp:"=!219""
         if exist !gpResX2p_219! (
             set "gp=!gpResX2p_219!"
@@ -771,7 +774,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p219""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! %description%
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -784,13 +787,15 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :219_windowedV2
         REM : 21/9 windowed graphic packs
         set /A "h=360"
-        set /A "w=908"
+        set /A "w=904"
         set /A "dw=452"
+
+        set "description=%description% windowed"
 
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p219_windowed""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (21:9) windowed"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -830,7 +835,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :219_windowed
         REM : 21/9 windowed graphic packs
         set /A "h=5760"
-        set /A "w=14818"
+        set /A "w=14812"
         set /A "dw=452"
 
         for /L %%p in (1,1,31) do (
@@ -852,11 +857,31 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         set "gp="%~1""
         set "gpName=!gp:_%resX2%p=!"
+        set "description= (4:3)"
 
         REM : search for resX2p43
         set "gpResX2p_43="!gp:"=!43""
-        if exist !gpResX2p_43! set "gpResX2=!gpResX2p_43!"
 
+        if exist !gpResX2p_43! set "gp=!gpResX2p_43!" && set "description=" goto:setdHeight
+
+        REM : if found 219, duplicate 1440p219
+        set "gpResX2p_219="!gp:"=!219""
+        if exist !gpResX2p_219! (
+            robocopy !gpResX2p_219! !gpResX2p_43! /S > NUL
+
+            REM : patch patches.txt
+            set "fnrLogFile="!fnrLogFolder:"=!\fnr_create43.log""
+
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask rules.txt --find "21:9" --replace "4:3" --logFile  !fnrLogFile!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask *_*s.txt --find "resXScale = 2.6875" --replace "float resXScale = 2.0" --logFile !fnrLogFile!
+
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask patches.txt --find ".float 2.389" --replace ".float 1.333" --logFile !fnrLogFile!
+
+            set "gp=!gpResX2p_43!"
+            set "description="
+        )
+
+        :setdHeight
         REM : height step
         set /A "dh=180"
 
@@ -865,12 +890,12 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : 4/3 fullscreen graphic packs
         set /A "h=360"
         set /A "w=480"
-        set /A "dw=540"
+        set /A "dw=240"
 
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p43""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (4:3)"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -883,13 +908,15 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :43_windowedV2
         REM : 4/3 windowed graphic packs
         set /A "h=360"
-        set /A "w=526"
-        set /A "dw=580"
+        set /A "w=516"
+        set /A "dw=258"
+
+        set "description=%description% windowed"
 
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p43_windowed""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (4:3) windowed"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -911,7 +938,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : 4/3 fullscreen graphic packs
         set /A "h=5760"
         set /A "w=7680"
-        set /A "dw=540"
+        set /A "dw=240"
 
         for /L %%p in (1,1,31) do (
 
@@ -930,8 +957,8 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :43_windowed
         REM : 4/3 windowed graphic packs
         set /A "h=5760"
-        set /A "w=8272"
-        set /A "dw=582"
+        set /A "w=82644"
+        set /A "dw=258"
 
         for /L %%p in (1,1,31) do (
 
@@ -957,7 +984,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : search for resX2p489
         set "gpResX2p_489="!gp:"=!489""
         if exist !gpResX2p_489! (
-            set "gpResX2=!gpResX2p_489!"
+            set "gp=!gpResX2p_489!"
             set "description="
         )
 
@@ -974,7 +1001,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p489""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! %description%
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -987,13 +1014,15 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :489_windowedV2
         REM : 48/9 windowed graphic packs
         set /A "h=360"
-        set /A "w=2074"
-        set /A "dw=1034"
+        set /A "w=2066"
+        set /A "dw=1032"
+
+        set "description=%description% windowed"
 
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p489_windowed""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (48:9) windowed"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description%
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -1032,8 +1061,8 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         :489_windowed
         REM : 16/10 windowed graphic packs
         set /A "h=5760"
-        set /A "w=33072"
-        set /A "dw=1034"
+        set /A "w=33066"
+        set /A "dw=1032"
 
         for /L %%p in (1,1,31) do (
 
@@ -1069,7 +1098,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p1610""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (16:10)"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! " (16:10)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -1088,7 +1117,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         for /L %%p in (1,1,31) do (
 
             set "newGp="!gpName:"=!_!h!p1610_windowed""
-            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeHeight% %nativeWidth% !gp! !newGp! !w! !h! " (16:10) windowed"
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! " (16:10) windowed"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
