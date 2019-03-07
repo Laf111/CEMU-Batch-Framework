@@ -561,6 +561,7 @@ REM : main
     if %nbArgs% EQU 1 (
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
+        timeout /T 3 > NUL
         goto:registerCemuInstalls
     )
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -592,7 +593,7 @@ REM : main
     )
 
     @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
-
+    timeout /T 3 > NUL
 
    :registerCemuInstalls
 

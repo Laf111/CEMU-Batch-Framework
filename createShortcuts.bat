@@ -40,17 +40,7 @@ REM : main
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-
-    REM : check if setup was launched
-    if exist !logFile! for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do goto:alreadyLaunched
-
-    @echo ERROR^, You have to use the setup before this script ^^! launching setup.bat
-    set "setup="!BFW_PATH:"=!\setup.bat""
-    wscript /nologo !Start! !setup!
-    timeout /t 4 > NUL
-    exit 51
-
-    :alreadyLaunched
+    
     REM : set current char codeset
     call:setCharSet
     
@@ -61,10 +51,11 @@ REM : main
         set /A "nbUsers+=1"
     )
     if ["!USERSLIST!"] == [""] (
-        @echo No BatchFw^'s users registered ^^!
-        @echo Delete _BatchFw_Install folder and reinstall
-        pause
-        exit /b 9
+        @echo You have to use the setup before this script ^^! launching setup.bat
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        wscript /nologo !Start! !setup!
+        timeout /t 4 > NUL
+        exit 51
     )
 
     REM : cd to GAMES_FOLDER
