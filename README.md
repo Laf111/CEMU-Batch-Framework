@@ -79,7 +79,7 @@ How to use:
 
 "How to" informations are displayed in the console when creating shortcuts.
 
-BatchFW does not need Adminstrator rights unless you need to create shortcuts at specifics locations.
+BatchFW does not need Adminstrator rights unless you want to create shortcuts at specifics locations.
 
 All batch source code is in delayed expansion mode and uses your system charset to check/handle the minimum of unsupported characters in paths. When launching a game, batchFw is completly silent. It opens its log if needed and open Cemu's one if it crashes.
 
