@@ -540,9 +540,12 @@ REM : main
     @echo 1: Windows shortcuts
     @echo 2: Executables files
     @echo.
-    @echo 3: Cancel^, i just wanted to set BatchFw^'s settings
-    @echo.
-    call:getUserInput "Enter your choice (1,2,3)?: " "1,2,3" ANSWER
+    REM : siplay only if shortcuts have already been created
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do (
+        @echo 3: Cancel^, i just wanted to set BatchFw^'s settings
+        @echo.
+    )
+    call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     if [!ANSWER!] == ["3"] exit 70
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
@@ -725,6 +728,9 @@ REM : main
     @echo ^> relaunch this script from its shortcut
     @echo Wii-U Games^\Register CEMU installs^.lnk
     @echo ---------------------------------------------------------
+    @echo You can now only use the shortcuts created in  
+    @echo !OUTPUT_FOLDER:"=!\Wii-U Games
+    @echo There^'s no need to launch scripts from here now^!
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if %nbArgs% EQU 1 exit 0
