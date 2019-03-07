@@ -1,5 +1,5 @@
 07/03/2019 V13-1 : 
-- fix : faulty GAMES_FOLDER profile computation in uninstall
+- fix : faulty GAMES_FOLDER folder computation in uninstall
 - add : check in Create*.bat if setup.bat was launched earlier and launch it if needed
 
 
