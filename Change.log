@@ -1,3 +1,8 @@
+07/03/2019 V13-1 : 
+- fix : faulty GAMES_FOLDER profile computation in uninstall
+- add : check in Create*.bat if setup.bat was launched earlier and launch it if needed
+
+
 06/03/2019 V13 : 
 - hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
