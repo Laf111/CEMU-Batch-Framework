@@ -120,7 +120,7 @@ REM : main
     set "pat="!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete""
 
     set "gpl="NOT_FOUND""
-    for /F %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
+    for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
     if not [!gpl!] == ["NOT_FOUND"] set "zipLogFile="!BFW_GP_FOLDER:"=!\!gpl:"=!""
 
     if [!gpl!] == ["NOT_FOUND"] (

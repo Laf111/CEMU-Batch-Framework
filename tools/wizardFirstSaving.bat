@@ -317,15 +317,16 @@ REM : main
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     if not exist !cemuLog! goto:getPacks
 
-    set "version=NOT_FOUND"
+    set "CemuVersionRead=NOT_FOUND"
+    set "versionRead=NOT_FOUND"
 
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "version=%%e"
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "versionRead=%%e"
 
-    if ["%version%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+    if ["%versionRead%"] == ["NOT_FOUND"] goto:getPacks
 
-    set "str=%version:.=%"
-    set "n=%str:~0,4%"
-    if %n% LSS 1140 set "gfxType=V2"
+    set "str=%versionRead:.=%"
+    set /A "CemuVersionRead=%str:~0,4%"
+    if %CemuVersionRead% LSS 1140 set "gfxType=V2"
     
     :getPacks
     
@@ -333,7 +334,7 @@ REM : main
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
     
     REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+    if exist !GAME_GP_FOLDER! for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q /S !gpLink! 2>NUL
     )
@@ -396,23 +397,27 @@ REM : main
     set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
     for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! 2>NUL
 
-    if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
+    if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL
 
-    set "graphicPacksSaved="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup!    > NUL
 
-    mklink /D /J !graphicPacks! !graphicPacksSaved! > NUL
+    REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
+    REM : when using a simlink with a the target on another partition
+    for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
+    for %%a in (!graphicPacks!) do set "d2=%%~da"
+        
+    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:syncCtrlProfiles
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL
+    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
 
+    :syncCtrlProfiles
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
 
+    REM : launching CEMU
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
-
-
-    REM : restore CEMU's graphicPacks subfolder
-    rmdir /Q /S !graphicPacks! 2>NUL
-    if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
 
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
     if not exist !scp! mkdir !scp! > NUL

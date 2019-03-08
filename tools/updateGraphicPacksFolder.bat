@@ -176,7 +176,7 @@ REM : main
 
     REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat=graphicPacks*.doNotDelete"
-    for /F %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
+    for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
 
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""

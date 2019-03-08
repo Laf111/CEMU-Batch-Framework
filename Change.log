@@ -1,7 +1,9 @@
-07/03/2019 V13-1 : 
+08/03/2019 V13-1 : 
+- hot fix : Cemu 1.15.3 fail to compute relative path for the symbolic link made on the GFX packs folder when the target is 
+  located on a different partition. It results in a GFX selection fucked up and a settings.xml corruption (empty nodes in GraphicPack)
 - fix : faulty GAMES_FOLDER folder computation in uninstall
 - add : check in Create*.bat if setup.bat was launched earlier and launch it if needed
-
+- fix : links in graphic packs folder of a game were not cleaned successfully
 
 06/03/2019 V13 : 
 - hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)

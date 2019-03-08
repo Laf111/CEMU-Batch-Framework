@@ -229,15 +229,16 @@ REM : main
 
     if not exist !cemuLog! goto:updateGameGraphicPack
 
-    set "version=NOT_FOUND"
+    set "CemuVersionRead=NOT_FOUND"
+    set "versionRead=NOT_FOUND"
 
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "version=%%e"
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "versionRead=%%e"
 
-    if ["%version%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+    if ["%versionRead%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
 
-    set "str=%version:.=%"
-    set "n=%str:~0,4%"
-    if %n% LSS 1140 set "gfxType=V2"
+    set "str=%versionRead:.=%"
+    set /A "CemuVersionRead=%str:~0,4%"
+    if %CemuVersionRead% LSS 1140 set "gfxType=V2"
 
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -495,6 +496,10 @@ REM : main
     set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
     wscript /nologo !StartHidden! !launchThirdPartySoftware!
 
+    REM : GFX folders in CEMU
+    set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
+    set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
+    
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -681,7 +686,7 @@ REM : main
     )
 
     REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+    if exist !GAME_GP_FOLDER! for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q /S !gpLink! 2>NUL
     )
@@ -720,8 +725,17 @@ REM : main
         if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL
     )
 
+    if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL
+    REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
+    REM : when using a simlink with a the target on another partition
+    for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
+    for %%a in (!graphicPacks!) do set "d2=%%~da"
+        
+    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:minimizeAll
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL
+    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
+    
     :minimizeAll
-
     REM : minimize all windows befaore launching in full screen
     set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
     powershell !psCommand!
@@ -1094,6 +1108,13 @@ REM : main
 
     :endMain
 
+    REM : restore CEMU's graphicPacks subfolder
+    set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
+    set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
+    rmdir /Q /S !graphicPacks! 2>NUL
+    if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
+    if not exist !graphicPacks! mkdir !graphicPacks! > NUL
+    
     REM @echo =========================================================>> !batchFwLog!
     REM @echo This windows will close automatically in 8s>> !batchFwLog!
     REM @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
@@ -1164,7 +1185,7 @@ REM : functions
         REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\mods""
         if not exist !pat! mkdir !pat! > NUL
-        for /F "delims=" %%a in ('dir /B !pat! 2^>NUL') do (
+        for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do (
             set "modName="%%a""
             set "mod="!GAME_FOLDER_PATH:"=!\Cemu\mods\!modName:"=!""
             set "tName="MOD_!modName:"=!""
@@ -1294,14 +1315,11 @@ REM : functions
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
         if exist !cemuProfile! set "PROFILE_FILE=!cemuProfile!"
 
-        set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
-        set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
-
         REM : check if it is already a link (case of crash) : delete-it
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
-        for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL
-
-        if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
+        for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! 2>NUL
+        
+        if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL
 
         set "endTitleId=%titleId:~8,8%"
 
@@ -1459,10 +1477,6 @@ REM : functions
         if exist !filePath! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! settings.xml > NUL
         set "filePath="!SETTINGS_FOLDER:"=!\cemuhook.ini""
         if exist !filePath! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! cemuhook.ini > NUL
-
-        set "graphicPacksSaved="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks\""
-        if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup!    > NUL
-        mklink /D /J !graphicPacks! !graphicPacksSaved! > NUL
 
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
@@ -1810,13 +1824,6 @@ REM : functions
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "ccp="!CEMU_FOLDER:"=!\controllerProfiles""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
-
-        REM : restore CEMU's graphicPacks subfolder
-        set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
-        set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
-        rmdir /Q /S !graphicPacks! 2>NUL
-        if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
-        if not exist !graphicPacks! mkdir !graphicPacks! > NUL
 
     goto:eof
     REM : ------------------------------------------------------------------
