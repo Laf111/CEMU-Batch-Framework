@@ -524,61 +524,89 @@ REM : functions
 
         REM : check CEMU options (and controollers settings)
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        if exist !cs! (
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            @echo Main current CEMU^'s settings ^:
+        if not exist !cs! goto:checkCemuHook
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo Main current CEMU^'s settings ^:
+        @echo ---------------------------------------------------------
+
+        REM : get audio et graphic Api
+        set "graphicApi=NONE"
+        set "audioApi=NONE"
+        
+        set /A "n=1"
+        set "values="
+        for /F "tokens=2 delims=~>" %%i in ('type !cs! ^| find /I "<api>"') do (
+            
+            set "value="NONE""
+            for /F "tokens=1 delims=~<" %%j in ('echo "%%i"') do set "value=%%j"" 
+            if not [!value!] == ["NONE"] set "values=!values! !value:"=!"
+            set /A "n+=1"
+        )
+        if not ["!values!"] == [""] (
+            set "values=!values:~1,%n%!"
+            for /F "tokens=1-%n%" %%i in ("!values!") do set "graphicApi=%%i" && set "audioApi=%%j"
+        )
+        if not ["!graphicApi!"] == ["NONE"] (
+            if ["!graphicApi!"] == ["0"] echo Graphics API [OpenGL]
+        )
+
+        type !cs! | find /I "<fullscreen_menubar>" | find /I "true" > NUL && echo Fullscreen Menubar [ON]
+        type !cs! | find /I "<fullscreen_menubar>" | find /I "false" > NUL && echo Fullscreen Menubar [OFF]
+        type !cs! | find /I "<VSync>" | find /I "true" > NUL && echo VSync [ON]
+        type !cs! | find /I "<VSync>" | find /I "false" > NUL && echo VSync [OFF]
+        type !cs! | find /I "<GX2DrawdoneSync>" | find /I "true" > NUL && echo Full sync @GX2DrawDone [ON]
+        type !cs! | find /I "<GX2DrawdoneSync>" | find /I "false" > NUL && echo Full sync @GX2DrawDone [OFF]
+        type !cs! | find /I "<SeparableShaders>" | find /I "true" > NUL && echo Separable shaders [ON]
+        type !cs! | find /I "<SeparableShaders>" | find /I "false" > NUL && echo Conventional shaders [ON]
+        type !cs! | find /I "<UpscaleFilter>" | find /I "0" > NUL && echo Upscale filter [bilinear]
+        type !cs! | find /I "<UpscaleFilter>" | find /I "1" > NUL && echo Upscale filter [bicubic]
+        type !cs! | find /I "<UpscaleFilter>" | find /I "2" > NUL && echo Upscale filter [hermithe]
+        type !cs! | find /I "<UpscaleFilter>" | find /I "3" > NUL && echo Upscale filter [nearest neighbor]
+        type !cs! | find /I "<DownscaleFilter>" | find /I "0" > NUL && echo DownscaleFilter filter [bilinear]
+        type !cs! | find /I "<DownscaleFilter>" | find /I "1" > NUL && echo DownscaleFilter filter [bicubic]
+        type !cs! | find /I "<DownscaleFilter>" | find /I "2" > NUL && echo DownscaleFilter filter [hermithe]
+        type !cs! | find /I "<DownscaleFilter>" | find /I "3" > NUL && echo DownscaleFilter filter [nearest neighbor]
+        type !cs! | find /I "<FullscreenScaling>" | find /I "0" > NUL && echo Fullscreen Scaling [keep aspect ratio]
+        type !cs! | find /I "<FullscreenScaling>" | find /I "1" > NUL && echo Fullscreen Scaling [stretch]
+        
+        
+        if not ["!audioApi!"] == ["NONE"] (
+            if ["!audioApi!"] == ["0"] echo Audio API used [DirectSound]
+            if ["!audioApi!"] == ["1"] echo Audio API used [XAudio]
+        )            
+        if ["!audioApi!"] == ["NONE"] (
+            if ["!graphicApi!"] == ["0"] echo Audio API used [DirectSound]
+            if ["!graphicApi!"] == ["1"] echo Audio API used [XAudio]
+        )
+        
+        for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "^<delay^>" 2^>NUL') do echo Latency set [%%k ms]
+        type !cs! | find /I "<TVDevice><" > NUL && echo Audio TV device [OFF] && goto:getVolume
+        type !cs! | find /I /V "<TVDevice>" | find /I "default" > NUL && echo Audio TV device [main audio device] && goto:getVolume
+        type !cs! | find /I /V "<TVDevice>" > NUL && echo Audio TV device [use specific user device]
+
+        :getVolume
+        for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "<TVVolume>" 2^>NUL') do echo Audio TV Volume set [%%k]
+
+        :checkCemuHook
+        if not exist !chs! goto:eof
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo Current CemuHook^'s settings ^:
+        @echo ---------------------------------------------------------
+        type !chs! | find /I /V "#" | find /I /V "["
+        type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL && (
+            type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" 2> NUL && goto:eof
             @echo ---------------------------------------------------------
-
-            type !cs! | find /I "<api>" | find /I "0" > NUL && echo Graphics API [OpenGL]
-            type !cs! | find /I "<fullscreen_menubar>" | find /I "true" > NUL && echo Fullscreen Menubar [ON]
-            type !cs! | find /I "<fullscreen_menubar>" | find /I "false" > NUL && echo Fullscreen Menubar [OFF]
-            type !cs! | find /I "<VSync>" | find /I "true" > NUL && echo VSync [ON]
-            type !cs! | find /I "<VSync>" | find /I "false" > NUL && echo VSync [OFF]
-            type !cs! | find /I "<GX2DrawdoneSync>" | find /I "true" > NUL && echo Full sync @GX2DrawDone [ON]
-            type !cs! | find /I "<GX2DrawdoneSync>" | find /I "false" > NUL && echo Full sync @GX2DrawDone [OFF]
-            type !cs! | find /I "<SeparableShaders>" | find /I "true" > NUL && echo Separable shaders [ON]
-            type !cs! | find /I "<SeparableShaders>" | find /I "false" > NUL && echo Conventional shaders [ON]
-            type !cs! | find /I "<UpscaleFilter>" | find /I "0" > NUL && echo Upscale filter [bilinear]
-            type !cs! | find /I "<UpscaleFilter>" | find /I "1" > NUL && echo Upscale filter [bicubic]
-            type !cs! | find /I "<UpscaleFilter>" | find /I "2" > NUL && echo Upscale filter [hermithe]
-            type !cs! | find /I "<UpscaleFilter>" | find /I "3" > NUL && echo Upscale filter [nearest neighbor]
-            type !cs! | find /I "<DownscaleFilter>" | find /I "0" > NUL && echo DownscaleFilter filter [bilinear]
-            type !cs! | find /I "<DownscaleFilter>" | find /I "1" > NUL && echo DownscaleFilter filter [bicubic]
-            type !cs! | find /I "<DownscaleFilter>" | find /I "2" > NUL && echo DownscaleFilter filter [hermithe]
-            type !cs! | find /I "<DownscaleFilter>" | find /I "3" > NUL && echo DownscaleFilter filter [nearest neighbor]
-            type !cs! | find /I "<FullscreenScaling>" | find /I "0" > NUL && echo Fullscreen Scaling [keep aspect ratio]
-            type !cs! | find /I "<FullscreenScaling>" | find /I "1" > NUL && echo Fullscreen Scaling [stretch]
-            type !cs! | find /I "<api>" | find /I "0" > NUL && echo Audio API used [DirectSound]
-            type !cs! | find /I "<api>" | find /I "1" > NUL && echo Audio API used [XAudio]
-            for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "^<delay^>" 2^>NUL') do echo Latency set [%%k ms]
-            type !cs! | find /I "<TVDevice><" > NUL && echo Audio TV device [OFF] && goto:getVolume
-            type !cs! | find /I /V "<TVDevice>" | find /I "default" > NUL && echo Audio TV device [main audio device] && goto:getVolume
-            type !cs! | find /I /V "<TVDevice>" > NUL && echo Audio TV device [use specific user device]
-
-            :getVolume
-            for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "<TVVolume>" 2^>NUL') do echo Audio TV Volume set [%%k]
-            )
-
-        if exist !chs! (
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            @echo Current CemuHook^'s settings ^:
-            @echo ---------------------------------------------------------
-            type !chs! | find /I /V "#" | find /I /V "["
-            type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL && (
-                type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" 2> NUL && goto:eof
-                @echo ---------------------------------------------------------
-                @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
-                @echo one ^(RDTSC^) is not disabled in the game^'s profile
-                @echo Be aware that might cause crash for some games since 1^.14
-                @echo.
-                @echo If you really want to use a custom timer^, You^'d better
-                @echo had the following lines in the game^'s profile
-                @echo.
-                @echo [General]
-                @echo useRDTSC = false
-                @echo.
-                cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
-            )
+            @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
+            @echo one ^(RDTSC^) is not disabled in the game^'s profile
+            @echo Be aware that might cause crash for some games since 1^.14
+            @echo.
+            @echo If you really want to use a custom timer^, You^'d better
+            @echo had the following lines in the game^'s profile
+            @echo.
+            @echo [General]
+            @echo useRDTSC = false
+            @echo.
+            cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
         )
 
     goto:eof
