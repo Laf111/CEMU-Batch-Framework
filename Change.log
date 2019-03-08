@@ -4,6 +4,7 @@
 - fix : faulty GAMES_FOLDER folder computation in uninstall
 - add : check in Create*.bat if setup.bat was launched earlier and launch it if needed
 - fix : links in graphic packs folder of a game were not cleaned successfully
+- add : Graphic API option display in wizardFirstLaunch.bat
 
 06/03/2019 V13 : 
 - hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)

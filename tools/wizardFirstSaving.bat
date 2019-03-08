@@ -529,6 +529,7 @@ REM : functions
             @echo Main current CEMU^'s settings ^:
             @echo ---------------------------------------------------------
 
+            type !cs! | find /I "<api>" | find /I "0" > NUL && echo Graphics API [OpenGL]
             type !cs! | find /I "<fullscreen_menubar>" | find /I "true" > NUL && echo Fullscreen Menubar [ON]
             type !cs! | find /I "<fullscreen_menubar>" | find /I "false" > NUL && echo Fullscreen Menubar [OFF]
             type !cs! | find /I "<VSync>" | find /I "true" > NUL && echo VSync [ON]
