@@ -227,19 +227,20 @@ REM : main
     REM : GFX type to provide
     set "gfxType=V3"
 
-    if not exist !cemuLog! goto:updateGameGraphicPack
+    if not exist !cemuLog! goto:getTitleId
 
     set "CemuVersionRead=NOT_FOUND"
     set "versionRead=NOT_FOUND"
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "versionRead=%%e"
 
-    if ["%versionRead%"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+    if ["%versionRead%"] == ["NOT_FOUND"] goto:getTitleId
 
     set "str=%versionRead:.=%"
     set /A "CemuVersionRead=%str:~0,4%"
     if %CemuVersionRead% LSS 1140 set "gfxType=V2"
 
+    :getTitleId
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
 
@@ -732,7 +733,7 @@ REM : main
     for %%a in (!graphicPacks!) do set "d2=%%~da"
         
     if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:minimizeAll
-    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! 2> NUL
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
     
     :minimizeAll

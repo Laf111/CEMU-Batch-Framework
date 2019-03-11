@@ -236,7 +236,7 @@ REM : main
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if ["!REF_CEMU_FOLDER!"] == ["NONE"] goto:diffProfileFile
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -408,7 +408,7 @@ REM : main
     for %%a in (!graphicPacks!) do set "d2=%%~da"
         
     if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:syncCtrlProfiles
-    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! 2> NUL
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
 
     :syncCtrlProfiles

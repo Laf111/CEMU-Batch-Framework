@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V13"
+    set "BFW_VERSION=V13-1"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -537,12 +537,12 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo What kind of outputs do you want to launch your games^?
     @echo.
-    @echo 1: Windows shortcuts
-    @echo 2: Executables files
+    @echo 1^: Windows shortcuts
+    @echo 2^: Executables files
     @echo.
-    REM : siplay only if shortcuts have already been created
+    REM : display only if shortcuts have already been created
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do (
-        @echo 3: Cancel^, i just wanted to set BatchFw^'s settings
+        @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
     )
     call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
@@ -568,7 +568,7 @@ REM : main
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -646,7 +646,7 @@ REM : main
    :askCemuFolder
     set /A "NBCV+=1"
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

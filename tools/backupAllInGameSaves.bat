@@ -79,7 +79,7 @@ REM : main
     @echo For each game^, if a mlc01 folder is found under game^'s folder it will be used instead^!
 
     :askMlc01Folder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75

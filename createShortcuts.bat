@@ -51,7 +51,7 @@ REM : main
         set /A "nbUsers+=1"
     )
     if ["!USERSLIST!"] == [""] (
-        @echo You have to use the setup before this script ^^! launching setup.bat
+        @echo You have to use the setup before this script ^^! launching setup^.bat
         set "setup="!BFW_PATH:"=!\setup.bat""
         wscript /nologo !Start! !setup!
         timeout /t 4 > NUL
@@ -109,7 +109,7 @@ REM : main
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
@@ -142,7 +142,7 @@ REM : main
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 exit 75
