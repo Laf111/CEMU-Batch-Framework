@@ -664,10 +664,10 @@ REM : main
     :launchCemu
 
     REM : create a lock file to protect this launch
-    set "blf="!CEMU_FOLDER:"=!\BatchFW_!user!-%USERNAME%.lock""
-    @echo !DATE! : !user! launched !GAME_TITLE! using %USERNAME% windows profile > !blf!
+    set "blf="!CEMU_FOLDER:"=!\BatchFW_!user!-!USERNAME!.lock""
+    @echo !DATE! : !user! launched !GAME_TITLE! using !USERNAME! windows profile > !blf!
     if not exist !blf! (
-        cscript /nologo !MessageBox! "ERROR when creating !LOCK_FILE:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
+        cscript /nologo !MessageBox! "ERROR when creating !blf:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
         exit 3
     )
 

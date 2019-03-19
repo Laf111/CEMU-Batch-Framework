@@ -417,7 +417,7 @@ REM : main
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n):"
     if !ERRORLEVEL! EQU 1 (
-        set "msg="USER_REGISTERED=%USERNAME%""
+        set "msg="USER_REGISTERED=!USERNAME!""
         call:log2HostFile !msg!
         goto:getSoftware
     )
@@ -438,7 +438,7 @@ REM : main
     set /P "input=Please enter user's name: "
     set "userName=%input: =%"
 
-    set "msg="USER_REGISTERED=%userName%""
+    set "msg="USER_REGISTERED=!USERNAME!""
     call:log2HostFile !msg!
 
     choice /C yn /N /M "Add another user? (y,n): "
