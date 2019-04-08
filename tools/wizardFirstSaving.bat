@@ -587,6 +587,9 @@ REM : functions
         :getVolume
         for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "<TVVolume>" 2^>NUL') do echo Audio TV Volume set [%%k]
 
+        type !cs! | find /I "<AccountId><" > NUL && echo Online mode [OFF] && goto:checkCemuHook
+        for /F "tokens=1-6 delims=~<>^" %%i in ('type !cs! ^| find /I "<AccountId>" 2^>NUL') do echo Online mode [ON, id=%%k]
+        
         :checkCemuHook
         if not exist !chs! goto:eof
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -619,11 +622,21 @@ REM : functions
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
-            set "gp=!str:rules=!"
-            set "gp=!gp:\=!"
+            set "str=!str:~1!"
+
+            set "gp=!str:\rules=!"
+
+            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+                REM : V3 graphic pack with more than one folder's level
+                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
+
+                for %%a in (!fp!) do set "parentFolder="%%~dpa""
+                set "pfp=!parentFolder:~0,-2!""
+
+                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+            )
 
             set "tName=!gp:_graphicPacksV2=!"
-
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
@@ -641,11 +654,21 @@ REM : functions
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
-            set "gp=!str:rules=!"
-            set "gp=!gp:\=!"
+            set "str=!str:~1!"
 
+            set "gp=!str:\rules=!"
+
+            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+                REM : V3 graphic pack with more than one folder's level
+                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
+
+                for %%a in (!fp!) do set "parentFolder="%%~dpa""
+                set "pfp=!parentFolder:~0,-2!""
+
+                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+            )
+            
             set "tName=!gp:_graphicPacksV2=!"
-
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it

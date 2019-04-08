@@ -711,7 +711,8 @@ REM : main
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
 
-    call:importGraphicPacks > NUL
+REM    call:importGraphicPacks > NUL
+    call:importGraphicPacks
 
     REM : get user defined ratios list
     set "ARLIST="
@@ -1206,11 +1207,21 @@ REM : functions
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:"') do (
 
             set "str=%%i"
-            set "gp=!str:rules=!"
-            set "gp=!gp:\=!"
+            set "str=!str:~1!"
 
+            set "gp=!str:\rules=!"
+
+            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+                REM : V3 graphic pack with more than one folder's level
+                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
+
+                for %%a in (!fp!) do set "parentFolder="%%~dpa""
+                set "pfp=!parentFolder:~0,-2!""
+
+                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+            )
+            
             set "tName=!gp:_graphicPacksV2=!"
-
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
@@ -1228,12 +1239,22 @@ REM : functions
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
 
             set "str=%%i"
-            set "gp=!str:rules=!"
-            set "gp=!gp:\=!"
+            set "str=!str:~1!"
+            
+            set "gp=!str:\rules=!"
+
+            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+                REM : V3 graphic pack with more than one folder's level
+                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
+
+                for %%a in (!fp!) do set "parentFolder="%%~dpa""
+                set "pfp=!parentFolder:~0,-2!""
+
+                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+            )
 
             set "tName=!gp:_graphicPacksV2=!"
-
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
+            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!"" 
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
