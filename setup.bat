@@ -541,12 +541,16 @@ REM : main
     @echo 2^: Executables files
     @echo.
     REM : display only if shortcuts have already been created
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do (
+    set /A "alreadyInstalled=0"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set /A "alreadyInstalled=1"
+    if %alreadyInstalled% NEQ 0 (
         @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
+        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
+        if [!ANSWER!] == ["3"] exit 70
+    ) else (    
+        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     )
-    call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
-    if [!ANSWER!] == ["3"] exit 70
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
     set "outputType=EXE"

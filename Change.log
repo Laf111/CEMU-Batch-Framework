@@ -1,3 +1,9 @@
+08/04/2019 V13-2 : 
+- hot fix : handle GFX packs with multiple folders levels
+- add : text to browse folder widget 
+- add : online setting display in wizardFirstSaving.bat
+- fix : Cancel choice repeated in setup.bat
+
 08/03/2019 V13-1 : 
 - hot fix : Cemu 1.15.3 fail to compute relative path for the symbolic link made on the GFX packs folder when the target is 
   located on a different partition. It results in a GFX selection fucked up and a settings.xml corruption (empty nodes in GraphicPack)
