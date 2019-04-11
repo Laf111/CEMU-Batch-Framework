@@ -53,7 +53,7 @@ REM : main
 
     pushd !GAMES_FOLDER!
 
-    REM : searching for code folder to find in only one rpx file (the bigger one)
+    REM : searching for meta file
     for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
@@ -96,10 +96,22 @@ REM : functions
         for /F "tokens=2-3 delims=." %%j in ('type !fnrLogfgf! ^| find "File:"') do (
 
             set "str=%%j"
-            set "gp=!str:rules=!"
+            set "str=!str:~1!"
+
+            set "gp=!str:\rules=!"
+
+            echo !gp! | find "\" && (
+                REM : V3 graphic pack with more than one folder's level
+                set "fp="!BFW_GP_TMP:"=!\!gp:"=!""
+
+                for %%a in (!fp!) do set "parentFolder="%%~dpa""
+                set "pfp=!parentFolder:~0,-2!""
+
+                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+            )
             set "gp="!BFW_GP_TMP:"=!\!gp:\=!""
 
-            move /Y !gp! !BFW_GP_FOLDER! > NUL
+            if exist !gp! move /Y !gp! !BFW_GP_FOLDER! > NUL
             set /A "cr=!ERRORLEVEL!"
         )
     goto:eof
