@@ -1,3 +1,6 @@
+12/04/2019 V13-4 : 
+- hot fix : during GFX update, the folder was not empty correctly
+
 11/04/2019 V13-3 : 
 - hot fix : still an issue handling GFX packs with multiple folders levels in filterGraphicPackFolder.bat
 - modifiy cemuHook install wizard
