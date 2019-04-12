@@ -170,7 +170,7 @@ REM : main
     pushd !GAMES_FOLDER!
 
     REM : delete all V3 gp under BFW_GP_FOLDER
-    call:deleteV3gp
+    call:deleteGFX
 
     pushd !BFW_GP_FOLDER!
 
@@ -199,24 +199,11 @@ REM : functions
 
 
     REM : ------------------------------------------------------------------
-    :deleteV3gp
-        set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-        if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
-
-        set "fnrLogDV3gp="!BFW_PATH:"=!\logs\fnr_deleteV3gp.log""
-        if exist !fnrLogDV3gp! del /F !fnrLogDV3gp!
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find "version = 3" --logFile !fnrLogDV3gp!
-
-
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogDV3gp! ^| find "File:" ^| find /I /V "^!" 2^>NUL') do (
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-            set "gp=!rulesFile:\rules.txt=!"
-
-            rmdir /Q /S !gp! 2>NUL
+    :deleteGFX
+        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find /V "_graphicPacksV2"') do (
+            set "folder="!BFW_GP_FOLDER:"=!\%%i"
+            rmdir /Q /S !folder!
         )
-
-        if exist !fnrLogDV3gp! del /F !fnrLogDV3gp!
     goto:eof
     REM : ------------------------------------------------------------------
 
