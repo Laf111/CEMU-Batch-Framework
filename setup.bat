@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V13-3"
+    set "BFW_VERSION=V13-4"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -846,6 +846,8 @@ REM : functions
 
         REM : check if CemuHook is installed
         set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
+        
+       :checkCemuHook
         if exist !dllFile! goto:checkSharedFonts
 
         @echo ---------------------------------------------------------
@@ -861,15 +863,16 @@ REM : functions
         if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
         @echo Opening CemuHook download page^.^.^.
-
-        wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
         @echo Download and extract CemuHook in !CEMU_FOLDER!
+
+        wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
 
         timeout /T 2 > NUL
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
-
+        gotocheckCemuHook
+        
        :checkSharedFonts
 
         REM : check if sharedFonts were downloaded
