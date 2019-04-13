@@ -21,6 +21,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""    
+    
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -44,8 +46,6 @@ REM : main
         if !ERRORLEVEL! EQU 2 goto:eof
         goto:getDate
     )
-
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""

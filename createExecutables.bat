@@ -313,6 +313,7 @@ REM : main
     REM : check if CemuHook is installed
     set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
 
+    :checkCemuHook
     if exist !dllFile! goto:checkSharedFonts
     @echo ---------------------------------------------------------
     @echo CemuHook was not found^. It is required to
@@ -326,14 +327,15 @@ REM : main
     if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
     @echo Opening CemuHook download page^.^.^.
-
-    wscript /nologo !StartWait! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
     @echo Download and extract CemuHook in !CEMU_FOLDER!
+
+    wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
 
     timeout /T 2 > NUL
     wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
     choice /C y /N /M "If CemuHook is installed, continue? (y) : "
+    goto:checkCemuHook
 
     :checkSharedFonts
 
@@ -1185,7 +1187,7 @@ REM : functions
             REM : if exe exist and import mode enabled : if shortcut exist skip this game
             if exist !EXE_FILE! (
                 if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 0 @echo Executable for !user! already exist^, skipped
+                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: executable for !user! already exist^, skipped
             ) else (
                 call:userGameExe !user!
             )

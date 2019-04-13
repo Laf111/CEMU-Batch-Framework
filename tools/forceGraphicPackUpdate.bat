@@ -70,11 +70,6 @@ REM : main
         set "pat="!BFW_GP_FOLDER:"=!\*.doNotDelete""
         del /F /S !pat! 2>NUL
 
-        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find /V "_graphicPacksV2"') do (
-            set "folder="!BFW_GP_FOLDER:"=!\%%i"
-            rmdir /Q /S !folder!
-        )
-
         REM : update graphic packs
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         call !ugp! -forced
