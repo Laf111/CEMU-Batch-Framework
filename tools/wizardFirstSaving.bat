@@ -423,13 +423,21 @@ REM : main
     if not exist !scp! mkdir !scp! > NUL
 
     REM : saving CEMU an cemuHook settings
-    set "filePath="!CEMU_FOLDER:"=!\settings.bin""
-    if exist !filePath! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL
+    robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL
+    set "src="!SETTINGS_FOLDER:"=!\settings.bin""
+    set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
+    move /Y !src! !target!
+    
+    robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
+    set "src="!SETTINGS_FOLDER:"=!\settings.xml""
+    set "target="!SETTINGS_FOLDER:"=!\!user!_settings.xml""
+    move /Y !src! !target!
 
-    if exist !cs! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
-
-    if exist !chs! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL
-
+    robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL
+    set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
+    set "target="!SETTINGS_FOLDER:"=!\!user!_cemuhook.ini""
+    move /Y !src! !target!
+            
     REM : controller profiles
     set "pat="!CEMU_FOLDER:"=!\controllerProfiles\controller*.*""
     copy /A /Y !pat! !scp! > NUL

@@ -47,6 +47,8 @@ REM : main
         goto:getDate
     )
 
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""
     @echo ========================================================= > !batchFwLog!
@@ -1490,15 +1492,28 @@ REM : functions
 
         :loaded
         for /F "delims=" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
-        @echo Using settings from !settingsFolderName! ^!>> !batchFwLog!
-        @echo Using settings from !settingsFolderName! ^!
-        REM : saving CEMU an cemuHook settings
-        set "filePath="!SETTINGS_FOLDER:"=!\settings.bin""
-        if exist !filePath! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! settings.bin > NUL
-        set "filePath="!SETTINGS_FOLDER:"=!\settings.xml""
-        if exist !filePath! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! settings.xml > NUL
-        set "filePath="!SETTINGS_FOLDER:"=!\cemuhook.ini""
-        if exist !filePath! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! cemuhook.ini > NUL
+        @echo Using settings from !settingsFolderName! for !user! ^!>> !batchFwLog!
+        @echo Using settings from !settingsFolderName! for !user! ^!
+        
+        REM : looking for last modified *settings.bin to create !user!_settings.bin
+        call:setSettingsForUser
+        
+        REM : loading CEMU an cemuHook settings
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.bin > NUL
+        set "src="!CEMU_FOLDER:"=!\!user!_settings.bin""
+        set "target="!CEMU_FOLDER:"=!\settings.bin""
+        move /Y !src! !target!
+        
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.xml > NUL
+        set "src="!CEMU_FOLDER:"=!\!user!_settings.xml""
+        set "target="!CEMU_FOLDER:"=!\settings.xml""
+        move /Y !src! !target!
+
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_cemuhook.ini > NUL
+        set "src="!CEMU_FOLDER:"=!\!user!_cemuhook.ini""
+        set "target="!CEMU_FOLDER:"=!\cemuhook.ini""
+        move /Y !src! !target!
+
 
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
@@ -1517,6 +1532,39 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :setSettingsForUser
+    
+        set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""    
+        if exist !target! goto:eof        
+        
+        pushd !SETTINGS_FOLDER!
+        
+        for /F "delims=~" %%i in ('dir /O:D /B *settings.bin') do (
+            set "f="%%i""
+            copy /Y !f! !user!_settings.bin
+            REM : remove old saved settings
+            if [!f!] == ["settings.bin"] del /F !f! > NUL
+        )
+        for /F "delims=~" %%i in ('dir /O:D /B *settings.xml') do (
+            set "f="%%i""
+            copy /Y !f! !user!_settings.xml
+            REM : remove old saved settings
+            if [!f!] == ["settings.xml"] del /F !f! > NUL
+        )
+        set "target="!SETTINGS_FOLDER:"=!\!user!_cemuhook.ini""
+        for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini') do (
+            set "f="%%i""
+            copy /Y !f! !user!_cemuhook.ini
+            REM : remove old saved settings
+            if [!f!] == ["cemuhook.ini"] del /F !f! > NUL
+        )
+        
+        pushd !BFW_TOOLS_PATH!
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    
     :ignorePrecompiled
 
         set "value=%1"
@@ -1832,15 +1880,23 @@ REM : functions
         if exist !SETTINGS_FOLDER! (
 
             REM : saving CEMU an cemuHook settings
-            set "filePath="!CEMU_FOLDER:"=!\settings.bin""
-            if exist !filePath! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL
-            set "filePath="!CEMU_FOLDER:"=!\settings.xml""
-            if exist !filePath! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
-            set "filePath="!CEMU_FOLDER:"=!\cemuhook.ini""
-            if exist !filePath! robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL
+            set "src="!SETTINGS_FOLDER:"=!\settings.bin""
+            set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
+            move /Y !src! !target!
+            
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
+            set "src="!SETTINGS_FOLDER:"=!\settings.xml""
+            set "target="!SETTINGS_FOLDER:"=!\!user!_settings.xml""
+            move /Y !src! !target!
 
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! ^!>> !batchFwLog!
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! ^!
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL
+            set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
+            set "target="!SETTINGS_FOLDER:"=!\!user!_cemuhook.ini""
+            move /Y !src! !target!
+
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user! ^!>> !batchFwLog!
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user! ^!
         )
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""

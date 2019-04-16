@@ -217,7 +217,7 @@ REM : main
         if exist !cemuLog! (
             del /F !cemuLog! > NUL
         )
-        set "pat="!CEMU_FOLDER:"=!\settings.*""
+        set "pat="!CEMU_FOLDER:"=!\*settings.*""
         del /F !pat! > NUL
     )
     :logToGL
