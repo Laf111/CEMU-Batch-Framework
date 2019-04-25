@@ -119,16 +119,20 @@ REM : main
     !StartHiddenWait! !fnrPath! --cl --dir !WinScpFolder! --fileMask WinScp.ini --find "FTPiiU-port" --replace "!port!" --logFile !fnrLog!
 
     :checkConnection
-    curl -s !wiiuIp! > NUL
-    if !ERRORLEVEL! NEQ 0 (
+    REM : check its state
+    set /A "state=NONE"
+    call:getHostState !wiiuIp! state
+
+    if !state! EQU 1 (
         @echo ERROR^: unable to connect to !wiiuIp!^, check if FTP server is running on the WII-U
         pause
         exit 2
-    ) 
+    )
+
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
 
-    !WinScp! /session "USER@!wiiuIp!" /command "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "failed to retrieve directory listing" && (
+    !WinScp! /session "USER@!wiiuIp!" /command "option batch on" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Could not retrieve directory listing" && (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -163,17 +167,54 @@ REM : main
     @echo Launching FTP transferts^.^.^.
 
     REM : run ftp transferts ^: 
+    @echo.
+    @echo ---------------------------------------------------------    
     @echo - CCERTS
+    @echo ---------------------------------------------------------    
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!CCERTS_FOLDER!" /storage_mlc/sys/title/0005001b/10054000/content/ccerts" "exit"
+    @echo.
+    @echo ---------------------------------------------------------    
     @echo - SCERTS
+    @echo ---------------------------------------------------------    
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!SCERTS_FOLDER!" /storage_mlc/sys/title/0005001b/10054000/content/scerts" "exit"
+    @echo.
+    @echo ---------------------------------------------------------    
     @echo - MIIs Head
+    @echo ---------------------------------------------------------    
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!MIIH_FOLDER!" /storage_mlc/sys/title/0005001b/10056000" "exit"
+    @echo.
+    @echo ---------------------------------------------------------    
     @echo - Friend list
+    @echo ---------------------------------------------------------    
+    
+    !WinScp! /session "USER@!wiiuIp!" /command "option batch on" "ls /storage_mlc/sys/title/00050030/1001500A" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Could not retrieve directory listing" && (
+        goto:US
+    )
+    @echo.
+    @echo found JPN one
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!JFL_FOLDER!" /storage_mlc/sys/title/00050030/1001500A" "exit"
+
+    :US
+    !WinScp! /session "USER@!wiiuIp!" /command "option batch on" "ls /storage_mlc/sys/title/00050030/1001510A" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Could not retrieve directory listing" && (
+        goto:EU
+    )
+    @echo.
+    @echo found USA one
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!UFL_FOLDER!" /storage_mlc/sys/title/00050030/1001510A" "exit"
+    :EU
+    !WinScp! /session "USER@!wiiuIp!" /command "option batch on" "ls /storage_mlc/sys/title/00050030/1001520A" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Could not retrieve directory listing" && (
+        goto:accounts
+    )
+    @echo found EUR one
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!EFL_FOLDER!" /storage_mlc/sys/title/00050030/1001520A" "exit"
+    :accounts
+    @echo.
+    @echo ---------------------------------------------------------    
     @echo - WII-U accounts
+    @echo ---------------------------------------------------------    
     !winScp! /session "USER@!wiiuIp!" /command "synchronize local "!WIIU_ACCOUNTS_FOLDER!" /storage_mlc/usr/save/system/act" "exit"
 
     @echo Waiting for all transfert end^.^.^.
@@ -198,15 +239,13 @@ REM : main
 
     call:getFolderSize !UFL_FOLDER! folderSize
     if !folderSize! EQU 0 rmdir /Q /S !UFL_FOLDER!
-
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    exit /b 0
-
     
     REM : associate BatchFw's users to Wii-U accounts
     set "setAccountToUsers="!BFW_TOOLS_PATH:"=!\setWiiuAccountToUsers.bat""
     call !setAccountToUsers!
     
+    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+    exit /b 0
     
     goto:eof
     REM : ------------------------------------------------------------------
@@ -215,6 +254,18 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :getHostState
+        set "ipaddr=%~1"
+
+        set /A state=0
+        for /f "tokens=5,6,7" %%a in ('ping -n 1 !ipaddr!') do (
+            if "x%%a"=="xReceived" if "x%%c"=="x1,"  set /A "state=1"
+        )
+        
+        set "~2=!state!"
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :checkPathForDos
 

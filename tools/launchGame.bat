@@ -1509,7 +1509,6 @@ REM : functions
         set "target="!CEMU_FOLDER:"=!\cemuhook.ini""
         move /Y !src! !target!
 
-
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
         robocopy !controllersProfilesSaved! !controllersProfiles! > NUL
@@ -1591,6 +1590,17 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :getHostState
+        set "ipaddr=%~1"
+
+        set /A state=0
+        for /f "tokens=5,6,7" %%a in ('ping -n 1 !ipaddr!') do (
+            if "x%%a"=="xReceived" if "x%%c"=="x1,"  set /A "state=1"
+        )
+        
+        set "~2=!state!"
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :setOnlineFiles
 
@@ -1618,14 +1628,19 @@ REM : functions
         )
 
         REM : check if the Wii-U is not power on
-        REM set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
-        REM set "WinScp="!WinScpFolder:"=!\WinScp.com""
+        set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
+        if not exist !winScpIni! goto:installAccount
+        
+        REM : get the hostname
+        for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
+        REM : check its state
+        set /A "state=NONE"
+        call:getHostState !ipRead! state
 
-        REM curl -s !wiiuIp! > NUL
-        REM if !ERRORLEVEL! EQU 0 (
-            REM cscript /nologo !MessageBox! "Your Wii-U was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort launching" 4112
-            REM if !ERRORLEVEL! EQU 2 wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call terminate
-        REM )
+        if !state! EQU 1 (
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort using online feature" 4112
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
 
         :installAccount
         REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"

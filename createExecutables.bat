@@ -636,7 +636,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:Â£=!"
+        set "str=!str:£=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -753,6 +753,9 @@ REM : functions
         set "subfolder="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!""
         call:createFolder !subfolder!
 
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U""
+        call:createFolder !subfolder!
+        
         set "ARGS="NONE""
 
         REM : create shortcut for 3rd party software

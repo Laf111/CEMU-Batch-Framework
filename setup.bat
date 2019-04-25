@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V13-5"
+    set "BFW_VERSION=V13-6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -442,9 +442,9 @@ REM : main
     REM : Get BatchFw's users registered with the current windows profile
 
    :getUsers
-    set /P "input=Please enter user's name (space and = are not allowed) : "
+    set /P "input=Please enter user's name (space and # are not allowed) : "
     set "tmpStr=%input: =%"
-    set "userName=%tmpStr:==%"
+    set "userName=%tmpStr:#=%"
     if not ["%userName%"] == ["%input%"] (
         @echo Name invalid ^(space and = are not allowed^)^, please enter another name
         goto:getUsers
@@ -1050,7 +1050,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:Â£=!"
+        set "str=!str:£=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
