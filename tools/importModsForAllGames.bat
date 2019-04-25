@@ -59,7 +59,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
     if [!MODS_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askModFolder
     )    
     REM : check if folder name contains forbiden character for batch file

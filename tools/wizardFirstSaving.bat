@@ -279,6 +279,9 @@ REM : main
     REM : check CEMU options (and controollers settings)
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
+    REM : set online files 
+    call:setOnlineFiles    
+    
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -496,6 +499,69 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :setOnlineFiles
+
+        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFW_WiiU\onlineFiles""
+        set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
+
+        If not exist !BFW_ONLINE_ACC! goto:eof
+
+        REM : get the account.dat file for the current user and the accId
+        set "accId=NONE"
+        
+        set "pat="!BFW_ONLINE_ACC:"=!\!user!*.dat""       
+
+        for /F "delims=~" %%i in ('dir /B !pat!') do (
+            set "af="!BFW_ONLINE_ACC:"=!\%%i""
+        
+            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId="') do set "accId=%%j"
+        )
+        
+        if ["!accId!"] == ["NONE"] (
+            @echo WARNING^: AccountId not found for !user!^, cancel online files installation ^!
+            pause
+            goto:eof
+        )
+
+        REM : copy mlc01 folder to MLC01_FOLDER_PATH if needed
+        set "MLC01_FOLDER_PATH="!GAME_FOLDER_PATH:"=!\mlc01""
+    
+        set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
+        
+        if not exist !ccerts! (
+            set "omlc01="!BFW_ONLINE:"=!\mlc01""    
+            robocopy  !omlc01! !MLC01_FOLDER_PATH! /S > NUL
+        )
+        
+        REM : copy otp.bin and seeprom.bin if needed
+        set "t1="!CEMU_FOLDER:"=!\otp.bin""
+        set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
+        
+        set "s1="!BFW_ONLINE_FOLDER:"=!\otp.bin""
+        set "S2="!BFW_ONLINE_FOLDER:"=!\seeprom.bin""
+       
+        if exist !s1! if not exist !t1! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! otp.bin > NUL
+        if exist !s2! if not exist !t2! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! seeprom.bin > NUL
+
+        REM : patch settings.xml
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
+              
+        type !cs! | find /V "AccountId" | find /V "/Online" | find /V "/content" > !csTmp!
+        
+        echo         ^<AccountId^>!accId!^<^/AccountId^> >> !csTmp!
+        echo     ^<^/Online^> >> !csTmp!
+        echo ^<^/content^> >> !csTmp!
+
+        del /F !cs! > NUL
+        move /Y !csTmp! !cs! > NUL
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
+    
+
 
     REM : function to check unrecognized game
     :checkValidity

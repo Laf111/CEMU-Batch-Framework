@@ -21,8 +21,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""    
-    
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -46,8 +46,6 @@ REM : main
         if !ERRORLEVEL! EQU 2 goto:eof
         goto:getDate
     )
-
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""
@@ -85,7 +83,7 @@ REM : main
     REM : flag importing settings
     set /A "settingsImported=0"
 
-    REM : cd to GAMES_FOLDER
+    REM : cd to BFW_TOOLS_PATH
     pushd !BFW_TOOLS_PATH!
 
     REM : checking arguments
@@ -502,7 +500,7 @@ REM : main
     REM : GFX folders in CEMU
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
-    
+
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -713,8 +711,7 @@ REM : main
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
 
-REM    call:importGraphicPacks > NUL
-    call:importGraphicPacks
+    call:importGraphicPacks > NUL
 
     REM : get user defined ratios list
     set "ARLIST="
@@ -734,11 +731,11 @@ REM    call:importGraphicPacks > NUL
     REM : when using a simlink with a the target on another partition
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
-        
+
     if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:minimizeAll
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! 2> NUL
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
-    
+
     :minimizeAll
     REM : minimize all windows befaore launching in full screen
     set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
@@ -755,9 +752,7 @@ REM    call:importGraphicPacks > NUL
     set "fp="!BFW_TOOLS_PATH:"=!\forcePriority.bat""
     wscript /nologo !StartHidden! !fp!
 
-
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
-
 
     if [!MLC01_FOLDER_PATH!] == [!cml01!] (
         @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg! >> !batchFwLog!
@@ -1118,7 +1113,7 @@ REM    call:importGraphicPacks > NUL
     rmdir /Q /S !graphicPacks! 2>NUL
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL
-    
+
     REM @echo =========================================================>> !batchFwLog!
     REM @echo This windows will close automatically in 8s>> !batchFwLog!
     REM @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
@@ -1222,7 +1217,7 @@ REM : functions
 
                 for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
             )
-            
+
             set "tName=!gp:_graphicPacksV2=!"
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
@@ -1242,7 +1237,7 @@ REM : functions
 
             set "str=%%i"
             set "str=!str:~1!"
-            
+
             set "gp=!str:\rules=!"
 
             echo !gp! | find "\" | find /V "_graphicPacksV2" && (
@@ -1256,7 +1251,7 @@ REM : functions
             )
 
             set "tName=!gp:_graphicPacksV2=!"
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!"" 
+            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! 2>NUL
@@ -1342,19 +1337,19 @@ REM : functions
         REM : check if it is already a link (case of crash) : delete-it
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
         for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! 2>NUL
-        
+
         if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL
 
         set "endTitleId=%titleId:~8,8%"
 
         REM : remove saves but not before BatchFw first run
         if exist !gameInfoFile! for /F %%i in ('type !gameInfoFile! ^| find "Last launch with"') do (
-        
+
             REM : delete current saves in mlc01
             set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
-            for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"            
+            for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
         )
-        
+
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
         if not exist !rarFile! goto:savesLoaded
@@ -1494,16 +1489,16 @@ REM : functions
         for /F "delims=" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
         @echo Using settings from !settingsFolderName! for !user! ^!>> !batchFwLog!
         @echo Using settings from !settingsFolderName! for !user! ^!
-        
+
         REM : looking for last modified *settings.bin to create !user!_settings.bin
         call:setSettingsForUser
-        
+
         REM : loading CEMU an cemuHook settings
         robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.bin > NUL
         set "src="!CEMU_FOLDER:"=!\!user!_settings.bin""
         set "target="!CEMU_FOLDER:"=!\settings.bin""
         move /Y !src! !target!
-        
+
         robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.xml > NUL
         set "src="!CEMU_FOLDER:"=!\!user!_settings.xml""
         set "target="!CEMU_FOLDER:"=!\settings.xml""
@@ -1523,6 +1518,9 @@ REM : functions
         if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
         if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
 
+        REM : set onlines files for user
+        call:setOnlineFiles
+
         REM : if needed, create a game profile shorcut
         call:createGameProfileShorcut
 
@@ -1533,12 +1531,12 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :setSettingsForUser
-    
-        set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""    
-        if exist !target! goto:eof        
-        
+
+        set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
+        if exist !target! goto:eof
+
         pushd !SETTINGS_FOLDER!
-        
+
         for /F "delims=~" %%i in ('dir /O:D /B *settings.bin') do (
             set "f="%%i""
             copy /Y !f! !user!_settings.bin
@@ -1558,13 +1556,13 @@ REM : functions
             REM : remove old saved settings
             if [!f!] == ["cemuhook.ini"] del /F !f! > NUL
         )
-        
+
         pushd !BFW_TOOLS_PATH!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+
     :ignorePrecompiled
 
         set "value=%1"
@@ -1592,6 +1590,67 @@ REM : functions
         @echo Ignoring precompiled shader = %value%
     goto:eof
     REM : ------------------------------------------------------------------
+
+
+    :setOnlineFiles
+
+        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFW_WiiU\onlineFiles""
+        set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
+
+        If not exist !BFW_ONLINE_ACC! goto:eof
+
+        REM : get the account.dat file for the current user and the accId
+        set "accId=NONE"
+
+        set "pat="!BFW_ONLINE_ACC:"=!\!user!*.dat""
+
+        for /F "delims=~" %%i in ('dir /B !pat!') do (
+            set "af="!BFW_ONLINE_ACC:"=!\%%i""
+
+            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId="') do set "accId=%%j"
+        )
+
+        if ["!accId!"] == ["NONE"] (
+            @echo WARNING^: AccountId not found for !user!
+            @echo WARNING^: AccountId not found for !user!  >> !batchFwLog!
+            cscript /nologo !MessageBox! "AccountId not found for !user!, cancel online files installation" 4160
+            goto:eof
+        )
+
+        REM : check if the Wii-U is not power on
+        REM set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
+        REM set "WinScp="!WinScpFolder:"=!\WinScp.com""
+
+        REM curl -s !wiiuIp! > NUL
+        REM if !ERRORLEVEL! EQU 0 (
+            REM cscript /nologo !MessageBox! "Your Wii-U was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort launching" 4112
+            REM if !ERRORLEVEL! EQU 2 wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call terminate
+        REM )
+
+        :installAccount
+        REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
+        set "target="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat""
+        copy /Y !af! !target!
+
+        REM : patch settings.xml
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
+              
+        type !cs! | find /V "AccountId" | find /V "/Online" | find /V "/content" > !csTmp!
+        
+        echo         ^<AccountId^>!accId!^<^/AccountId^> >> !csTmp!
+        echo     ^<^/Online^> >> !csTmp!
+        echo ^<^/content^> >> !csTmp!
+
+        del /F !cs! > NUL
+        move /Y !csTmp! !cs! > NUL
+
+        @echo Online account enabled for !user! ^: !accId! >> !batchFwLog!
+        @echo Online account enabled for !user! ^: !accId!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :patchGraphicSection
         REM : arg1 : file
@@ -1884,7 +1943,7 @@ REM : functions
             set "src="!SETTINGS_FOLDER:"=!\settings.bin""
             set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
             move /Y !src! !target!
-            
+
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
             set "src="!SETTINGS_FOLDER:"=!\settings.xml""
             set "target="!SETTINGS_FOLDER:"=!\!user!_settings.xml""

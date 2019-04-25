@@ -67,7 +67,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFile!') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askInputFile
     )    
     
@@ -80,7 +80,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askGameFolder
     )    
     REM : check if folder name contains forbiden character for batch file

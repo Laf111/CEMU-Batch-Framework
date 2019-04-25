@@ -1,0 +1,42 @@
+=========================================================
+WII-U transferts : 
+=========================================================
+
+I recommend to use an USB Ethernet adapter because WIi-U's builtin Wifi really sucks. 
+
+BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
+The first time you need to access to your Wii-U, you'll have to enter the IP fo the Wii-U and the port
+An ini file is created.
+
+If you're using a static IP adress policy on your local network, no need to create a another configuration.
+You'll be able to use the first one you created.
+Note that if you want to run _BatchFw_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
+
+I'll only have to start/stop the ftpiiu server on your Wii-U and launch the scripts.
+
+---------------------------------------------------------
+Create a SDCard for Wii-U
+---------------------------------------------------------
+BatchFw can prepare a SDcard for your Wii-U (format the device in FAT32 with 64K clusters size usinf fat32format.exe
+then install HromBrew Launcher and the needed app).
+If you're running a CBHC CFW use FTP everywhere FOR CBHC.
+Otherwise launch MOCHA then FTP everywhere FOR MOCHA.
+
+---------------------------------------------------------
+Get online files : _BatchFw_WiiU\onlineFiles
+---------------------------------------------------------
+To dump files needed for playing online with Cemu : 
+- CCERTS
+- SCERTS
+- MIIH
+- Friends list
+- accounts
+
+This script will also launch the following :
+
+---------------------------------------------------------
+Associate BatchFw's user to Wii-U accounts : _BatchFw_WiiU\onlineFiles\usersAccounts
+---------------------------------------------------------
+This script associate BatchFw's users to Wii-U accounts.
+Once done, files (account.dat) are automatically installed when launching Cemu.
+

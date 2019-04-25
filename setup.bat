@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V13-5"
+    set "BFW_VERSION=V13-6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -262,9 +262,16 @@ REM : main
 
        :iFOK
         call:getUserInput "Read how graphic packs are handled? (y,n)" "y,n" ANSWER
-        if [!ANSWER!] == ["n"] goto:externalGP
+        if [!ANSWER!] == ["n"] goto:wiiuOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
+         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+
+       :wiiuOK
+        call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
+        if [!ANSWER!] == ["n"] goto:externalGP
+
+        set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
    :externalGP
@@ -308,7 +315,7 @@ REM : main
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo ERROR while extracting V3_GFX_Packs^.rar, exiting 1
+        @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
         pause
         exit /b 1
     )
@@ -435,8 +442,13 @@ REM : main
     REM : Get BatchFw's users registered with the current windows profile
 
    :getUsers
-    set /P "input=Please enter user's name: "
-    set "userName=%input: =%"
+    set /P "input=Please enter user's name (space and = are not allowed) : "
+    set "tmpStr=%input: =%"
+    set "userName=%tmpStr:==%"
+    if not ["%userName%"] == ["%input%"] (
+        @echo Name invalid ^(space and = are not allowed^)^, please enter another name
+        goto:getUsers
+    )
 
     set "msg="USER_REGISTERED=!USERNAME!""
     call:log2HostFile !msg!
@@ -575,7 +587,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -653,7 +665,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askCemuFolder
     )
     

@@ -112,7 +112,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a source folder"') do set "folder=%%b" && set "INPUT_FOLDER=!folder:?= !"
     if [!INPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askInputFolder
     )
     

@@ -72,7 +72,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askMlc01Folder
     )
     

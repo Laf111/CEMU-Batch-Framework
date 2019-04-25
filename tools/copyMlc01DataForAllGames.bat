@@ -73,7 +73,7 @@ REM : main
     
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
         goto:askMlc01Folder
     )
     REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!

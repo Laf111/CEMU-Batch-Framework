@@ -1,3 +1,14 @@
+25/04/2019 V13-6 : 
+- add : add a WII-U shortcuts folder 
+- add : WII-U / script to prepare your SD card (fat32format -c64) + add 
+        HomeBrewLauncher, MOCHA + Ftp everywhere, Ftp everywhere CBHC version, nanddumper
+        (you can use HBL get/update feature to complete app)
+        If you use a hidden secondary USB device, you'll have to unplug it for the transferts
+        otherwise FTP access to /storage_usb will fail
+- add : WII-U / script to dump all necessary files to play online in _BatchFW_WiiU\onlineFiles
+- add : WII-U / script to associate BatchFw's user to WiiU accounts
+- add : auto-install onlines files for the current user when launching a game
+
 16/04/2019 V13-5 : 
 - add : settings by user (allows different GFX packs and mostly mods selection per user) 
 
