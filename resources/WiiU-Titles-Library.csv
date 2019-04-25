@@ -1490,7 +1490,7 @@
 '00050000101C5400';Thebridge;wup-n-abce;-;-;v1;usa;yes;'00050000101C5400';720;60
 '00050000101C5500';Wordparty;wup-n-awpe;-;-;-;usa;yes;'00050000101C4A00';720;60
 '00050000101C5700';Abyss;wup-n-wagj;-;-;v1;jap;yes;'000500001016D900';720;60
-'00050000101C5800';Pokkêntournament;wup-n-apkj;002p;-;v16;jap;yes;'00050000101C5800';720;60
+'00050000101C5800';Pokkêemontournament;wup-n-apkj;002p;-;v16;jap;yes;'00050000101C5800';720;60
 '00050000101C5900';3-in-1;wup-n-atyj;-;-;v0;jap;yes;'00050000101C5900';720;60
 '00050000101C5A00';Mightyno.9;wup-p-amqp;-;-;-;eur;yes;'00050000101C5A00';720;60
 '00050000101C5B00';Secretfilestunguska;-;-;-;v0;eur;yes;'00050000101C5B00';720;60
@@ -1720,8 +1720,8 @@
 '00050000101DE500';1001spikes;wup-n-wm9j;-;-;-;jap;yes;'0005000010176B00';720;60
 '00050000101DE700';Cutiepetsjumprope;wup-n-ar3e;-;-;-;usa;yes;'00050000101DE700';720;60
 '00050000101DEE00';Avoider;wup-n-avre;-;-;-;usa;yes;'00050000101DEE00';720;60
-'00050000101DF400';PokkÇntournament;wup-n-apke;1;-;v16;usa;yes;'00050000101DF500';720;60
-'00050000101DF500';PokkÇntournament;wup-p-apkp;1;-;v16;eur;yes;'00050000101DF500';720;60
+'00050000101DF400';Pokkemontournament;wup-n-apke;1;-;v16;usa;yes;'00050000101DF500';720;60
+'00050000101DF500';Pokkemontournament;wup-p-apkp;1;-;v16;eur;yes;'00050000101DF500';720;60
 '00050000101DFA00';Draw2survive;wup-n-bdxe;-;-;-;usa;yes;'00050000101DFA00';720;60
 '00050000101DFD00';Snowball;wup-n-blle;-;-;-;usa;yes;'00050000101DFD00';720;60
 '00050000101DFF00';Petitcombig;wup-u-bp5j;00r8;-;17;jap;yes;'00050000101DFF00';720;60
