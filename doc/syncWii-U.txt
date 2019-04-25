@@ -12,7 +12,7 @@ If you're using a static IP adress policy on your local network, no need to crea
 You'll be able to use the first one you created.
 Note that if you want to run _BatchFw_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
 
-I'll only have to start/stop the ftpiiu server on your Wii-U and launch the scripts.
+You'll only have to start/stop the ftpiiu server on your Wii-U and launch the scripts.
 
 ---------------------------------------------------------
 Create a SDCard for Wii-U
