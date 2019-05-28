@@ -25,7 +25,7 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
 
@@ -85,35 +85,35 @@ REM : main
     @echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:eof
 
-    set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""   
+    set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if not exist !BatchFW_Graphic_Packs! goto:removeReports
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeReports
-    rmdir /Q /S !BatchFW_Graphic_Packs!  2>NUL
+    rmdir /Q /S !BatchFW_Graphic_Packs!  > NUL 2>&1
     @echo ^> _BatchFW_Graphic_Packs deleted ^!
     @echo ---------------------------------------------------------
     :removeReports
-    set "BatchFW_Games_Compatibility_Reports="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports""
+    set "BatchFW_Games_Compatibility_Reports="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports""
     if not exist !BatchFW_Games_Compatibility_Reports! goto:removeMissing
     call:getUserInput "Remove _BatchFW_Games_Compatibility_Reports folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeMissing
-    rmdir /Q /S !BatchFW_Games_Compatibility_Reports!  2>NUL
+    rmdir /Q /S !BatchFW_Games_Compatibility_Reports!  > NUL 2>&1
     @echo ^> _BatchFW_Games_Compatibility_Reports deleted ^!
     @echo ---------------------------------------------------------
     :removeMissing
-    set "BatchFW_Missing_Games_Profiles="!GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles""
+    set "BatchFW_Missing_Games_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
     if not exist !BatchFW_Missing_Games_Profiles! goto:removeController
     call:getUserInput "Remove _BatchFW_Missing_Games_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeController
-    rmdir /Q /S !BatchFW_Missing_Games_Profiles! 2>NUL
+    rmdir /Q /S !BatchFW_Missing_Games_Profiles! > NUL 2>&1
     @echo ^> _BatchFW_Missing_Games_Profiles deleted ^!
     @echo ---------------------------------------------------------
     :removeController
-    set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles""
+    set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
     if not exist !BatchFW_Controller_Profiles! goto:removeGLCache
     call:getUserInput "Remove _BatchFW_Controller_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeGLCache
-    rmdir /Q /S !BatchFW_Controller_Profiles! 2>NUL
+    rmdir /Q /S !BatchFW_Controller_Profiles! > NUL 2>&1
     @echo ^> _BatchFW_Controller_Profiles deleted ^!
 
     @echo ---------------------------------------------------------
@@ -136,7 +136,7 @@ REM : main
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
     if not exist !GLCacheSavesFolder! goto:restoreMlc01
-    rmdir /Q /S !GLCacheSavesFolder! 2>NUL
+    rmdir /Q /S !GLCacheSavesFolder! > NUL 2>&1
 
     @echo ^> OpenGL cache backup was removed ^!
 
@@ -150,7 +150,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askMlc01Folder
     )
     REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
@@ -162,14 +162,14 @@ REM : main
         pause
         goto:askMlc01Folder
     )
-    
+
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
         @echo !usrTitle! not found ^?
         goto:askMlc01Folder
     )
-    
+
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartWait! !script! !MLC01_FOLDER!
     set "mlc01Restored=1"
@@ -183,14 +183,14 @@ REM : main
     :restoreTransShaderCache
     set "TransShaderCacheRestored=0"
     call:getUserInput "Restore all transferable shader cache to a Cemu folder ? (y, n)" "y,n" ANSWER
-  
+
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
@@ -202,14 +202,14 @@ REM : main
         pause
         goto:askCemuFolder
     )
-    
+
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if /I not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
-    
+
     set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
   
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
@@ -233,7 +233,7 @@ REM : main
     )
     :removeMlc01
     for /F "delims=" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
-        rmdir /Q /S "%%x" 2>NUL
+        rmdir /Q /S "%%x" > NUL 2>&1
     )
 
     :removeShaderCache
@@ -250,7 +250,7 @@ REM : main
     )
     :removeTransCache
     for /F "delims=" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
-        rmdir /Q /S "%%x" 2>NUL
+        rmdir /Q /S "%%x" > NUL 2>&1
     )
     :removeFoldersLeft
     @echo Do you want to remove all Cemu extra subfolders created^?
@@ -286,7 +286,7 @@ REM : main
         for %%a in (!cf!) do set "parentFolder="%%~dpa""
         set "gf=!parentFolder:~0,-2!""
         set "cemuFolder="!gf:"=!\Cemu""
-        rmdir /Q /S !cemuFolder! 2>NUL
+        rmdir /Q /S !cemuFolder! > NUL 2>&1
     )
     @echo ^> Batch FW^'s extra files and folders were removed
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -302,7 +302,7 @@ REM : main
     )
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
-        rmdir /Q /S !WIIU_GAMES_FOLDER! 2>NUL
+        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
         @echo ^> !WIIU_GAMES_FOLDER! deleted ^!
         @echo ---------------------------------------------------------
     )
@@ -310,10 +310,10 @@ REM : main
     @echo ^> Done^.
     @echo =========================================================
     @echo This windows will close automatically in 15s
-    timeout /T 4 > NUL
-    
+    timeout /T 4 > NUL 2>&1
+
     REM remove this folder
-    rmdir /Q /S !BFW_PATH! 2>NUL
+    rmdir /Q /S !BFW_PATH! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
@@ -345,7 +345,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -409,7 +409,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

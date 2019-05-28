@@ -7,7 +7,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -29,6 +29,7 @@ REM : main
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -37,12 +38,12 @@ REM : main
 REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : set current char codeset
     call:setCharSet
-    
+
     set "USERSLIST="
     set /A "nbUsers=0"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
@@ -53,7 +54,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         @echo You have to use the setup before this script ^^! launching setup^.bat
         set "setup="!BFW_PATH:"=!\setup.bat""
         wscript /nologo !Start! !setup!
-        timeout /t 4 > NUL
+        timeout /t 4 > NUL 2>&1
         exit 51
     )
 
@@ -84,13 +85,13 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     title Create CEMU shortcuts for selected games
-    
+
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
-    
+
     @echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
@@ -100,7 +101,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         @echo BatchFw updated^, please relaunch
         set "ChangeLog="!BFW_PATH:"=!\Change.log""
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
-        timeout /t 4 > NUL
+        timeout /t 4 > NUL 2>&1
         exit 75
     )
 
@@ -111,7 +112,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
 
@@ -123,7 +124,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askCemuFolder
-    )    
+    )
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
@@ -144,7 +145,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -155,8 +156,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askOutputFolder
-    )    
-    
+    )
+
     goto:inputsAvailables
 
     :getArgsValue
@@ -297,7 +298,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     call:fwShortcuts
 
-    REM : importing CEMU VERSION controller profiles under !GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\!USERDOMAIN!
+    REM : importing CEMU VERSION controller profiles under !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!
     call:syncControllerProfiles
     @echo ---------------------------------------------------------
     @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles\!USERDOMAIN!^)
@@ -336,7 +337,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
 
-    timeout /T 2 > NUL
+    timeout /T 2 > NUL 2>&1
     wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
     choice /C y /N /M "If CemuHook is installed, continue? (y) : "
@@ -375,31 +376,33 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if %n% GEQ 1140 goto:autoImportMode
 
    :extractV2Packs
-    set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
+    set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:autoImportMode
 
-    mkdir !gfxv2! > NUL
+    mkdir !gfxv2! > NUL 2>&1
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1
         pause
         exit /b 21
     )
-    timeout /T 3 > NUL
+    timeout /T 3 > NUL 2>&1
    :autoImportMode
     @echo ---------------------------------------------------------
     @echo.
-    @echo Do you want to enable automatic settings import between versions of CEMU^?
+    @echo Enable AUTOMATIC SETTINGS IMPORT between versions of CEMU^?
+    @echo.
     @echo y^: Using settings of the last version of CEMU used to play this game
     @echo n^: BatchFW will launch the wizard script to collect settings for each game
     @echo.
-    @echo If a game shortcut already exists skip this game
+    @echo Choose y ONLY if you^'re sure that there was no new settings    
+    @echo introduced between the last played version and this version
     @echo.
 
     REM : importMode
@@ -534,7 +537,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
             call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -548,7 +551,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo Treated !NB_GAMES_TREATED! games
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you want to change global CEMU^'s settings you^'ve just 
+    @echo If you want to change global CEMU^'s settings you^'ve just
     @echo entered here^:
     @echo ---------------------------------------------------------
     @echo ^> simply delete the shortcuts and recreate them using
@@ -557,10 +560,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo ---------------------------------------------------------
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when 
+    @echo If you encounter any issues or have made a mistake when
     @echo collecting settings for a game^:
     @echo ---------------------------------------------------------
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using 
+    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
     @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
     @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     @echo ---------------------------------------------------------
@@ -602,10 +605,10 @@ REM : functions
 
     REM : check if (DLC) or (UPDATE DATA) folders exist
    :checkGamesToBePrepared
-   
+
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
-        
+
         set "pat=*(DLC)*"
         for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
         set "pat=*(UPDATE DATA)*"
@@ -613,29 +616,29 @@ REM : functions
 
         REM : if need call import script and wait
         if !needImport! EQU 0 goto:eof
-        
-        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found 
+
+        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found
         @echo Preparing those games for emulation^.^.^.
-        timeout /T 5 > NUL
-        
+        timeout /T 5 > NUL 2>&1
+
         REM : calling createShortcuts.bat
-        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat"" 
+        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
         call !tobeLaunch! !GAMES_FOLDER!
         set /A "cr=!ERRORLEVEL!"
 
-        @echo ^> Games ready for emulation 
-        timeout /T 5 > NUL
+        @echo ^> Games ready for emulation
+        timeout /T 5 > NUL 2>&1
         cls
-                
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     REM : remove DOS forbiden character from a string
     :secureStringPathForDos
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:£=!"
+        set "str=!str:?=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -652,16 +655,16 @@ REM : functions
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !logFile! > NUL
-        move /Y !logFileTmp! !logFile! > NUL
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     :syncControllerProfiles
 
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\!USERDOMAIN!""
-        if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!""
+        if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
         if not exist !ccp! goto:eof
@@ -671,7 +674,7 @@ REM : functions
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL
+            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL 2>&1
         )
 
         pushd !CONTROLLER_PROFILE_FOLDER!
@@ -679,7 +682,7 @@ REM : functions
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL
+            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
         )
         pushd !GAMES_FOLDER!
 
@@ -688,7 +691,7 @@ REM : functions
 
     :createFolder
         set "folder="%~1""
-        if not exist !folder! mkdir !folder! > NUL
+        if not exist !folder! mkdir !folder! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -725,23 +728,23 @@ REM : functions
         set "value="%~1""
         set "%2=%value%"
     goto:eof
-    REM : ------------------------------------------------------------------    
-    
+    REM : ------------------------------------------------------------------
+
     :fwShortcuts
 
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's icons""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Mlc01 folder handling""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Mlc01 folder handling""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's saves""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's data""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's data""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Graphic packs""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's icons""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons""
         call:createFolder !subfolder!
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Games Compatibility Reports""
         call:createFolder !subfolder!
@@ -749,12 +752,12 @@ REM : functions
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME:"=!""
         call:createFolder !subfolder!
 
-        set "subfolder="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!""
+        set "subfolder="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!""
         call:createFolder !subfolder!
 
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U""
         call:createFolder !subfolder!
-        
+
         set "ARGS="NONE""
 
         REM : create shortcut for 3rd party software
@@ -762,9 +765,9 @@ REM : functions
         for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
 
             if not exist !subfolder! call:createFolder !subfolder!
-        
+
             set "command=%%i"
-            for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command            
+            for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
 
             set "program="NONE""
 
@@ -774,7 +777,7 @@ REM : functions
 
             for %%a in (!program!) do set "parentFolder="%%~dpa""
             set "WD_FOLDER=!parentFolder:~0,-2!""
-    
+
             REM : create a shortcut (if needed)
             set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\3rdParty\!name:.exe=.lnk!""
             set "LINK_DESCRIPTION="!name:.exe=!""
@@ -785,8 +788,31 @@ REM : functions
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
             )
         )
-        
-        
+
+        REM : create a shortcut to scanWiiU.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Scan my Wii-U.lnk""
+        set "LINK_DESCRIPTION="Take snapshot of your Wii-U content ^(list games^, saves^, updates and DLC^)""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\scanWiiU.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\wii-u.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to scanWiiU^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        set "scansFolder="!GAMES_FOLDER:"=!\_BatchFw_WiiU\Scans""
+        if exist !scansFolder! (
+            REM : create a shortcut to explore scans saved
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Scans results.lnk""
+            set "LINK_DESCRIPTION="Explore existing Wii-U scan results""
+            set "TARGET_PATH=!scansFolder!"
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\scanResults.ico""
+
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to Wii-I scans results
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+            )
+        )
+
         REM : create a shortcut to getWiiuOnlineFiles.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Get online files.lnk""
         set "LINK_DESCRIPTION="Download all necessary files to play online with CEMU""
@@ -807,6 +833,15 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to dumpGamesFromWiiu.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Dump games from my Wii-U.lnk""
+        set "LINK_DESCRIPTION="Dump games installed on your Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\ftp.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to dumpGamesFromWiiu^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
 
         REM : create a shortcut to createWiiuSDcard.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Create a SDCard for Wii-U.lnk""
@@ -816,10 +851,30 @@ REM : functions
         if not exist !LINK_PATH! (
                 if !QUIET_MODE! EQU 0 @echo Creating a shortcut to createWiiuSDcard^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
-        ) 
+        )
+
+        REM : create a shortcut to exportSavesToWiiu.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Export CEMU saves to my Wii-U.lnk""
+        set "LINK_DESCRIPTION="Export CEMU saves to your Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\exportSavesToWiiu.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exportSave.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to exportSavesToWiiu^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        REM : create a shortcut to importWiiuSaves.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Import saves from my Wii-U.lnk""
+        set "LINK_DESCRIPTION="Import saves from my Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\importWiiuSaves.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importSave.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importWiiuSaves^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
 
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's icons\Convert all jpg files to centered icons.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons\Convert all jpg files to centered icons.lnk""
         set "LINK_DESCRIPTION="Convert all jpg files near rpx ones to centered icon in order to be used by createShortcuts.bat""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\convertIconsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\convertIconsForAllGames.ico""
@@ -829,7 +884,7 @@ REM : functions
         )
 
         REM : create a shortcut to copyMlc01DataForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\mlc01 folder handling\Copy mlc01 data for each games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\mlc01 folder handling\Copy mlc01 data for each games.lnk""
         set "LINK_DESCRIPTION="Copy mlc01 data ^(saves+updates+DLC^) in each game^'s folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\copyMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\copyMlc01DataForAllGames.ico""
@@ -839,7 +894,7 @@ REM : functions
         )
 
         REM : create a shortcut to moveMlc01DataForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\mlc01 folder handling\Move mlc01 data for each games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\mlc01 folder handling\Move mlc01 data for each games.lnk""
         set "LINK_DESCRIPTION="Move mlc01 data ^(saves+updates+DLC^) in each game^'s folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\moveMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\moveMlc01DataForAllGames.ico""
@@ -849,7 +904,7 @@ REM : functions
         )
 
         REM : create a shortcut to restoreMlc01DataForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\mlc01 folder handling\Restore mlc01 data for each games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\mlc01 folder handling\Restore mlc01 data for each games.lnk""
         set "LINK_DESCRIPTION="Restore mlc01 data ^(saves+updates+DLC^) of each game^'s folder in a mlc01 target folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreMlc01DataForAllGames.ico""
@@ -859,7 +914,7 @@ REM : functions
         )
 
         REM : create a shortcut to backupAllInGameSaves.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's saves\Backup my games's saves.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Backup my games's saves.lnk""
         set "LINK_DESCRIPTION="Compress all my games^'s saves""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\backupAllInGameSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\backupAllInGameSaves.ico""
@@ -869,7 +924,7 @@ REM : functions
         )
 
         REM : create a shortcut to deleteAllInGameSavesBackup.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's saves\Delete all my games's saves backup.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Delete all my games's saves backup.lnk""
         set "LINK_DESCRIPTION="Delete my games^'s saves backup for all my games""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllInGameSavesBackup.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllInGameSavesBackup.ico""
@@ -879,7 +934,7 @@ REM : functions
         )
 
         REM : create a shortcut to importSaves.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's saves\Import saves.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Import saves.lnk""
         set "LINK_DESCRIPTION="Import saves from a mlc01 folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importSaves.ico""
@@ -889,7 +944,7 @@ REM : functions
         )
 
         REM : create a shortcut to getTitleDataFromLibrary.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Games's data\Get GAME data with titleId.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's data\Get GAME data with titleId.lnk""
         set "LINK_DESCRIPTION="Get GAME data with titleId from WiiU-Titles-Library^.csv""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getTitleDataFromLibrary.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getTitleDataFromLibrary.ico""
@@ -899,7 +954,7 @@ REM : functions
         )
 
         REM : create a shortcut to importTransferableCache.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Import transferable cache.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache.lnk""
         set "LINK_DESCRIPTION="Import transferable cache for a game""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importTransferableCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importTransferableCache.ico""
@@ -909,7 +964,7 @@ REM : functions
         )
 
         REM : create a shortcut to deleteMyGpuCache.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Flush my GPU OpenGL cache.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Flush my GPU OpenGL cache.lnk""
         set "LINK_DESCRIPTION="Empty my GPU OpenGL cache""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteMyGpuCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteMyGpuCache.ico""
@@ -919,7 +974,7 @@ REM : functions
         )
 
         REM : create a shortcut to getMyShaderCachesSize.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Get my shaders caches size.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Get my shaders caches size.lnk""
         set "LINK_DESCRIPTION="Get my shaders caches size for all CEMU versions""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getMyShaderCachesSize.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getMyShaderCachesSize.ico""
@@ -929,7 +984,7 @@ REM : functions
         )
 
         REM : create a shortcut to restoreTransShadersForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Restore transferable cache for each games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Restore transferable cache for each games.lnk""
         set "LINK_DESCRIPTION="Restore transferable cache of each game^'s folder in CEMU target folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreTransShadersForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreTransShadersForAllGames.ico""
@@ -939,7 +994,7 @@ REM : functions
         )
 
         REM : create a shortcut to createGameGraphicPacks.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Graphic packs\Create Graphic Pack for a game using its titleId.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Create Graphic Pack for a game using its titleId.lnk""
         set "LINK_DESCRIPTION="Create Graphic Pack for a game using its titleId""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\createGameGraphicPacks.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createGameGraphicPacks.ico""
@@ -949,7 +1004,7 @@ REM : functions
         )
 
         REM : create a shortcut to forceGraphicPackUpdate.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Graphic packs\Force Graphic Pack folder update.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Force Graphic Pack folder update.lnk""
         set "LINK_DESCRIPTION="Force Graphic Pack folder update and BatchFw GFX rebuild""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\forceGraphicPackUpdate.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
@@ -961,7 +1016,7 @@ REM : functions
         REM : create a shortcut to reports folder
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Games Compatibility Reports\!USERDOMAIN! reports.lnk""
         set "LINK_DESCRIPTION="Games^'s compatibility reports generated on !USERDOMAIN!""
-        set "TARGET_PATH="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!""
+        set "TARGET_PATH="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !USERDOMAIN! compatibility reports folder
@@ -969,9 +1024,9 @@ REM : functions
         )
 
         REM : create a shortcut to BatchFW_readme.txt (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\BatchFW_readme.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\BatchFw_readme.lnk""
         set "LINK_DESCRIPTION="BatchFW_readme.txt""
-        set "TARGET_PATH="!BFW_PATH:"=!\BatchFW_readme.txt""
+        set "TARGET_PATH="!BFW_PATH:"=!\BatchFw_readme.txt""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 @echo Creating a shortcut to BatchFW_readme^.txt
@@ -979,7 +1034,7 @@ REM : functions
         )
 
         REM : create a shortcut to this script (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU^'s shortcuts for selected games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's shortcuts for selected games.lnk""
         set "LINK_DESCRIPTION="Create missing CEMU^'s shortcuts for selected games given a version of CEMU""
         set "TARGET_PATH="!THIS_SCRIPT!""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createShortcuts.ico""
@@ -999,7 +1054,7 @@ REM : functions
         )
 
         REM : create a shortcut to restoreBfwDefaultSettings.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Reset BatchFw.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Reset BatchFw.lnk""
         set "LINK_DESCRIPTION="Restore BatchFw factory settings""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreBfwDefaultSettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreBfwDefaultSettings.ico""
@@ -1009,7 +1064,7 @@ REM : functions
         )
 
         REM : create a shortcut to createExecutables.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU^'s executables for selected games.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's executables for selected games.lnk""
         set "LINK_DESCRIPTION="Create missing CEMU^'s executables for selected games given a version of CEMU""
         set "TARGET_PATH="!BFW_PATH:"=!\createExecutables.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createExecutables.ico""
@@ -1053,7 +1108,7 @@ REM : functions
         set "ARGS=""!OUTPUT_FOLDER:"=!\Wii-U Games"""
 
         REM : create a shortcut to uninstall.bat
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Uninstall BatchFW.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Uninstall BatchFW.lnk""
         set "LINK_DESCRIPTION="Uninstall BatchFW""
         set "TARGET_PATH="!BFW_PATH:"=!\uninstall.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\uninstall.ico""
@@ -1116,7 +1171,7 @@ REM : functions
         set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!"
 
         REM : create a shortcut to explore OpenGL Cache saved
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFW\Tools\Shaders Caches\Explore OpenGL caches saved.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore OpenGL caches saved.lnk""
         set "LINK_DESCRIPTION="Explore OpenGL caches saved""
         set "TARGET_PATH=!GLCacheSavesFolder!"
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
@@ -1183,7 +1238,7 @@ REM : functions
             if [!defaultBrowser!] == ["NOT_FOUND"] (
                 @echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\code
                 @echo ^(no need to rename it^) then use the shortcut
-                @echo Wii-U Games^\BatchFW^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
+                @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
                 goto:icoSet
             )
             @echo.
@@ -1208,17 +1263,17 @@ REM : functions
         :icoSet
         set /A "gameDisplayed=0"
         REM : create shortcuts for all users
-        for %%a in (!USERSLIST!) do (
-            set "user=%%a"
-            set "userFolder="!OUTPUT_FOLDER:"=!\wii-U Games\!user!""
-            set "SHORCTUT_PATH="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!] !user!.lnk""
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+            set "user="%%a""
+            set "userFolder="!OUTPUT_FOLDER:"=!\wii-U Games\!user:"=!""
+            set "SHORCTUT_PATH="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.lnk""
 
-            if ["%icoUpdate%"] == ["true"] if exist !SHORCTUT_PATH! del /F !SHORCTUT_PATH! > NUL
+            if ["%icoUpdate%"] == ["true"] if exist !SHORCTUT_PATH! del /F !SHORCTUT_PATH! > NUL 2>&1
 
             REM : if shortcut exist and import mode enabled : if shortcut exist skip this game
             if exist !SHORCTUT_PATH! (
                 if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: shortcut for !user! already exist^, skipped
+                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: shortcut for !user:"=! already exist^, skipped
             ) else (
                 call:userGameShortcut !user!
             )
@@ -1269,7 +1324,7 @@ REM : functions
 
 
     :userGameShortcut
-        set "user=%~1"
+        set "user="%~1""
 
         REM : Creating shortcut to launch game
         if !QUIET_MODE! EQU 0 if !gameDisplayed! EQU 0 (
@@ -1281,10 +1336,10 @@ REM : functions
             @echo.
             @echo Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
             @echo   ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
-            @echo   ^(y^)^: default value after 8s timeout
-            @echo. 
+            @echo   ^(y^)^: default value after 15s timeout
+            @echo.
 
-            call:getUserInput "Enter your choice? : " "y,n" ANSWER 8
+            call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["n"] (
                 REM : skip this game
                 echo Skip this GAME
@@ -1312,7 +1367,7 @@ REM : functions
             set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%titleId:00050000=%\aoc""
             call:createFolder !dlcFolder!
 REM            set "dlcFolder2="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%titleId:00050000=%\aoc_%titleId%""
-REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! > NUL
+REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! > NUL 2>&1
 
             REM : first game's registration : create mods folder
             set "subfolder="!GAME_FOLDER_PATH:"=!\Cemu\mods""
@@ -1321,7 +1376,7 @@ REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! >
 
         REM : arguments for LaunchGame.bat
         set "launchGame="!BFW_TOOLS_PATH:"=!\launchGame.bat""
-        set "ARGS="!launchGame!" "!CEMU_FOLDER!" "!GAME_FILE_PATH!" "!OUTPUT_FOLDER!" "!ICO_PATH!" "!MLC01_FOLDER_PATH!" !user!"
+        set "ARGS="!launchGame!" "!CEMU_FOLDER!" "!GAME_FILE_PATH!" "!OUTPUT_FOLDER!" "!ICO_PATH!" "!MLC01_FOLDER_PATH!" "!user!""
 
         if ["!IMPORT_MODE!"] == ["ENABLED"] goto:ignorePrecomp
         set "ARGS=!ARGS! -noImport"
@@ -1344,22 +1399,33 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         echo oLink.TargetPath = !StartHiddenWait! >> !TMP_VBS_FILE!
         echo oLink.WindowStyle = 7 >> !TMP_VBS_FILE!
         echo oLink.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
-        echo oLink.Description = "Launch !GAME_TITLE! with !CEMU_FOLDER_NAME! for !user!" >> !TMP_VBS_FILE!
+        echo oLink.Description = "Launch !GAME_TITLE! with !CEMU_FOLDER_NAME!" >> !TMP_VBS_FILE!
         echo oLink.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
         echo oLink.WorkingDirectory = !OUTPUT_FOLDER! >> !TMP_VBS_FILE!
         echo oLink.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
+
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
-        if !QUIET_MODE! EQU 0 @echo - Shortcut for !user! created ^^!
+        if !QUIET_MODE! EQU 0 @echo - Shortcut for !user:"=! created ^!
         set /A NB_GAMES_TREATED+=1
     goto:eof
     REM : ------------------------------------------------------------------
 
     :getIcon
 
+        set "TGA_FILE="!GAME_FOLDER_PATH:"=!\meta\iconTex.tga""
+        if not exist !TGA_FILE! goto:searchIconDataBase
+
+        set "ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
+        REM : convert-it in ICO centered format
+        call !imgConverter! !TGA_FILE! -resize 256x256 !ICO_PATH!
+
+        goto:eof
+
+        :searchIconDataBase
         REM : check if !BFW_PATH!\resources\gamesIcon\%titleId%.ico exist
         set "icoBase="!BFW_PATH:"=!\resources\gamesIcons""
         set "icoBaseFile="!icoBase:"=!\%titleId%.ico""
@@ -1368,11 +1434,11 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
             goto:copyIcoFile
         )
 
-        set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
         REM : add-it to the library
         if [!libFileLine!] == ["NONE"] goto:eof
@@ -1399,11 +1465,11 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         :copyIcoFile
         REM : copy and renaming the ico file
-        robocopy !icoBase! !codeFullPath! "%titleIdIco%.ico" > NUL
+        robocopy !icoBase! !codeFullPath! "%titleIdIco%.ico" > NUL 2>&1
 
         set "oldIcoGameFile="!codeFullPath:"=!\%titleIdIco%.ico""
         set "newIcoGameFile="!codeFullPath:"=!\!titleId!.ico""
-        move /Y !oldIcoGameFile! !newIcoGameFile! > NUL
+        move /Y !oldIcoGameFile! !newIcoGameFile! > NUL 2>&1
         set "ICO_PATH=!newIcoGameFile!"
     goto:eof
 
@@ -1426,7 +1492,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -1489,7 +1555,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -1502,7 +1568,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

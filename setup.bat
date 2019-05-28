@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V13-6"
+    set "BFW_VERSION=V14"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -54,7 +54,7 @@ REM : main
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : initialize log file for current host (if needed)
@@ -101,12 +101,12 @@ REM : main
     if [!OUTPUT_FOLDER!] == ["!drive!\"] set "OUTPUT_FOLDER="!drive!""
 
    :beginSetup
-   
+
     call:cleanHostLogFile BFW_VERSION
-    
+
     set "msg="BFW_VERSION=%BFW_VERSION%""
     call:log2HostFile !msg!
-    
+
     @echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
@@ -114,13 +114,13 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
         @echo BatchFw updated^, please relaunch
-        timeout /t 4 > NUL
+        timeout /t 4 > NUL 2>&1
         set "ChangeLog="!BFW_PATH:"=!\Change.log""
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
         exit 75
     )
 
-    set "readme="!BFW_PATH:"=!\BatchFW_readme.txt""
+    set "readme="!BFW_PATH:"=!\BatchFw_readme.txt""
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
 
@@ -147,7 +147,7 @@ REM : main
         )
     ) else (
         @echo =========================================================
-        @echo Set your BatchFw^'s settings and register more than 
+        @echo Set your BatchFw^'s settings and register more than
         @echo one CEMU's version
         @echo =========================================================
         @echo ^(in case of false input close this main window to cancel^)
@@ -224,7 +224,7 @@ REM : main
             call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -275,10 +275,10 @@ REM : main
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
    :externalGP
-    REM : check if GAMES_FOLDER\_BatchFW_Graphic_Packs exist
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
-    if not exist !BFW_GP_FOLDER!  mkdir !BFW_GP_FOLDER! > NUL
+    if not exist !BFW_GP_FOLDER!  mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     REM : check if an internet connection is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
@@ -293,15 +293,18 @@ REM : main
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp!
     set /A "cr=!ERRORLEVEL!"
+    REM : if user cancelled the update
+    if !cr! EQU 1 if not exist !BFW_GP_FOLDER! goto:beginExtraction
 
     if !cr! EQU 0 goto:importModForGames
 
    :extractV3pack
     if %QUIET_MODE% EQU 1 goto:importModForGames
 
-    REM : first launch of setup.bat
-    if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! 2> NUL
-    mkdir !BFW_GP_FOLDER!
+   :beginExtraction
+    REM : first launch of setup.bat  
+    if exist !BFW_GP_FOLDER!  goto:importModForGames  
+    mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Extracting integrated graphics packs^.^.^.
@@ -310,9 +313,9 @@ REM : main
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
 
     set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP! > NUL
+    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP! > NUL 2>&1
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
@@ -322,7 +325,7 @@ REM : main
 
     @echo ^> Graphic packs installed from archive
     set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
-    move !pat! !BFW_GP_FOLDER! > NUL
+    move !pat! !BFW_GP_FOLDER! > NUL 2>&1
 
     REM : filter graphic pack folder
     set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
@@ -341,7 +344,7 @@ REM : main
     call:getUserInput "Do you want to add another mod folder (y,n)?" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:askAnotherModFolder
     @echo Next time use the shortcut in
-    @echo Wii-U Games^\BatchFW^\Tools^\Graphic packs^\Import Mods for my games^.lnk
+    @echo Wii-U Games^\_BatchFw^\Tools^\Graphic packs^\Import Mods for my games^.lnk
 
     @echo ^> Mods were imported in each game^'s folder
 
@@ -414,12 +417,11 @@ REM : main
    :getUserMode
 
     REM : by default: create shortcuts
-    set "outputType=LNK"
     @echo ---------------------------------------------------------
 
     REM : get the users list
     set "usersList=EMPTY"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do set "usersList=!usersList! %%i"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do set "usersList=!usersList! [%%i]"
 
     if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n):"
@@ -440,17 +442,63 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do call:cleanHostLogFile USER_REGISTERED
 
     REM : Get BatchFw's users registered with the current windows profile
-
+    set /A "alreadyAsked=0"
    :getUsers
-    set /P "input=Please enter user's name (space and # are not allowed) : "
-    set "tmpStr=%input: =%"
-    set "userName=%tmpStr:#=%"
-    if not ["%userName%"] == ["%input%"] (
-        @echo Name invalid ^(space and = are not allowed^)^, please enter another name
+
+    if !alreadyAsked! EQU 1 goto:batchFwUsers
+    REM : Have a Wii-U ?
+    @echo You can use your Wii-U to create BatchFw^'users list
+    @echo For that^, you need to had dumped your NAND in order
+    @echo to provide files to play online and have launched
+    @echo ftpiiU server on your Wii-U^.
+    @echo.
+    choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
+    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
+
+    REM : get online files and accounts
+    pushd !BFW_TOOLS_PATH!
+    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\getWiiuOnlineFiles.bat""
+    call !tobeLaunch! -wiiuAccounts
+    set /A "cr=!ERRORLEVEL!"
+    pushd !GAMES_FOLDER!
+    if !cr! NEQ 0 (
+        @echo.
+        @echo Fail to get users from wiiU ^!
+        goto:handleUsers
+    )
+    @echo.
+    @echo Do you want to take a snapshot of your WII-U now^?
+    @echo.
+    @echo BatchFw will list the games^, saves^, updates and DLC
+    @echo precising where there are installed ^(mlc or usb^)
+    @echo and use its result to synchronize CEMU and your Wii-U
+    @echo ^(import / export saves^, dump games^)
+    @echo.
+
+    choice /C yn /N /M "Take a snapshot of your Wii-U now? (y,n):"
+    if !ERRORLEVEL! EQU 2 && goto:getSoftware
+    pushd !BFW_TOOLS_PATH!
+    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\scanWiiU.bat.bat""
+    wscript /nologo !StartWait! !tobeLaunch!
+    goto:getSoftware
+
+   :batchFwUsers
+    set /P "input=Please enter BatchFw's user name : "
+    call:secureUserNameForBfw "!input!" safeInput
+    if !ERRORLEVEL! NEQ 0 (
+        @echo Some unhandled characters were found ^!
+        @echo Please remove them
         goto:getUsers
     )
 
-    set "msg="USER_REGISTERED=!USERNAME!""
+    if not ["!safeInput!"] == ["!input!"] (
+        @echo Some unhandled characters were found ^!
+        choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
+        if !ERRORLEVEL! EQU 2 goto:getUsers
+    )
+    set "user="!safeInput!""
+
+    set "msg="USER_REGISTERED=!user:"=!""
     call:log2HostFile !msg!
 
     choice /C yn /N /M "Add another user? (y,n): "
@@ -498,7 +546,7 @@ REM : main
     set "spath=!spath:"='!"
 
     set "msg=TO_BE_LAUNCHED@!spath!"
-    
+
     choice /C ny /N /M "Do you want BatchFw to close it after Cemu stops? (y,n) "
     if !ERRORLEVEL! EQU 1  set "msg="!msg!@N""
     if !ERRORLEVEL! EQU 2  set "msg="!msg!@Y""
@@ -510,7 +558,7 @@ REM : main
     set "firstArg="NONE""
     for /F "tokens=1 delims=~'" %%j in ("!spath!") do set "program="%%j""
     for /F "delims=" %%i in (!program!) do set "name=%%~nxi"
-    
+
     set "icoFile=!name:.exe=.ico!"
     set "icoPath="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
     if not exist !icoPath! call !quick_Any2Ico! "-res=!program:"=!" "-icon=!icoPath:"=!" -formats=256
@@ -538,7 +586,7 @@ REM : main
         @echo ^> External mlc01 data was imported^!
         @echo.
         @echo Next time use the shortcuts in
-        @echo Wii-U Games^\BatchFW^\Tools^\Mlc01 folder handling
+        @echo Wii-U Games^\_BatchFw^\Tools^\Mlc01 folder handling
         @echo.
         pause
 
@@ -546,6 +594,7 @@ REM : main
 
    :getOuptutsType
     cls
+    set "outputType=LNK"
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo What kind of outputs do you want to launch your games^?
     @echo.
@@ -560,7 +609,7 @@ REM : main
         @echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         if [!ANSWER!] == ["3"] exit 70
-    ) else (    
+    ) else (
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     )
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
@@ -577,7 +626,7 @@ REM : main
     if %nbArgs% EQU 1 (
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
-        timeout /T 3 > NUL
+        timeout /T 3 > NUL 2>&1
         goto:registerCemuInstalls
     )
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -587,7 +636,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -609,7 +658,7 @@ REM : main
     )
 
     @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
-    timeout /T 3 > NUL
+    timeout /T 3 > NUL 2>&1
 
    :registerCemuInstalls
 
@@ -642,7 +691,7 @@ REM : main
 
         @echo If you^'re duplicating the same CEMU^'s version for many players^:
         @echo register this version with one user^, and use the shortcut
-        @echo Wii-U Games^\BatchFW^\Tools^\Games^'s saves^\Import Saves
+        @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s saves^\Import Saves
         @echo to import saves of other users afterwards^.
         @cls
     )
@@ -665,10 +714,10 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
-    
+
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !CEMU_FOLDER!
@@ -677,14 +726,14 @@ REM : main
         @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askCemuFolder
-    )    
+    )
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if /I not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
-    
+
     if !cr! EQU 1 (
         set /A "NBCV-=1"
         goto:askCemuFolder
@@ -745,14 +794,14 @@ REM : main
     @echo ^> relaunch this script from its shortcut
     @echo Wii-U Games^\Register CEMU installs^.lnk
     @echo ---------------------------------------------------------
-    @echo You can now only use the shortcuts created in  
+    @echo You can now only use the shortcuts created in
     @echo !OUTPUT_FOLDER:"=!\Wii-U Games
     @echo There^'s no need to launch scripts from here now^!
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if %nbArgs% EQU 1 exit 0
     @echo Openning !OUTPUT_FOLDER:"=!\Wii-U Games^.^.^.
-    timeout /T 4 > NUL
+    timeout /T 4 > NUL 2>&1
 
     set "folder="!OUTPUT_FOLDER:"=!\Wii-U Games""
     wscript /nologo !Start! "%windir%\explorer.exe" !folder!
@@ -793,7 +842,7 @@ REM : functions
 
         @echo Hum^.^.^. some DLC and UPDATE DATA folders were found
         @echo Preparing those games for emulation^.^.^.
-        timeout /T 5 > NUL
+        timeout /T 5 > NUL 2>&1
 
         REM : calling createShortcuts.bat
         set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
@@ -801,7 +850,7 @@ REM : functions
 
         @echo ---------------------------------------------------------
         @echo ^> Games ready for emulation
-        timeout /T 5 > NUL
+        timeout /T 5 > NUL 2>&1
         cls
 
     goto:eof
@@ -858,7 +907,7 @@ REM : functions
 
         REM : check if CemuHook is installed
         set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
-        
+
        :checkCemuHook
         if exist !dllFile! goto:checkSharedFonts
 
@@ -879,12 +928,12 @@ REM : functions
 
         wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
 
-        timeout /T 2 > NUL
+        timeout /T 2 > NUL 2>&1
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
         gotocheckCemuHook
-        
+
        :checkSharedFonts
 
         REM : check if sharedFonts were downloaded
@@ -921,16 +970,16 @@ REM : functions
         if %n% GEQ 1140 goto:autoImportMode
 
        :extractV2Packs
-        set "gfxv2="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs\_graphicPacksV2""
+        set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:autoImportMode
 
-        mkdir !gfxv2! > NUL
+        mkdir !gfxv2! > NUL 2>&1
         set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
         @echo ---------------------------------------------------------
         @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             @echo ERROR while extracting V2_GFX_Packs, exiting 1
@@ -942,12 +991,13 @@ REM : functions
         @echo ---------------------------------------------------------
         if %cemuNumber% EQU 1  (
 
-            @echo Do you want to enable automatic settings import between versions of CEMU^?
+            @echo Enable AUTOMATIC SETTINGS IMPORT between versions of CEMU^?
             @echo.
             @echo y^: Using settings of the last version of CEMU used to play this game
             @echo n^: Will launch the wizard script to collect settings for each game
             @echo.
-            @echo If a game shortcut already exists^: skip this game
+            @echo Choose y ONLY if you^'re sure that there was no new settings    
+            @echo introduced between the last played version and this version
             @echo.
         )
 
@@ -1050,7 +1100,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:£=!"
+        set "str=!str:?=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1061,6 +1111,40 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : remove DOS forbiden character from a string
+   :secureUserNameForBfw
+        set "str=%~1"
+
+        REM : DOS reserved characters
+        set "str=!str:&=!"
+        set "str=!str:^!=!"
+        
+        REM : Forbidden characters for files in WINDOWS
+        set "str=!str:?=!"
+        set "str=!str:\=!"
+        set "str=!str:/=!"       
+        set "str=!str::=!"        
+        set "str=!str:"=!"
+        set "str=!str:>=!"
+        set "str=!str:<=!"
+        set "str=!str:|=!"
+        set "str=!str:^=!"
+        
+        @echo !str! | find "*" > NUL 2>&1 && (
+            echo Please remove * ^(unsupported charcater^) from !str!
+            exit /b 50
+        )
+        @echo !str! | find "=" > NUL 2>&1 && (
+            echo Please remove = ^(unsupported charcater^) from !str!
+            exit /b 50
+        )
+
+        set "%2=!str!"
+        exit /b 0
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
    :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
@@ -1068,8 +1152,8 @@ REM : functions
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !logFile! > NUL
-        move /Y !logFileTmp! !logFile! > NUL
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1117,39 +1201,39 @@ REM : functions
             set "folder="!GAME_FOLDER_PATH:"=!\%%k""
 
             if ["%%k"] == ["inGameSaves"] (
-                if not exist !cemuFolder! mkdir !cemuFolder! > NUL
+                if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   An inGameSaves subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
-                if !cr! EQU 2 rmdir /Q /S !folder! 2>NUL
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["shaderCache"] (
 
-                if not exist !cemuFolder! mkdir !cemuFolder! > NUL
+                if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   A shaderCache subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
-                if !cr! EQU 2 rmdir /Q /S !folder! 2>NUL
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["graphicPacks"] (
 
-                if not exist !cemuFolder! mkdir !cemuFolder! > NUL
+                if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   A graphicPacks subfolder was found directly under the game^'s path root
                 @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL
-                if !cr! EQU 2 rmdir /Q /S !folder! 2>NUL
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
 
         )
@@ -1157,8 +1241,8 @@ REM : functions
         set "gif="!GAME_FOLDER_PATH:"=!\!GAME_TITLE!.txt""
 
         if exist !gif! (
-            if not exist !cemuFolder! mkdir !cemuFolder! > NUL
-            move /Y !gif! !cemuFolder! > NUL
+            if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
+            move /Y !gif! !cemuFolder! > NUL 2>&1
         )
 
        :gameTreated
@@ -1185,7 +1269,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -1251,7 +1335,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -1263,11 +1347,11 @@ REM : functions
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %BFW_PATH% > NUL && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
+        echo msg=!msg! | find %BFW_PATH% > NUL 2>&1 && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present
@@ -1285,10 +1369,10 @@ REM : functions
 
         if exist !logFile! goto:eof
         set "logFolder="!BFW_PATH:"=!\logs""
-        if not exist !logFolder! mkdir !logFolder! > NUL
+        if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
 
         call:log2HostFile "================================================="
-        call:log2HostFile "CEMU BATCH Framework history for !USERDOMAIN!"
+        call:log2HostFile "CEMU BATCH Framework history and settings for !USERDOMAIN!"
         call:log2HostFile "-------------------------------------------------"
 
     goto:eof
