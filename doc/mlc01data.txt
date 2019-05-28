@@ -13,12 +13,16 @@ BatchFw ties your game's mlc01 data to the game's folder.
 - to avoid having all data for all your games mixed in the CEMU's folder and prevent from leaving USELESS data 
   when uninstalling a game;
 
-Shortcuts created will use -mlc option pointing to mlc01 game's subfolder (your initial mlc01 folder in your Cemu's folder will be untouched)
-So you can safely choose the first time to copy your mlc01 CEMU's subfolder (and remove it later if you keep BatchFW installed);
+Shortcuts created will use -mlc option pointing to mlc01 game's subfolder (your initial mlc01 folder in your 
+Cemu's folder will be untouched)
+So you can safely choose the first time to copy your mlc01 CEMU's subfolder (and remove it later if you 
+keep BatchFW installed);
 
-But before copying or moving, check your left space on your drives. If you have enough space, we recommend to copy the mlc01 folder instead of moving it.
+But before copying or moving, check your left space on your drives. If you have enough space, we recommend to 
+copy the mlc01 folder instead of moving it.
 
-If you want to uninstall BatchFW and have progressed in some games, choose to revert mlc01 from games's folders to your CEMU folder in order 
-to keep your last saves created during BatchFW's trial. You should also think to choose to revert transferable cache.
+If you want to uninstall BatchFW and have progressed in some games, choose to revert mlc01 from games's folders 
+to your CEMU folder in order to keep your last saves created during BatchFW's trial. 
+You should also think to choose to revert transferable cache.
 
 

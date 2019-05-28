@@ -6,20 +6,31 @@ The main purpose of BatchFW is:
 
     Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 
-    Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
+    Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. 
+    You can also register multiple versions of the emulator;
 
 All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
 
-With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version.
+With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache 
+ignoring if you're an NVidia user - since you won't need to build a shader cache for each version.
 
 The mlc01 path is in the game folder so
 
     you can backup a whole game by compressing its folder (saves, updates, DLCs, controller profiles, settings... are ALL included);
 
-    your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
+    your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by 
+    host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
-Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
+Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a 
+resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. 
+And when an official pack for the game comes out BatchFW will automatically replace the created one.
 
+FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template) 
+The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created. 
+If you're using a static IP adress policy on your local network, no need to create a another configuration. 
+You'll be able to use the first one you created. 
+Note that if you want to run _BatchFw_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file. 
+You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts
 
 Other features:
 
@@ -31,9 +42,12 @@ Other features:
 
     Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
-    Your own games compatibility datase per host you use (BatchFW logs silently the first version of CEMU that manages to run a game on this host);
+    Your own games compatibility datase per host you use (BatchFW logs silently the first version of CEMU that manages to run a 
+    game on this host);
 
-    Your own CEMU X.Y.Z games compatibility list per host: compatibility per version and per host of all your games (last column in the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically with your specs and the settings used);
+    Your own CEMU X.Y.Z games compatibility list per host: compatibility per version and per host of all your games (last column in 
+    the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically 
+    with your specs and the settings used);
 
     Easy game profile configuration per version (using shortcuts);
 
@@ -41,7 +55,8 @@ Other features:
 
     Double automatic backup of your transferable cache and saves for each games to avoid their corruption that can occur on CEMU crash;
 
-    Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8) and not only...
+    Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to 
+    track broken shaderCacheId (as it happened with CEMU 1.8) and not only...
 
     ect...
 

@@ -2,17 +2,16 @@
 WII-U transferts : 
 =========================================================
 
-I recommend to use an USB Ethernet adapter because WIi-U's builtin Wifi really sucks. 
-
 BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
 The first time you need to access to your Wii-U, you'll have to enter the IP fo the Wii-U and the port
 An ini file is created.
 
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
 You'll be able to use the first one you created.
-Note that if you want to run _BatchFw_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
+Note that if you want to run _BatchFw_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use 
+this ini file.
 
-You'll only have to start/stop the ftpiiu server on your Wii-U and launch the scripts.
+I'll only have to start/stop the ftpiiu server on your Wii-U and launch the scripts.
 
 ---------------------------------------------------------
 Create a SDCard for Wii-U
@@ -23,7 +22,16 @@ If you're running a CBHC CFW use FTP everywhere FOR CBHC.
 Otherwise launch MOCHA then FTP everywhere FOR MOCHA.
 
 ---------------------------------------------------------
-Get online files : _BatchFw_WiiU\onlineFiles
+Scan my Wii-U : _BatchFw_WiiU\Scans\YYYY-MM-DD_HH-MM-SS
+---------------------------------------------------------
+This feature allows you to take snasphot of your wii-U to list games, updates, DLC and saves installed on storage_mlc 
+(NAND) and storage_usb (USB device).
+
+Each scan is valid unless you install/uninstall games on your Wii-U and only the last one will be use by the other scripts.
+During this process, necessary onlines files are dumped in _BatchFw_WiiU\OnlineFiles 
+
+---------------------------------------------------------
+Get online files : _BatchFw_WiiU\OnlineFiles
 ---------------------------------------------------------
 To dump files needed for playing online with Cemu : 
 - CCERTS
@@ -35,8 +43,51 @@ To dump files needed for playing online with Cemu :
 This script will also launch the following :
 
 ---------------------------------------------------------
-Associate BatchFw's user to Wii-U accounts : _BatchFw_WiiU\onlineFiles\usersAccounts
+Associate BatchFw's user to Wii-U accounts : _BatchFw_WiiU\OnlineFiles\usersAccounts
 ---------------------------------------------------------
 This script associate BatchFw's users to Wii-U accounts.
 Once done, files (account.dat) are automatically installed when launching Cemu.
+You'll received a warning if your Wii-U is detected on the network to ensure that no one is using your account Id at the same 
+time (risk of ban)
 
+---------------------------------------------------------
+Import saves from my Wii-U :
+---------------------------------------------------------
+The script will use the last scan results (or your can launch a new scan) to be sure that the game is 
+installed on your Wii-U and your PC then import the saves for all users that have an accountId (so an associated folder 80000XX) and 
+saves for this game.
+For all user, their folders are replaced by 8000001 (the only user CEMU handle for now) and the saveInfo.xml file is updated (only 
+one user = 8000001).
+Saves are then compressed directly in %GAMES_FOLDER_PATH%\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar
+A backup of the CEMU's ones is made and saved as %GAMES_FOLDER_PATH%\Cemu\inGameSaves\!GAME_TITLE!_!user!_Cemu.rar
+
+---------------------------------------------------------
+Export Cemu saves to my Wii-U :
+---------------------------------------------------------
+Browse for a game in your library for which you want export saves to your Wii-U.
+The script will use the last scan results (or your can launch a new scan) to be sure that the game is installed on your Wii-U and your PC 
+then export the saves for all users that have an accountId (so an associated folder 80000XX) and saves for this game. 
+
+The saves are directly saved on the SD card of your Wii-U for a SaveMii use.
+
+The 8000001 folder is replaced by the one used by this user on the wii-U.
+If a common folder is found, it will be also backuped.
+
+
+---------------------------------------------------------
+Dump games from my Wii-U :
+---------------------------------------------------------
+Using the last scan results, pick up the games installed on your Wii-U (on mlc and usb) you want to dump.
+BatchFw will download all the data found for this game and prepare the game's folder for the emulation.
+update and DLC are installed in the mlc01 folder (located in game's folder).
+Save are imported for all accounts associated to a Batch's user.
+
+WARNING : its up to you to verify that there is enough space left on the target device
+
+
+---------------------------------------------------------
+NOTES : 
+
+- saves and games cannot be upload directly on the Wii-U
+- FTP injection of saves does not work for all games and for all Wii-U users
+- SaveMii is still the more reliable solution to backup saves for all users  

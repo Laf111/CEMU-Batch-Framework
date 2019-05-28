@@ -2,18 +2,26 @@
 CEMU HISTORY :
 =========================================================
 
-    CEMU 1.8    Broke shader cache compatibility -> If you try to import a shader cache on earlier version, it will be erase/reset by CEMU;
-    CEMU 1.10   Added -mlc argument to customize path for mlc01 directory -> In earlier version, all games' data were mixed in mlc01 subfolder in CEMU;
-    CEMU 1.11   Modified saving process and location: broken compatibility on saves -> Use Cemu 1.11 to import/format your saves from previous versions;
+    CEMU 1.8    Broke shader cache compatibility -> If you try to import a shader cache on earlier 
+                version, it will be erase/reset by CEMU;
+    CEMU 1.10   Added -mlc argument to customize path for mlc01 directory -> In earlier version, all 
+                games' data were mixed in mlc01 subfolder in CEMU;
+    CEMU 1.11   Modified saving process and location: broken compatibility on saves -> Use Cemu 1.11 to 
+                import/format your saves from previous versions;
+    CEMU 1.12.0 Added games list;
     CEMU 1.12.1 Added disable precompiled shader cache option (UI settings & in game profiles);
     CEMU 1.13   Added -mlc settings in UI to customize path for mlc01 directory;
     CEMU 1.14   Shader reworked and introduced V3 graphic packs;
     CEMU 1.15   Support for game's mods;
+    CEMU 1.15.6 Save controler profile used in the game's profile when using the UI (right click on the 
+                game in the list);
 
 Before 1.11, saves were in mlc01/emulatorSave/ShaderCacheId and updates and DLC were applied by overwriting files.
-After 1.11, they are stored in mlc01/usr/save/titleId[0:7]/titleId[8:15]/* (where titleId is the 16 characters id of your game (cf http://wiiubrew.org/wiki/Title_database )), 
-updates are in mlc01/usr/title/titleId[0:7]/titleId[8:15] 
-and DLC are in mlc01/usr/title/titleId[0:7]/titleId[8:15]/aoc
+After 1.11, they are stored in mlc01/usr/save/titleId[0:7]/titleId[8:15]/* (where titleId is the 16 characters id 
+of your game (cf http://wiiubrew.org/wiki/Title_database )), 
+
+- updates are in mlc01/usr/title/titleId[0:7]/titleId[8:15] 
+- and DLC are in mlc01/usr/title/titleId[0:7]/titleId[8:15]/aoc
 
 Recommended versions for BatchFw are >=1.11 (to avoid down side save format conversion issues).
 Anyways, if you want to use a version earlier than 1.11, you'd better have a specific Cemu install for those games.
