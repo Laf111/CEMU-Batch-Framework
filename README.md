@@ -22,8 +22,7 @@ The mlc01 path is in the game folder so
 Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
 
 FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
-The first time you need to access to your Wii-U, you'll have to enter the IP fo the Wii-U and the port
-An ini file is created.
+The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
 You'll be able to use the first one you created.
 Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
