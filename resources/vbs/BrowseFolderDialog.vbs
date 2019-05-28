@@ -1,13 +1,18 @@
 Option Explicit
 
-Dim strPath, objArgs, messageText
+Dim strPath, objArgs, messageText, myStartFolder
 
 Set objArgs = WScript.Arguments
 
 ' message
 messageText = objArgs(0)
+' root folder
+myStartFolder=""
+If objArgs.Count=2 Then
+    myStartFolder = objArgs(1)
+End If
 
-strPath = SelectFolder( "", messageText )
+strPath = SelectFolder( myStartFolder, messageText )
 If strPath = vbNull Then
     WScript.Echo """NONE"""
 Else
