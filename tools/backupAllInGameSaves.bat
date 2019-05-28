@@ -31,9 +31,6 @@ REM : main
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -74,34 +71,7 @@ REM : main
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    
-    @echo Please select mlc01 source folder
-    @echo For each game^, if a mlc01 folder is found under game^'s folder it will be used instead^!
-
-    :askMlc01Folder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
-    if [!MLC01_FOLDER_PATH!] == ["NONE"] (
-        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
-        goto:askMlc01Folder
-    )
-
-    REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !MLC01_FOLDER_PATH!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! GTR 1 (
-        @echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
-        pause
-        goto:askMlc01Folder
-    )
-    
-    REM : check if a usr/title exist
-    set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
-    if not exist !usrTitle! (
-        @echo !usrTitle! not found^?
-        goto:askMlc01Folder
-    )
+    set /A "QUIET_MODE=0"
 
     goto:inputsAvailables
 
@@ -126,15 +96,14 @@ REM : main
 
     :inputsAvailables
 
-    @echo  - source mlc01 folder^: !MLC01_FOLDER_PATH!
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^)^: launch now
     @echo     ^(n^)^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -206,7 +175,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -221,7 +190,7 @@ REM : main
     @echo     ^(n^)^: don^'t close^, i want to read history log first
     @echo     ^(q^)^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -271,7 +240,7 @@ REM : functions
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
 
-        for %%a in (!USERSLIST!) do (
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
 
             set rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_%%a.rar"
 
@@ -282,14 +251,14 @@ REM : functions
             set backup="!str:.rar=!_%DATE%.rar"
 
             @echo Game saves found, backuping under !backup!
-            copy /Y !rarFile! !backup! > NUL
+            copy /Y !rarFile! !backup! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! NEQ 0 (
                 @echo ERROR when copying !rarFile! to !backup!
                 pause
             )
             :skipUser
-            echo. > NUL
+            echo. > NUL 2>&1
         )
 
         set /A NB_SAVES_TREATED+=1
@@ -319,7 +288,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -364,7 +333,7 @@ REM : functions
             )
             set /A j+=1
         )
-        
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -384,7 +353,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -399,7 +368,7 @@ REM : functions
        set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

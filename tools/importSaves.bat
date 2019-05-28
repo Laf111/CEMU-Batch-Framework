@@ -35,7 +35,7 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     REM : RAR.exe path
     set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
 
@@ -79,17 +79,17 @@ REM : main
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    
+    set /A "QUIET_MODE=0"
     @echo Please select mlc01 source folder
 
     :askMlc01Folder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askMlc01Folder
     )
-    
+
     REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !MLC01_FOLDER_PATH!
@@ -99,7 +99,7 @@ REM : main
         pause
         goto:askMlc01Folder
     )
-    
+
     REM : check if a usr/title exist
     set usrSave="!MLC01_FOLDER_PATH:"=!\usr\save"
     if not exist !usrSave! (
@@ -198,7 +198,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -213,7 +213,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -261,11 +261,11 @@ REM : functions
             :metafix
             @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
             set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-            if not exist !metaFolder! mkdir !metaFolder! > NUL
+            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
             @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
             @echo "Then close notepad to continue"
-            set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
-            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
+            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
 
             REM : create the meta.xml file
             @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
@@ -304,8 +304,8 @@ REM : functions
 
         set /A "nbUsers=0"
         set "cargs="
-        for %%a in (!USERSLIST!) do (
-            set "users[!nbUsers!]=%%a"
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+            set "users[!nbUsers!]="%%a""
             set /A "nbUsers +=1"
             set "cargs=!cargs!!nbUsers!"
             echo !nbUsers! ^. %%a
@@ -318,12 +318,12 @@ REM : functions
         set "user=!users[%index%]!"
 
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-        if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL
+        if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
         if exist !rarFile! (
-            choice /C yn /N /M "A save already exist for !user!, overwrite ? (y, n)"
+            choice /C yn /N /M "A save already exist for "!user!", overwrite ? (y, n)"
             if !ERRORLEVEL! EQU 2 @echo Cancel^! && goto:eof
         )
         @echo.
@@ -358,7 +358,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -403,7 +403,7 @@ REM : functions
             )
             set /A j+=1
         )
-        
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -423,7 +423,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -438,7 +438,7 @@ REM : functions
        set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

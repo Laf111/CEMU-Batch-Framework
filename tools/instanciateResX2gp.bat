@@ -74,10 +74,10 @@ REM : main
     for /F "delims=" %%j in ('echo !gpResX2gp! ^| find /I "p489"') do set /A "wToReplace=7680"
 
     REM : create graphic pack folder
-    if not exist !gp! mkdir !gp! > NUL
+    if not exist !gp! mkdir !gp! > NUL 2>&1
 
     REM : copy ResX2gpp one content in
-    robocopy !gpResX2gp! !gp! /S > NUL
+    robocopy !gpResX2gp! !gp! /S > NUL 2>&1
 
     REM : rules.txt
     set "rulesFilegp="!gp:"=!\rules.txt""
@@ -86,7 +86,7 @@ REM : main
     for /F "delims=" %%i in (!gp!) do set "gpName=%%~nxi"
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr\%gpName%""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     set "fnrLogFile="!fnrLogFolder:"=!\%wToReplace%xResX2gp.log""
     echo "GFX %wToReplace%x%resX2% !description!" > !fnrLogFile!
@@ -277,7 +277,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -290,7 +290,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

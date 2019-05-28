@@ -57,11 +57,6 @@ REM : main
         goto:continue
     :end
 
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
-
     if %nbArgs% NEQ 3 (
         @echo ERROR on arguments passed^!
         @echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
@@ -87,8 +82,6 @@ REM : main
     )
 
     set "user=!args[2]!"
-    set "user=!user:"=!"
-
 
     REM : No need to handles saves in function of their nature :
     REM : CEMU version earlier than 1.10 : mlc01/emulatorSave in CEMU_FOLDER
@@ -117,12 +110,12 @@ REM : main
         :metafix
         @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-        if not exist !metaFolder! mkdir !metaFolder! > NUL
+        if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
         @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
         @echo "Then close notepad to continue"
 
-        set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
+        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
 
         REM : create the meta.xml file
         @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
@@ -142,13 +135,13 @@ REM : main
     set "endTitleId=%titleId:~8,8%"
 
     set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-    if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL
+    if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
     pushd !inGameSavesFolder!
-    set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
+    set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
     REM : if exist delete-it
-    if exist !rarFile! del /F /S !rarFile! > NUL
+    if exist !rarFile! del /F /S !rarFile! > NUL 2>&1
 
     set usrSaveFolder="!MLC01_FOLDER_PATH:"=!\usr\save"
     for /F "delims=" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
@@ -181,8 +174,8 @@ REM : main
     for /F "delims=" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
         set "folder="!emulatorSaveFolder:"=!\%%i""
 
-        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFile! !folder! > NUL
-        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFileEmuSave! !folder! > NUL
+        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFile! !folder! > NUL 2>&1
+        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFileEmuSave! !folder! > NUL 2>&1
     )
 
     :done
@@ -203,7 +196,7 @@ REM : functions
         set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\%~1\%endTitleId%""
 
         if exist !sf! (
-            !rarExe! a -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul !rarFile! !sf! > NUL
+            !rarExe! a -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul !rarFile! !sf! > NUL 2>&1
         )
 
     goto:eof
@@ -223,7 +216,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -246,7 +239,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -263,7 +256,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

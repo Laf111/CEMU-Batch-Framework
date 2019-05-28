@@ -31,9 +31,9 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -68,17 +68,17 @@ REM : main
     set /A "QUIET_MODE=0"
 
     REM : check if exist external Graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         goto:getTitleId
     )
-    
+
     @echo Please select a reference graphics packs folder
     :askGpFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -89,7 +89,7 @@ REM : main
         @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askGpFolder
-    )    
+    )
 
     :getTitleId
     set "checkLenght="
@@ -153,27 +153,27 @@ REM : main
     :inputsAvailables
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     set "titleId=%titleId: =%"
-    
+
     set titleId=%titleId:"=%
     set "ftid=%titleId:~0,16%"
 
     REM : check if game is recognized
     call:checkValidity %ftid%
 
-    set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%ftid%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%ftid%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiuLibFile!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
         exit /b 3
     )
     @echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiuLibFile!
+    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
 
@@ -209,7 +209,7 @@ REM : main
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:begin
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
@@ -228,14 +228,14 @@ REM : main
     set "gpV3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     set "rulesFileV3="!gpV3:"=!\rules.txt""
     set "v3ExistFlag=1"
 
     if not exist !gpV3! (
         set "v3ExistFlag=0"
-        mkdir !gpV3! > NUL
+        mkdir !gpV3! > NUL 2>&1
         call:initV3CapGP
     )
 
@@ -243,7 +243,7 @@ REM : main
     call:createCapGP
 
     REM : finalize V3 graphic packs if a FPS++ pack was not found
-    if !fpsPPV3! EQU 1 rmdir /Q /S !gpV3! 2>NUL && set "v3ExistFlag=1"
+    if !fpsPPV3! EQU 1 rmdir /Q /S !gpV3! > NUL 2>&1 && set "v3ExistFlag=1"
     if %v3ExistFlag% EQU 0 call:finalizeV3CapGP
 
     if %nbArgs% EQU 0 endlocal && pause
@@ -264,7 +264,7 @@ REM : functions
         REM now searching using icoId
         set "line="NONE""
 
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
@@ -373,9 +373,9 @@ REM : functions
 
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
-        copy /Y !rulesFileV3! !utf8! > NUL
+        copy /Y !rulesFileV3! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV3!
-        del /F !utf8! > NUL
+        del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -387,13 +387,13 @@ REM : functions
 
         set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
         if not exist !bfwgpv2! goto:eof
-        set "gp="!bfwgpv2:"=!\_BatchFW_%description: =_%""
+        set "gp="!bfwgpv2:"=!\_BatchFw_%description: =_%""
 
         if exist !gp! (
             @echo ^^! !gp! already exist, skipped ^^!
             goto:eof
         )
-        if not exist !gp! mkdir !gp! > NUL
+        if not exist !gp! mkdir !gp! > NUL 2>&1
 
         set "rulesFileV2="!gp:"=!\rules.txt""
 
@@ -411,9 +411,9 @@ REM : functions
 
         REM : force UTF8 format
         set "utf8=!rulesFileV2:rules.txt=rules.tmp!"
-        copy /Y !rulesFileV2! !utf8! > NUL
+        copy /Y !rulesFileV2! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV2!
-        del /F !utf8! > NUL
+        del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -460,12 +460,12 @@ REM : functions
 
 
         :create
-        
+
         REM : cap to 100%-1FPS (online compatibility)
         set /A "fps=%nativeFps%/%factor% - 1"
-        
+
         call:createCapV2GP %fps% "!GAME_TITLE!_%fps%FPS_cap"
-        type !rulesFileV3! | find /I /V "FPS = %fps%" > NUL && if %fpsPPV3% EQU 0 call:fillCapV3GP "99" "Speed (%fps%FPS)"
+        type !rulesFileV3! | find /I /V "FPS = %fps%" > NUL 2>&1 && if %fpsPPV3% EQU 0 call:fillCapV3GP "99" "Speed (%fps%FPS)"
 
         if %fpsPP% EQU 1 goto:capMenu
 
@@ -558,7 +558,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -581,7 +581,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -594,7 +594,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

@@ -58,11 +58,11 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    
-    title Move all transferable caches to a CEMU install target folder    
+
+    title Move all transferable caches to a CEMU install target folder
 
     REM : with no arguments to this script, activating user inputs
-    set /A "QUIET_MODE=0"    
+    set /A "QUIET_MODE=0"
     @echo Please select CEMU target folder
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
@@ -76,7 +76,7 @@ REM : main
         pause
         goto:askCemuFolder
     )
-    
+
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if /I not exist !cemuExe! (
@@ -116,11 +116,11 @@ REM : main
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -188,7 +188,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -206,7 +206,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -243,10 +243,10 @@ REM : functions
 
         @echo Moving transferable cache to !CEMU_FOLDER! ^?
         @echo   ^(n^) ^: no^, skip
-        @echo   ^(y^) ^: yes ^(default value after 8s timeout^)
-        @echo. 
+        @echo   ^(y^) ^: yes ^(default value after 15s timeout^)
+        @echo.
 
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 8
+        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
             REM : skip this game
             echo Skip this GAME
@@ -270,7 +270,7 @@ REM : functions
         ) else (
             @echo Moving !sf!
         )
-        
+
         :logInfos
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! restore transferable shader cache for !GAME_TITLE! in=!CEMU_FOLDER:"=!""
@@ -293,11 +293,11 @@ REM : functions
 
         set "source=!source:\\=\!"
         set "target=!target:\\=\!"
-        
+
         if not exist !source! goto:eof
         if [!source!] == [!target!] if exist !target! goto:eof
         if not exist !target! mkdir !target!
-        
+
         REM : source drive
         for %%a in (!source!) do set "sourceDrive=%%~da"
 
@@ -309,10 +309,10 @@ REM : functions
 
             for %%a in (!target!) do set "parentFolder="%%~dpa""
             set "parentFolder=!parentFolder:~0,-2!""
-            if exist !target! rmdir /Q /S !target! 2>NUL
+            if exist !target! rmdir /Q /S !target! > NUL 2>&1
 
             REM : use move command (much type faster)
-            move /Y !source! !parentFolder! > NUL
+            move /Y !source! !parentFolder! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! EQU 1 (
                 set /A "%3=1"
@@ -324,7 +324,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT > NUL
+        robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"
@@ -350,7 +350,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -415,7 +415,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
 
@@ -430,7 +430,7 @@ REM : functions
         set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
@@ -441,8 +441,8 @@ REM : functions
         REM : sorting the log
         set "gLogFileTmp="!glogFile:"=!.tmp""
         type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL
-        move /Y !gLogFileTmp! !glogFile! > NUL
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -454,7 +454,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

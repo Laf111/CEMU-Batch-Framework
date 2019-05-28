@@ -7,7 +7,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    
+
     title Import a transferable cache for a game
 
     REM : checking THIS_SCRIPT path
@@ -32,10 +32,10 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "browseFile="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFileDialog.vbs""
-    
+
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
@@ -59,7 +59,7 @@ REM : main
     @echo =========================================================
     @echo Import a transferable cache file
     @echo =========================================================
-    
+
     REM : browse to the file
     :askInputFile
     @echo Please browse to the transferable cache file
@@ -67,22 +67,22 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFile!') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askInputFile
-    )    
-    
+    )
+
     for %%a in (!TRANSF_CACHE!) do set "folder="%%~dpa""
     set "SOURCE_FOLDER=!folder:~0,-2!""
-    
+
     :askGameFolder
     @echo Please browse to the game^'s folder
 
     for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGameFolder
-    )    
+    )
     REM : check if folder name contains forbiden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !GAME_FOLDER_PATH!
@@ -92,7 +92,7 @@ REM : main
         pause
         goto:askGameFolder
     )
-    
+
     REM : check if rpx file present under game folder
     set "RPX_FILE="NONE""
     set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
@@ -104,16 +104,16 @@ REM : main
         @echo This folder does not contain rpx file under a code subfolder
         goto:askGameFolder
     )
-    
+
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
     for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     REM : search for BatchFw game info file
     set "infoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
-    
+
     if not exist !infoFile! (
         @echo BatchFw^'^s game info file was not found
-        @echo The shader cache id is read from Cemu^'s log and 
+        @echo The shader cache id is read from Cemu^'s log and
         @echo write in !infoFile! after the first launch
         @echo.
         @echo Please^, launch the game at least one time and
@@ -123,44 +123,44 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !infoFile! ^| find /I "ShaderCache Id" 2^>NUL') do set "sci=%%i"
     set "sci=!sci:"=!"
     set "sci=!sci: =!"
-    
+
     REM : check the files sizes
     for /F "tokens=*" %%a in (!TRANSF_CACHE!)  do set "newSize=%%~za"
 
     REM : search for existing cache
     set "TARGET_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\ShaderCache\transferable""
-    
+
     pushd !TARGET_FOLDER!
-    
+
     set "oldCache="NONE""
     for /F "delims=" %%i in ('dir /B /O:D *.bin 2^>NUL') do (
         set "oldCache="!TARGET_FOLDER:"=!\%%i""
     )
 
     pushd !GAMES_FOLDER!
-    
+
     REM : if no cache is found
     if [!oldCache!] == ["NONE"] goto:copyCache
-    
+
     REM : get size
     for /F "tokens=*" %%a in (!oldCache!)  do set "oldSize=%%~za"
-  
+
     if %newSize% LSS %oldSize% (
         @echo WARNING the size of the new file is lower than your current cache
         call:getUserInput "Do you want to continue? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] (
             @echo Cancelled by user
-            timout /T 3 > NUL
+            timout /T 3 > NUL 2>&1
             exit 1
         )
     )
-    
+
     :copyCache
     set "newName="!SOURCE_FOLDER:"=!\!sci!.bin""
-    
-    move /Y !TRANSF_CACHE! !newName! > NUL
-    robocopy !SOURCE_FOLDER! !TARGET_FOLDER! !sci!.bin > NUL
-        
+
+    move /Y !TRANSF_CACHE! !newName! > NUL 2>&1
+    robocopy !SOURCE_FOLDER! !TARGET_FOLDER! !sci!.bin > NUL 2>&1
+
     @echo !TRANSF_CACHE! successfully copied to
     @echo !TARGET_FOLDER! as !sci!.bin
 
@@ -169,7 +169,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -206,7 +206,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -271,7 +271,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -285,7 +285,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

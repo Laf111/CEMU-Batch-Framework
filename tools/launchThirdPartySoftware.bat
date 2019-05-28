@@ -21,12 +21,12 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     set /A "nbIs=0"
     for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
 
         set "command=%%i"
-        for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command            
+        for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
 
         set "program="NONE""
         set "firstArg="NONE""
@@ -46,13 +46,13 @@ REM : main
             if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
             set cmd=!command:"=!
-            
+
             REM : start the program if it is not already running
             if !nbIs! EQU 0 wscript /nologo !Start! !cmd:'="!
         )
     )
     exit !ERRORLEVEL!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 

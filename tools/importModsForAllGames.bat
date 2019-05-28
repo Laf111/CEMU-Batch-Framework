@@ -7,7 +7,7 @@ REM : main
     color 4F
 
     title Import Mods for my games
-    
+
     set "THIS_SCRIPT=%~0"
 
     REM : checking THIS_SCRIPT path
@@ -32,7 +32,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
@@ -54,14 +54,14 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
     @echo Please select your mods source folder
-    
+
     :askModFolder
     for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
     if [!MODS_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askModFolder
-    )    
+    )
     REM : check if folder name contains forbiden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !MODS_FOLDER_PATH!
@@ -71,21 +71,21 @@ REM : main
         pause
         goto:askModFolder
     )
-    
+
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
-    
+
     cls
     @echo =========================================================
     @echo Identify and copy each mods to each game^'s folder
     @echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
     @echo  - source mods folder ^: !MODS_FOLDER_PATH!
     @echo =========================================================
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -154,7 +154,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -165,7 +165,7 @@ REM : main
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
     @echo     ^(q^) ^: close it now and quit
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice? : " "q,n" ANSWER 12
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -216,12 +216,12 @@ REM : functions
             :metafix
             @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
             set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-            if not exist !metaFolder! mkdir !metaFolder! > NUL
+            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
             @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
             @echo "Then close notepad to continue"
 
-            set "df="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
-            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !df!
+            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
 
             REM : create the meta.xml file
             @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
@@ -253,7 +253,7 @@ REM : functions
             REM : rules.txt
             set "rulesFile="!MODS_FOLDER_PATH:"=!%%i.%%j""
 
-            type !rulesFile! | find "path =" | find /I "Mod" > NUL && (
+            type !rulesFile! | find "path =" | find /I "Mod" > NUL 2>&1 && (
                 REM : V2 graphic pack
                 set "str=%%i"
                 set "str=!str:rules=!"
@@ -261,10 +261,10 @@ REM : functions
 
                 set "srcModPath="!MODS_FOLDER_PATH:"=!\!name!""
                 set "GAME_MOD_PATH="!GAME_FOLDER_PATH:"=!\Cemu\mods""
-                if not exist !GAME_MOD_PATH! mkdir !GAME_MOD_PATH! > NUL
+                if not exist !GAME_MOD_PATH! mkdir !GAME_MOD_PATH! > NUL 2>&1
                 set "targetModPath="!GAME_MOD_PATH:"=!\!name!""
 
-                robocopy !srcModPath! !targetModPath! /S > NUL
+                robocopy !srcModPath! !targetModPath! /S > NUL 2>&1
                 @echo ---------------------------------------------------------
                 @echo Mod !name! for !GAME_TITLE! was successfull imported
 
@@ -294,7 +294,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -359,7 +359,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -373,7 +373,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

@@ -20,7 +20,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     set /A "nbIs=0"
     for /F "tokens=* delims=~" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
 
@@ -28,22 +28,22 @@ REM : main
     )
 
     exit !ERRORLEVEL!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
 
-    
+
     :closeSoftware
-    
+
         set "line="%~1""
 
         for /F "tokens=3 delims=~@" %%j in (!line!) do set "whatTodo=%%j"
-       
+
         if ["!whatTodo!"] == ["N"] goto:eof
- 
+
         for /F "tokens=2 delims=~@" %%j in (!line!) do set "command="%%j""
 
 
@@ -67,12 +67,12 @@ REM : functions
             REM : basename of GAME FOLDER PATH (used to name shorcut)
             for /F "delims=" %%i in (!program!) do set "exe=%%~nxi"
             for /F "delims=" %%i in (!firstArg!) do set "argPiece=%%~nxi"
-          
+
             REM : start the program if it is not already running
             if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate
             if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate
 
-        )    
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
 REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V13-6"
+    set "BFW_NEXT_VERSION=V14"
 
     set "THIS_SCRIPT=%~0"
     
@@ -46,14 +46,18 @@ REM : ------------------------------------------------------------------
     set "changeLog="!BFW_PATH:"=!\Change.log""
     REM : ------------------------------------------------------------------
     REM : Check that the new version appear in the Change.log
-    type !changeLog! | find "!BFW_NEXT_VERSION!" > NUL && goto:patchSetup
+    type !changeLog! | find "!BFW_NEXT_VERSION!" > NUL 2>&1 && goto:patchSetup
 
     @echo ERROR^: Change.log does not contains !BFW_NEXT_VERSION!
     pause
     exit /b 1
 
+    REM : sleep 3 sec (called from restoreBfwDefaultSettings.bat)
+    timeout /T 3 > NUL 2>&1
 
     :patchSetup
+    set "sf="!BFW_PATH:"=!\setup.bat""
+    attrib -R !sf! > NUL 2>&1
     REM : ------------------------------------------------------------------
     REM : Patch version in setup.bat
     if not ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
@@ -71,9 +75,9 @@ REM : ------------------------------------------------------------------
         set "filePath="%%f""
         set "tmpFile=!filePath:.bat=.tmp!"
         type !filePath! > !tmpFile!
-        del /F !filePath! > NUL
-        move /Y !tmpFile! !filePath! > NUL
-        attrib +R !filePath! > NUL
+        del /F !filePath! > NUL 2>&1
+        move /Y !tmpFile! !filePath! > NUL 2>&1
+        attrib +R !filePath! > NUL 2>&1
     )
 
     pause
@@ -99,7 +103,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

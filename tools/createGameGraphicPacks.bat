@@ -29,7 +29,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
-    
+
     set "createV2GraphicPacks="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -66,7 +66,7 @@ REM : main
     set /A "QUIET_MODE=0"
 
     REM : check if exist external Graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         goto:getTitleId
     )
@@ -76,7 +76,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -87,7 +87,7 @@ REM : main
         @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askGpFolder
-    )    
+    )
     :getTitleId
     set "checkLenght="
     set "titleId="
@@ -139,26 +139,26 @@ REM : main
     :inputsAvailables
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     set "titleId=%titleId:"=%"
-    
+
     REM : check if game is recognized
     call:checkValidity %titleId%
 
     :createGP
-    set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiuLibFile!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
         exit /b 3
     )
     @echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiuLibFile!
+    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
 
@@ -190,7 +190,7 @@ REM : main
     @echo Create graphic packs for !GAME_TITLE!
     @echo =========================================================
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
@@ -232,7 +232,7 @@ REM : functions
         REM : waiting all children processes ending
         :waitingLoop
         for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
-            timeout /T 1 > NUL
+            timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
 
@@ -384,9 +384,9 @@ REM : functions
 
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
-        copy /Y !rulesFileV3! !utf8! > NUL
+        copy /Y !rulesFileV3! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV3!
-        del /F !utf8! > NUL
+        del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -605,7 +605,7 @@ REM : functions
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
-        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -626,7 +626,7 @@ REM : functions
         :169_windowed
 
         REM : create windowed packs only if user chosen it during setup
-        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -732,7 +732,7 @@ REM : functions
         REM now searching using icoId
         set "line="NONE""
 
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
@@ -755,7 +755,7 @@ REM : functions
             @echo ^^! !GAME_TITLE! already exist, skipped ^^!
             goto:eof
         )
-        if not exist !gpv3! mkdir !gpv3! > NUL
+        if not exist !gpv3! mkdir !gpv3! > NUL 2>&1
         set "rulesFileV3="!gpv3:"=!\rules.txt""
 
         call:initV3ResGraphicPack %nativeHeight% %nativeWidth% !GAME_TITLE!
@@ -835,7 +835,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -858,7 +858,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -871,7 +871,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

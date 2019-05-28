@@ -31,10 +31,10 @@ REM : main
 
     set "ffat32="!BFW_RESOURCES_PATH:"=!\fat32format.exe""
     set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
-    
+
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
@@ -46,17 +46,17 @@ REM : main
     @echo =========================================================
     @echo.
     @echo - format your device in FAT32 (32K clusters size)
-    @echo - install ^: 
-    @echo       ^* HBL ^(HomeBrew Launcher^)  
-    @echo       ^* appStore ^(HomeBrew AppStore^)  
-    @echo       ^* DDD ^(WiiU Disk itle Dumper^)  
-    @echo       ^* MOCHA ^(MOCHA CFW^)  
-    @echo       ^* FTP everywhere for MOCHA ^(ftpiiu^)  
-    @echo       ^* FTP everywhere for CBHC ^(ftpiiu^)  
-    @echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)  
-    @echo       ^* nanddumper ^(to dump your NAND and get online files^)  
-    @echo       ^* sigpatcher2sysmenu ^(DLC patch with non permanent CFW^)  
-    @echo       ^* wup_installer_gx2 ^(installer for WUP format^)  
+    @echo - install ^:
+    @echo       ^* HBL ^(HomeBrew Launcher^)
+    @echo       ^* appStore ^(HomeBrew AppStore^)
+    @echo       ^* DDD ^(WiiU Disk itle Dumper^)
+    @echo       ^* MOCHA ^(MOCHA CFW^)
+    @echo       ^* FTP everywhere for MOCHA ^(ftpiiu^)
+    @echo       ^* FTP everywhere for CBHC ^(ftpiiu^)
+    @echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)
+    @echo       ^* nanddumper ^(to dump your NAND and get online files^)
+    @echo       ^* sigpatcher2sysmenu ^(DLC patch with non permanent CFW^)
+    @echo       ^* wup_installer_gx2 ^(installer for WUP format^)
     @echo.
     @echo Once plugged in your Wii-U^, open the internet browser
     @echo and enter the following adress ^: http^:^/^/wiiuexploit^.xyz
@@ -73,25 +73,25 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select the drive of your SDCard"') do set "folder=%%b" && set "SDCARD=!folder:?= !"
     if [!SDCARD!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askDrive
     )
-    
+
     for %%a in (!SDCARD!) do set "SDCARD=%%~da"
     :formatDrive
     REM : format %SDCARD% with fat32format.exe
     !ffat32! -c64 %SDCARD%
     if !ERRORLEVEL! NEQ 0 goto:formatDrive
     @echo.
-    @echo ---------------------------------------------------------    
+    @echo ---------------------------------------------------------
     @echo Installing content^.^.^.
     REM : install content
     set "sdCardContent="!BFW_RESOURCES_PATH:"=!\WiiuSDcard.rar""
-    
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !sdCardContent! !SDCARD! > NUL
+
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !sdCardContent! !SDCARD! > NUL 2>&1
     @echo done
     @echo =========================================================
-   
+
     pause
 
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
@@ -105,20 +105,6 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :getUser
-    
-        for /L %%i in (0,1,!nbUsers!) do @echo %%i ^: !USERSLIST[%%i]!
-        @echo.
-        :askUser
-        set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
-
-        if %num% LSS 0 goto:askUser
-        if %num% GTR %nbUsers% goto:askUser
-        
-        set "%1=!USERSLIST[%num%]!"        
-    goto:eof
-
-    
     :checkPathForDos
 
         set "toCheck=%1"
@@ -138,7 +124,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
@@ -159,12 +145,12 @@ REM : functions
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
             @echo Host char codeSet not found ^?^, exiting 1
-            timeout /t 8 > NUL
+            timeout /t 8 > NUL 2>&1
             exit /b 9
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"

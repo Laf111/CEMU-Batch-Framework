@@ -14,7 +14,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -28,95 +28,85 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+
+    set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
+    set "WinScp="!WinScpFolder:"=!\WinScp.com""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
 
-    REM : create folders
-    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
-    set "BFW_ONLINE_FOLDER="!BFW_WIIU_FOLDER:"=!\OnlineFiles""
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
 
-    set "WIIU_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\wiiuAccounts\usr\save\system\act""
-    if not exist !WIIU_ACCOUNTS_FOLDER! (
-        @echo ERROR^: !WIIU_ACCOUNTS_FOLDER! does not exist ^!^
-        @echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
-        @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-        @echo before this script
+    if %nbArgs% GTR 5 (
+        @echo ERROR on arguments passed ^(%nbArgs%^)
+        @echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER SITENAME
+        @echo given {%*}
         pause
-        exit 99
+        exit /b 9
     )
-    cls
-
-    @echo =========================================================
-    @echo Associate BatchFw^'s users to Wii-U accounts
-    @echo =========================================================
-
-    REM : display BatchFw users list
-    set "USERSARRAY="
-    set /A "nbUsers=0"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-        set "USERSARRAY[!nbUsers!]=%%i"
-        set /A "nbUsers+=1"
+    if %nbArgs% LSS 4 (
+        @echo ERROR on arguments passed ^(%nbArgs%^)
+        @echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER SITENAME
+        @echo given {%*}
+        pause
+        exit /b 9
     )
-    set /A "nbUsers-=1"
 
-    @echo =========================================================
-
-    set "usersFolderAccount="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
-    if  exist !usersFolderAccount! rmdir /Q /S !usersFolderAccount!
-    mkdir !usersFolderAccount! > NUL 2>&1
-
-
-    REM : loop on all 800000XX folders found
-    pushd !WIIU_ACCOUNTS_FOLDER!
-    for /F "delims=~" %%d in ('dir /B /A:D 800000*') do (
-
-        set "af="!WIIU_ACCOUNTS_FOLDER:"=!\%%d\account.dat""
-
-        for /F "delims=~= tokens=2" %%n in ('type !af! ^| find /I "IsPasswordCacheEnabled=0"') do (
-            @echo WARNING^: this account seems to not have "Save password" option checked ^(auto login^) ^!
-            @echo it might be unusable with CEMU
-            @echo.
-        )
-
-        REM : get AccountId from account.dat
-        set "accId=NONE"
-        for /F "delims=~= tokens=2" %%n in ('type !af! ^| find /I "AccountId="') do set "accId=%%n"
-        if ["%accId%"] == ["NONE"] (
-            @echo ERROR^: fail to parse !af!
-            pause
-        )
-        REM : Ask for Batch's user
-        @echo Which batchFw^'s user use the accountId
-        @echo ^> !accId!
-        @echo on the Wii-U ^(folder^'s name is %%d^) ^?
-        @echo.
-
-        set "user=NONE"
-        call:getUser user
-
-        REM : copy the file
-        set "uf="!usersFolderAccount:"=!\!user!%%d.dat""
-
-        copy /Y !af! !uf! > NUL 2>&1
-        @echo saving \%%d\account.dat to !uf!
-        @echo ---------------------------------------------------------
+    REM : get and check CEMU_FOLDER
+    set "wiiuIp=!args[0]!"
+    ping -n 1 !wiiuIp! > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 (
+        @echo ERROR^: !wiiuIp! was not found on your network ^!
+        pause
+        exit /b 1
     )
-    @echo =========================================================
-    @echo if you had mistaken^, relaunch this script to change the
-    @echo association
+    set "wiiuIp=!wiiuIp:"=!"
+
+    set "SYNC_TYPE=!args[1]!"
+    if not [!SYNC_TYPE!] == ["local"] if not [!SYNC_TYPE!] == ["remote"] (
+        @echo ERROR ^: !SYNC_TYPE! not equal to ^'local^' neither ^'remote^'"
+        pause
+        exit /b 2
+    )
+    set "SYNC_TYPE=!SYNC_TYPE:"=!"
+    set "LOCAL_FOLDER=!args[2]!"
+    set "REMOTE_FOLDER=!args[3]!"
+
+    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if %nbArgs% EQU 5 (
+        set "SITENAME=!args[4]!"
+        set "SITENAME=!SITENAME:"=!"
+
+        @echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp!
+        @echo !SITENAME!
+    ) else (
+        @echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp! ^:
+    )
+    @echo ----------------------------------------------------------
+
+    REM : create localFolder if needed
+    if not exist !LOCAL_FOLDER! mkdir !LOCAL_FOLDER! > NUL 2>&1
+
     @echo.
-    @echo if an account was not listed^, you might have to relaunch
-    @echo Wii-U Games\Wii-U\Get online files^.lnk
-    @echo to synchronize folders with your Wii-U first
+    @echo ^> Sync !SYNC_TYPE! !LOCAL_FOLDER! !REMOTE_FOLDER!
 
-    pause
+    REM : run ftp transferts :
+    !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "exit"
+    set "cr=!ERRORLEVEL!"
+    if !cr! NEQ 0 @echo ERROR detected when transferring ^!
+    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+    if !cr! NEQ 0 exit /b !cr!
     exit /b 0
 
     goto:eof
@@ -126,20 +116,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-    :getUser
-
-        for /L %%i in (0,1,!nbUsers!) do @echo %%i ^: !USERSARRAY[%%i]!
-        @echo.
-        :askUser
-        set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
-
-        if %num% LSS 0 goto:askUser
-        if %num% GTR %nbUsers% goto:askUser
-
-        set "%1=!USERSARRAY[%num%]!"
-    goto:eof
-
 
     :checkPathForDos
 

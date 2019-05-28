@@ -65,7 +65,6 @@ REM : main
     set "GAME_FOLDER_PATH=!args[0]!"
     set "CEMU_FOLDER=!args[1]!"
     set "user=!args[2]!"
-    set "user=!user:"=!"
     set "titleId=!args[3]!"
     set "titleId=!titleId:"=!"
 
@@ -99,15 +98,15 @@ REM : main
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
     set "VERSION=NONE"
 
-    set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';" 2^>NUL') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';" 2^>NUL') do set "libFileLine="%%i""
 
     REM : add-it to the library
     if [!libFileLine!] == ["NONE"] (
-       echo ^'%titleId%^';!GAME_TITLE!;;-;Created by BatchFW;v0;^?;^?;^'%titleId%^';720;60 >> !wiiuLibFile!
+       echo ^'%titleId%^';!GAME_TITLE!;;-;Created by BatchFW;v0;^?;^?;^'%titleId%^';720;60 >> !wiiTitlesDataBase!
     )
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
@@ -163,8 +162,8 @@ REM : main
     set "gameInfoFileTmp="!gameInfoFile:"=!.tmp""
     type !gameInfoFile! | find /I /V "game" | find /I /V "DLC" | find /I /V "ShaderCache" | find /I /V "Updated" > !gameInfoFileTmp!
 
-    del /F /S !gameInfoFile! > NUL
-    move /Y !gameInfoFileTmp! !gameInfoFile! > NUL
+    del /F /S !gameInfoFile! > NUL 2>&1
+    move /Y !gameInfoFileTmp! !gameInfoFile! > NUL 2>&1
 
     REM : GAME_VERSION
     @echo game version     ="%GAME_VERSION%" >> !gameInfoFile!
@@ -244,11 +243,11 @@ REM : main
         set "line=!line: =!"
         set "ADD_NOTES=!ADD_NOTES!^, !line!"
     )
-    set "GAMES_REPORT_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!""
-    if not exist !GAMES_REPORT_FOLDER! mkdir !GAMES_REPORT_FOLDER! > NUL
+    set "GAMES_REPORT_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!""
+    if not exist !GAMES_REPORT_FOLDER! mkdir !GAMES_REPORT_FOLDER! > NUL 2>&1
 
     if not ["!CEMU_STATUS!"] == ["Loads"] goto:gameReportUpToDate
-    set "GAMES_REPORT_PATH="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!\Working_games_list.csv""
+    set "GAMES_REPORT_PATH="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!\Working_games_list.csv""
 
     REM : if report doesn't exist, creating it
     if not exist !GAMES_REPORT_PATH! (
@@ -259,14 +258,14 @@ REM : main
     )
 
     REM : report exist, find in !GAME_TITLE!
-    type !GAMES_REPORT_PATH! | find /I "%titleId%" > NUL
+    type !GAMES_REPORT_PATH! | find /I "%titleId%" > NUL 2>&1
     if !ERRORLEVEL! EQU 0 goto:gameReportUpToDate
 
     REM : add line for current game
-    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%;%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID% >> !GAMES_REPORT_PATH!
+    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%;%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user:"=!;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID% >> !GAMES_REPORT_PATH!
 
     :gameReportUpToDate
-    set "CEMU_REPORT_PATH="!GAMES_FOLDER:"=!\_BatchFW_Games_Compatibility_Reports\!USERDOMAIN!\!CEMU_FOLDER_NAME!_games_compatibility_list.csv""
+    set "CEMU_REPORT_PATH="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!\!CEMU_FOLDER_NAME!_games_compatibility_list.csv""
 
     REM : if report doesn't exist, creating it
     if not exist !CEMU_REPORT_PATH! (
@@ -285,15 +284,15 @@ REM : main
     )
 
     REM : report exist, find in !GAME_TITLE!
-    type !CEMU_REPORT_PATH! | find /I "%titleId%" > NUL
+    type !CEMU_REPORT_PATH! | find /I "%titleId%" > NUL 2>&1
     if !ERRORLEVEL! EQU 0 goto:reportUpToDate
 
     REM : report line for http://compat.cemu.info/
-    set "REPORT_LINE="^{^{testsection^|!CEMU_FOLDER_NAME!^|collapsed^}^}^{^{testline^|version=!CEMU_FOLDER_NAME!^|OS=!OS_VERSION!^|region=!REGION!^|CPU=%CPU:"=%^[%RAM:"=%]^|GPU=%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%^|user=!user!^|FPS=%FPS%^|rating=%CEMU_STATUS%^|notes=!ADD_NOTES:"=!^}^}^{^{testend^}^}""
-    if not ["!VERSION!"] == ["!CEMU_FOLDER_NAME!"] set "REPORT_LINE="^{^{testsection^|%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%^|collapsed^}^}^{^{testline^|version=%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%.%CEMU_3RD_DIGIT%^|OS=!OS_VERSION!^|region=!REGION!^|CPU=%CPU:"=%^[%RAM:"=%]^|GPU=%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%^|user=!user!^|FPS=%FPS%^|rating=%CEMU_STATUS%^|notes=!ADD_NOTES:"=!^}^}^{^{testend^}^}""
+    set "REPORT_LINE="^{^{testsection^|!CEMU_FOLDER_NAME!^|collapsed^}^}^{^{testline^|version=!CEMU_FOLDER_NAME!^|OS=!OS_VERSION!^|region=!REGION!^|CPU=%CPU:"=%^[%RAM:"=%]^|GPU=%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%^|user=!user:"=!^|FPS=%FPS%^|rating=%CEMU_STATUS%^|notes=!ADD_NOTES:"=!^}^}^{^{testend^}^}""
+    if not ["!VERSION!"] == ["!CEMU_FOLDER_NAME!"] set "REPORT_LINE="^{^{testsection^|%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%^|collapsed^}^}^{^{testline^|version=%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%.%CEMU_3RD_DIGIT%^|OS=!OS_VERSION!^|region=!REGION!^|CPU=%CPU:"=%^[%RAM:"=%]^|GPU=%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%^|user=!user:"=!^|FPS=%FPS%^|rating=%CEMU_STATUS%^|notes=!ADD_NOTES:"=!^}^}^{^{testend^}^}""
 
     REM : add line for current game
-    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%[!RAM:"=!];%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID%;!REPORT_LINE:"=!  >> !CEMU_REPORT_PATH!
+    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%[!RAM:"=!];%GPU_VENDORS:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user:"=!;;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID%;!REPORT_LINE:"=!  >> !CEMU_REPORT_PATH!
 
 
     :reportUpToDate
@@ -363,7 +362,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -387,7 +386,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -400,7 +399,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

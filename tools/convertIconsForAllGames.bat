@@ -31,9 +31,9 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
+    set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
 
-    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : checking GAMES_FOLDER folder
@@ -83,11 +83,11 @@ REM : main
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
     @echo =========================================================
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^)^: launch now
     @echo     ^(n^)^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -160,7 +160,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -230,7 +230,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -296,6 +296,9 @@ REM : functions
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
+        REM : flag for tga Icon found
+        set /A "tgaFound=0"
+
         REM : path to meta.xml file
         set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
         if not exist !META_FILE! goto:searchJpgFile
@@ -303,20 +306,20 @@ REM : functions
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        if [!titleLine!] == ["NONE"] goto:searchJpgFile
+        if [!titleLine!] == ["NONE"] goto:searchTgaFile
 
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
         REM : add-it to the library
         if [!libFileLine!] == ["NONE"] (
              set "titleIdIco=%titleId%"
-             REM : add a line in wiiuLibFile
-             echo ^'%titleId%^'^;!GAME_TITLE: =!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;1080^;60 >> !wiiuLibFile!
-             goto:searchJpgFile
+             REM : add a line in wiiTitlesDataBase
+             echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;1080^;60 >> !wiiTitlesDataBase!
+             goto:searchTgaFile
         )
 
         REM : strip line to get data
@@ -339,7 +342,7 @@ REM : functions
         set "pat="!codeFullPath:"=!\*.ico""
         for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
-        if [!ICO_FILE!] == ["NONE"] goto:searchJpgFile
+        if [!ICO_FILE!] == ["NONE"] goto:searchTgaFile
 
         set "NEW_ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
         if [!ICO_FILE!] == ["%titleIdIco%.ico"] goto:checkDataBase
@@ -347,14 +350,22 @@ REM : functions
         set "OLD_ICO_PATH="!codeFullPath:"=!\!ICO_FILE:"=!""
 
         REM : renaming ico file with title Id
-        move /Y !OLD_ICO_PATH! !NEW_ICO_PATH! > NUL
+        move /Y !OLD_ICO_PATH! !NEW_ICO_PATH! > NUL 2>&1
 
         :checkDataBase
         set "dataBaseIco="!BFW_PATH:"=!\resources\gamesIcons\%titleIdIco%.ico""
         REM : copy ico to dadabase if needed
-        if not exist !dataBaseIco! copy /Y !NEW_ICO_PATH! !dataBaseIco! > NUL
+        if not exist !dataBaseIco! copy /Y !NEW_ICO_PATH! !dataBaseIco! > NUL 2>&1
 
         goto:eof
+
+        :searchTgaFile
+        set "TGA_FILE="!GAME_FOLDER_PATH:"=!\meta\iconTex.tga""
+        if not exist !TGA_FILE! goto:searchJpgFile
+
+        set "INPUT_IMG=!TGA_FILE!"
+        set /A "tgaFound=1"
+        goto:convert
 
         :searchJpgFile
         REM : search for jpg file
@@ -374,21 +385,22 @@ REM : functions
         )
 
         set "OLD_JPG_PATH="!codeFullPath:"=!\!JPG_FILE:"=!""
-        set "NEW_JPG_PATH="!codeFullPath:"=!\!GAME_TITLE!.jpg""
+        set "INPUT_IMG="!codeFullPath:"=!\!GAME_TITLE!.jpg""
         REM : rename JPEG_FILE with GAME_TITLE (if needed)
-        if not exist !NEW_JPG_PATH! (
+        if not exist !INPUT_IMG! (
             @echo Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
-            move /Y !OLD_JPG_PATH! !NEW_JPG_PATH! > NUL
+            move /Y !OLD_JPG_PATH! !INPUT_IMG! > NUL 2>&1
         )
+        :convert
         set "ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
 
-        @echo Converting !GAME_TITLE!^.jpg
+        @echo Creating !GAME_TITLE! icon
         REM : convert-it in ICO centered format
-        call !quick_Any2Ico! "-img=!NEW_JPG_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
+        call !imgConverter! !INPUT_IMG! -resize 256x256 !ICO_PATH!
 
         if !ERRORLEVEL! EQU 0 (
             @echo !GAME_TITLE! icon created^!
-            del /F !NEW_JPG_PATH! > NUL
+            if !tgaFound! EQU 0 del /F !NEW_JPG_PATH! > NUL 2>&1
             set /A NB_GAMES_TREATED+=1
         ) else (
             @echo Error when launching Conversion^!
@@ -397,7 +409,7 @@ REM : functions
 
         set "dataBaseIco="!BFW_PATH:"=!\resources\gamesIcons\%titleIdIco%.ico""
         REM : copy ico to dadabase if needed
-        if not exist !dataBaseIco! copy /Y !ICO_PATH! !dataBaseIco! > NUL
+        if !tgaFound! EQU 0 if not exist !dataBaseIco! copy /Y !ICO_PATH! !dataBaseIco! > NUL 2>&1
 
         @echo.
 
@@ -417,7 +429,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -430,7 +442,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

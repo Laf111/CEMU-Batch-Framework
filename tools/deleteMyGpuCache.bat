@@ -72,8 +72,8 @@ REM : main
         choice /C y /T 2 /D y /N /M "> Cancelled by user, exiting in 2s"
         goto:endScript
     )
-    rmdir /Q /S !OPENGL_CACHE! 2>NUL
-    mkdir !OPENGL_CACHE! > NUL
+    rmdir /Q /S !OPENGL_CACHE! > NUL 2>&1
+    mkdir !OPENGL_CACHE! > NUL 2>&1
 
     @echo ^> !OPENGL_CACHE:"=! was cleared ^!
 
@@ -81,7 +81,7 @@ REM : main
     set "msg="!DATE!-empty GPU OpenGL cache=!OPENGL_CACHE:"=!""
     call:log2HostFile !msg!
 
-    timeout /T 3 > NUL
+    timeout /T 3 > NUL 2>&1
 
     :endScript
     endlocal
@@ -109,7 +109,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -132,7 +132,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -149,7 +149,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

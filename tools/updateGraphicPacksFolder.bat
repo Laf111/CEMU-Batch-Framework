@@ -80,7 +80,7 @@ REM : main
         @echo No active connection was found, cancel updating
         exit /b 20
     )
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     REM : powerShell script in _BatchFW_Graphic_Packs
     set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestGP.ps1""
@@ -91,7 +91,7 @@ REM : main
     if !ERRORLEVEL! EQU 1 (
         @echo Failed to get the last graphic Packs update available
         type !lgpvLog!
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 10
     )
     for /F %%i in ('type !lgpvLog!') do set "zipFile=%%i"
@@ -99,23 +99,23 @@ REM : main
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
     if exist !zipLogFile! (
         @echo No new graphics packs update^(s^) available^, last version is still !zipFile:.zip=!
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 0
     )
     if ["!zipFile!"] == ["graphicPacks.zip"] (
         @echo Searching for a new graphic packs release failed ^!
         @echo Network connection was refused^, please check you powerscript policy
-        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 30
     )
     if !FORCED_MODE! EQU 1 goto:noMsg
     if !QUIET_MODE! EQU 1 goto:msgBox
     @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
-    call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
+    call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
-        timeout /T 4 > NUL
-        exit /b 0
+        timeout /T 4 > NUL 2>&1
+        exit /b 1
     )
     goto:updateGP
 
@@ -141,7 +141,7 @@ REM : main
 
     set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
 
-    copy /Y !pws_src! !pws_target! > NUL
+    copy /Y !pws_src! !pws_target! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo Error when copying !pws_src!
@@ -160,7 +160,7 @@ REM : main
         @echo ERROR While getting and extracting graphic packs folder ^!
         if !QUIET_MODE! EQU 0 pause
         pushd !GAMES_FOLDER!
-        rmdir /Q /S !BFW_GP_TMP! > NUL
+        rmdir /Q /S !BFW_GP_TMP! > NUL 2>&1
         exit /b !cr!
     )
 
@@ -188,7 +188,7 @@ REM : main
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"
     echo !DATE! ^: !USERNAME! on !USERDOMAIN! > !noDelFile!
-    
+
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -264,7 +264,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -288,7 +288,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -301,7 +301,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

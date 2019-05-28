@@ -43,7 +43,7 @@ REM : main
 
     set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
     if not exist !BFW_GP_TMP! exit 10
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if not exist !BFW_GP_FOLDER! exit 20
 
     REM create a log file containing all your games titleId
@@ -70,7 +70,7 @@ REM : main
 
     for /F "delims=~=" %%i in ('type !tidLog! 2^>NUL') do call:checkGP %%i
 
-    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL
+    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL 2>&1
 
     if !cr! NEQ 0 exit !cr!
     exit 0
@@ -111,7 +111,7 @@ REM : functions
             )
             set "gp="!BFW_GP_TMP:"=!\!gp:\=!""
 
-            if exist !gp! move /Y !gp! !BFW_GP_FOLDER! > NUL
+            if exist !gp! move /Y !gp! !BFW_GP_FOLDER! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
         )
     goto:eof
@@ -134,7 +134,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -160,7 +160,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -174,7 +174,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

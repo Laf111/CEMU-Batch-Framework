@@ -67,7 +67,7 @@ REM : main
     set "BFW_VERSION=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
     set "BFW_VERSION=!BFW_VERSION: =!"
-    
+
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -103,10 +103,10 @@ REM : main
     )
 
     @echo New version available, do you want to update BatchFW to !bfwVR!^?
-    call:getUserInput "Enter your choice ? : (n by default in 12sec)" "n,y" ANSWER 12
+    call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
-        timeout /T 4 > NUL
+        timeout /T 4 > NUL 2>&1
         exit /b 14
     )
 
@@ -120,7 +120,7 @@ REM : main
 
     set "pws_target="!GAMES_FOLDER:"=!\updateBFW.ps1""
 
-    copy /Y !pws_src! !pws_target! > NUL
+    copy /Y !pws_src! !pws_target! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo Error when copying !pws_src!
@@ -134,8 +134,8 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo ERROR While getting and extracting batchFw !bfwVR! ^!
-        if exist !pws_target! del /F !pws_target! > NUL
-        if exist updateBFW.log del /F updateBFW.log > NUL
+        if exist !pws_target! del /F !pws_target! > NUL 2>&1
+        if exist updateBFW.log del /F updateBFW.log > NUL 2>&1
         exit /b 7
     )
 
@@ -143,8 +143,13 @@ REM : main
     if not ["!BFW_VERSION!"] == ["NONE"] call:cleanHostLogFile BFW_VERSION
     echo BFW_VERSION=!bfwVR! >> !logFile!
 
-    if exist !pws_target! del /F !pws_target! > NUL
-    if exist updateBFW.log del /F updateBFW.log > NUL
+    if exist !pws_target! del /F !pws_target! > NUL 2>&1
+    if exist updateBFW.log del /F updateBFW.log > NUL 2>&1
+
+
+    REM BFW_VERSION=1.14
+    if not ["!BFW_VERSION!"] == ["V14"] call:cleanForV14
+
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -152,6 +157,23 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :cleanForV14
+
+        REM : clean old icons
+        pushd !GAMES_FOLDER!
+
+        for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+            set "codeFullPath="%%i""
+            set "pat="!codeFullPath:"=!\*.ico""
+            for /F "delims=" %%j in ('dir /b /s !pat! 2^>NUL') do (
+                set "icoFile="%%j""
+                del /F !icoFile! > NUL 2>&1
+            )
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
 
    :cleanHostLogFile
@@ -161,8 +183,8 @@ REM : functions
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !logFile! > NUL
-        move /Y !logFileTmp! !logFile! > NUL
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -224,7 +246,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -248,7 +270,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -261,7 +283,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

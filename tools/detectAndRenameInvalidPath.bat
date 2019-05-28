@@ -108,7 +108,7 @@ REM : main
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -142,7 +142,7 @@ REM : main
         if [!newName!] == [!FOLDER_PATH!] goto:eof
 
         @echo !folderName! ^: Unsupported characters found ^!
-        call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER 15
+        call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
         if [!ANSWER!] == ["n"] (
 
             set cr=3
@@ -217,7 +217,7 @@ REM : main
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

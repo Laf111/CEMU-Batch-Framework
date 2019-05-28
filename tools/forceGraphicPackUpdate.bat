@@ -39,8 +39,38 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
+
+    REM : silent mode
+    set /A "QUIET_MODE=0"
+    if !nbArgs! NEQ 0 (
+        if [!args[0]!] == ["-silent"] set /A "QUIET_MODE=1"
+    )
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
+
+    REM : check if an internet connexion is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+    REM : if a network connection was not found, exit 10
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+        @echo No active connection was found, cancel updating
+        pause
+        if !QUIET_MODE! EQU 1 exit /b 20
+        if !QUIET_MODE! EQU 0 exit 20
+    )
+
+    if !QUIET_MODE! EQU 1 goto:launchUpdate
 
     @echo =========================================================
     @echo Force graphic packs update ^?
@@ -48,14 +78,14 @@ REM : main
     @echo Note that :
     @echo     - V2 graphic packs will be untouched
     @echo     - If you^'ve chosen to let BatchFw complete your GFX
-    @echo       It will rebuild all of them for all games
+    @echo       It will rebuild all the first time you launch a game
     @echo =========================================================
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -63,12 +93,13 @@ REM : main
     )
     cls
 
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    :launchUpdate
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
 
         REM : delete the graphicPacks*.doNotDelete file
         set "pat="!BFW_GP_FOLDER:"=!\*.doNotDelete""
-        del /F /S !pat! 2>NUL
+        del /F /S !pat! > NUL 2>&1
 
         REM : update graphic packs
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
@@ -92,7 +123,7 @@ REM : main
 
 
     @echo This windows will close automatically in 8s
-    timeout /T 8 > NUL
+    timeout /T 8 > NUL 2>&1
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -112,8 +143,8 @@ REM : functions
 
         type !GLFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !GLFile! > NUL
-        move /Y !logFileTmp! !GLFile! > NUL
+        del /F /S !GLFile! > NUL 2>&1
+        move /Y !logFileTmp! !GLFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -135,7 +166,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -200,7 +231,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -214,7 +245,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

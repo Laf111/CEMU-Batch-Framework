@@ -6,7 +6,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
     color 4F
-    
+
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
@@ -25,21 +25,21 @@ REM : main
     REM : duration value in seconds
     set /A "duration=0"
 
-    REM : monitor LaunchGame.bat until cemu.exe is launched 
-        
+    REM : monitor LaunchGame.bat until cemu.exe is launched
+
     :waitingLoopProcesses
-    timeout /T 1 > NUL
+    timeout /T 1 > NUL 2>&1
     for /F "delims=" %%i in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "LaunchGame" ^| find /I /V "find"') do (
 
         REM : set BatchFw processes to priority to high
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL
-    
+        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL 2>&1
+
         REM : if wizrad is running, don't count
         wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%wizardFirstSaving.bat%%'" goto:waitingLoopProcesses
-    
-        REM : monitor Cemu.exe launch and exit 
+
+        REM : monitor Cemu.exe launch and exit
         for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do exit 0
-        set /A "duration+=1" 
+        set /A "duration+=1"
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
             cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117

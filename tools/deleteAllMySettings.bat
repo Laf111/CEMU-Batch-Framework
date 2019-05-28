@@ -105,11 +105,11 @@ REM : main
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
@@ -137,7 +137,7 @@ REM : main
         goto:eof
     )
 
-    set /A NB_GAMES_TREATED=0
+    set /A NB_SETTINGS_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
@@ -181,14 +181,14 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
     @echo =========================================================
-    @echo Treated !NB_GAMES_TREATED! games
+    @echo Deleted !NB_SETTINGS_TREATED! settings
     @echo #########################################################
     @echo This windows will close automatically in 15s
     @echo     ^(n^) ^: don^'t close^, i want to read history log first
@@ -200,7 +200,7 @@ REM : main
         pause
     )
 
-    if !NB_GAMES_TREATED! EQU 0 goto:ending
+    if !NB_SETTINGS_TREATED! EQU 0 goto:ending
 
     REM : HOST not given
     if %nbArgs% GEQ 1 set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all settings stored for all CEMU version""
@@ -212,18 +212,18 @@ REM : main
         set "CEMU_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "!CEMU_FOLDER_NAME! install folder path" 2^>NUL') do set "CEMU_FOLDER="%%i""
         if [!CEMU_FOLDER!] == ["NONE"] goto:logToGL
-        
+
         set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
         if exist !cemuLog! (
-            del /F !cemuLog! > NUL
+            del /F !cemuLog! > NUL 2>&1
         )
         set "pat="!CEMU_FOLDER:"=!\*settings.*""
-        del /F !pat! > NUL
+        del /F !pat! > NUL 2>&1
     )
     :logToGL
     call:log2GamesLibraryFile !msg!
-        
-    
+
+
     :ending
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
@@ -277,7 +277,7 @@ REM : functions
         )
 
         for /F "delims=" %%j in ('dir /o:n /a:d /b * ^| find "!CEMU_FOLDER_NAME!" 2^>NUL') do (
-            rmdir /S /Q "%%j" 2>NUL
+            rmdir /S /Q "%%j" > NUL 2>&1
             @echo %%j deleted ^^!
         )
         goto:endTreatment
@@ -289,7 +289,7 @@ REM : functions
         @echo Deleting all settings saved for all versions^?
         @echo  ^(n^) ^: skip
         @echo  ^(y^) ^: default value after 15s timeout
-        @echo.     
+        @echo.
         @echo ---------------------------------------------------------
         call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
@@ -298,7 +298,7 @@ REM : functions
             goto:eof
         )
         for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
-            rmdir /S /Q "%%j" 2>NUL
+            rmdir /S /Q "%%j" > NUL 2>&1
             @echo %%j deleted ^^!
         )
         goto:endTreatment
@@ -324,12 +324,12 @@ REM : functions
 
         pushd !rootDir!
         for /F "delims=" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
-            rmdir /S /Q "%%j" 2>NUL
+            rmdir /S /Q "%%j" > NUL 2>&1
             @echo %%j deleted ^^!
         )
 
         :endTreatment
-        set /A NB_GAMES_TREATED+=1
+        set /A NB_SETTINGS_TREATED+=1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -351,7 +351,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -416,7 +416,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -429,7 +429,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present
@@ -448,7 +448,7 @@ REM : functions
         set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
@@ -459,8 +459,8 @@ REM : functions
         REM : sorting the log
         set "gLogFileTmp="!glogFile:"=!.tmp""
         type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL
-        move /Y !gLogFileTmp! !glogFile! > NUL
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

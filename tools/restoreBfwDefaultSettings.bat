@@ -30,6 +30,8 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
@@ -47,27 +49,27 @@ REM : main
     @echo Reset BatchFw to factory settings ^?
     @echo =========================================================
 
-    @echo Launching in 12s
+    @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 12
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
         goto:eof
     )
     cls
-    
+
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
-    
+
     @echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
     pushd !BFW_LOGS!
-    del /F /S *.log > NUL
+    del /F /S *.log > NUL 2>&1
 
     pushd !GAMES_FOLDER!
 
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         rmdir /Q /S !BFW_GP_FOLDER!
         @echo ---------------------------------------------------------
@@ -75,26 +77,29 @@ REM : main
     )
 
     if exist !WIIU_GAMES_FOLDER! (
-        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL
+        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
         @echo ---------------------------------------------------------
         @echo ^> Delete shortcuts created ^.^.^.
     )
 
 
-    set "bfrf="!BFW_PATH:"=!\BatchFW_readme.txt""
+    set "bfrf="!BFW_PATH:"=!\BatchFw_readme.txt""
     if exist !bfrf! (
         @echo ---------------------------------------------------------
         @echo ^> Delete BatchFW_readme.txt ^.^.^.
-        del /F !bfrf! > NUL
+        del /F !bfrf! > NUL 2>&1
     )
 
+    REM : convert all bat files to AINSI, remove trailling spaces
+    set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFile.bat""
+    !StartHidden! !fixBatFile!
     @echo =========================================================
     @echo Done
     @echo #########################################################
 
 
-    @echo This windows will close automatically in 8s
-    timeout /T 8 > NUL
+    @echo This windows will close automatically in 2s
+    timeout /T 2 > NUL 2>&1
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -124,7 +129,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
@@ -189,7 +194,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -203,7 +208,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

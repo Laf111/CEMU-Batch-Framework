@@ -73,7 +73,7 @@ REM : main
     set /A "QUIET_MODE=0"
 
     REM : check if exist external Graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         goto:getTitleId
     )
@@ -83,7 +83,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -171,21 +171,21 @@ REM : main
     call:checkValidity %titleId%
 
     :createGP
-    set "wiiuLibFile="!BFW_PATH:"=!\resources\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiuLibFile!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
         exit /b 3
     )
     @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiuLibFile!
+    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
 
@@ -238,7 +238,7 @@ REM : main
     pushd !BFW_GP_FOLDER!
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     set "fnrLogCegp="!BFW_PATH:"=!\logs\fnr_createExtraGraphicPacks.log""
     if exist !fnrLogCegp! del /F !fnrLogCegp!
@@ -262,13 +262,13 @@ REM : main
         set "gpName=!gpName:rules=!"
         set "gpName=!gpName:\=!"
 
-        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL && (
+        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 && (
             set "gpName=!gpName:_graphicPacksV2=_graphicPacksV2\!"
-            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
+            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
         )
 
         REM : creating V3 graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL && (type !rules! | find "$height" > NUL && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
 
     )
     if %gpV3exist% EQU 1 goto:ending
@@ -286,7 +286,7 @@ REM : main
 
     set "gpV3="!BFW_GP_FOLDER:"=!\!v3name!_Resolution""
 
-    if not exist !gpV3! mkdir !gpV3! > NUL
+    if not exist !gpV3! mkdir !gpV3! > NUL 2>&1
     set "rulesFileV3="!gpV3:"=!\rules.txt""
 
     call:initV3ResGraphicPack
@@ -341,7 +341,7 @@ REM : functions
         REM now searching using icoId
         set "line="NONE""
 
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
@@ -417,21 +417,25 @@ REM : functions
         set "gpFolderName="%~1""
         set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /I /V "_Resolution" > NUL && set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!_Resolution""
+        echo !gpv3! | find /I /V "_Resolution" > NUL 2>&1 && set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!_Resolution""
 
         set "rulesFile="!gpV3:"=!\rules.txt""
 
         REM : disable creation for packs introducing unexpected varaiables
-REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /V "overwriteHeight"| find /I /V "gameWidth" | find /I /V "gameHeight" | find /I /V "width" | find /I /V "height" > NUL && goto:eof
+REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /V "overwriteHeight"| find /I /V "gameWidth" | find /I /V "gameHeight" | find /I /V "width" | find /I /V "height" > NUL 2>&1 && goto:eof
 
         set /A "heightFixFlag=0"
-        type !rulesFile! | find /I "heightfix" > NUL && set /A "heightFixFlag=1"
+        type !rulesFile! | find /I "heightfix" > NUL 2>&1 && set /A "heightFixFlag=1"
         set /A "internalResFlag=0"
-        type !rulesFile! | find /I "internalRes" > NUL && set /A "internalResFlag=1"
+        type !rulesFile! | find /I "internalRes" > NUL 2>&1 && set /A "internalResFlag=1"
         set /A "ditherFlag=0"
-        type !rulesFile! | find /I "dither" > NUL && set /A "ditherFlag=1"
+        type !rulesFile! | find /I "dither" > NUL 2>&1 && set /A "ditherFlag=1"
         set /A "scaleShaderFlag=0"
-        type !rulesFile! | find /I "scaleShader" > NUL && set /A "scaleShaderFlag=1"
+        type !rulesFile! | find /I "scaleShader" > NUL 2>&1 && set /A "scaleShaderFlag=1"
+        set /A "lightSourceFlag=0"
+        type !rulesFile! | find /I "lightSource" > NUL 2>&1 && set /A "lightSourceFlag=1"
+        set /A "aspectRatioFlag=0"
+        type !rulesFile! | find /I "aspectRatio" > NUL 2>&1 && set /A "aspectRatioFlag=1"
 
         REM : create missing full screen 16/9 resolutions graphic packs
         call:createV3Gp169
@@ -606,9 +610,9 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
-        copy /Y !rulesFileV3! !utf8! > NUL
+        copy /Y !rulesFileV3! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV3!
-        del /F !utf8! > NUL
+        del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -641,7 +645,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : waiting all children processes ending
         :waitingLoop
         for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
-            timeout /T 1 > NUL
+            timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
 
@@ -677,7 +681,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         goto:eof
 
         :169_windowedV2
-        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -725,7 +729,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : create windowed presets only if user chosen it during setup
 
         :169_windowed
-        echo !ARLIST! | find /I /V "169" > NUL && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
 
         REM : 16/9 windowed graphic packs
@@ -867,7 +871,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : if found 219, duplicate 1440p219
         set "gpResX2p_219="!gp:"=!219""
         if exist !gpResX2p_219! (
-            robocopy !gpResX2p_219! !gpResX2p_43! /S > NUL
+            robocopy !gpResX2p_219! !gpResX2p_43! /S > NUL 2>&1
 
             REM : patch patches.txt
             set "fnrLogFile="!fnrLogFolder:"=!\fnr_create43.log""
@@ -1204,11 +1208,12 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "[Preset]\nname = !wt!x!ht!" --replace "[Preset]\nname = !w!x!h! !desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !wt!x!ht!" --logFile !logFileV3!
 
-        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0" --logFile !logFileV3!
+        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
+        if %aspectRatioFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/9.0)" --logFile !logFileV3!
         if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = 1.0" --logFile !logFileV3!
+        if %lightSourceFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$lightSource = 1.0" --logFile !logFileV3!
         if %ditherFlag% EQU 1      wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$dither = 0.75" --logFile !logFileV3!
-        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1" --logFile !logFileV3!
-
+        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1.0" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1232,10 +1237,30 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "version = 3" --replace "version = 3\n\n[Preset]\nname = !w!x!h! !desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n" --logFile !logFileV3!
 
-        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0" --logFile !logFileV3!
-        if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = 1.0" --logFile !logFileV3!
+        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:10)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/10.0)" --logFile !logFileV3!
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (21:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (64.0/27.0)" --logFile !logFileV3!
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (48:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (48.0/9.0)" --logFile !logFileV3!
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (4:3)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (4.0/3.0)" --logFile !logFileV3!
+
+        REM : 169_windowed
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (11016.0/5760.0)" --logFile !logFileV3!
+
+        REM : 219_windowed
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (14812.0/5760.0)" --logFile !logFileV3!
+
+        REM : 43_windowed
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (4:3) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (82644.0/5760.0)" --logFile !logFileV3!
+
+        REM : 489_windowed
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (48:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (33066.0/5760.0)" --logFile !logFileV3!
+
+        REM : 1610_windowed
+        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:10) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (9920.0/5760.0)" --logFile !logFileV3!
+        if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = (%nativeWidth%.0/!w!.0)" --logFile !logFileV3!
+        if %lightSourceFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$lightSource = 1.0" --logFile !logFileV3!
         if %ditherFlag% EQU 1      wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$dither = 0.75" --logFile !logFileV3!
-        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1" --logFile !logFileV3!
+        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1.0" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1402,7 +1427,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -1426,7 +1451,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -1439,7 +1464,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

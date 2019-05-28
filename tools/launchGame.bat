@@ -22,6 +22,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+    set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -57,7 +58,7 @@ REM : main
     @echo ========================================================= >> !batchFwLog!
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : set current char codeset
     call:setCharSet
@@ -68,7 +69,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr! >> !batchFwLog!
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         exit 1
     )
     REM : checking GAMES_FOLDER folder
@@ -78,7 +79,7 @@ REM : main
     set "argLeg="
 
     REM : current user
-    set "user=NOT_FOUND"
+    set "user="NOT_FOUND""
 
     REM : flag importing settings
     set /A "settingsImported=0"
@@ -105,7 +106,7 @@ REM : main
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^*
         @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         exit 99
     )
 
@@ -118,7 +119,7 @@ REM : main
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^*
         @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         exit 99
     )
     REM : flag for nolegacy options
@@ -128,7 +129,6 @@ REM : main
 
     REM : args 6
     set "user=!args[5]!"
-    set "user=!user:"=!"
     if %nbArgs% EQU 6 goto:getCemuFolder
 
     REM : args 7
@@ -164,7 +164,7 @@ REM : main
     if not exist !OUTPUT_FOLDER! (
         @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^! >> !batchFwLog!
         @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^!
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         exit 3
     )
 
@@ -175,7 +175,7 @@ REM : main
     if not exist !RPX_FILE_PATH! (
         @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable >> !batchFwLog!
         @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 2
     )
@@ -200,10 +200,10 @@ REM : main
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
 
     REM : BatchFW graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
-    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL
+    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
 
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
@@ -252,11 +252,11 @@ REM : main
     if [!titleLine!] == ["NONE"] goto:getScreenMode
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
-    set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] goto:getScreenMode
 
@@ -273,8 +273,8 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode="
 
     REM : shortcut path
-    set "gameShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\!user!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user!.lnk""
-    set "gameExe="!OUTPUT_FOLDER:"=!\Wii-U Games\!user!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user!.exe""
+    set "gameShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\!user:"=!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.lnk""
+    set "gameExe="!OUTPUT_FOLDER:"=!\Wii-U Games\!user:"=!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.exe""
 
     REM : shortcut to game's profile
     set "profileShortcuts="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
@@ -287,18 +287,18 @@ REM : main
         REM : delete shortcuts
         if exist !gameShortcut! del /F !gameShortcut! >NUL
         if exist !gameExe! del /F !gameExe! >NUL
-        rmdir /Q /S !profileShortcuts! 2>NUL
+        rmdir /Q /S !profileShortcuts! > NUL 2>&1
 
         REM : Delete the shortcut
         set "delSettings="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\%CEMU_FOLDER_NAME%\Delete my %CEMU_FOLDER_NAME%'s settings""
 
-        del /F !delSettings! >NUL
+        del /F !delSettings! 2>NUL
 
         REM : Delete the shortcut
         set "logShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\Logs\!CEMU_FOLDER_NAME!.lnk""
 
-        del /F !logShortcut! >NUL
-        timeout /t 8 > NUL
+        del /F !logShortcut! 2>NUL
+        timeout /t 8 > NUL 2>&1
         exit 20
     )
 
@@ -308,7 +308,7 @@ REM : main
     if not exist !ICO_PATH! (
         @echo ERROR ^: game's icon file path !ICO_PATH! does not exist ^! >> !batchFwLog!
         @echo ERROR ^: game's icon file path !ICO_PATH! does not exist ^!
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 4
     )
@@ -318,7 +318,7 @@ REM : main
     if not exist !MLC01_FOLDER_PATH! (
         @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^! >> !batchFwLog!
         @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^!
-        timeout /t 8 > NUL
+        timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 5
     )
@@ -359,9 +359,9 @@ REM : main
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
     set "gpuType=OTHER"
-    echo !GPU_VENDOR! | find /I "NVIDIA" > NUL && set "gpuType=NVIDIA"
-    echo !GPU_VENDOR! | find /I "AMD" > NUL && set "gpuType=AMD"
-    echo !GPU_VENDOR! | find /I "INTEL" > NUL && set "gpuType=INTEL"
+    echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 && set "gpuType=NVIDIA"
+    echo !GPU_VENDOR! | find /I "AMD" > NUL 2>&1 && set "gpuType=AMD"
+    echo !GPU_VENDOR! | find /I "INTEL" > NUL 2>&1 && set "gpuType=INTEL"
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
         set "string=%%i"
@@ -416,10 +416,10 @@ REM : main
 
     REM also create default folder (not exist when you've just upadte your display drivers)
     set "folder="%LOCALAPPDATA%\%gpuType%\GLCache""
-    if not exist !folder! mkdir !folder! > NUL
+    if not exist !folder! mkdir !folder! > NUL 2>&1
     REM : also in APPDATA
     set "folder="%APPDATA%\%gpuType%\GLCache""
-    if not exist !folder! mkdir !folder! > NUL
+    if not exist !folder! mkdir !folder! > NUL 2>&1
 
     REM : Settings folder for CEMU_FOLDER_NAME
     set "SETTINGS_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
@@ -459,7 +459,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
+    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL 2>&1
 
     wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
@@ -532,7 +532,7 @@ REM : main
     )
 
     REM : transShaderCache log
-    if not exist !gtscf! mkdir !gtscf! > NUL
+    if not exist !gtscf! mkdir !gtscf! > NUL 2>&1
     set "tscl="!gtscf:"=!\transShaderCache.log""
     @echo GAME_CONFIGURATION before launching !CEMU_FOLDER_NAME! : > !tscl!
     if exist !gameInfoFile! type !gameInfoFile! >> !tscl!
@@ -584,7 +584,7 @@ REM : main
         set "msg="!DATE!-non matching GPU Vendor GLCache backup deleted=!IdGpuFolder!""
         call:log2HostFile !msg!
 
-        rmdir /Q /S !IdGpuFolder! 2>NUL
+        rmdir /Q /S !IdGpuFolder! > NUL 2>&1
         goto:launchCemu
     )
     REM : secure string for diff
@@ -633,7 +633,7 @@ REM : main
     REM OPENGL_CACHE_PATH already created before (if missing)
     for /F "delims=" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        robocopy !GLCacheBackupFolder! !OPENGL_CACHE_PATH! !file! /MOV /IS /IT > NUL
+        robocopy !GLCacheBackupFolder! !OPENGL_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -645,7 +645,7 @@ REM : main
     :subfolderFound
     set "GlCache="!OPENGL_CACHE_PATH:"=!\%oldOGLCacheId%""
 
-    if exist !GlCache! rmdir /Q /S !GlCache! 2>NUL
+    if exist !GlCache! rmdir /Q /S !GlCache! > NUL 2>&1
 
     set "GlCacheSaved="!GLCacheBackupFolder:"=!\%oldOGLCacheId%""
 
@@ -664,8 +664,8 @@ REM : main
     :launchCemu
 
     REM : create a lock file to protect this launch
-    set "blf="!CEMU_FOLDER:"=!\BatchFW_!user!-!USERNAME!.lock""
-    @echo !DATE! : !user! launched !GAME_TITLE! using !USERNAME! windows profile > !blf!
+    set "blf="!CEMU_FOLDER:"=!\BatchFw_!user:"=!-!USERNAME!.lock""
+    @echo !DATE! : %user:"=% launched !GAME_TITLE! using !USERNAME! windows profile > !blf!
     if not exist !blf! (
         cscript /nologo !MessageBox! "ERROR when creating !blf:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
         exit 3
@@ -681,7 +681,7 @@ REM : main
             @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
             @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
             REM : import mods for the game as graphic packs
-            call:importMods > NUL
+            call:importMods > NUL 2>&1
         )
         goto:minimizeAll
     )
@@ -689,7 +689,7 @@ REM : main
     REM : clean links in game's graphic pack folder
     if exist !GAME_GP_FOLDER! for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        rmdir /Q /S !gpLink! 2>NUL
+        rmdir /Q /S !gpLink! > NUL 2>&1
     )
 
     REM : create links to mods
@@ -697,7 +697,7 @@ REM : main
         @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
         @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
         REM : import mods for the game as graphic packs
-        call:importMods > NUL
+        call:importMods > NUL 2>&1
     )
 
     REM : create links in game's graphic pack folder
@@ -711,7 +711,7 @@ REM : main
     REM : link all missing graphic packs
     REM : always import 16/9 graphic packs
 
-    call:importGraphicPacks > NUL
+    call:importGraphicPacks > NUL 2>&1
 
     REM : get user defined ratios list
     set "ARLIST="
@@ -720,21 +720,21 @@ REM : main
 
     REM : import user defined ratios graphic packs
     for %%a in (!ARLIST!) do (
-        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610 > NUL
-        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219 > NUL
-        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL
-        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL
+        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610 > NUL 2>&1
+        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219 > NUL 2>&1
+        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL 2>&1
+        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL 2>&1
     )
 
-    if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL
+    if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
     REM : when using a simlink with a the target on another partition
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL & goto:minimizeAll
-    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! 2> NUL
-    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL
+    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
     :minimizeAll
     REM : minimize all windows befaore launching in full screen
@@ -779,7 +779,7 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     REM : remove lock file
-    del /F /S !blf! > NUL
+    del /F /S !blf! > NUL 2>&1
 
     REM : analyse CEMU's return code
     :analyseCemuStatus
@@ -799,7 +799,7 @@ REM : main
         ) else (
             REM : open log.txt
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed, openning its log ^.^.^." 4144
-            timeout /T 2 > NUL
+            timeout /T 2 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
 
         )
@@ -869,12 +869,12 @@ REM : main
 
     REM : create a new folder to save OGLCache
     set "targetFolder="!GLCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!""
-    if not exist !targetFolder! mkdir !targetFolder! > NUL
+    if not exist !targetFolder! mkdir !targetFolder! > NUL 2>&1
 
     pushd !OPENGL_CACHE!
     for /F "delims=" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        robocopy !OPENGL_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL
+        robocopy !OPENGL_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -914,22 +914,22 @@ REM : main
 
     REM : if a display drivers update was detected
     if %driversUpdateFlag% EQU 1 (
-        if exist !IdGpuFolder! rmdir /Q /S !IdGpuFolder! 2>NUL
+        if exist !IdGpuFolder! rmdir /Q /S !IdGpuFolder! > NUL 2>&1
     )
 
     if not [!GlCacheSaved!] == ["NOT_FOUND"] (
         REM : remove old folder
-        if exist !GlCacheSaved! rmdir /Q /S !GlCacheSaved! 2>NUL
+        if exist !GlCacheSaved! rmdir /Q /S !GlCacheSaved! > NUL 2>&1
     )
     if not [!GlCache!] == ["NOT_FOUND"] (
         REM : remove folder
-        if exist !GlCache! rmdir /Q /S !GlCache! 2>NUL
+        if exist !GlCache! rmdir /Q /S !GlCache! > NUL 2>&1
     )
 
     REM : create a new folder to save OGLCache
     set "newFolder="!GLCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!\%newOGLCacheId%""
 
-    if not exist !newFolder! mkdir !newFolder! > NUL
+    if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
 
     REM : robocopy
     call:moveFolder !newOGLCache! !newFolder! cr
@@ -1050,7 +1050,7 @@ REM : main
         @echo meta/metax.xml  : %titleId%>> !batchFwLog!
         @echo CEMU log.txt    : %cemuTitleId%
         @echo meta/metax.xml  : %titleId%
-        rmdir /Q /S !SETTINGS_FOLDER! 2>NUL
+        rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
     cscript /nologo !MessageBox! "ERROR ^: CEMU and GAME TitleId not matching ^!^, disable saving options" 4112
     goto:endMain
@@ -1075,7 +1075,7 @@ REM : main
         @echo meta/metax.xml  ^: %titleId%>> !batchFwLog!
         @echo CEMU log.txt    ^: %cemuTitleId%
         @echo meta/metax.xml  ^: %titleId%
-        rmdir /Q /S !SETTINGS_FOLDER! 2>NUL
+        rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
     cscript /nologo !MessageBox! "ERROR ^: UNKNOWN GAME TitleId detected in CEMU Log^.txt ^!^, disable saving options" 4112
     goto:endMain
@@ -1098,11 +1098,11 @@ REM : main
     call:saveCemuOptions
 
     REM : echo compress game's saves
-    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
     if exist !userGameSave! (
-        @echo Compress game^'s saves for !user! in inGameSaves^\!GAME_TITLE!_!user!^.rar>> !batchFwLog!
-        @echo Compress game^'s saves for !user! in inGameSaves^\!GAME_TITLE!_!user!^.rar
+        @echo Compress game^'s saves for !user:"=! in inGameSaves^\!GAME_TITLE!_!user:"=!^.rar>> !batchFwLog!
+        @echo Compress game^'s saves for !user:"=! in inGameSaves^\!GAME_TITLE!_!user:"=!^.rar
     )
 
     :endMain
@@ -1110,9 +1110,9 @@ REM : main
     REM : restore CEMU's graphicPacks subfolder
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
-    rmdir /Q /S !graphicPacks! 2>NUL
-    if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL
-    if not exist !graphicPacks! mkdir !graphicPacks! > NUL
+    rmdir /Q /S !graphicPacks! > NUL 2>&1
+    if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
+    if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
     REM @echo =========================================================>> !batchFwLog!
     REM @echo This windows will close automatically in 8s>> !batchFwLog!
@@ -1124,14 +1124,14 @@ REM : main
     REM @echo     ^(n^) ^: don^'t close^, i want to read history log first
     REM @echo     ^(q^) ^: close it now and quit
     REM @echo ---------------------------------------------------------
-    REM call:getUserInput "Enter your choice? : " "q,n" ANSWER 8
+    REM call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     REM if [!ANSWER!] == ["n"] (
         REM REM : Waiting before exiting
         REM pause
     REM )
 
     REM : del log folder for fnr.exe
-    if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! 2>NUL
+    if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
     @echo =========================================================>> !batchFwLog!
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
@@ -1155,8 +1155,8 @@ REM : functions
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !logFile! > NUL
-        move /Y !logFileTmp! !logFile! > NUL
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1165,7 +1165,7 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        timeout /T 1 > NUL
+        timeout /T 1 > NUL 2>&1
         for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
             goto:waitingLoopProcesses
         )
@@ -1183,7 +1183,7 @@ REM : functions
     :importMods
         REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\mods""
-        if not exist !pat! mkdir !pat! > NUL
+        if not exist !pat! mkdir !pat! > NUL 2>&1
         for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do (
             set "modName="%%a""
             set "mod="!GAME_FOLDER_PATH:"=!\Cemu\mods\!modName:"=!""
@@ -1192,8 +1192,8 @@ REM : functions
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! 2>NUL
-            mklink /J /D !linkPath! !mod!
+            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
+            mklink /J /D !linkPath! !mod! > NUL 2>&1
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1201,14 +1201,14 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do (
 
             set "str=%%i"
             set "str=!str:~1!"
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -1222,25 +1222,25 @@ REM : functions
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! 2>NUL
+            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
 
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
         )
     goto:eof
     REM : ------------------------------------------------------------------
 
     :importGraphicPacks
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do (
 
             set "str=%%i"
             set "str=!str:~1!"
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" && (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -1254,11 +1254,11 @@ REM : functions
             set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
 
             REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! 2>NUL
+            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
             set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
 
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL
+            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
+            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
 
         )
     goto:eof
@@ -1289,10 +1289,10 @@ REM : functions
 
             for %%a in (!target!) do set "parentFolder="%%~dpa""
             set "parentFolder=!parentFolder:~0,-2!""
-            if exist !target! rmdir /Q /S !target! 2>NUL
+            if exist !target! rmdir /Q /S !target! > NUL 2>&1
 
             REM : use move command (much type faster)
-            move /Y !source! !parentFolder! > NUL
+            move /Y !source! !parentFolder! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! EQU 1 (
                 set /A "%3=1"
@@ -1304,7 +1304,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT  > NUL
+        robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! GTR 7 set /A "%3=1"
@@ -1318,7 +1318,7 @@ REM : functions
 
         set "str=%~1"
         set "str=!str:&=!"
-        set "str=!str:£=!"
+        set "str=!str:?=!"
         set "str=!str:(=!"
         set "str=!str:)=!"
         set "str=!str:%%=!"
@@ -1336,9 +1336,9 @@ REM : functions
 
         REM : check if it is already a link (case of crash) : delete-it
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
-        for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! 2>NUL
+        for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
 
-        if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL
+        if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
 
         set "endTitleId=%titleId:~8,8%"
 
@@ -1351,7 +1351,7 @@ REM : functions
         )
 
         REM : importing game's saves for !user!
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar""
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
         if not exist !rarFile! goto:savesLoaded
 
         REM : make a backup of saves fo rarFile
@@ -1362,8 +1362,8 @@ REM : functions
         REM : on this run
         set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
 
-        if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL
+        if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL 2>&1
 
         set "PREVIOUS_SHADER_CACHE_ID=NONE"
 
@@ -1376,7 +1376,7 @@ REM : functions
 
         if not ["!PREVIOUS_SHADER_CACHE_ID!"] == ["NONE"] (
             set "folder="!oldSavePath:"=!\!PREVIOUS_SHADER_CACHE_ID!""
-            if exist !folder! rmdir /Q /S !folder! > NUL
+            if exist !folder! rmdir /Q /S !folder! > NUL 2>&1
         )
 
         :LoadingSaves
@@ -1384,17 +1384,17 @@ REM : functions
         set "EXTRACT_PATH=!parentFolder:~0,-2!""
 
         pushd !BFW_TOOLS_PATH!
-        @echo Loading saves for !user!^.^.^.>> !batchFwLog!
-        @echo Loading saves for !user!^.^.^.
+        @echo Loading saves for !user:"=!^.^.^.>> !batchFwLog!
+        @echo Loading saves for !user:"=!^.^.^.
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !EXTRACT_PATH!
 
         :savesLoaded
         if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
 
         REM : if game profile exist, create a shortcut to edit it with notepad
-        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles""
+        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
 
-        REM : create folder !GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles (if need)
+        REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
         if not exist !MISSING_PROFILES_FOLDER! goto:isSettingsExist
 
         REM : its path if already saved under _BatchFW_Missing_Games_Profiles
@@ -1456,6 +1456,7 @@ REM : functions
 
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
+
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
         cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^." 4160
         goto:syncCP
@@ -1473,10 +1474,10 @@ REM : functions
         @echo Import settings from !previousSettingsFolder:"=!
 
         set /A "settingsImported=1"
-        robocopy !previousSettingsFolder! !nsf! /S > NUL
+        robocopy !previousSettingsFolder! !nsf! /S > NUL 2>&1
 
         REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!user!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
+        set "msg="!GAME_TITLE!:!DATE!-!user:"=!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
         call:log2GamesLibraryFile !msg!
 
         :beforeLoad
@@ -1487,38 +1488,38 @@ REM : functions
 
         :loaded
         for /F "delims=" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
-        @echo Using settings from !settingsFolderName! for !user! ^!>> !batchFwLog!
-        @echo Using settings from !settingsFolderName! for !user! ^!
+        @echo Using settings from !settingsFolderName! for !user:"=! ^!>> !batchFwLog!
+        @echo Using settings from !settingsFolderName! for !user:"=! ^!
 
         REM : looking for last modified *settings.bin to create !user!_settings.bin
         call:setSettingsForUser
 
         REM : loading CEMU an cemuHook settings
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.bin > NUL
-        set "src="!CEMU_FOLDER:"=!\!user!_settings.bin""
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.bin" > NUL 2>&1
+        set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.bin""
         set "target="!CEMU_FOLDER:"=!\settings.bin""
-        move /Y !src! !target!
+        if exist !src! move /Y !src! !target! > NUL 2>&1
 
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_settings.xml > NUL
-        set "src="!CEMU_FOLDER:"=!\!user!_settings.xml""
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.xml" > NUL 2>&1
+        set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.xml""
         set "target="!CEMU_FOLDER:"=!\settings.xml""
-        move /Y !src! !target!
+        if exist !src! move /Y !src! !target! > NUL 2>&1
 
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! !user!_cemuhook.ini > NUL
-        set "src="!CEMU_FOLDER:"=!\!user!_cemuhook.ini""
+        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_cemuhook.ini" > NUL 2>&1
+        set "src="!CEMU_FOLDER:"=!\!user:"=!_cemuhook.ini""
         set "target="!CEMU_FOLDER:"=!\cemuhook.ini""
-        move /Y !src! !target!
+        if exist !src! move /Y !src! !target! > NUL 2>&1
 
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
-        robocopy !controllersProfilesSaved! !controllersProfiles! > NUL
+        robocopy !controllersProfilesSaved! !controllersProfiles! > NUL 2>&1
 
         REM : patching files for ignoring precompiled cache
         if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
         if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
 
         REM : set onlines files for user
-        call:setOnlineFiles
+        if !wizardLaunched! EQU 0 call:setOnlineFiles
 
         REM : if needed, create a game profile shorcut
         call:createGameProfileShorcut
@@ -1526,34 +1527,35 @@ REM : functions
         REM : if needed, create a example.ini profile shorcut
         call:createExampleIniShorcut
 
+        exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
 
     :setSettingsForUser
 
-        set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
+        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
         if exist !target! goto:eof
 
         pushd !SETTINGS_FOLDER!
 
         for /F "delims=~" %%i in ('dir /O:D /B *settings.bin') do (
             set "f="%%i""
-            copy /Y !f! !user!_settings.bin
+            copy /Y !f! "!user:"=!_settings.bin"
             REM : remove old saved settings
-            if [!f!] == ["settings.bin"] del /F !f! > NUL
+            if [!f!] == ["settings.bin"] del /F !f! > NUL 2>&1
         )
         for /F "delims=~" %%i in ('dir /O:D /B *settings.xml') do (
             set "f="%%i""
-            copy /Y !f! !user!_settings.xml
+            copy /Y !f! "!user:"=!_settings.xml"
             REM : remove old saved settings
-            if [!f!] == ["settings.xml"] del /F !f! > NUL
+            if [!f!] == ["settings.xml"] del /F !f! > NUL 2>&1
         )
-        set "target="!SETTINGS_FOLDER:"=!\!user!_cemuhook.ini""
+        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
         for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini') do (
             set "f="%%i""
-            copy /Y !f! !user!_cemuhook.ini
+            copy /Y !f! "!user:"=!_cemuhook.ini"
             REM : remove old saved settings
-            if [!f!] == ["cemuhook.ini"] del /F !f! > NUL
+            if [!f!] == ["cemuhook.ini"] del /F !f! > NUL 2>&1
         )
 
         pushd !BFW_TOOLS_PATH!
@@ -1592,19 +1594,17 @@ REM : functions
 
     :getHostState
         set "ipaddr=%~1"
+        set /A "state=0"
+        ping -n 1 !ipaddr! > NUL 2>&1
+        if !ERRORLEVEL! EQU 0 set /A "state=1"
 
-        set /A state=0
-        for /f "tokens=5,6,7" %%a in ('ping -n 1 !ipaddr!') do (
-            if "x%%a"=="xReceived" if "x%%c"=="x1,"  set /A "state=1"
-        )
-        
-        set "~2=!state!"
+        set "%2=%state%"
     goto:eof
     REM : ------------------------------------------------------------------
 
     :setOnlineFiles
 
-        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFW_WiiU\onlineFiles""
+        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
         If not exist !BFW_ONLINE_ACC! goto:eof
@@ -1612,7 +1612,7 @@ REM : functions
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
-        set "pat="!BFW_ONLINE_ACC:"=!\!user!*.dat""
+        set "pat="!BFW_ONLINE_ACC:"=!\!user:"=!*.dat""
 
         for /F "delims=~" %%i in ('dir /B !pat!') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
@@ -1621,22 +1621,21 @@ REM : functions
         )
 
         if ["!accId!"] == ["NONE"] (
-            @echo WARNING^: AccountId not found for !user!
-            @echo WARNING^: AccountId not found for !user!  >> !batchFwLog!
-            cscript /nologo !MessageBox! "AccountId not found for !user!, cancel online files installation" 4160
+            @echo WARNING^: AccountId not found for !user:"=!
+            @echo WARNING^: AccountId not found for !user:"=!  >> !batchFwLog!
+            cscript /nologo !MessageBox! "AccountId not found for !user:"=!, cancel online files installation" 4160
             goto:eof
         )
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
         if not exist !winScpIni! goto:installAccount
-        
+
         REM : get the hostname
         for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
         REM : check its state
-        set /A "state=NONE"
-        call:getHostState !ipRead! state
 
+        call:getHostState !ipRead! state
         if !state! EQU 1 (
             cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort using online feature" 4112
             if !ERRORLEVEL! EQU 2 goto:eof
@@ -1650,19 +1649,16 @@ REM : functions
         REM : patch settings.xml
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
-              
-        type !cs! | find /V "AccountId" | find /V "/Online" | find /V "/content" > !csTmp!
-        
-        echo         ^<AccountId^>!accId!^<^/AccountId^> >> !csTmp!
-        echo     ^<^/Online^> >> !csTmp!
-        echo ^<^/content^> >> !csTmp!
 
-        del /F !cs! > NUL
-        move /Y !csTmp! !cs! > NUL
+        !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
-        @echo Online account enabled for !user! ^: !accId! >> !batchFwLog!
-        @echo Online account enabled for !user! ^: !accId!
+        del /F !cs! > NUL 2>&1
+        move /Y !csTmp! !cs! > NUL 2>&1
 
+        @echo Online account enabled for !user:"=! ^: !accId! >> !batchFwLog!
+        @echo Online account enabled for !user:"=! ^: !accId!
+
+        exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1751,8 +1747,8 @@ REM : functions
 
     :syncControllerProfiles
 
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\!USERDOMAIN!""
-        if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!""
+        if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
         if not exist !ccp! goto:eof
@@ -1782,7 +1778,7 @@ REM : functions
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL
+            if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
         )
         pushd !BFW_TOOLS_PATH!
 
@@ -1797,10 +1793,10 @@ REM : functions
         if exist !profileShortcut! goto:eof
 
         REM : if game profile exist, create a shortcut to edit it with notepad
-        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles""
+        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
 
-        REM : create folder !GAMES_FOLDER:"=!\_BatchFW_Missing_Games_Profiles (if need)
-        if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL
+        REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
+        if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
         REM : in wizardFirstSaving.bat profile file is first created in _BatchFW_Missing_Games_Profiles subfolder, then copied to cemu one
 
         REM : its path if already saved under _BatchFW_Missing_Games_Profiles
@@ -1812,7 +1808,7 @@ REM : functions
         REM : if game profile does not exist in CEMU subfolder
         if not exist !cgp! (
             REM : if exist in_BatchFW_Missing_Games_Profiles copy it to cemu folder
-            if exist !ugp! copy /Y !ugp! !cgp! > NUL
+            if exist !ugp! copy /Y !ugp! !cgp! > NUL 2>&1
         )
 
         REM : temporary vbs file for creating a windows shortcut
@@ -1822,7 +1818,7 @@ REM : functions
 
         REM : create a shortcut to game's profile
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
-        if not exist !gpsf! mkdir !gpsf! > NUL
+        if not exist !gpsf! mkdir !gpsf! > NUL 2>&1
 
         set "LINK_DESCRIPTION="Edit !GAME_TITLE!'s profile for !CEMU_FOLDER_NAME!""
 
@@ -1861,7 +1857,7 @@ REM : functions
 
         REM : create a folder (if needed)
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
-        if not exist !gpsf! mkdir !gpsf! > NUL
+        if not exist !gpsf! mkdir !gpsf! > NUL 2>&1
 
         set "LINK_DESCRIPTION="Edit example.ini profile for !CEMU_FOLDER_NAME!""
 
@@ -1896,7 +1892,7 @@ REM : functions
 
         REM : create a folder (if needed)
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!""
-        if not exist !gpsf! mkdir !gpsf! > NUL
+        if not exist !gpsf! mkdir !gpsf! > NUL 2>&1
 
         set "LINK_DESCRIPTION="!CEMU_FOLDER_NAME!'s Log""
 
@@ -1954,35 +1950,44 @@ REM : functions
         if exist !SETTINGS_FOLDER! (
 
             REM : saving CEMU an cemuHook settings
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.bin""
-            set "target="!SETTINGS_FOLDER:"=!\!user!_settings.bin""
+            set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
             move /Y !src! !target!
 
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.xml""
-            set "target="!SETTINGS_FOLDER:"=!\!user!_settings.xml""
+            set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
             move /Y !src! !target!
 
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
-            set "target="!SETTINGS_FOLDER:"=!\!user!_cemuhook.ini""
+            set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
             move /Y !src! !target!
 
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user! ^!>> !batchFwLog!
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user! ^!
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user:"=! ^!>> !batchFwLog!
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user:"=! ^!
         )
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "ccp="!CEMU_FOLDER:"=!\controllerProfiles""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
 
+        REM : if a backup on settings.xml was made in wizardFirstLaunch, restore it
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
+        set "backup="!CEMU_FOLDER:"=!\settings.ini""
+
+        if exist !backup! (
+            del /F !cs!
+            move /Y !backup! !cs!
+        )
+
     goto:eof
     REM : ------------------------------------------------------------------
 
     :removeSaves
         set "sf="!saveFolder:"=!\%~1\%endTitleId%""
-        if exist !sf! rmdir /Q /S !sf! 2>NUL
+        if exist !sf! rmdir /Q /S !sf! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2017,7 +2022,7 @@ REM : functions
 
         if exist !gtscf! goto:handleShaderFiles
 
-        mkdir !gtscf! > NUL
+        mkdir !gtscf! > NUL 2>&1
         REM :  move CEMU transferable shader cache file to GAME_FOLDER_PATH
         echo move !ctscf! to !gtscf!>> !batchFwLog!
         echo move !ctscf! to !gtscf!
@@ -2049,7 +2054,7 @@ REM : functions
 
         REM : prepare log to edit it
         @echo --------------------------------------------------- >> !tscl!
-        @echo - [!DATE!] !user!@!USERDOMAIN! >> !tscl!
+        @echo - [!DATE!] !user:"=!@!USERDOMAIN! >> !tscl!
         @echo - >> !tscl!
         @echo - CEMU install = !CEMU_FOLDER! >> !tscl!
         @echo - >> !tscl!
@@ -2085,7 +2090,7 @@ REM : functions
             @echo - >> !tscl!
             @echo - Renaming saved cache to !OLD_SHADER_CACHE_ID!.old >> !tscl!
 
-            move /Y !otscf! !otscr! > NUL
+            move /Y !otscf! !otscr! > NUL 2>&1
             @echo - >> !tscl!
             @echo - Moving CEMU^'s transferable shader cache to game^'s folder >> !tscl!
             wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
@@ -2093,7 +2098,7 @@ REM : functions
 
             set "tscrl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_replace_!OLD_SHADER_CACHE_ID!_with_!NEW_SHADER_CACHE_ID!""
 
-            @echo - [!DATE!] !user!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !tscrl!
+            @echo - [!DATE!] !user:"=!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !tscrl!
             @echo - >> !tscrl!
             @echo - !CEMU_FOLDER_NAME! change !GAME_TITLE!^'s ShaderCacheId from !OLD_SHADER_CACHE_ID! to !NEW_SHADER_CACHE_ID! >> !tscrl!
 
@@ -2107,7 +2112,7 @@ REM : functions
             @echo - Renaming saved cache with CEMU^'s one name^.^.^. >> !tscl!
             @echo - >> !tscl!
 
-            move /Y !otscf! !gntscf! > NUL
+            move /Y !otscf! !gntscf! > NUL 2>&1
 
             @echo - >> !tscl!
         )
@@ -2142,13 +2147,13 @@ REM : functions
 
         set "btscl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_broke_!OLD_SHADER_CACHE_ID!""
 
-        @echo - [!DATE!] !user!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !btscl!
+        @echo - [!DATE!] !user:"=!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !btscl!
         @echo - >> !btscl!
         @echo - !CEMU_FOLDER_NAME! refuse to use !OLD_SHADER_CACHE_ID!^.old >> !btscl!
 
         REM : rename saved file
-        move /Y !otscf! !otscr! > NUL
-        move /Y !gntscf! !ntscf! > NUL
+        move /Y !otscf! !otscr! > NUL 2>&1
+        move /Y !gntscf! !ntscf! > NUL 2>&1
 
         @echo - >> !tscl!
         @echo ^(close notepad to continue^) >> !tscl!
@@ -2165,11 +2170,11 @@ REM : functions
             set "NEW_TRANS_SHADER=!NEW_TRANS_SHADER:.bin=_j.bin!"
         )
 
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL 2>&1
 
         :delLog
         REM : delete transShaderCache.log (useless)
-        if exist !tscl! del /F /S !tscl!  > NUL
+        if exist !tscl! del /F /S !tscl!  > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2233,7 +2238,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
@@ -2255,12 +2260,12 @@ REM : functions
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
             @echo Host char codeSet not found ^?^, exiting 1
-            timeout /t 8 > NUL
+            timeout /t 8 > NUL 2>&1
             exit /b 9
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
@@ -2277,7 +2282,7 @@ REM : functions
         set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
@@ -2288,8 +2293,8 @@ REM : functions
         REM : sorting the log
         set "gLogFileTmp="!glogFile:"=!.tmp""
         type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL
-        move /Y !gLogFileTmp! !glogFile! > NUL
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2302,7 +2307,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

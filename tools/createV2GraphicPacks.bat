@@ -35,7 +35,7 @@ REM : main
     :end
 
     REM : check if exist external Graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     if %nbArgs% GTR 6 (
         @echo ERROR ^: on arguments passed ^!
@@ -65,7 +65,7 @@ REM : main
         @echo ^^! _BatchFW %description% already exist, skipped ^^!
         exit 1
     )
-    if not exist !gp! mkdir !gp! > NUL
+    if not exist !gp! mkdir !gp! > NUL 2>&1
 
     set "rulesFileV2="!gp:"=!\rules.txt""
 
@@ -110,9 +110,9 @@ REM : main
     :formatrV2Utf8
     REM : force UTF8 format
     set "utf8v2="!gp:"=!\rules.tmp""
-    copy /Y !rulesFileV2! !utf8v2! > NUL
+    copy /Y !rulesFileV2! !utf8v2! > NUL 2>&1
     type !utf8v2! > !rulesFileV2!
-    del /F !utf8v2! > NUL
+    del /F !utf8v2! > NUL 2>&1
 
     if %ERRORLEVEL% NEQ 0 exit %ERRORLEVEL%
     exit 0
@@ -297,7 +297,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -310,7 +310,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present

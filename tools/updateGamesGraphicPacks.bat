@@ -81,7 +81,7 @@ REM : main
     )
 
     REM : get and check BFW_GP_FOLDER
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFW_Graphic_Packs""
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
@@ -182,8 +182,8 @@ REM : functions
 
         type !glogFile! | find /I /V "!pat!" > !logFileTmp!
 
-        del /F /S !glogFile! > NUL
-        move /Y !logFileTmp! !glogFile! > NUL
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -204,7 +204,7 @@ REM : functions
 
         REM : update game's graphic packs
         set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
-        if not exist !ggp! mkdir !ggp! > NUL
+        if not exist !ggp! mkdir !ggp! > NUL 2>&1
 
         REM : Get Game information using titleId
         set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -217,11 +217,11 @@ REM : functions
         )
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
-        set "wiiuLibFile="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=" %%i in ('type !wiiuLibFile! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
         REM : strip line to get data
         for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
@@ -282,7 +282,7 @@ REM : functions
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL && (
+            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL 2>&1 && (
                 REM : V2 graphic pack
                 set "gameName=%%i"
                 set "gameName=!gameName:rules=!"
@@ -295,8 +295,8 @@ REM : functions
                 REM : V3 graphic pack
                 set "v3Gpfound=1"
                 REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
-                echo !rulesFile! | find "_Resolution" > NUL && type !rulesFile! | find /I "BatchFW" > NUL && goto:eof
-                echo !rulesFile! | find "_Resolution" > NUL && set "gpV3Res=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
+                echo !rulesFile! | find "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
             )
         )
 
@@ -379,7 +379,7 @@ REM : functions
         )
 
         REM : try to list
-        dir !toCheck! > NUL
+        dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
@@ -444,7 +444,7 @@ REM : functions
         )
         REM : set char code set, output to host log file
 
-        chcp %CHARSET% > NUL
+        chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
 
     goto:eof
@@ -458,7 +458,7 @@ REM : functions
         set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
@@ -470,8 +470,8 @@ REM : functions
         REM : sorting the log
         set "gLogFileTmp="!glogFile:"=!.tmp""
         type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL
-        move /Y !gLogFileTmp! !glogFile! > NUL
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -483,7 +483,7 @@ REM : functions
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present
