@@ -1,3 +1,29 @@
+28/05/2019 V14 : 
+- add : use Game's icon (if meta\iconTex.tga found, use box art icons otherwise)
+- fix : handle spaces and custom characters in user's name (only those forbiden by windows 
+        to name folder and files are not allowed)
+- fix : re-work the wii-u title database (game's title)
+- add : xmlStartlet resource for handling xml files
+- fix : enhance GFX completion to compute scaleShader, aspectRatio (Wind Waker HD bug) 
+- add : active network detection in forceGraphicPackUpdate.bat 
+- fix : setting.xml found in CEMU FOLDER is restored after every run
+- add : if CEMU version >= 1.15.6, wizardFirstLaunch.bat use CEMU UI to tweak game's settings
+        it's still possible to compare game's profile with the one from another version
+        when opening CEMU in wizardFirstLaunch.bat, create a fake game's folder using a link
+        to let only the game in CEMU UI games list
+- add : WII-U / set BatchFw's users list with WiiU users list (done if asked 
+        in the setup.bat)
+- add : WII-U / scan to list games, saves, updates and DLC installed on mlc and usb
+        take snapshot (dated and saved under _BatchFW_WiiU\Scans) 
+- add : WII-U / script to dump selected games from mlc and usb storage
+- add : WII-U / script to import save for each BatchFw's user (associated to a WiiU account) 
+        from the Wii-U
+- add : WII-U / script to export CEMU saves for each BatchFw's user (associated to a WiiU account)
+        to the Wii-U SD card in SaveMii backups folder
+        savemii tutorial : 
+        https://gbatemp.net/threads/tutorial-importing-wii-u-saves-with-savemii.475349/
+- add : silent mode to forceGraphicPackUpdate.bat to be called after game(s) dump
+
 25/04/2019 V13-6 : 
 - add : add a WII-U shortcuts folder 
 - add : WII-U / script to prepare your SD card (fat32format -c64) + add 
@@ -8,10 +34,12 @@
 - add : WII-U / script to dump all necessary files to play online in _BatchFW_WiiU\onlineFiles
 - add : WII-U / script to associate BatchFw's user to WiiU accounts
 - add : auto-install onlines files for the current user when launching a game
+        Check before if your Wii-U is not present on the network (set static IP adressing on your 
+        network for that feature) to avoid ban
 
 16/04/2019 V13-5 : 
 - add : settings by user (allows different GFX packs and mostly mods selection per user) 
-
+        
 12/04/2019 V13-4 : 
 - hot fix : during GFX update, the folder was not empty correctly
 
