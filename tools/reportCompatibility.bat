@@ -208,17 +208,12 @@ REM : main
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "=" 2^>NUL') do (
         set "GPU_VENDORS=%%i"
-        goto:firstOccurGpu
     )
-    :firstOccurGpu
-
     set "GPU_DRIVERS_VERSION=NONE"
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "=" 2^>NUL') do (
         set "GPU_DRIVERS_VERSION=%%i"
-        goto:firstOccurDrivers
     )
-    :firstOccurDrivers
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value ^| find "=" 2^>NUL') do (
         set "RAM=%%i"

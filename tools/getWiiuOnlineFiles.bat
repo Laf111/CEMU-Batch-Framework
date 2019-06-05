@@ -297,18 +297,22 @@ REM : functions
         REM : DOS reserved characters
         set "str=!str:&=!"
         set "str=!str:^!=!"
+        set "str=!str:%%=!"
+
+        REM : add the point
+        set "str=!str:.=!"
         
         REM : Forbidden characters for files in WINDOWS
         set "str=!str:?=!"
         set "str=!str:\=!"
-        set "str=!str:/=!"       
-        set "str=!str::=!"        
+        set "str=!str:/=!"
+        set "str=!str::=!"
         set "str=!str:"=!"
         set "str=!str:>=!"
         set "str=!str:<=!"
         set "str=!str:|=!"
         set "str=!str:^=!"
-        
+
         @echo !str! | find "*" > NUL 2>&1 && (
             echo Please remove * ^(unsupported charcater^) from !str!
             exit /b 50
@@ -379,14 +383,15 @@ REM : functions
         set /P "input=Please enter BatchFw's user name : "
         call:secureUserNameForBfw "!input!" safeInput
         if !ERRORLEVEL! NEQ 0 (
-            @echo Some unhandled characters were found ^!
+            @echo ^* or ^= are not allowed characters ^!
             @echo Please remove them
             goto:askUser
         )
 
         if not ["!safeInput!"] == ["!input!"] (
             @echo Some unhandled characters were found ^!
-             choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
+            @echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& ^%
+            choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
             if !ERRORLEVEL! EQU 2 goto:askUser
         )
         set "%1="!safeInput!""

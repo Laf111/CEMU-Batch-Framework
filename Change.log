@@ -1,7 +1,6 @@
-- ifx : enhance the automatic settings import mode if a settings.xml exist for both (src and target version)
-        getting each nodes' values of src file and try to update values in the target settings.xml
-
 28/05/2019 V14 : 
+- fix : enhance the automatic settings import mode if a settings.xml exist for both (src and target version)
+        getting each nodes' values of src file and try to update values in the target settings.xml
 - add : use Game's icon (if meta\iconTex.tga found, use box art icons otherwise)
 - fix : handle spaces and custom characters in user's name (only those forbiden by windows 
         to name folder and files are not allowed)

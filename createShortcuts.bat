@@ -370,12 +370,16 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
 
-    set "str=%version:.=%"
-    set "n=%str:~0,4%"
-    if %n% LSS 1151 set /A "post1151=0"
-    if %n% GEQ 1140 goto:autoImportMode
+    call:compareVersions %version% "1.15.1"
+    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+    if !ERRORLEVEL! EQU 2 set /A "post1151=0"
 
-   :extractV2Packs
+    call:compareVersions %version% "1.14.0"
+    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+    if !ERRORLEVEL! EQU 1 goto:autoImportMode
+    if !ERRORLEVEL! EQU 0 goto:autoImportMode
+
+    :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:autoImportMode
 
@@ -395,59 +399,31 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     timeout /T 3 > NUL 2>&1
    :autoImportMode
     @echo ---------------------------------------------------------
-    @echo.
-    @echo Enable AUTOMATIC SETTINGS IMPORT between versions of CEMU^?
-    @echo.
-    @echo y^: Using settings of the last version of CEMU used to play this game
-    @echo n^: BatchFW will launch the wizard script to collect settings for each game
-    @echo.
-    @echo Choose y ONLY if you^'re sure that there was no new settings    
-    @echo introduced between the last played version and this version
-    @echo.
-
     REM : importMode
-    set "IMPORT_MODE=DISABLED"
-    call:getUserInput "Enable automatic settings import? (y, n) : " "n,y" ANSWER
-    if [!ANSWER!] == ["y"] set "IMPORT_MODE=ENABLED"
+    set "IMPORT_MODE=ENABLED"
+    call:getUserInput "Disable automatic settings import? (y,n : default in 5sec): " "n,y" ANSWER 5
+    if [!ANSWER!] == ["y"] set "IMPORT_MODE=DISABLED"
 
-    set "msg="!CEMU_FOLDER_NAME! install with automatic import=!IMPORT_MODE:"=!""
+    set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
     call:log2HostFile !msg!
+
 
     REM : get GPU_VENDOR to set default choice on ignoring precompiled shader cache
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        goto:firstOccur
     )
-    :firstOccur
     set "GPU_VENDOR=!string: =!"
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
-    set "gpuType=AMD"
-    set "noAMD=!GPU_VENDOR:AMD=!"
-    if ["!noAMD!"] == ["!GPU_VENDOR!"] set "gpuType=OTHER"
+    set "gpuType=OTHER"
+    echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 && set "gpuType=NVIDIA"
 
-    REM : ignoring precompiled shader cache
     set "IGNORE_PRECOMP=DISABLED"
-    @echo ---------------------------------------------------------
+    REM : GPU is NVIDIA => ignoring precompiled shaders cache
+    if ["!gpuType!"] == ["NVIDIA"] set "IGNORE_PRECOMP=ENABLED"
 
-    if ["!gpuType!"] == ["OTHER"] (
-
-            @echo Ignore the precompiled shader cache for all games^?
-            @echo.
-            @echo y^: Use only GPU GLCache backuped per game
-            @echo n^: Use in addition precompiled shaders
-            @echo.
-            @echo if you select y^:
-            @echo   and encounter slow shaders compilation time after the first time^,
-            @echo   your display drivers are corrupt^!
-            @echo   do a clean uninstall using DDU and re-install it
-            @echo.
-        call:getUserInput "Ignore precompiled shader cache for all games? (y, n) : " "y,n" ANSWER
-        if [!ANSWER!] == ["y"] set "IGNORE_PRECOMP=ENABLED"
-
-        set "msg="!CEMU_FOLDER_NAME:"=! install with ignoring precompiled shader cache=!IGNORE_PRECOMP:"=!""
-        call:log2HostFile !msg!
-    )
+    set "msg="!CEMU_FOLDER_NAME:"=! install with ignoring precompiled shader cache=!IGNORE_PRECOMP:"=!""
+    call:log2HostFile !msg!
 
     REM : check if main GPU is iGPU. Ask for -nolegacy if it is the case
     set "noIntel=!GPU_VENDOR:Intel=!"
@@ -827,7 +803,7 @@ REM : functions
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Associate users to wii-u accounts.lnk""
         set "LINK_DESCRIPTION="Associate BatchFw^'s user to your Wii-U accounts""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\setWiiuAccountToUsers.bat""
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\wii-u.ico""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\WiiU-user.ico""
         if not exist !LINK_PATH! (
                 if !QUIET_MODE! EQU 0 @echo Creating a shortcut to setWiiuAccountToUsers^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
@@ -1471,6 +1447,63 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "newIcoGameFile="!codeFullPath:"=!\!titleId!.ico""
         move /Y !oldIcoGameFile! !newIcoGameFile! > NUL 2>&1
         set "ICO_PATH=!newIcoGameFile!"
+    goto:eof
+
+    REM : functions to compare Cemu Versions
+    :countSeparators
+
+        set "string=%~1"
+
+        set /A "count=0"
+        :again
+        set "oldstring=!string!"
+        set "string=!string:*%sep%=!"
+        set /A "count+=1"
+        if not ["!string!"] == ["!oldstring!"] goto:again
+        set /A "count-=1"
+        set "%2=!count!"
+
+    goto:eof
+
+    :compareDigits
+
+            set /A "num=%~1"
+
+            set /A "dr=99"
+            set /A "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
+
+            if !dt! LSS !dr! exit /b 2
+            if !dt! GTR !dr! exit /b 1
+
+    goto:eof
+
+    REM : if vit < vir return 1
+    REM : if vit = vir return 0
+    REM : if vit > vir return 2
+    :compareVersions
+        set "vit=%~1"
+        set "vir=%~2"
+
+        REM : versioning separator
+        set "sep=."
+
+        call:countSeparators !vit! nbst
+        call:countSeparators !vir! nbsr
+
+        REM : get the number minimum of sperators found
+        set /A "minNbSep=!nbst!"
+        if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
+        set /A "minNbSep+=1"
+
+        REM : Loop on the minNbSep and comparing each number
+        REM : note that the shell can compare 1c with 1d for example
+        for /L %%l in (1,1,!minNbSep!) do (
+            call:compareDigits %%l !vir! !vit!
+            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+        )
+
     goto:eof
 
     REM : ------------------------------------------------------------------

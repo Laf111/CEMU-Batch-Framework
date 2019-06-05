@@ -214,21 +214,22 @@ REM : main
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     if not exist !cemuLog! goto:backupDefaultSettings
 
-    set "CemuVersionRead=NOT_FOUND"
     set "versionRead=NOT_FOUND"
-
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "versionRead=%%e"
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
     if ["%versionRead%"] == ["NOT_FOUND"] goto:displayGameProfile
-
-    set "str=%versionRead:.=%"
-    set /A "CemuVersionRead=%str:~0,4%"
-    if %CemuVersionRead% LSS 1140 set "gfxType=V2"
+    
+    call:compareVersions %versionRead% "1.14.0"
+    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+    if !ERRORLEVEL! EQU 2 set "gfxType=V2"
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REM : if CEMU version < 1.12.0
-    if %CemuVersionRead% LSS 1120 goto:displayGameProfile
+    call:compareVersions %versionRead% "1.12.0"
+    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+    if !ERRORLEVEL! EQU 2 goto:displayGameProfile
+
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
@@ -298,7 +299,7 @@ REM : main
     goto:updateMissingProfileFolder
 
     :openProfileFile
-    if %CemuVersionRead% GEQ 1156 goto:step2
+    if %versionRead% GEQ 1156 goto:step2
 
     @echo Openning !PROFILE_FILE:"=! ^.^.^.
     @echo Complete it ^(if needed^) then close notepad to continue
@@ -334,7 +335,7 @@ REM : main
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings
 
-    if %CemuVersionRead% GEQ 1156 goto:wait
+    if %versionRead% GEQ 1156 goto:wait
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
@@ -447,7 +448,7 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:syncCtrlProfiles
+    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] if %versionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:syncCtrlProfiles
     if not exist !graphicPacks! mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -826,6 +827,65 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
+
+    REM : functions to compare Cemu Versions
+    :countSeparators
+
+        set "string=%~1"
+
+        set /A "count=0"
+        :again
+        set "oldstring=!string!"
+        set "string=!string:*%sep%=!"
+        set /A "count+=1"
+        if not ["!string!"] == ["!oldstring!"] goto:again
+        set /A "count-=1"
+        set "%2=!count!"
+
+    goto:eof
+
+    :compareDigits
+
+            set /A "num=%~1"
+
+            set /A "dr=99"
+            set /A "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
+
+            if !dt! LSS !dr! exit /b 2
+            if !dt! GTR !dr! exit /b 1
+
+    goto:eof
+
+    REM : if vit < vir return 1
+    REM : if vit = vir return 0
+    REM : if vit > vir return 2
+    :compareVersions
+        set "vit=%~1"
+        set "vir=%~2"
+
+        REM : versioning separator
+        set "sep=."
+
+        call:countSeparators !vit! nbst
+        call:countSeparators !vir! nbsr
+
+        REM : get the number minimum of sperators found
+        set /A "minNbSep=!nbst!"
+        if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
+        set /A "minNbSep+=1"
+
+        REM : Loop on the minNbSep and comparing each number
+        REM : note that the shell can compare 1c with 1d for example
+        for /L %%l in (1,1,!minNbSep!) do (
+            call:compareDigits %%l !vir! !vit!
+            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+        )
+
+    goto:eof
+
+
 
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos

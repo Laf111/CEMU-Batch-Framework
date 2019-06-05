@@ -229,16 +229,15 @@ REM : main
 
     if not exist !cemuLog! goto:getTitleId
 
-    set "CemuVersionRead=NOT_FOUND"
     set "versionRead=NOT_FOUND"
-
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu"') do set "versionRead=%%e"
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
     if ["%versionRead%"] == ["NOT_FOUND"] goto:getTitleId
+   
+    call:compareVersions %versionRead% "1.14.0"
+    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+    if !ERRORLEVEL! EQU 2 set "gfxType=V2"
 
-    set "str=%versionRead:.=%"
-    set /A "CemuVersionRead=%str:~0,4%"
-    if %CemuVersionRead% LSS 1140 set "gfxType=V2"
 
     :getTitleId
     REM : META.XML file
@@ -352,9 +351,8 @@ REM : main
     REM : get GPU_VENDOR and current display drivers version (end of list returned in case of type than one graphic card)
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        goto:firstOccur
     )
-    :firstOccur
+
     set "GPU_VENDOR=!string: =!"
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
@@ -365,9 +363,8 @@ REM : main
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
         set "string=%%i"
-        goto:firstOccur
     )
-    :firstOccur
+
     set "GPU_DRIVERS_VERSION=!string: =!"
 
     REM : search your current GLCache
@@ -732,7 +729,7 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%CemuVersionRead%"] == ["NOT_FOUND"] if %CemuVersionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] if %versionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -1417,8 +1414,8 @@ REM : functions
         REM : if no import goto:continueLoad
         if ["!IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
-        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\*""
-        for /F "delims=" %%i in ('dir /B /O:D /A:D !pat! 2^> NUL') do set "previousSettingsFolder="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\%%i""
+        REM : search for valid settings
+        call:getSettings
 
         :continueLoad
         if [!previousSettingsFolder!] == ["NONE"] (
@@ -1531,6 +1528,102 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : fucntion to count nodes in settings.xml
+    :countNodes
+        set "file="%~1""
+
+        set "fileTmp="!BFW_PATH:"=!\logs\settings.tmp""
+
+        REM : delete ignored nodes
+        set "file0=!fileTmp:.tmp=.tmp0!"
+        !xmlS! ed -d "//GamePaths" !file! > !file0!
+
+        set "file1=!fileTmp:.tmp=.tmp1!"
+        !xmlS! ed -d "//GameCache" !file0! > !file1!
+
+        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
+
+        set /A "nbNodes=0"
+        for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /I /V "!"') do (
+            set "line=%%i"
+            for /F "tokens=2 delims=~<>" %%a in ("!line!") do (
+                set /A "nbNodes+=1"
+            )
+        )
+        set "pat="!BFW_PATH:"=!\logs\settings.tmp*""
+        del /F !pat! > NUL 2>&1
+
+        set "%2=!nbNodes!"
+    goto:eof
+
+    :getSettings
+
+        set "tSetBin="!CEMU_FOLDER:"=!\settings.bin""
+        set "tSetXml="!CEMU_FOLDER:"=!\settings.xml""
+
+        REM : get the size of the settings.bin of the launched version
+        set "tSetBinSize=0"
+        if exist !tSetBin! (
+            for /F "tokens=*" %%a in (!tSetBin!)  do set "tSetBinSize=%%~za"
+        )
+
+        set "tSetXmlnbNodes=0"
+        REM : count the nodes in the settings.xml of the launched version
+        if exist !tSetXml! call:countNodes !tSetXml! tSetXmlnbNodes
+
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\*""
+        for /F "delims=" %%j in ('dir /B /A:D /O:-N !pat! 2^> NUL') do (
+            call:checkSettingsFolder "%%j"
+            if !ERRORLEVEL! EQU 0 (
+                set "previousSettingsFolder=!candidateFolder!"
+            )
+        )
+    goto:eof
+
+    :checkSettingsFolder
+        set "folderName=%~1"
+
+        REM : setting folder found
+        set "candidateFolder="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\%folderName%""
+
+        REM : settings.bin
+        pushd !candidateFolder!
+
+        REM : initialize to user settings
+        set "sSetBin="!candidateFolder:"=!\!user:"=!_settings.bin""
+        if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
+
+        REM : initialize to user settings
+        set "sSetXml="!candidateFolder:"=!\!user:"=!_settings.xml""
+        if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
+
+        pushd !BFW_TOOLS_PATH!
+        
+        set "sSetBinSize=0"
+        if exist !sSetBin! (
+            for /F "tokens=*" %%a in (!sSetBin!)  do set "sSetBinSize=%%~za"
+
+            if !sSetBinSize! NEQ !tSetBinSize! exit /b 1
+            if not exist !sSetXml! exit /b 0
+        )
+
+        set "version=!folderName:cemu_=!"
+        call:compareVersions %version% "1.12.2"
+        if !ERRORLEVEL! EQU 50 echo Error when comparing versions
+        if !ERRORLEVEL! EQU 2 if exist !sSetBin! if !sSetBinSize! EQU !tSetBinSize! exit /b 0
+        if !ERRORLEVEL! EQU 2 exit /b 1
+        
+        if exist !sSetXml! (
+            set "sSetXmlnbNodes=0"
+            REM : count the nodes in the settings.xml of the launched version
+            call:countNodes !sSetXml! sSetXmlnbNodes
+            if !sSetXmlnbNodes! NEQ !tSetXmlnbNodes! exit /b 1
+            exit /b 0
+        )
+        exit /b 2
+
+    goto:eof
+
     :setSettingsForUser
 
         set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
@@ -1538,20 +1631,20 @@ REM : functions
 
         pushd !SETTINGS_FOLDER!
 
-        for /F "delims=~" %%i in ('dir /O:D /B *settings.bin') do (
+        for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!user:"=!_settings.bin"
             REM : remove old saved settings
             if [!f!] == ["settings.bin"] del /F !f! > NUL 2>&1
         )
-        for /F "delims=~" %%i in ('dir /O:D /B *settings.xml') do (
+        for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!user:"=!_settings.xml"
             REM : remove old saved settings
             if [!f!] == ["settings.xml"] del /F !f! > NUL 2>&1
         )
         set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
-        for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini') do (
+        for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!user:"=!_cemuhook.ini"
             REM : remove old saved settings
