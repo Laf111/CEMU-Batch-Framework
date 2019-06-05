@@ -206,9 +206,16 @@ REM : main
 
     set "GPU_VENDORS=NOT_FOUND"
 
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "=" 2^>NUL') do (
-        set "GPU_VENDORS=%%i"
+    REM : get GPU_VENDOR
+    set "GPU_VENDOR=NOT_FOUND"
+    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+        set "string=%%i"
+        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+            set "GPU_VENDOR=!string: =!"
+        )
     )
+    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
+    
     set "GPU_DRIVERS_VERSION=NONE"
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "=" 2^>NUL') do (

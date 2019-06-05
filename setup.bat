@@ -662,15 +662,19 @@ REM : main
 
    :registerCemuInstalls
 
-    REM : get GPU_VENDOR to set default choice on ignoring precompiled shader cache
+    REM : get GPU_VENDOR
+    set "GPU_VENDOR=NOT_FOUND"
+    set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
+        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+            set "gpuType=NVIDIA"
+            set "GPU_VENDOR=!string: =!"
+        )
     )
-    set "GPU_VENDOR=!string: =!"
-    call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
-    set "gpuType=OTHER"
-    echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 && set "gpuType=NVIDIA"
+    call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
     cls
     if %QUIET_MODE% EQU 0 (

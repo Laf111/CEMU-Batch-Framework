@@ -1,11 +1,13 @@
 28/05/2019 V14 : 
-- add : enhance existing settings detection (based on settings.bin size and settings.xml
-        nodes if the files exist). If no detected => launching the wizard to collect settings
-- add : automatic settings import mode is enabled by default
-- fix : comparison of CEMU's versions
+- add : enhance existing settings import process (using settings.bin size and settings
+        nodes in settings.xml if files exist). 
+        If no suitable settings are found => launching the wizard to collect settings
+- add : automatic settings import mode is enabled by default (default timeout choice
+        and so it still can be disabled)
 - add : use Game's icon (if meta\iconTex.tga found, use box art icons otherwise)
 - fix : handle spaces and more custom characters in user's name
-- fix : re-work the wii-u title database (game's title)
+- fix : re-work the wii-u title database (full game's title) and ignoring spaces when
+        parsing it
 - add : xmlStartlet resource for handling xml files
 - fix : enhance GFX completion to compute scaleShader, aspectRatio (Wind Waker HD bug) 
 - add : active network detection in forceGraphicPackUpdate.bat 
@@ -14,18 +16,16 @@
         it's still possible to compare game's profile with the one from another version
         when opening CEMU in wizardFirstLaunch.bat, create a fake game's folder using a link
         to let only the game in CEMU UI games list
-- add : WII-U / set BatchFw's users list with WiiU users list (done if asked 
-        in the setup.bat)
-- add : WII-U / scan to list games, saves, updates and DLC installed on mlc and usb
-        take snapshot (dated and saved under _BatchFW_WiiU\Scans) 
-- add : WII-U / script to dump selected games from mlc and usb storage
-- add : WII-U / script to import save for each BatchFw's user (associated to a WiiU account) 
-        from the Wii-U
-- add : WII-U / script to export CEMU saves for each BatchFw's user (associated to a WiiU account)
-        to the Wii-U SD card in SaveMii backups folder
-        savemii tutorial : 
-        https://gbatemp.net/threads/tutorial-importing-wii-u-saves-with-savemii.475349/
-- add : silent mode to forceGraphicPackUpdate.bat to be called after game(s) dump
+- add : WII-U / set BatchFw's users list with WiiU users list (if asked in the setup.bat)
+- add : WII-U / scan: to list games, saves, updates and DLC installed on mlc and usb
+        it takes snapshots (dated and saved under _BatchFW_WiiU\Scans) 
+- add : WII-U / script to dump selected games from mlc and usb storage (including saves for all
+        users, update and DLC files
+- add : WII-U / script to import game's save for each BatchFw's user (associated to a WiiU 
+        account) from the Wii-U 
+- add : WII-U / script to export CEMU saves for each BatchFw's user (associated to a WiiU 
+        account) to the Wii-U SD card in SaveMii backups folder
+- add : a silent mode in forceGraphicPackUpdate.bat needed when called after game(s) dump
 
 25/04/2019 V13-6 : 
 - add : add a WII-U shortcuts folder 

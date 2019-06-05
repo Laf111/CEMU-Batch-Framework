@@ -348,19 +348,20 @@ REM : main
 
     set /A "driversUpdateFlag=0"
 
-    REM : get GPU_VENDOR and current display drivers version (end of list returned in case of type than one graphic card)
+    REM : get GPU_VENDOR
+    set "GPU_VENDOR=NOT_FOUND"
+    set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
+        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+            set "gpuType=NVIDIA"
+            set "GPU_VENDOR=!string: =!"
+        )
     )
+    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
-    set "GPU_VENDOR=!string: =!"
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
-
-    set "gpuType=OTHER"
-    echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 && set "gpuType=NVIDIA"
-    echo !GPU_VENDOR! | find /I "AMD" > NUL 2>&1 && set "gpuType=AMD"
-    echo !GPU_VENDOR! | find /I "INTEL" > NUL 2>&1 && set "gpuType=INTEL"
-
+    
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
         set "string=%%i"
     )

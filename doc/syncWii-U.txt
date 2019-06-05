@@ -68,10 +68,12 @@ Browse for a game in your library for which you want export saves to your Wii-U.
 The script will use the last scan results (or your can launch a new scan) to be sure that the game is installed on your Wii-U and your PC 
 then export the saves for all users that have an accountId (so an associated folder 80000XX) and saves for this game. 
 
-The saves are directly saved on the SD card of your Wii-U for a SaveMii use.
-
 The 8000001 folder is replaced by the one used by this user on the wii-U.
 If a common folder is found, it will be also backuped.
+
+The saves are directly saved on the SD card of your Wii-U for a SaveMii use.
+
+saveMii tutorial : https://gbatemp.net/threads/tutorial-importing-wii-u-saves-with-savemii.475349/
 
 
 ---------------------------------------------------------
