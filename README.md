@@ -92,4 +92,6 @@ BatchFW does not need Adminstrator rights unless you want to create shortcuts at
 All batch source code is in delayed expansion mode and uses your system charset to check/handle the minimum of unsupported characters in paths. When launching a game, batchFw is completly silent. It opens its log if needed and open Cemu's one if it crashes.
 
 Code is well commented and is read only. 
-If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
+
+WARNING : If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
+Also, take care if you clone the repository some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
