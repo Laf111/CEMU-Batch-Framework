@@ -361,7 +361,7 @@ REM : main
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
-    
+
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
         set "string=%%i"
     )
@@ -1577,6 +1577,7 @@ REM : functions
             call:checkSettingsFolder "%%j"
             if !ERRORLEVEL! EQU 0 (
                 set "previousSettingsFolder=!candidateFolder!"
+                goto:eof
             )
         )
     goto:eof
