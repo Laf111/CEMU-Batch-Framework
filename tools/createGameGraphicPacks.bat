@@ -536,7 +536,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
 
-        @echo 16^/10 fullscreen graphic packs created ^^!
+        @echo 16^/10 fullscreen graphic packs created ^!
 
         goto:eof
 
@@ -553,7 +553,7 @@ REM : functions
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        @echo 16^/10 windowed graphic packs created ^^!
+        @echo 16^/10 windowed graphic packs created ^!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -576,7 +576,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
 
-        @echo 21^/9 graphic packs created ^^!
+        @echo 21^/9 graphic packs created ^!
 
         goto:eof
 
@@ -593,7 +593,7 @@ REM : functions
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        @echo 21^/9 windowed graphic packs created ^^!
+        @echo 21^/9 windowed graphic packs created ^!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -620,7 +620,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
 
-        @echo 16^/9 graphic packs created ^^!
+        @echo 16^/9 graphic packs created ^!
         goto:eof
 
         :169_windowed
@@ -640,7 +640,7 @@ REM : functions
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        @echo 16^/9 windowed graphic packs created ^^!
+        @echo 16^/9 windowed graphic packs created ^!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -664,7 +664,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
 
-        @echo 4^/3 graphic packs created ^^!
+        @echo 4^/3 graphic packs created ^!
         goto:eof
 
         :43_windowed
@@ -680,7 +680,7 @@ REM : functions
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        @echo 4^/3 windowed graphic packs created ^^!
+        @echo 4^/3 windowed graphic packs created ^!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -705,7 +705,7 @@ REM : functions
             set /A "w=!w!+%dw%"
         )
 
-        @echo 48^/9 graphic packs created ^^!
+        @echo 48^/9 graphic packs created ^!
 
         goto:eof
 
@@ -722,7 +722,7 @@ REM : functions
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        @echo 48^/9 windowed graphic packs created ^^!
+        @echo 48^/9 windowed graphic packs created ^!
 
     goto:eof
     REM : ------------------------------------------------------------------

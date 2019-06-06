@@ -215,7 +215,7 @@ REM : main
         )
     )
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
-    
+
     set "GPU_DRIVERS_VERSION=NONE"
 
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "=" 2^>NUL') do (

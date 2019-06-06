@@ -503,7 +503,7 @@ REM : functions
         if %fpsPPV3% EQU 0 call:fillCapV3GP "200" "Speed (%targetFps%FPS)"
 
         :done
-        @echo FPS cap graphic packs created ^^!
+        @echo FPS cap graphic packs created ^!
     goto:eof
     REM : ------------------------------------------------------------------
 

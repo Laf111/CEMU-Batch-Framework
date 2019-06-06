@@ -1396,7 +1396,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         wscript /nologo !StartHiddenWait! !bec! !ARGS! > NUL 2>&1
 
         pushd !GAMES_FOLDER!
-        if !QUIET_MODE! EQU 0 @echo - Executable for !user:"=! created ^^!
+        if !QUIET_MODE! EQU 0 @echo - Executable for !user:"=! created ^!
 
         set /A NB_GAMES_TREATED+=1
     goto:eof
