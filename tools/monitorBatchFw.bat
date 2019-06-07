@@ -19,6 +19,8 @@ REM : main
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
+    set "killBatchFw="BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+
     REM : timeout value in seconds
     set /A "timeOut=180"
 
@@ -45,7 +47,7 @@ REM : main
             cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
             if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:waitingLoopProcesses
 
-            wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%launchGame.bat%%'" call terminate
+            call !killBatchFw!
             exit 1
         )
         goto:waitingLoopProcesses

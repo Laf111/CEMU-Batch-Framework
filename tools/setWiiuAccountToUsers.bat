@@ -62,6 +62,11 @@ REM : main
         set "USERSARRAY[!nbUsers!]=%%i"
         set /A "nbUsers+=1"
     )
+    if !nbUsers! EQU 0 (
+        @echo No users were found^!^. Please restore BatchFw factory settings
+        pause
+        exit 50
+    )
     set /A "nbUsers-=1"
 
     @echo =========================================================
