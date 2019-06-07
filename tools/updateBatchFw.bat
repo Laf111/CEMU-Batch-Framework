@@ -97,8 +97,8 @@ REM : main
     )
     set "bfwVR=!bfwVR: =!"
 
-    if !BFW_VERSION! LEQ !bfwVR! (
-        @echo No new BatchFw update^(s^) available^, last version is still !bfwVR!
+    if !BFW_VERSION! GEQ !bfwVR! (
+        @echo No new BatchFw update^(s^) available^, last version is still !BFW_VERSION!
         exit /b 13
     )
 
