@@ -234,9 +234,9 @@ REM : main
 
     if ["%versionRead%"] == ["NOT_FOUND"] goto:getTitleId
    
-    call:compareVersions %versionRead% "1.14.0"
-    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-    if !ERRORLEVEL! EQU 2 set "gfxType=V2"
+    call:compareVersions %versionRead% "1.14.0" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 2 set "gfxType=V2"
 
 
     :getTitleId
@@ -353,7 +353,7 @@ REM : main
     set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
@@ -1610,10 +1610,10 @@ REM : functions
         )
 
         set "version=!folderName:cemu_=!"
-        call:compareVersions %version% "1.12.2"
-        if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-        if !ERRORLEVEL! EQU 2 if exist !sSetBin! if !sSetBinSize! EQU !tSetBinSize! exit /b 0
-        if !ERRORLEVEL! EQU 2 exit /b 1
+        call:compareVersions %version% "1.12.2" result
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 2 if exist !sSetBin! if !sSetBinSize! EQU !tSetBinSize! exit /b 0
+        if !result! EQU 2 exit /b 1
         
         if exist !sSetXml! (
             set "sSetXmlnbNodes=0"
@@ -2274,6 +2274,62 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : functions to compare Cemu Versions
+    :countSeparators
+
+        set "string=%~1"
+
+        set /A "count=0"
+        :again
+        set "oldstring=!string!"
+        set "string=!string:*%sep%=!"
+        set /A "count+=1"
+        if not ["!string!"] == ["!oldstring!"] goto:again
+        set /A "count-=1"
+        set "%2=!count!"
+
+    goto:eof
+
+    :compareDigits
+
+            set /A "num=%~1"
+
+            set /A "dr=99"
+            set /A "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
+
+            if !dt! LSS !dr! exit /b 2
+            if !dt! GTR !dr! exit /b 1
+
+    goto:eof
+
+    REM : if vit < vir return 1
+    REM : if vit = vir return 0
+    REM : if vit > vir return 2
+    :compareVersions
+        set "vit=%~1"
+        set "vir=%~2"
+
+        REM : versioning separator
+        set "sep=."
+
+        call:countSeparators !vit! nbst
+        call:countSeparators !vir! nbsr
+
+        REM : get the number minimum of sperators found
+        set /A "minNbSep=!nbst!"
+        if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
+        set /A "minNbSep+=1"
+
+        REM : Loop on the minNbSep and comparing each number
+        REM : note that the shell can compare 1c with 1d for example
+        for /L %%l in (1,1,!minNbSep!) do (
+            call:compareDigits %%l !vir! !vit!
+            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
+        )
+
+    goto:eof
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput
 

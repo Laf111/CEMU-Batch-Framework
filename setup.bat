@@ -119,7 +119,7 @@ REM : main
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
         exit 75
     )
-
+    timeout /t 2 > NUL 2>&1
     set "readme="!BFW_PATH:"=!\BatchFw_readme.txt""
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
@@ -520,7 +520,7 @@ REM : main
     @echo.
     @echo They will be launched in the order you will enter here^.
     @echo.
-    choice /C ny /N /M "Register a third party software? (y,n) "
+    choice /C ny /N /M "Register a third party software? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     @echo.
@@ -667,13 +667,13 @@ REM : main
     set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
     )
-    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
+    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
     cls
@@ -965,17 +965,16 @@ REM : functions
          set "version=NOT_FOUND"
 
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "version=%%e"
-
         if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
 
-        call:compareVersions %version% "1.15.1"
-        if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-        if !ERRORLEVEL! EQU 2 set /A "post1151=0"
+        call:compareVersions %version% "1.15.1" result
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 2 set /A "post1151=0"
 
-        call:compareVersions %version% "1.14.0"
-        if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-        if !ERRORLEVEL! EQU 1 goto:autoImportMode
-        if !ERRORLEVEL! EQU 0 goto:autoImportMode
+        call:compareVersions %version% "1.14.0" result
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 1 goto:autoImportMode
+        if !result! EQU 0 goto:autoImportMode
 
        :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
@@ -1006,7 +1005,7 @@ REM : functions
             @echo version of CEMU^, BatchFw will try to find suitables
             @echo settings and you won^'t have to re-enter your settings
             @echo.
-            pause
+            timeout /t 2 > NUL 2>&1
         )
 
         REM : importMode
@@ -1298,7 +1297,7 @@ REM : functions
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
             call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
         )
 
     goto:eof

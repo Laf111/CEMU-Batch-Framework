@@ -210,7 +210,7 @@ REM : main
     set "GPU_VENDOR=NOT_FOUND"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
             set "GPU_VENDOR=!string: =!"
         )
     )

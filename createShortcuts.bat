@@ -370,14 +370,14 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
 
-    call:compareVersions %version% "1.15.1"
-    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-    if !ERRORLEVEL! EQU 2 set /A "post1151=0"
+    call:compareVersions %version% "1.15.1" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 2 set /A "post1151=0"
 
-    call:compareVersions %version% "1.14.0"
-    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-    if !ERRORLEVEL! EQU 1 goto:autoImportMode
-    if !ERRORLEVEL! EQU 0 goto:autoImportMode
+    call:compareVersions %result% "1.14.0" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 1 goto:autoImportMode
+    if !result! EQU 0 goto:autoImportMode
 
     :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
@@ -413,7 +413,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo !GPU_VENDOR! | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
@@ -1505,7 +1505,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
             call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
         )
 
     goto:eof

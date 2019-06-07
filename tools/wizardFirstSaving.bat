@@ -219,16 +219,16 @@ REM : main
 
     if ["%versionRead%"] == ["NOT_FOUND"] goto:displayGameProfile
     
-    call:compareVersions %versionRead% "1.14.0"
-    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-    if !ERRORLEVEL! EQU 2 set "gfxType=V2"
+    call:compareVersions %versionRead% "1.14.0" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 2 set "gfxType=V2"
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REM : if CEMU version < 1.12.0
-    call:compareVersions %versionRead% "1.12.0"
-    if !ERRORLEVEL! EQU 50 echo Error when comparing versions
-    if !ERRORLEVEL! EQU 2 goto:displayGameProfile
+    call:compareVersions %versionRead% "1.12.0" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 2 goto:displayGameProfile
 
     REM : else using CEMU UI for the game profile
 
@@ -880,12 +880,10 @@ REM : functions
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
             call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
         )
 
     goto:eof
-
-
 
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
