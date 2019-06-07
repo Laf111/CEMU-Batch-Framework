@@ -1,5 +1,3 @@
-update BtahcFw if only net > BFW_VERSION
-
 07/06/2019 V14 : 
 - add : enhance existing settings import process (using settings.bin size and settings
         nodes in settings.xml if files exist). 
