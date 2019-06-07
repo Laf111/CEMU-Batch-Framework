@@ -1043,6 +1043,16 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
+        REM : create a shortcut to killBatchFw.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Kill BatchFw Processes.lnk""
+        set "LINK_DESCRIPTION="Kill all BatchFw processes""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\killBatchFw.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\kill.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to killBatchFw^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
+        )
+
         REM : create a shortcut to createExecutables.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Create CEMU's executables for selected games.lnk""
         set "LINK_DESCRIPTION="Create missing CEMU^'s executables for selected games given a version of CEMU""
