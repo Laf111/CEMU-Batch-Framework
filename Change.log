@@ -4,6 +4,8 @@
         If no suitable settings are found => launching the wizard to collect settings
 - add : automatic settings import mode is enabled by default (default timeout choice
         and so it still can be disabled)
+- add : you can import the last modified save when launching for a user that does not 
+        have save for this game  
 - add : empty transferable shader cache detection : if an active internet connexion is found
         launch a google search on your web browser
 - add : ignoring the precompiled cache for NVIDIA users (for all games) is now by default
