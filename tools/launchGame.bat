@@ -1354,7 +1354,22 @@ REM : functions
 
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
-        if not exist !rarFile! goto:savesLoaded
+        if not exist !rarFile! (
+            REM : search the last modified save file for other user
+            set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
+
+            set "OTHER_SAVE="NONE""
+            set "pat="!igsvf:"=!\!GAME_TITLE!_*.rar""
+            for /F "delims=" %%i in ('dir /B /O:D !pat!  2^>NUL') do (
+                set "OTHER_SAVE="%%i""
+            )
+            if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
+
+            cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one from another user ?" 4132
+            if !ERRORLEVEL! EQU 2 goto:savesLoaded
+            set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
+            copy /Y !isv! !rarFile! > NUL 2>&1
+        )
 
         REM : make a backup of saves fo rarFile
         set "backup=!rarFile:.rar=-backupLaunchN.rar!"
