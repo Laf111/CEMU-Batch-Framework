@@ -417,6 +417,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
+        echo "!string!" | find /I "AMD" > NUL 2>&1 (
+            set "gpuType=AMD"
+            set "GPU_VENDOR=!string: =!"
+        )
     )
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
@@ -431,7 +435,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     REM : check if main GPU is iGPU. Ask for -nolegacy if it is the case
     set "noIntel=!GPU_VENDOR:Intel=!"
-    if not ["!noIntel!"] == ["!GPU_VENDOR!"] (
+    if ["!gpuType!"] == ["OTHER"] if not ["!noIntel!"] == ["!GPU_VENDOR!"] (
 
         @echo ---------------------------------------------------------
         REM : CEMU < 1.15.1

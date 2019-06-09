@@ -447,7 +447,11 @@ REM : main
     for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL') do set "cacheFile=%%i"
 
     REM : if not file found
-    if ["!cacheFile!"] == ["NONE"] goto:loadOptions
+    if ["!cacheFile!"] == ["NONE"] (
+        call:getTransferableCache
+        goto:loadOptions
+    )
+
 
     REM : backup transferable cache in case of CEMU corrupt it
     set "transF="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!cacheFile:"=!""
@@ -2086,6 +2090,35 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
+
+
+    :getTransferableCache
+
+        cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
+        if !ERRORLEVEL! EQU 2 (
+            cscript /nologo !MessageBox! "If you have a cache for this game, let CEMU launch the game a first time then use the shortcut Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache and browse to your cache file. Not need to rename-it, BatchFw will do it for you" 4144
+            goto:eof
+        )
+
+        REM : check if an internet connexion is active
+        set "ACTIVE_ADAPTER=NOT_FOUND"
+        set "defaultBrowser="NOT_FOUND""
+        for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+            for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+            if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+        )
+        if [!defaultBrowser!] == ["NOT_FOUND"] goto:eof
+
+        REM : open a google search
+        wscript /nologo !Start! !defaultBrowser! "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
+
+        cscript /nologo !MessageBox! "Let CEMU launch the game a first time, then use the shortcut Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache and browse to the file downloaded. Not need to rename-it, BatchFw will do it for you" 4144
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :transShaderCache
 
         REM : get NEW_TRANS_SHADER id from log.txt
