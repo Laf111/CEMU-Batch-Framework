@@ -1366,7 +1366,7 @@ REM : functions
             if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
 
             cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one from another user ?" 4132
-            if !ERRORLEVEL! EQU 2 goto:savesLoaded
+            if !ERRORLEVEL! EQU 7 goto:savesLoaded
             set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
             copy /Y !isv! !rarFile! > NUL 2>&1
         )
