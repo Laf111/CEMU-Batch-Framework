@@ -19,7 +19,11 @@ The mlc01 path is in the game folder so
 
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
+Launch and close one or more third party softwares (DS4windows, Wiimotehook ...)  
+
 Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
+
+Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more apscet ratios  
 
 FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
 The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
