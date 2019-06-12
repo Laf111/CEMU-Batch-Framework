@@ -374,7 +374,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 set /A "post1151=0"
 
-    call:compareVersions %result% "1.14.0" result
+    call:compareVersions %version% "1.14.0" result
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 1 goto:autoImportMode
     if !result! EQU 0 goto:autoImportMode
