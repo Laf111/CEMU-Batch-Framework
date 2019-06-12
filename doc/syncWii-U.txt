@@ -86,7 +86,6 @@ Save are imported for all accounts associated to a Batch's user.
 
 WARNING : its up to you to verify that there is enough space left on the target device
 
-
 ---------------------------------------------------------
 NOTES : 
 
