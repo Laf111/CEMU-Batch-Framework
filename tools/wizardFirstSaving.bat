@@ -203,6 +203,7 @@ REM : main
     :completeGameProfile
     REM : settings.xml files
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
+    set "csTmp0="!CEMU_FOLDER:"=!\settings.tmp0""
     set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
     set "backup="!CEMU_FOLDER:"=!\settings.ini""
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
@@ -242,11 +243,15 @@ REM : main
     if not exist !TMP_GAME_FOLDER_PATH! mklink /D /J !TMP_GAME_FOLDER_PATH! !GAME_FOLDER_PATH! > NUL 2>&1
 
     REM : remove the node //GamePaths
-    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp!
+    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
 
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp! > !cs!
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp0! > !csTmp!
+    REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
+    set "MLC01_FOLDER_PATH="!GAME_FOLDER_PATH:"=!\mlc01""
 
+    !xmlS! ed -u "//mlc_path" -v !MLC01_FOLDER_PATH! !csTmp! > !cs!
+    del /F !csTmp0! > NUL 2>&1
     goto:diffProfileFile
 
     :displayGameProfile
@@ -365,7 +370,7 @@ REM : main
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogWgp!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogWgp! > NUL 2>&1
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
@@ -566,8 +571,6 @@ REM : functions
         )
 
         REM : copy mlc01 folder to MLC01_FOLDER_PATH if needed
-        set "MLC01_FOLDER_PATH="!GAME_FOLDER_PATH:"=!\mlc01""
-
         set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
 
         if not exist !ccerts! (
