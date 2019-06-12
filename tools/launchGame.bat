@@ -734,7 +734,12 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] if %versionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
+        call:compareVersions %versionRead% "1.15.3b" result
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+        if !result! EQU 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+    )
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -1365,7 +1370,7 @@ REM : functions
             )
             if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
 
-            cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one from another user ?" 4132
+            cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one (from another user) ?" 4132
             if !ERRORLEVEL! EQU 7 goto:savesLoaded
             set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
             copy /Y !isv! !rarFile! > NUL 2>&1
@@ -2111,7 +2116,7 @@ REM : functions
 
         cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
         if !ERRORLEVEL! EQU 2 (
-            cscript /nologo !MessageBox! "If you have a cache for this game, let CEMU launch the game a first time then use the shortcut Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache and browse to your cache file. Not need to rename-it, BatchFw will do it for you" 4144
+            cscript /nologo !MessageBox! "If you have a cache for this game, launch the game a first time then use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. Not need to rename-it, BatchFw will do it for you" 4144
             goto:eof
         )
 
