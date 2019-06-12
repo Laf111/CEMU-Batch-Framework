@@ -103,4 +103,4 @@ WARNING : If you edit source code, use a text editor that doesn't change ANSI fi
 
 I recommend to not clone the repository : use the last released version
 
-But if you clone the repository, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
+But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
