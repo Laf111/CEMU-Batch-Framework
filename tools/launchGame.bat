@@ -706,7 +706,7 @@ REM : main
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp!
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL 2>&1
 
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
