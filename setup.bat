@@ -594,6 +594,15 @@ REM : main
 
    :getOuptutsType
     cls
+    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
+    if !NB_GAMES_VALID! EQU 0 (
+        if not exist !BFW_WIIU_FOLDER! (
+            @echo ERROR^: no games were found^, BatchFw works only with loadiine games ^!
+            pause
+            exit 55
+        )
+    )
+    
     set "outputType=LNK"
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo What kind of outputs do you want to launch your games^?
@@ -607,16 +616,16 @@ REM : main
     if %alreadyInstalled% NEQ 0 (
         @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
-        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
-        if [!ANSWER!] == ["3"] exit 70
+        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER        
     ) else (
-        if !NB_GAMES_VALID! EQU 0 (
-            @echo 3^: Cancel^, i wish dumping my games now
+        if exist !BFW_WIIU_FOLDER! (
+            @echo 3^: Cancel^, for dumping my games now
             call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         ) else (
             call:getUserInput "Enter your choice ?: " "1,2" ANSWER
         )
     )
+    if [!ANSWER!] == ["3"] exit 70
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
     set "outputType=EXE"
