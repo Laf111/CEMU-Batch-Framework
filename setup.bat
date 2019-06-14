@@ -602,7 +602,7 @@ REM : main
             exit 55
         )
     )
-    
+
     set "outputType=LNK"
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo What kind of outputs do you want to launch your games^?
@@ -616,7 +616,7 @@ REM : main
     if %alreadyInstalled% NEQ 0 (
         @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
-        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER        
+        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     ) else (
         if exist !BFW_WIIU_FOLDER! (
             @echo 3^: Cancel^, for dumping my games now
@@ -703,7 +703,7 @@ REM : main
         @echo.
 
         @echo If you^'re using more than one CEMU version ^(per game
-        @echo for example^) register all installations with selecting 
+        @echo for example^) register all installations with selecting
         @echo only the games concerned by the version^.
         @echo.
 
