@@ -163,7 +163,7 @@ REM : main
     set "endTitleId=NONE"
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" ^| sort /R 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" ^| sort /R 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -183,7 +183,7 @@ REM : main
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
-            for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
+            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
 
             echo !GAME_FOLDER_PATH! | find /I /V "(DLC)" | find /I /V "(UPDATE DATA)" > NUL 2>&1 && call:prepareGame
             echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && call:installUpdate
@@ -251,7 +251,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : if no rpx file found, ignore GAME

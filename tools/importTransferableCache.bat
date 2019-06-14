@@ -96,7 +96,7 @@ REM : main
     REM : check if rpx file present under game folder
     set "RPX_FILE="NONE""
     set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-    for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
         set "RPX_FILE="%%i""
     )
     REM : if no rpx file found, ignore GAME
@@ -106,7 +106,7 @@ REM : main
     )
 
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-    for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     REM : search for BatchFw game info file
     set "infoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
@@ -133,7 +133,7 @@ REM : main
     pushd !TARGET_FOLDER!
 
     set "oldCache="NONE""
-    for /F "delims=" %%i in ('dir /B /O:D *.bin 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /B /O:D *.bin 2^>NUL') do (
         set "oldCache="!TARGET_FOLDER:"=!\%%i""
     )
 

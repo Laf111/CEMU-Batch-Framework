@@ -105,7 +105,7 @@ REM : main
     )
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
-    for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     @echo Update all graphic packs for !GAME_TITLE! >> !myLog!
     @echo ========================================================= >> !myLog!
@@ -128,7 +128,7 @@ REM : main
         goto:treatOneGame
     )
 
-    for /F "delims=" %%i in (!zipLogFile!) do (
+    for /F "delims=~" %%i in (!zipLogFile!) do (
         set "fileName=%%~nxi"
         set "newVersion=!fileName:.doNotDelete=!"
     )
@@ -198,7 +198,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do set "RPX_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do set "RPX_FILE="%%i""
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
@@ -239,7 +239,7 @@ REM : functions
         )
 
         REM : check if V3 gp exist for this game
-        for /F "delims=" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find "_Resolution" 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find "_Resolution" 2^>NUL') do (
 
             set "gpFolder="!BFW_GP_FOLDER:"=!\%%i""
             set "rulesFile="!gpFolder:"=!\rules.txt""
@@ -291,7 +291,7 @@ REM : functions
                 set "gameName=!gameName:_%resX2%p=!"
             )
 
-            for /F "delims=" %%a in ('type !rulesFile! ^| find "version = 3"') do (
+            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = 3"') do (
                 REM : V3 graphic pack
                 set "v3Gpfound=1"
                 REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
@@ -302,7 +302,7 @@ REM : functions
 
         REM : if a v3 graphic pack was found get the game's name from it
         if not [!gpV3Res!] == ["NONE"] (
-            for /F "delims=" %%i in (!gpV3Res!) do set "str=%%~nxi"
+            for /F "delims=~" %%i in (!gpV3Res!) do set "str=%%~nxi"
             set "gameName=!str:_Resolution=!"
         )
 

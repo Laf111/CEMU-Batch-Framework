@@ -110,7 +110,7 @@ REM : main
     )
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
-    for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     set "EXIST_IN_DATABASE=no"
     set "REGION=UNKNOWN"
@@ -118,7 +118,7 @@ REM : main
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
 
     set "libFileLine="NONE""
-    for /F "delims=" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"]  (
         set EXIST_IN_DATABASE=yes
@@ -138,7 +138,7 @@ REM : main
 
     REM : get Title Id from meta.xml
     set "versionLine="NONE""
-    for /F "delims=" %%i in ('type !META_FILE! ^| find /I "title_version" 2^>NUL') do set "versionLine="%%i""
+    for /F "delims=~" %%i in ('type !META_FILE! ^| find /I "title_version" 2^>NUL') do set "versionLine="%%i""
     if [!versionLine!] == ["NONE"] goto:dlc
 
     set "str=!versionLine:"=!"
@@ -188,7 +188,7 @@ REM : main
     set "SAVES_FOUND=no"
     set "rarFile="NONE""
     set "pat="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_*.*""
-    for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
         set "rarFile="%%i""
     )
 
@@ -240,7 +240,7 @@ REM : main
     REM : get region of games and directives in game's profile
     set "profileFile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
 
-    for /F "delims=" %%i in ('type !profileFile! ^| find /I /V "#" ^| find /I /V "[" 2^>NUL') do (
+    for /F "delims=~" %%i in ('type !profileFile! ^| find /I /V "#" ^| find /I /V "[" 2^>NUL') do (
         set "line=%%i"
         set "line=!line: =!"
         set "ADD_NOTES=!ADD_NOTES!^, !line!"

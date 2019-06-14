@@ -39,7 +39,7 @@ REM : main
     set DATE=%ldt%
 
     REM : check if cemu if not already running
-    for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
+    for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
 
         wscript /nologo !Start! "%windir%\System32\taskmgr.exe"
 
@@ -181,14 +181,14 @@ REM : main
     )
 
     REM : get codeFolder
-    for /F "delims=" %%i in (!RPX_FILE_PATH!) do set "dirname="%%~dpi""
+    for /F "delims=~" %%i in (!RPX_FILE_PATH!) do set "dirname="%%~dpi""
     set "codeFolder=!dirname:~0,-2!""
 
-    for /F "delims=" %%i in (!codeFolder!) do set "strTmp="%%~dpi""
+    for /F "delims=~" %%i in (!codeFolder!) do set "strTmp="%%~dpi""
     set "GAME_FOLDER_PATH=!strTmp:~0,-2!""
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
-    for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
@@ -383,8 +383,8 @@ REM : main
     REM : else search it
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
-    for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
 
     pushd !BFW_TOOLS_PATH!
@@ -444,7 +444,7 @@ REM : main
     set "cacheFile=NONE"
     set "pat="!gtscf:"=!\*.bin""
     REM : getting the last modified one including _j.bin (conventionnal shader cache)
-    for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL') do set "cacheFile=%%i"
+    for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL') do set "cacheFile=%%i"
 
     REM : if not file found
     if ["!cacheFile!"] == ["NONE"] (
@@ -510,7 +510,7 @@ REM : main
     :searchLockFile
     set "LOCK_FILE="NONE""
     set "pat="!CEMU_FOLDER:"=!\*.lock""
-    for /F "delims=" %%i in ('dir /B !pat! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
         set "LOCK_FILE="!CEMU_FOLDER:"=!\%%i""
     )
 
@@ -567,7 +567,7 @@ REM : main
     set "IdGpuFolder="NOT_FOUND""
     pushd !GLCacheSavesFolder!
     set "pat=!GPU_VENDOR!*"
-    for /F "delims=" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "IdGpuFolder="%%x""
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "IdGpuFolder="%%x""
     pushd !BFW_TOOLS_PATH!
 
     REM : if no backup found for your GPU VENDOR goto:launchCemu
@@ -621,19 +621,19 @@ REM : main
     if not exist %GLCacheBackupFolder% goto:launchCemu
 
     REM : openGLCacheID
-    for /F "delims=" %%x in ('dir /A:D /O:D /B !GLCacheBackupFolder!') do set "oldOGLCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B !GLCacheBackupFolder!') do set "oldOGLCacheId=%%x"
     if not ["%oldOGLCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
 
     REM : search for shader files
     pushd !GLCacheBackupFolder!
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:launchCemu
 
     pushd !GLCacheBackupFolder!
     REM OPENGL_CACHE_PATH already created before (if missing)
-    for /F "delims=" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
+    for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
         robocopy !GLCacheBackupFolder! !OPENGL_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
@@ -775,7 +775,7 @@ REM : main
     pushd !BFW_TOOLS_PATH!
     REM : check if cemu if not still running
     :killCemu
-    for /F "delims=" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
+    for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
 
         wscript /nologo !Start! "%windir%\System32\taskmgr.exe"
 
@@ -799,7 +799,7 @@ REM : main
         if !settingsImported! EQU 1 (
 
             REM : basename of previousSettingsFolder to get version of CEMU used to import settings
-            for /F "delims=" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"
+            for /F "delims=~" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed with settings imported from !CEMU_IMPORTED! ^(last version used to run the game^)^. ^
                             Launch 'Wii-U Games\CEMU\%CEMU_FOLDER_NAME%\Delete my %CEMU_FOLDER_NAME%^'s settings' and recreate your shortcuts without ^
                             automatic import^, to be sure that is not related^." 4144
@@ -837,8 +837,8 @@ REM : main
 
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
-    for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
 
     pushd !BFW_TOOLS_PATH!
@@ -860,7 +860,7 @@ REM : main
     REM : backup of GLCache, get the last modified folder under GLCache
     pushd !OPENGL_CACHE_PATH!
     set "newOGLCacheId=NOT_FOUND"
-    for /F "delims=" %%x in ('dir /A:D /O:D /B * 2^>NUL') do set "newOGLCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B * 2^>NUL') do set "newOGLCacheId=%%x"
     pushd !BFW_TOOLS_PATH!
 
     if not ["%newOGLCacheId%"] == ["NOT_FOUND"] goto:whatToDo
@@ -869,7 +869,7 @@ REM : main
     REM : search for last modified bin file under OPENGL_CACHE (AMD GPU cache shaders without subfolders)
     pushd !OPENGL_CACHE!
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
 
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:warning
@@ -879,7 +879,7 @@ REM : main
     if not exist !targetFolder! mkdir !targetFolder! > NUL 2>&1
 
     pushd !OPENGL_CACHE!
-    for /F "delims=" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
+    for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
         robocopy !OPENGL_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
     )
@@ -969,7 +969,7 @@ REM : main
 
     REM : get SHADER_MODE
     set "SHADER_MODE=SEPARABLE"
-    for /F "delims=" %%i in ('type !cemuLog! ^| find /I "UseSeparableShaders: false"') do set "SHADER_MODE=CONVENTIONAL"
+    for /F "delims=~" %%i in ('type !cemuLog! ^| find /I "UseSeparableShaders: false"') do set "SHADER_MODE=CONVENTIONAL"
 
     @echo SHADER_MODE=%SHADER_MODE%>> !batchFwLog!
     @echo SHADER_MODE=%SHADER_MODE%
@@ -1002,7 +1002,7 @@ REM : main
     set "UNKNOW_GAME=00050000ffffffff"
     set "cemuTitleLine="NONE""
 
-    for /F "delims=" %%i in ('type !cemuLog! ^| find /I "TitleId"') do (
+    for /F "delims=~" %%i in ('type !cemuLog! ^| find /I "TitleId"') do (
         set "cemuTitleLine="%%i""
         goto:firstOcTitle
     )
@@ -1173,10 +1173,10 @@ REM : functions
         set "disp=0"
         :waitingLoopProcesses
         timeout /T 1 > NUL 2>&1
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
             goto:waitingLoopProcesses
         )
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
@@ -1222,7 +1222,7 @@ REM : functions
                 for %%a in (!fp!) do set "parentFolder="%%~dpa""
                 set "pfp=!parentFolder:~0,-2!""
 
-                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+                for /F "delims=~" %%i in (!pfp!) do set "gp=%%~nxi"
             )
 
             set "tName=!gp:_graphicPacksV2=!"
@@ -1254,7 +1254,7 @@ REM : functions
                 for %%a in (!fp!) do set "parentFolder="%%~dpa""
                 set "pfp=!parentFolder:~0,-2!""
 
-                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+                for /F "delims=~" %%i in (!pfp!) do set "gp=%%~nxi"
             )
 
             set "tName=!gp:_graphicPacksV2=!"
@@ -1354,7 +1354,7 @@ REM : functions
 
             REM : delete current saves in mlc01
             set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
-            for /F "delims=" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
+            for /F "delims=~" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
         )
 
         REM : importing game's saves for !user!
@@ -1365,7 +1365,7 @@ REM : functions
 
             set "OTHER_SAVE="NONE""
             set "pat="!igsvf:"=!\!GAME_TITLE!_*.rar""
-            for /F "delims=" %%i in ('dir /B /O:D !pat!  2^>NUL') do (
+            for /F "delims=~" %%i in ('dir /B /O:D !pat!  2^>NUL') do (
                 set "OTHER_SAVE="%%i""
             )
             if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
@@ -1394,7 +1394,7 @@ REM : functions
         pushd !oldSavePath!
 
         REM : delete old saves path in MLC01_FOLDER_PATH
-        for /F "delims=" %%i in ('dir /b /o:d /a:d * 2^>NUL') do set "PREVIOUS_SHADER_CACHE_ID=%%i"
+        for /F "delims=~" %%i in ('dir /b /o:d /a:d * 2^>NUL') do set "PREVIOUS_SHADER_CACHE_ID=%%i"
 
         if not ["!PREVIOUS_SHADER_CACHE_ID!"] == ["NONE"] (
             set "folder="!oldSavePath:"=!\!PREVIOUS_SHADER_CACHE_ID!""
@@ -1462,7 +1462,7 @@ REM : functions
         for %%a in (!CEMU_FOLDER!) do set "parentFolder="%%~dpa""
         set "CEMU_INSTALLS_FOLDER=!parentFolder:~0,-2!""
         REM : get the version of CEMU for the imported settings
-        for /F "delims=" %%i in (!previousSettingsFolder!) do set "settingFolder=%%~nxi"
+        for /F "delims=~" %%i in (!previousSettingsFolder!) do set "settingFolder=%%~nxi"
 
         set "OLD_CEMU_VERSION=!settingFolder!"
 
@@ -1509,7 +1509,7 @@ REM : functions
         if exist !cemuProfile! set "PROFILE_FILE=!cemuProfile!"
 
         :loaded
-        for /F "delims=" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
+        for /F "delims=~" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
         @echo Using settings from !settingsFolderName! for !user:"=! ^!>> !batchFwLog!
         @echo Using settings from !settingsFolderName! for !user:"=! ^!
 
@@ -1553,55 +1553,66 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : fucntion to count nodes in settings.xml
-    :countNodes
-        set "file="%~1""
-
-        set "fileTmp="!BFW_PATH:"=!\logs\settings.tmp""
-
+    REM : function to valid a settings.xml for automatic import
+    :isValid
+        
+        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.tmp""  
+        
         REM : delete ignored nodes
         set "file0=!fileTmp:.tmp=.tmp0!"
-        !xmlS! ed -d "//GamePaths" !file! > !file0!
+        !xmlS! ed -d "//GamePaths" !tSetXml! > !file0!
 
         set "file1=!fileTmp:.tmp=.tmp1!"
         !xmlS! ed -d "//GameCache" !file0! > !file1!
-
-        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
-
-        set /A "nbNodes=0"
-        for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /I /V "!"') do (
-            set "line=%%i"
-            for /F "tokens=2 delims=~<>" %%a in ("!line!") do (
-                set /A "nbNodes+=1"
-            )
-        )
+        
+        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!    
         set "pat="!BFW_PATH:"=!\logs\settings.tmp*""
+        
+        REM : initialize to false = 0
+        set /A "%1=0"
+        
+        REM : for each nodes in the filtered target wml file 
+        for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /V "!"') do (
+            set "line=%%i"
+            REM : get the node from the line
+            for /F "tokens=2 delims=~<>" %%a in ("!line!") do (
+                set "read=%%a"
+                set "node=!read:/=!"
+                set /A "nb=0"
+                REM : check if the target node exist in the source file
+                for /F "delims=~" %%b in ('type !sSetXml! ^| find "!node!" 2^>NUL') do set /A "nb=1"
+                REM : if not found, %1 is still =0, del temporary files and exit
+                if !nb! EQU 0 del /F !pat! > NUL 2>&1 && goto:eof
+            )
+        )        
+       
         del /F !pat! > NUL 2>&1
-
-        set "%2=!nbNodes!"
+        REM : set validity to true
+        set /A "%1=1"
     goto:eof
-
+    
+    
     :getSettings
 
         set "tSetBin="!CEMU_FOLDER:"=!\settings.bin""
-        set "tSetXml="!CEMU_FOLDER:"=!\settings.xml""
+        set "tSetXml="!CEMU_FOLDER:"=!\settings.xml""        
 
         REM : get the size of the settings.bin of the launched version
         set "tSetBinSize=0"
         if exist !tSetBin! (
             for /F "tokens=*" %%a in (!tSetBin!)  do set "tSetBinSize=%%~za"
         )
-
-        set "tSetXmlnbNodes=0"
-        REM : count the nodes in the settings.xml of the launched version
-        if exist !tSetXml! call:countNodes !tSetXml! tSetXmlnbNodes
-
+        
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\*""
-        for /F "delims=" %%j in ('dir /B /A:D /O:-N !pat! 2^> NUL') do (
+        
+        for /F "delims=~" %%j in ('dir /B /A:D /O:-N !pat! 2^> NUL') do (
             call:checkSettingsFolder "%%j"
             if !ERRORLEVEL! EQU 0 (
                 set "previousSettingsFolder=!candidateFolder!"
+                echo Importing settings from %%j>> !batchFwLog!
                 goto:eof
+            ) else (
+                echo Failed to import settings from %%j>> !batchFwLog!
             )
         )
     goto:eof
@@ -1618,7 +1629,7 @@ REM : functions
         REM : initialize to user settings
         set "sSetBin="!candidateFolder:"=!\!user:"=!_settings.bin""
         if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
-
+        
         REM : initialize to user settings
         set "sSetXml="!candidateFolder:"=!\!user:"=!_settings.xml""
         if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
@@ -1629,27 +1640,28 @@ REM : functions
         if exist !sSetBin! (
             for /F "tokens=*" %%a in (!sSetBin!)  do set "sSetBinSize=%%~za"
 
-            if !sSetBinSize! NEQ !tSetBinSize! exit /b 1
-            if not exist !sSetXml! exit /b 0
+            REM : invalidate the import if size of source^'s file lower than target one
+            if !sSetBinSize! LSS !tSetBinSize! (
+                echo Import cancelled bin size of source^'s file lower than target one>> !batchFwLog!
+                echo source !sSetBinSize! bytes>> !batchFwLog!
+                echo target !tSetBinSize! bytes>> !batchFwLog!
+                exit /b 1
+            )
         )
-
-        set "version=!folderName:cemu_=!"
-        call:compareVersions %version% "1.12.2" result
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 2 if exist !sSetBin! if !sSetBinSize! EQU !tSetBinSize! exit /b 0
-        if !result! EQU 2 exit /b 1
-        
+            
         if exist !sSetXml! (
-            set "sSetXmlnbNodes=0"
-            REM : count the nodes in the settings.xml of the launched version
-            call:countNodes !sSetXml! sSetXmlnbNodes
-            if !sSetXmlnbNodes! NEQ !tSetXmlnbNodes! exit /b 1
-            exit /b 0
+            set /A "result=0"
+            call:isValid result
+            if !result! NEQ 1 (
+                echo Import cancelled because non macthing nodes in xml file>> !batchFwLog! 
+                exit /b 1
+            )
         )
-        exit /b 2
+        exit /b 0
 
     goto:eof
-
+    
+    REM : function to set settings for a givne user
     :setSettingsForUser
 
         set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
@@ -1801,15 +1813,15 @@ REM : functions
         set "strTargetWithoutSpace=!strTarget: =!"
 
         REM : if strTarget found in file : exit
-        for /F "delims=" %%i in ('type !file! ^| find /I "!strTarget!"') do goto:eof
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!strTarget!"') do goto:eof
         REM : if strTargetWithoutSpace found in file : exit
-        for /F "delims=" %%i in ('type !file! ^| find /I "!strTargetWithoutSpace!"') do goto:eof
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!strTargetWithoutSpace!"') do goto:eof
 
         REM : if [Graphics] is found in file and is commented : goto patchGraphic
-        for /F "delims=" %%i in ('type !file! ^| find /I "[Graphics]"') do for /F "delims=" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
+        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]"') do for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
 
         REM : if disablePrecompiledShaders=false found in !file!, replace in file
-        for /F "delims=" %%i in ('type !file! ^| find /I "[Graphics]"') do (
+        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]"') do (
             call:replaceInFile
             goto:eof
         )
@@ -1827,7 +1839,7 @@ REM : functions
     :replaceInFile
 
         REM get file name to create file filter for fnr.exe
-        for /F "delims=" %%a in (!file!) do set "filter=%%~nxa"
+        for /F "delims=~" %%a in (!file!) do set "filter=%%~nxa"
         for %%a in (!file!) do set "tmp="%%~dpa""
         set "parentFolder=!tmp:~0,-2!""
 
@@ -1835,7 +1847,7 @@ REM : functions
         set "fnrLogFile="!fnrLogFolder:"=!\%filter:"=%.log""
 
         REM : if str found in file : replace it with strTarget
-        for /F "delims=" %%i in ('type !file! ^| find /I "!str!" 2^>NUL') do (
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!str!" 2^>NUL') do (
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!str!" --replace "!strTarget!" --logFile !fnrLogFile!
 
             goto:eof
@@ -1843,7 +1855,7 @@ REM : functions
 
         REM : if strWithoutSpace found in file : strTargetWithoutSpace
         if exist !fnrLogFile! del /F !fnrLogFile!
-        for /F "delims=" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
 
             goto:eof
@@ -1851,7 +1863,7 @@ REM : functions
 
         REM : if [Graphics] found in file :
         if exist !fnrLogFile! del /F !fnrLogFile!
-        for /F "delims=" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
+        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
             goto:eof
@@ -1877,7 +1889,7 @@ REM : functions
 
         pushd !gcp!
         REM : import from GAME_FOLDER_PATH to CEMU_FOLDER
-        for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!gcp:"=!\%%x"
             if not exist !ccpf!  wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gcp! !ccp! "%%x"
@@ -1885,7 +1897,7 @@ REM : functions
 
         pushd !ccp!
         REM : import from CEMU_FOLDER to CONTROLLER_PROFILE_FOLDER
-        for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
             if not exist !bcpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*"
@@ -1894,7 +1906,7 @@ REM : functions
         :syncWithBatchFW
         pushd !CONTROLLER_PROFILE_FOLDER!
         REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
-        for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
             if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1

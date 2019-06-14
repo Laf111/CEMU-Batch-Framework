@@ -481,7 +481,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -655,7 +655,7 @@ REM : functions
 
         pushd !ccp!
         REM : import from CEMU_FOLDER to CONTROLLER_PROFILE_FOLDER
-        for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
             if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL 2>&1
@@ -663,7 +663,7 @@ REM : functions
 
         pushd !CONTROLLER_PROFILE_FOLDER!
         REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
-        for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
             if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
@@ -757,7 +757,7 @@ REM : functions
 
             REM : resolve venv for search
             for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
-            for /F "delims=" %%i in (!program!) do set "name=%%~nxi"
+            for /F "delims=~" %%i in (!program!) do set "name=%%~nxi"
 
             for %%a in (!program!) do set "parentFolder="%%~dpa""
             set "WD_FOLDER=!parentFolder:~0,-2!""
@@ -1149,8 +1149,8 @@ REM : functions
         REM : else search it
         pushd "%LOCALAPPDATA%"
         set "cache="NOT_FOUND""
-        for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+        for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
         if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
         pushd !BFW_TOOLS_PATH!
 
@@ -1182,7 +1182,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
 
@@ -1193,7 +1193,7 @@ REM : functions
         set "GAME_FILE_PATH="!GAME_FOLDER_PATH:"=!\code\!RPX_FILE:"=!""
 
         REM : basename of GAME FOLDER PATH (used to name shorcut)
-        for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         REM : path to meta.xml file
         set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -1215,7 +1215,7 @@ REM : functions
         set "ICO_PATH="NONE""
         set "ICO_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.ico""
-        for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         REM : if no ico not file found, using cemu.exe icon
         if [!ICO_FILE!] == ["NONE"] (

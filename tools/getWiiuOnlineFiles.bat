@@ -260,7 +260,7 @@ REM : main
     REM : wait all transfert end
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do (
+    for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do (
         goto:waitingLoop
     )
 

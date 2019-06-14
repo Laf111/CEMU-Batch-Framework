@@ -54,7 +54,7 @@ REM : main
     pushd !GAMES_FOLDER!
 
     REM : searching for meta file
-    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
         set "META_FILE="%%i""
@@ -107,7 +107,7 @@ REM : functions
                 for %%a in (!fp!) do set "parentFolder="%%~dpa""
                 set "pfp=!parentFolder:~0,-2!""
 
-                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
+                for /F "delims=~" %%i in (!pfp!) do set "gp=%%~nxi"
             )
             set "gp="!BFW_GP_TMP:"=!\!gp:\=!""
 

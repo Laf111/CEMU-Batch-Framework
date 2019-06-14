@@ -183,7 +183,7 @@ REM : main
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=" %%i in ('dir /B /S /A:D code ^| find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S /A:D code ^| find /I /V "\mlc01" 2^> NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -557,7 +557,7 @@ REM : main
     set "program="NONE""
     set "firstArg="NONE""
     for /F "tokens=1 delims=~'" %%j in ("!spath!") do set "program="%%j""
-    for /F "delims=" %%i in (!program!) do set "name=%%~nxi"
+    for /F "delims=~" %%i in (!program!) do set "name=%%~nxi"
 
     set "icoFile=!name:.exe=.ico!"
     set "icoPath="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
@@ -610,7 +610,12 @@ REM : main
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         if [!ANSWER!] == ["3"] exit 70
     ) else (
-        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
+        if !NB_GAMES_VALID! EQU 0 (
+            @echo 3^: Cancel^, i wish dumping my games now
+            call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
+        ) else (
+            call:getUserInput "Enter your choice ?: " "1,2" ANSWER
+        )
     )
     if [!ANSWER!] == ["1"] goto:getOuptutsFolder
 
@@ -684,13 +689,13 @@ REM : main
     if %QUIET_MODE% EQU 0 (
 
         @echo ---------------------------------------------------------
-        @echo BatchFw needS you to register and import mlc01 data of
+        @echo BatchFw needs you to register and import mlc01 data of
         @echo the last^(s^) version^(s^) of CEMU you used to play your games^.
         @echo.
 
         @echo If you^'re using more than one CEMU version ^(per game
-        @echo for example^) register all installations and select the
-        @echo games concerned^.
+        @echo for example^) register all installations with selecting 
+        @echo only the games concerned by the version^.
         @echo.
 
         @echo Once your shortcuts are created^, launch all your games one time to
@@ -1009,7 +1014,8 @@ REM : functions
             @echo version of CEMU^, BatchFw will try to find suitables
             @echo settings and you won^'t have to re-enter your settings
             @echo.
-            timeout /t 2 > NUL 2>&1
+            if %QUIET_MODE% EQU 0 pause
+            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
         )
 
         REM : importMode
@@ -1178,13 +1184,13 @@ REM : functions
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
 
-        for /F "delims=" %%j in ('dir /B /O:S !pat! 2^> NUL') do (
+        for /F "delims=~" %%j in ('dir /B /O:S !pat! 2^> NUL') do (
             set "RPX_FILE="%%j""
         )
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
-        for /F "delims=" %%k in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxk"
+        for /F "delims=~" %%k in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxk"
 
         @echo - !GAME_TITLE!
 
@@ -1194,7 +1200,7 @@ REM : functions
         set "cemuFolder="!GAME_FOLDER_PATH:"=!\Cemu""
         REM : search for inGameSaves, shaderCache and GAME_TITLE.txt under game folder
 
-        for /F "delims=" %%k in ('dir /B /A:D !GAME_FOLDER_PATH!') do (
+        for /F "delims=~" %%k in ('dir /B /A:D !GAME_FOLDER_PATH!') do (
             set "folder="!GAME_FOLDER_PATH:"=!\%%k""
 
             if ["%%k"] == ["inGameSaves"] (

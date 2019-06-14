@@ -59,8 +59,8 @@ REM : main
     REM : else search it
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
-    for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
     pushd !BFW_TOOLS_PATH!
 
@@ -82,7 +82,7 @@ REM : main
     @echo Global OpenGL Cache size ^(Mo^) ^: %size%
     @echo ---------------------------------------------------------
 
-    for /F "delims=" %%x in ('dir /b /o:n /a:d !GLCacheSavesFolder! 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /o:n /a:d !GLCacheSavesFolder! 2^>NUL') do (
 
         set "gpuVersion="!GLCacheSavesFolder:"=!\%%x""
         call:getGameCacheSize
@@ -121,7 +121,7 @@ REM : functions
     :getGameCacheSize
 
         pushd !gpuVersion!
-        for /F "delims=" %%y in ('dir /b /o:n /a:d * 2^>NUL') do (
+        for /F "delims=~" %%y in ('dir /b /o:n /a:d * 2^>NUL') do (
 
             set "gameGLCacheFolder="!gpuVersion:"=!\%%y""
             set "sizeG=0"

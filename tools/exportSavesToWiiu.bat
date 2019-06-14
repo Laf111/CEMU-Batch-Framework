@@ -168,7 +168,7 @@ REM : Main
 
     pushd !GAMES_FOLDER!
     REM : searching for meta file
-    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
         set "META_FILE="%%i""
@@ -379,7 +379,7 @@ REM : functions
         set "num=%~1"
 
         REM : searching for meta file
-        for /F "delims=" %%i in ('dir /B /S meta.xml ^| find /I /V "\mlc01"') do (
+        for /F "delims=~" %%i in ('dir /B /S meta.xml ^| find /I /V "\mlc01"') do (
 
             REM : meta.xml
             set "META_FILE="%%i""
@@ -392,7 +392,7 @@ REM : functions
                 set "GAME_FOLDER_PATH=!parentFolder:~0,-2!""
 
                 REM : update titles[%num%] with folder's name (GAME_TITLE)
-                for /F "delims=" %%a in (!GAME_FOLDER_PATH!) do set "selectedTitles[%num%]=%%~nxa"
+                for /F "delims=~" %%a in (!GAME_FOLDER_PATH!) do set "selectedTitles[%num%]=%%~nxa"
             )
         )
 

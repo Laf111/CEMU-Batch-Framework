@@ -644,7 +644,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         REM : waiting all children processes ending
         :waitingLoop
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )

@@ -163,10 +163,10 @@ REM : functions
         REM : clean old icons
         pushd !GAMES_FOLDER!
 
-        for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
             set "codeFullPath="%%i""
             set "pat="!codeFullPath:"=!\*.ico""
-            for /F "delims=" %%j in ('dir /b /s !pat! 2^>NUL') do (
+            for /F "delims=~" %%j in ('dir /b /s !pat! 2^>NUL') do (
                 set "icoFile="%%j""
                 del /F !icoFile! > NUL 2>&1
             )

@@ -119,7 +119,7 @@ REM : main
     if %nbArgs% EQU 1 goto:treatOneGame
 
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -286,7 +286,7 @@ REM : functions
         set "RPX_FILE="NONE""
         set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
         set "pat="!codeFullPath:"=!\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
 
@@ -294,7 +294,7 @@ REM : functions
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-        for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         REM : flag for tga Icon found
         set /A "tgaFound=0"
@@ -340,7 +340,7 @@ REM : functions
         REM : looking for ico file close to rpx file
         set "ICO_FILE="NONE""
         set "pat="!codeFullPath:"=!\*.ico""
-        for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         if [!ICO_FILE!] == ["NONE"] goto:searchTgaFile
 
@@ -371,7 +371,7 @@ REM : functions
         REM : search for jpg file
         set "JPG_FILE="NONE""
         set "pat="!codeFullPath:"=!\*.jpg""
-        for /F "delims=" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
 
         @echo =========================================================
         @echo - !GAME_TITLE!

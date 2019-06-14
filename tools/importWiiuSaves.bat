@@ -171,7 +171,7 @@ REM : games that exist in local AND remote locations
 
     pushd !GAMES_FOLDER!
     REM : searching for meta file
-    for /F "delims=" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
 
         REM : meta.xml
         set "META_FILE="%%i""

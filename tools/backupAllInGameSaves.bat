@@ -134,7 +134,7 @@ REM : main
 
     set /A NB_SAVES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -215,7 +215,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : if no rpx file found, ignore GAME
@@ -234,7 +234,7 @@ REM : functions
         :treatThisGame
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-        for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         @echo =========================================================
         @echo - !GAME_TITLE!

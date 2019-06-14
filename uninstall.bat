@@ -220,7 +220,7 @@ REM : main
 
     :removeExtraFolders
 
-    for /F "delims=" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
         @echo At least one mlc01 subfolder still exist in your games library^.
         @echo If you restored previously each mlc01^'s data, you can choose to delete them all^.
         @echo Otherwise^, keep them^. It contain update^,DLC and your last game^'s saves ^^!
@@ -232,12 +232,12 @@ REM : main
         goto:removeMlc01
     )
     :removeMlc01
-    for /F "delims=" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
         rmdir /Q /S "%%x" > NUL 2>&1
     )
 
     :removeShaderCache
-    for /F "delims=" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
         @echo At least one shaderCache subfolder still exist in your games library^.
         @echo If you restored previously each shaderCache, you can choose to delete them all^.
         @echo Otherwise^, keep them^. It contain your last game^'s transferable cache ^^!
@@ -249,7 +249,7 @@ REM : main
         goto:removeTransCache
     )
     :removeTransCache
-    for /F "delims=" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
         rmdir /Q /S "%%x" > NUL 2>&1
     )
     :removeFoldersLeft
@@ -267,7 +267,7 @@ REM : main
     @echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:removeShortcuts
 
-    for /F "delims=" %%x in ('dir /b /a:d /s mods ^| find "Cemu" 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s mods ^| find "Cemu" 2^>NUL') do (
         @echo At least one mods subfolder still exist in your games library^.
         @echo Moving all mods folders in game^'s folders ^.^.^.
 
@@ -280,7 +280,7 @@ REM : main
         move /Y "%%i" !GAME_FOLDER! > NUL 2>&1
     )
 
-    for /F "delims=" %%x in ('dir /b /a:d /s code 2^>NUL') do (
+    for /F "delims=~" %%x in ('dir /b /a:d /s code 2^>NUL') do (
 
         set "cf="%%x""
         for %%a in (!cf!) do set "parentFolder="%%~dpa""

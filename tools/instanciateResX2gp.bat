@@ -69,9 +69,9 @@ REM : main
 
     REM : analyse gpResX2gp folder name
     set /A "wToReplace=%nativeWidth%*2"
-    for /F "delims=" %%j in ('echo !gpResX2gp! ^| find /I "p43"') do set /A "wToReplace=3440"
-    for /F "delims=" %%j in ('echo !gpResX2gp! ^| find /I "p219"') do set /A "wToReplace=3440"
-    for /F "delims=" %%j in ('echo !gpResX2gp! ^| find /I "p489"') do set /A "wToReplace=7680"
+    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p43"') do set /A "wToReplace=3440"
+    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p219"') do set /A "wToReplace=3440"
+    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p489"') do set /A "wToReplace=7680"
 
     REM : create graphic pack folder
     if not exist !gp! mkdir !gp! > NUL 2>&1
@@ -83,7 +83,7 @@ REM : main
     set "rulesFilegp="!gp:"=!\rules.txt""
 
     REM : get gp name
-    for /F "delims=" %%i in (!gp!) do set "gpName=%%~nxi"
+    for /F "delims=~" %%i in (!gp!) do set "gpName=%%~nxi"
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr\%gpName%""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
@@ -134,7 +134,7 @@ REM : main
 
     REM : treating extra files (*_*.txt) if needed
     set "pat="!gp:"=!\*_*s.txt""
-    for /F "delims=" %%d in ('dir !pat! 2^>NUL') do goto:treatExtraFiles
+    for /F "delims=~" %%d in ('dir !pat! 2^>NUL') do goto:treatExtraFiles
     goto:eof
 
     :treatExtraFiles

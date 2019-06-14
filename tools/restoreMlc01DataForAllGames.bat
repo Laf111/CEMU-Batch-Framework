@@ -118,7 +118,7 @@ REM : main
     :inputsAvailables
 
     REM : basename of MLC01_FOLDER_PATH
-    for /F "delims=" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"
+    for /F "delims=~" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"
     set CEMU_FOLDER=!MLC01_FOLDER_PATH:\%basename%=!
 
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
@@ -161,7 +161,7 @@ REM : main
     )
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -245,7 +245,7 @@ REM : functions
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : if no rpx file found, ignore GAME
@@ -257,7 +257,7 @@ REM : functions
         if not exist !mlc01Folder! goto:eof
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-        for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         @echo =========================================================
         @echo - !GAME_TITLE!
@@ -315,19 +315,19 @@ REM : functions
         set "endTitleId=%titleId:~8,8%"
 
         set pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\save"
-        for /F "delims=" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveSaves "%%i"
         )
 
         set pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title"
-        for /F "delims=" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveTitle "%%i"
         )
 
         REM : restore last save
         set "rarFile="NONE""
         set pat="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\*.rar"
-        for /F "delims=" %%i in ('dir /b /o:d !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /o:d !pat! 2^>NUL') do (
             set "rarFile="%%i""
         )
         if [!rarFile!] == ["NONE"] goto:logInfos

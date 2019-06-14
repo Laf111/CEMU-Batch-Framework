@@ -370,7 +370,7 @@ REM : ------------------------------------------------------------------
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
-        for /F "delims=" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do timeout /T 2 > NUL 2>&1 && goto:waitingLoop
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do timeout /T 2 > NUL 2>&1 && goto:waitingLoop
 
         REM : get current date
         for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"

@@ -65,8 +65,8 @@ REM : functions
             if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
             REM : basename of GAME FOLDER PATH (used to name shorcut)
-            for /F "delims=" %%i in (!program!) do set "exe=%%~nxi"
-            for /F "delims=" %%i in (!firstArg!) do set "argPiece=%%~nxi"
+            for /F "delims=~" %%i in (!program!) do set "exe=%%~nxi"
+            for /F "delims=~" %%i in (!firstArg!) do set "argPiece=%%~nxi"
 
             REM : start the program if it is not already running
             if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate

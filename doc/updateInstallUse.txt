@@ -110,16 +110,15 @@ USE :
 
     AUTOMATIC_IMPORT : 
     
-    When creating shortcuts, you'll be asked to enable or not automatic settings import. 
-    In this mode, if you have already saved settings for this game with another version, you won't need to re-enter your settings for the new
-    version. It wil use the settings of the last version used to play the game.
-    
-    This settings is disabled by default. 
-    Enable it only when you know that no changes was done on the settings handled between the 2 versions.
-    If you don't know, leave it at disabled (default).
-    
-    If you enable automatic import and have the single issue, delete the shortcut and recreate it whith disabling the automatic import 
-    before report any issue on CEMU's reddit or discord
+    This process is enabled by default.
+    If any settings are already saved for a game, BatchFw will try to use them avoiding you to collect settings from scratch.
+    It begins with the newer versions down to the the last ones.
+    One or two checks are done (depending on the couple of versions checked) to decide if the import of the source is valid or not : 
+    - bin files size check: if source file's size is striclty lower than target's one => invalid import
+    - if bin files check is OK, check if all criticals nodes (settings ones only) in xml target file exist in source file, if not => invalid import
+      
+    If you have a single issue, delete the shortcut and recreate it whith disabling the automatic import before report any issue on 
+    CEMU's reddit or discord
 
     WARNING : Do not delete log files created under ./logs 
     If you need to reset BatchFw to default, use the shortcut "Wii-U Games\BatchFW\Reset BatchFw.lnk"

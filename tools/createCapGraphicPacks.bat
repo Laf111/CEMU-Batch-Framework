@@ -351,7 +351,7 @@ REM : functions
         )
 
         REM : search for "!desc1!" in rulesFile: if found exit
-        for /F "delims=" %%i in ('type !rulesFileV3! ^| find /I /V "#" ^| find /I "!desc1!"') do goto:eof
+        for /F "delims=~" %%i in ('type !rulesFileV3! ^| find /I /V "#" ^| find /I "!desc1!"') do goto:eof
 
         REM : not found add it by replacing a [Preset] bloc
 
@@ -439,7 +439,7 @@ REM : functions
             REM : search V3 FPS++ graphic pack or patch for this game
             set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*FPS++*""
             REM : graphic pack created by BatchFw : gameName=NONE
-            for /F "delims=" %%d in ('dir /B !pat! 2^>NUL') do (
+            for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
                 set /A "fpsPPV3=1"
                 set /A "fpsPP=1"
             )
@@ -450,7 +450,7 @@ REM : functions
             if not exist !bfwgpv2! goto::checkV3FPSpp
 
             set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
-            for /F "delims=" %%d in ('dir /B !pat! 2^>NUL') do (
+            for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
                 set /A "fpsPP=1"
                 goto:create
             )

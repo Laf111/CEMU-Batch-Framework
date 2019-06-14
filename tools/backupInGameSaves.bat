@@ -93,7 +93,7 @@ REM : main
     REM : So backup systematically /mlc01/emulatorSave and /usr/save.
 
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-    for /F "delims=" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
     if not exist !META_FILE! (
@@ -144,7 +144,7 @@ REM : main
     if exist !rarFile! del /F /S !rarFile! > NUL 2>&1
 
     set usrSaveFolder="!MLC01_FOLDER_PATH:"=!\usr\save"
-    for /F "delims=" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
         call:compress "%%i"
     )
 
@@ -155,7 +155,7 @@ REM : main
     REM : compress old saved files (before Cemu 1.10)
     set "shaderCacheIdLine=NONE"
     set gameFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
-    for /F "delims=" %%i in ('type !gameFile! ^| find /I "shaderCache"') do set "shaderCacheIdLine="%%i""
+    for /F "delims=~" %%i in ('type !gameFile! ^| find /I "shaderCache"') do set "shaderCacheIdLine="%%i""
 
     if [!shaderCacheIdLine!] == ["NONE"] goto:done
 
@@ -171,7 +171,7 @@ REM : main
     REM : under inGameSaves
     set "rarFileEmuSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_emulatorSave.rar""
 
-    for /F "delims=" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
         set "folder="!emulatorSaveFolder:"=!\%%i""
 
         !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFile! !folder! > NUL 2>&1
