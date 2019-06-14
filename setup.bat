@@ -595,7 +595,7 @@ REM : main
    :getOuptutsType
     cls
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
-    if !NB_GAMES_VALID! EQU 0 (
+    if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
         if not exist !BFW_WIIU_FOLDER! (
             @echo ERROR^: no games were found^, BatchFw works only with loadiine games ^!
             pause
