@@ -542,8 +542,8 @@ REM : main
     @echo If you want to change global CEMU^'s settings you^'ve just
     @echo entered here^:
     @echo ---------------------------------------------------------
-    @echo ^> simply delete the shortcuts and recreate them using
-    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
+    @echo ^> simply delete the executables and recreate them using
+    @echo Wii-U Games^\Create CEMU^'s executables for selected games^.lnk
     @echo to register a SINGLE version of CEMU
     @echo ---------------------------------------------------------
     pause
