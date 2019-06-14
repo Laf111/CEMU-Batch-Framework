@@ -1517,17 +1517,20 @@ REM : functions
         call:setSettingsForUser
 
         REM : loading CEMU an cemuHook settings
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.bin" > NUL 2>&1
+        set binUser="!SETTINGS_FOLDER:"=!\"!user:"=!_settings.bin""
+        if exist !binUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.bin" > NUL 2>&1
         set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.bin""
         set "target="!CEMU_FOLDER:"=!\settings.bin""
         if exist !src! move /Y !src! !target! > NUL 2>&1
 
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.xml" > NUL 2>&1
+        set xmlUser="!SETTINGS_FOLDER:"=!\"!user:"=!_settings.xml""
+        if exist !xmlUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.xml" > NUL 2>&1
         set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.xml""
         set "target="!CEMU_FOLDER:"=!\settings.xml""
         if exist !src! move /Y !src! !target! > NUL 2>&1
 
-        robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_cemuhook.ini" > NUL 2>&1
+        set chIniUser="!SETTINGS_FOLDER:"=!\"!user:"=!_cemuhook.ini""
+        if exist !chIniUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_cemuhook.ini" > NUL 2>&1
         set "src="!CEMU_FOLDER:"=!\!user:"=!_cemuhook.ini""
         set "target="!CEMU_FOLDER:"=!\cemuhook.ini""
         if exist !src! move /Y !src! !target! > NUL 2>&1
@@ -1555,23 +1558,23 @@ REM : functions
 
     REM : function to valid a settings.xml for automatic import
     :isValid
-        
-        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.tmp""  
-        
+
+        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.tmp""
+
         REM : delete ignored nodes
         set "file0=!fileTmp:.tmp=.tmp0!"
         !xmlS! ed -d "//GamePaths" !tSetXml! > !file0!
 
         set "file1=!fileTmp:.tmp=.tmp1!"
         !xmlS! ed -d "//GameCache" !file0! > !file1!
-        
-        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!    
+
+        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
         set "pat="!BFW_PATH:"=!\logs\settings.tmp*""
-        
+
         REM : initialize to false = 0
         set /A "%1=0"
-        
-        REM : for each nodes in the filtered target wml file 
+
+        REM : for each nodes in the filtered target wml file
         for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /V "!"') do (
             set "line=%%i"
             REM : get the node from the line
@@ -1584,27 +1587,27 @@ REM : functions
                 REM : if not found, %1 is still =0, del temporary files and exit
                 if !nb! EQU 0 del /F !pat! > NUL 2>&1 && goto:eof
             )
-        )        
-       
+        )
+
         del /F !pat! > NUL 2>&1
         REM : set validity to true
         set /A "%1=1"
     goto:eof
-    
-    
+
+
     :getSettings
 
         set "tSetBin="!CEMU_FOLDER:"=!\settings.bin""
-        set "tSetXml="!CEMU_FOLDER:"=!\settings.xml""        
+        set "tSetXml="!CEMU_FOLDER:"=!\settings.xml""
 
         REM : get the size of the settings.bin of the launched version
         set "tSetBinSize=0"
         if exist !tSetBin! (
             for /F "tokens=*" %%a in (!tSetBin!)  do set "tSetBinSize=%%~za"
         )
-        
+
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\*""
-        
+
         for /F "delims=~" %%j in ('dir /B /A:D /O:-N !pat! 2^> NUL') do (
             call:checkSettingsFolder "%%j"
             if !ERRORLEVEL! EQU 0 (
@@ -1629,13 +1632,13 @@ REM : functions
         REM : initialize to user settings
         set "sSetBin="!candidateFolder:"=!\!user:"=!_settings.bin""
         if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
-        
+
         REM : initialize to user settings
         set "sSetXml="!candidateFolder:"=!\!user:"=!_settings.xml""
         if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
 
         pushd !BFW_TOOLS_PATH!
-        
+
         set "sSetBinSize=0"
         if exist !sSetBin! (
             for /F "tokens=*" %%a in (!sSetBin!)  do set "sSetBinSize=%%~za"
@@ -1648,19 +1651,19 @@ REM : functions
                 exit /b 1
             )
         )
-            
+
         if exist !sSetXml! (
             set /A "result=0"
             call:isValid result
             if !result! NEQ 1 (
-                echo Import cancelled because non macthing nodes in xml file>> !batchFwLog! 
+                echo Import cancelled because non macthing nodes in xml file>> !batchFwLog!
                 exit /b 1
             )
         )
         exit /b 0
 
     goto:eof
-    
+
     REM : function to set settings for a givne user
     :setSettingsForUser
 
