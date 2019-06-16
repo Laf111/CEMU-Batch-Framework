@@ -104,9 +104,9 @@ REM : main
     @echo PortNumber=!ipRead!
     @echo HostName=!portRead!
     @echo.
-    
+
     choice /C yn /N /M "Use this setup (y, n)? : "
-    
+
     if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
