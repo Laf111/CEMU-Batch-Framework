@@ -137,7 +137,8 @@ REM : main
 
     REM : temporary folder
     set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP!
+    if exist !BFW_GP_TMP! rmdir /Q !BFW_GP_TMP! > NUL 2>&1
+    mkdir !BFW_GP_TMP! > NUL 2>&1
 
     set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
 
