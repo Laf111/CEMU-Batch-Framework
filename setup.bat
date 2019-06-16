@@ -474,7 +474,7 @@ REM : main
     @echo.
 
     choice /C yn /N /M "Take a snapshot of your Wii-U now? (y,n):"
-    if !ERRORLEVEL! EQU 2 && goto:getSoftware
+    if !ERRORLEVEL! EQU 2 goto:getSoftware
     pushd !BFW_TOOLS_PATH!
     set "tobeLaunch="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
     wscript /nologo !StartWait! !tobeLaunch!
