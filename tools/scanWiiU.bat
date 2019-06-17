@@ -17,7 +17,7 @@ REM : main
         goto:continue
     :end
 
-    set "THIS_SCRIPT=%~0" && set "ERRORLEVEL=0"
+    set "THIS_SCRIPT=%~0"
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -104,7 +104,9 @@ REM : main
     @echo PortNumber=!ipRead!
     @echo HostName=!portRead!
     @echo.
+
     choice /C yn /N /M "Use this setup (y, n)? : "
+
     if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
