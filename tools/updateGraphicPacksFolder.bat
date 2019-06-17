@@ -137,8 +137,7 @@ REM : main
 
     REM : temporary folder
     set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL 2>&1
-    mkdir !BFW_GP_TMP! > NUL 2>&1
+    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP!
 
     set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
 
@@ -166,7 +165,7 @@ REM : main
     )
 
     REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_TMP! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_TMP! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     pushd !GAMES_FOLDER!
 
@@ -201,8 +200,6 @@ REM : functions
 
     REM : ------------------------------------------------------------------
     :deleteGFX
-        if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1 && goto:eof
-
         for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find /V "_graphicPacksV2"') do (
             set "folder="!BFW_GP_FOLDER:"=!\%%i"
             rmdir /Q /S !folder!

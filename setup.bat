@@ -814,7 +814,7 @@ REM : main
     @echo than one version of CEMU^:
     @echo ---------------------------------------------------------
     @echo ^> relaunch this script from its shortcut
-    @echo Wii-U Games^\Register CEMU installs^.lnk
+    @echo Wii-U Games^\Set BatchFw settings and register CEMU installs^.lnk
     @echo ---------------------------------------------------------
     @echo You can now only use the shortcuts created in
     @echo !OUTPUT_FOLDER:"=!\Wii-U Games

@@ -274,7 +274,7 @@ REM : games that exist in local AND remote locations
     set "src=!args[3]!"
     set "src=!src:"=!"
     if not ["!src!"] == ["mlc"] if not ["!src!"] == ["usb"] (
-        @echo ERROR^: !src! is not a valid storage source ^^!
+        @echo ERROR^: !src! is not a valid storage source ^!
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
 
@@ -295,7 +295,7 @@ REM : games that exist in local AND remote locations
 
     set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
     if not exist !USERS_ACCOUNTS_FOLDER! (
-        @echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!^
+        @echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!
         @echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
         @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
         @echo before this script

@@ -23,10 +23,7 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    set "installFolder=!parentFolder:~0,-2!""
-    for %%a in (!installFolder!) do set "parentFolder="%%~dpa""
-    for %%a in (!BFW_PATH!) do set "drive=%%~da"
-    set "GAMES_FOLDER=!parentFolder!"
+
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""

@@ -369,7 +369,7 @@ REM : functions
             set "uf="!usersFolderAccount:"=!\!user:"=!%%d.dat""
 
             copy /Y !af! !uf! > NUL 2>&1
-            @echo saving \%%d\account.dat to !uf!
+            @echo saving %%d\account.dat to !uf!
             @echo ---------------------------------------------------------
         )
 
