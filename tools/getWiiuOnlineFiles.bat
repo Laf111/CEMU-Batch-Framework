@@ -117,7 +117,10 @@ REM : main
     @echo ^(CTRL-C^) to abort
     pause
     cls
-    
+
+    set "WIIU_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\wiiuAccounts\usr\save\system\act""
+    if not exist !WIIU_ACCOUNTS_FOLDER! mkdir !WIIU_ACCOUNTS_FOLDER! > NUL 2>&1
+       
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
     set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
@@ -193,9 +196,6 @@ REM : main
 
     set "ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\mlc01\usr\save\system\act\80000001""
     if not exist !ACCOUNTS_FOLDER! mkdir !ACCOUNTS_FOLDER! > NUL 2>&1
-
-    set "WIIU_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\wiiuAccounts\usr\save\system\act""
-    if not exist !WIIU_ACCOUNTS_FOLDER! mkdir !WIIU_ACCOUNTS_FOLDER! > NUL 2>&1
 
     @echo Launching FTP transferts^.^.^.
 
