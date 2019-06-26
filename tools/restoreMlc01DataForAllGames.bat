@@ -533,7 +533,7 @@ REM : functions
         REM : arg1 = msg
         set "msg=%~1"
 
-        set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1

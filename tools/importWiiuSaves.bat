@@ -62,11 +62,11 @@ REM : games that exist in local AND remote locations
     @echo Import Wii-U saves to CEMU
     @echo =========================================================
     @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping/shutdown features
+    @echo - disable the sleeping^/shutdown features
     @echo - if you^'re using a permanent hack ^(CBHC^)^:
     @echo    ^* launch HomeBrewLauncher
     @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you're not^:
+    @echo - if you^'re not^:
     @echo    ^* first run Mocha CFW HomeBrewLauncher
     @echo    ^* then ftp-everywhere for MOCHA
     @echo.
@@ -277,7 +277,6 @@ REM : games that exist in local AND remote locations
         @echo ERROR^: !src! is not a valid storage source ^!
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
-
     )
 
     set "selectedTitles[0]=!GAME_TITLE!"

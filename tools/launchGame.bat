@@ -211,7 +211,7 @@ REM : main
     for /F "delims==" %%f in ('wmic process get Commandline ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GTR 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running, aborting ^!" 16
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. Use "Wii-U Games\BatchFw\Kill BatchFw Processes.lnk". Aborting ^!" 16
             exit 20
         )
     )
@@ -1748,10 +1748,10 @@ REM : functions
 
         set "pat="!BFW_ONLINE_ACC:"=!\!user:"=!*.dat""
 
-        for /F "delims=~" %%i in ('dir /B !pat!') do (
+        for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
 
-            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId="') do set "accId=%%j"
+            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
         )
 
         if ["!accId!"] == ["NONE"] (
@@ -1766,7 +1766,7 @@ REM : functions
         if not exist !winScpIni! goto:installAccount
 
         REM : get the hostname
-        for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
+        for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
         REM : check its state
 
         call:getHostState !ipRead! state
@@ -1788,6 +1788,13 @@ REM : functions
 
         del /F !cs! > NUL 2>&1
         move /Y !csTmp! !cs! > NUL 2>&1
+
+        REM : install other files needed for online play
+        set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
+        if exist !onLineMlc01Files! (
+            set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
+            if not exist !ccerts! xcopy !onLineMlc01Files! !MLC01_FOLDER_PATH! /R /S /Y > NUL 2>&1
+        )
 
         @echo Online account enabled for !user:"=! ^: !accId! >> !batchFwLog!
         @echo Online account enabled for !user:"=! ^: !accId!
@@ -1871,7 +1878,6 @@ REM : functions
 
             goto:eof
         )
-
 
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
@@ -2131,7 +2137,7 @@ REM : functions
 
         cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
         if !ERRORLEVEL! EQU 2 (
-            cscript /nologo !MessageBox! "If you have a cache for this game, launch the game a first time then use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. Not need to rename-it, BatchFw will do it for you" 4144
+            cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you" 4144
             goto:eof
         )
 
@@ -2149,7 +2155,7 @@ REM : functions
         REM : open a google search
         wscript /nologo !Start! !defaultBrowser! "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
 
-        cscript /nologo !MessageBox! "Let CEMU launch the game a first time, then use the shortcut Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache and browse to the file downloaded. Not need to rename-it, BatchFw will do it for you" 4144
+        cscript /nologo !MessageBox! "Let CEMU launch the game a first time then close it and use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache'. Browse to the file downloaded, no need to rename-it, BatchFw will do it for you" 4144
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2498,7 +2504,7 @@ REM : functions
         REM : arg1 = msg
         set "msg=%~1"
 
-        set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1

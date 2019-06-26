@@ -66,6 +66,7 @@ REM : main
     @echo Please select CEMU target folder
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    if [!CEMU_FOLDER!] == ["NONE"] goto:eof
 
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
@@ -427,7 +428,7 @@ REM : functions
         REM : arg1 = msg
         set "msg=%~1"
 
-        set "glogFile="!BFW_PATH:"=!\logs\GamesLibrary.log""
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1

@@ -73,8 +73,8 @@ REM : main
     set "f2="!BFW_ONLINE_FOLDER:"=!\seeprom.bin""
     if exist !f1! if exist !f2! goto:beginProcess
 
-    @echo First^, you have to use NandDumper to get otp.bin and seeprom.bin
-    @echo and copy them manually in !BFW_ONLINE_FOLDER!
+    @echo First^, you have to use NandDumper to get otp^.bin and seeprom^.bin
+    
     @echo.
     @echo Consult the pinned guide on Cemu^'s reddit to know how
     @echo Press any key to continue or CTRL^+C to exit
@@ -103,11 +103,11 @@ REM : main
     @echo.
 
     @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping/shutdown features
+    @echo - disable the sleeping^/shutdown features
     @echo - if you^'re using a permanent hack ^(CBHC^)^:
     @echo    ^* launch HomeBrewLauncher
     @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you're not^:
+    @echo - if you^'re not^:
     @echo    ^* first run Mocha CFW HomeBrewLauncher
     @echo    ^* then ftp-everywhere for MOCHA
     @echo.

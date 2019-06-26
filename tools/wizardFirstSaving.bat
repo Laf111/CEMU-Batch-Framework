@@ -247,11 +247,12 @@ REM : main
 
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
     !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp0! > !csTmp!
-    REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
-    set "MLC01_FOLDER_PATH="!GAME_FOLDER_PATH:"=!\mlc01""
 
-    !xmlS! ed -u "//mlc_path" -v !MLC01_FOLDER_PATH! !csTmp! > !cs!
-    del /F !csTmp0! > NUL 2>&1
+    REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
+    set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
+
+    !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs!
+    del /F !csTmp0! > NUL 2>&1  
     goto:diffProfileFile
 
     :displayGameProfile
@@ -290,7 +291,7 @@ REM : main
     REM : get cemu install folder for existing game's profile
 
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
-    if ["!REF_CEMU_FOLDER!"] == ["NONE"] goto:diffProfileFile
+    if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
     if /I not exist !refProfileFile! (
@@ -304,7 +305,11 @@ REM : main
     goto:updateMissingProfileFolder
 
     :openProfileFile
-    if %versionRead% GEQ 1156 goto:step2
+
+    call:compareVersions %versionRead% "1.15.6" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 1 goto:step2
+    if !result! EQU 0 goto:step2
 
     @echo Openning !PROFILE_FILE:"=! ^.^.^.
     @echo Complete it ^(if needed^) then close notepad to continue
@@ -340,7 +345,10 @@ REM : main
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings
 
-    if %versionRead% GEQ 1156 goto:wait
+    call:compareVersions %versionRead% "1.15.6" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! EQU 1 goto:wait
+    if !result! EQU 0 goto:wait
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
@@ -424,7 +432,11 @@ REM : main
     @echo    - all controller profiles for all players
     @echo    - select graphic pack^(s^)
     @echo    - select amiibo paths^(NFC Tags^)
-    @echo    - version ^>= 1^.15^.6 ^: set game^'s settings with UI
+
+    call:compareVersions %versionRead% "1.15.6" result
+    if !result! EQU 50 echo Error when comparing versions
+    if !result! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
+
     @echo.
     @echo And for CEMU versions earlier than 1^.11^.6 ^:
     @echo also GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
@@ -453,7 +465,14 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] if %versionRead% GEQ 1153 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:syncCtrlProfiles
+    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
+        call:compareVersions %versionRead% "1.15.3" result
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! LEQ 1 (
+            robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
+            goto:syncCtrlProfiles
+        )
+    )
     if not exist !graphicPacks! mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -551,33 +570,31 @@ REM : functions
         set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
-        If not exist !BFW_ONLINE_ACC! goto:eof
+        If not exist !BFW_ONLINE! goto:eof
 
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
         set "pat="!BFW_ONLINE_ACC:"=!\!user:"=!*.dat""
 
-        for /F "delims=~" %%i in ('dir /B !pat!') do (
+        for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
 
-            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId="') do set "accId=%%j"
+            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
         )
 
         if ["!accId!"] == ["NONE"] (
             @echo WARNING^: AccountId not found for !user:"=!^, cancel online files installation ^!
             pause
-            goto:eof
         )
 
-        REM : copy mlc01 folder to MLC01_FOLDER_PATH if needed
-        set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
-
-        if not exist !ccerts! (
-            set "omlc01="!BFW_ONLINE:"=!\mlc01""
-            robocopy  !omlc01! !MLC01_FOLDER_PATH! /S > NUL 2>&1
+        REM : install other files needed for online play
+        set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
+        if exist !onLineMlc01Files! (
+            set "ccerts="!MLC01_FOLDER_PATH!\sys\title\0005001b\10054000\content\ccerts""
+            if not exist !ccerts! xcopy !onLineMlc01Files! "!MLC01_FOLDER_PATH!" /R /S /Y > NUL 2>&1
         )
-
+      
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
@@ -588,12 +605,13 @@ REM : functions
         if exist !s1! if not exist !t1! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! otp.bin > NUL 2>&1
         if exist !s2! if not exist !t2! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! seeprom.bin > NUL 2>&1
 
-        REM : patch settings.xml
-        !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        if not ["!accId!"] == ["NONE"] (
+            REM : patch settings.xml
+            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
-        del /F !cs! > NUL 2>&1
-        move /Y !csTmp! !cs! > NUL 2>&1
-
+            del /F !cs! > NUL 2>&1
+            move /Y !csTmp! !cs! > NUL 2>&1
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 

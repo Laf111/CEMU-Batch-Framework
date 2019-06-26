@@ -111,7 +111,7 @@ REM : main
             @echo ERROR ^: Graphic pack folder update failed ^!
         )
         set "BFW_LOGS="!BFW_PATH:"=!\logs""
-        set "GLFile="!BFW_LOGS:"=!\GamesLibrary.log""
+        set "GLFile="!BFW_LOGS:"=!\gamesLibrary.log""
 
         REM : flush GamesLibrary log
         call:cleanGameLibFile "graphic packs version=graphicPacks"
@@ -122,8 +122,10 @@ REM : main
     @echo #########################################################
 
 
-    @echo This windows will close automatically in 8s
-    timeout /T 8 > NUL 2>&1
+    if !QUIET_MODE! EQU 0 (
+        @echo This windows will close automatically in 8s
+        timeout /T 8 > NUL 2>&1
+    )
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -141,7 +143,7 @@ REM : functions
         set "pat=%~1"
         set "logFileTmp="!GLFile:"=!.tmp""
 
-        type !GLFile! | find /I /V "!pat!" > !logFileTmp!
+        type !GLFile! | find /I /V "!pat!" > !logFileTmp! 2>&1
 
         del /F /S !GLFile! > NUL 2>&1
         move /Y !logFileTmp! !GLFile! > NUL 2>&1

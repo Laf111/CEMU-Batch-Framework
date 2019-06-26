@@ -63,7 +63,7 @@ REM : Main
     @echo - if you^'re using a permanent hack ^(CBHC^)^:
     @echo    ^* launch HomeBrewLauncher
     @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you're not^:
+    @echo - if you^'re not^:
     @echo    ^* first run Mocha CFW HomeBrewLauncher
     @echo    ^* then ftp-everywhere for MOCHA
     @echo.

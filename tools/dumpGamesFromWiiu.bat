@@ -73,11 +73,11 @@ REM : main
     pause
     @echo.
     @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping/shutdown features
+    @echo - disable the sleeping^/shutdown features
     @echo - if you^'re using a permanent hack ^(CBHC^)^:
     @echo    ^* launch HomeBrewLauncher
     @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you're not^:
+    @echo - if you^'re not^:
     @echo    ^* first run Mocha CFW HomeBrewLauncher
     @echo    ^* then ftp-everywhere for MOCHA
     @echo.
@@ -185,19 +185,22 @@ REM : main
     set "remoteDlc="!wiiuScanFolder:"=!\SRCDlc.log""
 
     set /A "nbGames=0"
-
+    
     cls
     @echo =========================================================
     @echo Games found on the Wii-U
     @echo =========================================================
-
+    REM : loop on games
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
 
         set "second=%%j"
         set "endTitleId=!second:'=!"
 
-        REM : if the game is not also installed on your PC
-        type !localTid! | find /V "!endTitleId!" > NUL 2>&1 && (
+        REM : check if the game is not also installed on your PC
+        set /A "gameAlreadyInstalled=0"
+        for /F "delims=~" %%n in ('type !localTid! ^| find "!endTitleId!"') do set /A "gameAlreadyInstalled=1"
+
+        if !gameAlreadyInstalled! EQU 0 (
             set "titles[!nbGames!]=%%i"
             set "endTitlesId[!nbGames!]=!endTitleId!"
             set "titlesSrc[!nbGames!]=%%k"
@@ -357,13 +360,12 @@ REM : ------------------------------------------------------------------
         )
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
-        type !srcRemoteSaves! | find /V "%endTitleId%" > NUL 2>&1 && goto:waitingLoop
-
-        @echo - dumping saves
-        
-        REM : Import Wii-U saves
-        wscript /nologo !StartHiddenWait! !importWiiuSaves! !wiiuIp! !GAME_FOLDER_PATH! %endTitleId% %src%
-
+        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 (
+            @echo - dumping saves
+            
+            REM : Import Wii-U saves
+            wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_FOLDER_PATH! %endTitleId% %src%
+        )
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
