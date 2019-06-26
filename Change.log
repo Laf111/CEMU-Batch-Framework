@@ -1,4 +1,4 @@
-09/06/2019 V14 : 
+26/06/2019 V14 : 
 - add : enhance existing settings import process (using settings.bin size and settings
         nodes in settings.xml if files exist). 
         If no suitable settings are found => launching the wizard to collect settings
@@ -17,6 +17,7 @@
 - add : add a shocrtcut to the script used to kill all BatchFw's processes
 - add : xmlStartlet resource for handling xml files
 - fix : enhance GFX completion to compute scaleShader, aspectRatio (Wind Waker HD bug) 
+- fix : now uninstall delete _BatchFw_WiiU folder
 - add : active network detection in forceGraphicPackUpdate.bat 
 - fix : setting.xml found in CEMU FOLDER is restored after every run
 - add : if CEMU version >= 1.15.6, wizardFirstLaunch.bat use CEMU UI to tweak game's settings

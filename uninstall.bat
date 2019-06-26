@@ -86,11 +86,19 @@ REM : main
     if [!ANSWER!] == ["n"] goto:eof
 
     set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    if not exist !BatchFW_Graphic_Packs! goto:removeReports
+    if not exist !BatchFW_Graphic_Packs! goto:removeWiiuFolder
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER
-    if [!ANSWER!] == ["n"] goto:removeReports
+    if [!ANSWER!] == ["n"] goto:removeWiiuFolder
     rmdir /Q /S !BatchFW_Graphic_Packs!  > NUL 2>&1
     @echo ^> _BatchFW_Graphic_Packs deleted ^!
+    @echo ---------------------------------------------------------
+    :removeWiiuFolder
+    set "BatchFW_WiiU="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
+    if not exist !BatchFW_WiiU! goto:removeReports
+    call:getUserInput "Remove _BatchFw_WiiU folder ? (y, n)" "y,n" ANSWER
+    if [!ANSWER!] == ["n"] goto:removeReports
+    rmdir /Q /S !BatchFW_WiiU!  > NUL 2>&1
+    @echo ^> _BatchFw_WiiU deleted ^!
     @echo ---------------------------------------------------------
     :removeReports
     set "BatchFW_Games_Compatibility_Reports="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports""

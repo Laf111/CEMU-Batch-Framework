@@ -30,6 +30,7 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
 
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     REM : check if
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /I /V "NTFS"') do (
@@ -228,17 +229,6 @@ REM : main
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
-    )
-
-    if !NB_GAMES_VALID! EQU 0 (
-        @echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^^!
-        @echo Please extract BatchFw in your loadiines games^' folder
-        REM : show doc
-        set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
-
-        @echo Exiting 10
-        pause
     )
 
     @echo =========================================================
@@ -594,12 +584,15 @@ REM : main
 
    :getOuptutsType
     cls
-    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
     if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
         if not exist !BFW_WIIU_FOLDER! (
-            @echo ERROR^: no games were found^, BatchFw works only with loadiine games ^!
+            @echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
+            @echo Please extract BatchFw in your loadiines games^' folder
+            REM : show doc
+            set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
+            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
             pause
-            exit 55
+            @echo Exiting 10
         )
     )
 
@@ -618,7 +611,7 @@ REM : main
         @echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     ) else (
-        if exist !BFW_WIIU_FOLDER! (
+        if exist !BFW_WIIU_FOLDER! if !NB_GAMES_VALID! EQU 0 (
             @echo 3^: Cancel^, for dumping my games now
             call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         ) else (
@@ -954,7 +947,7 @@ REM : functions
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
-        gotocheckCemuHook
+        goto:checkCemuHook
 
        :checkSharedFonts
 
