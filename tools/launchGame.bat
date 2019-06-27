@@ -208,10 +208,10 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims==" %%f in ('wmic process get Commandline ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    for /F "delims==" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GTR 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. Use "Wii-U Games\BatchFw\Kill BatchFw Processes.lnk". Aborting ^!" 16
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. Use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
             exit 20
         )
     )
@@ -736,7 +736,7 @@ REM : main
     REM : get user defined ratios list
     set "ARLIST="
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
-    if ["!ARLIST!"] == [""] goto:minimizeAll
+    if ["!ARLIST!"] == [""] goto:patchGfx
 
     REM : import user defined ratios graphic packs
     for %%a in (!ARLIST!) do (
@@ -745,7 +745,8 @@ REM : main
         if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL 2>&1
         if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL 2>&1
     )
-
+    
+    :patchGfx
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
     REM : when using a simlink with a the target on another partition
