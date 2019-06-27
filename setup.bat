@@ -474,7 +474,7 @@ REM : main
     set /P "input=Please enter BatchFw's user name : "
     call:secureUserNameForBfw "!input!" safeInput
     if !ERRORLEVEL! NEQ 0 (
-        @echo ^* or ^= are not allowed characters ^!
+        @echo ^~^, ^* or ^= are not allowed characters ^!
         @echo Please remove them
         goto:getUsers
     )
@@ -606,7 +606,7 @@ REM : main
     REM : display only if shortcuts have already been created
     set /A "alreadyInstalled=0"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set /A "alreadyInstalled=1"
-    if %alreadyInstalled% NEQ 0 (
+    if %alreadyInstalled% EQU 1 (
         @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
@@ -615,6 +615,9 @@ REM : main
             @echo 3^: Cancel^, for dumping my games now
             call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         ) else (
+            call:getUserInput "Enter your choice ?: " "1,2" ANSWER
+        )
+        if not exist !BFW_WIIU_FOLDER! (
             call:getUserInput "Enter your choice ?: " "1,2" ANSWER
         )
     )
@@ -979,10 +982,12 @@ REM : functions
         if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
 
         call:compareVersions %version% "1.15.1" result
+        if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 2 set /A "post1151=0"
 
         call:compareVersions %version% "1.14.0" result
+        if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 1 goto:autoImportMode
         if !result! EQU 0 goto:autoImportMode
@@ -1120,8 +1125,12 @@ REM : functions
         set "str=!str:^!=!"
         set "str=!str:%%=!"
 
-        REM : add the point
+        REM : add . and ~
         set "str=!str:.=!"
+        @echo !str! | find "~" > NUL 2>&1 && (
+            echo Please remove ^~ ^(unsupported charcater^) from !str!
+            exit /b 50
+        )
 
         REM : add . ? (%userName%_settings.*) ?
         REM : Forbidden characters for files in WINDOWS
@@ -1136,11 +1145,11 @@ REM : functions
         set "str=!str:^=!"
 
         @echo !str! | find "*" > NUL 2>&1 && (
-            echo Please remove * ^(unsupported charcater^) from !str!
+            echo Please remove ^* ^(unsupported charcater^) from !str!
             exit /b 50
         )
         @echo !str! | find "=" > NUL 2>&1 && (
-            echo Please remove = ^(unsupported charcater^) from !str!
+            echo Please remove ^= ^(unsupported charcater^) from !str!
             exit /b 50
         )
 
@@ -1279,11 +1288,11 @@ REM : functions
 
             set /A "dr=99"
             set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
-
-            if !dt! LSS !dr! exit /b 2
-            if !dt! GTR !dr! exit /b 1
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
+            
+            if !dt! LSS !dr! set /A "%2=2" && goto:eof
+            if !dt! GTR !dr! set /A "%2=1" && goto:eof
 
     goto:eof
 
@@ -1293,7 +1302,7 @@ REM : functions
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-
+        
         REM : versioning separator
         set "sep=."
 
@@ -1304,12 +1313,12 @@ REM : functions
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-
+        
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
-            call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
+            call:compareDigits %%l result
+            if !result! NEQ 0 set "%2=!result!" && goto:eof
         )
 
     goto:eof

@@ -299,8 +299,12 @@ REM : functions
         set "str=!str:^!=!"
         set "str=!str:%%=!"
 
-        REM : add the point
+        REM : add . and ~
         set "str=!str:.=!"
+        @echo !str! | find "~" > NUL 2>&1 && (
+            echo Please remove ~ ^(unsupported charcater^) from !str!
+            exit /b 50
+        )
         
         REM : Forbidden characters for files in WINDOWS
         set "str=!str:?=!"
@@ -383,7 +387,7 @@ REM : functions
         set /P "input=Please enter BatchFw's user name : "
         call:secureUserNameForBfw "!input!" safeInput
         if !ERRORLEVEL! NEQ 0 (
-            @echo ^* or ^= are not allowed characters ^!
+            @echo ^~^, ^* or ^= are not allowed characters ^!
             @echo Please remove them
             goto:askUser
         )

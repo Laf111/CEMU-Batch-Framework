@@ -231,13 +231,31 @@ REM : main
 
     set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-
-    if ["%versionRead%"] == ["NOT_FOUND"] goto:getTitleId
    
+    set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+    if exist !gfxv2! goto:getTitleId
+    
     call:compareVersions %versionRead% "1.14.0" result
-    if !result! EQU 50 echo Error when comparing versions
+    if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!   
+    if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!   
     if !result! EQU 2 set "gfxType=V2"
+    if !result! LEQ 1 goto:getTitleId
 
+    mkdir !gfxv2! > NUL 2>&1
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
+
+    @echo --------------------------------------------------------- >> !batchFwLog!
+    @echo graphic pack V2 are needed for this version^, extracting^.^.^. >> !batchFwLog!
+
+    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, close this popup to continue^." 4160
+
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
+    set /A cr=!ERRORLEVEL!
+    if !cr! GTR 1 (
+        @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
+        pause
+        exit 21
+    )    
 
     :getTitleId
     REM : META.XML file
@@ -736,7 +754,8 @@ REM : main
 
     if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
         call:compareVersions %versionRead% "1.15.3b" result
-        if !result! EQU 50 echo Error when comparing versions
+        if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!   
+        if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!   
         if !result! EQU 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
         if !result! EQU 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
     )
@@ -1569,12 +1588,12 @@ REM : functions
         !xmlS! ed -d "//GameCache" !file0! > !file1!
 
         !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
-        set "pat="!BFW_PATH:"=!\logs\settings.tmp*""
+        set "pat="!BFW_PATH:"=!\logs\settings_target.tmp*""
 
         REM : initialize to false = 0
         set /A "%1=0"
 
-        REM : for each nodes in the filtered target wml file
+        REM : for each nodes in the filtered target xml file
         for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /V "!"') do (
             set "line=%%i"
             REM : get the node from the line
@@ -1609,8 +1628,8 @@ REM : functions
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\*""
 
         for /F "delims=~" %%j in ('dir /B /A:D /O:-N !pat! 2^> NUL') do (
-            call:checkSettingsFolder "%%j"
-            if !ERRORLEVEL! EQU 0 (
+            call:checkSettingsFolder "%%j" result
+            if !result! EQU 1 (
                 set "previousSettingsFolder=!candidateFolder!"
                 echo Importing settings from %%j>> !batchFwLog!
                 goto:eof
@@ -1648,7 +1667,7 @@ REM : functions
                 echo Import cancelled bin size of source^'s file lower than target one>> !batchFwLog!
                 echo source !sSetBinSize! bytes>> !batchFwLog!
                 echo target !tSetBinSize! bytes>> !batchFwLog!
-                exit /b 1
+                set /A "%2=0" && goto:eof
             )
         )
 
@@ -1657,10 +1676,10 @@ REM : functions
             call:isValid result
             if !result! NEQ 1 (
                 echo Import cancelled because non macthing nodes in xml file>> !batchFwLog!
-                exit /b 1
+                set /A "%2=0" && goto:eof
             )
         )
-        exit /b 0
+        set /A "%2=1"
 
     goto:eof
 
@@ -2370,11 +2389,11 @@ REM : functions
 
             set /A "dr=99"
             set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
-
-            if !dt! LSS !dr! exit /b 2
-            if !dt! GTR !dr! exit /b 1
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
+            
+            if !dt! LSS !dr! set /A "%2=2" && goto:eof
+            if !dt! GTR !dr! set /A "%2=1" && goto:eof
 
     goto:eof
 
@@ -2384,7 +2403,7 @@ REM : functions
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-
+        
         REM : versioning separator
         set "sep=."
 
@@ -2395,15 +2414,17 @@ REM : functions
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-
+        
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
-            call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
+            call:compareDigits %%l result
+            if !result! NEQ 0 set "%2=!result!" && goto:eof
         )
 
     goto:eof
+    
+    
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput
 

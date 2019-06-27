@@ -323,6 +323,30 @@ REM : games that exist in local AND remote locations
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :updateTitle
+
+        set "num=%~1"
+
+        REM : searching for meta file
+        for /F "delims=~" %%i in ('dir /B /S meta.xml ^| find /I /V "\mlc01"') do (
+
+            REM : meta.xml
+            set "META_FILE="%%i""
+
+            type !META_FILE! | find /I "!endTitleId!" > NUL 2>&1 && (
+
+                for %%a in (!META_FILE!) do set "parentFolder="%%~dpa""
+                set "str=!parentFolder:~0,-2!""
+                for %%a in (!str!) do set "parentFolder="%%~dpa""
+                set "GAME_FOLDER_PATH=!parentFolder:~0,-2!""
+
+                REM : update titles[%num%] with folder's name (GAME_TITLE)
+                for /F "delims=~" %%a in (!GAME_FOLDER_PATH!) do set "selectedTitles[%num%]=%%~nxa"
+            )
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
     REM : check list of games and create selection
     :checkListOfGames
 
@@ -445,12 +469,14 @@ REM : functions
             )
 
             if %nbArgs% EQU 0 (
-                choice /C yn /N /M "Import "!user!" saves from Wii-U (y, n)? : "
+                choice /C yn /N /M "Import !user! saves from Wii-U (y, n)? : "
                 if !ERRORLEVEL! EQU 2 goto:eof
             )
+            set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
+            if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
 
             REM : for the current user :
-            set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!user:"=!.rar""
 
             REM : backup the CEMU save
             set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!_Cemu_!DATE!.rar""

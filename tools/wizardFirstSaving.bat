@@ -221,6 +221,7 @@ REM : main
     if ["%versionRead%"] == ["NOT_FOUND"] goto:displayGameProfile
     
     call:compareVersions %versionRead% "1.14.0" result
+    if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 set "gfxType=V2"
 
@@ -228,6 +229,7 @@ REM : main
 
     REM : if CEMU version < 1.12.0
     call:compareVersions %versionRead% "1.12.0" result
+    if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 goto:displayGameProfile
 
@@ -307,6 +309,7 @@ REM : main
     :openProfileFile
 
     call:compareVersions %versionRead% "1.15.6" result
+    if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 1 goto:step2
     if !result! EQU 0 goto:step2
@@ -346,6 +349,7 @@ REM : main
     call:checkCemuSettings
 
     call:compareVersions %versionRead% "1.15.6" result
+    if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 1 goto:wait
     if !result! EQU 0 goto:wait
@@ -434,6 +438,7 @@ REM : main
     @echo    - select amiibo paths^(NFC Tags^)
 
     call:compareVersions %versionRead% "1.15.6" result
+    if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
 
@@ -467,6 +472,7 @@ REM : main
 
     if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
         call:compareVersions %versionRead% "1.15.3" result
+        if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! LEQ 1 (
             robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
@@ -871,11 +877,11 @@ REM : functions
 
             set /A "dr=99"
             set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("%vir%") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("%vit%") do set "dt=%%t"
-
-            if !dt! LSS !dr! exit /b 2
-            if !dt! GTR !dr! exit /b 1
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
+            
+            if !dt! LSS !dr! set /A "%2=2" && goto:eof
+            if !dt! GTR !dr! set /A "%2=1" && goto:eof
 
     goto:eof
 
@@ -885,7 +891,7 @@ REM : functions
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-
+        
         REM : versioning separator
         set "sep=."
 
@@ -896,12 +902,12 @@ REM : functions
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-
+        
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
-            call:compareDigits %%l !vir! !vit!
-            if !ERRORLEVEL! NEQ 0 set "%2=!ERRORLEVEL!" goto:eof
+            call:compareDigits %%l result
+            if !result! NEQ 0 set "%2=!result!" && goto:eof
         )
 
     goto:eof
