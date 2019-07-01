@@ -30,6 +30,7 @@ REM : main
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
+    set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -84,7 +85,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Create CEMU shortcuts for selected games
+    title Create CEMU^'s shortcuts for selected games
 
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
@@ -400,6 +401,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     )
     timeout /T 3 > NUL 2>&1
    :autoImportMode
+
     @echo ---------------------------------------------------------
     REM : importMode
     set "IMPORT_MODE=ENABLED"
@@ -693,9 +695,9 @@ REM : functions
         set "TMP_VBS_FILE="!TEMP!\RACC_!DATE!.vbs""
 
         REM : create object
-        echo Set oWS = WScript.CreateObject("WScript.Shell") >> !TMP_VBS_FILE!
+        echo set oWS = WScript.CreateObject("WScript.Shell") >> !TMP_VBS_FILE!
         echo sLinkFile = !LINK_PATH! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
+        echo set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
         echo oLink.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
         echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
         if not [!ICO_PATH!] == ["NONE"] echo oLink.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
@@ -773,6 +775,24 @@ REM : functions
                     if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !name:.exe=!
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
             )
+        )
+
+        REM : create a shortcut to WinSCP
+        set "WD_FOLDER="!BFW_RESOURCES_PATH:"=!\winSCP""
+        set "TARGET_PATH="!WD_FOLDER:"=!\WinSCP.exe""
+        for /F "delims=~" %%i in (!TARGET_PATH!) do set "name=%%~nxi"
+
+        set "icoFile=!name:.exe=.ico!"
+        set "ICO_PATH="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
+        if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
+
+        REM : create a shortcut to cemu.exe (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\WinSCP.lnk""
+        set "LINK_DESCRIPTION="FTP to Wii-U using WinSCP""
+
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to WinSCP
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
         )
 
         REM : create a shortcut to scanWiiU.bat (if needed)
@@ -1139,6 +1159,23 @@ REM : functions
 
         set "ARGS="NONE""
 
+        REM : create a shortcut to CEMU
+        set "WD_FOLDER=!CEMU_FOLDER!"
+        set "TARGET_PATH="!WD_FOLDER:"=!\Cemu.exe""
+        for /F "delims=~" %%i in (!TARGET_PATH!) do set "name=%%~nxi"
+
+        set "icoFile=!name:.exe=.ico!"
+        set "ICO_PATH="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
+        if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
+
+        REM : create a shortcut to cemu.exe (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\!CEMU_FOLDER_NAME!.lnk""
+        set "LINK_DESCRIPTION="Open !CEMU_FOLDER_NAME!""
+
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !CEMU_FOLDER_NAME!
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
+        )
         REM : search your current GLCache
         REM : check last path saved in log file
         REM : search in logFile, getting only the last occurence
@@ -1489,13 +1526,13 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
             set /A "num=%~1"
 
-            set /A "dr=99"
-            set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
-            
-            if !dt! LSS !dr! set /A "%2=2" && goto:eof
-            if !dt! GTR !dr! set /A "%2=1" && goto:eof
+            set "dr=99"
+            set "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+            if !dt! LSS !dr! set "%2=2" && goto:eof
+            if !dt! GTR !dr! set "%2=1" && goto:eof
 
     goto:eof
 
@@ -1505,7 +1542,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-        
+
         REM : versioning separator
         set "sep=."
 
@@ -1516,7 +1553,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-        
+
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (

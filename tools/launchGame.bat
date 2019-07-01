@@ -231,13 +231,13 @@ REM : main
 
     set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-   
+
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:getTitleId
     
     call:compareVersions %versionRead% "1.14.0" result
-    if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!   
-    if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!   
+    if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !result! EQU 2 set "gfxType=V2"
     if !result! LEQ 1 goto:getTitleId
 
@@ -255,7 +255,7 @@ REM : main
         @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
         pause
         exit 21
-    )    
+    )
 
     :getTitleId
     REM : META.XML file
@@ -364,7 +364,7 @@ REM : main
     set "GlCache="NOT_FOUND""
     set "GlCacheSaved="NOT_FOUND""
 
-    set /A "driversUpdateFlag=0"
+    set "driversUpdateFlag=0"
 
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
@@ -629,7 +629,7 @@ REM : main
         REM : log to host log file
         set "msg="Detected %GPU_VENDOR% drivers version upgrade from %gpuDriversVersionRead% to =%GPU_DRIVERS_VERSION%""
         call:log2HostFile !msg!
-        set /A "driversUpdateFlag=1"
+        set "driversUpdateFlag=1"
     )
     set "IdGpuFolder="!GLCacheSavesFolder:"=!\!IdGpuFolder:"=!""
 
@@ -745,7 +745,7 @@ REM : main
         if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL 2>&1
         if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL 2>&1
     )
-    
+
     :patchGfx
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
@@ -755,8 +755,8 @@ REM : main
 
     if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
         call:compareVersions %versionRead% "1.15.3b" result
-        if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!   
-        if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!   
+        if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
+        if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
         if !result! EQU 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
     )
@@ -1680,7 +1680,7 @@ REM : functions
                 set /A "%2=0" && goto:eof
             )
         )
-        set /A "%2=1"
+        set "%2=1"
 
     goto:eof
 
@@ -2388,13 +2388,13 @@ REM : functions
 
             set /A "num=%~1"
 
-            set /A "dr=99"
-            set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
-            
-            if !dt! LSS !dr! set /A "%2=2" && goto:eof
-            if !dt! GTR !dr! set /A "%2=1" && goto:eof
+            set "dr=99"
+            set "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+            if !dt! LSS !dr! set "%2=2" && goto:eof
+            if !dt! GTR !dr! set "%2=1" && goto:eof
 
     goto:eof
 
@@ -2404,7 +2404,7 @@ REM : functions
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-        
+
         REM : versioning separator
         set "sep=."
 
@@ -2415,7 +2415,7 @@ REM : functions
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-        
+
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
@@ -2424,7 +2424,7 @@ REM : functions
         )
 
     goto:eof
-    
+
     
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput

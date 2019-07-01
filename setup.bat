@@ -1286,13 +1286,13 @@ REM : functions
 
             set /A "num=%~1"
 
-            set /A "dr=99"
-            set /A "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set /A "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set /A "dt=%%t"
-            
-            if !dt! LSS !dr! set /A "%2=2" && goto:eof
-            if !dt! GTR !dr! set /A "%2=1" && goto:eof
+            set "dr=99"
+            set "dt=99"
+            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+            if !dt! LSS !dr! set "%2=2" && goto:eof
+            if !dt! GTR !dr! set "%2=1" && goto:eof
 
     goto:eof
 
@@ -1302,7 +1302,7 @@ REM : functions
     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
-        
+
         REM : versioning separator
         set "sep=."
 
@@ -1313,7 +1313,7 @@ REM : functions
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
         set /A "minNbSep+=1"
-        
+
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (

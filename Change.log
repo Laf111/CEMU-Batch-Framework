@@ -1,4 +1,4 @@
-28/06/2019 V14 : 
+01/07/2019 V14 : 
 - add : enhance existing settings import process (using settings.bin size and settings
         nodes in settings.xml if files exist). 
         If no suitable settings are found => launching the wizard to collect settings
@@ -11,6 +11,7 @@
 - add : ignoring the precompiled cache for NVIDIA users (for all games) is now by default
         (disabled for other GPU type)
 - add : use Game's icon (if meta\iconTex.tga found, use box art icons otherwise)
+- add : Cemu.exe and WinScp.exe shortcuts
 - fix : GFX packs not installed when you don't let BatchFw complete them
 - fix : not handling spaces and custom characters in user's name
 - fix : re-work the wii-u title database (full game's title) and ignoring spaces when
