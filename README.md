@@ -11,7 +11,7 @@ The main purpose of BatchFW is:
 
 All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
 
-With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version.
+With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw also clean useless GLcaches left in CEMU folder on a display drivers’ update.
 
 The mlc01 path is in the game folder so
 
