@@ -25,6 +25,8 @@ Automatic graphics pack creation: you don't need to wait for the release of grap
 
 Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios  
 
+Prepare a SDcard content for your Wii-U (optional) : format using fat32format, install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC)
+
 FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
 The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
