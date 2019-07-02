@@ -16,8 +16,9 @@ I'll only have to start/stop the ftpiiu server on your Wii-U and launch the scri
 ---------------------------------------------------------
 Create a SDCard for Wii-U
 ---------------------------------------------------------
-BatchFw can prepare a SDcard for your Wii-U (format the device in FAT32 with 64K clusters size usinf fat32format.exe
-then install HromBrew Launcher and the needed app).
+BatchFw can prepare a SDcard for your Wii-U (format the device in FAT32 with 64K clusters size using fat32format.exe
+then install the needed app : HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, 
+SaveMii_MOD, FTPiiU for MOCHA and CBHC).
 If you're running a CBHC CFW use FTP everywhere FOR CBHC.
 Otherwise launch MOCHA then FTP everywhere FOR MOCHA.
 
