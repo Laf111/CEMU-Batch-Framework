@@ -333,10 +333,10 @@ REM : ------------------------------------------------------------------
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/code" "!name! (code)"
 
         set "contentFolder="!GAME_FOLDER_PATH:"=!\content""
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/content" "!name! (meta)"
+        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/content" "!name! (content)"
 
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/meta" "!name! (content)"
+        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/meta" "!name! (meta)"
 
         REM : search if this game has an update
         set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
@@ -358,6 +358,7 @@ REM : ------------------------------------------------------------------
             set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0050000\%endTitleId%\aoc""
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/%endTitleId%" "!name! (DLC)"
         )
+        
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 (
@@ -366,11 +367,12 @@ REM : ------------------------------------------------------------------
             REM : Import Wii-U saves
             wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_FOLDER_PATH! %endTitleId% %src%
         )
+
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
         for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do timeout /T 2 > NUL 2>&1 && goto:waitingLoop
-
+        
         REM : get current date
         for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -409,14 +411,12 @@ REM : ------------------------------------------------------------------
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13>> !batchFwLog!
             @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
@@ -424,7 +424,6 @@ REM : ------------------------------------------------------------------
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
@@ -441,7 +440,6 @@ REM : ------------------------------------------------------------------
         for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
             @echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9

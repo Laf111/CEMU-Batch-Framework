@@ -253,7 +253,7 @@ REM : games that exist in local AND remote locations
     :getArgsValue
     if %nbArgs% NEQ 4 (
         @echo ERROR on arguments passed ^(%nbArgs%^)
-        @echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE ENDTITLEID SRC
+        @echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE endTitleId src
         @echo given {%*}
         pause
         if %nbArgs% EQU 0 exit 9
@@ -266,9 +266,9 @@ REM : games that exist in local AND remote locations
     set "GAME_TITLE=!args[1]!"
     set "GAME_TITLE=!GAME_TITLE:"=!"
 
-    REM : get ENDTITLEID
-    set "ENDTITLEID=!args[2]!"
-    set "ENDTITLEID=!ENDTITLEID:"=!"
+    REM : get endTitleId
+    set "endTitleId=!args[2]!"
+    set "endTitleId=!endTitleId:"=!"
 
     REM : get and check src
     set "src=!args[3]!"
@@ -280,10 +280,10 @@ REM : games that exist in local AND remote locations
     )
 
     set "selectedTitles[0]=!GAME_TITLE!"
-    set "selectedEndTitlesId[0]=!ENDTITLEID:!"
+    set "selectedEndTitlesId[0]=!endTitleId!"
     set "selectedtitlesSrc[0]=!src!"
 
-    set "listGamesSelected=0"
+    set /A "nbGamesSelected=1"
 
     :treatments
     cls
@@ -417,6 +417,7 @@ REM : functions
         set "localFolderUser="!localFolder:"=!\user""
         if not exist !localFolderUser! (
             @echo WARNING ^: no saves found for !GAME_TITLE!
+            rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
             goto:eof
         )        
         REM : creates saves for each users
@@ -516,14 +517,12 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13>> !batchFwLog!
             @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
@@ -531,7 +530,6 @@ REM : functions
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
@@ -548,7 +546,6 @@ REM : functions
         for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
             @echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9

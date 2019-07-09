@@ -64,7 +64,7 @@ REM : main
     :askInputFile
     @echo Please browse to the transferable cache file
 
-    for /F %%b in ('cscript /nologo !browseFile!') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
+    for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
@@ -77,7 +77,7 @@ REM : main
     :askGameFolder
     @echo Please browse to the game^'s folder
 
-    for /F %%b in ('cscript /nologo !browseFolder!') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
