@@ -101,8 +101,9 @@ Code is well commented and is read only.
 
 Last tutorials :
 
-(V13)   : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
-(V13-6) : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
+V13   : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
+
+V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 
 WARNING : If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
