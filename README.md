@@ -109,8 +109,9 @@ V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/commen
 V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 
+# Recommendations : 
 
-WARNING : If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
+If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
 
 I recommend to not clone the repository : use the last released version
 
