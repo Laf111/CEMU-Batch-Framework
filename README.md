@@ -4,7 +4,7 @@ BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powers
 
 CEMU is still under development and highly experimental. Therefore, due to its reverse-engineed nature, it might tends to introduce regressions more than other softwares, and so it's useful to keep your working versions instead of systematically overwrite your install with the last one.
 
-# The main purpose of BatchFW is:
+## The main purpose of BatchFW is:
 
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
@@ -34,7 +34,7 @@ You'll be able to use the first one you created.
 Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts
 
-# Other features:
+## Other features:
 
 - Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
 
@@ -67,13 +67,13 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
     ect...
 
 
-# Install : 
+## Install : 
 
 - Extract in your games folder
 - launch _BatchFW_Install\\setup.bat
 
 
-# How to use:
+## How to use:
 
 - You want to create shortcuts to all your games for versions of CEMU using the ones created after the installation on your desktop?:
 
@@ -100,18 +100,18 @@ All batch source code is in delayed expansion mode and uses your system charset 
 Code is well commented and is read only. 
 
 
-# Last tutorials :
+## Last tutorials :
 
 V11 (install, mlc01 import... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
 
-V12 (multi users without Wii-U) : https://www.reddit.com/r/cemu/comments/ahkt5d/batchfw_v12_multiusers_mode_save_per_users_each/
+V12 (multi users without a Wii-U) : https://www.reddit.com/r/cemu/comments/ahkt5d/batchfw_v12_multiusers_mode_save_per_users_each/
 
 V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
 
 V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 
-# Recommendations : 
+## Recommendations : 
 
 If you edit source code, use a text editor that doesn't change ANSI files format to UTF8!
 
