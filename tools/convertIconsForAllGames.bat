@@ -185,7 +185,7 @@ REM : main
     )
 
     :ending
-    if !QUIET_MODE! EQU 1 goto::exiting
+    if !QUIET_MODE! EQU 1 goto:exiting
 
     @echo =========================================================
     @echo Treated !NB_GAMES_TREATED! games

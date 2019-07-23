@@ -161,7 +161,6 @@ REM : main
     call:checkValidity %ftid%
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
     for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%ftid%';"') do set "libFileLine="%%i""
@@ -248,7 +247,6 @@ REM : main
 
     if %nbArgs% EQU 0 endlocal && pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    exit /b 0
 
     exit /b 0
 goto:eof
@@ -443,11 +441,9 @@ REM : functions
                 set /A "fpsPPV3=1"
                 set /A "fpsPP=1"
             )
-
             :checkV2FPSpp
             REM : search V2 FPS++ graphic pack or patch for this game
             set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
-            if not exist !bfwgpv2! goto::checkV3FPSpp
 
             set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
             for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
