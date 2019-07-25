@@ -87,7 +87,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - You want to add a game?: once in your games folder, create shortcuts to this game with one or more version of CEMU by relaunching one of the 2 first scripts listed above;
 
-- You want to remove a game from your library?: simply delete its created shortcut (BatchFw's broken shortcuts appear as the others ones, but without icon);
+- If you use an external drive and shortcuts created before are broken (because the drive letter have changed): simply delete the shortcuts and re create them;
 
 - You don't need to manually open CEMU to play. Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts on your desktop (Or your shortcuts folder);
 
