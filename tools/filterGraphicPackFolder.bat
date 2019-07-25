@@ -91,7 +91,7 @@ REM : functions
         if exist !fnrLogfgf! del /F !fnrLogfgf!
 
         REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_TMP! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogfgf!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_TMP! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogfgf! > NUL
 
         for /F "tokens=2-3 delims=." %%j in ('type !fnrLogfgf! ^| find "File:"') do (
 

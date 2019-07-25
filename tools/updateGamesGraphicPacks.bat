@@ -267,7 +267,7 @@ REM : functions
         if exist !fnrLogUggp! del /F !fnrLogUggp!
 
         REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogUggp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogUggp! > NUL
 
         set /A "resX2=%nativeHeight%*2"
 
