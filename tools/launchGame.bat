@@ -470,7 +470,6 @@ REM : main
         goto:loadOptions
     )
 
-
     REM : backup transferable cache in case of CEMU corrupt it
     set "transF="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!cacheFile:"=!""
     set "backup="!transF:"=!-backupLaunchN.rar""
@@ -837,6 +836,7 @@ REM : main
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu%
     )
+
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
     wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
@@ -847,7 +847,6 @@ REM : main
     REM : search in logFile, getting only the last occurence
     set "OPENGL_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
-
 
     if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:searchCacheFolder
 
@@ -986,6 +985,11 @@ REM : main
 
     REM : analyse CEMU's log
     if not exist !cemuLog! goto:titleIdChecked
+
+    REM : if BatchFw complete GFX packs, check if CEMU log contains 'contains inconsistent preset variables'
+    type !logFile! | find /I "COMPLETE_GP" > NUL && (
+        type !cemuLog! | find /I "contains inconsistent preset variables" > NUL && cscript /nologo !MessageBox! "WARNING ^: some presets built by BatchFw are not valid, disable GFX packs completion, force a GFX pack update and please report this error to BatchFw's team" 4144
+    )
 
     REM : get SHADER_MODE
     set "SHADER_MODE=SEPARABLE"

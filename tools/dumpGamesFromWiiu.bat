@@ -358,7 +358,7 @@ REM : ------------------------------------------------------------------
             set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0050000\%endTitleId%\aoc""
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/%endTitleId%" "!name! (DLC)"
         )
-        
+
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 (

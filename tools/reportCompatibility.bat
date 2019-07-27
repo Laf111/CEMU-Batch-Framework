@@ -98,6 +98,16 @@ REM : main
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
     set "VERSION=NONE"
 
+    REM : log CEMU
+    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+
+    set "versionRead=NOT_FOUND"
+    if not exist !cemuLog! goto:getGameData
+
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+    if not ["%versionRead%"] == ["NOT_FOUND"] set "CEMU_FOLDER_NAME=%versionRead%"
+
+    :getGameData
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : get information on game using WiiU Library File
@@ -172,15 +182,16 @@ REM : main
     REM : ShaderCache Id
     @echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
 
-    call:getVersion
-    if not ["!VERSION!"] == ["NONE"] (
-        REM : ShaderCache Id
-        @echo Last launch with ="!VERSION!" >> !gameInfoFile!
-    ) else (
-        REM : using folder name
-        set "VERSION=!CEMU_FOLDER_NAME!"
+    if ["%versionRead%"] == ["NOT_FOUND"] (
+        call:getVersion
+        if not ["!VERSION!"] == ["NONE"] (
+            REM : ShaderCache Id
+            @echo Last launch with ="!VERSION!" >> !gameInfoFile!
+        ) else (
+            REM : using folder name
+            set "VERSION=!CEMU_FOLDER_NAME!"
+        )
     )
-
     REM : update reports
     REM --------------------------------------------------------------------------------
 

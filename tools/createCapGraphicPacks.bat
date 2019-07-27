@@ -232,6 +232,16 @@ REM : main
     set "rulesFileV3="!gpV3:"=!\rules.txt""
     set "v3ExistFlag=1"
 
+
+    REM : for 30FPS games running @60FPS on WiiU
+    if ["%nativeFps%"] == ["30"] (
+
+        set /A "g30=1"
+
+        REM : double the value used as nativeFps
+        set /A "nativeFps=%nativeFps%*2"
+    )
+
     if not exist !gpV3! (
         set "v3ExistFlag=0"
         mkdir !gpV3! > NUL 2>&1
@@ -327,7 +337,7 @@ REM : functions
         @echo # >> !rulesFileV3!
         @echo [Preset] >> !rulesFileV3!
         @echo name = 100%% Speed ^(Default^) >> !rulesFileV3!
-        @echo $FPS = %nativeFps% >> !rulesFileV3!
+        @echo $FPS = !nativeFps! >> !rulesFileV3!
         @echo # >> !rulesFileV3!
 
     goto:eof
@@ -424,18 +434,20 @@ REM : functions
         set /A "g30=0"
 
         REM : for 30FPS games running @60FPS on WiiU
-        if ["%nativeFps%"] == ["30"] (
-
-            set /A "g30=1"
-
-            REM : double the value used as nativeFps
-            set /A "nativeFps=%nativeFps%*2"
+        if !g30! EQU 1 (
 
             REM : graphic pack created by BatchFw : gameName=NONE no FPS++
             if [!gameName!] == ["NONE"] goto:create
 
             REM : search V3 FPS++ graphic pack or patch for this game
             set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*FPS++*""
+            REM : graphic pack created by BatchFw : gameName=NONE
+            for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
+                set /A "fpsPPV3=1"
+                set /A "fpsPP=1"
+            )
+            REM : search V3 FPS++ graphic pack or patch for this game
+            set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*60FPS*""
             REM : graphic pack created by BatchFw : gameName=NONE
             for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
                 set /A "fpsPPV3=1"
@@ -458,7 +470,7 @@ REM : functions
         :create
 
         REM : cap to 100%-1FPS (online compatibility)
-        set /A "fps=%nativeFps%/%factor% - 1"
+        set /A "fps=!nativeFps!/%factor% - 1"
 
         call:createCapV2GP %fps% "!GAME_TITLE!_%fps%FPS_cap"
         type !rulesFileV3! | find /I /V "FPS = %fps%" > NUL 2>&1 && if %fpsPPV3% EQU 0 call:fillCapV3GP "99" "Speed (%fps%FPS)"
@@ -467,33 +479,33 @@ REM : functions
 
         if %g30% EQU 1 goto:cap110
         REM : cap to 105%
-        call:mulfloat "%nativeFps%.00" "1.04" 2 fps
+        call:mulfloat "!nativeFps!.00" "1.04" 2 fps
         set /A "targetFps=%fps%/%factor%"
         call:createCapV2GP %fps% "!GAME_TITLE!_%targetFps%FPS_cap"
         if %fpsPPV3% EQU 0 call:fillCapV3GP "105" "Speed (%targetFps%FPS)"
 
         :cap110
         REM : cap to 110%
-        call:mulfloat "%nativeFps%.00" "1.09" 2 fps
+        call:mulfloat "!nativeFps!.00" "1.09" 2 fps
         set /A "targetFps=%fps%/%factor%"
         call:createCapV2GP %fps% "!GAME_TITLE!_%targetFps%FPS_cap"
         if %fpsPPV3% EQU 0 call:fillCapV3GP "110" "Speed (%targetFps%FPS)"
         REM : cap to 120%
-        call:mulfloat "%nativeFps%.00" "1.19" 2 fps
+        call:mulfloat "!nativeFps!.00" "1.19" 2 fps
         set /A "targetFps=%fps%/%factor%"
         call:createCapV2GP %fps% "!GAME_TITLE!_%targetFps%FPS_cap"
         if %fpsPPV3% EQU 0 call:fillCapV3GP "120" "Speed (%targetFps%FPS)"
         :capMenu
         if %g30% EQU 0 goto:done
         REM : cap to 150%
-        call:mulfloat "%nativeFps%.00" "1.49" 2 fps
+        call:mulfloat "!nativeFps!.00" "1.49" 2 fps
         set /A "targetFps=%fps%/%factor%"
         call:createCapV2GP %fps% "!GAME_TITLE!_%targetFps%FPS_cap"
         if %fpsPPV3% EQU 0 call:fillCapV3GP "150" "Speed (%targetFps%FPS)"
         if %g30% EQU 1 if %fpsPP% EQU 0 goto:done
 
         REM : cap to 200%
-        call:mulfloat "%nativeFps%.00" "1.99" 2 fps
+        call:mulfloat "!nativeFps!.00" "1.99" 2 fps
         set /A "targetFps=%fps%/%factor%"
         call:createCapV2GP %fps% "!GAME_TITLE!_%targetFps%FPS_cap"
         if %fpsPPV3% EQU 0 call:fillCapV3GP "200" "Speed (%targetFps%FPS)"

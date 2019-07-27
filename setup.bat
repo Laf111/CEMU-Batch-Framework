@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14"
+    set "BFW_VERSION=V14-1"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -460,7 +460,7 @@ REM : main
     @echo BatchFw will list the games^, saves^, updates and DLC
     @echo precising where there are installed ^(mlc or usb^)
     @echo and use its result to synchronize CEMU and your Wii-U
-    @echo ^(import / export saves^, dump games^)
+    @echo ^(import / export saves^)
     @echo.
 
     choice /C yn /N /M "Take a snapshot of your Wii-U now? (y,n):"

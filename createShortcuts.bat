@@ -839,15 +839,15 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
-        REM : create a shortcut to dumpGamesFromWiiu.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Dump games from my Wii-U.lnk""
-        set "LINK_DESCRIPTION="Dump games installed on your Wii-U""
-        set "TARGET_PATH="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\ftp.ico""
-        if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to dumpGamesFromWiiu^.bat
-            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
-        )
+        REM REM : create a shortcut to dumpGamesFromWiiu.bat (if needed)
+        REM set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Dump games from my Wii-U.lnk""
+        REM set "LINK_DESCRIPTION="Dump games installed on your Wii-U""
+        REM set "TARGET_PATH="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
+        REM set "ICO_PATH="!BFW_PATH:"=!\resources\icons\ftp.ico""
+        REM if not exist !LINK_PATH! (
+                REM if !QUIET_MODE! EQU 0 @echo Creating a shortcut to dumpGamesFromWiiu^.bat
+            REM call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        REM )
 
         REM : create a shortcut to createWiiuSDcard.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Create a SDCard for Wii-U.lnk""

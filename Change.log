@@ -1,3 +1,11 @@
+27/07/2019 V14-1 : 
+- add : when BatchFw completes GFX packs, add a "contains inconsistent preset variables" check when analysing Cemu's log
+- add : scaleBlur & 2pScaling directives in GFX pack completion
+- fix : aspectRatio directive write twice when completing GFX packs
+- fix : nativeFps value not double for 30FPS native game without FPS++
+- fix : detect _60FPS GFX packs (FPS++)
+- add : WII-U / restore scan Wii-U shortcuts and the call from setup.bat
+
 01/07/2019 V14 : 
 - add : enhance existing settings import process (using settings.bin size and settings
         nodes in settings.xml if files exist). 
