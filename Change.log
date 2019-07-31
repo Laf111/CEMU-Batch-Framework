@@ -1,3 +1,8 @@
+31/07/2019 V14-2 : 
+- fix : precompiled shader key in profile file since 1.15.8 (disablePrecompiledShaders => precompiledShaders)
+- fix : FPS++ and 60FPS packs detection
+- fix : BOTW GFX pack completion failure
+
 27/07/2019 V14-1 : 
 - add : when BatchFw completes GFX packs, add a "contains inconsistent preset variables" check when analysing Cemu's log
 - add : scaleBlur & 2pScaling directives in GFX pack completion

@@ -417,11 +417,11 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
-        echo "!string!" | find /I "AMD" > NUL 2>&1 (
+        echo "!string!" | find /I "AMD" > NUL 2>&1 && (
             set "gpuType=AMD"
             set "GPU_VENDOR=!string: =!"
         )

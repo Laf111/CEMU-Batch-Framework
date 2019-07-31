@@ -361,7 +361,7 @@ REM : ------------------------------------------------------------------
 
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
-        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 (
+        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 && (
             @echo - dumping saves
             
             REM : Import Wii-U saves

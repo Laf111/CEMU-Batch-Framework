@@ -282,6 +282,7 @@ REM : main
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
+    echo !ugp! true !GAME_FOLDER_PATH! >> !batchFwLog!
 
     :getScreenMode
 
@@ -371,7 +372,7 @@ REM : main
     set "gpuType=OTHER"
     for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
@@ -756,8 +757,7 @@ REM : main
         call:compareVersions %versionRead% "1.15.3b" result
         if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
-        if !result! EQU 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
-        if !result! EQU 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+        if !result! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
     )
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
@@ -1740,6 +1740,12 @@ REM : functions
         call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
 
         :patchGp
+
+        call:compareVersions %versionRead% "1.15.8" result
+        if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
+        if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
+        if !result! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
+        if !result! LEQ 1 call:patchGraphicSection !PROFILE_FILE! "precompiledShaders" %value%
 
         REM : force disablePrecompiledShaders = true in PROFILE_FILE
         call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%

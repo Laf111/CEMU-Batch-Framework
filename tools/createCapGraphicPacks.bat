@@ -240,8 +240,19 @@ REM : main
 
         REM : double the value used as nativeFps
         set /A "nativeFps=%nativeFps%*2"
+
+        REM : search V3 FPS++ or 60FPS pack
+        set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
+        if exist !fnrLogLggp! del /F !fnrLogLggp!
+        REM : Re launching the search
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
+
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPPV3=1"
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPPV3=1"
     )
 
+    if !fpsPPV3! EQU 1 exit /b 0
+    
     if not exist !gpV3! (
         set "v3ExistFlag=0"
         mkdir !gpV3! > NUL 2>&1
@@ -439,20 +450,6 @@ REM : functions
             REM : graphic pack created by BatchFw : gameName=NONE no FPS++
             if [!gameName!] == ["NONE"] goto:create
 
-            REM : search V3 FPS++ graphic pack or patch for this game
-            set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*FPS++*""
-            REM : graphic pack created by BatchFw : gameName=NONE
-            for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
-                set /A "fpsPPV3=1"
-                set /A "fpsPP=1"
-            )
-            REM : search V3 FPS++ graphic pack or patch for this game
-            set "pat="!BFW_GP_FOLDER:"=!\!GAME_TITLE!*60FPS*""
-            REM : graphic pack created by BatchFw : gameName=NONE
-            for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
-                set /A "fpsPPV3=1"
-                set /A "fpsPP=1"
-            )
             :checkV2FPSpp
             REM : search V2 FPS++ graphic pack or patch for this game
             set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""

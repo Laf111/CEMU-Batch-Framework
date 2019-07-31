@@ -436,9 +436,9 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         type !rulesFile! | find /I "lightSource" > NUL 2>&1 && set /A "lightSourceFlag=1"
         set /A "aspectRatioFlag=0"
         type !rulesFile! | find /I "aspectRatio" > NUL 2>&1 && set /A "aspectRatioFlag=1"
-        set /A "scaleBlur=0"
+        set /A "scaleBlurFlag=0"
         type !rulesFile! | find /I "scaleBlur" > NUL 2>&1 && set /A "scaleBlurFlag=1"
-        set /A "twopScaling=0"
+        set /A "twopScalingFlag=0"
         type !rulesFile! | find /I "2pScaling" > NUL 2>&1 && set /A "twopScalingFlag=1"
 
         REM : create missing full screen 16/9 resolutions graphic packs
@@ -1215,7 +1215,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
         if %aspectRatioFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/9.0)" --logFile !logFileV3!
         if %twopScalingFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$2pScaling = 1.0" --logFile !logFileV3!
-        if %scaleBlurFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleBlur = 1.0" --logFile !logFileV3!
+        if %scaleBlurFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleBlur = 1.0" --logFile !logFileV3!
         if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = 1.0" --logFile !logFileV3!
         if %lightSourceFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$lightSource = 1.0" --logFile !logFileV3!
         if %ditherFlag% EQU 1      wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$dither = 0.75" --logFile !logFileV3!
@@ -1244,6 +1244,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "version = 3" --replace "version = 3\n\n[Preset]\nname = !w!x!h! !desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n" --logFile !logFileV3!
 
         if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
+
         if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:10)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/10.0)" --logFile !logFileV3!
         if %aspectRatioFlag% EQU 1 if [!desc!] == [" (21:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (64.0/27.0)" --logFile !logFileV3!
         if %aspectRatioFlag% EQU 1 if [!desc!] == [" (48:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (48.0/9.0)" --logFile !logFileV3!
