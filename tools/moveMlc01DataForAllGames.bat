@@ -238,7 +238,7 @@ REM : functions
     :mvGameData
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
-        if /I !GAME_FOLDER_PATH! == "!GAMES_FOLDER:"=!\mlc01" goto:eof
+        if /I [!GAME_FOLDER_PATH!] == ["!GAMES_FOLDER:"=!\mlc01"] goto:eof
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
@@ -279,7 +279,7 @@ REM : functions
             if !ERRORLEVEL! EQU 2 goto:eof
         )
         @echo ---------------------------------------------------------
-        set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
+        set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
         if not exist !META_FILE! (
             @echo No meta folder found under game folder^, aborting^!
             goto:metaFix
@@ -318,20 +318,20 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
-        set pat="!MLC01_FOLDER_PATH:"=!\usr\save"
+        set "pat="!MLC01_FOLDER_PATH:"=!\usr\save""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveSaves "%%i"
         )
 
-        set pat="!MLC01_FOLDER_PATH:"=!\usr\title"
+        set "pat="!MLC01_FOLDER_PATH:"=!\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveTitle "%%i"
         )
 
-        set sysSrc="!MLC01_FOLDER_PATH:"=!\sys"
-        set sysTarget="!GAME_FOLDER_PATH:"=!\mlc01\sys"
+        set "sysSrc="!MLC01_FOLDER_PATH:"=!\sys""
+        set "sysTarget="!GAME_FOLDER_PATH:"=!\mlc01\sys""
 
-        set sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content"
+        set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
         robocopy  !sysSrc! !sysTarget! /S /MOVE /IS /IT  > NUL 2>&1

@@ -283,6 +283,7 @@ REM : main
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
     echo !ugp! true !GAME_FOLDER_PATH! >> !batchFwLog!
+    echo !ugp! true !GAME_FOLDER_PATH!
 
     :getScreenMode
 
@@ -377,6 +378,8 @@ REM : main
             set "GPU_VENDOR=!string: =!"
         )
     )
+    @echo gpuType = %gpuType%>> !batchFwLog!
+    @echo gpuType = %gpuType%
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
@@ -1019,9 +1022,13 @@ REM : main
 
     REM : report compatibility for CEMU_FOLDER_NAME and GAME on USERDOMAIN
     set "rc="!BFW_TOOLS_PATH:"=!\reportCompatibility.bat""
+
     wscript /nologo !StartHidden! !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS!
     @echo Compatibility reports updated for !GAME_TITLE! with !CEMU_FOLDER_NAME!>> !batchFwLog!
     @echo Compatibility reports updated for !GAME_TITLE! with !CEMU_FOLDER_NAME!
+
+    @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
+    @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS!
     REM : check that CEMU recognize the game
     set "UNKNOW_GAME=00050000ffffffff"
     set "cemuTitleLine="NONE""
@@ -1474,6 +1481,10 @@ REM : functions
 
             set "ws="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
             wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
+
+            @echo !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!>> !batchFwLog!
+            @echo !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
+
             goto:beforeLoad
         )
 
@@ -1746,9 +1757,6 @@ REM : functions
         if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
         if !result! LEQ 1 call:patchGraphicSection !PROFILE_FILE! "precompiledShaders" %value%
-
-        REM : force disablePrecompiledShaders = true in PROFILE_FILE
-        call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
 
         :display
         @echo Ignoring precompiled shader = %value%>> !batchFwLog!

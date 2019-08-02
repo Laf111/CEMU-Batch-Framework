@@ -78,16 +78,6 @@ saveMii tutorial : https://gbatemp.net/threads/tutorial-importing-wii-u-saves-wi
 
 
 ---------------------------------------------------------
-Dump games from my Wii-U :
----------------------------------------------------------
-Using the last scan results, pick up the games installed on your Wii-U (on mlc and usb) you want to dump.
-BatchFw will download all the data found for this game and prepare the game's folder for the emulation.
-update and DLC are installed in the mlc01 folder (located in game's folder).
-Save are imported for all accounts associated to a Batch's user.
-
-WARNING : its up to you to verify that there is enough space left on the target device
-
----------------------------------------------------------
 NOTES : 
 
 - saves and games cannot be upload directly on the Wii-U

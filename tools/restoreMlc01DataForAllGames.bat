@@ -240,7 +240,7 @@ REM : functions
     :mvGameData
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
-        if /I !GAME_FOLDER_PATH! == "!GAMES_FOLDER:"=!\mlc01" goto:eof
+        if /I [!GAME_FOLDER_PATH!] == ["!GAMES_FOLDER:"=!\mlc01"] goto:eof
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
@@ -251,7 +251,7 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
-        set mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01"
+        set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
 
         REM : not mlc01 folder, skip
         if not exist !mlc01Folder! goto:eof
@@ -276,7 +276,7 @@ REM : functions
         )
 
         @echo ---------------------------------------------------------
-        set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
+        set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
         if not exist !META_FILE! (
             @echo No meta folder not found under game folder ^?^, aborting ^^!
             goto:metaFix
@@ -314,19 +314,19 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
-        set pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\save"
+        set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\save""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveSaves "%%i"
         )
 
-        set pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title"
+        set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveTitle "%%i"
         )
 
         REM : restore last save
         set "rarFile="NONE""
-        set pat="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\*.rar"
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\*.rar""
         for /F "delims=~" %%i in ('dir /b /o:d !pat! 2^>NUL') do (
             set "rarFile="%%i""
         )
@@ -373,7 +373,6 @@ REM : functions
 
         set "tf="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
         if not exist !tf! (
-            mkdir !tf! > NUL 2>&1
             goto:eof
         )
 
