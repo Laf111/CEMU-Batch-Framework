@@ -155,7 +155,7 @@ REM : games that exist in local AND remote locations
     cls
     if !noOldScan! EQU 1 goto:getLocalTitleId
 
-    @echo The last WiiU can found is !LAST_SCAN!
+    @echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
     if !ERRORLEVEL! EQU 1 goto:getLocalTitleId
 
@@ -401,7 +401,7 @@ REM : functions
         set "DATE=%ldt%"
 
         REM : temporary folder where recreated the Wii-U save
-        set "TMP_DLSAVE_PATH="!BFW_PATH:"=!\logs\ImportSave_!DATE!""
+        set "TMP_DLSAVE_PATH="!GAMES_FOLDER:"=!\_BatchFw_WiiU\ImportSave_!DATE!""
 
         set "localFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\!endTitleId!""
 

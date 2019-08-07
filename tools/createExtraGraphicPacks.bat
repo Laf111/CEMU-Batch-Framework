@@ -214,7 +214,7 @@ REM : main
     if not ["%gameName%"] == ["NONE"] set "GAME_TITLE=%gameName%"
 
     @echo =========================================================
-    @echo Create extra graphic packs ^(missing resolutions^, cap^) for !GAME_TITLE!
+    @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE!
     @echo =========================================================
 
     REM get all title Id for this game (in case of a new V3 res gp creation)

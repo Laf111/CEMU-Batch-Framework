@@ -1,3 +1,13 @@
+07/08/2019 V14-4 : 
+- add : enhance the portability of the games library. Add an users import process from a previous
+        installation (on another host) when installing batchFw on a new host
+- add : install online files only if an active network connection is found.
+- fix : unwanted message in the console when exporting save to the Wii-U
+- fix : remove GFX packs filtering (useless and force a GFX packs update on a game addition)
+- fix : remaining issue on CAP FPS packs and separate V2 form V3 FPS++ detection
+- fix : in setup.bat ask for output folder before registering CEMu install
+- add : update GFX packs to v509
+
 02/08/2019 V14-3 : 
 - fix : broken comptability reports
 - add : support to new paths of update and DLC (since CEMU 1.15.11)

@@ -343,7 +343,12 @@ REM : main
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
     REM : set online files
-    call:setOnlineFiles
+    REM : check if an internet connexion is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+
+    for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
 
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings

@@ -66,10 +66,6 @@ REM : main
     @echo WARNING ^: it is impossible to get the space left on your Wii-U
     @echo storage device^. Be sure that there^'s sufficient space ^!
     @echo.
-    @echo If you want to use online account ^:
-    @echo Make sure the Wii U account you want to dump^/use has
-    @echo the "Save password" option checked ^(auto login^) ^!
-    @echo.
     pause
     @echo.
     @echo On your Wii-U^, you need to ^:
@@ -91,7 +87,6 @@ REM : main
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
     set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
-    set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
     set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
     if not exist !winScpIni! goto:getWiiuIp
 
@@ -145,7 +140,7 @@ REM : main
     )
     cls
 
-    REM : scans folder
+    REM : get last scan folder
     set /A "noOldScan=0"
     :scanMyWii
     set "BFW_WIIUSCAN_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU\Scans""
@@ -167,7 +162,7 @@ REM : main
     cls
     if !noOldScan! EQU 1 goto:getList
 
-    @echo The last WiiU can found is !LAST_SCAN!
+    @echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
     if !ERRORLEVEL! EQU 1 goto:getList
 

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-3"
+    set "BFW_VERSION=V14-4"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -32,7 +32,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
-    REM : check if
+    REM : check if file system is NTFS
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /I /V "NTFS"') do (
 
         @echo This volume is not an NTFS one^^!
@@ -315,10 +315,6 @@ REM : main
     set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
     move !pat! !BFW_GP_FOLDER! > NUL 2>&1
 
-    REM : filter graphic pack folder
-    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    wscript /nologo !StartHidden! !script!
-
    :importModForGames
     cls
     @echo ---------------------------------------------------------
@@ -401,7 +397,7 @@ REM : main
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
 
-    REM : browse for OUTPUT_FOLDER
+    REM : get users
    :getUserMode
 
     REM : by default: create shortcuts
@@ -458,9 +454,9 @@ REM : main
     @echo Do you want to take a snapshot of your WII-U now^?
     @echo.
     @echo BatchFw will list the games^, saves^, updates and DLC
-    @echo precising where there are installed ^(mlc or usb^)
+    @echo precising where they are installed ^(mlc or usb^)
     @echo and use its result to synchronize CEMU and your Wii-U
-    @echo ^(import / export saves^)
+    @echo ^(import ^/ export saves^)
     @echo.
 
     choice /C yn /N /M "Take a snapshot of your Wii-U now? (y,n):"
@@ -481,8 +477,8 @@ REM : main
 
     if not ["!safeInput!"] == ["!input!"] (
         @echo Some unhandled characters were found ^!
-        @echo ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& ^%
-        @echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& ^%
+        @echo ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& %%
+        @echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& %%
         choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
         if !ERRORLEVEL! EQU 2 goto:getUsers
     )
@@ -560,7 +556,7 @@ REM : main
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
         @echo ---------------------------------------------------------
         choice /C ny /N /M "Do you use an external mlc01 folder you wish to import? (y,n): "
-        if !ERRORLEVEL! EQU 1 goto:getOuptutsType
+        if !ERRORLEVEL! EQU 1 goto:getOuptutsFolder
 
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
@@ -582,8 +578,48 @@ REM : main
 
     )
 
-   :getOuptutsType
+   :getOuptutsFolder
     cls
+    REM : skip if one arg is given
+    if %nbArgs% EQU 1 (
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
+        timeout /T 3 > NUL 2>&1
+        goto:getOuptutsType
+    )
+
+    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
+    @echo ---------------------------------------------------------
+    :askOutputFolder
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    if [!OUTPUT_FOLDER!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        goto:askOutputFolder
+    )
+    REM : check if folder name contains forbiden character for batch file
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !OUTPUT_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askOutputFolder
+    )
+
+    set "cemuFolderCheck=!OUTPUT_FOLDER:"=!\Cemu.exe""
+
+    if exist !cemuFolderCheck! (
+        @echo Not a Cemu install folder^, please enter the output folder
+        @echo ^(where shortcuts or exe will be created^)
+        goto:getOuptutsFolder
+    )
+
+    @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
+    timeout /T 3 > NUL 2>&1
+
+   :getOuptutsType
     if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
         if not exist !BFW_WIIU_FOLDER! (
             @echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
@@ -622,7 +658,7 @@ REM : main
         )
     )
     if [!ANSWER!] == ["3"] exit 70
-    if [!ANSWER!] == ["1"] goto:getOuptutsFolder
+    if [!ANSWER!] == ["1"] goto:registerCemuInstalls
 
     set "outputType=EXE"
     set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
@@ -630,45 +666,6 @@ REM : main
         set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
-
-   :getOuptutsFolder
-    REM : skip if one arg is given
-    if %nbArgs% EQU 1 (
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
-        timeout /T 3 > NUL 2>&1
-        goto:registerCemuInstalls
-    )
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
-    @echo ---------------------------------------------------------
-    :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
-    if [!OUTPUT_FOLDER!] == ["NONE"] (
-        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
-        goto:askOutputFolder
-    )
-    REM : check if folder name contains forbiden character for batch file
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !OUTPUT_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! GTR 1 (
-        @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
-        pause
-        goto:askOutputFolder
-    )
-
-    set "cemuFolderCheck=!OUTPUT_FOLDER:"=!\Cemu.exe""
-
-    if exist !cemuFolderCheck! (
-        @echo Not a Cemu install folder^, please enter the output folder
-        @echo ^(where shortcuts or exe will be created^)
-        goto:getOuptutsFolder
-    )
-
-    @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
-    timeout /T 3 > NUL 2>&1
 
    :registerCemuInstalls
 
@@ -1028,7 +1025,7 @@ REM : functions
         REM : importMode
         set "argOpt="
         set "IMPORT_MODE=ENABLED"
-        call:getUserInput "Disable automatic settings import? (y,n : default in 5sec): " "n,y" ANSWER 5
+        call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
 
         if [!ANSWER!] == ["y"] (
             set "argOpt=-noImport"
@@ -1447,5 +1444,49 @@ REM : functions
         call:log2HostFile "================================================="
         call:log2HostFile "CEMU BATCH Framework history and settings for !USERDOMAIN!"
         call:log2HostFile "-------------------------------------------------"
+
+        REM : check if _BatchFw_WiiU\OnlineFiles\usersAccounts exist and contains files
+        if not exist !BFW_WIIU_FOLDER! goto:scanOtherHost
+        @echo =========================================================
+        @echo New installation on host !USERDOMAIN!
+        @echo -------------------------------------------------
+        @echo Found a _BatchFw_WiiU folder^, trying to get Wii-U user^'s profiles
+        @echo to define BatchFw^'s users^.^.^.
+        @echo.
+
+        set "pat="!BFW_WIIU_FOLDER:"=!\OnlineFiles\usersAccounts\*.dat""
+        for /F "delims=~" %%i in ('dir /B !pat! 2^> NUL') do (
+            REM : get user name
+            for /F "tokens=1 delims=8" %%j in ("%%i") do (
+                @echo Found %%j user with an online account^, add it for !USERDOMAIN! configuration
+                @echo USER_REGISTERED=%%j>>!logFile!
+            )
+        )
+        @echo. ^(you can modify this list later in the setup process^)
+        pause
+        goto:eof
+
+        :scanOtherHost
+        REM : check if other log file exist for another host and import user defined in
+        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+
+        for /F "delims=~" %%i in ('dir /S /B /O:D !pat! 2^> NUL') do (
+
+            type "%%i" | find /I "USER_REGISTERED" > NUL && (
+                @echo =========================================================
+                @echo New installation for host !USERDOMAIN!
+                @echo -------------------------------------------------
+                @echo Getting users defined for the last previous installation
+                @echo using "%%i"
+                @echo.
+                type "%%i" | find /I "USER_REGISTERED"
+                type "%%i" | find /I "USER_REGISTERED">>!logFile!
+                @echo.
+                @echo. ^(you can modify this list later in the setup process^)
+                timeout /t 10 > NUL
+                cls
+                goto:eof
+            )
+        )
 
     goto:eof

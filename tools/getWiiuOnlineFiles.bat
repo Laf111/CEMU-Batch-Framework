@@ -394,7 +394,7 @@ REM : functions
 
         if not ["!safeInput!"] == ["!input!"] (
             @echo Some unhandled characters were found ^!
-            @echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& ^%
+            @echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& %%
             choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
             if !ERRORLEVEL! EQU 2 goto:askUser
         )

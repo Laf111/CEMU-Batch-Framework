@@ -403,7 +403,7 @@ REM : main
     @echo ---------------------------------------------------------
     REM : importMode
     set "IMPORT_MODE=ENABLED"
-    call:getUserInput "Disable automatic settings import? (y,n : default in 5sec): " "n,y" ANSWER 5
+    call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
     if [!ANSWER!] == ["y"] set "IMPORT_MODE=DISABLED"
 
     set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""

@@ -541,7 +541,7 @@ REM : main
         @echo ERROR when launching !GAME_TITLE! ^: A lock file was found under !CEMU_FOLDER:"=! ^! >> !batchFwLog!
         @echo Please close^/kill runing CEMU executable and remove !LOCK_FILE:"=! >> !batchFwLog!
         @echo --------------------------------------------------------- >> !batchFwLog!
-        type !LOCK_FILE!
+        type !LOCK_FILE!>> !batchFwLog!
         @echo --------------------------------------------------------- >> !batchFwLog!
         @echo ERROR when launching !GAME_TITLE! ^: A lock file was found under !CEMU_FOLDER:"=! ^!
         @echo Please close^/kill runing CEMU executable and remove !LOCK_FILE:"=!
@@ -1578,8 +1578,8 @@ REM : functions
         if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
         if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
 
-        REM : set onlines files for user
-        if !wizardLaunched! EQU 0 call:setOnlineFiles
+        REM : set onlines files for user if an active connection was found
+        if !wizardLaunched! EQU 0 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
 
         REM : if needed, create a game profile shorcut
         call:createGameProfileShorcut

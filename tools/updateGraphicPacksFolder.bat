@@ -135,9 +135,9 @@ REM : main
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
 
-    REM : temporary folder
-    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if exist !BFW_GP_TMP! rmdir /Q /S !BFW_GP_TMP! > NUL 2>&1
+    REM : BatchFw's GFX packs folder
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! > NUL 2>&1
     mkdir !BFW_GP_TMP! > NUL 2>&1
 
     set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
@@ -161,12 +161,12 @@ REM : main
         @echo ERROR While getting and extracting graphic packs folder ^!
         if !QUIET_MODE! EQU 0 pause
         pushd !GAMES_FOLDER!
-        rmdir /Q /S !BFW_GP_TMP! > NUL 2>&1
+        rmdir /Q /S !BFW_GP_FOLDER! > NUL 2>&1
         exit /b !cr!
     )
 
     REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_TMP! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
 
     pushd !GAMES_FOLDER!
 
@@ -178,14 +178,6 @@ REM : main
     REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat=graphicPacks*.doNotDelete"
     for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
-
-    REM : filter graphic pack folder
-    set "script="!BFW_TOOLS_PATH:"=!\filterGraphicPackFolder.bat""
-    if !QUIET_MODE! EQU 1 wscript /nologo !StartHiddenWait! !script!
-    if !QUIET_MODE! EQU 0 (
-        if !FORCED_MODE! EQU 1 wscript /nologo !StartHiddenWait! !script!
-        if !FORCED_MODE! EQU 0 wscript /nologo !StartHidden! !script!
-    )
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"
     echo !DATE! ^: !USERNAME! on !USERDOMAIN! > !noDelFile!

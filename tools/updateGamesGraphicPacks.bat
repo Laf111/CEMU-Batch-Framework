@@ -239,7 +239,7 @@ REM : functions
         )
 
         REM : check if V3 gp exist for this game
-        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find "_Resolution" 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find /V "_Resolution_" ^| find "_Resolution" 2^>NUL') do (
 
             set "gpFolder="!BFW_GP_FOLDER:"=!\%%i""
             set "rulesFile="!gpFolder:"=!\rules.txt""
@@ -295,8 +295,8 @@ REM : functions
                 REM : V3 graphic pack
                 set "v3Gpfound=1"
                 REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
-                echo !rulesFile! | find "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
-                echo !rulesFile! | find "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find /V "_Resolution_" | find "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
+                echo !rulesFile! | find /V "_Resolution_" | find "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
             )
         )
 
@@ -344,7 +344,8 @@ REM : functions
 
         set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
 
         call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile!
 
@@ -354,6 +355,8 @@ REM : functions
         set "cfcgpLog="!BFW_PATH:"=!\logs\createCapGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
+
         call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! > !cfcgpLog!
 
 
