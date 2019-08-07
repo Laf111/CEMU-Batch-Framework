@@ -4,7 +4,7 @@
 - add : install online files only if an active network connection is found.
 - fix : unwanted message in the console when exporting save to the Wii-U
 - fix : remove GFX packs filtering (useless and force a GFX packs update on a game addition)
-- fix : remaining issue on CAP FPS packs and separate V2 form V3 FPS++ detection
+- fix : remaining issue on CAP FPS packs and separate V2 from V3 FPS++ detection
 - fix : in setup.bat ask for output folder before registering CEMu install
 - add : update GFX packs to v509
 
@@ -295,7 +295,7 @@
 2018/10/28 V9-12 : 
     - remove pause in restoreTransferableCache + delete ShaderCache folder after moving transferable folder
     - redirect std_out & std_err of updateGP.ps1
-    - fix settings not saved (add settings.xml in the saved files list : settings were move form bin to xml files)
+    - fix settings not saved (add settings.xml in the saved files list : settings were move from bin to xml files)
     - add GAME_FOLDER_PATH as second argument to updateMySavedGraphicPacks.bat to update only for one game
     - force to update saved graphic pack for the game after automatic settings import
     - force to update saved graphic pack after each graphic packs update
