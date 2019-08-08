@@ -474,7 +474,7 @@ REM : main
         @echo =========================================================
         pause
     )
-    cls
+    if !QUIET_MODE! EQU 0 cls
     REM : temporary batch files folder
     set "launchersFolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\ExeLaunchers""
     call:createFolder !launchersFolder!

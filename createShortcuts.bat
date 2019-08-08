@@ -477,7 +477,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         @echo =========================================================
         pause
     )
-    cls
+    if !QUIET_MODE! EQU 0 cls
     @echo =========================================================
     @echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^:
     @echo =========================================================

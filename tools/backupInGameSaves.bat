@@ -140,12 +140,13 @@ REM : main
     pushd !inGameSavesFolder!
     set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
-    REM : if exist delete-it
-    if exist !rarFile! del /F /S !rarFile! > NUL 2>&1
+    REM : if exist rename-it
+    set "oldFile=!rarFile:.rar=.old!"
+    if exist !rarFile! move /Y !rarFile! !oldFile! > NUL 2>&1
 
     set usrSaveFolder="!MLC01_FOLDER_PATH:"=!\usr\save"
     for /F "delims=~" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
-        call:compress "%%i"
+        call:compress "%%i" cr
     )
 
     set "emulatorSaveFolder="!MLC01_FOLDER_PATH:"=!\emulatorSave""
@@ -173,13 +174,23 @@ REM : main
 
     for /F "delims=~" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
         set "folder="!emulatorSaveFolder:"=!\%%i""
-
-        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFile! !folder! > NUL 2>&1
         !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFileEmuSave! !folder! > NUL 2>&1
     )
 
     :done
-    @echo Backup in !rarFile!
+    if !cr! EQU 0 (
+        if exist !rarFile! (
+            @echo Backup in !rarFile!
+            del /F !oldFile! > NUL 2>&1
+        ) else (
+            move /Y !oldFile! !rarFile! > NUL 2>&1
+        )
+    ) else (
+        if exist !oldFile! if exist !rarFile! del /F !rarFile! > NUL 2>&1
+        move /Y !oldFile! !rarFile! > NUL 2>&1
+        @echo Error when backup !rarFile!^, restoring it
+    )
+
 
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
@@ -197,6 +208,7 @@ REM : functions
 
         if exist !sf! (
             !rarExe! a -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul !rarFile! !sf! > NUL 2>&1
+            set "%1=!ERRORLEVEL!"
         )
 
     goto:eof

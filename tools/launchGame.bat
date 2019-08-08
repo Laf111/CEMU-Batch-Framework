@@ -842,6 +842,7 @@ REM : main
 
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
+    echo !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! >> !batchFwLog!
     wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
 
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)

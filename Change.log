@@ -1,3 +1,11 @@
+08/08/2019 V14-5 : 
+- fix : in wizardFirstSaving.bat do not propose a profile file comparison if no profile file was found
+- fix : in wizardFirstSaving.bat clean GameCache entries to force CEMU to refresh its games' list
+- add : in wizardFirstSaving.bat use xmlStartlet to parse settings.xml
+- fix : enhance "Kill BatchFw Processes" features
+- fix : do not create a missing game profiles for CEMU >= 1.15.6 (let CEMU handle it)
+- fix : backupInGameSaves.bat delete the old save file only if rar.exe return 0 (backup the old first)
+
 07/08/2019 V14-4 : 
 - add : enhance the portability of the games library. Add an users import process from a previous
         installation (on another host) when installing batchFw on a new host
