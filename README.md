@@ -38,7 +38,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
 
-- This last feature allows you to handle multiple saves per user by defining as many "pseudo users" as differents saves you want (user_slot1, user_slot2...);
+- This last feature allows you to handle multiple saves per user by defining as many "pseudo users" as differents saves you want (user_slot1, user_slot2... in this case, online user account will follow);
 
 - Save all settings including controller profiles for each players per game;
 
