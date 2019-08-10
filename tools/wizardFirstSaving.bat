@@ -235,7 +235,7 @@ REM : main
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 set "gfxType=V2"
 
-    REM : if CEMU version < 1.12.0
+    REM : if CEMU version < 1.12.0 (add games' list in UI)
     call:compareVersions %versionRead% "1.12.0" result
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
@@ -244,6 +244,15 @@ REM : main
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
+    REM : clean links in game's graphic pack folder
+    for /F "delims=~" %%a in ('dir /A:L /B !BFW_LOGS! 2^>NUL') do (
+        set "link="!BFW_LOGS:"=!\%%a""
+        rmdir /Q /S !link! > NUL 2>&1
+    )
+
+    REM : check the file size
+    for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
+    
     REM : backup settings.xml
     copy /Y !cs! !backup! > NUL 2>&1
 
@@ -265,6 +274,7 @@ REM : main
     set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
 
     !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs!
+REM    del /F !csTmp!* > NUL 2>&1
     del /F !csTmp0! > NUL 2>&1
     del /F !csTmp1! > NUL 2>&1
     goto:diffProfileFile
@@ -455,7 +465,7 @@ REM : main
     if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
 
     REM : if version of CEMU < 1.11.6 (v1116<=1)
-    if !v1116! LEQ 2 @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+    if !v1116! EQU 2 @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
 
     @echo ---------------------------------------------------------
     @echo Then close CEMU to continue
@@ -640,18 +650,19 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : get a node value in a xml file
+    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
     :getValueInXml
 
         set "xPath="%~1""
         set "xmlFile="%~2""
 
-        pushd !BFW_RESOURCES_PATH!
         for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
             set "%3=%%x"
-            pushd !BFW_TOOLS_PATH!
+
             goto:eof
         )
-        pushd !BFW_TOOLS_PATH!
+
         set "%3=NOT_FOUND"
 
     goto:eof
@@ -663,9 +674,12 @@ REM : functions
 
         REM : check CEMU options (and controollers settings)
         if not exist !cs! goto:checkCemuHook
+        for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:checkCemuHook
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         @echo Main current CEMU^'s settings ^:
         @echo ---------------------------------------------------------
+
+        pushd !BFW_RESOURCES_PATH!
 
         REM : get graphic settings
         call:getValueInXml "//Graphic/api/text()" !cs! value
@@ -753,6 +767,9 @@ REM : functions
             if ["!value!"] == [""] (@echo Online mode [OFF]) else (@echo Online mode [ON using !value! account])
         )
 
+        pushd !BFW_TOOLS_PATH!
+        
+        :checkCemuHook
         if not exist !chs! goto:eof
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         @echo Current CemuHook^'s settings ^:

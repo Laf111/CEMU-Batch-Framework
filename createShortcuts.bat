@@ -1299,7 +1299,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
             set "userFolder="!OUTPUT_FOLDER:"=!\wii-U Games\!user:"=!""
-            set "SHORCTUT_PATH="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.lnk""
+            set "SHORCTUT_PATH="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!].lnk""
 
             if ["%icoUpdate%"] == ["true"] if exist !SHORCTUT_PATH! del /F !SHORCTUT_PATH! > NUL 2>&1
 

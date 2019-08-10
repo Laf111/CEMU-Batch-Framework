@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-5"
+    set "BFW_VERSION=V14-6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -156,8 +156,6 @@ REM : main
 
    :validateGamesLibrary
 
-    if %nbArgs% EQU 1 goto:externalGP
-
     @echo ---------------------------------------------------------
     @echo Scanning your games library^.^.^.
     @echo ---------------------------------------------------------
@@ -300,10 +298,7 @@ REM : main
     REM : extract embeded V3 packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
 
-    set "BFW_GP_TMP="!BFW_PATH:"=!\logs\gpUpdateTmpDir""
-    if not exist !BFW_GP_TMP! mkdir !BFW_GP_TMP! > NUL 2>&1
-
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_TMP! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
@@ -312,8 +307,6 @@ REM : main
     )
 
     @echo ^> Graphic packs installed from archive
-    set "pat="!BFW_GP_TMP:"=!\graphicPacks*.doNotDelete!""
-    move !pat! !BFW_GP_FOLDER! > NUL 2>&1
 
    :importModForGames
     cls
@@ -637,7 +630,7 @@ REM : main
     @echo What kind of outputs do you want to launch your games^?
     @echo.
     @echo 1^: Windows shortcuts
-    @echo 2^: Executables files
+    @echo 2^: Executables files ^(to define Steam shorcuts^)
     @echo.
     REM : display only if shortcuts have already been created
     set /A "alreadyInstalled=0"
@@ -811,7 +804,7 @@ REM : main
     @echo ---------------------------------------------------------
     @echo You can now only use the shortcuts created in
     @echo !OUTPUT_FOLDER:"=!\Wii-U Games
-    @echo There^'s no need to launch scripts from here now^!
+    @echo There^'s no need to launch scripts from _BatchFw_Install now^!
     pause
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if %nbArgs% EQU 1 exit 0

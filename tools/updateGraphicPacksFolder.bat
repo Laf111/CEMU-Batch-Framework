@@ -137,10 +137,9 @@ REM : main
 
     REM : BatchFw's GFX packs folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    if exist !BFW_GP_FOLDER! rmdir /Q /S !BFW_GP_FOLDER! > NUL 2>&1
-    mkdir !BFW_GP_TMP! > NUL 2>&1
-
-    set "pws_target="!BFW_GP_TMP:"=!\updateGP.ps1""
+    if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
+    set "pws_target="!BFW_GP_FOLDER:"=!\updateGP.ps1"" > NUL 2>&1
+    set "uplog="!BFW_GP_FOLDER:"=!\updateGP.log""
 
     copy /Y !pws_src! !pws_target! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -152,7 +151,7 @@ REM : main
     if !FORCED_MODE! EQU 0 @echo Launching graphic pack update to !zipFile!^.^.^.
     if !FORCED_MODE! EQU 1 @echo Installing !zipFile!^.^.^.
 
-    pushd !BFW_GP_TMP!
+    pushd !BFW_GP_FOLDER!
 
     REM : launching powerShell script to downaload and extract GFX archive
     Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
@@ -168,19 +167,14 @@ REM : main
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
 
-    pushd !GAMES_FOLDER!
-
-    REM : delete all V3 gp under BFW_GP_FOLDER
-    call:deleteGFX
-
-    pushd !BFW_GP_FOLDER!
-
     REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat=graphicPacks*.doNotDelete"
     for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"
     echo !DATE! ^: !USERNAME! on !USERDOMAIN! > !noDelFile!
+    del /F !pws_target! > NUL 2>&1
+    del /F !uplog! > NUL 2>&1
 
     exit /b 0
     goto:eof
@@ -189,18 +183,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-
-    REM : ------------------------------------------------------------------
-    :deleteGFX
-        if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1 && goto:eof
-
-        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find /V "_graphicPacksV2"') do (
-            set "folder="!BFW_GP_FOLDER:"=!\%%i"
-            rmdir /Q /S !folder!
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
 
 
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice

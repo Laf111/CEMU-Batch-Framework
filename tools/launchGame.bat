@@ -1204,10 +1204,10 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        timeout /T 1 > NUL 2>&1
         for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
             goto:waitingLoopProcesses
         )
+        timeout /T 1 > NUL 2>&1
         for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
             if !disp! EQU 0 (
                 set "disp=1"
@@ -1821,6 +1821,8 @@ REM : functions
 
         REM : patch settings.xml
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
+        REM if not nul
+        for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:eof
         set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!

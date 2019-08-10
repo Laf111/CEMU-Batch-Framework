@@ -1305,7 +1305,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
             set "userFolder="!OUTPUT_FOLDER:"=!\wii-U Games\!user:"=!""
-            set "EXE_FILE="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.exe""
+            set "EXE_FILE="!userFolder:"=!\!GAME_TITLE:"=! [!CEMU_FOLDER_NAME!!argLeg!].exe""
 
             if ["%icoUpdate%"] == ["true"] if exist !EXE_FILE! del /F !EXE_FILE! > NUL 2>&1
 
