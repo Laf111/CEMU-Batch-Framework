@@ -1306,7 +1306,7 @@ REM : functions
             REM : if shortcut exist and import mode enabled : if shortcut exist skip this game
             if exist !SHORCTUT_PATH! (
                 if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: shortcut for !user:"=! already exist^, skipped
+                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: shortcut for !user:"=! already exists^, skipped
             ) else (
                 call:userGameShortcut !user!
             )

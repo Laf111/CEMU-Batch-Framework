@@ -181,7 +181,7 @@ REM : main
 
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
     @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
@@ -216,6 +216,7 @@ REM : main
     @echo =========================================================
     @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE!
     @echo =========================================================
+    @echo Native height set to !nativeHeight! in WiiU-Titles-Library.csv
 
     REM get all title Id for this game (in case of a new V3 res gp creation)
     set "titleIdList="
@@ -247,14 +248,14 @@ REM : main
     set "gpV3exist=0"
     set "v2Name="NOT_FOUND""
     REM : launching the search
-    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% > !fnrLogCegp!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogCegp!
+    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% > !fnrLogCegp!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogCegp!
 
 
     REM : creating V2 graphic packs by instanciating nativeHeightx2 graphic packs
     set /A "resX2=%nativeHeight%*2"
 
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogCegp! ^| find "File:" ^| find /I /V "^!" ^| find /I /V "_Gamepad" ^| find /I /V "_BatchFW" 2^>NUL') do (
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogCegp! ^| find "File:" ^| find /I /V "^!" ^| find /I /V "_Gamepad" ^| find /I /V "_BatchFW" ^| find /I /V "_Performance_" ^| find /V "_Resolution_" 2^>NUL') do (
 
         set "rules="!BFW_GP_FOLDER:"=!%%i.%%j""
 
@@ -325,7 +326,6 @@ REM : main
 
     if %nbArgs% EQU 0 endlocal && pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    exit /b 0
 
     exit /b 0
     goto:eof
@@ -406,57 +406,105 @@ REM : functions
 
         set "name=!gpFolderName:_%resX2%p=!"
         set "name=!name:_graphicPacksV2\=!"
+        @echo ---------------------------------------------------------
         @echo ^> !name:"=!^'s V2 extra graphic packs created successfully
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to create extra V2 graphic packs for a game
+    REM : function to create extra graphic packs for a game
     :createExtraV3Gp
 
         set "gpFolderName="%~1""
         set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /I /V "_Resolution" > NUL 2>&1 && set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!_Resolution""
+        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 && goto:eof
 
         set "rulesFile="!gpV3:"=!\rules.txt""
 
-        REM : disable creation for packs introducing unexpected varaiables
-REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /V "overwriteHeight"| find /I /V "gameWidth" | find /I /V "gameHeight" | find /I /V "width" | find /I /V "height" > NUL 2>&1 && goto:eof
+        REM : Windows formating (LF -> CRLF)
+        call:unixToDos
 
-        set /A "heightFixFlag=0"
-        type !rulesFile! | find /I "heightfix" > NUL 2>&1 && set /A "heightFixFlag=1"
-        set /A "internalResFlag=0"
-        type !rulesFile! | find /I "internalRes" > NUL 2>&1 && set /A "internalResFlag=1"
-        set /A "ditherFlag=0"
-        type !rulesFile! | find /I "dither" > NUL 2>&1 && set /A "ditherFlag=1"
-        set /A "scaleShaderFlag=0"
-        type !rulesFile! | find /I "scaleShader" > NUL 2>&1 && set /A "scaleShaderFlag=1"
-        set /A "lightSourceFlag=0"
-        type !rulesFile! | find /I "lightSource" > NUL 2>&1 && set /A "lightSourceFlag=1"
-        set /A "aspectRatioFlag=0"
-        type !rulesFile! | find /I "aspectRatio" > NUL 2>&1 && set /A "aspectRatioFlag=1"
-        set /A "scaleBlurFlag=0"
-        type !rulesFile! | find /I "scaleBlur" > NUL 2>&1 && set /A "scaleBlurFlag=1"
-        set /A "twopScalingFlag=0"
-        type !rulesFile! | find /I "2pScaling" > NUL 2>&1 && set /A "twopScalingFlag=1"
+        REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
+        set "gpNativeHeight=NOT_FOUND"
+        for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
 
-        REM : create missing full screen 16/9 resolutions graphic packs
+        if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
+            echo WARNING : Native Height was not found in !rulesFile!
+        )
+
+        echo Native height set to !gpNativeHeight! in rules.txt
+        echo.
+        if not ["!gpNativeHeight!"] == ["NOT_FOUND"] if !gpNativeHeight! NEQ !nativeHeight! (
+            echo WARNING : Native Height in rules.txt does not match
+        )
+
+        set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
+
+        if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
+        set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
+
+        call:getExtraDirectives > !extraDirectives!
+        if exist !extraDirectives! copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
+
+        set "ed="
+        for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\r\n"
+
+        if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
+
+        REM : replacing directives in extraDirectives.log
+        set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
+        if exist !logFileED! del /F !logFileED! > NUL 2>&1
+
+        REM : complete 16/9 (if here => COMPLETE_GP=YES)
         call:createV3Gp169
 
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
-            if ["%%a"] == ["1610"] call:createV3Gp1610
-            if ["%%a"] == ["219"]  call:createV3Gp219
-            if ["%%a"] == ["43"]   call:createV3Gp43
+            if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            if ["%%a"] == ["1610"] call:createV3Gp1610 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+
+            if ["%%a"] == ["219"]  call:createV3Gp219 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+
+            if ["%%a"] == ["43"]   call:createV3Gp43 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+
             if ["%%a"] == ["489"]   call:createV3Gp489
         )
 
-        @echo ^> !gpFolderName:"=!^'s V3 extra graphic packs created successfully
+        @echo ---------------------------------------------------------
+        @echo ^> !gpFolderName:"=!^'s V3 extra presets created successfully
 
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :unixToDos
+    REM : convert LF -> CRLF (UNIX -> WINDOWS)
+        set "uTdLog="!fnrLogFolder:"=!\uniXtoDos.log""
+
+        REM : replace all \n by \r\n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\n" --replace "\r\n" --logFile !uTdLog!
+
+        REM : replace all \r\r\n by \r\n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\r\n" --replace "\r\n" --logFile !uTdLog!
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :getExtraDirectives
+    set "first="
+    set /A "firstSetFlag=0"
+
+    for /F "delims=~" %%i in ('type !rulesFile! ^| findStr /R "^$[A-Za-z0-9]*" ^| find /I /V "height " ^| find /I /V "width "') do (
+
+        if !firstSetFlag! EQU 0 for /F "tokens=1 delims=~=" %%j in ("%%i") do set "first=%%j"
+
+        if !firstSetFlag! EQU 1 echo %%i | find "!first!" > NUL 2>&1 && goto:eof
+        echo %%i
+        set /A "firstSetFlag=1"
+
+    )
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :treatGP
 
@@ -665,6 +713,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowedV2
+        @echo Create 16^/9 missing V2 resolution packs
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -686,6 +735,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :169_windowedV2
         echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        @echo Create 16^/9 windowed missing V2 resolution packs
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -707,6 +757,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :updateExtraDirectives
+        set "src="%~1""
+        set "target="%~2""
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src! --replace !target! --logFile !logFileED!
+
+        set "edu="
+        for /F "delims=~" %%j in ('type !extraDirectives!') do set "edu=!edu!%%j\r\n"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :createV3Gp169
 
@@ -715,6 +777,9 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
+        @echo Complete 16^/9 presets in V3 GFX resolution pack
+        set "edu=!ed!"
+
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=640"
@@ -722,19 +787,58 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         for /L %%p in (1,1,31) do (
 
-            if !h! NEQ %nativeHeight% if %gpV3exist% EQU 1 call:addResoV3GP169 " (16:9)"
             if !h! NEQ %nativeHeight% if %gpV3exist% EQU 0 call:fillResV3GP !w! !h! " (16:9)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        if %gpV3exist% EQU 0 goto:eof
+
+        REM : complete existing 16/9 resolution
+        set /A "h=360"
+        set /A "w=640"
+        set /A "dw=320"
+
+        set /A "downIter=%nativeHeight%/%dh%-2"
+        set /A "supIter=%nativeHeight%/%dh%"
+
+        for /L %%p in (1,1,%downIter%) do (
+
+            if %gpV3exist% EQU 1 call:addResoV3GP169 " (16:9)"
+
+            set /A "h=!h!+%dh%"
+            set /A "w=!w!+%dw%"
+        )
+
+        REM : reverse loop
+        set /A "h=5760"
+        set /A "w=10240"
+        set /A "dw=320"
+        for /L %%p in (%supIter%,1,31) do (
+
+            if %gpV3exist% EQU 1 call:addResoV3GP169 " (16:9)"
+
+            set /A "h=!h!-%dh%"
+            set /A "w=!w!-%dw%"
+        )
+
         goto:eof
 
         REM : create windowed presets only if user chosen it during setup
 
         :169_windowed
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        @echo Create 16^/9 windowed presets in V3 GFX resolution pack
 
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (11016.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (11016.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (11016.0/5760.0)"
+        )
 
         REM : 16/9 windowed graphic packs
         set /A "h=5760"
@@ -769,10 +873,12 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
             set "gp=!gpResX2p_219!"
             set "description="
         )
+
         REM : height step
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:219_windowedV2
+        @echo Create 21^/9 missing V2 resolution packs
 
         REM : 21/9 fullscreen graphic packs
         set /A "h=360"
@@ -794,6 +900,8 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :219_windowedV2
         REM : 21/9 windowed graphic packs
+        @echo Create 21^/9 windowed V2 resolution packs
+
         set /A "h=360"
         set /A "w=904"
         set /A "dw=452"
@@ -820,6 +928,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:219_windowed
+        @echo Complete 21^/9 presets in V3 GFX resolution pack
+
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (13760.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (13760.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (13760.0/5760.0)"
+        )
 
         REM : 21/9 fullscreen graphic packs
         set /A "h=5760"
@@ -841,6 +961,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         goto:eof
 
         :219_windowed
+        @echo Create 21^/9 windowed presets in V3 GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (14812.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (14812.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (14812.0/5760.0)"
+        )
+
         REM : 21/9 windowed graphic packs
         set /A "h=5760"
         set /A "w=14812"
@@ -880,7 +1012,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
             REM : patch patches.txt
             set "fnrLogFile="!fnrLogFolder:"=!\fnr_create43.log""
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask rules.txt --find "21:9" --replace "4:3" --logFile  !fnrLogFile!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask "rules.txt" --find "21:9" --replace "4:3" --logFile  !fnrLogFile!
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask *_*s.txt --find "resXScale = 2.6875" --replace "float resXScale = 2.0" --logFile !fnrLogFile!
 
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpResX2p_43! --fileMask patches.txt --find ".float 2.389" --replace ".float 1.333" --logFile !fnrLogFile!
@@ -894,6 +1026,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:43_windowedV2
+        @echo Create 4^/3 missing V2 resolution packs
 
         REM : 4/3 fullscreen graphic packs
         set /A "h=360"
@@ -915,6 +1048,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :43_windowedV2
         REM : 4/3 windowed graphic packs
+        @echo Create 4^/3 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=516"
         set /A "dw=258"
@@ -942,7 +1076,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:43_windowed
+        @echo Complete 4^/3 presets in V3 GFX resolution pack
 
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (4.0/3.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (4.0/3.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (4.0/3.0)"
+        )
         REM : 4/3 fullscreen graphic packs
         set /A "h=5760"
         set /A "w=7680"
@@ -964,8 +1109,20 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :43_windowed
         REM : 4/3 windowed graphic packs
+        @echo Create 4^/3 windowed presets in V3 GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (8266.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (8266.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (8266.0/5760.0)"
+        )
+
         set /A "h=5760"
-        set /A "w=82644"
+        set /A "w=8266"
         set /A "dw=258"
 
         for /L %%p in (1,1,31) do (
@@ -1000,6 +1157,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:489_windowedV2
+        @echo Create 48^/9 missing V2 resolution packs
 
         REM : 48/9 fullscreen graphic packs
         set /A "h=360"
@@ -1021,6 +1179,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :489_windowedV2
         REM : 48/9 windowed graphic packs
+        @echo Create 48^/9 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=2066"
         set /A "dw=1032"
@@ -1047,6 +1206,19 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:489_windowed
+        @echo Complete 48^/9 presets in V3 GFX resolution pack
+
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (48.0/9.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (48.0/9.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (48.0/9.0)"
+        )
+
         REM : 48/9 fullscreen graphic packs
         set /A "h=5760"
         set /A "w=30720"
@@ -1068,6 +1240,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :489_windowed
         REM : 16/10 windowed graphic packs
+        @echo Create 48^/9 windowed presets in V3 GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (33066.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (33066.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (33066.0/5760.0)"
+        )
+
         set /A "h=5760"
         set /A "w=33066"
         set /A "dw=1032"
@@ -1097,6 +1281,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowedV2
+        @echo Create 16^/10 missing V2 resolution packs
 
         REM : 16/10 full screen graphic packs
         set /A "h=360"
@@ -1118,6 +1303,7 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :1610_windowedV2
         REM : 16/10 windowed graphic packs
+        @echo Create 16^/10 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=620"
         set /A "dw=310"
@@ -1145,6 +1331,17 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         set /A "dh=180"
 
         if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowed
+        @echo Create 16^/10 presets in V3 GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (16.0/10.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (16.0/10.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (16.0/10.0)"
+        )
 
         REM : 16/10 full screen graphic packs
         set /A "h=5760"
@@ -1167,6 +1364,18 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
 
         :1610_windowed
         REM : 16/10 windowed graphic packs
+        @echo Create 16^/10 windowed presets in V3 GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (9920.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (9920.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (9920.0/5760.0)"
+        )
+
         set /A "h=5760"
         set /A "w=9920"
         set /A "dw=310"
@@ -1187,39 +1396,48 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : add a resolution bloc BEFORE the native one in rules.txt
+    :pushFront
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*[\r]*\nname[ ]*=[ ]*.*[\r]*\n\$width[ ]*=[ ]*!nativeWidth![ ]*[\r]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n\r\n[Preset]\r\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\r\n$width = !nativeWidth!\r\n$height = !nativeHeight!" --logFile !logFileV3!
+
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\r\n\$height = !h!\r\n\$gameWidth = %nativeWidth%\r\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : add a resolution bloc AFTER the native one in rules.txt
+    :pushBack
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*[\r]*\nname[ ]*=[ ]*.*[\r]*\n\$width[ ]*=[ ]*!nativeWidth![ ]*[\r]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*[\r]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*[\r]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\r\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\r\n$width = !nativeWidth!\r\n$height = !nativeHeight!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
+
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\r\n\$height = !nativeHeight!\r\n\$gameWidth = %nativeWidth%\r\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\r\n$height = !nativeHeight!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     REM : function to add an extra 16/9 preset in V3 graphic pack of the game
     :addResoV3GP169
-
 
         set "desc="%~1""
 
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
         set "fnrLogAddResoV3GP169="!fnrLogFolder:"=!\addResoV3GP169_!w!x!h!.log""
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!" --logFile !fnrLogAddResoV3GP169!
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /I /V "^!" ^| find "File:"') do goto:eof
-
-        REM : not found add it by replacing a [Preset] bloc
-
-        REM : to keep the increasing res order in the file
-        REM : search for the next bloc
-        set /A "ht=!h!+%dh%"
-        set /A "wt=!w!+%dw%"
-
+        if exist !fnrLogAddResoV3GP169! del /F !fnrLogAddResoV3GP169! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*[\r]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP169!
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /I /V "^!" ^| find "File:"') do (
+            @echo Preset !w!x!h! already exists
+            goto:eof
+        )
+REM @echo Adding !w!x!h!!desc:"=! preset
 
         REM : replacing %wToReplace%xresX2 in rules.txt
         set "logFileV3="!fnrLogFolder:"=!\!gpFolderName:"=!-V3_!h!x!w!.log""
+        if exist !logFileV3! del /F !logFileV3! > NUL 2>&1
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "[Preset]\nname = !wt!x!ht!" --replace "[Preset]\nname = !w!x!h! !desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !wt!x!ht!" --logFile !logFileV3!
-
-        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
-        if %aspectRatioFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/9.0)" --logFile !logFileV3!
-        if %twopScalingFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$2pScaling = 1.0" --logFile !logFileV3!
-        if %scaleBlurFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleBlur = 1.0" --logFile !logFileV3!
-        if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = 1.0" --logFile !logFileV3!
-        if %lightSourceFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$lightSource = 1.0" --logFile !logFileV3!
-        if %ditherFlag% EQU 1      wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$dither = 0.75" --logFile !logFileV3!
-        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1.0" --logFile !logFileV3!
+        if !h! GTR !nativeHeight! call:pushBack
+        if !h! LSS !nativeHeight! call:pushFront
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1231,47 +1449,27 @@ REM        type !rulesFile! | find "$" | find /I /V "overwriteWidth" | find /I /
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
 
         set "fnrLogAddResoV3GP="!fnrLogFolder:"=!\addResoV3GP_!w!x!h!.log""
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!" --logFile !fnrLogAddResoV3GP!
+        if exist !fnrLogAddResoV3GP! del /F !fnrLogAddResoV3GP! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*[\r]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP!
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /I /V "^!" ^| find "File:"') do goto:eof
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /I /V "^!" ^| find "File:"') do (
+            @echo Preset !w!x!h!!desc:"=! already exists
+            goto:eof
+        )
 
-        REM : not found add it by replacing a [Preset] bloc
+REM @echo Adding !w!x!h!!desc:"=! preset
 
         REM : Adding !h!x!w! in rules.txt
         set "logFileV3="!fnrLogFolder:"=!\!gpFolderName:"=!-V3_!h!x!w!.log""
+        if exist !logFileV3! del /F !logFileV3! > NUL 2>&1
 
+        if not ["!edu!"] == [""] (
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "version = 3" --replace "version = 3\n\n[Preset]\nname = !w!x!h! !desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n" --logFile !logFileV3!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+            goto:eof
+        )
 
-        if %heightFixFlag% EQU 1   wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$heightfix = 0.0" --logFile !logFileV3!
-
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:10)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (16.0/10.0)" --logFile !logFileV3!
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (21:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (64.0/27.0)" --logFile !logFileV3!
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (48:9)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (48.0/9.0)" --logFile !logFileV3!
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (4:3)"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (4.0/3.0)" --logFile !logFileV3!
-
-        REM : 169_windowed
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (11016.0/5760.0)" --logFile !logFileV3!
-
-        REM : 219_windowed
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (21:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (14812.0/5760.0)" --logFile !logFileV3!
-
-        REM : 43_windowed
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (4:3) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (82644.0/5760.0)" --logFile !logFileV3!
-
-        REM : 489_windowed
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (48:9) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (33066.0/5760.0)" --logFile !logFileV3!
-
-        REM : 1610_windowed
-        if %aspectRatioFlag% EQU 1 if [!desc!] == [" (16:10) windowed"] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$aspectRatio = (9920.0/5760.0)" --logFile !logFileV3!
-
-        if %twopScalingFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$2pScaling = 1.0" --logFile !logFileV3!
-        if %scaleBlurFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleBlur = 1.0" --logFile !logFileV3!
-
-        if %scaleShaderFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$scaleShader = (%nativeWidth%.0/!w!.0)" --logFile !logFileV3!
-        if %lightSourceFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$lightSource = 1.0" --logFile !logFileV3!
-        if %ditherFlag% EQU 1      wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$dither = 0.75" --logFile !logFileV3!
-        if %internalResFlag% EQU 1 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n$internalRes = 1.0" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -1312,7 +1312,7 @@ REM : functions
             REM : if exe exist and import mode enabled : if shortcut exist skip this game
             if exist !EXE_FILE! (
                 if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: executable for !user:"=! already exist^, skipped
+                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: executable for !user:"=! already exists^, skipped
             ) else (
                 call:userGameExe !user!
             )

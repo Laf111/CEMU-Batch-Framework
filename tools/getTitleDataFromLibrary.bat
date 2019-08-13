@@ -115,7 +115,7 @@ REM : main
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get those informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
+        cscript /nologo !MessageBox! "Unable to get those informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     ) else (
         @echo getTitleDataFromLibrary ^: unable to get informations on the game for titleId %titleId% ^?

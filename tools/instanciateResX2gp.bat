@@ -94,23 +94,23 @@ REM : main
 
     REM : replacing %wToReplace%xResX2gp in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!"
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!"
 
     REM : replacing overwriteHeight = ResX2gp in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!height!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" --logFile !fnrLogFile!
 
     REM : replacing overwriteWidth = ResX2gp in rules.txt (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!height!asWidth.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" --logFile !fnrLogFile!
 
     REM : replacing overwriteWidth = %wToReplace% in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!width!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" --logFile !fnrLogFile!
 
 
     REM compute half target resolution
@@ -119,18 +119,18 @@ REM : main
 
     REM : replacing half res height in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res height in rules.txt  (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!asWidth.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res width in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfWidth!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask rules.txt --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
 
     REM : treating extra files (*_*.txt) if needed
     set "pat="!gp:"=!\*_*s.txt""

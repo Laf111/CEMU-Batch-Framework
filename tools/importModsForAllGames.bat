@@ -245,7 +245,7 @@ REM : functions
         if exist !fnrLogIm! del /F !fnrLogIm!
 
         REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !MODS_FOLDER_PATH! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogIm! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !MODS_FOLDER_PATH! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogIm! > NUL
 
         REM : loop on files found
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogIm! ^| find /I /V "^!" ^| find "File:"') do (

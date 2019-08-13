@@ -274,9 +274,7 @@ REM : main
     set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
 
     !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs!
-REM    del /F !csTmp!* > NUL 2>&1
-    del /F !csTmp0! > NUL 2>&1
-    del /F !csTmp1! > NUL 2>&1
+    if exist !cs! del /F !csTmp!* > NUL 2>&1
     goto:diffProfileFile
 
     :displayGameProfile
@@ -404,7 +402,7 @@ REM    del /F !csTmp!* > NUL 2>&1
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogWgp! > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogWgp! > NUL
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
@@ -610,8 +608,10 @@ REM : functions
             REM : patch settings.xml
             !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
-            del /F !cs! > NUL 2>&1
-            move /Y !csTmp! !cs! > NUL 2>&1
+            if exist !csTmp! (
+                del /F !cs! > NUL 2>&1
+                move /Y !csTmp! !cs! > NUL 2>&1
+            )
         )
     goto:eof
     REM : ------------------------------------------------------------------

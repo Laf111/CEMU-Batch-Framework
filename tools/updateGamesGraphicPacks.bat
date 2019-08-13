@@ -239,7 +239,7 @@ REM : functions
         )
 
         REM : check if V3 gp exist for this game
-        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find /V "_Resolution_" ^| find "_Resolution" 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find /V "_Performance_" ^| find /I /V "_Resolution_" ^| find /I "_Resolution" 2^>NUL') do (
 
             set "gpFolder="!BFW_GP_FOLDER:"=!\%%i""
             set "rulesFile="!gpFolder:"=!\rules.txt""
@@ -267,7 +267,7 @@ REM : functions
         if exist !fnrLogUggp! del /F !fnrLogUggp!
 
         REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogUggp! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogUggp! > NUL
 
         set /A "resX2=%nativeHeight%*2"
 
@@ -295,8 +295,8 @@ REM : functions
                 REM : V3 graphic pack
                 set "v3Gpfound=1"
                 REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
-                echo !rulesFile! | find /V "_Resolution_" | find "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
-                echo !rulesFile! | find /V "_Resolution_" | find "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
             )
         )
 

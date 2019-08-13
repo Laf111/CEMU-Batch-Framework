@@ -62,7 +62,7 @@ REM : main
 
     set "gp="!bfwgpv2:"=!\_BatchFW %description%""
     if exist !gp! (
-        @echo ^^! _BatchFW %description% already exist, skipped ^^!
+        @echo ^^! _BatchFW %description% already exists, skipped ^^!
         exit 1
     )
     if not exist !gp! mkdir !gp! > NUL 2>&1

@@ -168,7 +168,7 @@ REM : main
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
     @echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
@@ -232,7 +232,8 @@ REM : main
     set "rulesFileV3="!gpV3:"=!\rules.txt""
     set "v3ExistFlag=1"
 
-    echo !GAME_TITLE! native FPS = %nativeFps%
+    echo Native FPS set in WiiU-Titles-Library.csv to = %nativeFps%
+    echo.
 
     set /A "g30=0"
     REM : for 30FPS games
@@ -243,7 +244,7 @@ REM : main
         set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
         if exist !fnrLogLggp! del /F !fnrLogLggp!
         REM : Search FPS++ or 60FPS patch
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPP=1"
@@ -383,7 +384,7 @@ REM : functions
 
         @echo name = Speed Adjustment >> !rulesFileV3!
         @echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !rulesFileV3!
-        @echo description = Allows you to adjust the game speed. Please note that the ability to consistently reach the speed will depend on your specs. >> !rulesFileV3!
+        @echo description = Allows you to adjust the game speed ^(need vsync disabled^). Please note that the ability to consistently reach the speed will depend on your specs. >> !rulesFileV3!
         @echo version = 3 >> !rulesFileV3!
         @echo # >> !rulesFileV3!
         @echo [Preset] >> !rulesFileV3!
@@ -418,7 +419,7 @@ REM : functions
         set "logFileV3="!fnrLogFolder:"=!\!gameName:"=!-V3_!fps!cap.log""
         if exist !logFileV3! del /F !logFileV3!
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask rules.txt --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -448,7 +449,7 @@ REM : functions
         set "gp="!bfwgpv2:"=!\_BatchFw_%description: =_%""
 
         if exist !gp! (
-            @echo !gp! already exist, skipped ^^^!
+            @echo !gp! already exists, skipped ^^^!
             goto:eof
         )
         if not exist !gp! mkdir !gp! > NUL 2>&1
@@ -462,7 +463,7 @@ REM : functions
         @echo version = 2 >> !rulesFileV2!
         @echo # >> !rulesFileV2!
 
-        @echo # Cap FPS to %displayedValue% >> !rulesFileV2!
+        @echo # Cap FPS to %displayedValue% ^(need vsync disabled^) >> !rulesFileV2!
         @echo [Control] >> !rulesFileV2!
 
         @echo vsyncFrequency = %syncValue% >> !rulesFileV2!

@@ -154,7 +154,7 @@ REM : main
 
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase!" 4112
+        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
     @echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
@@ -752,7 +752,7 @@ REM : functions
         REM : initialize V3 graphic pack
         set "gpv3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""
         if exist !gpv3! (
-            @echo ^^! !GAME_TITLE! already exist, skipped ^^!
+            @echo ^^! !GAME_TITLE! already exists, skipped ^^!
             goto:eof
         )
         if not exist !gpv3! mkdir !gpv3! > NUL 2>&1

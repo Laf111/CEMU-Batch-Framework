@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-6"
+    set "BFW_VERSION=V14-7"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -273,7 +273,7 @@ REM : main
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
 
     @echo ---------------------------------------------------------
-    @echo Downloading latest graphics packs
+    @echo Checking latest graphics packs^' update
 
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
@@ -1208,7 +1208,7 @@ REM : functions
                 if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   An inGameSaves subfolder was found directly under the game^'s path root
-                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
+                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exists^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
@@ -1220,7 +1220,7 @@ REM : functions
                 if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   A shaderCache subfolder was found directly under the game^'s path root
-                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
+                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exists^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
@@ -1232,7 +1232,7 @@ REM : functions
                 if not exist !cemuFolder! mkdir !cemuFolder! > NUL 2>&1
 
                 @echo   A graphicPacks subfolder was found directly under the game^'s path root
-                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exist^)
+                @echo   Do you want to move it to !cemuFolder!^? ^(you might overwrite existing files if the folder already exists^)
                 @echo   ^(if you haven't used a BatchFW V10 or later, choose move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"

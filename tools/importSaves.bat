@@ -323,7 +323,7 @@ REM : functions
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
         if exist !rarFile! (
-            choice /C yn /N /M "A save already exist for "!user!", overwrite ? (y, n)"
+            choice /C yn /N /M "A save already exists for "!user!", overwrite ? (y, n)"
             if !ERRORLEVEL! EQU 2 @echo Cancel^! && goto:eof
         )
         @echo.

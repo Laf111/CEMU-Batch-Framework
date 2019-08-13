@@ -727,7 +727,7 @@ REM : main
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp!
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask rules.txt --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
 
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
@@ -1827,9 +1827,10 @@ REM : functions
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
-        del /F !cs! > NUL 2>&1
-        move /Y !csTmp! !cs! > NUL 2>&1
-
+        if exist !csTmp! (
+            del /F !cs! > NUL 2>&1
+            move /Y !csTmp! !cs! > NUL 2>&1
+        )
         REM : install other files needed for online play
         set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
         if exist !onLineMlc01Files! (
