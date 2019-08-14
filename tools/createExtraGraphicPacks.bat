@@ -440,40 +440,50 @@ REM : functions
         )
 
         set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
-
         if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
         set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
 
         call:getExtraDirectives > !extraDirectives!
-        if exist !extraDirectives! copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
-
+        
+        REM : replacing directives in extraDirectives.log
+        set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
+        if exist !logFileED! del /F !logFileED! > NUL 2>&1
+        
+        if exist !extraDirectives! (
+            call:set169
+            copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
+        )
         set "ed="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\r\n"
 
         if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
 
-        REM : replacing directives in extraDirectives.log
-        set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
-        if exist !logFileED! del /F !logFileED! > NUL 2>&1
-
         REM : complete 16/9 (if here => COMPLETE_GP=YES)
         call:createV3Gp169
 
+        REM : reset extra directives file
+        if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
-            if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
-            if ["%%a"] == ["1610"] call:createV3Gp1610 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            
+            if ["%%a"] == ["1610"] call:createV3Gp1610
 
-            if ["%%a"] == ["219"]  call:createV3Gp219 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            if ["%%a"] == ["219"]  call:createV3Gp219
 
-            if ["%%a"] == ["43"]   call:createV3Gp43 && if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            if ["%%a"] == ["43"]   call:createV3Gp43
 
             if ["%%a"] == ["489"]   call:createV3Gp489
+
+            REM : reset extra directives file
+            if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
 
         @echo ---------------------------------------------------------
         @echo ^> !gpFolderName:"=!^'s V3 extra presets created successfully
 
+        del /F !extraDirectives! > NUL 2>&1
+        del /F !extraDirectives169! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -491,6 +501,7 @@ REM : functions
 
 
     :getExtraDirectives
+    REM : get extra directives in rules.txt
     set "first="
     set /A "firstSetFlag=0"
 
@@ -502,10 +513,61 @@ REM : functions
         echo %%i
         set /A "firstSetFlag=1"
 
-    )
+    )    
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :set169
+    REM : force 169 values in case of BatchFw already treated the rules.txt for this game
+    
+        REM : 16/9 windowed        
+        call:updateExtraDirectives "aspectRatio = \(11016.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectY = \(11016.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
+        call:updateExtraDirectives "GameAspect = \(11016.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+     
+        REM : 21/9
+        call:updateExtraDirectives "aspectRatio = \(13760.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(13760.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(13760.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+    
+        REM : 21/9 windowed
+        call:updateExtraDirectives "aspectRatio = \(14812.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(14812.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(14812.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+    
+        REM : 4/3
+        call:updateExtraDirectives "aspectRatio = \(4.0\/3.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectY = \(4.0\/3.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
+        call:updateExtraDirectives "GameAspect = \(4.0\/3.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+        
+        REM : 4/3 windowed
+        call:updateExtraDirectives "aspectRatio = \(8266.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectY = \(8266.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
+        call:updateExtraDirectives "GameAspect = \(8266.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+    
+        REM : 48/9
+        call:updateExtraDirectives "aspectRatio = \(48.0\/9.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(48.0\/9.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(48.0\/9.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+        
+        REM : 48/9 windowed 
+        call:updateExtraDirectives "aspectRatio = \(33066.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(33066.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(33066.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+        
+        REM : 16/10
+        call:updateExtraDirectives "aspectRatio = \(16.0\/10.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(16.0\/10.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(16.0\/10.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+        
+        REM : 16/10 windowed 
+        call:updateExtraDirectives "aspectRatio = \(9920.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(9920.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(9920.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+       
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     :treatGP
 
         set "gpFolderName=!gpFolderName:_%resX2%p=!"
@@ -761,8 +823,16 @@ REM : functions
         set "src="%~1""
         set "target="%~2""
 
+REM echo src=!src!
+REM echo target=!target!
+REM echo !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src! --replace !target!
+REM echo.
+REM !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src!
+REM pause
+REM echo replacing      
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src! --replace !target! --logFile !logFileED!
-
+REM more !logFileED!
+REM pause
         set "edu="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "edu=!edu!%%j\r\n"
 
@@ -832,12 +902,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (11016.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (11016.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (11016.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (11016.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (11016.0/5760.0)"
         )
 
         REM : 16/9 windowed graphic packs
@@ -933,12 +1003,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (13760.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (13760.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (13760.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (13760.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (13760.0/5760.0)"
         )
 
         REM : 21/9 fullscreen graphic packs
@@ -965,12 +1035,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (14812.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (14812.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (14812.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (14812.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (14812.0/5760.0)"
         )
 
         REM : 21/9 windowed graphic packs
@@ -1081,12 +1151,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (4.0/3.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (4.0/3.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (4.0/3.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (4.0/3.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (4.0/3.0)"
         )
         REM : 4/3 fullscreen graphic packs
         set /A "h=5760"
@@ -1113,12 +1183,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (8266.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (8266.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (8266.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (8266.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (8266.0/5760.0)"
         )
 
         set /A "h=5760"
@@ -1211,12 +1281,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (48.0/9.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (48.0/9.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (48.0/9.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (48.0/9.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (48.0/9.0)"
         )
 
         REM : 48/9 fullscreen graphic packs
@@ -1239,17 +1309,17 @@ REM : functions
         goto:eof
 
         :489_windowed
-        REM : 16/10 windowed graphic packs
+        REM : 49/9 windowed graphic packs
         @echo Create 48^/9 windowed presets in V3 GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (33066.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (33066.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (33066.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (33066.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (33066.0/5760.0)"
         )
 
         set /A "h=5760"
@@ -1335,12 +1405,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (16.0/10.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (16.0/10.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (16.0/10.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (16.0/10.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (16.0/10.0)"
         )
 
         REM : 16/10 full screen graphic packs
@@ -1368,12 +1438,12 @@ REM : functions
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*(16.0[ ]*/[ ]*9.0[ ]*)" "aspectRatio = (9920.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (9920.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (9920.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*(!nativeWidtht![ ]*/[ ]*!nativeHeight![ ]*)" "GameAspect = (9920.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (9920.0/5760.0)"
         )
 
         set /A "h=5760"
