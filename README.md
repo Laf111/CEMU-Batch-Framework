@@ -106,7 +106,7 @@ Settings are saved by host (and per users). Transferable cache, controller profi
 
 BatchFW does not need Adminstrator rights unless you want to create shortcuts at specifics locations.
 
-All batch source code is in delayed expansion mode and uses your system charset to check/handle the minimum of unsupported characters in paths. When launching a game, batchFw is completly silent. It opens its log if needed and open Cemu's one if it crashes.
+All batch source code use delayed expansion mode and set your system charset to check/handle the minimum of unsupported characters in paths. When launching a game, batchFw is completly silent. It opens its log if needed and open Cemu's one if it crashes.
 
 Code is well commented and is read only. 
 
@@ -129,3 +129,5 @@ If you edit source code, use a text editor that doesn't change ANSI files format
 I recommend to not clone the repository : use the last released version
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
+
+If you have any trouble, send me a private message on CEMU's reddit (/u/Laf111) or GBATemp (Laf111) and i'll gladly help you.
