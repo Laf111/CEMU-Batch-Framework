@@ -12,7 +12,7 @@ CEMU HISTORY :
     CEMU 1.12.1 Added disable precompiled shader cache option (UI settings & in game profiles);
     CEMU 1.13   Added -mlc settings in UI to customize path for mlc01 directory;
     CEMU 1.14   Shader reworked and introduced V3 graphic packs;
-    CEMU 1.15   Support for game's mods;
+    CEMU 1.15   Support for game's mods and protection of the GLCache under shaderCahce/driver/nvidia;
     CEMU 1.15.6 Save controler profile used in the game's profile when using the UI (right click on the 
                 game in the list);
 
