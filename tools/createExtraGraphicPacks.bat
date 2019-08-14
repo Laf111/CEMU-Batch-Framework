@@ -444,11 +444,11 @@ REM : functions
         set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
 
         call:getExtraDirectives > !extraDirectives!
-        
+
         REM : replacing directives in extraDirectives.log
         set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
         if exist !logFileED! del /F !logFileED! > NUL 2>&1
-        
+
         if exist !extraDirectives! (
             call:set169
             copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
@@ -466,7 +466,7 @@ REM : functions
         
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
-            
+
             if ["%%a"] == ["1610"] call:createV3Gp1610
 
             if ["%%a"] == ["219"]  call:createV3Gp219
@@ -519,52 +519,52 @@ REM : functions
 
     :set169
     REM : force 169 values in case of BatchFw already treated the rules.txt for this game
-    
-        REM : 16/9 windowed        
+
+        REM : 16/9 windowed
         call:updateExtraDirectives "aspectRatio = \(11016.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectY = \(11016.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
         call:updateExtraDirectives "GameAspect = \(11016.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-     
+
         REM : 21/9
         call:updateExtraDirectives "aspectRatio = \(13760.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(13760.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(13760.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-    
+
         REM : 21/9 windowed
         call:updateExtraDirectives "aspectRatio = \(14812.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(14812.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(14812.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-    
+
         REM : 4/3
         call:updateExtraDirectives "aspectRatio = \(4.0\/3.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectY = \(4.0\/3.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
         call:updateExtraDirectives "GameAspect = \(4.0\/3.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-        
+
         REM : 4/3 windowed
         call:updateExtraDirectives "aspectRatio = \(8266.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectY = \(8266.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
         call:updateExtraDirectives "GameAspect = \(8266.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-    
+
         REM : 48/9
         call:updateExtraDirectives "aspectRatio = \(48.0\/9.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(48.0\/9.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(48.0\/9.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-        
-        REM : 48/9 windowed 
+
+        REM : 48/9 windowed
         call:updateExtraDirectives "aspectRatio = \(33066.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(33066.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(33066.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-        
+
         REM : 16/10
         call:updateExtraDirectives "aspectRatio = \(16.0\/10.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(16.0\/10.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(16.0\/10.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-        
-        REM : 16/10 windowed 
+
+        REM : 16/10 windowed
         call:updateExtraDirectives "aspectRatio = \(9920.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(9920.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(9920.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
-       
+
     goto:eof
     REM : ------------------------------------------------------------------
     

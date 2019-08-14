@@ -70,6 +70,7 @@ REM : main
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr! >> !batchFwLog!
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         timeout /t 8 > NUL 2>&1
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 1
     )
     REM : checking GAMES_FOLDER folder
@@ -107,6 +108,7 @@ REM : main
         @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
         timeout /t 8 > NUL 2>&1
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 99
     )
 
@@ -120,6 +122,7 @@ REM : main
         @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
         timeout /t 8 > NUL 2>&1
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 99
     )
     REM : flag for nolegacy options
@@ -165,6 +168,7 @@ REM : main
         @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^! >> !batchFwLog!
         @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^!
         timeout /t 8 > NUL 2>&1
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 3
     )
 
@@ -198,6 +202,12 @@ REM : main
 
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+    set "cs="!CEMU_FOLDER:"=!\settings.xml""
+    set "backup="!CEMU_FOLDER:"=!\settings.old""
+
+    if exist !cs! (
+        copy /Y !cs! !backup! > NUL 2>&1
+    )
 
     REM : BatchFW graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
@@ -253,6 +263,8 @@ REM : main
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
+        @echo ERROR while extracting V2_GFX_Packs, exiting 1
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         pause
         exit 21
     )
@@ -2157,11 +2169,11 @@ REM : functions
 
         REM : if a backup on settings.xml was made in wizardFirstLaunch, restore it
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        set "backup="!CEMU_FOLDER:"=!\settings.ini""
+        set "backup="!CEMU_FOLDER:"=!\settings.old""
 
         if exist !backup! (
             del /F !cs!
-            move /Y !backup! !cs!
+            move /Y !backup! !cs! > NUL 2>&1
         )
 
     goto:eof

@@ -215,7 +215,7 @@ REM : main
     set "csTmp0="!CEMU_FOLDER:"=!\settings.tmp0""
     set "csTmp1="!CEMU_FOLDER:"=!\settings.tmp1""
     set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
-    set "backup="!CEMU_FOLDER:"=!\settings.ini""
+    set "backup="!CEMU_FOLDER:"=!\settings.old""
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
     REM : GFX type to provide
