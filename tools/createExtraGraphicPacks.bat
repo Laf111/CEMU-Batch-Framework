@@ -484,6 +484,13 @@ REM : functions
 
         del /F !extraDirectives! > NUL 2>&1
         del /F !extraDirectives169! > NUL 2>&1
+
+        REM : force UTF8 format
+        set "utf8=!rulesFile:rules.txt=rules.tmp!"
+        copy /Y !rulesFile! !utf8! > NUL 2>&1
+        type !utf8! > !rulesFile!
+        del /F !utf8! > NUL 2>&1
+
     goto:eof
     REM : ------------------------------------------------------------------
 
