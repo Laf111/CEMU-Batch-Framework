@@ -423,7 +423,7 @@ REM : functions
         set "rulesFile="!gpV3:"=!\rules.txt""
 
         REM : Windows formating (LF -> CRLF)
-        call:unixToDos
+        call:dosToUnix
 
         REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
         set "gpNativeHeight=NOT_FOUND"
@@ -454,7 +454,7 @@ REM : functions
             copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
         )
         set "ed="
-        for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\r\n"
+        for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\n"
 
         if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
 
@@ -485,24 +485,16 @@ REM : functions
         del /F !extraDirectives! > NUL 2>&1
         del /F !extraDirectives169! > NUL 2>&1
 
-        REM : force UTF8 format
-        set "utf8=!rulesFile:rules.txt=rules.tmp!"
-        copy /Y !rulesFile! !utf8! > NUL 2>&1
-        type !utf8! > !rulesFile!
-        del /F !utf8! > NUL 2>&1
-
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :unixToDos
-    REM : convert LF -> CRLF (UNIX -> WINDOWS)
-        set "uTdLog="!fnrLogFolder:"=!\uniXtoDos.log""
+    :dosToUnix
+    REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
-        REM : replace all \n by \r\n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\n" --replace "\r\n" --logFile !uTdLog!
+        REM : replace all \n by \n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
-        REM : replace all \r\r\n by \r\n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\r\n" --replace "\r\n" --logFile !uTdLog!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -841,7 +833,7 @@ REM echo replacing
 REM more !logFileED!
 REM pause
         set "edu="
-        for /F "delims=~" %%j in ('type !extraDirectives!') do set "edu=!edu!%%j\r\n"
+        for /F "delims=~" %%j in ('type !extraDirectives!') do set "edu=!edu!%%j\n"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1476,9 +1468,9 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*[\r]*\nname[ ]*=[ ]*.*[\r]*\n\$width[ ]*=[ ]*!nativeWidth![ ]*[\r]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n\r\n[Preset]\r\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\r\n$width = !nativeWidth!\r\n$height = !nativeHeight!" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileV3!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\r\n\$height = !h!\r\n\$gameWidth = %nativeWidth%\r\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\n\$height = !h!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1486,9 +1478,9 @@ REM pause
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*[\r]*\nname[ ]*=[ ]*.*[\r]*\n\$width[ ]*=[ ]*!nativeWidth![ ]*[\r]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*[\r]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*[\r]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\r\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\r\n$width = !nativeWidth!\r\n$height = !nativeHeight!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\r\n\$height = !nativeHeight!\r\n\$gameWidth = %nativeWidth%\r\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\r\n$height = !nativeHeight!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1502,7 +1494,7 @@ REM pause
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
         set "fnrLogAddResoV3GP169="!fnrLogFolder:"=!\addResoV3GP169_!w!x!h!.log""
         if exist !fnrLogAddResoV3GP169! del /F !fnrLogAddResoV3GP169! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*[\r]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP169!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP169!
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /I /V "^!" ^| find "File:"') do (
             @echo Preset !w!x!h! already exists
             goto:eof
@@ -1527,7 +1519,7 @@ REM @echo Adding !w!x!h!!desc:"=! preset
 
         set "fnrLogAddResoV3GP="!fnrLogFolder:"=!\addResoV3GP_!w!x!h!.log""
         if exist !fnrLogAddResoV3GP! del /F !fnrLogAddResoV3GP! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*[\r]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP!
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /I /V "^!" ^| find "File:"') do (
             @echo Preset !w!x!h!!desc:"=! already exists
@@ -1542,11 +1534,11 @@ REM @echo Adding !w!x!h!!desc:"=! preset
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%\r\n!edu!" --logFile !logFileV3!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\r\n\r\n[Preset]\r\nname = !w!x!h!!desc:"=!\r\n$width = !w!\r\n$height = !h!\r\n$gameWidth = %nativeWidth%\r\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
 
     goto:eof
     REM : ------------------------------------------------------------------
