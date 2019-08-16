@@ -1,3 +1,9 @@
+16/08/2019 V14-8 : 
+- fix : getMyShaderCachesSize.bat size were not displayed is the cache is less than 1Mo
+- fix : launchGame.bat extend status search for Cemu.exe already running
+- hotfix : killBatchFw.bat call in launchGame.bat
+- fix : killBatchFw.bat kill Cemu.exe before every BatchFw process
+
 14/08/2019 V14-7 : 
 - fix : fix find in rules.txt console output when completing GFX packs from wizardFirstSaving.bat
 - fix : re-write the code for GFX pack completion/creation using regExp (checked on all V512 res packs)

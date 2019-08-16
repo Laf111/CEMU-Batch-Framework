@@ -7,7 +7,7 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
-    
+
     title Kill all BatchFw^'s process
     @echo ---------------------------------------------------------
     @echo killing BatchFw^'s process^.^.^.
@@ -22,7 +22,7 @@ REM : main
 
     REM : kill CEMU's running process
     wmic process where "Name like '%%cemu.exe%%'" call terminate
-    
+
     REM : kill BatchFw's running process
     wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call terminate
     timeout /T 4 > NUL

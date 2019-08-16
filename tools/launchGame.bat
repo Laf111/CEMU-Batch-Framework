@@ -33,7 +33,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
-    
+
     :getDate
     REM : get DATE
     for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set ldt=%%j

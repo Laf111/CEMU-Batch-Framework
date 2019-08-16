@@ -182,7 +182,7 @@ REM : functions
         set "line=NONE"
         for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
         REM : powershell call always return %ERRORLEVEL%=0
-   
+
         if ["!line!"] == ["NONE"] (
             set "%2=0"
             goto:eof
