@@ -155,13 +155,13 @@ REM : functions
         set "precompiled="!CEMU_FOLDER:"=!\ShaderCache\precompiled""
         set "sizeP=0"
         if exist !precompiled! call:getFolderSize !precompiled! sizeP
-        @echo - precompiled     ^: %sizeP%
+        @echo - precompiled     ^: !sizeP!
 
         :transferable
         set "transferable="!CEMU_FOLDER:"=!\ShaderCache\transferable""
         set "sizeT=0"
         if exist !transferable! call:getFolderSize !transferable! sizeT
-        @echo - transferable    ^: %sizeT%
+        @echo - transferable    ^: !sizeT!
         @echo =========================================================
 
     goto:eof
@@ -182,6 +182,7 @@ REM : functions
         set "line=NONE"
         for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
         REM : powershell call always return %ERRORLEVEL%=0
+   
         if ["!line!"] == ["NONE"] (
             set "%2=0"
             goto:eof
@@ -189,13 +190,21 @@ REM : functions
 
         set "sizeRead=!line: =!"
 
-        if ["%sizeRead%"] == [" ="] (
+        if ["!sizeRead!"] == [" ="] (
             set "%2=0"
             goto:eof
         )
 
-        if not ["%sizeRead%"] == ["0"] set "%2=%sizeRead:~,-6%"
-        if ["%sizeRead%"] == [""] set "%2=0"
+        set "inMo=0"
+        if not ["!sizeRead!"] == ["0"] (
+            set "inMo=!sizeRead:~,-6!"
+            if ["!inMo!"] == [""] (
+                set "%2=0"
+            ) else (
+                set "%2=!inMO!"
+            )
+        )
+        if ["!sizeRead!"] == [""] set "%2=0"
 
     goto:eof
 

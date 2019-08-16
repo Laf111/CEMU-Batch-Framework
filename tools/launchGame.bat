@@ -32,6 +32,8 @@ REM : main
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
+    set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+    
     :getDate
     REM : get DATE
     for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set ldt=%%j
@@ -39,13 +41,11 @@ REM : main
     set DATE=%ldt%
 
     REM : check if cemu if not already running
-    for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
+    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe"') do (
 
-        wscript /nologo !Start! "%windir%\System32\taskmgr.exe"
-
-        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^, please kill it and relaunch" 16
-        if !ERRORLEVEL! EQU 2 goto:eof
-        goto:getDate
+        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^, killing it (with all BatchFw process)" 4112
+        wscript /nologo !StartHidden! !killBatchFw!
+        exit 70
     )
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -205,7 +205,9 @@ REM : main
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
     set "backup="!CEMU_FOLDER:"=!\settings.old""
 
-    if exist !cs! (
+    if exist !backup! (
+        copy /Y !backup! !cs! > NUL 2>&1
+    ) else (
         copy /Y !cs! !backup! > NUL 2>&1
     )
 
@@ -807,15 +809,6 @@ REM : main
         set /a cr_cemu=!ERRORLEVEL!
     )
     pushd !BFW_TOOLS_PATH!
-    REM : check if cemu if not still running
-    :killCemu
-    for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do (
-
-        wscript /nologo !Start! "%windir%\System32\taskmgr.exe"
-
-        cscript /nologo !MessageBox! "Cemu is already^/still running in the background ^!^, please kill it and hit c to continue" 4112
-        goto:killCemu
-    )
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1712,7 +1705,7 @@ REM : functions
 
     goto:eof
 
-    REM : function to set settings for a givne user
+    REM : function to set settings for a given user
     :setSettingsForUser
 
         set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""

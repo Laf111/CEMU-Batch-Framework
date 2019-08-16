@@ -19,7 +19,7 @@ REM : main
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
-    set "killBatchFw="BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+    set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
 
     REM : timeout value in seconds
     set /A "timeOut=180"
