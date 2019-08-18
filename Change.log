@@ -1,4 +1,7 @@
-16/08/2019 V14-8 : 
+18/08/2019 V14-9 : 
+- hotfix : online files installation was broken and may lead in puting CEMU in the backgound
+
+15/08/2019 V14-8 : 
 - fix : getMyShaderCachesSize.bat size were not displayed is the cache is less than 1Mo
 - fix : launchGame.bat extend status search for Cemu.exe already running
 - hotfix : killBatchFw.bat call in launchGame.bat

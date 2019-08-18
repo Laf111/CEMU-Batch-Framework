@@ -20,6 +20,8 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
@@ -1151,6 +1153,32 @@ REM : main
 
     :endMain
 
+    REM : copy otp.bin and seeprom.bin if needed
+    set "t1="!CEMU_FOLDER:"=!\otp.bin""
+    set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
+    set "t1o="!CEMU_FOLDER:"=!\otp.old""
+    set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
+
+    if not exist !t1! goto:restoreGp
+    if not exist !t2! goto:restoreGp
+
+    set "s1="!BFW_ONLINE:"=!\otp.bin""
+    set "s2="!BFW_ONLINE:"=!\seeprom.bin""
+
+    if exist !s1! (
+        del /F !t1! > NUL 2>&1
+        if exist !t1o! (
+            move !t1o! !t1!  > NUL 2>&1
+        )
+    )
+    if exist !s2! (
+        del /F !t2! > NUL 2>&1
+        if exist !t2o! (
+            move !t2o! !t2!  > NUL 2>&1
+        )
+    )
+
+    :restoreGp
     REM : restore CEMU's graphicPacks subfolder
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
@@ -1782,7 +1810,6 @@ REM : functions
 
     :setOnlineFiles
 
-        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
         If not exist !BFW_ONLINE_ACC! goto:eof
@@ -1794,16 +1821,16 @@ REM : functions
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
-
             for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
         )
 
         if ["!accId!"] == ["NONE"] (
-            @echo WARNING^: AccountId not found for !user:"=!
-            @echo WARNING^: AccountId not found for !user:"=!  >> !batchFwLog!
+            @echo WARNING^: AccountId not found >> !batchFwLog!
+            @echo WARNING^: AccountId not found
             cscript /nologo !MessageBox! "AccountId not found for !user:"=!, cancel online files installation" 4160
             goto:eof
         )
+        @echo AccountId found >> !batchFwLog!
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
@@ -1820,14 +1847,25 @@ REM : functions
         )
 
         :installAccount
+
         REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
         set "target="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat""
         copy /Y !af! !target!
 
         REM : patch settings.xml
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
+
         REM if not nul
-        for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:eof
+        for /F "tokens=*" %%a in (!cs!) do (
+            set /A "css=%%~za"
+
+            if !css! EQU 0 (
+                @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^! >> !batchFwLog!
+                @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^!
+                goto:eof
+           )
+        )
+
         set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
@@ -1836,17 +1874,33 @@ REM : functions
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
         )
+        @echo Settings^.xml patched >> !batchFwLog!
+        @echo Settings^.xml patched
+
         REM : install other files needed for online play
         set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
         if exist !onLineMlc01Files! (
             set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
             if not exist !ccerts! xcopy !onLineMlc01Files! !MLC01_FOLDER_PATH! /R /S /Y > NUL 2>&1
         )
+        REM : copy otp.bin and seeprom.bin if needed
+        set "t1="!CEMU_FOLDER:"=!\otp.bin""
+        set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
+        set "t1o="!CEMU_FOLDER:"=!\otp.old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
 
-        @echo Online account enabled for !user:"=! ^: !accId! >> !batchFwLog!
-        @echo Online account enabled for !user:"=! ^: !accId!
+        set "s1="!BFW_ONLINE:"=!\otp.bin""
+        set "s2="!BFW_ONLINE:"=!\seeprom.bin""
 
-        exit /b 0
+        if exist !s1! if exist !t1! move !t1! !t1o! > NUL 2>&1
+        if exist !s2! if exist !t2! move !t2! !t2o! > NUL 2>&1
+
+        if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
+        if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
+
+        @echo Online account enabled ^: !accId! >> !batchFwLog!
+        @echo Online account enabled ^: !accId!
+
     goto:eof
     REM : ------------------------------------------------------------------
 

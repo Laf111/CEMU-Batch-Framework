@@ -597,12 +597,17 @@ REM : functions
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
+        set "t1o="!CEMU_FOLDER:"=!\otp.old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
 
-        set "s1="!BFW_ONLINE_FOLDER:"=!\otp.bin""
-        set "S2="!BFW_ONLINE_FOLDER:"=!\seeprom.bin""
+        set "s1="!BFW_ONLINE:"=!\otp.bin""
+        set "s2="!BFW_ONLINE:"=!\seeprom.bin""
 
-        if exist !s1! if not exist !t1! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! otp.bin > NUL 2>&1
-        if exist !s2! if not exist !t2! robocopy !BFW_ONLINE_FOLDER! !CEMU_FOLDER! seeprom.bin > NUL 2>&1
+        if exist !s1! if exist !t1! move !t1! !t1o! > NUL 2>&1
+        if exist !s2! if exist !t2! move !t2! !t2o! > NUL 2>&1
+        
+        if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
+        if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
         if not ["!accId!"] == ["NONE"] (
             REM : patch settings.xml
