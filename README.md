@@ -6,10 +6,12 @@ All versions of CEMU released from the 1.11.0 are supported.
 
 ## The main purpose of BatchFW is:
 
-- Make your loadiine games library portable;
-- Handle more than one user and sync CEMU with the Wii-U
-- Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
+- Handle more than one user/saves and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves)
+- Install many versions of CEMU to launch your games (keeping the most stables for your games and rig);
+- Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
+- Check new release before updating your main install
+- Make your loadiine games library portable;
 
 
 ## How it works:
