@@ -2,10 +2,12 @@
 
 BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
 
-CEMU is still under development and highly experimental. Therefore, due to its reverse-engineed nature, it might tends to introduce regressions more than other softwares, and so it's useful to keep your working versions instead of systematically overwrite your install with the last one.
+BatchFw supports versions of CEMU released from the 1.11.0 included.
 
 ## The main purpose of BatchFW is:
 
+- Make your loadiine games library portable;
+- Handle more than one user and sync CEMU with the Wii-U
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 
@@ -13,7 +15,7 @@ All by creating shortcuts (or executables) on your desktop - or a folder of your
 
 With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw also clean useless GLcaches left in CEMU folder on a display drivers’ update.
 
-The mlc01 path is in the game folder so
+The mlc01 path is in the game folder so :
 
 - you can backup a whole game by compressing its folder (saves, updates, DLCs, controller profiles, settings... are ALL included);
 
