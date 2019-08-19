@@ -1,13 +1,13 @@
 # CEMU's Batch FrameWork
 
-BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
+BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts.
 All versions of CEMU released from the 1.11.0 are supported.
 
 
 ## The main purpose of BatchFW is:
 
 - Handle more than one user/saves and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves)
-- Install many versions of CEMU to launch your games (keeping the most stables for your games and rig);
+- Making easier the installation of many versions of CMU to launch your games (keeping as stable as possible for your games and your rig);
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 - Check new release before updating your main install
