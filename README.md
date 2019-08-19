@@ -1,8 +1,8 @@
 # CEMU's Batch FrameWork
 
 BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powershell and vbs scripts. 
+All versions of CEMU released from the 1.11.0 are supported.
 
-BatchFw supports versions of CEMU released from the 1.11.0 included.
 
 ## The main purpose of BatchFW is:
 
@@ -10,6 +10,9 @@ BatchFw supports versions of CEMU released from the 1.11.0 included.
 - Handle more than one user and sync CEMU with the Wii-U
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. You can also register multiple versions of the emulator;
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
+
+
+## How it works:
 
 All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
 
@@ -35,6 +38,7 @@ If you're using a static IP adress policy on your local network, no need to crea
 You'll be able to use the first one you created.
 Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts
+
 
 ## Other features:
 
@@ -132,4 +136,4 @@ I recommend to not clone the repository : use the last released version
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
 
-If you have any trouble, send me a private message on CEMU's reddit (/u/Laf111) or GBATemp (Laf111) and i'll gladly help you.
+If you have any trouble, send me a private message on CEMU's reddit, Discord (/u/Laf111) or GBATemp (Laf111) and i'll gladly help you.
