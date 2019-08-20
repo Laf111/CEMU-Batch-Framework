@@ -26,7 +26,7 @@ The mlc01 path is in the game folder so:
 
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
-Main features of BatchFw:
+## Main features of BatchFw:
 
 - Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
 
@@ -52,7 +52,7 @@ Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (Win
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
 
 
-## Other features:
+Other features:
 
 - GLCache backup/restore per game (AMD, NVIDIA);
 
