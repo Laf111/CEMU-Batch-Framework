@@ -76,7 +76,6 @@ Other features:
 
 - Automatic update (check availability);
 
-    ect...
 
 
 ## Install : 
