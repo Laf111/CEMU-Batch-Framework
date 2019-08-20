@@ -6,12 +6,12 @@ All versions of CEMU released from the 1.11.0 are supported.
 
 ## The main purpose of BatchFW is:
 
-- Handle more than one user/save and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves)
+- Handle more than one user/save and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves);
 - Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig);
-- Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one. 
+- Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
-- Check new release before updating your main install
-- Make your loadiine games library portable;
+- Check new release before updating your main install;
+- Make your loadiine games library portable.
 
 
 ## How it works:
@@ -26,20 +26,20 @@ The mlc01 path is in the game folder so :
 
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
-Launch and close one or more third party softwares (DS4windows, Wiimotehook ...)  
+Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
 Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
 
-Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios  
+Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios.  
 
-Prepare a SDcard content for your Wii-U (optional) : format using fat32format, install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC)
+Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC).
 
 FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
 The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
 You'll be able to use the first one you created.
 Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
-You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts
+You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
 
 
 ## Other features:
@@ -70,18 +70,18 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8) and not only...
 
-- Automatic graphic packs update (check availability)
+- Automatic graphic packs update (check availability);
 
-- Automatic update (check availability)
+- Automatic update (check availability);
 
     ect...
 
 
 ## Install : 
 
-- Extract in your games folder
-- launch _BatchFW_Install\\setup.bat
-- move or copy your mlc01 data when asked
+- Extract in your games folder;
+- launch _BatchFW_Install\\setup.bat;
+- move or copy your mlc01 data when asked;
 - launch all your games a first time using the shortcuts created for the current user (boot to the menu is sufficient) to let BatchFw collect your settings, get your transferable cache and create a save for the current user.
 
 If you use some external mlc01 folder or a/some CEMU install per user, repeat the last two steps for each user.
@@ -134,7 +134,7 @@ V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 If you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
 
-I recommend to not clone the repository : use the last released version
+I recommend to not clone the repository : use the last released version.
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
 
