@@ -53,8 +53,8 @@ Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (Win
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
     - Map BatchFw's users to Wii-U profiles;
     - Automatically get online files and install files when an active network connection is found (you still need to dump opt.bin and seeprom.bin manually with NANDDUMPER);
-    - Sync your account with the Wii-U (update scores...);
-    - list all your games installed on the Wii-U by taking a snapshot to a csv file containing for each game:
+    - Update your account with the Wii-U one (update scores...);
+    - List all your games installed on the Wii-U by taking a snapshot to a csv file containing for each game:
         - its location (mlc/usb);
         - if saves were found (for one user at least);
         - if an update is installed;
