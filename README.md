@@ -44,13 +44,23 @@ The mlc01 path is in the game folder so:
 
 - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC).
 
-- FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
+- FTP transferts with your Wii-U (optional) : 
+    - BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template);
 The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
 You'll be able to use the first one you created.
 Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
-
+    - Map BatchFw's users to Wii-U profiles;
+    - Automatically get online files and install files when an active network connection is found (you still need to dump opt.bin and seeprom.bin manually with NANDDUMPER);
+    - Sync your account with the Wii-U (update scores...);
+    - list all your games installed on the Wii-U by taking a snapshot to a csv file containing for each game:
+        - its location (mlc/usb);
+        - if saves were found (for one user at least);
+        - if an update is installed;
+        - if a DLC is installed;
+    - Import saves from the Wii-U (for all users);
+    - Export saves to the Wii-U using SaveMii (create SaveMii's slots directly on the SD card by FTP)
 
 Other features:
 
