@@ -27,6 +27,15 @@ The mlc01 path is in the game folder so:
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
 Main features of BatchFw:
+
+- Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
+
+- This last feature allows you to handle multiple saves per user by defining as many "pseudo users" as differents saves you want (user_slot1, user_slot2... in this case, online user account will follow);
+
+- Save all settings including controller profiles for each players per game;
+
+- Save separate CEMU settings per users (allow users to use differents mods);
+
 - Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
@@ -44,14 +53,6 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 
 ## Other features:
-
-- Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
-
-- This last feature allows you to handle multiple saves per user by defining as many "pseudo users" as differents saves you want (user_slot1, user_slot2... in this case, online user account will follow);
-
-- Save all settings including controller profiles for each players per game;
-
-- Save separate CEMU settings per users (allow users to use differents mods);
 
 - GLCache backup/restore per game (AMD, NVIDIA);
 
