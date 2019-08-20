@@ -20,21 +20,22 @@ All by creating shortcuts (or executables) on your desktop - or a folder of your
 
 With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw also clean useless GLcaches left in CEMU folder on a display drivers’ update.
 
-The mlc01 path is in the game folder so :
+The mlc01 path is in the game folder so:
 
 - you can backup a whole game by compressing its folder (saves, updates, DLCs, controller profiles, settings... are ALL included);
 
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
-Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
+Main features of BatchFw:
+- Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
-Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
+- Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
 
-Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios.  
+- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios.  
 
-Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC).
+- Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC).
 
-FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
+- FTP transferts with your Wii-U (optional) : BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template)
 The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
 If you're using a static IP adress policy on your local network, no need to create a another configuration.
 You'll be able to use the first one you created.
