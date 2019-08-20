@@ -97,7 +97,7 @@ Other features:
 
 If you use some external mlc01 folder or a/some CEMU install per user, repeat the last two steps for each user.
 
-When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install BatchFw from the HDD, install CEMU and create shortcuts (users already defined on another host are imported automatically, online files as well). 
+When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to  create shortcuts (users already defined on another host are imported automatically, online files as well). 
 
 Settings are saved by host (and per users). Transferable cache, controller profiles, graphic packs are shared by all hosts.
 
