@@ -11,7 +11,7 @@ All versions of CEMU released from the 1.11.0 are supported.
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 - Check new release before updating your main install;
-- Make your loadiine games library portable.
+- Make your loadiine games library portable and save settings per host (and per user)
 
 
 ## How it works:
