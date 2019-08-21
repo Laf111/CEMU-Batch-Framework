@@ -138,9 +138,14 @@ REM : main
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
         goto:eof
     )
-    cls
+
     :scanGamesFolder
     cls
+
+    REM : add a call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
+    set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
+    call !importSave! !MLC01_FOLDER_PATH!
+
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -211,7 +216,7 @@ REM : main
     @echo =========================================================
     @echo Treated !NB_GAMES_TREATED! games
     @echo #########################################################
-    if ["%QUIET_MODE%"] == ["1"] goto:exiting
+    if !QUIET_MODE! EQU 1 goto:exiting
     @echo ---------------------------------------------------------
     @echo Delete and recreate shortcuts for the treated games
     @echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
@@ -320,11 +325,6 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
-        set "pat="!MLC01_FOLDER_PATH:"=!\usr\save""
-        for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
-            call:copySaves "%%i"
-        )
-
         set "pat="!MLC01_FOLDER_PATH:"=!\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:copyTitle "%%i"
@@ -350,35 +350,14 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :copySaves
-
-        set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\%~1\%endTitleId%""
-        if not exist !sf! (
-            mkdir !sf! > NUL 2>&1
-            goto:eof
-        )
-
-        set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%~1\%endTitleId%""
-        robocopy !sf! !target! /S > NUL 2>&1
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! GTR 7 (
-            @echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
-            pause
-        )
-        if !cr! GTR 0 echo - Copying !sf!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :copyTitle
 
         set "tf="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
-        if not exist !tf! (
-            mkdir !tf! > NUL 2>&1
-            goto:eof
-        )
+        if not exist !tf! goto:eof
 
         set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
+        if exist !target! goto:eof
+
         robocopy !tf! !target! /S > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (

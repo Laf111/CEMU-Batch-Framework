@@ -32,6 +32,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
 
     REM : optional second arg
     set "GAME_FOLDER_PATH="NONE""
@@ -91,6 +92,8 @@ REM : main
 
         exit /b 1
     )
+    REM : check if GFX pack folder was treated to be DOS compliant
+    call:checkGpFolders
 
     set "createLegacyPacks=!args[0]!"
     set "createLegacyPacks=%createLegacyPacks:"=%"
@@ -174,6 +177,16 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :checkGpFolders
+
+        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find "^!" 2^>NUL') do (
+            @echo Treat GFX pack folder to be DOS compliant
+            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
+            goto:eof
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :cleanGameLogFile
         REM : pattern to ignore in log file
@@ -245,7 +258,7 @@ REM : functions
             set "rulesFile="!gpFolder:"=!\rules.txt""
 
             REM : launching the search
-            if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId%" 2^>NUL') do if ["!lastVersion!"] == ["!newVersion!"] goto:eof
+            if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do if ["!lastVersion!"] == ["!newVersion!"] goto:eof
 
         )
         call:updateGPFolder !ggp!
@@ -267,7 +280,7 @@ REM : functions
         if exist !fnrLogUggp! del /F !fnrLogUggp!
 
         REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogUggp! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp! > NUL
 
         set /A "resX2=%nativeHeight%*2"
 

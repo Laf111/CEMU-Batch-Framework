@@ -183,7 +183,7 @@ REM : main
 
     @echo =========================================================
     @echo Treated !NB_SAVES_TREATED! saves
-    if ["%QUIET_MODE%"] == ["1"] goto:exiting
+    if !QUIET_MODE! EQU 1 goto:exiting
 
     @echo #########################################################
     @echo This windows will close automatically in 12s

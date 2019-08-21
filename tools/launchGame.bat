@@ -743,7 +743,7 @@ REM : main
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp!
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
@@ -1988,7 +1988,7 @@ REM : functions
 
     :syncControllerProfiles
 
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!""
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
         if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""

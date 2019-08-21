@@ -1,5 +1,20 @@
+21/08/2019 V15 :
+- fix : don't ask for a user in importSaves.bat if no users were defined 
+- add : add a call to importSaves.bat in copy/moveMlc01DataForAllGames.bat with the mlc01 folder as 
+  argument (it asks which user is concerned by the Mlc01 folder and create his compressed save)
+- fix : in setup.bat, do not ask to import mlc01 data when registering a CEMU's install
+        if you already browse to any external mlc01 folder 
+- fix : now hosts share all controller profiles
+- add : rename getOnlineFiles shortcut (you can also use this script to sync your online accounts)
+- add : deleteMyGpuCache.bat now also clean CEMU's cache folders (GLCache + precompiled one)
+- add : a script to validate the extra graphic packs creation (dev purpose only) on all games in 
+        BatchFw's GFX pack folder
+- add : rename GFX packs folders to be DOS compliant in updateGameGraphicPacks.bat if needed (to prevent
+        issues if user extract manually a GFX pack release in BatchFw's folder)
+- add : handle the 13 digits format of the titleId (ex 5000010116300) in rules.txt
+
 18/08/2019 V14-9 : 
-- hotfix : online files installation was broken and may lead in puting CEMU in the backgound
+- hotfix : online files installation was broken and may lead in puting CEMU in the background
 
 15/08/2019 V14-8 : 
 - fix : getMyShaderCachesSize.bat size were not displayed is the cache is less than 1Mo

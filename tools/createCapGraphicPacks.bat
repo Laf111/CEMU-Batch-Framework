@@ -244,7 +244,7 @@ REM : main
         set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
         if exist !fnrLogLggp! del /F !fnrLogLggp!
         REM : Search FPS++ or 60FPS patch
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogLggp!  > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPP=1"
@@ -384,7 +384,7 @@ REM : functions
 
         @echo name = Speed Adjustment >> !rulesFileV3!
         @echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !rulesFileV3!
-        @echo description = Allows you to adjust the game speed ^(need vsync disabled^). Please note that the ability to consistently reach the speed will depend on your specs. >> !rulesFileV3!
+        @echo description = Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV3!
         @echo version = 3 >> !rulesFileV3!
         @echo # >> !rulesFileV3!
         @echo [Preset] >> !rulesFileV3!
@@ -463,7 +463,7 @@ REM : functions
         @echo version = 2 >> !rulesFileV2!
         @echo # >> !rulesFileV2!
 
-        @echo # Cap FPS to %displayedValue% ^(need vsync disabled^) >> !rulesFileV2!
+        @echo # Cap FPS to %displayedValue% Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV2!
         @echo [Control] >> !rulesFileV2!
 
         @echo vsyncFrequency = %syncValue% >> !rulesFileV2!

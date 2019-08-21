@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-9"
+    set "BFW_VERSION=V15"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -114,6 +114,9 @@ REM : main
     call !ubw! !BFW_VERSION!
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
+        REM : treatments to be done after update
+        call:cleanBeforeUpdate
+
         @echo BatchFw updated^, please relaunch
         timeout /t 4 > NUL 2>&1
         set "ChangeLog="!BFW_PATH:"=!\Change.log""
@@ -546,28 +549,42 @@ REM : main
     if !ERRORLEVEL! EQU 1 goto:askSpath
 
    :askExtMlC01Folders
+    set /A "useMlcFolderFlag=0"
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
         @echo ---------------------------------------------------------
-        choice /C ny /N /M "Do you use an external mlc01 folder you wish to import? (y,n): "
+        choice /C ny /N /M "Do you use an/some external mlc01 folder(s) you wish to import? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getOuptutsFolder
 
+        set "tmpFile="!BFW_PATH:"=!\doc\mlc01data.txt""
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
+
+        @echo.
+        @echo If you have defined more than one user^, you^'ll need to
+        @echo define which user^'s save is it.
+        @echo.
+
+       :getExtMlc01
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
-        choice /C mc /CS /N /M "Move (m) or copy (c)?"
+        choice /C mc /CS /N /M "Move (m) or copy (c) data?"
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! EQU 2 set "script="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
-       :getExtMlc01
+
         wscript /nologo !StartWait! !script!
 
         choice /C yn /N /M "Add another external mlc01 folder? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getExtMlc01
 
-        @echo ^> External mlc01 data was imported^!
+        @echo ^> Externals mlc01 data was imported^!
         @echo.
         @echo Next time use the shortcuts in
         @echo Wii-U Games^\_BatchFw^\Tools^\Mlc01 folder handling
+        @echo and^/or
+        @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s saves to import
+        @echo only save for a user from a ml01 folder
         @echo.
         pause
+        set /A "useMlcFolderFlag=1"
 
     )
 
@@ -681,28 +698,7 @@ REM : main
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
     cls
-    if %QUIET_MODE% EQU 0 (
 
-        @echo ---------------------------------------------------------
-        @echo BatchFw needs you to register and import mlc01 data of
-        @echo the last^(s^) version^(s^) of CEMU you used to play your games^.
-        @echo.
-
-        @echo If you^'re using more than one CEMU version ^(per game
-        @echo for example^) register all installations with selecting
-        @echo only the games concerned by the version^.
-        @echo.
-
-        @echo Once your shortcuts are created^, launch all your games one time to
-        @echo let BatchFw copy the transferable cache into the game^'s folder^.
-        @echo.
-
-        @echo If you^'re duplicating the same CEMU^'s version for many players^:
-        @echo register this version with one user^, and use the shortcut
-        @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s saves^\Import Saves
-        @echo to import saves of other users afterwards^.
-        pause
-    )
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Please^, define your CEMU^'s installations paths
     @echo ---------------------------------------------------------
@@ -758,14 +754,21 @@ REM : main
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo ^> Done
+    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if %QUIET_MODE% EQU 0 (
-        call:getUserInput "Would you like to see how BatchFW works? (y,n)" "y,n" ANSWER
-        if [!ANSWER!] == ["n"] goto:done
+    if %QUIET_MODE% EQU 1 goto:done
 
-        set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""
-         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
-    )
+    @echo You^'ll need to launch each game one time with the last versions
+    @echo of CEMU you used^, to let BatchFw copy the transferable cache into
+    @echo the game^'s folder^.^(lets boot the game to the menu^)
+    @echo.
+
+    call:getUserInput "Would you like to see how BatchFW works? (y,n)" "y,n" ANSWER
+    if [!ANSWER!] == ["n"] goto:done
+
+    set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""
+    wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+
    :done
     cls
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -834,6 +837,20 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM ; treatments to be done after updating to this release
+   :cleanBeforeUpdate
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
+
+        pushd !CONTROLLER_PROFILE_FOLDER!
+
+        REM : move each USERDOMAIN folder contain ..
+        for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
+            move /Y "%%x\*" . > NUL 2>&1
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : check if (DLC) or (UPDATE DATA) folders exist
    :checkGamesToBePrepared
 
@@ -852,7 +869,7 @@ REM : functions
         @echo Preparing those games for emulation^.^.^.
         timeout /T 5 > NUL 2>&1
 
-        REM : calling createShortcuts.bat
+        REM : calling importGames.bat
         set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
         call !tobeLaunch! !GAMES_FOLDER!
 
@@ -892,6 +909,7 @@ REM : functions
         for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
 
         if %nbArgs% EQU 1 goto:createShortcuts
+        if !useMlcFolderFlag! EQU 1 goto:createShortcuts
 
         REM : first Cemu install
         if %cemuNumber% EQU 1 (
@@ -1007,7 +1025,7 @@ REM : functions
             @echo AUTOMATIC SETTINGS IMPORT is enable by default
             @echo but if it causes issues^, you still can disable it
             @echo.
-            @echo For each games^, if not settings exist for a given
+            @echo For each games^, if no settings exist for a given
             @echo version of CEMU^, BatchFw will try to find suitables
             @echo settings and you won^'t have to re-enter your settings
             @echo.

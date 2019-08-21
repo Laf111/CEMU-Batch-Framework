@@ -58,9 +58,6 @@ REM : main
     pushd !GAMES_FOLDER!
 
     cls
-    @echo =========================================================
-    @echo Import saves from an mlc01 folder
-    @echo =========================================================
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -130,11 +127,11 @@ REM : main
 
     :inputsAvailables
 
-    @echo  - source mlc01 folder ^: !MLC01_FOLDER_PATH!
-    @echo =========================================================
+    IF !QUIET_MODE! EQU 0 @echo =========================================================
+    @echo Import saves from ^: !MLC01_FOLDER_PATH!
+    IF !QUIET_MODE! EQU 0 @echo =========================================================
 
     :scanGamesFolder
-    cls
 
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
@@ -204,9 +201,9 @@ REM : main
         )
     )
 
+    if !QUIET_MODE! EQU 1 goto:exiting
     @echo =========================================================
     @echo Treated !NB_SAVES_TREATED! saves
-    if ["%QUIET_MODE%"] == ["1"] goto:exiting
 
     @echo #########################################################
     @echo This windows will close automatically in 12s
@@ -288,9 +285,8 @@ REM : functions
         set "endTitleId=%titleId:~8,8%"
 
         REM : check if a save exist for this game in MLC01_FOLDER_PATH
-        set "save="!MLC01_FOLDER_PATH:"=!\usr\save\%startTitleId%\%endTitleId%""
-
-        if not exist !save! goto:eof
+        set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save\%startTitleId%\%endTitleId%""
+        if not exist !saveFolder! goto:eof
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
@@ -298,6 +294,15 @@ REM : functions
         @echo =========================================================
         @echo Save detected for !GAME_TITLE!
         @echo ---------------------------------------------------------
+
+        REM : check if more than user is defined
+        set /A "nbUsers=0"
+        for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
+
+        if !nbUsers! LEQ 1 (
+            set "user=%USERNAME%"
+            goto:compressSave
+        )
 
         @echo For which user do you want to use it ?
         @echo.
@@ -317,6 +322,7 @@ REM : functions
         set /A "index=!cr!-1"
         set "user=!users[%index%]!"
 
+        :compressSave
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
         if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
@@ -329,12 +335,12 @@ REM : functions
         @echo.
 
         pushd !inGameSavesFolder!
-        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul !rarFile! !save!
+        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul !rarFile! !saveFolder!
         pushd !GAMES_FOLDER!
         set /A NB_SAVES_TREATED+=1
-        )
 
-
+        set "targetSaveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%startTitleId%\%endTitleId%""
+        if not exist !targetSaveFolder! mkdir !targetSaveFolder! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -198,7 +198,7 @@ REM : main
     @echo =========================================================
     @echo Treated !NB_GAMES_TREATED! games
     @echo #########################################################
-    if ["%QUIET_MODE%"] == ["1"] goto:exiting
+    if !QUIET_MODE! EQU 1 goto:exiting
     @echo ---------------------------------------------------------
     @echo Delete and recreate shortcut for the treated games
     @echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)

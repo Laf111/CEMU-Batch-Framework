@@ -298,10 +298,10 @@ REM : main
 
     call:fwShortcuts
 
-    REM : importing CEMU VERSION controller profiles under !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!
+    REM : importing CEMU VERSION controller profiles under !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles
     call:syncControllerProfiles
     @echo ---------------------------------------------------------
-    @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles\!USERDOMAIN!^)
+    @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
     @echo ---------------------------------------------------------
@@ -654,7 +654,7 @@ REM : functions
 
     :syncControllerProfiles
 
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles\!USERDOMAIN!""
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
         if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
@@ -823,8 +823,8 @@ REM : functions
         )
 
         REM : create a shortcut to getWiiuOnlineFiles.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Get online files.lnk""
-        set "LINK_DESCRIPTION="Download all necessary files to play online with CEMU""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Get online files^, update accounts with the Wii-U ones.lnk""
+        set "LINK_DESCRIPTION="Download all necessary files to play online with CEMU and update accounts with the Wii-U ones""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getWiiuOnlineFiles.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\online.ico""
         if not exist !LINK_PATH! (
@@ -1014,7 +1014,7 @@ REM : functions
 
         REM : create a shortcut to forceGraphicPackUpdate.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Force Graphic Pack folder update.lnk""
-        set "LINK_DESCRIPTION="Force Graphic Pack folder update and BatchFw GFX rebuild""
+        set "LINK_DESCRIPTION="Force Graphic Pack folder update and BatchFw extra GFX packs rebuild""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\forceGraphicPackUpdate.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
         if not exist !LINK_PATH! (

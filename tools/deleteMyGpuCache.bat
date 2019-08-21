@@ -67,23 +67,43 @@ REM : main
 
     REM : openGL cache location
     :glCacheFound
-    choice /C y /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! ? (y/n : yes by default in 4s)"
+    choice /C y /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! (y/n : yes by default in 4s) ?:"
     if %ERRORLEVEL% EQU 2 (
-        choice /C y /T 2 /D y /N /M "> Cancelled by user, exiting in 2s"
-        goto:endScript
+        choice /C y /T 2 /D y /N /M "> Cancelled by user, exiting in 4s"
+        goto:cemuInstalls
     )
     rmdir /Q /S !OPENGL_CACHE! > NUL 2>&1
     mkdir !OPENGL_CACHE! > NUL 2>&1
 
     @echo ^> !OPENGL_CACHE:"=! was cleared ^!
 
+    :cemuInstalls
+
+
+    choice /C y /T 4 /D y /N /M "Clear all shader caches of ALL your CEMU installs (y/n : yes by default in 4s) ?:"
+    if %ERRORLEVEL% EQU 2 (
+        choice /C y /T 2 /D y /N /M "> Cancelled by user, exiting in 4s"
+        goto:log
+    )
+
+    REM : search in logFile, getting only the last occurence
+    set "installPath=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
+
+        set "installPath="%%i""
+        set "GLCache="!installPath:"=!\shaderCache\driver""
+        if exist !GLCache! @echo ^> Clearing !GLCache! && rmdir /S /Q  !GLCache! > NUL 2>&1
+        set "pcCache="!installPath:"=!\shaderCache\precompiled""
+        @echo ^> Clearing !pcCache!
+        for /F "delims=~" %%i in ('dir /B /S !pcCache! 2^>NUL') do del /F "%%i" > NUL 2>&1
+    )
+
     :log
-    set "msg="!DATE!-empty GPU OpenGL cache=!OPENGL_CACHE:"=!""
+    set "msg="!DATE! Shader Caches deleted by !USERNAME!""
     call:log2HostFile !msg!
 
     timeout /T 3 > NUL 2>&1
 
-    :endScript
     endlocal
     exit /b 0
 
