@@ -7,11 +7,16 @@ All versions of CEMU released from the 1.11.0 are supported (1.11.0 introduced t
 ## The main purpose of BatchFW is:
 
 - Handle more than one user/save and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves);
+
 - Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig);
+
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; 
+
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
+
 - Check new release before updating your main install;
-- Make your loadiine games library portable and save settings per host (and per user)
+
+- Make your loadiine games library portable and save settings per user and per host.
 
 
 ## How it works:
@@ -42,11 +47,11 @@ The mlc01 path is in the game folder so:
 
 - Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
-- Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one.
+- Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
 
-- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios.  
+- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios; 
 
-- Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC).
+- Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC);
 
 - FTP transferts with your Wii-U (optional) : 
     - BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template);
@@ -86,7 +91,7 @@ Other features:
 
 - Double automatic backup of your transferable cache and saves for each games to avoid their corruption that can occur on CEMU crash;
 
-- Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8) and not only...
+- Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8);
 
 - Automatic graphic packs update (check availability);
 
@@ -99,8 +104,8 @@ Other features:
 - Extract in your games folder;
 - launch _BatchFW_Install\\setup.bat;
 - move or copy your mlc01 data when asked;
-    - if you use an/some external mlc01 folder(s) per user, import all of them
-    - a/some CEMU install(s) per user, register all installs with importing mlc01 data   
+    - if you use external mlc01 folders per user, import all of them
+    - if you use a CEMU installs per user, register all installs with importing mlc01 data   
 - launch all your games a first time (boot to the menu is sufficient) using the shortcuts created to let BatchFw collect your transferable cache.
 
 When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to  create shortcuts (users already defined on another host are imported automatically, online files as well). 
