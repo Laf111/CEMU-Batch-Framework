@@ -70,6 +70,8 @@ Other features:
 
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
+- Push the CEMU process priority to "above nromal" to "high" to minimize FPS drops while in game;
+
 - Your own games compatibility datase per host you use (BatchFW logs silently the first version of CEMU that manages to run a game on this host);
 
 - Your own CEMU X.Y.Z games compatibility list per host: compatibility per version and per host of all your games (last column in the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically with your specs and the settings used);
