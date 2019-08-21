@@ -18,7 +18,7 @@ All versions of CEMU released from the 1.11.0 are supported (1.11.0 introduced t
 
 All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
 
-With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw use the -mlc argument (introduced since 1.10) to set the mlc01 folder path outside CEMU. 
+With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw use the -mlc argument (introduced since 1.10) to set the mlc01 folder path outside the CEMU's folder. 
 
 The mlc01 path is in the game folder so:
 
