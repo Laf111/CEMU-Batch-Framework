@@ -107,7 +107,7 @@ REM : main
     if not exist !cemuLog! goto:getGameData
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-    if not ["%versionRead%"] == ["NOT_FOUND"] set "VERSION=%versionRead%"
+    if not ["!versionRead!"] == ["NOT_FOUND"] set "VERSION=!versionRead!"
 
     :getGameData
 
@@ -176,7 +176,7 @@ REM : main
     REM : ShaderCache Id
     @echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
 
-    if ["%versionRead%"] == ["NOT_FOUND"] (
+    if ["!versionRead!"] == ["NOT_FOUND"] (
         call:getVersion
         if not ["!VERSION!"] == ["NONE"] (
             REM : ShaderCache Id

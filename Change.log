@@ -1,7 +1,8 @@
-21/08/2019 V15 :
+22/08/2019 V15 :
+- fix : using delayed expansion for versionRead (when comparing version)
 - fix : don't ask for a user in importSaves.bat if no users were defined 
 - add : add a call to importSaves.bat in copy/moveMlc01DataForAllGames.bat with the mlc01 folder as 
-  argument (it asks which user is concerned by the Mlc01 folder and create his compressed save)
+        argument (it asks which user is concerned by the Mlc01 folder and create his compressed save)
 - fix : in setup.bat, do not ask to import mlc01 data when registering a CEMU's install
         if you already browse to any external mlc01 folder 
 - fix : now hosts share all controller profiles

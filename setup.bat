@@ -984,17 +984,17 @@ REM : functions
         set /A "post1151=1"
         if not exist !clog! goto:openCemuAFirstTime
 
-         set "version=NOT_FOUND"
+         set "versionRead=NOT_FOUND"
 
-        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "version=%%e"
-        if ["%version%"] == ["NOT_FOUND"] goto:extractV2Packs
+        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
-        call:compareVersions %version% "1.15.1" result
+        call:compareVersions !versionRead! "1.15.1" result
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 2 set /A "post1151=0"
 
-        call:compareVersions %version% "1.14.0" result
+        call:compareVersions !versionRead! "1.14.0" result
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 1 goto:autoImportMode

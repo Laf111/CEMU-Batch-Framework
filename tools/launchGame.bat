@@ -249,7 +249,7 @@ REM : main
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:getTitleId
     
-    call:compareVersions %versionRead% "1.14.0" result
+    call:compareVersions !versionRead! "1.14.0" result
     if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
     if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !result! EQU 2 set "gfxType=V2"
@@ -294,6 +294,10 @@ REM : main
     if [!libFileLine!] == ["NONE"] goto:getScreenMode
 
     :updateGameGraphicPack
+
+    REM : minimize all windows befaore launching in full screen
+    set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
+    powershell !psCommand!
 
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
@@ -595,11 +599,11 @@ REM : main
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
     set "GLCacheBackupFolder="NOT_FOUND""
-    if [!OPENGL_CACHE_PATH!] == ["NOT_FOUND"] goto:launchCemu
+    if [!OPENGL_CACHE_PATH!] == ["NOT_FOUND"] goto:lockCemu
 
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!"
 
-    if not exist !GLCacheSavesFolder! goto:launchCemu
+    if not exist !GLCacheSavesFolder! goto:lockCemu
 
     set "IdGpuFolder="NOT_FOUND""
     pushd !GLCacheSavesFolder!
@@ -607,15 +611,15 @@ REM : main
     for /F "delims=~" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "IdGpuFolder="%%x""
     pushd !BFW_TOOLS_PATH!
 
-    REM : if no backup found for your GPU VENDOR goto:launchCemu
-    if [!IdGpuFolder!] == ["NOT_FOUND"] goto:launchCemu
+    REM : if no backup found for your GPU VENDOR goto:lockCemu
+    if [!IdGpuFolder!] == ["NOT_FOUND"] goto:lockCemu
     REM : get gpuVendor and gpuDriversVersion from folder's name
     for /F "tokens=1-2 delims=@" %%i in (!IdGpuFolder!) do (
         set "gpuVendorRead=%%i"
         set "gpuDriversVersionRead=%%j"
     )
 
-    REM : if GPU_VENDOR not match goto:launchCemu ignore the file
+    REM : if GPU_VENDOR not match goto:lockCemu ignore the file
     if not ["!gpuVendorRead!"] == ["!GPU_VENDOR!"] (
         @echo Found a GLCache backup !IdGpuFolder! that is not for your current GPU Vendor^, delete-it ^! >> !batchFwLog!
         @echo Found a GLCache backup !IdGpuFolder! that is not for your current GPU Vendor^, delete-it ^!
@@ -624,7 +628,7 @@ REM : main
         call:log2HostFile !msg!
 
         rmdir /Q /S !IdGpuFolder! > NUL 2>&1
-        goto:launchCemu
+        goto:lockCemu
     )
     REM : secure string for diff
     set "old=%gpuDriversVersionRead:.=%"
@@ -636,7 +640,7 @@ REM : main
     set "new=%new:-=%"
     set "new=%new:_=%"
 
-    REM : if GPU_DRIVERS_VERSION match goto:launchCemu use the file
+    REM : if GPU_DRIVERS_VERSION match goto:lockCemu use the file
     if not ["%old%"] == ["%new%"] (
         @echo Display drivers update detected ^! >> !batchFwLog!
         @echo from display drivers version    = [%gpuDriversVersionRead%] >> !batchFwLog!
@@ -654,8 +658,8 @@ REM : main
 
     set "GLCacheBackupFolder="!IdGpuFolder:"=!\!GAME_TITLE!""
 
-    REM : if no backup folder is found for this game goto:launchCemu
-    if not exist %GLCacheBackupFolder% goto:launchCemu
+    REM : if no backup folder is found for this game goto:lockCemu
+    if not exist %GLCacheBackupFolder% goto:lockCemu
 
     REM : openGLCacheID
     for /F "delims=~" %%x in ('dir /A:D /O:D /B !GLCacheBackupFolder!') do set "oldOGLCacheId=%%x"
@@ -666,7 +670,7 @@ REM : main
     set "shaderCacheFileName=NOT_FOUND"
     for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
-    if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:launchCemu
+    if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:lockCemu
 
     pushd !GLCacheBackupFolder!
     REM OPENGL_CACHE_PATH already created before (if missing)
@@ -679,7 +683,7 @@ REM : main
     REM : using backup
     @echo Using !shaderCacheFileName! >> !batchFwLog!
     @echo Using !shaderCacheFileName!
-    goto:launchCemu
+    goto:lockCemu
 
     :subfolderFound
     set "GlCache="!OPENGL_CACHE_PATH:"=!\%oldOGLCacheId%""
@@ -699,8 +703,9 @@ REM : main
     REM : using backup
     @echo Using !GlCacheSaved! as OpenGL cache >> !batchFwLog!
     @echo Using !GlCacheSaved! as OpenGL cache
+
     REM : Launching CEMU (for old versions -mlc will be ignored)
-    :launchCemu
+    :lockCemu
 
     REM : create a lock file to protect this launch
     set "blf="!CEMU_FOLDER:"=!\BatchFw_!user:"=!-!USERNAME!.lock""
@@ -722,7 +727,7 @@ REM : main
             REM : import mods for the game as graphic packs
             call:importMods > NUL 2>&1
         )
-        goto:minimizeAll
+        goto:launchCemu
     )
 
     REM : clean links in game's graphic pack folder
@@ -772,19 +777,17 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
-        call:compareVersions %versionRead% "1.15.3b" result
+    if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
+        call:compareVersions !versionRead! "1.15.3b" result
+
         if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
-        if !result! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:minimizeAll
+        if !result! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
     )
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
-    :minimizeAll
-    REM : minimize all windows befaore launching in full screen
-    set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
-    powershell !psCommand!
+    :launchCemu
 
     REM : launching CEMU on game and waiting
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
@@ -1786,7 +1789,7 @@ REM : functions
 
         :patchGp
 
-        call:compareVersions %versionRead% "1.15.8" result
+        call:compareVersions !versionRead! "1.15.8" result
         if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
         if !result! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
@@ -2477,6 +2480,7 @@ REM : functions
             if !dt! LSS !dr! set "%2=2" && goto:eof
             if !dt! GTR !dr! set "%2=1" && goto:eof
 
+            set "%2=0"
     goto:eof
 
     REM : if vit < vir return 1

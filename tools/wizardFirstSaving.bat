@@ -199,11 +199,11 @@ REM : main
     )
 
     set /A "v1156=99"
-    call:compareVersions %versionRead% "1.15.6" v1156
+    call:compareVersions !versionRead! "1.15.6" v1156
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
     set /A "v1116=99"
-    call:compareVersions %versionRead% "1.11.6" v1116
+    call:compareVersions !versionRead! "1.11.6" v1116
     if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
 
     REM : else, create profile file in CEMU_FOLDER
@@ -228,15 +228,15 @@ REM : main
     set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
-    if ["%versionRead%"] == ["NOT_FOUND"] goto:displayGameProfile
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:displayGameProfile
     
-    call:compareVersions %versionRead% "1.14.0" result
+    call:compareVersions !versionRead! "1.14.0" result
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 set "gfxType=V2"
 
     REM : if CEMU version < 1.12.0 (add games' list in UI)
-    call:compareVersions %versionRead% "1.12.0" result
+    call:compareVersions !versionRead! "1.12.0" result
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
     if !result! EQU 2 goto:displayGameProfile
@@ -489,8 +489,8 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    if not ["%d1%"] == ["%d2%"] if not ["%versionRead%"] == ["NOT_FOUND"] (
-        call:compareVersions %versionRead% "1.15.3" result
+    if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
+        call:compareVersions !versionRead! "1.15.3" result
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! LEQ 1 (
