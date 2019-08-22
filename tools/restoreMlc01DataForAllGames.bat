@@ -159,6 +159,7 @@ REM : main
         @echo =========================================================
         if !QUIET_MODE! EQU 0 pause
     )
+    
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
@@ -314,30 +315,10 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
-        set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\save""
-        for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
-            call:moveSaves "%%i"
-        )
-
         set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             call:moveTitle "%%i"
         )
-
-        REM : restore last save
-        set "rarFile="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\*.rar""
-        for /F "delims=~" %%i in ('dir /b /o:d !pat! 2^>NUL') do (
-            set "rarFile="%%i""
-        )
-        if [!rarFile!] == ["NONE"] goto:logInfos
-
-        pushd !CEMU_FOLDER!
-        set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
-
-        !rarExe! x -o+ -inul !rarFile! > NUL 2>&1
-        pushd !GAMES_FOLDER!
-
 
         :logInfos
         REM : log to games library log file
@@ -345,26 +326,6 @@ REM : functions
         call:log2GamesLibraryFile !msg!
 
         set /A NB_GAMES_TREATED+=1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :moveSaves
-
-        set "sf="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%~1\%endTitleId%""
-        if not exist !sf! (
-            mkdir !sf! > NUL 2>&1
-            goto:eof
-        )
-
-        set "target="!MLC01_FOLDER_PATH:"=!\usr\save\%~1\%endTitleId%""
-        call:moveFolder !sf! !target! cr
-        if !cr! NEQ 0 (
-            @echo ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!
-            pause
-        ) else (
-            @echo Moving !sf!
-        )
 
     goto:eof
     REM : ------------------------------------------------------------------

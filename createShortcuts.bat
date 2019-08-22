@@ -918,6 +918,16 @@ REM : functions
             if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
+        
+        REM : create a shortcut to restoreUserSavesOfAllGames.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Restore user saves for selected games.lnk""
+        set "LINK_DESCRIPTION="Restore user saves for selected games in a mlc01 target folder""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreUserSavesOfAllGames.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreUserSavesOfAllGames.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreUserSavesOfAllGames^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
 
         REM : create a shortcut to backupAllInGameSaves.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Backup my games's saves.lnk""
@@ -1409,7 +1419,7 @@ REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! >
 
         REM : arguments for LaunchGame.bat
         set "launchGame="!BFW_TOOLS_PATH:"=!\launchGame.bat""
-        set "ARGS="!launchGame!" "!CEMU_FOLDER!" "!GAME_FILE_PATH!" "!OUTPUT_FOLDER!" "!ICO_PATH!" "!MLC01_FOLDER_PATH!" "!user!""
+        set "ARGS="!launchGame!" "!CEMU_FOLDER!" "!GAME_FILE_PATH!" "!OUTPUT_FOLDER!" "!ICO_PATH!" "!MLC01_FOLDER_PATH!" !user:"=!"
 
         if ["!IMPORT_MODE!"] == ["ENABLED"] goto:ignorePrecomp
         set "ARGS=!ARGS! -noImport"

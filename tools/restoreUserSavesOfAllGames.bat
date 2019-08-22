@@ -3,6 +3,7 @@ setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
 
+
     setlocal EnableDelayedExpansion
 
     color 4F
@@ -44,6 +45,9 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
+    REM : initialize the number of users
+    set /A "nbUsers=0"
+    
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -61,11 +65,11 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Move mlc01 data to each game
+    title Restore all saves of !user:"=! to a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
-    @echo Please select mlc01 source folder
+    @echo Please select mlc01 target folder
 
     :askMlc01Folder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
@@ -88,16 +92,18 @@ REM : main
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
-        @echo !usrTitle! not found
+        @echo !usrTitle! not found ^?
         goto:askMlc01Folder
     )
+
     cls
     goto:inputsAvailables
 
     :getArgsValue
-    if %nbArgs% NEQ 1 (
-        @echo ERROR on arguments passed^!
-        @echo SYNTAX^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
+    if %nbArgs% GTR 2 (
+        @echo ERROR ^: on arguments passed ^!
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH user^*
+        @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
         pause
         exit /b 99
@@ -105,11 +111,15 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[0]!"
     if not exist !MLC01_FOLDER_PATH! (
-        @echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
+        @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^!
         pause
         exit /b 1
     )
 
+    if %nbArgs% EQU 2 (
+        set "user=!args[1]!"
+        set /A "nbUsers=1"
+    )
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
 
@@ -119,17 +129,48 @@ REM : main
     for /F "delims=~" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"
     set CEMU_FOLDER=!MLC01_FOLDER_PATH:\%basename%=!
 
-    for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
+    REM : if called with a user as 2nd argument
+    if !nbUsers! EQU 1 goto:displayHeader
+    
+    REM : ask for a registered user if more than one user exist
+    
+    REM : check if more than user is defined
+    for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
 
+    if !nbUsers! LEQ 1 (
+        set "user="%USERNAME%""
+        goto:displayHeader
+    )
+
+    @echo For which user do you want to use it ?
+    @echo.
+
+    set /A "nbUsers=0"
+    set "cargs="
+    for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        set "users[!nbUsers!]="%%a""
+        set /A "nbUsers +=1"
+        set "cargs=!cargs!!nbUsers!"
+        echo !nbUsers! ^. %%a
+    )
+    @echo.
+    choice /C !cargs! /N /M "Enter the user id (number above) : "
+    set /A "cr=!ERRORLEVEL!"
+    set "user=NONE"
+    set /A "index=!cr!-1"
+    set "user=!users[%index%]!"
+
+    :displayHeader
     @echo =========================================================
-    @echo Move Game data from mlc01 folder to each game^'s folder
+    @echo Restore saves of !user:"! to a mlc01 folder for each game^'s chosen
     @echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
-    @echo  - source mlc01 folder ^: !MLC01_FOLDER_PATH!
+    @echo  - target mlc01 folder ^: !MLC01_FOLDER_PATH!
     @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
+
     @echo Launching in 30s
-    @echo     ^(y^)^: launch now
-    @echo     ^(n^)^: cancel
+    @echo     ^(y^) ^: launch now
+    @echo     ^(n^) ^: cancel
     @echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
@@ -139,11 +180,6 @@ REM : main
     )
     cls
     :scanGamesFolder
-
-    REM : add a call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
-    set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
-    call !importSave! !MLC01_FOLDER_PATH!
-
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -156,13 +192,12 @@ REM : main
         type !tmpFile! | find "?"
         del /F !tmpFile!
         @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name
+        @echo Fix-it by removing characters here replaced in the folder^'s name by ^?
         @echo Exiting until you rename or move those folders
         @echo =========================================================
-        pause
-        goto:eof
+        if !QUIET_MODE! EQU 0 pause
     )
-    set /A NB_GAMES_TREATED=0
+    set /A NB_SAVES_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
 
@@ -181,13 +216,13 @@ REM : main
 
             if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
-            call:mvGameData
+            call:extractSave
 
         ) else (
 
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            @echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -195,6 +230,7 @@ REM : main
             set "str=!str:&=!"
             set "str=!str:\!=!"
             set "str=!str:%%=!"
+            set "str=!str:.=!"
             set "str=!str:?=!"
             set "str=!str:\"=!"
             set "str=!str:^=!"
@@ -205,17 +241,17 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
     @echo =========================================================
-    @echo Treated !NB_GAMES_TREATED! games
+    @echo Treated !NB_SAVES_TREATED! games
     @echo #########################################################
     if !QUIET_MODE! EQU 1 goto:exiting
     @echo ---------------------------------------------------------
-    @echo Delete and recreate shortcuts for the treated games
+    @echo Delete and recreate shortcut for the treated games
     @echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
     @echo ---------------------------------------------------------
     @echo This windows will close automatically in 12s
@@ -239,7 +275,7 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :mvGameData
+    :extractSave
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
         if /I [!GAME_FOLDER_PATH!] == ["!GAMES_FOLDER:"=!\mlc01"] goto:eof
@@ -253,18 +289,19 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+
+        REM : if rarFile not exists, skip this game
+        if not exist !rarFile! goto:eof
+
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         @echo =========================================================
-        @echo - !GAME_TITLE!
+        @echo - Restore !user:"=! save of !GAME_TITLE!
         @echo ---------------------------------------------------------
-
-        REM : asking for associating the current game with this CEMU VERSION
-
-        @echo If you play !GAME_TITLE! with !CEMU_FOLDER_NAME:"=! ^:
-        @echo.
-        @echo Moving game^'s data from !MLC01_FOLDER_PATH! ^?
+        if !QUIET_MODE! EQU 1 goto:extract
+        @echo Moving !user:"=! saves to !MLC01_FOLDER_PATH! ^?
         @echo   ^(n^) ^: no^, skip
         @echo   ^(y^) ^: yes ^(default value after 15s timeout^)
         @echo.
@@ -272,150 +309,27 @@ REM : functions
         call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
             REM : skip this game
-            echo Skip this GAME
+            @echo Skip this GAME
             goto:eof
         )
 
-        REM : mlc01 subfolder already present
-        set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
-        if exist !mlc01Folder! (
-            choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
-            if !ERRORLEVEL! EQU 2 goto:eof
-        )
         @echo ---------------------------------------------------------
-        set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
-        if not exist !META_FILE! (
-            @echo No meta folder found under game folder^, aborting^!
-            goto:metaFix
-        )
+        REM : extract rarFile
+        :extract
 
-        REM : get Title Id from meta.xml
-        :getTitleLine
-        set "titleLine="NONE""
-        for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        if [!titleLine!] == ["NONE"] (
-            @echo No titleId found in the meta^.xml file ^?
-            :metafix
-            @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
-            set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
-            @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
-            @echo "Then close notepad to continue"
+        pushd !CEMU_FOLDER!
+        set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
 
-            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
-            REM : create the meta.xml file
-            @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
-            @echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
-            @echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
-            @echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
-            @echo ^<^/menu^> >> !META_FILE!
-            @echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
-            @echo "Then close notepad to continue"
-            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
-            goto:getTitleLine
-        )
+        !rarExe! x -o+ -inul !rarFile! > NUL 2>&1
+        pushd !GAMES_FOLDER!
 
-        for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
-        if !titleId! == "################" goto:metafix
-
-        set "endTitleId=%titleId:~8,8%"
-
-        set "pat="!MLC01_FOLDER_PATH:"=!\usr\title""
-        for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
-            call:moveTitle "%%i"
-        )
-
-        set "sysSrc="!MLC01_FOLDER_PATH:"=!\sys""
-        set "sysTarget="!GAME_FOLDER_PATH:"=!\mlc01\sys""
-
-        set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
-
-        if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /S /MOVE /IS /IT  > NUL 2>&1
-
-        set /A NB_GAMES_TREATED+=1
-
-        :logInfos
-        REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! move mlc01 data from=!MLC01_FOLDER_PATH:"=!""
-        call:log2GamesLibraryFile !msg!
+        set /A NB_SAVES_TREATED+=1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :moveTitle
 
-        set "tf="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
-        if not exist !tf! goto:eof
-
-        set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
-        set "metaFolder="!target:"=!\meta""
-        if exist !metaFolder! goto:eof
-        
-        call:moveFolder !tf! !target! cr
-        if !cr! NEQ 0 (
-            @echo ERROR when moving !tf! !target!^, cr=!ERRORLEVEL!
-            pause
-        ) else (
-            @echo Moving !tf!
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to optimize a folder move (move if same drive letter much type faster)
-    :moveFolder
-
-        REM arg1 source
-        set "source="%~1""
-        REM arg2 target
-        set "target="%~2""
-        REM arg3 = return code
-
-        set "source=!source:\\=\!"
-        set "target=!target:\\=\!"
-
-        if not exist !source! goto:eof
-        if [!source!] == [!target!] if exist !target! goto:eof
-        if not exist !target! mkdir !target!
-
-        REM : source drive
-        for %%a in (!source!) do set "sourceDrive=%%~da"
-
-        REM : target drive
-        for %%a in (!target!) do set "targetDrive=%%~da"
-
-        REM : if folders are on the same drive
-        if ["!sourceDrive!"] == ["!targetDrive!"] (
-
-            for %%a in (!target!) do set "parentFolder="%%~dpa""
-            set "parentFolder=!parentFolder:~0,-2!""
-            if exist !target! rmdir /Q /S !target! > NUL 2>&1
-
-            REM : use move command (much type faster)
-            move /Y !source! !parentFolder! > NUL 2>&1
-            set /A "cr=!ERRORLEVEL!"
-            if !cr! EQU 1 (
-                set /A "%3=1"
-            ) else (
-                set /A "%3=0"
-            )
-
-           goto:eof
-        )
-
-        REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! GTR 7 set /A "%3=1"
-        if !cr! GEQ 0 set /A "%3=0"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
 
@@ -474,12 +388,12 @@ REM : functions
 
             if [%cr%] == [!j!] (
                 REM : value found , return function value
+
                 set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
-
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -529,7 +443,6 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     REM : function to log info for current host
     :log2HostFile

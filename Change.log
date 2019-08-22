@@ -1,5 +1,27 @@
+Check setOnlineFiles
+Report modifications in wizardFirstSaving 
+
+Wii-U and/or with CEMU
+backup account.dat parent's folder 
+backup MK8 saves
+make one race
+backup account.dat parent's folder 
+backup MK8 saves
+
+Diff
+
+
+
+
+
 22/08/2019 V15 :
-- fix : using delayed expansion for versionRead (when comparing version)
+- add : add a script restoreUserSavesOfAllGames.bat to copy back all last saves of a given user to 
+        a mlc01 folder (add a shortcut also in Wii-U Games\BatchFw\Tools\Mlc01 folder handling)
+- add : call restoreUserSavesOfAllGames.bat in restoreMlc01DataForAllGames.bat and remove saves
+        handling from this script
+- add : call restoreUserSavesOfAllGames.bat in uninstall.bat for all users registered
+- fix : using delayed expansion for versionRead (when comparing versions). Fixed broken graphic packs
+        intallation failure when BatchFw and Cemu are not on the same partition (because of cemu Bug #34)
 - fix : don't ask for a user in importSaves.bat if no users were defined 
 - add : add a call to importSaves.bat in copy/moveMlc01DataForAllGames.bat with the mlc01 folder as 
         argument (it asks which user is concerned by the Mlc01 folder and create his compressed save)
@@ -157,7 +179,7 @@
 - hot fix : shortcuts doesn't work for a windows OS with cmd extensions forced to disabled (even if registry says the reverse...)
   * full re-writing of all external calls (start command behavior is altered on such system)
   * force enabling extension inside cmd environnement (add a directive for that in all the code)
-- batchFw is now completly silent when launching games and create a log "shortcuted" in Wii-U Games\BatchFW
+- batchFw is now completly silent when launching games and create a log "shortcuted" in Wii-U Games\BatchFw
   On failure, batchFw's log is displayed. When CEMU's return code is <> 0, its log.txt is displayed.
 - add : script to monitor BatchFw execution, set launchGame.bat (and all its child processes) priority to high, define a timeout 
   and propose to kill BatchFw if reached.

@@ -515,7 +515,7 @@ REM : functions
         )
 
         if %nbArgs% EQU 0 (
-            choice /C yn /N /M "Upload "!user!" saves on Wii-U's SD card (y, n)? : "
+            choice /C yn /N /M "Upload !user:"=! saves on Wii-U's SD card (y, n)? : "
             if !ERRORLEVEL! EQU 2 goto:eof
         )
 

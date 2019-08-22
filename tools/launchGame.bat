@@ -1828,12 +1828,12 @@ REM : functions
         )
 
         if ["!accId!"] == ["NONE"] (
-            @echo WARNING^: AccountId not found >> !batchFwLog!
-            @echo WARNING^: AccountId not found
+            @echo WARNING^: AccountId not found for !user:"=! >> !batchFwLog!
+            @echo WARNING^: AccountId not found for !user:"=!
             cscript /nologo !MessageBox! "AccountId not found for !user:"=!, cancel online files installation" 4160
             goto:eof
         )
-        @echo AccountId found >> !batchFwLog!
+        @echo AccountId found for !user:"=! >> !batchFwLog!
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
@@ -1877,8 +1877,6 @@ REM : functions
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
         )
-        @echo Settings^.xml patched >> !batchFwLog!
-        @echo Settings^.xml patched
 
         REM : install other files needed for online play
         set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
@@ -1901,8 +1899,8 @@ REM : functions
         if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
-        @echo Online account enabled ^: !accId! >> !batchFwLog!
-        @echo Online account enabled ^: !accId!
+        @echo Online account for !user:"=! enabled ^: !accId! >> !batchFwLog!
+        @echo Online account for !user:"=! enabled ^: !accId!
 
     goto:eof
     REM : ------------------------------------------------------------------

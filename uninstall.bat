@@ -179,7 +179,7 @@ REM : main
     )
 
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
-    wscript /nologo !StartWait! !script! !MLC01_FOLDER!
+    wscript /nologo !StartWait! !script! !MLC01_FOLDER_PATH!
     set "mlc01Restored=1"
 
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
@@ -192,7 +192,7 @@ REM : main
     set "TransShaderCacheRestored=0"
     call:getUserInput "Restore all transferable shader cache to a Cemu folder ? (y, n)" "y,n" ANSWER
 
-    if [!ANSWER!] == ["n"] goto:removeExtraFolders
+    if [!ANSWER!] == ["n"] goto:restoreSaves
 
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
@@ -225,6 +225,49 @@ REM : main
     @echo ^> transferable shader caches restored
     @echo ---------------------------------------------------------
 
+    :restoreSaves
+    set "restoreUserSavesOfAllGames=0"
+    call:getUserInput "Restore all saves for all users to mlc01 folders ? (y, n)" "y,n" ANSWER
+
+    if [!ANSWER!] == ["n"] goto:removeExtraFolders
+    
+    REM : Loop on every user registered
+    for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        set "user="%%a""
+
+        :askSaveFolder
+        for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
+        if [!MLC01_FOLDER_PATH!] == ["NONE"] (
+            choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+            if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+            goto:askSaveFolder
+        )
+        REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
+        set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+        call !tobeLaunch! !MLC01_FOLDER_PATH!
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            @echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+            pause
+            goto:askSaveFolder
+        )
+
+        REM : check if a usr/title exist
+        set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
+        if not exist !usrTitle! (
+            @echo !usrTitle! not found ^?
+            goto:askSaveFolder
+        )
+
+        set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
+      
+        wscript /nologo !StartWait! !script! !MLC01_FOLDER_PATH! !user!
+
+    )    
+    
+    set "restoreUserSavesOfAllGames=1"
+    @echo ^> all saves of all users for all games were restored
+    @echo ---------------------------------------------------------
 
     :removeExtraFolders
 
@@ -263,7 +306,6 @@ REM : main
     :removeFoldersLeft
     @echo Do you want to remove all Cemu extra subfolders created^?
     @echo That^'s included ^:
-    @echo - all compressed saves for all users
     @echo - all controllers profiles
     @echo - all CEMU saved settings
     @echo - your own graphic packs if created ones in Cemu game^'s subfolder

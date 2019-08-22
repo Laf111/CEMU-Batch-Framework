@@ -127,8 +127,36 @@ REM : main
 
     :inputsAvailables
 
+    REM : check if more than user is defined
+    set /A "nbUsers=0"
+    for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
+
+    if !nbUsers! LEQ 1 (
+        set "user="%USERNAME%""
+        goto:displayHeader
+    )
+
+    @echo For which user do you want to use it ?
+    @echo.
+
+    set /A "nbUsers=0"
+    set "cargs="
+    for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        set "users[!nbUsers!]="%%a""
+        set /A "nbUsers +=1"
+        set "cargs=!cargs!!nbUsers!"
+        echo !nbUsers! ^. %%a
+    )
+    @echo.
+    choice /C !cargs! /N /M "Enter the user id (number above) : "
+    set /A "cr=!ERRORLEVEL!"
+    set "user=NONE"
+    set /A "index=!cr!-1"
+    set "user=!users[%index%]!"
+
+    :displayHeader        
     IF !QUIET_MODE! EQU 0 @echo =========================================================
-    @echo Import saves from ^: !MLC01_FOLDER_PATH!
+    @echo Import saves for !user:"=! from ^: !MLC01_FOLDER_PATH!
     IF !QUIET_MODE! EQU 0 @echo =========================================================
 
     :scanGamesFolder
@@ -292,44 +320,16 @@ REM : functions
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         @echo =========================================================
-        @echo Save detected for !GAME_TITLE!
+        @echo !user:"=! save detected for !GAME_TITLE!
         @echo ---------------------------------------------------------
 
-        REM : check if more than user is defined
-        set /A "nbUsers=0"
-        for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
-
-        if !nbUsers! LEQ 1 (
-            set "user=%USERNAME%"
-            goto:compressSave
-        )
-
-        @echo For which user do you want to use it ?
-        @echo.
-
-        set /A "nbUsers=0"
-        set "cargs="
-        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-            set "users[!nbUsers!]="%%a""
-            set /A "nbUsers +=1"
-            set "cargs=!cargs!!nbUsers!"
-            echo !nbUsers! ^. %%a
-        )
-        @echo.
-        choice /C !cargs! /N /M "Enter the user id (number above) : "
-        set /A "cr=!ERRORLEVEL!"
-        set "user=NONE"
-        set /A "index=!cr!-1"
-        set "user=!users[%index%]!"
-
-        :compressSave
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
         if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
         if exist !rarFile! (
-            choice /C yn /N /M "A save already exists for "!user!", overwrite ? (y, n)"
+            choice /C yn /N /M "A save already exists for !user:"=!, overwrite ? (y, n)"
             if !ERRORLEVEL! EQU 2 @echo Cancel^! && goto:eof
         )
         @echo.
