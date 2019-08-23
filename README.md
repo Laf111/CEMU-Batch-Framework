@@ -6,7 +6,7 @@ All versions of CEMU released from the 1.11.0 are supported (1.11.0 introduced t
 
 ## The main purpose of BatchFW is:
 
-- Handle more than one user/save and for Wii-U owners, sync CEMU with the Wii-U (accounts, saves);
+- Handle more than one user/save and for Wii-U owners : install online files, sync saves between CEMU with the Wii-U;
 
 - Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig);
 
@@ -62,7 +62,6 @@ Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (Win
 You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
     - Map BatchFw's users to Wii-U profiles;
     - Automatically get online files and install files when an active network connection is found (you still need to dump opt.bin and seeprom.bin manually with NANDDUMPER);
-    - Update your account with the Wii-U one (update ratings...);
     - List all your games installed on the Wii-U by taking a snapshot to a csv file containing for each game:
         - its location (mlc/usb);
         - if saves were found (for one user at least);
