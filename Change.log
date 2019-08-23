@@ -1,20 +1,8 @@
-Check setOnlineFiles
-Report modifications in wizardFirstSaving 
+23/08/2019 V14-11 :
+- fix : remaining bug when comparing versions
+- fix : move icons to %GAME_FOLDER_PATH%\Cemu (now leave game's folders untouched)
 
-Wii-U and/or with CEMU
-backup account.dat parent's folder 
-backup MK8 saves
-make one race
-backup account.dat parent's folder 
-backup MK8 saves
-
-Diff
-
-
-
-
-
-22/08/2019 V15 :
+22/08/2019 V14-10 :
 - add : add a script restoreUserSavesOfAllGames.bat to copy back all last saves of a given user to 
         a mlc01 folder (add a shortcut also in Wii-U Games\BatchFw\Tools\Mlc01 folder handling)
 - add : call restoreUserSavesOfAllGames.bat in restoreMlc01DataForAllGames.bat and remove saves

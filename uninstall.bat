@@ -230,7 +230,7 @@ REM : main
     call:getUserInput "Restore all saves for all users to mlc01 folders ? (y, n)" "y,n" ANSWER
 
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
-    
+
     REM : Loop on every user registered
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
         set "user="%%a""
@@ -260,11 +260,11 @@ REM : main
         )
 
         set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
-      
+
         wscript /nologo !StartWait! !script! !MLC01_FOLDER_PATH! !user!
 
-    )    
-    
+    )
+
     set "restoreUserSavesOfAllGames=1"
     @echo ^> all saves of all users for all games were restored
     @echo ---------------------------------------------------------

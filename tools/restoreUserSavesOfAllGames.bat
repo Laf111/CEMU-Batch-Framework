@@ -47,7 +47,7 @@ REM : main
 
     REM : initialize the number of users
     set /A "nbUsers=0"
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -131,9 +131,9 @@ REM : main
 
     REM : if called with a user as 2nd argument
     if !nbUsers! EQU 1 goto:displayHeader
-    
+
     REM : ask for a registered user if more than one user exist
-    
+
     REM : check if more than user is defined
     for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
 

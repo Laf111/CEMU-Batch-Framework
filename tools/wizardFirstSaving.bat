@@ -587,13 +587,56 @@ REM : functions
             pause
         )
 
+        @echo AccountId found for !user:"=!
+
+        REM : check if the Wii-U is not power on
+        set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
+        if not exist !winScpIni! goto:installAccount
+
+        REM : get the hostname
+        for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
+        REM : check its state
+
+        call:getHostState !ipRead! state
+        if !state! EQU 1 (
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort using online feature" 4112
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
+
+        :installAccount
+
+        REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
+        set "target="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat""
+        copy /Y !af! !target!
+
+        REM : patch settings.xml
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
+
+        REM if not nul
+        for /F "tokens=*" %%a in (!cs!) do (
+            set /A "css=%%~za"
+
+            if !css! EQU 0 (
+                @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^!
+                goto:eof
+           )
+        )
+
+        set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
+
+        !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+
+        if exist !csTmp! (
+            del /F !cs! > NUL 2>&1
+            move /Y !csTmp! !cs! > NUL 2>&1
+        )
+
         REM : install other files needed for online play
         set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
         if exist !onLineMlc01Files! (
-            set "ccerts="!MLC01_FOLDER_PATH!\sys\title\0005001b\10054000\content\ccerts""
-            if not exist !ccerts! xcopy !onLineMlc01Files! "!MLC01_FOLDER_PATH!" /R /S /Y > NUL 2>&1
+            set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
+            if not exist !ccerts! xcopy !onLineMlc01Files! !MLC01_FOLDER_PATH! /R /S /Y > NUL 2>&1
         )
-      
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
@@ -605,19 +648,12 @@ REM : functions
 
         if exist !s1! if exist !t1! move !t1! !t1o! > NUL 2>&1
         if exist !s2! if exist !t2! move !t2! !t2o! > NUL 2>&1
-        
+
         if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
-        if not ["!accId!"] == ["NONE"] (
-            REM : patch settings.xml
-            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        @echo Online account for !user:"=! enabled ^: !accId!
 
-            if exist !csTmp! (
-                del /F !cs! > NUL 2>&1
-                move /Y !csTmp! !cs! > NUL 2>&1
-            )
-        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -925,12 +961,11 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : functions to compare Cemu Versions
+    REM : COMPARE VERSIONS : function to count occurences of a separator
     :countSeparators
-
         set "string=%~1"
-
         set /A "count=0"
+
         :again
         set "oldstring=!string!"
         set "string=!string:*%sep%=!"
@@ -941,20 +976,7 @@ REM : functions
 
     goto:eof
 
-    :compareDigits
-
-            set /A "num=%~1"
-
-            set "dr=99"
-            set "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
-
-            if !dt! LSS !dr! set "%2=2" && goto:eof
-            if !dt! GTR !dr! set "%2=1" && goto:eof
-
-    goto:eof
-
+    REM : COMPARE VERSIONS :
     REM : if vit < vir return 1
     REM : if vit = vir return 0
     REM : if vit > vir return 2
@@ -962,8 +984,14 @@ REM : functions
         set "vit=%~1"
         set "vir=%~2"
 
-        REM : versioning separator
+        REM : format strings
+        call:formatStrVersion !vit! vit
+        call:formatStrVersion !vir! vir
+
+        REM : versioning separator (init to .)
         set "sep=."
+        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -971,17 +999,79 @@ REM : functions
         REM : get the number minimum of sperators found
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
-        set /A "minNbSep+=1"
 
+        if !minNbSep! NEQ 0 goto:loopSep
+
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
+
+        :loopSep
+        set /A "minNbSep+=1"
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
+
             call:compareDigits %%l result
-            if !result! NEQ 0 set "%2=!result!" && goto:eof
+
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
+        REM : check the length of string
+        call:strLength !vit! lt
+        call:strLength !vir! lr
+
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
+
+        set "%3=50"
 
     goto:eof
 
+    REM : COMPARE VERSION : function to compare digits of a rank
+    :compareDigits
+        set /A "num=%~1"
+
+        set "dr=99"
+        set "dt=99"
+        for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+        for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+        set "%2=50"
+
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
+    goto:eof
+
+    REM : COMPARE VERSION : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+
+    REM : COMPARE VERSION : function to format string version without alphabetic charcaters
+    :formatStrVersion
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+        set "str=!str:V=!"
+        set "str=!str:v=!"
+        set "str=!str:RC=!"
+        set "str=!str:rc=!"
+
+        set "%2=!str!"
+    goto:eof
+    
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
 

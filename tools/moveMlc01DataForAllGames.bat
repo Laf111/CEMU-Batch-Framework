@@ -353,7 +353,7 @@ REM : functions
         set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
         set "metaFolder="!target:"=!\meta""
         if exist !metaFolder! goto:eof
-        
+
         call:moveFolder !tf! !target! cr
         if !cr! NEQ 0 (
             @echo ERROR when moving !tf! !target!^, cr=!ERRORLEVEL!

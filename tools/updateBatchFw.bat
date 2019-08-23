@@ -58,15 +58,12 @@ REM : main
 
     if %nbArgs% EQU 1 (
         set "BFW_VERSION=!args[0]!"
-        set "BFW_VERSION=!BFW_VERSION:"=!"
-        set "BFW_VERSION=!BFW_VERSION: =!"
         goto:begin
     )
 
     REM : get the current version from the log file
     set "BFW_VERSION=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
-    set "BFW_VERSION=!BFW_VERSION: =!"
 
     :begin
     REM : cd to GAMES_FOLDER
@@ -95,9 +92,12 @@ REM : main
         @echo Failed to get the last BatchFw version available
         exit /b 12
     )
-    set "bfwVR=!bfwVR: =!"
 
-    if !BFW_VERSION! GEQ !bfwVR! (
+    call:compareVersions !bfwVR! !BFW_VERSION! result
+    if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
+
+    if !result! LEQ 1 (
         @echo No new BatchFw update^(s^) available^, last version is still !BFW_VERSION!
         exit /b 13
     )
@@ -147,8 +147,9 @@ REM : main
     if exist updateBFW.log del /F updateBFW.log > NUL 2>&1
 
 
-    REM BFW_VERSION=1.14
-    if not ["!BFW_VERSION!"] == ["V14"] call:cleanForV14
+    REM : treatments to be done after updating to this release
+    call:cleanBeforeUpdate
+
 
     exit /b 0
     goto:eof
@@ -158,24 +159,155 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :cleanForV14
 
-        REM : clean old icons
+    REM : treatments to be done after updating to this release
+   :cleanBeforeUpdate
+
+
+        REM : clean old icons and jpg files
         pushd !GAMES_FOLDER!
 
         for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\aoc" ^| find /I /V "\mlc01" 2^>NUL') do (
             set "codeFullPath="%%i""
-            set "pat="!codeFullPath:"=!\*.ico""
+            set "pat="!codeFullPath:"=!\00050000*.ico""
             for /F "delims=~" %%j in ('dir /b /s !pat! 2^>NUL') do (
                 set "icoFile="%%j""
                 del /F !icoFile! > NUL 2>&1
             )
+            for %%a in (!codeFullPath!) do set "parentFolder="%%~dpa""
+            set "GAME_FOLDER_PATH=!parentFolder:~0,-2!""
+
+            for /F "delims=~" %%b in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxb"
+
+            set "jpgFile="!codeFullPath:"=!\!GAME_TITLE!.jpg""
+
+            del /F !jpgFile! > NUL 2>&1
+        )
+
+        REM : now Host share all controller profiles
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
+
+        pushd !CONTROLLER_PROFILE_FOLDER!
+
+        REM : move each USERDOMAIN folder contain ..
+        for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
+            move /Y "%%x\*" . > NUL 2>&1
         )
 
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : COMPARE VERSIONS : function to count occurences of a separator
+    :countSeparators
+        set "string=%~1"
+        set /A "count=0"
 
+        :again
+        set "oldstring=!string!"
+        set "string=!string:*%sep%=!"
+        set /A "count+=1"
+        if not ["!string!"] == ["!oldstring!"] goto:again
+        set /A "count-=1"
+        set "%2=!count!"
+
+    goto:eof
+
+    REM : COMPARE VERSIONS :
+    REM : if vit < vir return 1
+    REM : if vit = vir return 0
+    REM : if vit > vir return 2
+    :compareVersions
+        set "vit=%~1"
+        set "vir=%~2"
+
+        REM : format strings
+        call:formatStrVersion !vit! vit
+        call:formatStrVersion !vir! vir
+
+        REM : versioning separator (init to .)
+        set "sep=."
+        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+
+        call:countSeparators !vit! nbst
+        call:countSeparators !vir! nbsr
+
+        REM : get the number minimum of sperators found
+        set /A "minNbSep=!nbst!"
+        if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
+
+        if !minNbSep! NEQ 0 goto:loopSep
+
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
+
+        :loopSep
+        set /A "minNbSep+=1"
+        REM : Loop on the minNbSep and comparing each number
+        REM : note that the shell can compare 1c with 1d for example
+        for /L %%l in (1,1,!minNbSep!) do (
+
+            call:compareDigits %%l result
+
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+        )
+        REM : check the length of string
+        call:strLength !vit! lt
+        call:strLength !vir! lr
+
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
+
+        set "%3=50"
+
+    goto:eof
+
+    REM : COMPARE VERSION : function to compare digits of a rank
+    :compareDigits
+        set /A "num=%~1"
+
+        set "dr=99"
+        set "dt=99"
+        for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+        for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+        set "%2=50"
+
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
+    goto:eof
+
+    REM : COMPARE VERSION : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+
+    REM : COMPARE VERSION : function to format string version without alphabetic charcaters
+    :formatStrVersion
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+        set "str=!str:V=!"
+        set "str=!str:v=!"
+        set "str=!str:RC=!"
+        set "str=!str:rc=!"
+
+        set "%2=!str!"
+    goto:eof
+    
    :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"

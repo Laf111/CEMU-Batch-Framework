@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15"
+    set "BFW_VERSION=V14-11"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -114,8 +114,6 @@ REM : main
     call !ubw! !BFW_VERSION!
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
-        REM : treatments to be done after update
-        call:cleanBeforeUpdate
 
         @echo BatchFw updated^, please relaunch
         timeout /t 4 > NUL 2>&1
@@ -837,20 +835,6 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM ; treatments to be done after updating to this release
-   :cleanBeforeUpdate
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
-
-        pushd !CONTROLLER_PROFILE_FOLDER!
-
-        REM : move each USERDOMAIN folder contain ..
-        for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
-            move /Y "%%x\*" . > NUL 2>&1
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     REM : check if (DLC) or (UPDATE DATA) folders exist
    :checkGamesToBePrepared
 
@@ -1273,13 +1257,11 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    REM : functions to compare Cemu Versions
+    REM : COMPARE VERSIONS : function to count occurences of a separator
     :countSeparators
-
         set "string=%~1"
-
         set /A "count=0"
+
         :again
         set "oldstring=!string!"
         set "string=!string:*%sep%=!"
@@ -1290,20 +1272,7 @@ REM : functions
 
     goto:eof
 
-    :compareDigits
-
-            set /A "num=%~1"
-
-            set "dr=99"
-            set "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
-
-            if !dt! LSS !dr! set "%2=2" && goto:eof
-            if !dt! GTR !dr! set "%2=1" && goto:eof
-
-    goto:eof
-
+    REM : COMPARE VERSIONS :
     REM : if vit < vir return 1
     REM : if vit = vir return 0
     REM : if vit > vir return 2
@@ -1311,8 +1280,14 @@ REM : functions
         set "vit=%~1"
         set "vir=%~2"
 
-        REM : versioning separator
+        REM : format strings
+        call:formatStrVersion !vit! vit
+        call:formatStrVersion !vir! vir
+
+        REM : versioning separator (init to .)
         set "sep=."
+        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -1320,17 +1295,78 @@ REM : functions
         REM : get the number minimum of sperators found
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
-        set /A "minNbSep+=1"
 
+        if !minNbSep! NEQ 0 goto:loopSep
+
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
+
+        :loopSep
+        set /A "minNbSep+=1"
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
+
             call:compareDigits %%l result
-            if !result! NEQ 0 set "%2=!result!" && goto:eof
+
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
+        REM : check the length of string
+        call:strLength !vit! lt
+        call:strLength !vir! lr
+
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
+
+        set "%3=50"
 
     goto:eof
 
+    REM : COMPARE VERSION : function to compare digits of a rank
+    :compareDigits
+        set /A "num=%~1"
+
+        set "dr=99"
+        set "dt=99"
+        for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+        for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+        set "%2=50"
+
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
+    goto:eof
+
+    REM : COMPARE VERSION : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+
+    REM : COMPARE VERSION : function to format string version without alphabetic charcaters
+    :formatStrVersion
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+        set "str=!str:V=!"
+        set "str=!str:v=!"
+        set "str=!str:RC=!"
+        set "str=!str:rc=!"
+
+        set "%2=!str!"
+    goto:eof
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion: &, %, !
    :checkPathForDos

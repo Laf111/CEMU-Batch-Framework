@@ -339,15 +339,15 @@ REM : functions
 
         REM : looking for ico file close to rpx file
         set "ICO_FILE="NONE""
-        set "pat="!codeFullPath:"=!\*.ico""
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
         for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         if [!ICO_FILE!] == ["NONE"] goto:searchTgaFile
 
-        set "NEW_ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
+        set "NEW_ICO_PATH="!GAME_FOLDER_PATH:"=!\Cemu\%titleId%.ico""
         if [!ICO_FILE!] == ["%titleIdIco%.ico"] goto:checkDataBase
 
-        set "OLD_ICO_PATH="!codeFullPath:"=!\!ICO_FILE:"=!""
+        set "OLD_ICO_PATH="!GAME_FOLDER_PATH:"=!\Cemu\!ICO_FILE:"=!""
 
         REM : renaming ico file with title Id
         move /Y !OLD_ICO_PATH! !NEW_ICO_PATH! > NUL 2>&1
@@ -370,7 +370,7 @@ REM : functions
         :searchJpgFile
         REM : search for jpg file
         set "JPG_FILE="NONE""
-        set "pat="!codeFullPath:"=!\*.jpg""
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\*.jpg""
         for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
 
         @echo =========================================================
@@ -380,19 +380,21 @@ REM : functions
 
         REM : if a ico file alread exist, exit
         if [!JPG_FILE!] == ["NONE"] (
-            @echo No jpg file found near the rpx one^, skip this game^!
+            @echo No jpg file found in the Cemu folder^, skip this game^!
             goto:eof
         )
 
-        set "OLD_JPG_PATH="!codeFullPath:"=!\!JPG_FILE:"=!""
-        set "INPUT_IMG="!codeFullPath:"=!\!GAME_TITLE!.jpg""
+        set "OLD_JPG_PATH="!GAME_FOLDER_PATH:"=!\Cemu\!JPG_FILE:"=!""
+        set "INPUT_IMG="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.jpg""
         REM : rename JPEG_FILE with GAME_TITLE (if needed)
         if not exist !INPUT_IMG! (
             @echo Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
             move /Y !OLD_JPG_PATH! !INPUT_IMG! > NUL 2>&1
         )
         :convert
-        set "ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
+        set "CemuSubFolder="!GAME_FOLDER_PATH:"=!\Cemu""
+        if not exist !CemuSubFolder! mkdir !CemuSubFolder! > NUL 2>&1
+        set "ICO_PATH="!CemuSubFolder:"=!\%titleId%.ico""
 
         @echo Creating !GAME_TITLE! icon
         REM : convert-it in ICO centered format
@@ -402,6 +404,7 @@ REM : functions
             @echo !GAME_TITLE! icon created^!
             if !tgaFound! EQU 0 del /F !NEW_JPG_PATH! > NUL 2>&1
             set /A NB_GAMES_TREATED+=1
+            del /F !INPUT_IMG! > NUL 2>&1
         ) else (
             @echo Error when launching Conversion^!
             pause

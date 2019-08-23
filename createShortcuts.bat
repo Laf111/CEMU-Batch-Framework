@@ -881,7 +881,7 @@ REM : functions
 
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons\Convert all jpg files to centered icons.lnk""
-        set "LINK_DESCRIPTION="Convert all jpg files near rpx ones to centered icon in order to be used by createShortcuts.bat""
+        set "LINK_DESCRIPTION="Convert all jpg files find in the Cemu subfolder of the game's folder, to centered icon in order to be used by createShortcuts.bat""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\convertIconsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\convertIconsForAllGames.ico""
         if not exist !LINK_PATH! (
@@ -918,7 +918,7 @@ REM : functions
             if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         REM : create a shortcut to restoreUserSavesOfAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Restore user saves for selected games.lnk""
         set "LINK_DESCRIPTION="Restore user saves for selected games in a mlc01 target folder""
@@ -1263,7 +1263,7 @@ REM : functions
         REM : looking for ico file close to rpx file
         set "ICO_PATH="NONE""
         set "ICO_FILE="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\code\*.ico""
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
         for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         REM : if no ico not file found, using cemu.exe icon
@@ -1279,7 +1279,7 @@ REM : functions
             @echo No icons found for !GAME_TITLE!
 
             if [!defaultBrowser!] == ["NOT_FOUND"] (
-                @echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\code
+                @echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
                 @echo ^(no need to rename it^) then use the shortcut
                 @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
                 goto:icoSet
@@ -1288,7 +1288,7 @@ REM : functions
             @echo. Opening up a google search^.^.^.
             REM : open a google search
             wscript /nologo !StartWait! !defaultBrowser! "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
-            @echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\code
+            @echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
             @echo ^(no need to rename it^)
             pause
 
@@ -1300,7 +1300,7 @@ REM : functions
 
             call:getIcon
         ) else (
-            set "ICO_PATH="!GAME_FOLDER_PATH:"=!\code\!ICO_FILE:"=!""
+            set "ICO_PATH="!GAME_FOLDER_PATH:"=!\Cemu\!ICO_FILE:"=!""
         )
 
         :icoSet
@@ -1462,7 +1462,9 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "TGA_FILE="!GAME_FOLDER_PATH:"=!\meta\iconTex.tga""
         if not exist !TGA_FILE! goto:searchIconDataBase
 
-        set "ICO_PATH="!codeFullPath:"=!\%titleId%.ico""
+        set "CemuSubFolder="!GAME_FOLDER_PATH:"=!\Cemu""
+        if not exist !CemuSubFolder! mkdir !CemuSubFolder! > NUL 2>&1
+        set "ICO_PATH="!CemuSubFolder:"=!\%titleId%.ico""
         REM : convert-it in ICO centered format
         call !imgConverter! !TGA_FILE! -resize 256x256 !ICO_PATH!
 
@@ -1507,21 +1509,20 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if not exist !icoBaseFile! goto:eof
 
         :copyIcoFile
-        REM : copy and renaming the ico file
-        robocopy !icoBase! !codeFullPath! "%titleIdIco%.ico" > NUL 2>&1
+        set "newLocation="!GAME_FOLDER_PATH:"=!\Cemu""
+        robocopy !icoBase! !newLocation! "%titleIdIco%.ico" > NUL 2>&1
 
-        set "oldIcoGameFile="!codeFullPath:"=!\%titleIdIco%.ico""
-        set "newIcoGameFile="!codeFullPath:"=!\!titleId!.ico""
+        set "oldIcoGameFile="!newLocation:"=!\%titleIdIco%.ico""
+        set "newIcoGameFile="!newLocation:"=!\!titleId!.ico""
         move /Y !oldIcoGameFile! !newIcoGameFile! > NUL 2>&1
         set "ICO_PATH=!newIcoGameFile!"
     goto:eof
 
-    REM : functions to compare Cemu Versions
+    REM : COMPARE VERSIONS : function to count occurences of a separator
     :countSeparators
-
         set "string=%~1"
-
         set /A "count=0"
+
         :again
         set "oldstring=!string!"
         set "string=!string:*%sep%=!"
@@ -1532,20 +1533,7 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
     goto:eof
 
-    :compareDigits
-
-            set /A "num=%~1"
-
-            set "dr=99"
-            set "dt=99"
-            for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
-            for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
-
-            if !dt! LSS !dr! set "%2=2" && goto:eof
-            if !dt! GTR !dr! set "%2=1" && goto:eof
-
-    goto:eof
-
+    REM : COMPARE VERSIONS :
     REM : if vit < vir return 1
     REM : if vit = vir return 0
     REM : if vit > vir return 2
@@ -1553,8 +1541,14 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "vit=%~1"
         set "vir=%~2"
 
-        REM : versioning separator
+        REM : format strings
+        call:formatStrVersion !vit! vit
+        call:formatStrVersion !vir! vir
+
+        REM : versioning separator (init to .)
         set "sep=."
+        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -1562,17 +1556,78 @@ REM        echo oLink.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         REM : get the number minimum of sperators found
         set /A "minNbSep=!nbst!"
         if !nbsr! LSS !nbst! set /A "minNbSep=!nbsr!"
-        set /A "minNbSep+=1"
 
+        if !minNbSep! NEQ 0 goto:loopSep
+
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
+
+        :loopSep
+        set /A "minNbSep+=1"
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
         for /L %%l in (1,1,!minNbSep!) do (
+
             call:compareDigits %%l result
-            if !result! NEQ 0 set "%2=!result!" && goto:eof
+
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
+        REM : check the length of string
+        call:strLength !vit! lt
+        call:strLength !vir! lr
+
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
+
+        set "%3=50"
 
     goto:eof
 
+    REM : COMPARE VERSION : function to compare digits of a rank
+    :compareDigits
+        set /A "num=%~1"
+
+        set "dr=99"
+        set "dt=99"
+        for /F "tokens=%num% delims=~%sep%" %%r in ("!vir!") do set "dr=%%r"
+        for /F "tokens=%num% delims=~%sep%" %%t in ("!vit!") do set "dt=%%t"
+
+        set "%2=50"
+
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
+    goto:eof
+
+    REM : COMPARE VERSION : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+
+    REM : COMPARE VERSION : function to format string version without alphabetic charcaters
+    :formatStrVersion
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+        set "str=!str:V=!"
+        set "str=!str:v=!"
+        set "str=!str:RC=!"
+        set "str=!str:rc=!"
+
+        set "%2=!str!"
+    goto:eof
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos

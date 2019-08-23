@@ -143,12 +143,12 @@ REM : main
     cls
 
     REM : check if exist game's folder(s) containing non supported characters
-    REM : is done in importSaves.bat 
-    
+    REM : is done in importSaves.bat
+
     REM : call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
     set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
     call !importSave! !MLC01_FOLDER_PATH!
-    
+
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
