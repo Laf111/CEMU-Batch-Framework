@@ -1,3 +1,8 @@
+24/08/2019 V14-12 :
+- fix : online files installation failed when made from the wizard with no Cemu subfolder 
+        in the game's folder
+- fix : use the same method comparison in wizardFirstLaunch.bat than in launchGame.bat
+
 23/08/2019 V14-11 :
 - fix : remaining bug when comparing versions
 - fix : move icons to %GAME_FOLDER_PATH%\Cemu (now leave game's folders untouched)

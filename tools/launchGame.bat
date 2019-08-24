@@ -718,7 +718,7 @@ REM : main
     REM : waiting all pre requisities are ready
     call:waitProcessesEnd
 
-    REM : if wiazrd was launched,  links are already created
+    REM : if wizard was launched,  links are already created
     if %wizardLaunched% EQU 1 (
         REM : create links to mods
         if ["!gfxType!"] == ["V3"] (
@@ -2553,12 +2553,68 @@ REM : functions
 
         REM : format strings
         set "str=!str: =!"
+
         set "str=!str:V=!"
         set "str=!str:v=!"
         set "str=!str:RC=!"
         set "str=!str:rc=!"
 
+        set "str=!str:A=!01"
+        set "str=!str:B=!02"
+        set "str=!str:C=!03"
+        set "str=!str:D=!04"
+        set "str=!str:E=!05"
+        set "str=!str:F=!06"
+        set "str=!str:G=!07"
+        set "str=!str:H=!08"
+        set "str=!str:I=!09"
+        set "str=!str:J=!10"
+        set "str=!str:K=!11"
+        set "str=!str:L=!12"
+        set "str=!str:M=!13"
+        set "str=!str:N=!14"
+        set "str=!str:O=!15"
+        set "str=!str:P=!16"
+        set "str=!str:Q=!17"
+        set "str=!str:R=!18"
+        set "str=!str:S=!19"
+        set "str=!str:T=!20"
+        set "str=!str:U=!21"
+
+        set "str=!str:W=!23"
+        set "str=!str:X=!24"
+        set "str=!str:Y=!25"
+        set "str=!str:Z=!26"
+
+        set "str=!str:a=!01"
+        set "str=!str:b=!02"
+        set "str=!str:c=!03"
+        set "str=!str:d=!04"
+        set "str=!str:e=!05"
+        set "str=!str:f=!06"
+        set "str=!str:g=!07"
+        set "str=!str:h=!08"
+        set "str=!str:i=!09"
+        set "str=!str:j=!10"
+        set "str=!str:k=!11"
+        set "str=!str:l=!12"
+        set "str=!str:m=!13"
+        set "str=!str:n=!14"
+        set "str=!str:o=!15"
+        set "str=!str:p=!16"
+        set "str=!str:q=!17"
+        set "str=!str:r=!18"
+        set "str=!str:s=!19"
+        set "str=!str:t=!20"
+        set "str=!str:u=!21"
+
+        set "str=!str:w=!23"
+        set "str=!str:x=!24"
+        set "str=!str:y=!25"
+        set "str=!str:z=!26"
+
         set "%2=!str!"
+
     goto:eof
     
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice

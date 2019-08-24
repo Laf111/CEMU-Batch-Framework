@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-11"
+    set "BFW_VERSION=V14-12"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -145,7 +145,8 @@ REM : main
             @echo -use the last saves format
             @echo.
             @echo It gathers all game^'s data in each game^'s folder and so
-            @echo also ease the CEMU^'s update process
+            @echo ease the CEMU^'s update process and make your loadiine
+            @echo games library portable^.
         )
     ) else (
         @echo =========================================================
