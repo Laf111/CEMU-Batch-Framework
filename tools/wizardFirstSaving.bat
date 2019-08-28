@@ -181,23 +181,26 @@ REM : main
 
     REM : _BatchFW_Missing_Games_Profiles folder to store missing games profiles in CEMU_FOLDER\GamesProfiles
     set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
+
+    REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
+    if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
+
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-    set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
+    set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
 
     REM : PROFILE_FILE=NOT_FOUND
     REM : define cemu profile path
-    set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
+    set "PROFILE_FILE="%CEMU_PF:"=%\%titleId%.ini""
 
     REM : if you already generated a profile under MISSING_PROFILES_FOLDER, use it
     if not exist !PROFILE_FILE! if exist !missingProfile! (
         robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
         goto:completeGameProfile
     )
-
     set /A "v1156=99"
     call:compareVersions !versionRead! "1.15.6" v1156
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
@@ -207,7 +210,7 @@ REM : main
     if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
 
     REM : else, create profile file in CEMU_FOLDER
-    if not exist !PROFILE_FILE! call:createGameProfile !PROFILE_FILE!
+    if not exist !PROFILE_FILE! call:createGameProfile
 
     :completeGameProfile
     REM : settings.xml files
@@ -306,6 +309,7 @@ REM : main
     wscript /nologo !Start! !exampleFile!
 
     :diffProfileFile
+
     if [!PROFILE_FILE!] == ["NOT_FOUND"] goto:askRefCemuFolder
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:openProfileFile
@@ -325,7 +329,7 @@ REM : main
     set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
     wscript /nologo !StartMaximizedWait! !WinMergeU! !refProfileFile! !PROFILE_FILE!
 
-    goto:updateMissingProfileFolder
+    goto:step2
 
     :openProfileFile
 
@@ -337,10 +341,7 @@ REM : main
     wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !PROFILE_FILE!
     @echo ---------------------------------------------------------
 
-    :updateMissingProfileFolder
-
-    REM : if just created, copy it in MISSING_PROFILES_FOLDER
-    if not exist !missingProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
+    :step2
 
     cls
     REM : create a text file in game's folder to save data for current game
@@ -355,7 +356,9 @@ REM : main
 
     type !gameInfoFile!
 
-    :step2
+    REM : if just created, copy it in MISSING_PROFILES_FOLDER
+    if not exist !missingProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
+
 
     REM : check CEMU options (and controollers settings)
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
@@ -907,27 +910,25 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :createGameProfile
-
-        set "profile="%~1""
-
-        @echo # !GAME_TITLE! > !profile!
-        @echo [Graphics] >> !profile!
+       
+        @echo # !GAME_TITLE! > %PROFILE_FILE%
+        @echo [Graphics] >> %PROFILE_FILE%
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
         if !v1156! EQU 2 (
-            @echo GPUBufferCacheAccuracy = 1 >> !profile!
+            @echo GPUBufferCacheAccuracy = 1 >> %PROFILE_FILE%
         ) else (
-            @echo GPUBufferCacheAccuracy = medium >> !profile!
+            @echo GPUBufferCacheAccuracy = medium >> %PROFILE_FILE%
         )
 
         REM : if version of CEMU < 1.11.6 (v1116<=1)
-        if !v1116! EQU 2 @echo disableGPUFence = true >> !profile!
+        if !v1116! EQU 2 @echo disableGPUFence = true >> %PROFILE_FILE%
 
-        @echo accurateShaderMul = min >> !profile!
-        @echo [CPU] >> !profile!
-        @echo cpuTimer = hostBased >> !profile!
-        @echo cpuMode = Singlecore-Recompiler >> !profile!
-        @echo threadQuantum = 45000 >> !profile!
+        @echo accurateShaderMul = min >> %PROFILE_FILE%
+        @echo [CPU] >> %PROFILE_FILE%
+        @echo cpuTimer = hostBased >> %PROFILE_FILE%
+        @echo cpuMode = Singlecore-Recompiler >> %PROFILE_FILE%
+        @echo threadQuantum = 45000 >> %PROFILE_FILE%
 
         @echo Creating a Game profile for tilte Id ^: %titleId%
 

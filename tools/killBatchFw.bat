@@ -25,6 +25,7 @@ REM : main
 
     REM : kill BatchFw's running process
     wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call terminate
+
     timeout /T 4 > NUL
 
 exit 0
