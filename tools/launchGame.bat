@@ -295,10 +295,6 @@ REM : main
 
     :updateGameGraphicPack
 
-    REM : minimize all windows befaore launching in full screen
-    set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
-    powershell !psCommand!
-
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
@@ -340,7 +336,6 @@ REM : main
         timeout /t 8 > NUL 2>&1
         exit 20
     )
-
 
     REM : get and check ICO_FILE_PATH
     set "ICO_PATH=!args[3]!"
@@ -707,6 +702,10 @@ REM : main
     REM : Launching CEMU (for old versions -mlc will be ignored)
     :lockCemu
 
+    REM : minimize all windows befaore launching in full screen
+    set "psCommand="(new-object -COM 'shell.Application')^.minimizeall()""
+    powershell !psCommand!
+
     REM : create a lock file to protect this launch
     set "blf="!CEMU_FOLDER:"=!\BatchFw_!user:"=!-!USERNAME!.lock""
     @echo !DATE! : %user:"=% launched !GAME_TITLE! using !USERNAME! windows profile > !blf!
@@ -796,7 +795,7 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Starting !CEMU_FOLDER_NAME! with the following command ^:
     @echo ---------------------------------------------------------
-    REM : start a script that will modify cemu.exe priority when it was started
+    REM : modify process priority to high
     set "fp="!BFW_TOOLS_PATH:"=!\forcePriority.bat""
     wscript /nologo !StartHidden! !fp!
 
@@ -1823,7 +1822,7 @@ REM : functions
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
-        set "pat="!BFW_ONLINE_ACC:"=!\!user:"=!*.dat""
+        set "pat="!BFW_ONLINE_ACC:"=!\!currentUser!*.dat""
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""

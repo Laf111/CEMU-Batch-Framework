@@ -575,10 +575,11 @@ REM : functions
 
         If not exist !BFW_ONLINE! goto:eof
 
+        set "currentUser=!user:"=!"
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
-        set "pat="!BFW_ONLINE_ACC:"=!\!user:"=!*.dat""
+        set "pat="!BFW_ONLINE_ACC:"=!\!currentUser!*.dat""
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
@@ -587,11 +588,11 @@ REM : functions
         )
 
         if ["!accId!"] == ["NONE"] (
-            @echo WARNING^: AccountId not found for !user:"=!^, cancel online files installation ^!
+            @echo WARNING^: AccountId not found for !currentUser!^, cancel online files installation ^!
             pause
         )
 
-        @echo AccountId found for !user:"=!
+        @echo AccountId found for !currentUser!
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
@@ -659,7 +660,7 @@ REM : functions
         if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
-        @echo Online account for !user:"=! enabled ^: !accId!
+        @echo Online account for !currentUser! enabled ^: !accId!
 
     goto:eof
     REM : ------------------------------------------------------------------
