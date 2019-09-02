@@ -70,7 +70,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
     - Import saves from the Wii-U (for all users);
     - Export saves to the Wii-U using SaveMii (create SaveMii's slots directly on the SD card by FTP)
 
-Other features:
+### Other features:
 
 - GLCache backup/restore per game (AMD, NVIDIA);
 
