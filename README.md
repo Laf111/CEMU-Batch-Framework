@@ -4,7 +4,7 @@ BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powers
 All versions of CEMU released from the 1.11.0 are supported (1.11.0 introduced the new saves format).
 
 
-## The main purpose of BatchFW is:
+## Main purpose:
 
 - Handle more than one user/save and for Wii-U owners : install online files, sync saves between CEMU with the Wii-U;
 
@@ -35,7 +35,7 @@ The mlc01 path is in the game folder so:
 
 
 
-## Main features of BatchFw:
+## Main features:
 
 - Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
 
@@ -98,7 +98,7 @@ Other features:
 
 
 
-## Install : 
+## Install: 
 
 - Extract in your games folder;
 - launch _BatchFW_Install\\setup.bat;
@@ -140,7 +140,7 @@ All batch source code use delayed expansion mode and set your system charset to 
 Code is well commented and is read only. 
 
 
-## Last tutorials :
+## Last tutorials:
 
 V11 (install, mlc01 import... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
 
@@ -151,7 +151,7 @@ V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/commen
 V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 
-## Recommendations : 
+## Recommendations: 
 
 If you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
 
