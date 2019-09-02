@@ -142,13 +142,13 @@ Code is well commented and is read only.
 
 ## Last tutorials:
 
-V11 (install, mlc01 import... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
+V11 (install, mlc01 import, gfx packs creation/completion... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
 
 V12 (multi users without a Wii-U) : https://www.reddit.com/r/cemu/comments/ahkt5d/batchfw_v12_multiusers_mode_save_per_users_each/
 
 V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
 
-V13-6 : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
+V13-6 (online files installation for all users) : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
 
 ## Recommendations: 
