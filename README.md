@@ -140,7 +140,7 @@ All batch source code use delayed expansion mode and set your system charset to 
 Code is well commented and is read only. 
 
 
-## Last tutorials:
+## Tutorials & videos:
 
 V11 (install, mlc01 import, gfx packs creation/completion... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
 
@@ -149,6 +149,8 @@ V12 (multi users without a Wii-U) : https://www.reddit.com/r/cemu/comments/ahkt5
 V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
 
 V13-6 (online files installation for all users) : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
+
+V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/cc606b/batchfw_v14_sync_saves_with_wiiu_for_all_wiiu/
 
 
 ## Recommendations: 
