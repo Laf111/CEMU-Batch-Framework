@@ -72,7 +72,7 @@ REM : main
     :end
 
     REM : get current date
-    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
@@ -285,7 +285,7 @@ REM : main
     REM : check if an internet connexion is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
     set "defaultBrowser="NOT_FOUND""
-    for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
@@ -414,7 +414,7 @@ REM : main
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -688,7 +688,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to create a executable for these CEMU version
+    REM : function to create a executable for this CEMU version
     :shortcut
 
         set "TARGET_PATH="%~1""
@@ -697,18 +697,20 @@ REM : functions
         set "ICO_PATH="%~4""
         set "WD_PATH="%~5""
 
+        if not exist !TARGET_PATH! goto:eof
+
         set "TMP_VBS_FILE="!TEMP!\RACC_!DATE!.vbs""
 
         REM : create object
-        echo set oWS = WScript.CreateObject("WScript.Shell") >> !TMP_VBS_FILE!
+        echo set oWS = WScript^.CreateObject^("WScript.Shell"^) >> !TMP_VBS_FILE!
         echo sLinkFile = !LINK_PATH! >> !TMP_VBS_FILE!
-        echo set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
-        echo oLink.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
-        echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        if not [!ICO_PATH!] == ["NONE"] echo oLink.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
-        if not [!ARGS!] == ["NONE"] echo oLink.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
-        echo oLink.WorkingDirectory = !WD_PATH! >> !TMP_VBS_FILE!
-        echo oLink.Save >> !TMP_VBS_FILE!
+        echo set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        if not [!ICO_PATH!] == ["NONE"] echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        if not [!ARGS!] == ["NONE"] echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
+        if not [!WD_PATH!] == ["NONE"] echo oLink^.WorkingDirectory = !WD_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
@@ -1708,7 +1710,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1

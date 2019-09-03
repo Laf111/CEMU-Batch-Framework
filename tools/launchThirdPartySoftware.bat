@@ -14,6 +14,7 @@ REM : main
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -36,14 +37,15 @@ REM : main
         for /F "tokens=3 delims=~'" %%j in (!command!) do set "firstArg="%%j""
 
         if not [!program!] == ["NONE"]  if not exist !program! (
-                call:cleanHostLogFile !program!
-                cscript /nologo !MessageBox! "WARNING software to launch before CEMU !program! does not exist anymore in ^, deleting this entry^!" 4144
+
+                cscript /nologo !MessageBox! "WARNING !program! does not exist anymore, deleting this entry^!" 4144
+                call:cleanHostLogFile !program:"='!
                 set /A "nbIs=99"
             )
         if !nbIs! NEQ 99 (
             REM : count number of running instances
-            if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
-            if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if not [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
             set cmd=!command:"=!
 
@@ -59,10 +61,32 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+   :cleanHostLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!logFile:"=!.tmp""
+
+        type !logFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :resolveVenv
         set "value="%~1""
-        set "%2=%value%"
+        set "resolved=%value:"=%"
+
+        REM : check if value is a path
+        echo %resolved% | find ":" && > NUL (
+            REM : check if it is only a device letter issue (in case of portable library)
+            set "tmp='!drive!%resolved:~3%
+            set "newLocation=!tmp:'="!"
+            if exist !newLocation! set "resolved=!tmp!"
+        )
+
+        set "%2=!resolved!"
     goto:eof
     REM : ------------------------------------------------------------------
 

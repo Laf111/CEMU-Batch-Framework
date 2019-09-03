@@ -30,7 +30,7 @@ REM : main
         for /F "delims=~" %%i in (%1) do set "name=%%~nxi"
         for /F "tokens=1 delims=_" %%j in ("!name!") do set "title=%%j"
 
-        for /F "tokens=2 delims==," %%k in ('type "%~1\rules.txt" ^| find "titleIds"') do set "tid=%%k"
+        for /F "tokens=2 delims=~=," %%k in ('type "%~1\rules.txt" ^| find "titleIds"') do set "tid=%%k"
         @echo #########################################################
         @echo !title!
         @echo #########################################################

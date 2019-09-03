@@ -1,3 +1,24 @@
+03/09/2019 V15 :
+- add : script to fix broken shortcuts in case of drive letter changing (installation on 
+        an USB device) or if you have moved your games'library.
+        Missing CEMU's install folder is already handle in LaunchGame.bat (shortcuts are 
+        deleted)
+- add : add a file browsing option when defining a 3rd party software to be launched 
+        before (and optionnaly closed after) CEMU.
+- add : add an existance check for 3rd Party Software when entering its command line
+- fix : disable the delayed expansion on game's profile path (when the file does not exist, it leads 
+        in a warning displayed in the console : the process tried to write on an non existing channel
+- fix : when a game's profile file was created (not existing) on versions >= 1.15.6, it wasn't 
+        copied in _BatchFw_Missing_Games_Profiles        
+- fix : launchThirdPartySoftware.bat not removing a third party software with invalid path
+- add : launchThirdPartySoftware.bat try to patch the drive letter on command and its args
+        to launch third party software in case of installation of an USB drive
+        where the drive letter changed. It was already working for third party softwares installed
+        at the same level (or lower) than BatchFw.
+- add : setup.bat now removes a third party software with invalid path and also modify the
+        path to software installed on an USB drive for which driver letter had changed
+- fix : still some unwanted message sent to console when completing/creating extra GFX packs
+
 24/08/2019 V14-12 :
 - fix : online files installation failed when made from the wizard with no Cemu subfolder 
         in the game's folder
@@ -33,8 +54,8 @@
 - hotfix : online files installation was broken and may lead in puting CEMU in the background
 
 15/08/2019 V14-8 : 
-- fix : getMyShaderCachesSize.bat size were not displayed is the cache is less than 1Mo
-- fix : launchGame.bat extend status search for Cemu.exe already running
+- fix : getMyShaderCachesSize.bat size were not displayed if the cache is less than 1Mo
+- fix : launchGame.bat extend search for Cemu.exe already running
 - hotfix : killBatchFw.bat call in launchGame.bat
 - fix : killBatchFw.bat kill Cemu.exe before every BatchFw process
 

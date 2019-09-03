@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V14-12"
+    set "BFW_VERSION=V15"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -33,7 +33,7 @@ REM : main
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     REM : check if file system is NTFS
-    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims==" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value  2^>NUL ^| find /I /V "NTFS"') do (
+    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value ^| find /I /V "NTFS"') do (
 
         @echo This volume is not an NTFS one^^!
         @echo BatchFw use Symlinks and need to be installed on a NTFS volume
@@ -47,6 +47,7 @@ REM : main
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -55,6 +56,7 @@ REM : main
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "browseFile="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFileDialog.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -75,13 +77,13 @@ REM : main
 
     REM : checking arguments
     set /A "nbArgs=0"
-   :continue
+    :continue
         if "%~1"=="" goto:end
         set "args[%nbArgs%]="%~1""
         set /A "nbArgs +=1"
         shift
         goto:continue
-   :end
+    :end
 
     if %nbArgs% EQU 0 (
         title -= Install BatchFw %BFW_VERSION% =-
@@ -101,7 +103,7 @@ REM : main
     for %%a in (!OUTPUT_FOLDER!) do set "drive=%%~da"
     if [!OUTPUT_FOLDER!] == ["!drive!\"] set "OUTPUT_FOLDER="!drive!""
 
-   :beginSetup
+    :beginSetup
 
     call:cleanHostLogFile BFW_VERSION
 
@@ -126,7 +128,7 @@ REM : main
     set /A "QUIET_MODE=0"
     if exist !readme! set /A "QUIET_MODE=1"
 
-   :scanGamesFolder
+    :scanGamesFolder
     set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\\=\!"
     cls
     if %nbArgs% EQU 0 (
@@ -156,7 +158,7 @@ REM : main
         @echo ^(in case of false input close this main window to cancel^)
     )
 
-   :validateGamesLibrary
+    :validateGamesLibrary
 
     @echo ---------------------------------------------------------
     @echo Scanning your games library^.^.^.
@@ -243,39 +245,39 @@ REM : main
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-       :goalsOK
+        :goalsOK
         call:getUserInput "Read informations on CEMU interfaces history? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-       :iFOK
+        :iFOK
         call:getUserInput "Read how graphic packs are handled? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:wiiuOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-       :wiiuOK
+        :wiiuOK
         call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:externalGP
 
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
-   :externalGP
+    :externalGP
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     REM : check if an internet connection is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
-    for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
 
     @echo ---------------------------------------------------------
-    @echo Checking latest graphics packs^' update
+    @echo Checking latest graphics packs^'update
 
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
@@ -286,10 +288,10 @@ REM : main
 
     if !cr! EQU 0 goto:importModForGames
 
-   :extractV3pack
+    :extractV3pack
     if %QUIET_MODE% EQU 1 goto:importModForGames
 
-   :beginExtraction
+    :beginExtraction
     REM : first launch of setup.bat
     if exist !BFW_GP_FOLDER!  goto:importModForGames
     mkdir !BFW_GP_FOLDER! > NUL 2>&1
@@ -310,13 +312,13 @@ REM : main
 
     @echo ^> Graphic packs installed from archive
 
-   :importModForGames
+    :importModForGames
     cls
     @echo ---------------------------------------------------------
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
 
-   :askAnotherModFolder
+    :askAnotherModFolder
     set "im="!BFW_TOOLS_PATH:"=!\importModsForAllGames.bat""
     wscript /nologo !StartWait! !im!
 
@@ -327,7 +329,7 @@ REM : main
 
     @echo ^> Mods were imported in each game^'s folder
 
-   :askGpCompletion
+    :askGpCompletion
     @echo ---------------------------------------------------------
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
@@ -341,7 +343,7 @@ REM : main
     REM : else
     goto:askScreenMode
 
-   :askRatios
+    :askRatios
     REM : flush logFile of DESIRED_ASPECT_RATIO
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "DESIRED_ASPECT_RATIO" 2^>NUL') do call:cleanHostLogFile DESIRED_ASPECT_RATIO
     REM :? 1366*768
@@ -356,7 +358,7 @@ REM : main
     @echo     ^(c^)^: cancel
     @echo ---------------------------------------------------------
 
-   :askRatioAgain
+    :askRatioAgain
     choice /C 12345c /N /M "Enter your choice: "
     if !ERRORLEVEL! EQU 1 (
         set "msg="DESIRED_ASPECT_RATIO=169""
@@ -381,7 +383,7 @@ REM : main
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
-   :askScreenMode
+    :askScreenMode
     @echo ---------------------------------------------------------
     REM : flush logFile of SCREEN_MODE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
@@ -393,7 +395,7 @@ REM : main
     call:log2HostFile !msg!
 
     REM : get users
-   :getUserMode
+    :getUserMode
 
     REM : by default: create shortcuts
     @echo ---------------------------------------------------------
@@ -409,7 +411,7 @@ REM : main
         call:log2HostFile !msg!
         goto:getSoftware
     )
-   :handleUsers
+    :handleUsers
     if ["%usersList%"] == ["EMPTY"] goto:getUsers
 
     set "usersList=!usersList:EMPTY=!"
@@ -422,7 +424,7 @@ REM : main
 
     REM : Get BatchFw's users registered with the current windows profile
     set /A "alreadyAsked=0"
-   :getUsers
+    :getUsers
 
     if !alreadyAsked! EQU 1 goto:batchFwUsers
     REM : Have a Wii-U ?
@@ -461,7 +463,7 @@ REM : main
     wscript /nologo !StartWait! !tobeLaunch!
     goto:getSoftware
 
-   :batchFwUsers
+    :batchFwUsers
     set /P "input=Please enter BatchFw's user name : "
     call:secureUserNameForBfw "!input!" safeInput
     if !ERRORLEVEL! NEQ 0 (
@@ -485,14 +487,33 @@ REM : main
     choice /C yn /N /M "Add another user? (y,n): "
     if !ERRORLEVEL! EQU 1  goto:getUsers
 
-   :getSoftware
+    :getSoftware
     cls
     @echo ---------------------------------------------------------
 
     REM : get the software list
     set "softwareList=EMPTY"
-    for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do set "softwareList=!softwareList! %%i"
+    for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do (
 
+        set "command=%%i"
+        for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
+
+        set "program="NONE""
+        set "firstArg="NONE""
+
+        REM : resolve venv for search
+        for /F "tokens=1 delims=~'" %%j in ("!command!") do set "program="%%j""
+        for /F "tokens=3 delims=~'" %%j in ("!command!") do set "firstArg="%%j""
+
+        if exist !program! (
+            set "softwareList=!softwareList! !program!"
+            set "msg=TO_BE_LAUNCHED@!command!"
+            call:log2HostFile !msg!
+        ) else (
+            call:cleanHostLogFile !program:"='!
+        )
+        call:cleanHostLogFile %%i
+    )
     if not ["!softwareList!"] == ["EMPTY"] goto:handleSoftware
 
     @echo Do you want BatchFw to launch a third party software before
@@ -505,13 +526,8 @@ REM : main
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     @echo.
-    @echo You^ll be asked to enter the full command line to
-    @echo the software and its arguments all surronded by quotes^.
-    @echo Use the file^'s absolute path and be sure that the
-    @echo command works by checking it in a cmd prompt before^!
-    @echo.
-   :handleSoftware
-    if ["!softwareList!"] == ["EMPTY"] goto:askSpath
+    :handleSoftware
+    if ["!softwareList!"] == ["EMPTY"] goto:askS
 
     set "softwareList=!softwareList:EMPTY=!"
     @echo Software already registered in BatchFW: !softwareList!
@@ -521,11 +537,37 @@ REM : main
     REM : flush logFile of TO_BE_LAUNCHED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do call:cleanHostLogFile TO_BE_LAUNCHED
 
-   :askSpath
+    :askS
     @echo ---------------------------------------------------------
-    set /P "spath=Enter the full command line: "
-    set "spath=!spath:"='!"
+    choice /C ny /N /M "Do you need to enter arguments for the 3rd party software? (y,n): "
+    if !ERRORLEVEL! EQU 1 goto:askSpath
 
+    REM : browse to the file
+    :browse3rdP
+    for /F %%b in ('cscript /nologo !browseFile! "Please browse to 3rd party program"') do set "file=%%b" && set "spath=!file:?= !"
+    if [!spath!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
+        goto:browse3rdP
+    )
+    goto:reg3rdPartySotware
+
+
+    :askSpath
+    @echo Enter full paths for the software and its arguments
+    @echo ALL SURROUNDED by double quotes^.
+    set /P "spath=Enter the full command line: "
+
+    REM : resolve venv for search
+    for /F "tokens=1 delims=~'" %%j in ("!spath!") do set "program="%%j""
+
+    if not exist !program! (
+        @echo !spath! is not valid ^!
+        goto:askSpath
+    )
+
+    :reg3rdPartySotware
+    set "spath=!spath:"='!"
     set "msg=TO_BE_LAUNCHED@!spath!"
 
     choice /C ny /N /M "Do you want BatchFw to close it after Cemu stops? (y,n) "
@@ -547,7 +589,7 @@ REM : main
     choice /C yn /N /M "Add another third party software? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askSpath
 
-   :askExtMlC01Folders
+    :askExtMlC01Folders
     set /A "useMlcFolderFlag=0"
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
         @echo ---------------------------------------------------------
@@ -562,7 +604,7 @@ REM : main
         @echo define which user^'s save is it.
         @echo.
 
-       :getExtMlc01
+        :getExtMlc01
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c) data?"
         set /A "cr=!ERRORLEVEL!"
@@ -587,7 +629,7 @@ REM : main
 
     )
 
-   :getOuptutsFolder
+    :getOuptutsFolder
     cls
     REM : skip if one arg is given
     if %nbArgs% EQU 1 (
@@ -600,7 +642,7 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
-    :askOutputFolder
+     :askOutputFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
@@ -628,7 +670,7 @@ REM : main
     @echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
     timeout /T 3 > NUL 2>&1
 
-   :getOuptutsType
+    :getOuptutsType
     if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
         if not exist !BFW_WIIU_FOLDER! (
             @echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
@@ -667,8 +709,25 @@ REM : main
         )
     )
     if [!ANSWER!] == ["3"] exit 70
-    if [!ANSWER!] == ["1"] goto:registerCemuInstalls
+    if [!ANSWER!] == ["1"] (
 
+        REM : instanciate a fixBrokenShortcut.bat
+        set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
+        if exist !fbsf! goto:registerCemuInstalls
+
+        mkdir !fbsf! > NUL 2>&1
+        robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+        set "vbsf="!BFW_RESOURCES_PATH:"=!\vbs""
+        robocopy !vbsf! !fbsf! "BrowseFolderDialog.vbs" > NUL 2>&1
+
+        robocopy !BFW_RESOURCES_PATH! !fbsf! "fnr.exe" > NUL 2>&1
+
+        set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
+        !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+        del /F !fnrLog! > NUL 2>&1
+
+        goto:registerCemuInstalls
+    )
     set "outputType=EXE"
     set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
     if %QUIET_MODE% EQU 0 (
@@ -676,12 +735,12 @@ REM : main
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
 
-   :registerCemuInstalls
+    :registerCemuInstalls
 
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -711,7 +770,7 @@ REM : main
     REM : intialize Number of Cemu Version beginning from 0
     set /A "NBCV=0"
 
-   :askCemuFolder
+    :askCemuFolder
     set /A "NBCV+=1"
 
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
@@ -768,7 +827,7 @@ REM : main
     set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""
     wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-   :done
+    :done
     cls
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -836,8 +895,24 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+     :resolveVenv
+        set "value="%~1""
+        set "resolved=%value:"=%"
+
+        REM : check if value is a path
+        echo %resolved% | find ":" > NUL 2>&1 && (
+            REM : check if it is only a device letter issue (in case of portable library)
+            set "tmp='!drive!%resolved:~3%
+            set "newLocation=!tmp:'="!"
+            if exist !newLocation! set "resolved=!tmp!"
+        )
+
+        set "%2=!resolved!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : check if (DLC) or (UPDATE DATA) folders exist
-   :checkGamesToBePrepared
+    :checkGamesToBePrepared
 
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
@@ -868,7 +943,7 @@ REM : functions
 
 
     REM : build doc
-   :buildDoc
+    :buildDoc
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         type !tmpFile! > !readme!
         set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
@@ -886,7 +961,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-   :regCemuInstall
+    :regCemuInstall
 
         set "cemuNumber=%1"
         set "CEMU_FOLDER="%~2""
@@ -914,12 +989,12 @@ REM : functions
         if !cr! EQU 1 call:move
         if !cr! EQU 2 call:copy
 
-       :createShortcuts
+        :createShortcuts
 
         REM : check if CemuHook is installed
         set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
 
-       :checkCemuHook
+        :checkCemuHook
         if exist !dllFile! goto:checkSharedFonts
 
         @echo ---------------------------------------------------------
@@ -945,13 +1020,13 @@ REM : functions
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
         goto:checkCemuHook
 
-       :checkSharedFonts
+        :checkSharedFonts
 
         REM : check if sharedFonts were downloaded
         set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
         if exist !sharedFonts! goto:getCemuVersion
 
-       :openCemuAFirstTime
+        :openCemuAFirstTime
 
         @echo ---------------------------------------------------------
         @echo Openning CEMU^.^.^.
@@ -962,7 +1037,7 @@ REM : functions
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
 
-       :getCemuVersion
+        :getCemuVersion
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
@@ -985,7 +1060,7 @@ REM : functions
         if !result! EQU 1 goto:autoImportMode
         if !result! EQU 0 goto:autoImportMode
 
-       :extractV2Packs
+        :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:autoImportMode
 
@@ -1003,7 +1078,7 @@ REM : functions
             exit /b 21
         )
 
-       :autoImportMode
+        :autoImportMode
         @echo ---------------------------------------------------------
         if %cemuNumber% EQU 1  (
 
@@ -1062,7 +1137,7 @@ REM : functions
             )
         )
 
-       :launchCreate
+        :launchCreate
         if ["%outputType%"] == ["EXE"] goto:createExe
 
         REM : calling createShortcuts.bat
@@ -1078,7 +1153,7 @@ REM : functions
         @echo ^> Shortcuts created for !CEMU_FOLDER_NAME!
         goto:eof
 
-       :createExe
+        :createExe
         REM : calling createExecutables.bat
         set "tobeLaunch="!BFW_PATH:"=!\createExecutables.bat""
         call !tobeLaunch! !CEMU_FOLDER! !OUTPUT_FOLDER! %argOpt%
@@ -1094,7 +1169,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : remove DOS forbiden character from a string
-   :secureStringPathForDos
+    :secureStringPathForDos
 
         set "str=%~1"
         set "str=!str:&=!"
@@ -1110,7 +1185,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : remove DOS forbiden character from a string
-   :secureUserNameForBfw
+    :secureUserNameForBfw
         set "str=%~1"
 
         REM : DOS reserved characters
@@ -1152,7 +1227,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
     
-   :cleanHostLogFile
+    :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
         set "logFileTmp="!logFile:"=!.tmp""
@@ -1165,7 +1240,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-   :move
+    :move
         set "ms="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !ms! !mlc01!
 
@@ -1173,7 +1248,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-   :copy
+    :copy
         set "cs="!BFW_TOOLS_PATH:"=!\copyMlc01DataForAllGames.bat""
         wscript /nologo !StartWait! !cs! !mlc01!
 
@@ -1182,7 +1257,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to search game in folder
-   :searchGameIn
+    :searchGameIn
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
@@ -1252,18 +1327,18 @@ REM : functions
             move /Y !gif! !cemuFolder! > NUL 2>&1
         )
 
-       :gameTreated
+        :gameTreated
         set /A NB_GAMES_VALID+=1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     REM : COMPARE VERSIONS : function to count occurences of a separator
-    :countSeparators
+     :countSeparators
         set "string=%~1"
         set /A "count=0"
 
-        :again
+         :again
         set "oldstring=!string!"
         set "string=!string:*%sep%=!"
         set /A "count+=1"
@@ -1277,7 +1352,7 @@ REM : functions
     REM : if vit < vir return 1
     REM : if vit = vir return 0
     REM : if vit > vir return 2
-    :compareVersions
+     :compareVersions
         set "vit=%~1"
         set "vir=%~2"
 
@@ -1303,7 +1378,7 @@ REM : functions
         if !vit! LSS !vir! set "%3=2" && goto:eof
         if !vit! GTR !vir! set "%3=1" && goto:eof
 
-        :loopSep
+         :loopSep
         set /A "minNbSep+=1"
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
@@ -1326,7 +1401,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to compare digits of a rank
-    :compareDigits
+     :compareDigits
         set /A "num=%~1"
 
         set "dr=99"
@@ -1342,7 +1417,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length
-    :strLength
+     :strLength
         Set "s=#%~1"
         Set "len=0"
         For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
@@ -1355,7 +1430,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to format string version without alphabetic charcaters
-    :formatStrVersion
+     :formatStrVersion
 
         set "str=%~1"
 
@@ -1370,7 +1445,7 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion: &, %, !
-   :checkPathForDos
+    :checkPathForDos
 
         set "toCheck=%1"
 
@@ -1398,7 +1473,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
-   :getUserInput
+    :getUserInput
 
         REM : arg1 = question
         set question=%1
@@ -1440,11 +1515,11 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
-    :setCharSet
+     :setCharSet
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1
@@ -1460,7 +1535,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to log info for current host
-   :log2HostFile
+    :log2HostFile
         REM : arg1 = msg
         set "msg=%~1"
 
@@ -1474,14 +1549,14 @@ REM : functions
         )
         REM : check if the message is not already entierely present
         for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-       :logMsg2HostFile
+        :logMsg2HostFile
         echo !msg!>> !logFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     REM : function to initialize log info for current host
-   :initLogForHost
+    :initLogForHost
 
         REM : create install log file for current host (if needed)
 
@@ -1514,7 +1589,7 @@ REM : functions
         pause
         goto:eof
 
-        :scanOtherHost
+         :scanOtherHost
         REM : check if other log file exist for another host and import user defined in
         set "pat="!BFW_PATH:"=!\logs\Host_*.log""
 

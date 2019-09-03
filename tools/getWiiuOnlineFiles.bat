@@ -128,9 +128,9 @@ REM : main
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
-    for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
+    for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
     REM : and teh port
-    for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
+    for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
 
     @echo Found an existing FTP configuration ^:
     @echo.
@@ -445,7 +445,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1
@@ -458,7 +458,7 @@ REM : functions
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

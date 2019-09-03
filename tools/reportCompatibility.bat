@@ -49,7 +49,7 @@ REM : main
     :end
 
     REM : get current date
-    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
@@ -201,17 +201,17 @@ REM : main
     if not [!rarFile!] == ["NONE"] set "SAVES_FOUND=yes"
 
     set "CPU=NOT_FOUND"
-    for /F "tokens=2 delims==" %%f in ('wmic path Win32_Processor get Name /value ^| find "=" 2^>NUL') do set "CPU="%%f""
+    for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_Processor get Name /value ^| find "=" 2^>NUL') do set "CPU="%%f""
 
     set "OS_VERSION=NONE"
-    for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Name /value ^| find "=" 2^>NUL') do set "OS_VERSION="%%f""
+    for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Name /value ^| find "=" 2^>NUL') do set "OS_VERSION="%%f""
     for  /f "tokens=1-3 delims=|" %%f in (!OS_VERSION!) do (
         set OS_VERSION=%%f
     )
 
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "GPU_VENDOR=!string: =!"
@@ -222,11 +222,11 @@ REM : main
 
     set "GPU_DRIVERS_VERSION=NONE"
 
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "=" 2^>NUL') do (
         set "GPU_DRIVERS_VERSION=%%i"
     )
 
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value ^| find "=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value ^| find "=" 2^>NUL') do (
         set "RAM=%%i"
     )
     set "RAM=%RAM: =%"
@@ -386,7 +386,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "=" 2^>NUL') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "=" 2^>NUL') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1

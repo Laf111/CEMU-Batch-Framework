@@ -38,7 +38,7 @@ REM : main
 
     :getDate
     REM : get DATE
-    for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set ldt=%%j
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set ldt=%%j
     set ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%
     set DATE=%ldt%
 
@@ -222,7 +222,7 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims==" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GTR 2 (
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. Use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
@@ -386,7 +386,7 @@ REM : main
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -399,7 +399,7 @@ REM : main
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
-    for /F "tokens=2 delims==" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
         set "string=%%i"
     )
 
@@ -1842,7 +1842,7 @@ REM : functions
         if not exist !winScpIni! goto:installAccount
 
         REM : get the hostname
-        for /F "delims== tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
+        for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
         REM : check its state
 
         call:getHostState !ipRead! state
@@ -2067,15 +2067,15 @@ REM : functions
         set "LINK_DESCRIPTION="Edit !GAME_TITLE!'s profile for !CEMU_FOLDER_NAME!""
 
         REM : create object
-        echo Set oWS = WScript.CreateObject("WScript.Shell") > !TMP_VBS_FILE!
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
         echo sLinkFile = !profileShortcut! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
-        echo oLink.TargetPath = "!ARGS!" >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = "!ARGS!" >> !TMP_VBS_FILE!
 
-        echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        echo oLink.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
-        echo oLink.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
-        echo oLink.Save >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
@@ -2106,14 +2106,14 @@ REM : functions
         set "LINK_DESCRIPTION="Edit example.ini profile for !CEMU_FOLDER_NAME!""
 
         REM : create object
-        echo Set oWS = WScript.CreateObject("WScript.Shell") > !TMP_VBS_FILE!
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
         echo sLinkFile = !profileShortcut! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
-        echo oLink.TargetPath = "!ARGS!" >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = "!ARGS!" >> !TMP_VBS_FILE!
 
-        echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        echo oLink.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
-        echo oLink.Save >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
@@ -2141,13 +2141,13 @@ REM : functions
         set "LINK_DESCRIPTION="!CEMU_FOLDER_NAME!'s Log""
 
         REM : create object
-        echo Set oWS = WScript.CreateObject("WScript.Shell") > !TMP_VBS_FILE!
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
         echo sLinkFile = !logShortcut! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
-        echo oLink.TargetPath = !ARGS! >> !TMP_VBS_FILE!
-        echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        echo oLink.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
-        echo oLink.Save >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = !ARGS! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
@@ -2173,13 +2173,13 @@ REM : functions
         set "LINK_DESCRIPTION="BatchFw %bfwVersion%'s Log""
 
         REM : create object
-        echo Set oWS = WScript.CreateObject("WScript.Shell") > !TMP_VBS_FILE!
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
         echo sLinkFile = !logShortcut! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS.createShortCut(sLinkFile) >> !TMP_VBS_FILE!
-        echo oLink.TargetPath = !ARGS! >> !TMP_VBS_FILE!
-        echo oLink.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        echo oLink.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
-        echo oLink.Save >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = !ARGS! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
@@ -2248,7 +2248,7 @@ REM : functions
         REM : check if an internet connexion is active
         set "ACTIVE_ADAPTER=NOT_FOUND"
         set "defaultBrowser="NOT_FOUND""
-        for /F "tokens=1 delims==" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+        for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
             for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
@@ -2695,7 +2695,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
@@ -2709,7 +2709,7 @@ REM : functions
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

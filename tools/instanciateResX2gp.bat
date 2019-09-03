@@ -100,17 +100,17 @@ REM : main
     REM : replacing overwriteHeight = ResX2gp in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!height!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" --logFile !fnrLogFile! > NUL
 
     REM : replacing overwriteWidth = ResX2gp in rules.txt (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!height!asWidth.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %resX2%" --replace "overwriteWidth = !height!" --logFile !fnrLogFile! > NUL
 
     REM : replacing overwriteWidth = %wToReplace% in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!width!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = %wToReplace%" --replace "overwriteWidth = !width!" --logFile !fnrLogFile! > NUL
 
 
     REM compute half target resolution
@@ -120,17 +120,17 @@ REM : main
     REM : replacing half res height in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile! > NUL
 
     REM : replacing half res height in rules.txt  (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!asWidth.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile! > NUL
 
     REM : replacing half res width in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfWidth!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile! > NUL
 
     REM : treating extra files (*_*.txt) if needed
     set "pat="!gp:"=!\*_*s.txt""
@@ -145,17 +145,17 @@ REM : main
     REM : replacing float resXScale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-xScale.log""
     echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resXScale = 2.0" --replace "float resXScale = !xScale!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resXScale = 2.0" --replace "float resXScale = !xScale!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resXScale = 2.0" --replace "float resXScale = !xScale!" --logFile !fnrLogFile! > NUL
 
     REM : replacing float resYScale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-yScale.log""
     echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resYScale = 2.0" --replace "float resYScale = !yScale!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resYScale = 2.0" --replace "float resYScale = !yScale!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resYScale = 2.0" --replace "float resYScale = !yScale!" --logFile !fnrLogFile! > NUL
 
     REM : replacing float resScale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-scale.log""
     echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" --logFile !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" --logFile !fnrLogFile! > NUL
 
     exit /b 0
 
@@ -269,7 +269,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             @echo Host char codeSet not found ^?^, exiting 1
