@@ -127,7 +127,7 @@ Settings are saved by host (and per users). Transferable cache, controller profi
 
 - You want to add a game?: once in your games folder, create shortcuts to this game with one or more version of CEMU by relaunching one of the 2 first scripts listed above;
 
-- If you use an external drive and shortcuts created before are broken (because the drive letter have changed or if you have moved your games): use the shortcut "Wii-U Games\Fix broken shortcuts.lnk";
+- If shortcuts created before are broken (because the drive letter have changed for an USB drive or simply because you have moved your games): use the shortcut "Wii-U Games\Fix broken shortcuts.lnk";
 
 - You don't need to manually open CEMU to play. Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts on your desktop (Or your shortcuts folder);
 
