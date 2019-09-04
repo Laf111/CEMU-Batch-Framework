@@ -31,7 +31,7 @@ REM : main
 
     :waitingLoopProcesses
     timeout /T 1 > NUL 2>&1
-    for /F "delims=~" %%i in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "LaunchGame" ^| find /I /V "find"') do (
+    for /F "delims=~" %%i in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "LaunchGame" ^| find /I /V "find"') do (
 
         REM : set BatchFw processes to priority to high
         wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL 2>&1

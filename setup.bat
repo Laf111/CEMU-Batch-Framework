@@ -540,7 +540,7 @@ REM : main
     :askS
     @echo ---------------------------------------------------------
     choice /C ny /N /M "Do you need to enter arguments for the 3rd party software? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:askSpath
+    if !ERRORLEVEL! EQU 2 goto:askSpath
 
     REM : browse to the file
     :browse3rdP
@@ -717,10 +717,6 @@ REM : main
 
         mkdir !fbsf! > NUL 2>&1
         robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
-        set "vbsf="!BFW_RESOURCES_PATH:"=!\vbs""
-        robocopy !vbsf! !fbsf! "BrowseFolderDialog.vbs" > NUL 2>&1
-
-        robocopy !BFW_RESOURCES_PATH! !fbsf! "fnr.exe" > NUL 2>&1
 
         set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
         !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL

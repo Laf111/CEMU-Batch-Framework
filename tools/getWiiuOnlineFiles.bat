@@ -152,8 +152,8 @@ REM : main
     set "fnrLog="!BFW_PATH:"=!\logs\fnr_WinScp.log""
 
     REM : set WiiU ip adress
-    !StartHiddenWait! !fnrPath! --cl --dir !WinScpFolder! --fileMask WinScp.ini --find "FTPiiU-IP" --replace "!wiiuIp!" --logFile !fnrLog! > NUL
-    !StartHiddenWait! !fnrPath! --cl --dir !WinScpFolder! --fileMask WinScp.ini --find "FTPiiU-port" --replace "!port!" --logFile !fnrLog! > NUL
+    !StartHiddenWait! !fnrPath! --cl --dir !WinScpFolder! --fileMask WinScp.ini --find "FTPiiU-IP" --replace "!wiiuIp!" --logFile !fnrLog!
+    !StartHiddenWait! !fnrPath! --cl --dir !WinScpFolder! --fileMask WinScp.ini --find "FTPiiU-port" --replace "!port!" --logFile !fnrLog!
 
     goto:checkConnection
 
@@ -260,7 +260,7 @@ REM : main
     REM : wait all transfert end
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do (
+    for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do (
         goto:waitingLoop
     )
 

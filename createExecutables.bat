@@ -38,6 +38,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -584,6 +585,8 @@ REM : main
     @echo =========================================================
     if !QUIET_MODE! EQU 0 @echo Waiting the end of all child processes before ending^.^.^.
 
+    call:waitProcessesEnd
+
     if %nbArgs% EQU 0 endlocal
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
@@ -595,6 +598,20 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :waitProcessesEnd
+
+        set "disp=0"
+        :waitingLoopProcesses
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "rar.exe" ^| find /I /V "find"') do (
+            if !disp! EQU 0 (
+                set "disp=1"
+                @echo Still extracting V2 GFX packs^, please wait ^.^.^.
+            )
+            goto:waitingLoopProcesses
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : check if (DLC) or (UPDATE DATA) folders exist
    :checkGamesToBePrepared

@@ -1,13 +1,15 @@
-03/09/2019 V15 :
+04/09/2019 V15 :
+- opt : wmic command line outputs filtered with _BatchFw_Install pattern 
+- fix : wait for the end of V2 GFX pack extraction in Create*.bat 
 - add : script to fix broken shortcuts in case of drive letter changing (installation on 
         an USB device) or if you have moved your games'library.
         Missing CEMU's install folder is already handle in LaunchGame.bat (shortcuts are 
-        deleted)
+        deleted automatically)
 - add : add a file browsing option when defining a 3rd party software to be launched 
         before (and optionnaly closed after) CEMU.
 - add : add an existance check for 3rd Party Software when entering its command line
 - fix : disable the delayed expansion on game's profile path (when the file does not exist, it leads 
-        in a warning displayed in the console : the process tried to write on an non existing channel
+        in a warning displayed in the console : the process tried to write on an non existing channel)
 - fix : when a game's profile file was created (not existing) on versions >= 1.15.6, it wasn't 
         copied in _BatchFw_Missing_Games_Profiles        
 - fix : launchThirdPartySoftware.bat not removing a third party software with invalid path
@@ -16,7 +18,7 @@
         where the drive letter changed. It was already working for third party softwares installed
         at the same level (or lower) than BatchFw.
 - add : setup.bat now removes a third party software with invalid path and also modify the
-        path to software installed on an USB drive for which driver letter had changed
+        path to software installed on an USB drive for whose driver letter had changed
 - fix : still some unwanted message sent to console when completing/creating extra GFX packs
 
 24/08/2019 V14-12 :

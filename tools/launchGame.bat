@@ -747,7 +747,7 @@ REM : main
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp!
     REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!
 
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
@@ -1239,11 +1239,11 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "robocopy" ^| find /I "transferable" ^| find /I /V "find"') do (
             goto:waitingLoopProcesses
         )
         timeout /T 1 > NUL 2>&1
-        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks" ^| find /I /V "find"') do (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
@@ -1962,7 +1962,7 @@ REM : functions
 
         REM : if str found in file : replace it with strTarget
         for /F "delims=~" %%i in ('type !file! ^| find /I "!str!" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!str!" --replace "!strTarget!" --logFile !fnrLogFile! > NUL
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!str!" --replace "!strTarget!" --logFile !fnrLogFile!
 
             goto:eof
         )
@@ -1970,7 +1970,7 @@ REM : functions
         REM : if strWithoutSpace found in file : strTargetWithoutSpace
         if exist !fnrLogFile! del /F !fnrLogFile!
         for /F "delims=~" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile! > NUL
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
 
             goto:eof
         )
@@ -1978,12 +1978,12 @@ REM : functions
         REM : if [Graphics] found in file :
         if exist !fnrLogFile! del /F !fnrLogFile!
         for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile! > NUL
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
 
     goto:eof
