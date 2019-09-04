@@ -161,4 +161,4 @@ I recommend to not clone the repository : use the last released version.
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
 
-If you have any trouble, send me a private message on CEMU's reddit, Discord (/u/Laf111) or GBATemp (Laf111) and i'll gladly help you.
+If you have any trouble, send me a private message on CEMU's reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
