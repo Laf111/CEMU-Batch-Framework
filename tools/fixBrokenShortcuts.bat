@@ -66,7 +66,7 @@ REM : main
 
     REM : update this script
     set "fnrLog="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\logs\fnr_brokenShortcuts.log""
-    !fnrPath! --cl --dir !shortcutsToolsFolder! --fileMask "fixBrokenShortcuts.bat" --find !LAST_GAMES_FOLDER_PATH! --replace !NEW_GAMES_FOLDER_PATH! --logFile !fnrLog!
+    !fnrPath! --cl --dir !shortcutsToolsFolder! --fileMask "fixBrokenShortcuts.bat" --find !LAST_GAMES_FOLDER_PATH! --replace !NEW_GAMES_FOLDER_PATH! --logFile !fnrLog! > NUL 2>&1
     del /F !fnrLog! > NUL 2>&1
 
     @echo.
