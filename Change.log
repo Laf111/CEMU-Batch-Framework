@@ -1,4 +1,6 @@
-04/09/2019 V15 :
+05/09/2019 V15 :
+- add : import 3rd party software from the last other host configuration if the path is valid
+        else try to changed the drive's letter and if valid import the setting 
 - opt : wmic command line outputs filtered with _BatchFw_Install pattern 
 - fix : wait for the end of V2 GFX pack extraction in Create*.bat 
 - add : script to fix broken shortcuts in case of drive letter changing (installation on 

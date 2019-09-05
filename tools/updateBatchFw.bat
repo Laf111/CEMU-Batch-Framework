@@ -84,7 +84,7 @@ REM : main
 
     set "bfwVR=NONE"
     for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do set "bfwVR=%%i"
-    if !ERRORLEVEL! EQU 1 (
+    if !ERRORLEVEL! NEQ 0 (
         @echo Failed to get the last BatchFw version available
         exit /b 11
     )

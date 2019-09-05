@@ -88,7 +88,7 @@ REM : main
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
-    if !ERRORLEVEL! EQU 1 (
+    if !ERRORLEVEL! NEQ 0 (
         @echo Failed to get the last graphic Packs update available
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
@@ -107,6 +107,12 @@ REM : main
         @echo Network connection was refused^, please check you powerscript policy
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 30
+    )
+    if ["!zipFile!"] == [""] (
+        @echo Searching for a new graphic packs release failed ^!
+        @echo Network connection was refused^, please check you powerscript policy
+        if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
+        exit /b 31
     )
     if !FORCED_MODE! EQU 1 goto:noMsg
     if !QUIET_MODE! EQU 1 goto:msgBox

@@ -245,21 +245,21 @@ REM : main
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-        :goalsOK
+       :goalsOK
         call:getUserInput "Read informations on CEMU interfaces history? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-        :iFOK
+       :iFOK
         call:getUserInput "Read how graphic packs are handled? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:wiiuOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-        :wiiuOK
+       :wiiuOK
         call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] goto:externalGP
 
@@ -496,23 +496,14 @@ REM : main
     for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do (
 
         set "command=%%i"
-        for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
+   
+        call:isSoftwareValid "!command!" program valid
 
-        set "program="NONE""
-        set "firstArg="NONE""
-
-        REM : resolve venv for search
-        for /F "tokens=1 delims=~'" %%j in ("!command!") do set "program="%%j""
-        for /F "tokens=3 delims=~'" %%j in ("!command!") do set "firstArg="%%j""
-
-        if exist !program! (
+        if !valid! EQU 1 (
             set "softwareList=!softwareList! !program!"
-            set "msg=TO_BE_LAUNCHED@!command!"
-            call:log2HostFile !msg!
         ) else (
             call:cleanHostLogFile !program:"='!
         )
-        call:cleanHostLogFile %%i
     )
     if not ["!softwareList!"] == ["EMPTY"] goto:handleSoftware
 
@@ -604,7 +595,7 @@ REM : main
         @echo define which user^'s save is it.
         @echo.
 
-        :getExtMlc01
+       :getExtMlc01
         set "script="!BFW_TOOLS_PATH:"=!\moveMlc01DataForAllGames.bat""
         choice /C mc /CS /N /M "Move (m) or copy (c) data?"
         set /A "cr=!ERRORLEVEL!"
@@ -642,7 +633,7 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
-     :askOutputFolder
+    :askOutputFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
@@ -890,22 +881,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-     :resolveVenv
-        set "value="%~1""
-        set "resolved=%value:"=%"
-
-        REM : check if value is a path
-        echo %resolved% | find ":" > NUL 2>&1 && (
-            REM : check if it is only a device letter issue (in case of portable library)
-            set "tmp='!drive!%resolved:~3%
-            set "newLocation=!tmp:'="!"
-            if exist !newLocation! set "resolved=!tmp!"
-        )
-
-        set "%2=!resolved!"
-    goto:eof
-    REM : ------------------------------------------------------------------
     
     REM : check if (DLC) or (UPDATE DATA) folders exist
     :checkGamesToBePrepared
@@ -985,12 +960,12 @@ REM : functions
         if !cr! EQU 1 call:move
         if !cr! EQU 2 call:copy
 
-        :createShortcuts
+       :createShortcuts
 
         REM : check if CemuHook is installed
         set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
 
-        :checkCemuHook
+       :checkCemuHook
         if exist !dllFile! goto:checkSharedFonts
 
         @echo ---------------------------------------------------------
@@ -1016,13 +991,13 @@ REM : functions
         choice /C y /N /M "If CemuHook is installed, continue? (y): "
         goto:checkCemuHook
 
-        :checkSharedFonts
+       :checkSharedFonts
 
         REM : check if sharedFonts were downloaded
         set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
         if exist !sharedFonts! goto:getCemuVersion
 
-        :openCemuAFirstTime
+       :openCemuAFirstTime
 
         @echo ---------------------------------------------------------
         @echo Openning CEMU^.^.^.
@@ -1033,7 +1008,7 @@ REM : functions
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
 
-        :getCemuVersion
+       :getCemuVersion
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
@@ -1056,7 +1031,7 @@ REM : functions
         if !result! EQU 1 goto:autoImportMode
         if !result! EQU 0 goto:autoImportMode
 
-        :extractV2Packs
+       :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:autoImportMode
 
@@ -1074,7 +1049,7 @@ REM : functions
             exit /b 21
         )
 
-        :autoImportMode
+       :autoImportMode
         @echo ---------------------------------------------------------
         if %cemuNumber% EQU 1  (
 
@@ -1133,7 +1108,7 @@ REM : functions
             )
         )
 
-        :launchCreate
+       :launchCreate
         if ["%outputType%"] == ["EXE"] goto:createExe
 
         REM : calling createShortcuts.bat
@@ -1149,7 +1124,7 @@ REM : functions
         @echo ^> Shortcuts created for !CEMU_FOLDER_NAME!
         goto:eof
 
-        :createExe
+       :createExe
         REM : calling createExecutables.bat
         set "tobeLaunch="!BFW_PATH:"=!\createExecutables.bat""
         call !tobeLaunch! !CEMU_FOLDER! !OUTPUT_FOLDER! %argOpt%
@@ -1323,18 +1298,18 @@ REM : functions
             move /Y !gif! !cemuFolder! > NUL 2>&1
         )
 
-        :gameTreated
+       :gameTreated
         set /A NB_GAMES_VALID+=1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     REM : COMPARE VERSIONS : function to count occurences of a separator
-     :countSeparators
+    :countSeparators
         set "string=%~1"
         set /A "count=0"
 
-         :again
+       :again
         set "oldstring=!string!"
         set "string=!string:*%sep%=!"
         set /A "count+=1"
@@ -1348,7 +1323,7 @@ REM : functions
     REM : if vit < vir return 1
     REM : if vit = vir return 0
     REM : if vit > vir return 2
-     :compareVersions
+    :compareVersions
         set "vit=%~1"
         set "vir=%~2"
 
@@ -1374,7 +1349,7 @@ REM : functions
         if !vit! LSS !vir! set "%3=2" && goto:eof
         if !vit! GTR !vir! set "%3=1" && goto:eof
 
-         :loopSep
+       :loopSep
         set /A "minNbSep+=1"
         REM : Loop on the minNbSep and comparing each number
         REM : note that the shell can compare 1c with 1d for example
@@ -1397,7 +1372,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to compare digits of a rank
-     :compareDigits
+    :compareDigits
         set /A "num=%~1"
 
         set "dr=99"
@@ -1413,7 +1388,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length
-     :strLength
+    :strLength
         Set "s=#%~1"
         Set "len=0"
         For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
@@ -1426,7 +1401,7 @@ REM : functions
     goto:eof
 
     REM : COMPARE VERSION : function to format string version without alphabetic charcaters
-     :formatStrVersion
+    :formatStrVersion
 
         set "str=%~1"
 
@@ -1511,7 +1486,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
-     :setCharSet
+    :setCharSet
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
@@ -1536,7 +1511,7 @@ REM : functions
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %BFW_PATH% > NUL 2>&1 && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
@@ -1545,7 +1520,7 @@ REM : functions
         )
         REM : check if the message is not already entierely present
         for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-        :logMsg2HostFile
+       :logMsg2HostFile
         echo !msg!>> !logFile!
 
     goto:eof
@@ -1559,6 +1534,13 @@ REM : functions
         if exist !logFile! goto:eof
         set "logFolder="!BFW_PATH:"=!\logs""
         if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+
+        REM : get last modified Host log (configuration)
+        set "lastHostLog="NONE""
+        set "patHostLog="!BFW_PATH:"=!\logs\Host_*.log""
+
+        REM : getting the last modified one including _j.bin (conventionnal shader cache)
+        for /F "delims=~" %%i in ('dir /B /S /O:D !patHostLog! 2^>NUL') do set "lastHostLog="%%i""
 
         call:log2HostFile "================================================="
         call:log2HostFile "CEMU BATCH Framework history and settings for !USERDOMAIN!"
@@ -1577,35 +1559,97 @@ REM : functions
         for /F "delims=~" %%i in ('dir /B !pat! 2^> NUL') do (
             REM : get user name
             for /F "tokens=1 delims=8" %%j in ("%%i") do (
-                @echo Found %%j user with an online account^, add it for !USERDOMAIN! configuration
+                @echo ^> Found %%j user with an online account
                 @echo USER_REGISTERED=%%j>>!logFile!
             )
         )
-        @echo. ^(you can modify this list later in the setup process^)
-        pause
-        goto:eof
+        @echo.
+        @echo. ^(you can modify users list later in the setup process^)
+        goto:3rdPartySoftware
 
-         :scanOtherHost
-        REM : check if other log file exist for another host and import user defined in
-        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+       :scanOtherHost
 
-        for /F "delims=~" %%i in ('dir /S /B /O:D !pat! 2^> NUL') do (
+        REM : if no file found
+        if [!lastHostLog!] == ["NONE"] goto:eof
+        
+        REM : get registered users list from the last modified Host log
+        type !lastHostLog! | find /I "USER_REGISTERED" > NUL && (
+            @echo =========================================================
+            @echo New installation for host !USERDOMAIN!
+            @echo -------------------------------------------------
+            @echo Getting users defined for the last previous installation
+            @echo using !lastHostLog:"=!
+            @echo.
+            type !lastHostLog! | find /I "USER_REGISTERED"
+            type !lastHostLog! | find /I "USER_REGISTERED">>!logFile!
+            @echo.
+            @echo ^(you can modify users list later in the setup process^)
 
-            type "%%i" | find /I "USER_REGISTERED" > NUL && (
-                @echo =========================================================
-                @echo New installation for host !USERDOMAIN!
-                @echo -------------------------------------------------
-                @echo Getting users defined for the last previous installation
-                @echo using "%%i"
-                @echo.
-                type "%%i" | find /I "USER_REGISTERED"
-                type "%%i" | find /I "USER_REGISTERED">>!logFile!
-                @echo.
-                @echo. ^(you can modify this list later in the setup process^)
-                timeout /t 10 > NUL
-                cls
-                goto:eof
-            )
         )
 
+       :3rdPartySoftware
+
+        REM : if no file found
+        if [!lastHostLog!] == ["NONE"] goto:eof
+
+        @echo -------------------------------------------------
+        @echo Try to keep 3rd party software defined in last installation
+        @echo using !lastHostLog:"=!
+        @echo.
+
+        for /F "tokens=2 delims=~@" %%j in ('type !lastHostLog! ^| find "TO_BE_LAUNCHED" 2^> NUL') do (
+
+            set "command=%%j"
+            call:isSoftwareValid "!command!" program valid
+
+            if !valid! EQU 1 (
+                @echo ^> !command:'=!
+
+                type !lastHostLog! | find "TO_BE_LAUNCHED">>!logFile!
+            )
+        )
+        @echo.
+        @echo ^(you can modify this list later in the setup process^)
+        @echo -------------------------------------------------
+        pause
     goto:eof
+
+    REM : function to check if a 3rd party software exist or can be patched (resolveEnv)
+    :isSoftwareValid
+
+        set "fc="%~1""
+
+        for /F "tokens=* delims=~" %%k in (!fc!) do call:resolveVenv "%%k" command
+
+        set "program="NONE""
+        set "firstArg="NONE""
+
+        REM : resolve venv for search
+        for /F "tokens=1 delims=~'" %%k in ("!command!") do set "program="%%k""
+        for /F "tokens=3 delims=~'" %%k in ("!command!") do set "firstArg="%%k""
+
+        set "%2=!program!"
+
+        if exist !program! set /A "%3=1" & goto:eof
+
+        set /A "%3=0"
+
+    goto:eof
+
+    REM : function that resolve environnemnt variable (such as %GAMES_FOLDER%)
+    REM : and try to repaired paths where only the drive letter has changed
+    :resolveVenv
+        set "value="%~1""
+        set "resolved=%value:"=%"
+
+        REM : check if value is a path
+        echo %resolved% | find ":" > NUL 2>&1 && (
+            REM : check if it is only a device letter issue (in case of portable library)
+            set "tmp='!drive!%resolved:~3%
+            set "newLocation=!tmp:'="!"
+            if exist !newLocation! set "resolved=!tmp!"
+        )
+
+        set "%2=!resolved!"
+    goto:eof
+    REM : ------------------------------------------------------------------    
