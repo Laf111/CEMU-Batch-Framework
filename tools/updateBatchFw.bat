@@ -81,7 +81,7 @@ REM : main
 
     REM : powerShell script in _BatchFW_Graphic_Packs
     set "pwsGetVersion="!BFW_PATH:"=!\resources\ps1\getLatestBFW.ps1""
-
+    
     set "bfwVR=NONE"
     for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do set "bfwVR=%%i"
     if !ERRORLEVEL! NEQ 0 (

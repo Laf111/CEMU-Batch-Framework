@@ -113,7 +113,7 @@ REM : main
     @echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw! !BFW_VERSION!
+    call !ubw! %BFW_VERSION%
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
 
@@ -1613,13 +1613,32 @@ REM : functions
         @echo -------------------------------------------------
         pause
     goto:eof
+    
+    REM : function that resolve environnemnt variable (such as %GAMES_FOLDER%)
+    REM : and try to repaired paths where only the drive letter has changed
+    :resolveVenv
+        set "value="%~1""
+        set "resolved=%value:"=%"
+
+        REM : check if value is a path
+        echo %resolved% | find ":" > NUL 2>&1 && (
+            REM : check if it is only a device letter issue (in case of portable library)
+            set "tmpStr='!drive!%resolved:~3%"
+
+            set "newLocation=!tmpStr:'="!"
+            if exist !newLocation! set "resolved=!tmpStr!"
+        )
+
+        set "%2=!resolved!"
+    goto:eof
+    REM : ------------------------------------------------------------------        
 
     REM : function to check if a 3rd party software exist or can be patched (resolveEnv)
     :isSoftwareValid
 
         set "fc="%~1""
 
-        for /F "tokens=* delims=~" %%k in (!fc!) do call:resolveVenv "%%k" command
+        for /F "delims=~" %%k in (!fc!) do call:resolveVenv "%%k" command
 
         set "program="NONE""
         set "firstArg="NONE""
@@ -1636,20 +1655,3 @@ REM : functions
 
     goto:eof
 
-    REM : function that resolve environnemnt variable (such as %GAMES_FOLDER%)
-    REM : and try to repaired paths where only the drive letter has changed
-    :resolveVenv
-        set "value="%~1""
-        set "resolved=%value:"=%"
-
-        REM : check if value is a path
-        echo %resolved% | find ":" > NUL 2>&1 && (
-            REM : check if it is only a device letter issue (in case of portable library)
-            set "tmp='!drive!%resolved:~3%
-            set "newLocation=!tmp:'="!"
-            if exist !newLocation! set "resolved=!tmp!"
-        )
-
-        set "%2=!resolved!"
-    goto:eof
-    REM : ------------------------------------------------------------------    

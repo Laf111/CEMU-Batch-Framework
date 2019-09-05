@@ -1954,8 +1954,8 @@ REM : functions
 
         REM get file name to create file filter for fnr.exe
         for /F "delims=~" %%a in (!file!) do set "filter=%%~nxa"
-        for %%a in (!file!) do set "tmp="%%~dpa""
-        set "parentFolder=!tmp:~0,-2!""
+        for %%a in (!file!) do set "tmpStr="%%~dpa""
+        set "parentFolder=!tmpStr:~0,-2!""
 
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\%filter:"=%.log""
