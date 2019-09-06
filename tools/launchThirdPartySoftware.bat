@@ -81,9 +81,9 @@ REM : functions
         REM : check if value is a path
         echo %resolved% | find ":" && > NUL (
             REM : check if it is only a device letter issue (in case of portable library)
-            set "tmpSTr='!drive!%resolved:~3%"
+            set "tmpStr='!drive!%resolved:~3%"
             set "newLocation=!tmpStr:'="!"
-            if exist !newLocation! set "resolved=!tmp!"
+            if exist !newLocation! set "resolved=!tmpStr!"
         )
 
         set "%2=!resolved!"
