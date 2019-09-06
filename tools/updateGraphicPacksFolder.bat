@@ -88,7 +88,7 @@ REM : main
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
-    if !ERRORLEVEL! NEQ 0 (
+    if !ERRORLEVEL! EQU 1 (
         @echo Failed to get the last graphic Packs update available
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1

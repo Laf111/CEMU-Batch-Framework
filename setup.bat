@@ -1613,7 +1613,7 @@ REM : functions
         @echo -------------------------------------------------
         pause
     goto:eof
-    
+
     REM : function that resolve environnemnt variable (such as %GAMES_FOLDER%)
     REM : and try to repaired paths where only the drive letter has changed
     :resolveVenv
@@ -1631,7 +1631,7 @@ REM : functions
 
         set "%2=!resolved!"
     goto:eof
-    REM : ------------------------------------------------------------------        
+    REM : ------------------------------------------------------------------
 
     REM : function to check if a 3rd party software exist or can be patched (resolveEnv)
     :isSoftwareValid
