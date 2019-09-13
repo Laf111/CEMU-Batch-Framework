@@ -8,7 +8,8 @@ All versions of CEMU released from the 1.11.0 are supported (1.11.0 introduced t
 
 - Handle more than one user/save and for Wii-U owners : install online files, sync saves between CEMU with the Wii-U;
 
-- Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (you'll keep your games stats unless settings.xml compatibility is broken with the next version);
+- Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature;
+
 - Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; 
 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
