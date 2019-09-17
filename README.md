@@ -100,8 +100,6 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 ## Install: 
 
-Wii-U Owner : if you haven't a SDCard ready, launch ./tools/createWiiuSDcard.bat before setup.bat
-
 - Extract in your games folder;
 - Wii-U Owner only : if you haven't a SDCard ready, launch  _BatchFW_Install\\tools\\createWiiuSDcard.bat before setup.bat
 - launch _BatchFW_Install\\setup.bat;
