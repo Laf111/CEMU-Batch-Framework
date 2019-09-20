@@ -5,7 +5,7 @@ $latestRelease = Invoke-WebRequest -UseBasicParsing https://github.com/slashiee/
 # The releases are returned in the format {"id":3622206,"tag_name":"hello-1.0.0.11",...}, we have to extract the tag_name.
 $json = $latestRelease.Content | ConvertFrom-Json
 $latestVersion = $json.tag_name
-$pos = $latestVersion.IndexOf("Travis")
+$pos = $latestVersion.IndexOf("Github")
 $leftPart = $latestVersion.Substring(0, $pos)
 $rightPart = $latestVersion.Substring($pos+6)
 $url = "https://github.com/slashiee/cemu_graphic_packs/releases/download/$latestVersion/graphicPacks" + $rightPart + ".zip"

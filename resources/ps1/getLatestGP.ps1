@@ -16,7 +16,7 @@ try {
 
 $json = $latestRelease.Content | ConvertFrom-Json
 $latestVersion = $json.tag_name
-$pos = $latestVersion.IndexOf("Travis")
+$pos = $latestVersion.IndexOf("Github")
 $leftPart = $latestVersion.Substring(0, $pos)
 $rightPart = $latestVersion.Substring($pos+6)
 $latest = "graphicPacks" + $rightPart + ".zip"
