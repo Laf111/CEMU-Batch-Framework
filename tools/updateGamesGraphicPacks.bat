@@ -181,7 +181,7 @@ REM : functions
 
         for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find "^!" 2^>NUL') do (
             @echo Treat GFX pack folder to be DOS compliant
-            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
+            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
             goto:eof
         )
 
@@ -210,8 +210,14 @@ REM : functions
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do set "RPX_FILE="%%i""
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
+        )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 

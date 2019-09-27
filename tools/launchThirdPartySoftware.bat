@@ -28,13 +28,17 @@ REM : main
 
         set "command=%%i"
         for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
+        @echo command=!command!
 
         set "program="NONE""
         set "firstArg="NONE""
 
         REM : resolve venv for search
-        for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
-        for /F "tokens=3 delims=~'" %%j in (!command!) do set "firstArg="%%j""
+        for /F "tokens=1 delims=~'" %%j in ("!command!") do set "program="%%j""
+        for /F "tokens=3 delims=~'" %%j in ("!command!") do set "firstArg="%%j""
+
+        @echo program=!program!
+        @echo firstArg=!firstArg!
 
         if not [!program!] == ["NONE"]  if not exist !program! (
 
@@ -79,7 +83,7 @@ REM : functions
         set "resolved=%value:"=%"
 
         REM : check if value is a path
-        echo %resolved% | find ":" && > NUL (
+        echo %resolved% | find ":" > NUL && (
             REM : check if it is only a device letter issue (in case of portable library)
             set "tmpStr='!drive!%resolved:~3%"
             set "newLocation=!tmpStr:'="!"

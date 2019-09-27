@@ -31,6 +31,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
@@ -242,13 +244,18 @@ REM : main
     :EU
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/sys/title/00050030/1001520A" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-        goto:accounts
+        goto:compressMlc01
     )
     @echo found EUR one
     if not exist !EFL_FOLDER! mkdir !EFL_FOLDER! > NUL 2>&1
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize local "!EFL_FOLDER!" /storage_mlc/sys/title/00050030/1001520A" "exit"
 
-    :accounts
+    :compressMlc01
+    set "BFW_MLC01_ONLINE_FOLDER="!BFW_ONLINE_FOLDER:"=!\mlc01""
+    set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
+
+    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !mlc01OnlineFiles! !BFW_MLC01_ONLINE_FOLDER!
+
     @echo.
     @echo ---------------------------------------------------------
     @echo - WII-U accounts

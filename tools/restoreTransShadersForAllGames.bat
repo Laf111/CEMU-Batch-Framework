@@ -80,7 +80,7 @@ REM : main
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
+    if not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
@@ -228,10 +228,14 @@ REM : functions
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 

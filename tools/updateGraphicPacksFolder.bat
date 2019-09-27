@@ -98,7 +98,7 @@ REM : main
 
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
     if exist !zipLogFile! (
-        @echo No new graphics packs update^(s^) available^, last version is still !zipFile:.zip=!
+        @echo No new graphics packs update available^, last version is still !zipFile:.zip=!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 0
     )
@@ -171,7 +171,7 @@ REM : main
     )
 
     REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat=graphicPacks*.doNotDelete"

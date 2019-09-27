@@ -31,8 +31,10 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
 
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -185,10 +187,47 @@ REM : main
     REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
     if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
 
+    REM : log CEMU
+    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
+    set "versionRead=NOT_FOUND"
+    if not exist !cemuLog! goto:checkProfile
+
+    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:checkProfile
+
+    REM : comparing version to V1.15.15
+    set "v11515="
+    call:compareVersions !versionRead! "1.15.15" v11515
+    if ["!v11515!"] == [""] @echo Error when comparing versions
+    if !v11515! EQU 50 @echo Error when comparing versions
+
+
+    set "v1156=1"
+    set "v1116=1"
+
+    if !v11515! LEQ 1 goto:checkProfile
+
+    set "v1156="
+    call:compareVersions !versionRead! "1.15.6" v1156
+    if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
+
+    set "v1116="
+    if !v1156! EQU 2 (
+        call:compareVersions !versionRead! "1.11.6" v1116
+        if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
+    ) else (
+        set /A "v1116=1"
+    )
+    :checkProfile
+
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
+    REM : handling user game profiles
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v11515! LEQ 1 set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
+    
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
 
@@ -201,13 +240,6 @@ REM : main
         robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
         goto:completeGameProfile
     )
-    set /A "v1156=99"
-    call:compareVersions !versionRead! "1.15.6" v1156
-    if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
-
-    set /A "v1116=99"
-    call:compareVersions !versionRead! "1.11.6" v1116
-    if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
 
     REM : else, create profile file in CEMU_FOLDER
     if not exist !PROFILE_FILE! call:createGameProfile
@@ -224,25 +256,35 @@ REM : main
     REM : GFX type to provide
     set "gfxType=V3"
 
-    REM : log CEMU
-    set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
-    if not exist !cemuLog! goto:backupDefaultSettings
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
 
-    set "versionRead=NOT_FOUND"
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+    set /A "v114=0"
+    if !v1116! EQU 1 if !v1156! EQU 2 (
+        call:compareVersions !versionRead! "1.14.0" result
+        if ["!result!"] == [""] echo Error when comparing versions
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 2 set "gfxType=V2"
 
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:displayGameProfile
-    
-    call:compareVersions !versionRead! "1.14.0" result
-    if ["!result!"] == [""] echo Error when comparing versions
-    if !result! EQU 50 echo Error when comparing versions
-    if !result! EQU 2 set "gfxType=V2"
+    ) else (
+        if !v1116! EQU 2 (
+            set "gfxType=V2"
+        ) else (
+            if !v1156! EQU 2 (
+                call:compareVersions !versionRead! "1.14.0" result
+                if ["!result!"] == [""] echo Error when comparing versions
+                if !result! EQU 50 echo Error when comparing versions
+                if !result! EQU 2 set "gfxType=V2"
 
-    REM : if CEMU version < 1.12.0 (add games' list in UI)
-    call:compareVersions !versionRead! "1.12.0" result
-    if ["!result!"] == [""] echo Error when comparing versions
-    if !result! EQU 50 echo Error when comparing versions
-    if !result! EQU 2 goto:displayGameProfile
+                REM : if CEMU version < 1.12.0 (add games' list in UI)
+                call:compareVersions !versionRead! "1.12.0" result
+                if ["!result!"] == [""] echo Error when comparing versions
+
+                if !result! EQU 50 echo Error when comparing versions
+                if !result! EQU 2 goto:displayGameProfile
+            )
+        )
+    )
+
 
     REM : else using CEMU UI for the game profile
 
@@ -253,9 +295,11 @@ REM : main
         rmdir /Q /S !link! > NUL 2>&1
     )
 
+    if not exist !cs! goto:displayGameProfile
+
     REM : check the file size
     for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
-    
+
     REM : backup settings.xml
     copy /Y !cs! !backup! > NUL 2>&1
 
@@ -267,7 +311,7 @@ REM : main
     REM : remove the node //GamePaths/Entry
     !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
 
-    REM : remove the node //GameCache/Entry
+    REM : remove the node //GameCache/Entry to force games'list refresh in UI
     !xmlS! ed -d "//GameCache/Entry" !csTmp0! > !csTmp1!
     
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
@@ -320,9 +364,11 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
     REM : check that profile file exist in
-    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-    if /I not exist !refProfileFile! (
-        @echo No game^'s profile file found under !REF_CEMU_FOLDER:"=!\gameProfiles ^!
+    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+    if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+
+    if not exist !refProfileFile! (
+        @echo No game^'s profile file found ^!
         goto:askRefCemuFolder
     )
     REM : open winmerge on files
@@ -334,7 +380,7 @@ REM : main
     :openProfileFile
 
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if !v1156! LEQ 1 goto:step2
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:step2
 
     @echo Openning !PROFILE_FILE:"=! ^.^.^.
     @echo Complete it ^(if needed^) then close notepad to continue
@@ -342,7 +388,6 @@ REM : main
     @echo ---------------------------------------------------------
 
     :step2
-
     cls
     REM : create a text file in game's folder to save data for current game
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
@@ -359,7 +404,6 @@ REM : main
     REM : if just created, copy it in MISSING_PROFILES_FOLDER
     if not exist !missingProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
 
-
     REM : check CEMU options (and controollers settings)
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
@@ -375,7 +419,7 @@ REM : main
     call:checkCemuSettings
 
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if !v1156! LEQ 1 goto:wait
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:wait
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
@@ -417,7 +461,9 @@ REM : main
     )
 
     REM : always import 16/9 graphic packs
-    call:importGraphicPacks > NUL 2>&1
+    call:importGraphicPacks
+
+    if ["!gfxType!"] == ["V3"] goto:checkHeightFix
 
     REM : get user defined ratios list
     set "ARLIST="
@@ -463,10 +509,14 @@ REM : main
     @echo    - select amiibo paths^(NFC Tags^)
 
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
 
     REM : if version of CEMU < 1.11.6 (v1116<=1)
-    if !v1116! EQU 2 @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+    if not ["!versionRead!"] == ["NOT_FOUND"] (
+        if !v1116! EQU 2 @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+    ) else (
+        @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+    )
 
     @echo ---------------------------------------------------------
     @echo Then close CEMU to continue
@@ -493,16 +543,17 @@ REM : main
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
-        call:compareVersions !versionRead! "1.15.3" result
+        if !v114! EQU 1 (
+            call:compareVersions !versionRead! "1.15.3b" result
 
-        if ["!result!"] == [""] echo Error when comparing versions
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! LEQ 1 (
-            robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
-            goto:launchCemu
+            if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+            if ["!result!"] == [""] @echo Error when comparing versions
+            if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+            if !result! EQU 50 @echo Error when comparing versions
+            if !result! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         )
     )
-    if not exist !graphicPacks! mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
+    mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
     :launchCemu
@@ -511,6 +562,16 @@ REM : main
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
 
+    if not exist !cs! goto:saveOptions
+
+    REM : set !GAMES_FOLDER! for //GamePaths
+    REM : remove the node //GamePaths/Entry
+    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
+    REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp0! > !cs!
+    del /F !csTmp0! > NUL 2>&1
+
+    :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
     if not exist !scp! mkdir !scp! > NUL 2>&1
 
@@ -520,16 +581,19 @@ REM : main
     set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
     if exist !src! move /Y !src! !target! > NUL 2>&1
 
-    robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
-    set "src="!SETTINGS_FOLDER:"=!\settings.xml""
-    set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
-    if exist !src! move /Y !src! !target! > NUL 2>&1
+    if exist !cs! (
+        robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
+        set "src="!SETTINGS_FOLDER:"=!\settings.xml""
+        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
+        if exist !src! move /Y !src! !target! > NUL 2>&1
+    )
 
-    robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
-    set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
-    set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
-    if exist !src! move /Y !src! !target! > NUL 2>&1
-
+     if exist !chs! (
+        robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
+        set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
+        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
+        if exist !src! move /Y !src! !target! > NUL 2>&1
+    )
     REM : controller profiles
     set "pat="!CEMU_FOLDER:"=!\controllerProfiles\controller*.*""
     copy /A /Y !pat! !scp! > NUL 2>&1
@@ -591,7 +655,7 @@ REM : functions
             @echo WARNING^: AccountId not found for !currentUser!^, cancel online files installation ^!
             pause
         )
-
+        @echo ---------------------------------------------------------
         @echo AccountId found for !currentUser!
 
         REM : check if the Wii-U is not power on
@@ -618,8 +682,6 @@ REM : functions
         copy /Y !af! !target! > NUL 2>&1
 
         REM : patch settings.xml
-        set "cs="!CEMU_FOLDER:"=!\settings.xml""
-
         REM if not nul
         for /F "tokens=*" %%a in (!cs!) do (
             set /A "css=%%~za"
@@ -640,11 +702,13 @@ REM : functions
         )
 
         REM : install other files needed for online play
-        set "onLineMlc01Files="!BFW_ONLINE:"=!\mlc01""
-        if exist !onLineMlc01Files! (
-            set "ccerts="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b\10054000\content\ccerts""
-            if not exist !ccerts! xcopy !onLineMlc01Files! !MLC01_FOLDER_PATH! /R /S /Y > NUL 2>&1
-        )
+        set "alreadyInstalled="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b""
+        if exist !alreadyInstalled! goto:copyBinFiles
+
+        set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+
+        :copyBinFiles
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
@@ -907,6 +971,17 @@ REM : functions
             if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
 
         )
+        REM : check that at least one GFX pack was listed
+        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
+
+        REM : stop execution something wrong happens
+        REM : warn user
+        @echo ERROR ^: No GFX packs were found ^!^, cancelling and killing process
+        REM : kill all running process
+        set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+        wscript /nologo !StartHidden! !killBatchFw!
+
+        exit 80
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -916,14 +991,18 @@ REM : functions
         @echo [Graphics] >> %PROFILE_FILE%
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
-        if !v1156! EQU 2 (
+        if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
             @echo GPUBufferCacheAccuracy = 1 >> %PROFILE_FILE%
         ) else (
             @echo GPUBufferCacheAccuracy = medium >> %PROFILE_FILE%
         )
 
         REM : if version of CEMU < 1.11.6 (v1116<=1)
-        if !v1116! EQU 2 @echo disableGPUFence = true >> %PROFILE_FILE%
+        if not ["!versionRead!"] == ["NOT_FOUND"] (
+            if !v1116! EQU 2 @echo disableGPUFence = true >> %PROFILE_FILE%
+        ) else (
+            @echo disableGPUFence = true >> %PROFILE_FILE%
+        )
 
         @echo accurateShaderMul = min >> %PROFILE_FILE%
         @echo [CPU] >> %PROFILE_FILE%
@@ -991,8 +1070,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        call:formatStrVersion !vit! vit
-        call:formatStrVersion !vir! vir
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1076,59 +1157,59 @@ REM : functions
         set "str=!str:RC=!"
         set "str=!str:rc=!"
 
-        set "str=!str:A=!01"
-        set "str=!str:B=!02"
-        set "str=!str:C=!03"
-        set "str=!str:D=!04"
-        set "str=!str:E=!05"
-        set "str=!str:F=!06"
-        set "str=!str:G=!07"
-        set "str=!str:H=!08"
-        set "str=!str:I=!09"
-        set "str=!str:J=!10"
-        set "str=!str:K=!11"
-        set "str=!str:L=!12"
-        set "str=!str:M=!13"
-        set "str=!str:N=!14"
-        set "str=!str:O=!15"
-        set "str=!str:P=!16"
-        set "str=!str:Q=!17"
-        set "str=!str:R=!18"
-        set "str=!str:S=!19"
-        set "str=!str:T=!20"
-        set "str=!str:U=!21"
+        set "str=!str:A=01!"
+        set "str=!str:B=02!"
+        set "str=!str:C=03!"
+        set "str=!str:D=04!"
+        set "str=!str:E=05!"
+        set "str=!str:F=06!"
+        set "str=!str:G=07!"
+        set "str=!str:H=08!"
+        set "str=!str:I=09!"
+        set "str=!str:J=10!"
+        set "str=!str:K=11!"
+        set "str=!str:L=12!"
+        set "str=!str:M=13!"
+        set "str=!str:N=14!"
+        set "str=!str:O=15!"
+        set "str=!str:P=16!"
+        set "str=!str:Q=17!"
+        set "str=!str:R=18!"
+        set "str=!str:S=19!"
+        set "str=!str:T=20!"
+        set "str=!str:U=21!"
 
-        set "str=!str:W=!23"
-        set "str=!str:X=!24"
-        set "str=!str:Y=!25"
-        set "str=!str:Z=!26"
+        set "str=!str:W=23!"
+        set "str=!str:X=24!"
+        set "str=!str:Y=25!"
+        set "str=!str:Z=26!"
 
-        set "str=!str:a=!01"
-        set "str=!str:b=!02"
-        set "str=!str:c=!03"
-        set "str=!str:d=!04"
-        set "str=!str:e=!05"
-        set "str=!str:f=!06"
-        set "str=!str:g=!07"
-        set "str=!str:h=!08"
-        set "str=!str:i=!09"
-        set "str=!str:j=!10"
-        set "str=!str:k=!11"
-        set "str=!str:l=!12"
-        set "str=!str:m=!13"
-        set "str=!str:n=!14"
-        set "str=!str:o=!15"
-        set "str=!str:p=!16"
-        set "str=!str:q=!17"
-        set "str=!str:r=!18"
-        set "str=!str:s=!19"
-        set "str=!str:t=!20"
-        set "str=!str:u=!21"
+        set "str=!str:a=01!"
+        set "str=!str:b=02!"
+        set "str=!str:c=03!"
+        set "str=!str:d=04!"
+        set "str=!str:e=05!"
+        set "str=!str:f=06!"
+        set "str=!str:g=07!"
+        set "str=!str:h=08!"
+        set "str=!str:i=09!"
+        set "str=!str:j=10!"
+        set "str=!str:k=11!"
+        set "str=!str:l=12!"
+        set "str=!str:m=13!"
+        set "str=!str:n=14!"
+        set "str=!str:o=15!"
+        set "str=!str:p=16!"
+        set "str=!str:q=17!"
+        set "str=!str:r=18!"
+        set "str=!str:s=19!"
+        set "str=!str:t=20!"
+        set "str=!str:u=21!"
 
-        set "str=!str:w=!23"
-        set "str=!str:x=!24"
-        set "str=!str:y=!25"
-        set "str=!str:z=!26"
+        set "str=!str:w=23!"
+        set "str=!str:x=24!"
+        set "str=!str:y=25!"
+        set "str=!str:z=26!"
 
         set "%2=!str!"
 

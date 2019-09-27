@@ -14,6 +14,13 @@ REM : main
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
+    REM : basename of GAME FOLDER PATH (used to name shorcut)
+    for /F "delims=~" %%i in (!GAMES_FOLDER!) do set "GAMES_FOLDER_NAME=%%~nxi"
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
@@ -27,21 +34,23 @@ REM : main
     REM : duration value in seconds
     set /A "duration=0"
 
-    REM : monitor LaunchGame.bat until cemu.exe is launched
+    REM : monitor LaunchGame.bat until cemu is launched
 
     :waitingLoopProcesses
-    timeout /T 1 > NUL 2>&1
-    for /F "delims=~" %%i in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "LaunchGame" ^| find /I /V "find"') do (
+    for /F "delims=~" %%i in ('wmic process get Commandline ^| find /I "LaunchGame" ^| find /I /V "wmic" ^| find /I /V "find"') do (
 
         REM : set BatchFw processes to priority to high
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%_BatchFW_Install%%'" call setpriority 128 > NUL 2>&1
+        wmic process where "CommandLine like '%%!GAMES_FOLDER_NAME!%%'" call setpriority 128 > NUL 2>&1
 
-        REM : if wizrad is running, don't count
+        REM : if wizard is running, don't count
         wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%wizardFirstSaving.bat%%'" goto:waitingLoopProcesses
 
-        REM : monitor Cemu.exe launch and exit
-        for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu.exe"') do exit 0
-        set /A "duration+=1"
+        REM : if rar is running, don't count
+        wmic process where "Name like '%%rar.exe%%' and CommandLine like '%%_BatchFw_Graphic_Packs%%'" goto:waitingLoopProcesses
+        
+        REM : monitor Cemu launch
+        for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu"') do set /A "duration=-1"
+        if !duration! GEQ 0 set /A "duration+=1"
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
             cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
@@ -50,6 +59,7 @@ REM : main
             call !killBatchFw!
             exit 1
         )
+        timeout /T 1 > NUL 2>&1
         goto:waitingLoopProcesses
     )
 

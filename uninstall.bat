@@ -213,7 +213,7 @@ REM : main
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
+    if not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )

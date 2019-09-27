@@ -447,22 +447,30 @@ REM : main
         @echo Fail to get users from wiiU ^!
         goto:handleUsers
     )
+
     @echo.
-    @echo Do you want to take a snapshot of your WII-U now^?
+    choice /C yn /N /M "Do you want to import some saves from your WII-U now? (y,n):"
+    if !ERRORLEVEL! EQU 2 goto:getSoftware
+
     @echo.
-    @echo BatchFw will list the games^, saves^, updates and DLC
+    @echo BatchFw need to take a snapshot of your Wii-U to
+    @echo will list games^, saves^, updates and DLC
     @echo precising where they are installed ^(mlc or usb^)
-    @echo and use its result to synchronize CEMU and your Wii-U
-    @echo ^(import ^/ export saves^)
     @echo.
 
-    choice /C yn /N /M "Take a snapshot of your Wii-U now? (y,n):"
-    if !ERRORLEVEL! EQU 2 goto:getSoftware
     pushd !BFW_TOOLS_PATH!
     set "tobeLaunch="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
     wscript /nologo !StartWait! !tobeLaunch!
-    goto:getSoftware
 
+    @echo.
+    @echo Now getting your wii-U saves^.^.^.
+    @echo.
+
+    set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importWiiuSaves.bat""
+    wscript /nologo !StartWait! !tobeLaunch!
+    pushd !GAMES_FOLDER!
+    goto:getSoftware
+    
     :batchFwUsers
     set /P "input=Please enter BatchFw's user name : "
     call:secureUserNameForBfw "!input!" safeInput
@@ -778,7 +786,7 @@ REM : main
     )
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
+    if not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
@@ -1012,25 +1020,26 @@ REM : functions
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
-        set /A "post1151=1"
-        if not exist !clog! goto:openCemuAFirstTime
-
+        set /A "v1151=2"
          set "versionRead=NOT_FOUND"
+         if not exist !clog! goto:openCemuAFirstTime
 
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
-        call:compareVersions !versionRead! "1.15.1" result
-        if ["!result!"] == [""] echo Error when comparing versions
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 2 set /A "post1151=0"
+        call:compareVersions !versionRead! "1.15.1" v1151
+        if ["!v1151!"] == [""] echo Error when comparing versions
+        if !v1151! EQU 50 echo Error when comparing versions
 
-        call:compareVersions !versionRead! "1.14.0" result
-        if ["!result!"] == [""] echo Error when comparing versions
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 1 goto:autoImportMode
-        if !result! EQU 0 goto:autoImportMode
-
+        if !v1151! EQU 2 (
+            call:compareVersions !versionRead! "1.14.0" result
+            if ["!result!"] == [""] echo Error when comparing versions
+            if !result! EQU 50 echo Error when comparing versions
+            if !result! EQU 1 goto:autoImportMode
+            if !result! EQU 0 goto:autoImportMode
+        ) else (
+            goto:autoImportMode
+        )
        :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:autoImportMode
@@ -1093,14 +1102,20 @@ REM : functions
 
             @echo ---------------------------------------------------------
             REM : CEMU < 1.15.1
-            if %post1151% EQU 0 (
+            if !v1151! LEQ 1 (
                 call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y,n): " "n,y" ANSWER
                 if [!ANSWER!] == ["n"] goto:launchCreate
                 set "argOpt=%argOpt% -noLegacy"
                 goto:launchCreate
             )
             REM : CEMU >= 1.15.1
-            if %post1151% EQU 1 (
+            if !v1151! EQU 0 (
+                call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y,n): " "n,y" ANSWER
+                if [!ANSWER!] == ["n"] goto:launchCreate
+                set "argOpt=%argOpt% -Legacy"
+                goto:launchCreate
+            )
+            if !v1151! EQU 2 (
                 call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y,n): " "n,y" ANSWER
                 if [!ANSWER!] == ["n"] goto:launchCreate
                 set "argOpt=%argOpt% -Legacy"
@@ -1232,11 +1247,15 @@ REM : functions
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-
-        for /F "delims=~" %%j in ('dir /B /O:S !pat! 2^> NUL') do (
-            set "RPX_FILE="%%j""
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
         )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
+
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
@@ -1328,8 +1347,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        call:formatStrVersion !vit! vit
-        call:formatStrVersion !vir! vir
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1407,12 +1428,68 @@ REM : functions
 
         REM : format strings
         set "str=!str: =!"
+
         set "str=!str:V=!"
         set "str=!str:v=!"
         set "str=!str:RC=!"
         set "str=!str:rc=!"
 
+        set "str=!str:A=01!"
+        set "str=!str:B=02!"
+        set "str=!str:C=03!"
+        set "str=!str:D=04!"
+        set "str=!str:E=05!"
+        set "str=!str:F=06!"
+        set "str=!str:G=07!"
+        set "str=!str:H=08!"
+        set "str=!str:I=09!"
+        set "str=!str:J=10!"
+        set "str=!str:K=11!"
+        set "str=!str:L=12!"
+        set "str=!str:M=13!"
+        set "str=!str:N=14!"
+        set "str=!str:O=15!"
+        set "str=!str:P=16!"
+        set "str=!str:Q=17!"
+        set "str=!str:R=18!"
+        set "str=!str:S=19!"
+        set "str=!str:T=20!"
+        set "str=!str:U=21!"
+
+        set "str=!str:W=23!"
+        set "str=!str:X=24!"
+        set "str=!str:Y=25!"
+        set "str=!str:Z=26!"
+
+        set "str=!str:a=01!"
+        set "str=!str:b=02!"
+        set "str=!str:c=03!"
+        set "str=!str:d=04!"
+        set "str=!str:e=05!"
+        set "str=!str:f=06!"
+        set "str=!str:g=07!"
+        set "str=!str:h=08!"
+        set "str=!str:i=09!"
+        set "str=!str:j=10!"
+        set "str=!str:k=11!"
+        set "str=!str:l=12!"
+        set "str=!str:m=13!"
+        set "str=!str:n=14!"
+        set "str=!str:o=15!"
+        set "str=!str:p=16!"
+        set "str=!str:q=17!"
+        set "str=!str:r=18!"
+        set "str=!str:s=19!"
+        set "str=!str:t=20!"
+        set "str=!str:u=21!"
+
+        set "str=!str:w=23!"
+        set "str=!str:x=24!"
+        set "str=!str:y=25!"
+        set "str=!str:z=26!"
+
         set "%2=!str!"
+
     goto:eof
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion: &, %, !
@@ -1565,6 +1642,7 @@ REM : functions
         )
         @echo.
         @echo. ^(you can modify users list later in the setup process^)
+        pause
         goto:3rdPartySoftware
 
        :scanOtherHost
@@ -1584,7 +1662,7 @@ REM : functions
             type !lastHostLog! | find /I "USER_REGISTERED">>!logFile!
             @echo.
             @echo ^(you can modify users list later in the setup process^)
-
+            pause
         )
 
        :3rdPartySoftware

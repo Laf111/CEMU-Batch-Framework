@@ -92,6 +92,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : rename folders that contains forbiden characters : & ! .
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    REM : rename GFX folders that contains forbiden characters : & ! .
+    wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
 
@@ -131,7 +135,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
-    if /I not exist !cemuExe! (
+    if not exist !cemuExe! (
         @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
@@ -365,24 +369,27 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :getCemuVersion
     set "clog="!CEMU_FOLDER:"=!\log.txt""
-    set /A "post1151=1"
+    set /A "v1151=2"
+    set "versionRead=NOT_FOUND"
     if not exist !clog! goto:openCemuAFirstTime
 
-    set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
-    call:compareVersions !versionRead! "1.15.1" result
-    if ["!result!"] == [""] echo Error when comparing versions
-    if !result! EQU 50 echo Error when comparing versions
-    if !result! EQU 2 set /A "post1151=0"
+    call:compareVersions !versionRead! "1.15.1" v1151
+    if ["!v1151!"] == [""] echo Error when comparing versions
+    if !v1151! EQU 50 echo Error when comparing versions
 
-    call:compareVersions !versionRead! "1.14.0" result
-    if ["!result!"] == [""] echo Error when comparing versions
-    if !result! EQU 50 echo Error when comparing versions
-    if !result! EQU 1 goto:autoImportMode
-    if !result! EQU 0 goto:autoImportMode
+    if !v1151! EQU 2 (
+        call:compareVersions !versionRead! "1.14.0" result
+        if ["!result!"] == [""] echo Error when comparing versions
+        if !result! EQU 50 echo Error when comparing versions
+        if !result! EQU 1 goto:autoImportMode
+        if !result! EQU 0 goto:autoImportMode
+    ) else (
+        goto:autoImportMode
+    )
 
     :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
@@ -445,17 +452,23 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
         @echo ---------------------------------------------------------
         REM : CEMU < 1.15.1
-        if %post1151% EQU 0 (
-            call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y, n) : " "n,y" ANSWER
+        if !v1151! LEQ 1 (
+            call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y,n): " "n,y" ANSWER
             if [!ANSWER!] == ["n"] goto:scanGamesFolder
-            set "argLeg=-noLegacy"
+            set "argOpt=%argOpt% -noLegacy"
             goto:scanGamesFolder
         )
         REM : CEMU >= 1.15.1
-        if %post1151% EQU 1 (
-            call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y, n) : " "n,y" ANSWER
+        if !v1151! EQU 0 (
+            call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y,n): " "n,y" ANSWER
             if [!ANSWER!] == ["n"] goto:scanGamesFolder
-            set "argLeg=-Legacy"
+            set "argOpt=%argOpt% -Legacy"
+            goto:scanGamesFolder
+        )
+        if !v1151! EQU 2 (
+            call:getUserInput "Enable all Intel GPU workarounds (add -Legacy)? (y,n): " "n,y" ANSWER
+            if [!ANSWER!] == ["n"] goto:scanGamesFolder
+            set "argOpt=%argOpt% -Legacy"
             goto:scanGamesFolder
         )
     )
@@ -727,14 +740,30 @@ REM : functions
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
-        if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE!
+        if !ERRORLEVEL! EQU 0 (
+            del /F !TMP_VBS_FILE! > NUL 2>&1
+        ) else (
+            @echo ERROR^: in !TMP_VBS_FILE!
+            pause
+            del /F !TMP_VBS_FILE! > NUL 2>&1
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     :resolveVenv
         set "value="%~1""
-        set "%2=%value%"
+        set "resolved=%value:"=%"
+
+        REM : check if value is a path
+        echo %resolved% | find ":" > NUL && (
+            REM : check if it is only a device letter issue (in case of portable library)
+            set "tmpStr='!drive!%resolved:~3%"
+            set "newLocation=!tmpStr:'="!"
+            if exist !newLocation! set "resolved=!tmpStr!"
+        )
+
+        set "%2=!resolved!"
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -780,7 +809,7 @@ REM : functions
             set "program="NONE""
 
             REM : resolve venv for search
-            for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
+            for /F "tokens=1 delims=~'" %%j in ("!command!") do set "program="%%j""
             for /F "delims=~" %%i in (!program!) do set "name=%%~nxi"
 
             for %%a in (!program!) do set "parentFolder="%%~dpa""
@@ -792,7 +821,7 @@ REM : functions
             set "TARGET_PATH=!program!"
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\!name:.exe=.ico!""
             if not exist !LINK_PATH! (
-                    if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !name:.exe=!
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !name:.exe=!
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
             )
         )
@@ -806,7 +835,6 @@ REM : functions
         set "ICO_PATH="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
         if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
 
-        REM : create a shortcut to cemu.exe (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\WinSCP.lnk""
         set "LINK_DESCRIPTION="FTP to Wii-U using WinSCP""
 
@@ -1149,6 +1177,22 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+            set "ARGS=%%a"
+
+            mkdir "!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!" > NUL 2>&1
+
+            REM : create a shortcut to displayGamesStats.bat (if needed)
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\Display Games stats.lnk""
+            set "LINK_DESCRIPTION="Display the golbal games^'stats for !ARGS:"=!""
+            set "TARGET_PATH="!BFW_PATH:"=!\tools\displayGamesStats.bat""
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\displayGamesStats.ico""
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to displayGamesStats^.bat for !ARGS:"=!
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+            )
+        )
+
         set "ARGS="!OUTPUT_FOLDER!""
 
         REM : create a shortcut to setup.bat
@@ -1199,23 +1243,6 @@ REM : functions
 
         set "ARGS="NONE""
 
-        REM : create a shortcut to CEMU
-        set "WD_FOLDER=!CEMU_FOLDER!"
-        set "TARGET_PATH="!WD_FOLDER:"=!\Cemu.exe""
-        for /F "delims=~" %%i in (!TARGET_PATH!) do set "name=%%~nxi"
-
-        set "icoFile=!name:.exe=.ico!"
-        set "ICO_PATH="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
-        if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
-
-        REM : create a shortcut to cemu.exe (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\!CEMU_FOLDER_NAME!.lnk""
-        set "LINK_DESCRIPTION="Open !CEMU_FOLDER_NAME!""
-
-        if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !CEMU_FOLDER_NAME!
-            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
-        )
         REM : search your current GLCache
         REM : check last path saved in log file
         REM : search in logFile, getting only the last occurence
@@ -1260,10 +1287,14 @@ REM : functions
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
-        set "pat="!GAME_FOLDER_PATH:"=!\code\*.rpx""
-        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
 
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
@@ -1294,7 +1325,7 @@ REM : functions
         set "ICO_PATH="NONE""
         set "ICO_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
-        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         REM : if no ico not file found, using cemu.exe icon
         if [!ICO_FILE!] == ["NONE"] (
@@ -1572,8 +1603,10 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "vir=%~2"
 
         REM : format strings
-        call:formatStrVersion !vit! vit
-        call:formatStrVersion !vir! vir
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1651,12 +1684,68 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         REM : format strings
         set "str=!str: =!"
+
         set "str=!str:V=!"
         set "str=!str:v=!"
         set "str=!str:RC=!"
         set "str=!str:rc=!"
 
+        set "str=!str:A=01!"
+        set "str=!str:B=02!"
+        set "str=!str:C=03!"
+        set "str=!str:D=04!"
+        set "str=!str:E=05!"
+        set "str=!str:F=06!"
+        set "str=!str:G=07!"
+        set "str=!str:H=08!"
+        set "str=!str:I=09!"
+        set "str=!str:J=10!"
+        set "str=!str:K=11!"
+        set "str=!str:L=12!"
+        set "str=!str:M=13!"
+        set "str=!str:N=14!"
+        set "str=!str:O=15!"
+        set "str=!str:P=16!"
+        set "str=!str:Q=17!"
+        set "str=!str:R=18!"
+        set "str=!str:S=19!"
+        set "str=!str:T=20!"
+        set "str=!str:U=21!"
+
+        set "str=!str:W=23!"
+        set "str=!str:X=24!"
+        set "str=!str:Y=25!"
+        set "str=!str:Z=26!"
+
+        set "str=!str:a=01!"
+        set "str=!str:b=02!"
+        set "str=!str:c=03!"
+        set "str=!str:d=04!"
+        set "str=!str:e=05!"
+        set "str=!str:f=06!"
+        set "str=!str:g=07!"
+        set "str=!str:h=08!"
+        set "str=!str:i=09!"
+        set "str=!str:j=10!"
+        set "str=!str:k=11!"
+        set "str=!str:l=12!"
+        set "str=!str:m=13!"
+        set "str=!str:n=14!"
+        set "str=!str:o=15!"
+        set "str=!str:p=16!"
+        set "str=!str:q=17!"
+        set "str=!str:r=18!"
+        set "str=!str:s=19!"
+        set "str=!str:t=20!"
+        set "str=!str:u=21!"
+
+        set "str=!str:w=23!"
+        set "str=!str:x=24!"
+        set "str=!str:y=25!"
+        set "str=!str:z=26!"
+
         set "%2=!str!"
+
     goto:eof
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !

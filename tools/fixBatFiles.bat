@@ -25,8 +25,6 @@ REM : ------------------------------------------------------------------
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     
     REM : get the last version
     for /F "delims=~= tokens=2" %%i in ('type setup.bat ^| find "BFW_VERSION=V"') do set "value=%%i"

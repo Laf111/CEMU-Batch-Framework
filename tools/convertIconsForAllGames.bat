@@ -284,11 +284,14 @@ REM : functions
 
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
-        set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
-        set "pat="!codeFullPath:"=!\*.rpx""
-        for /F "delims=~" %%i in ('dir /B /O:S !pat! 2^>NUL') do (
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
 
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
@@ -340,7 +343,7 @@ REM : functions
         REM : looking for ico file close to rpx file
         set "ICO_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
-        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
         if [!ICO_FILE!] == ["NONE"] goto:searchTgaFile
 
@@ -371,7 +374,7 @@ REM : functions
         REM : search for jpg file
         set "JPG_FILE="NONE""
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\*.jpg""
-        for /F "delims=~" %%i in ('dir /B /O:D !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
+        for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
 
         @echo =========================================================
         @echo - !GAME_TITLE!
