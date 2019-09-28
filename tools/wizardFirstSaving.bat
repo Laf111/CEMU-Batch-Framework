@@ -97,6 +97,7 @@ REM : main
     set "SETTINGS_FOLDER=!args[3]!"
 
     set "user=!args[4]!"
+    set "currentUser=!user:"=!"
 
     @echo =========================================================
     @echo - CEMU_FOLDER     ^: !CEMU_FOLDER!
@@ -542,15 +543,18 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
+    set "v1153b="
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
-            call:compareVersions !versionRead! "1.15.3b" result
+            call:compareVersions !versionRead! "1.15.3b" v1153b
 
-            if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-            if ["!result!"] == [""] @echo Error when comparing versions
-            if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-            if !result! EQU 50 @echo Error when comparing versions
-            if !result! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
+            if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+            if ["!v1153b!"] == [""] @echo Error when comparing versions
+            if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+            if !v1153b! EQU 50 @echo Error when comparing versions
+            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
+        ) else (
+            set /A "v1153b=2"
         )
     )
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
@@ -578,20 +582,20 @@ REM : main
     REM : saving CEMU an cemuHook settings
     robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
     set "src="!SETTINGS_FOLDER:"=!\settings.bin""
-    set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
+    set "target="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
     if exist !src! move /Y !src! !target! > NUL 2>&1
 
     if exist !cs! (
         robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
         set "src="!SETTINGS_FOLDER:"=!\settings.xml""
-        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
+        set "target="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
         if exist !src! move /Y !src! !target! > NUL 2>&1
     )
 
      if exist !chs! (
         robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
         set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
-        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
+        set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
         if exist !src! move /Y !src! !target! > NUL 2>&1
     )
     REM : controller profiles
@@ -639,7 +643,7 @@ REM : functions
 
         If not exist !BFW_ONLINE! goto:eof
 
-        set "currentUser=!user:"=!"
+        set "currentUser=!currentUser!"
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
@@ -675,10 +679,9 @@ REM : functions
         :installAccount
 
         REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
-        set "targetFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""
-        if not exist !targetFolder! mkdir !targetFolder! > NUL 2>&1
-        set "target="!targetFolder:"=!\account.dat""
-
+        set "cemuUserFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""
+        if not exist !cemuUserFolder! mkdir !cemuUserFolder! > NUL 2>&1
+        set "target="!cemuUserFolder:"=!\account.dat""
         copy /Y !af! !target! > NUL 2>&1
 
         REM : patch settings.xml
@@ -701,14 +704,9 @@ REM : functions
             move /Y !csTmp! !cs! > NUL 2>&1
         )
 
-        REM : install other files needed for online play
-        set "alreadyInstalled="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b""
-        if exist !alreadyInstalled! goto:copyBinFiles
-
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
         if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
-        :copyBinFiles
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""

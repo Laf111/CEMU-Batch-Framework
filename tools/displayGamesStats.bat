@@ -322,10 +322,13 @@ REM : ------------------------------------------------------------------
 
         if [!gamePath!] == [!gamePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && goto:cemuHookSettings
-            set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
-            if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
-            set "gamePath=!gamePath_LOGS!"
+            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && (
+                set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
+                set "gamePath=!gamePath_LOGS!"
+                goto:getRpx
+            )
+            goto:cemuHookSettings
         )
         goto:getRpx
 

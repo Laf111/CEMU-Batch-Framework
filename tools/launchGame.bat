@@ -134,6 +134,7 @@ REM : main
 
     REM : args 6
     set "user=!args[5]!"
+    set "currentUser=!user:"=!"
     if %nbArgs% EQU 6 goto:getCemuFolder
 
     REM : args 7
@@ -224,7 +225,7 @@ REM : main
 
     for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
-        if %nbI% GTR 2 (
+        if %nbI% GEQ 2 (
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. Use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
             exit 20
         )
@@ -329,8 +330,8 @@ REM : main
     REM : check CEMU_FOLDER
     if not exist !CEMU_FOLDER! (
         REM : shortcut path
-        set "gameShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\!user:"=!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.lnk""
-        set "gameExe="!OUTPUT_FOLDER:"=!\Wii-U Games\!user:"=!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !user:"=!.exe""
+        set "gameShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\!currentUser!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !currentUser!.lnk""
+        set "gameExe="!OUTPUT_FOLDER:"=!\Wii-U Games\!currentUser!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !currentUser!.exe""
 
         REM : shortcut to game's profile
         set "profileShortcuts="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
@@ -727,7 +728,7 @@ REM : main
     :lockCemu
 
     REM : create a lock file to protect this launch
-    set "blf="!CEMU_FOLDER:"=!\BatchFw_!user:"=!-!USERNAME!.lock""
+    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
     @echo !DATE! : %user:"=% launched !GAME_TITLE! using !USERNAME! windows profile > !blf!
     if not exist !blf! (
         cscript /nologo !MessageBox! "ERROR when creating !blf:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
@@ -1168,11 +1169,11 @@ REM : main
     )
 
     @echo compress game's saves
-    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
     if exist !userGameSave! (
-        @echo Compress game^'s saves for !user:"=! in inGameSaves^\!GAME_TITLE!_!user:"=!^.rar>> !batchFwLog!
-        @echo Compress game^'s saves for !user:"=! in inGameSaves^\!GAME_TITLE!_!user:"=!^.rar
+        @echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar>> !batchFwLog!
+        @echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar
     )
 
     REM : if exist, a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
@@ -1507,7 +1508,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         )
 
         REM : importing game's saves for !user!
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
         if not exist !rarFile! (
             REM : search the last modified save file for other user
             set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
@@ -1558,8 +1559,8 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         set "EXTRACT_PATH=!parentFolder:~0,-2!""
 
         pushd !BFW_TOOLS_PATH!
-        @echo Loading saves for !user:"=!^.^.^.>> !batchFwLog!
-        @echo Loading saves for !user:"=!^.^.^.
+        @echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
+        @echo Loading saves for !currentUser!^.^.^.
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !EXTRACT_PATH!
 
         :savesLoaded
@@ -1585,7 +1586,6 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
 
         :isSettingsExist
-
         if exist !SETTINGS_FOLDER! goto:loaded
 
         REM : search for the last modified settings folder
@@ -1662,7 +1662,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         robocopy !previousSettingsFolder! !nsf! /S > NUL 2>&1
 
         REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!user:"=!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
+        set "msg="!GAME_TITLE!:!DATE!-!currentUser!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
         call:log2GamesLibraryFile !msg!
 
         :beforeLoad
@@ -1673,25 +1673,28 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
         :loaded
         for /F "delims=~" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
-        @echo Using settings from !settingsFolderName! for !user:"=! ^!>> !batchFwLog!
-        @echo Using settings from !settingsFolderName! for !user:"=! ^!
+
+        @echo Using settings from !settingsFolderName! for !currentUser! ^!>> !batchFwLog!
+        @echo Using settings from !settingsFolderName! for !currentUser! ^!
 
         REM : looking for last modified *settings to create !user!_settings
         call:setSettingsForUser
 
         REM : loading CEMU an cemuHook settings
-        set "binUser="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
-        if exist !binUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.bin" > NUL 2>&1
-        set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.bin""
-        set "target="!CEMU_FOLDER:"=!\settings.bin""
-        if exist !src! move /Y !src! !target! > NUL 2>&1
-
-        set "xmlUser="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
-        if exist !xmlUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_settings.xml" > NUL 2>&1
-        set "src="!CEMU_FOLDER:"=!\!user:"=!_settings.xml""
-        set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        if exist !src! move /Y !src! !cs! > NUL 2>&1
-
+        set "binUser="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
+        if exist !binUser! (
+            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.bin" > NUL 2>&1
+            set "src="!CEMU_FOLDER:"=!\!currentUser!_settings.bin""
+            set "target="!CEMU_FOLDER:"=!\settings.bin""
+            move /Y !src! !target! > NUL 2>&1
+        )
+        set "xmlUser="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
+        if exist !xmlUser! (
+            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.xml" > NUL 2>&1
+            set "src="!CEMU_FOLDER:"=!\!currentUser!_settings.xml""
+            set "cs="!CEMU_FOLDER:"=!\settings.xml""
+            move /Y !src! !cs! > NUL 2>&1
+        )
         set "gamePath=!RPX_FILE_PATH!"
         if ["!versionRead!"] == ["NOT_FOUND"] goto:cemuHookSettings
 
@@ -1704,9 +1707,11 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
             if !result! EQU 50 @echo Error when comparing versions
             if !result! EQU 2 goto:cemuHookSettings
         )
+
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-        set "lls="!sf:"=!\!user:"=!_lastSettings.txt"
+        set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
+
         if not exist !lls! (
             @echo Warning ^: no last settings file found >> !batchFwLog!
             @echo Warning ^: no last settings file found
@@ -1721,7 +1726,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
             @echo Warning ^: last settings folder was not found^, !ls! does not exist
 
             REM : rebuild it
-            call:getModifiedFile !sf! "!user:"=!_settings.xml" last css
+            call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
             if not exist !css! del /F !lls! > NUL 2>&1 && goto:cemuHookSettings
             call:resolveSettingsPath ltarget
             @echo !ltarget!> !lls!
@@ -1734,7 +1739,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         REM : get game Id with RPX path
         :getRpx
         REM : if the file is the same
-        if [!xmlUser!] == [!lst!] pushd !BFW_TOOLS_PATH! && goto:eof
+        if [!xmlUser!] == [!lst!] pushd !BFW_TOOLS_PATH! && goto:cemuHookSettings
 
         call:getValueInXml "//GameCache/Entry[path='!gamePath:"=!']/title_id/text()" !lst! gid
         if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
@@ -1743,12 +1748,16 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
         if [!gamePath!] == [!gamePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && goto:cemuHookSettings
-            set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
-            if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
-            set "gamePath=!gamePath_LOGS!"
+            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && (
+                set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
+                set "gamePath=!gamePath_LOGS!"
+                goto:getRpx
+            )
+            goto:cemuHookSettings
         )
         goto:getRpx
+
 
         :updateGameStats
 
@@ -1761,9 +1770,9 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
         :cemuHookSettings
         pushd !BFW_TOOLS_PATH!
-        set "chIniUser="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
-        if exist !chIniUser! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!user:"=!_cemuhook.ini" > NUL 2>&1
-        set "src="!CEMU_FOLDER:"=!\!user:"=!_cemuhook.ini""
+        set "chIniUser="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
+        if exist !chIniUser! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_cemuhook.ini" > NUL 2>&1
+        set "src="!CEMU_FOLDER:"=!\!currentUser!_cemuhook.ini""
         set "target="!CEMU_FOLDER:"=!\cemuhook.ini""
         if exist !src! move /Y !src! !target! > NUL 2>&1
 
@@ -1874,11 +1883,11 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         pushd !candidateFolder!
 
         REM : initialize to user settings
-        set "sSetBin="!candidateFolder:"=!\!user:"=!_settings.bin""
+        set "sSetBin="!candidateFolder:"=!\!currentUser!_settings.bin""
         if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
 
         REM : initialize to user settings
-        set "sSetXml="!candidateFolder:"=!\!user:"=!_settings.xml""
+        set "sSetXml="!candidateFolder:"=!\!currentUser!_settings.xml""
         if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
 
         pushd !BFW_TOOLS_PATH!
@@ -1914,27 +1923,27 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
     REM : function to set settings for a given user
     :setSettingsForUser
 
-        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
+        set "target="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
         if exist !target! goto:eof
 
         pushd !SETTINGS_FOLDER!
 
         for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!user:"=!_settings.bin"
+            copy /Y !f! "!currentUser!_settings.bin"
             REM : remove old saved settings
             if [!f!] == ["settings.bin"] del /F !f! > NUL 2>&1
         )
         for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!user:"=!_settings.xml"
+            copy /Y !f! "!currentUser!_settings.xml"
             REM : remove old saved settings
             if [!f!] == ["settings.xml"] del /F !f! > NUL 2>&1
         )
-        set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
+        set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
         for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!user:"=!_cemuhook.ini"
+            copy /Y !f! "!currentUser!_cemuhook.ini"
             REM : remove old saved settings
             if [!f!] == ["cemuhook.ini"] del /F !f! > NUL 2>&1
         )
@@ -1999,8 +2008,6 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
         If not exist !BFW_ONLINE_ACC! goto:eof
-
-        set "currentUser=!user:"=!"
         
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
@@ -2034,10 +2041,11 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         )
 
         :installAccount
-
         REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
-        set "target="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat""
-        copy /Y !af! !target!
+        set "cemuUserFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""
+        if not exist !cemuUserFolder! mkdir !cemuUserFolder! > NUL 2>&1
+        set "target="!cemuUserFolder:"=!\account.dat""
+        copy /Y !af! !target! > NUL 2>&1
 
         REM : patch settings.xml
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
@@ -2062,14 +2070,10 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
             move /Y !csTmp! !cs! > NUL 2>&1
         )
 
-        REM : install other files needed for online play
-        set "alreadyInstalled="!MLC01_FOLDER_PATH:"=!\sys\title\0005001b""
-        if exist !alreadyInstalled! goto:copyBinFiles
-
+        REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
         if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
-        :copyBinFiles
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
@@ -2397,16 +2401,16 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
             REM : saving CEMU an cemuHook settings
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.bin""
-            set "st="!SETTINGS_FOLDER:"=!\!user:"=!_settings.bin""
+            set "st="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
             move /Y !src! !st!
 
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.xml""
-            set "css="!SETTINGS_FOLDER:"=!\!user:"=!_settings.xml""
+            set "css="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
             move /Y !src! !css!
 
             REM : update the last modified setting file
-            set "lls="!GAME_FOLDER_PATH:"=!\Cemu\settings\!user:"=!_lastSettings.txt""
+            set "lls="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
 
             call:resolveSettingsPath ltarget
 
@@ -2414,11 +2418,11 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
-            set "target="!SETTINGS_FOLDER:"=!\!user:"=!_cemuhook.ini""
+            set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
             move /Y !src! !target!
 
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user:"=! ^!>> !batchFwLog!
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !user:"=! ^!
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !currentUser! ^!>> !batchFwLog!
+            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !currentUser! ^!
         )
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
@@ -2546,7 +2550,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
         REM : prepare log to edit it
         @echo --------------------------------------------------- >> !tscl!
-        @echo - [!DATE!] !user:"=!@!USERDOMAIN! >> !tscl!
+        @echo - [!DATE!] !currentUser!@!USERDOMAIN! >> !tscl!
         @echo - >> !tscl!
         @echo - CEMU install = !CEMU_FOLDER! >> !tscl!
         @echo - >> !tscl!
@@ -2590,7 +2594,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
             set "tscrl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_replace_!OLD_SHADER_CACHE_ID!_with_!NEW_SHADER_CACHE_ID!""
 
-            @echo - [!DATE!] !user:"=!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !tscrl!
+            @echo - [!DATE!] !currentUser!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !tscrl!
             @echo - >> !tscrl!
             @echo - !CEMU_FOLDER_NAME! change !GAME_TITLE!^'s ShaderCacheId from !OLD_SHADER_CACHE_ID! to !NEW_SHADER_CACHE_ID! >> !tscrl!
 
@@ -2639,7 +2643,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
 
         set "btscl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_broke_!OLD_SHADER_CACHE_ID!""
 
-        @echo - [!DATE!] !user:"=!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !btscl!
+        @echo - [!DATE!] !currentUser!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !btscl!
         @echo - >> !btscl!
         @echo - !CEMU_FOLDER_NAME! refuse to use !OLD_SHADER_CACHE_ID!^.old >> !btscl!
 
