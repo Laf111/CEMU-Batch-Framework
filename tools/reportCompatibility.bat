@@ -163,7 +163,7 @@ REM : main
 
     REM : update GAME_VERSION,DLC,ShaderCahe in gameInfoFile
     REM --------------------------------------------------------------------------------
-    set "gameInfoFileTmp="!gameInfoFile:"=!.tmp""
+    set "gameInfoFileTmp="!gameInfoFile:"=!.bfw_tmp""
     type !gameInfoFile! | find /I /V "game" | find /I /V "DLC" | find /I /V "ShaderCache" | find /I /V "Updated" > !gameInfoFileTmp!
 
     del /F /S !gameInfoFile! > NUL 2>&1

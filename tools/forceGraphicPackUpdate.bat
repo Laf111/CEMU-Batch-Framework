@@ -141,7 +141,7 @@ REM : functions
     :cleanGameLibFile
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!GLFile:"=!.tmp""
+        set "logFileTmp="!GLFile:"=!.bfw_tmp""
 
         type !GLFile! | find /I /V "!pat!" > !logFileTmp! 2>&1
 

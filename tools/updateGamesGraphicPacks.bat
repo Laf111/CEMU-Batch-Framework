@@ -191,7 +191,7 @@ REM : functions
     :cleanGameLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!glogFile:"=!.tmp""
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
 
         type !glogFile! | find /I /V "!pat!" > !logFileTmp!
 
@@ -490,7 +490,7 @@ REM : functions
         :logMsg2GamesLibraryFile
         echo !msg! >> !glogFile!
         REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.tmp""
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
         type !glogFile! | sort > !gLogFileTmp!
         del /F /S !glogFile! > NUL 2>&1
         move /Y !gLogFileTmp! !glogFile! > NUL 2>&1

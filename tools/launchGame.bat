@@ -206,7 +206,7 @@ REM : main
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "backup="!CEMU_FOLDER:"=!\settings.old""
+    set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
 
     if exist !backup! (
         copy /Y !backup! !cs! > NUL 2>&1
@@ -552,7 +552,7 @@ REM : main
     @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
     @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^.
     REM : copy all *.bin file (2 files if separable and conventionnal)
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.old /XF *emu* /XF *.rar
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.bfw_old /XF *emu* /XF *.rar
 
     :loadOptions
 
@@ -1189,8 +1189,8 @@ REM : main
     REM : copy otp.bin and seeprom.bin if needed
     set "t1="!CEMU_FOLDER:"=!\otp.bin""
     set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
-    set "t1o="!CEMU_FOLDER:"=!\otp.old""
-    set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
+    set "t1o="!CEMU_FOLDER:"=!\otp.bfw_old""
+    set "t2o="!CEMU_FOLDER:"=!\seeprom.bfw_old""
 
     if not exist !t1! goto:restoreGp
     if not exist !t2! goto:restoreGp
@@ -1256,7 +1256,7 @@ REM : functions
 
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!logFile:"=!.tmp""
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
@@ -1810,17 +1810,17 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
     REM : function to valid a settings.xml for automatic import
     :isValid
 
-        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.tmp""
+        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.bfw_tmp""
 
         REM : delete ignored nodes
-        set "file0=!fileTmp:.tmp=.tmp0!"
+        set "file0=!fileTmp:.bfw_tmp=.bfw_tmp0!"
         !xmlS! ed -d "//GamePaths" !tSetXml! > !file0!
 
-        set "file1=!fileTmp:.tmp=.tmp1!"
+        set "file1=!fileTmp:.bfw_tmp=.bfw_tmp1!"
         !xmlS! ed -d "//GameCache" !file0! > !file1!
 
         !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
-        set "pat="!BFW_PATH:"=!\logs\settings_target.tmp*""
+        set "pat="!BFW_PATH:"=!\logs\settings_target.bfw_tmp*""
 
         REM : initialize to false = 0
         set /A "%1=0"
@@ -2061,7 +2061,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
            )
         )
 
-        set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
@@ -2077,8 +2077,8 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
-        set "t1o="!CEMU_FOLDER:"=!\otp.old""
-        set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
+        set "t1o="!CEMU_FOLDER:"=!\otp.bfw_old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfw_old""
 
         set "s1="!BFW_ONLINE:"=!\otp.bin""
         set "s2="!BFW_ONLINE:"=!\seeprom.bin""
@@ -2442,7 +2442,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         :restoreBackup
         REM : if a backup on settings.xml exist, restore it
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        set "backup="!CEMU_FOLDER:"=!\settings.old""
+        set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
 
         if exist !backup! (
             del /F !cs!
@@ -2559,7 +2559,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         @echo - >> !tscl!
 
         REM : OLD_TRANS_SHADER cache file renamed
-        set "otscr="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!OLD_SHADER_CACHE_ID!.old""
+        set "otscr="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!OLD_SHADER_CACHE_ID!.bfw_old""
         REM : NEW_TRANS_SHADER cache file saving path
         set "gntscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!NEW_TRANS_SHADER!""
 
@@ -2584,7 +2584,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
             @echo - >> !tscl!
             @echo - Is !CEMU_FOLDER_NAME! change the shaderCacheId ^? >> !tscl!
             @echo - >> !tscl!
-            @echo - Renaming saved cache to !OLD_SHADER_CACHE_ID!.old >> !tscl!
+            @echo - Renaming saved cache to !OLD_SHADER_CACHE_ID!.bfw_old >> !tscl!
 
             move /Y !otscf! !otscr! > NUL 2>&1
             @echo - >> !tscl!
@@ -2638,14 +2638,14 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         @echo - As the saved one was copied before launching the game in cemu FOLDER >> !tscl!
         @echo - there^'s no doubts that !CEMU_FOLDER_NAME! broke shaderCache compatibility >> !tscl!
         @echo - >> !tscl!
-        @echo - If you are in case 2^, backup if justified or delete !OLD_SHADER_CACHE_ID!^.old >> !tscl!
+        @echo - If you are in case 2^, backup if justified or delete !OLD_SHADER_CACHE_ID!^.bfw_old >> !tscl!
         @echo - >> !tscl!
 
         set "btscl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_broke_!OLD_SHADER_CACHE_ID!""
 
         @echo - [!DATE!] !currentUser!@!USERDOMAIN! with !CEMU_FOLDER_NAME! > !btscl!
         @echo - >> !btscl!
-        @echo - !CEMU_FOLDER_NAME! refuse to use !OLD_SHADER_CACHE_ID!^.old >> !btscl!
+        @echo - !CEMU_FOLDER_NAME! refuse to use !OLD_SHADER_CACHE_ID!^.bfw_old >> !btscl!
 
         REM : rename saved file
         move /Y !otscf! !otscr! > NUL 2>&1
@@ -2962,7 +2962,7 @@ echo waitProcessesEnd : updateGameStats still running : %%j  >> !batchFwLog!
         :logMsg2GamesLibraryFile
         @echo !msg! >> !glogFile!
         REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.tmp""
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
         type !glogFile! | sort > !gLogFileTmp!
         del /F /S !glogFile! > NUL 2>&1
         move /Y !gLogFileTmp! !glogFile! > NUL 2>&1

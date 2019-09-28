@@ -71,7 +71,7 @@ REM : ------------------------------------------------------------------
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "!THIS_SCRIPT!"') do (
 
         set "filePath="%%f""
-        set "tmpFile=!filePath:.bat=.tmp!"
+        set "tmpFile=!filePath:.bat=.bfw_tmp!"
         type !filePath! > !tmpFile!
         del /F !filePath! > NUL 2>&1
         move /Y !tmpFile! !filePath! > NUL 2>&1

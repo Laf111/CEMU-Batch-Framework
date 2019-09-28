@@ -383,7 +383,7 @@ REM : functions
         @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !rulesFileV3!
 
         REM : force UTF8 format
-        set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
+        set "utf8=!rulesFileV3:rules.txt=rules.bfw_tmp!"
         copy /Y !rulesFileV3! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV3!
         del /F !utf8! > NUL 2>&1

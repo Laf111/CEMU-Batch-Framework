@@ -109,7 +109,7 @@ REM : main
 
     :formatrV2Utf8
     REM : force UTF8 format
-    set "utf8v2="!gp:"=!\rules.tmp""
+    set "utf8v2="!gp:"=!\rules.bfw_tmp""
     copy /Y !rulesFileV2! !utf8v2! > NUL 2>&1
     type !utf8v2! > !rulesFileV2!
     del /F !utf8v2! > NUL 2>&1

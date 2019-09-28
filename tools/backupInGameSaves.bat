@@ -141,7 +141,7 @@ REM : main
     set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
 
     REM : if exist rename-it
-    set "oldFile=!rarFile:.rar=.old!"
+    set "oldFile=!rarFile:.rar=.bfw_old!"
     if exist !rarFile! move /Y !rarFile! !oldFile! > NUL 2>&1
 
     set usrSaveFolder="!MLC01_FOLDER_PATH:"=!\usr\save"

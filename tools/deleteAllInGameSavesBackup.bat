@@ -318,7 +318,7 @@ REM : functions
         :logMsg2GamesLibraryFile
         echo !msg! >> !glogFile!
         REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.tmp""
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
         type !glogFile! | sort > !gLogFileTmp!
         del /F /S !glogFile! > NUL 2>&1
         move /Y !gLogFileTmp! !glogFile! > NUL 2>&1

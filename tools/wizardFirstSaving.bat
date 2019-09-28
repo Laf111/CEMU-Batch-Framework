@@ -203,9 +203,9 @@ REM : main
     if ["!v11515!"] == [""] @echo Error when comparing versions
     if !v11515! EQU 50 @echo Error when comparing versions
 
-
     set "v1156=1"
     set "v1116=1"
+    set "v114=1"
 
     if !v11515! LEQ 1 goto:checkProfile
 
@@ -220,6 +220,7 @@ REM : main
     ) else (
         set /A "v1116=1"
     )
+
     :checkProfile
 
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
@@ -248,10 +249,10 @@ REM : main
     :completeGameProfile
     REM : settings.xml files
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "csTmp0="!CEMU_FOLDER:"=!\settings.tmp0""
-    set "csTmp1="!CEMU_FOLDER:"=!\settings.tmp1""
-    set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
-    set "backup="!CEMU_FOLDER:"=!\settings.old""
+    set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+    set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+    set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+    set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
     REM : GFX type to provide
@@ -259,33 +260,31 @@ REM : main
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
 
-    set /A "v114=0"
     if !v1116! EQU 1 if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" result
-        if ["!result!"] == [""] echo Error when comparing versions
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 2 set "gfxType=V2"
+        call:compareVersions !versionRead! "1.14.0" v114
+        if ["!v114!"] == [""] echo Error when comparing versions
+        if !v114! EQU 50 echo Error when comparing versions
+        if !v114! EQU 2 set "gfxType=V2"
 
     ) else (
         if !v1116! EQU 2 (
             set "gfxType=V2"
         ) else (
             if !v1156! EQU 2 (
-                call:compareVersions !versionRead! "1.14.0" result
-                if ["!result!"] == [""] echo Error when comparing versions
-                if !result! EQU 50 echo Error when comparing versions
-                if !result! EQU 2 set "gfxType=V2"
+                call:compareVersions !versionRead! "1.14.0" v114
+                if ["!v114!"] == [""] echo Error when comparing versions
+                if !v114! EQU 50 echo Error when comparing versions
+                if !v114! EQU 2 set "gfxType=V2"
 
                 REM : if CEMU version < 1.12.0 (add games' list in UI)
-                call:compareVersions !versionRead! "1.12.0" result
-                if ["!result!"] == [""] echo Error when comparing versions
+                call:compareVersions !versionRead! "1.12.0" v112
+                if ["!v112!"] == [""] echo Error when comparing versions
 
-                if !result! EQU 50 echo Error when comparing versions
-                if !result! EQU 2 goto:displayGameProfile
+                if !v112! EQU 50 echo Error when comparing versions
+                if !v112! EQU 2 goto:displayGameProfile
             )
         )
     )
-
 
     REM : else using CEMU UI for the game profile
 
@@ -547,7 +546,6 @@ REM : main
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
             call:compareVersions !versionRead! "1.15.3b" v1153b
-
             if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if ["!v1153b!"] == [""] @echo Error when comparing versions
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
@@ -559,7 +557,6 @@ REM : main
     )
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
-
     :launchCemu
 
     REM : launching CEMU
@@ -695,7 +692,7 @@ REM : functions
            )
         )
 
-        set "csTmp="!CEMU_FOLDER:"=!\settings.tmp""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
@@ -710,8 +707,8 @@ REM : functions
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
-        set "t1o="!CEMU_FOLDER:"=!\otp.old""
-        set "t2o="!CEMU_FOLDER:"=!\seeprom.old""
+        set "t1o="!CEMU_FOLDER:"=!\otp.bfw_old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfw_old""
 
         set "s1="!BFW_ONLINE:"=!\otp.bin""
         set "s2="!BFW_ONLINE:"=!\seeprom.bin""
@@ -893,12 +890,14 @@ REM : functions
             @echo one ^(RDTSC^) is not disabled in the game^'s profile
             @echo Be aware that might cause crash for some games since 1^.14
             @echo.
-            @echo If you really want to use a custom timer^, You^'d better
-            @echo had the following lines in the game^'s profile
-            @echo.
-            @echo [General]
-            @echo useRDTSC = false
-            @echo.
+            if !v1156! EQU 2 (
+                @echo If you really want to use a custom timer^, You^'d better
+                @echo had the following lines in the game^'s profile
+                @echo.
+                @echo [General]
+                @echo useRDTSC = false
+                @echo.
+            )
             cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
         )
 

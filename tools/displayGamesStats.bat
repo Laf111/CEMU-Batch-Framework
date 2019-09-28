@@ -75,7 +75,7 @@ REM : ------------------------------------------------------------------
     :backupCs
     REM : backup settings.xml -> old
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "backup="!CEMU_FOLDER:"=!\settings.old""
+    set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
 
     if exist !backup! (
         copy /Y !backup! !cs! > NUL 2>&1
@@ -85,14 +85,14 @@ REM : ------------------------------------------------------------------
 
     pushd !BFW_RESOURCES_PATH!
     REM : delete node in csTgt
-    set "csTmp=!cs:.xml=.tmp!"
+    set "csTmp=!cs:.xml=.bfw_tmp!"
     "xml.exe" ed -d "//GamePaths/Entry" !cs! > !csTmp!
 
-    set "csTmp1=!cs:.xml=.tmp1!"
+    set "csTmp1=!cs:.xml=.bfw_tmp1!"
     REM : remove the node //GameCache/Entry
     "xml.exe" ed -d "//GameCache/Entry" !csTmp! > !csTmp1!
 
-    set "csTmp2=!cs:.xml=.tmp2!"
+    set "csTmp2=!cs:.xml=.bfw_tmp2!"
     "xml.exe" ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp1! > !csTmp2!
 
     set "MLC01_FOLDER_PATH=!CEMU_FOLDER:"=!\mlc01"
@@ -177,7 +177,7 @@ REM : ------------------------------------------------------------------
 
     REM : if a backup on settings.xml exist, restore it
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "backup="!CEMU_FOLDER:"=!\settings.old""
+    set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
 
     if exist !backup! (
         del /F !cs!
@@ -324,11 +324,11 @@ REM : ------------------------------------------------------------------
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
             echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && (
                 set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
-                if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
+                if [!gamePath!] == [!gamePath_LOGS!] goto:eof
                 set "gamePath=!gamePath_LOGS!"
                 goto:getRpx
             )
-            goto:cemuHookSettings
+            goto:eof
         )
         goto:getRpx
 

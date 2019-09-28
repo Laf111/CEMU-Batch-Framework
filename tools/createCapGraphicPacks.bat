@@ -430,7 +430,7 @@ REM : functions
         @echo vsyncFrequency = $FPS >> !rulesFileV3!
 
         REM : force UTF8 format
-        set "utf8=!rulesFileV3:rules.txt=rules.tmp!"
+        set "utf8=!rulesFileV3:rules.txt=rules.bfw_tmp!"
         copy /Y !rulesFileV3! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV3!
         del /F !utf8! > NUL 2>&1
@@ -469,7 +469,7 @@ REM : functions
         @echo vsyncFrequency = %syncValue% >> !rulesFileV2!
 
         REM : force UTF8 format
-        set "utf8=!rulesFileV2:rules.txt=rules.tmp!"
+        set "utf8=!rulesFileV2:rules.txt=rules.bfw_tmp!"
         copy /Y !rulesFileV2! !utf8! > NUL 2>&1
         type !utf8! > !rulesFileV2!
         del /F !utf8! > NUL 2>&1

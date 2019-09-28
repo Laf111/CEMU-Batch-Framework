@@ -94,7 +94,7 @@ REM : ------------------------------------------------------------------
         )
 
         REM : delete node in csTgt
-        set "csTgtTmp=!csTgt:.xml=.tmp!"
+        set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
         "xml.exe" ed -d "//content/GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
