@@ -11,7 +11,7 @@ REM : main
     title !THIS_SCRIPT!
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"

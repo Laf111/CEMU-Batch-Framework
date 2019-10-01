@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -185,9 +185,9 @@ REM : main
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
             for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
 
-            echo !GAME_FOLDER_PATH! | find /I /V "(DLC)" | find /I /V "(UPDATE DATA)" > NUL 2>&1 & call:prepareGame
-            echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 & call:installUpdate
-            echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL 2>&1 & call:installDlc
+            echo !GAME_FOLDER_PATH! | find /I /V "(DLC)" | find /I /V "(UPDATE DATA)" > NUL 2>&1 && call:prepareGame
+            echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && call:installUpdate
+            echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL 2>&1 && call:installDlc
 
         ) else (
             pushd !GAMES_FOLDER!
@@ -263,7 +263,7 @@ REM : functions
 
         set "GAME_TITLE=!GAME_FOLDER_NAME!"
         REM : if USB Helper output : NAME[Id], get only the name
-        echo "!GAME_FOLDER_PATH!" | find "[" > NUL 2>&1 & for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        echo "!GAME_FOLDER_PATH!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
 

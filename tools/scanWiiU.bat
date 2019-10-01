@@ -29,7 +29,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -137,7 +137,7 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -288,15 +288,15 @@ REM : main
 
         set "save="
         set "file=!remoteSaves:SRC=!"
-        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 & set "save=X"
+        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 && set "save=X"
 
         set "update="
         set "file=!remoteUpdates:SRC=!"
-        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 & set "update=X"
+        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 && set "update=X"
 
         set "file=!remoteDlc:SRC=!"
         set "dlc="
-        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 & set "dlc=X"
+        type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 && set "dlc=X"
 
         @echo !titles[%%i]!;^'!endTitlesId[%%i]!^';!titlesSrc[%%i]!;!save!;!update!;!dlc! >> !tmpFile!
     )

@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "basename="%%~dpa""
     set "BFW_PATH=!basename:~0,-2!""

@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -263,13 +263,13 @@ REM : main
         set "gpName=!gpName:rules=!"
         set "gpName=!gpName:\=!"
 
-        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 & (
+        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 && (
             set "gpName=!gpName:_graphicPacksV2=_graphicPacksV2\!"
-            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 & set "v2Name=!gpName:_%resX2%p=!" & call:createExtraV2Gp "!gpName!"
+            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" & call:createExtraV2Gp "!gpName!"
         )
 
         REM : creating V3 graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 & (type !rules! | find "$height" > NUL 2>&1 & set "gpV3exist=1" & call:createExtraV3Gp "!gpName!")
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gpV3exist=1" & call:createExtraV3Gp "!gpName!")
 
     )
     if %gpV3exist% EQU 1 goto:ending
@@ -418,7 +418,7 @@ REM : functions
         set "gpFolderName="%~1""
         set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 & goto:eof
+        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 && goto:eof
 
         set "rulesFile="!gpV3:"=!\rules.txt""
 
@@ -508,7 +508,7 @@ REM : functions
 
         if !firstSetFlag! EQU 0 for /F "tokens=1 delims=~=" %%j in ("%%i") do set "first=%%j"
 
-        if !firstSetFlag! EQU 1 echo %%i | find "!first!" > NUL 2>&1 & goto:eof
+        if !firstSetFlag! EQU 1 echo %%i | find "!first!" > NUL 2>&1 && goto:eof
         echo %%i
         set /A "firstSetFlag=1"
 
@@ -795,7 +795,7 @@ REM : functions
         goto:eof
 
         :169_windowedV2
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
         @echo Create 16^/9 windowed missing V2 resolution packs
 
         REM : 16/9 windowed graphic packs

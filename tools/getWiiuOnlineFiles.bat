@@ -20,7 +20,7 @@ REM : main
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -174,7 +174,7 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -223,7 +223,7 @@ REM : main
     @echo ---------------------------------------------------------
 
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/sys/title/00050030/1001500A" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         goto:US
     )
     @echo.
@@ -233,7 +233,7 @@ REM : main
 
     :US
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/sys/title/00050030/1001510A" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         goto:EU
     )
     @echo.
@@ -243,7 +243,7 @@ REM : main
 
     :EU
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/sys/title/00050030/1001520A" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         goto:compressMlc01
     )
     @echo found EUR one
@@ -308,7 +308,7 @@ REM : functions
 
         REM : add . and ~
         set "str=!str:.=!"
-        @echo !str! | find "~" > NUL 2>&1 & (
+        @echo !str! | find "~" > NUL 2>&1 && (
             echo Please remove ~ ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -324,11 +324,11 @@ REM : functions
         set "str=!str:|=!"
         set "str=!str:^=!"
 
-        @echo !str! | find "*" > NUL 2>&1 & (
+        @echo !str! | find "*" > NUL 2>&1 && (
             echo Please remove * ^(unsupported charcater^) from !str!
             exit /b 50
         )
-        @echo !str! | find "=" > NUL 2>&1 & (
+        @echo !str! | find "=" > NUL 2>&1 && (
             echo Please remove = ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -476,7 +476,7 @@ REM : functions
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %BFW_PATH% > NUL 2>&1 & set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
+        echo msg=!msg! | find %BFW_PATH% > NUL 2>&1 && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

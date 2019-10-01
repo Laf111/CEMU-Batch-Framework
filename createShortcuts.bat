@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
@@ -426,11 +426,11 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "gpuType=OTHER"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 & (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
-        echo "!string!" | find /I "AMD" > NUL 2>&1 & (
+        echo "!string!" | find /I "AMD" > NUL 2>&1 && (
             set "gpuType=AMD"
             set "GPU_VENDOR=!string: =!"
         )
@@ -756,7 +756,7 @@ REM : functions
         set "resolved=%value:"=%"
 
         REM : check if value is a path
-        echo %resolved% | find ":" > NUL & (
+        echo %resolved% | find ":" > NUL && (
             REM : check if it is only a device letter issue (in case of portable library)
             set "tmpStr='!drive!%resolved:~3%"
             set "newLocation=!tmpStr:'="!"
@@ -1603,10 +1603,10 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."

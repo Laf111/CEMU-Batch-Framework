@@ -23,7 +23,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
@@ -737,11 +737,11 @@ REM : main
     set "gpuType=OTHER"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 & (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
-        echo "!string!" | find /I "AMD" > NUL 2>&1 & (
+        echo "!string!" | find /I "AMD" > NUL 2>&1 && (
             set "gpuType=AMD"
             set "GPU_VENDOR=!string: =!"
         )
@@ -1181,7 +1181,7 @@ REM : functions
 
         REM : add . and ~
         set "str=!str:.=!"
-        @echo !str! | find "~" > NUL 2>&1 & (
+        @echo !str! | find "~" > NUL 2>&1 && (
             echo Please remove ^~ ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -1198,11 +1198,11 @@ REM : functions
         set "str=!str:|=!"
         set "str=!str:^=!"
 
-        @echo !str! | find "*" > NUL 2>&1 & (
+        @echo !str! | find "*" > NUL 2>&1 && (
             echo Please remove ^* ^(unsupported charcater^) from !str!
             exit /b 50
         )
-        @echo !str! | find "=" > NUL 2>&1 & (
+        @echo !str! | find "=" > NUL 2>&1 && (
             echo Please remove ^= ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -1347,10 +1347,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1588,7 +1588,7 @@ REM : functions
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 & set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
@@ -1651,7 +1651,7 @@ REM : functions
         if [!lastHostLog!] == ["NONE"] goto:eof
         
         REM : get registered users list from the last modified Host log
-        type !lastHostLog! | find /I "USER_REGISTERED" > NUL & (
+        type !lastHostLog! | find /I "USER_REGISTERED" > NUL && (
             @echo =========================================================
             @echo New installation for host !USERDOMAIN!
             @echo -------------------------------------------------
@@ -1699,7 +1699,7 @@ REM : functions
         set "resolved=%value:"=%"
 
         REM : check if value is a path
-        echo %resolved% | find ":" > NUL 2>&1 & (
+        echo %resolved% | find ":" > NUL 2>&1 && (
             REM : check if it is only a device letter issue (in case of portable library)
             set "tmpStr='!drive!%resolved:~3%"
 

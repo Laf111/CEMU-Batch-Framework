@@ -8,7 +8,7 @@ REM : main
     color F0
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "shortcutsToolsFolder=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "shortcutsToolsFolder=!SCRIPT_FOLDER:\"="!"
 
     REM : Last installation path
     set "LAST_GAMES_FOLDER_PATH="TO_BE_REPLACED""

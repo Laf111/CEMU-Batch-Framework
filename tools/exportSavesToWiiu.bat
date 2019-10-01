@@ -30,7 +30,7 @@ REM : Main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -118,7 +118,7 @@ REM : Main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -193,7 +193,7 @@ REM : Main
         set "endTitleId=!second:'=!"
 
         REM : if the game is also installed on your PC
-        type !localTid! | find /I "!endTitleId!" > NUL 2>&1 & (
+        type !localTid! | find /I "!endTitleId!" > NUL 2>&1 && (
             set "titles[!nbGames!]=%%i"
             set "endTitlesId[!nbGames!]=!endTitleId!"
             set "titlesSrc[!nbGames!]=%%k"
@@ -292,7 +292,7 @@ REM : Main
     REM : check if sdcard is plugged
     set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         @echo ^/sd^/wiiu^/backups^ not found^, make sure that your SDCard is
         @echo plugged in your Wii-U
         @echo ---------------------------------------------------------
@@ -381,7 +381,7 @@ REM : functions
             REM : meta.xml
             set "META_FILE="%%i""
 
-            type !META_FILE! | find /I "!endTitleId!" > NUL 2>&1 & (
+            type !META_FILE! | find /I "!endTitleId!" > NUL 2>&1 && (
 
                 for %%a in (!META_FILE!) do set "parentFolder="%%~dpa""
                 set "str=!parentFolder:~0,-2!""
@@ -501,7 +501,7 @@ REM : functions
         REM : check if a save axist on the wii-U for this user
 
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/save/00050000/!endTitleId!/user/!folder!" "exit" > !ftplogFile! 2>&1
-        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
             @echo No Wii-U saves were found for !user:"=!
             goto:eof
         )
@@ -555,7 +555,7 @@ REM : functions
         set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
 
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu/backups/00050000%endTitleId%" "exit" > !ftplogFile! 2>&1
-        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
             !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%" "exit"  > !ftplogFile! 2>&1
             !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%/0" "exit"  > !ftplogFile! 2>&1
             goto:eof
@@ -565,7 +565,7 @@ REM : functions
 
             REM : check if a save exist on the wii-U for this user
             !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu/backups/00050000%endTitleId%/%%i" "exit" > !ftplogFile! 2>&1
-            type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+            type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
                 set /A "cemuSlot=%%i"
                 !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!" "exit"  > !ftplogFile! 2>&1
                 goto:eof

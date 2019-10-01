@@ -14,7 +14,7 @@ REM : ------------------------------------------------------------------
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -76,7 +76,7 @@ REM : ------------------------------------------------------------------
     @echo temporary file ^: !csTmp!
 
     REM : if GameCache node exist in csTgt (CEMU >= 1.12.0)
-    type !csTgt! | find /I "GameCache" > NUL 2>&1 & (
+    type !csTgt! | find /I "GameCache" > NUL 2>&1 && (
 
 
         pushd !BFW_RESOURCES_PATH!

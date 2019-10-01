@@ -12,7 +12,7 @@ REM : ------------------------------------------------------------------
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -322,7 +322,7 @@ REM : ------------------------------------------------------------------
 
         if [!gamePath!] == [!gamePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find /V "_BatchFW_Install" > NUL 2>&1 & (
+            echo !gamePath! | find /V "_BatchFW_Install" > NUL 2>&1 && (
                 set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
                 if [!gamePath!] == [!gamePath_LOGS!] goto:eof
                 set "gamePath=!gamePath_LOGS!"
@@ -366,10 +366,10 @@ REM : ------------------------------------------------------------------
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -608,7 +608,7 @@ REM : ------------------------------------------------------------------
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 & set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

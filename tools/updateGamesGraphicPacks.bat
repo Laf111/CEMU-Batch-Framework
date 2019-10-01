@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -301,7 +301,7 @@ REM : functions
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL 2>&1 & (
+            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL 2>&1 && (
                 REM : V2 graphic pack
                 set "gameName=%%i"
                 set "gameName=!gameName:rules=!"
@@ -314,8 +314,8 @@ REM : functions
                 REM : V3 graphic pack
                 set "v3Gpfound=1"
                 REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 & type !rulesFile! | find /I "BatchFW" > NUL 2>&1 & goto:eof
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 & set "gpV3Res=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
             )
         )
 

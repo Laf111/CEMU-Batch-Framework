@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -605,7 +605,7 @@ REM : functions
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -626,7 +626,7 @@ REM : functions
         :169_windowed
 
         REM : create windowed packs only if user chosen it during setup
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"

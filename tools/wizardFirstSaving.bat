@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -484,7 +484,7 @@ REM : main
 
         set "gpV3="!BFW_GP_FOLDER:"=!\!tName:"=!_Resolution"
         set "rulesFile="!gpV3:"=!\rules.txt""
-        if exist !rulesFile! type !rulesFile! | find /I "heightfix" > NUL 2>&1 & (
+        if exist !rulesFile! type !rulesFile! | find /I "heightfix" > NUL 2>&1 && (
             @echo Graphic pack for this game use a height fix to avoid black borders
             @echo By default^, BatchFw complete presets with ^$heightfix=0
             @echo Switch this value to 1 if you encounter black border for the preset choosen
@@ -894,8 +894,8 @@ REM : functions
         @echo Current CemuHook^'s settings ^:
         @echo ---------------------------------------------------------
         type !chs! | find /I /V "#" | find /I /V "["
-        type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL 2>&1 & (
-            type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" > NUL 2>&1 & goto:eof
+        type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL 2>&1 && (
+            type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" > NUL 2>&1 && goto:eof
             @echo ---------------------------------------------------------
             if !v1156! EQU 2 (
                 @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
@@ -926,7 +926,7 @@ REM : functions
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 & (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -958,7 +958,7 @@ REM : functions
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 & (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -980,7 +980,7 @@ REM : functions
 
         )
         REM : check that at least one GFX pack was listed
-        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 & goto:eof
+        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
 
         REM : stop execution something wrong happens
         REM : warn user
@@ -1078,10 +1078,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."

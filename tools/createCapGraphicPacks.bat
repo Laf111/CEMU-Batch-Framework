@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -496,7 +496,7 @@ REM : functions
 @echo fps=!fps!
 @echo targetFps=!targetFps!
 
-        if !fpsPP! EQU 0 type !rulesFileV3! | find /I /V "FPS = !fps!" > NUL 2>&1 & call:fillCapV3GP "99" "Speed (!targetFps!FPS)"
+        if !fpsPP! EQU 0 type !rulesFileV3! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapV3GP "99" "Speed (!targetFps!FPS)"
 
         if !fpsPpOld! EQU 1 goto:capMenu
 

@@ -32,7 +32,7 @@ REM : games that exist in local AND remote locations
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -124,7 +124,7 @@ REM : games that exist in local AND remote locations
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -199,7 +199,7 @@ REM : games that exist in local AND remote locations
         set "endTitleId=!second:'=!"
 
         REM : if the game is also installed on your PC
-        type !localTid! | find /I "!endTitleId!" > NUL 2>&1 & (
+        type !localTid! | find /I "!endTitleId!" > NUL 2>&1 && (
             set "titles[!nbGames!]=%%i"
             set "endTitlesId[!nbGames!]=!endTitleId!"
             set "titlesSrc[!nbGames!]=%%k"
@@ -333,7 +333,7 @@ REM : functions
             REM : meta.xml
             set "META_FILE="%%i""
 
-            type !META_FILE! | find /I "!endTitleId!" > NUL 2>&1 & (
+            type !META_FILE! | find /I "!endTitleId!" > NUL 2>&1 && (
 
                 for %%a in (!META_FILE!) do set "parentFolder="%%~dpa""
                 set "str=!parentFolder:~0,-2!""
