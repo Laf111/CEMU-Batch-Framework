@@ -1,5 +1,5 @@
 XX/09/2019 V15 :
-
+- add : support of user's game profiles (Cemu 1.15.15)
 - add : BatchFw now propgates games'stats through versions of CEMU AND Hosts used for each user
         A script updateGameStats.bat is added
 - add : script displayMyGamesStats.bat and a shortcut for each users

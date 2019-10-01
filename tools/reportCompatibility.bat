@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -131,7 +131,7 @@ REM : main
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
 
     set "libFileLine="NONE""
-    for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "REGION=%%i" && set "EXIST_IN_DATABASE=yes"
+    for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "REGION=%%i" & set "EXIST_IN_DATABASE=yes"
     set "REGION=%REGION:"=%"
 
     set "beginTitleId=%titleId:~0,8%"
@@ -213,7 +213,7 @@ REM : main
     set "GPU_VENDOR=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 & (
             set "GPU_VENDOR=!string: =!"
         )
     )

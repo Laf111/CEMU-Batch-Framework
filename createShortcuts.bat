@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
@@ -116,10 +116,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" & set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askCemuFolder
     )
 
@@ -149,10 +149,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" & set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -426,11 +426,11 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "gpuType=OTHER"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 & (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
-        echo "!string!" | find /I "AMD" > NUL 2>&1 && (
+        echo "!string!" | find /I "AMD" > NUL 2>&1 & (
             set "gpuType=AMD"
             set "GPU_VENDOR=!string: =!"
         )
@@ -540,7 +540,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
             call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -549,7 +549,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if !QUIET_MODE! EQU 1 goto:log
     @echo =========================================================
 
-    if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result && set /A "NB_GAMES_TREATED=!result!"
+    if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result & set /A "NB_GAMES_TREATED=!result!"
 
     @echo Treated !NB_GAMES_TREATED! games
 
@@ -756,7 +756,7 @@ REM : functions
         set "resolved=%value:"=%"
 
         REM : check if value is a path
-        echo %resolved% | find ":" > NUL && (
+        echo %resolved% | find ":" > NUL & (
             REM : check if it is only a device letter issue (in case of portable library)
             set "tmpStr='!drive!%resolved:~3%"
             set "newLocation=!tmpStr:'="!"
@@ -1256,7 +1256,7 @@ REM : functions
         pushd "%LOCALAPPDATA%"
         set "cache="NOT_FOUND""
         for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" & for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
         if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
         pushd !BFW_TOOLS_PATH!
 
@@ -1603,10 +1603,10 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1622,9 +1622,9 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" && goto:eof
-        if !vit! LSS !vir! set "%3=2" && goto:eof
-        if !vit! GTR !vir! set "%3=1" && goto:eof
+        if !vit! EQU !vir! set "%3=0" & goto:eof
+        if !vit! LSS !vir! set "%3=2" & goto:eof
+        if !vit! GTR !vir! set "%3=1" & goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -1634,15 +1634,15 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" && goto:eof
-        if !lt! LSS !lr! set "%3=2" && goto:eof
-        if !lt! GTR !lr! set "%3=1" && goto:eof
+        if !lt! EQU !lr! set "%3=0" & goto:eof
+        if !lt! LSS !lr! set "%3=2" & goto:eof
+        if !lt! GTR !lr! set "%3=1" & goto:eof
 
         set "%3=50"
 
@@ -1659,9 +1659,9 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" && goto:eof
-        if !dt! GTR !dr! set "%2=1" && goto:eof
-        if !dt! EQU !dr! set "%2=0" && goto:eof
+        if !dt! LSS !dr! set "%2=2" & goto:eof
+        if !dt! GTR !dr! set "%2=1" & goto:eof
+        if !dt! EQU !dr! set "%2=0" & goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

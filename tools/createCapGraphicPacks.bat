@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -75,10 +75,10 @@ REM : main
 
     @echo Please select a reference graphics packs folder
     :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" & set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -260,8 +260,8 @@ REM : main
     )
 
     REM : when a FPS++ or a 60FPS GFX is found on rules.txt V3 or next, vsync is defined in => exit
-    if !fpsPP! EQU 1 @echo FPS^+^+ or 60FPS GFX pack was found && goto:computeFactor
-    if !fpsPpOld! EQU 1 @echo Old FPS^+^+ GFX pack was found && goto:computeFactor
+    if !fpsPP! EQU 1 @echo FPS^+^+ or 60FPS GFX pack was found & goto:computeFactor
+    if !fpsPpOld! EQU 1 @echo Old FPS^+^+ GFX pack was found & goto:computeFactor
     @echo no FPS^+^+ or 60FPS GFX pack found
 
     :computeFactor
@@ -304,10 +304,10 @@ REM : main
     call:createCapGP
 
     REM : finalize V3 graphic packs if a FPS++ pack was not found
-    if !fpsPP! EQU 1 rmdir /Q /S !gpV3! > NUL 2>&1 && set "v3ExistFlag=1"
+    if !fpsPP! EQU 1 rmdir /Q /S !gpV3! > NUL 2>&1 & set "v3ExistFlag=1"
     if %v3ExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeV3CapGP
 
-    if %nbArgs% EQU 0 endlocal && pause
+    if %nbArgs% EQU 0 endlocal & pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 
     exit /b 0
@@ -496,7 +496,7 @@ REM : functions
 @echo fps=!fps!
 @echo targetFps=!targetFps!
 
-        if !fpsPP! EQU 0 type !rulesFileV3! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapV3GP "99" "Speed (!targetFps!FPS)"
+        if !fpsPP! EQU 0 type !rulesFileV3! | find /I /V "FPS = !fps!" > NUL 2>&1 & call:fillCapV3GP "99" "Speed (!targetFps!FPS)"
 
         if !fpsPpOld! EQU 1 goto:capMenu
 

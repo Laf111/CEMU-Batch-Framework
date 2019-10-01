@@ -10,7 +10,7 @@ REM : main
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -54,7 +54,7 @@ REM : main
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
             cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
-            if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:waitingLoopProcesses
+            if !ERRORLEVEL! EQU 4 set /A "duration-=30" & goto:waitingLoopProcesses
 
             call !killBatchFw!
             exit 1

@@ -23,7 +23,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
@@ -227,7 +227,7 @@ REM : main
             call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -434,7 +434,7 @@ REM : main
     @echo ftpiiU server on your Wii-U^.
     @echo.
     choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
-    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
+    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" & goto:batchFwUsers
 
     REM : get online files and accounts
     pushd !BFW_TOOLS_PATH!
@@ -543,7 +543,7 @@ REM : main
 
     REM : browse to the file
     :browse3rdP
-    for /F %%b in ('cscript /nologo !browseFile! "Please browse to 3rd party program"') do set "file=%%b" && set "spath=!file:?= !"
+    for /F %%b in ('cscript /nologo !browseFile! "Please browse to 3rd party program"') do set "file=%%b" & set "spath=!file:?= !"
     if [!spath!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
@@ -642,10 +642,10 @@ REM : main
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" & set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -737,11 +737,11 @@ REM : main
     set "gpuType=OTHER"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 & (
             set "gpuType=NVIDIA"
             set "GPU_VENDOR=!string: =!"
         )
-        echo "!string!" | find /I "AMD" > NUL 2>&1 && (
+        echo "!string!" | find /I "AMD" > NUL 2>&1 & (
             set "gpuType=AMD"
             set "GPU_VENDOR=!string: =!"
         )
@@ -768,10 +768,10 @@ REM : main
     :askCemuFolder
     set /A "NBCV+=1"
 
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" & set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askCemuFolder
     )
 
@@ -1017,7 +1017,7 @@ REM : functions
         wscript /nologo !StartWait! !cemu!
 
        :getCemuVersion
-        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         set /A "v1151=2"
@@ -1181,7 +1181,7 @@ REM : functions
 
         REM : add . and ~
         set "str=!str:.=!"
-        @echo !str! | find "~" > NUL 2>&1 && (
+        @echo !str! | find "~" > NUL 2>&1 & (
             echo Please remove ^~ ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -1198,11 +1198,11 @@ REM : functions
         set "str=!str:|=!"
         set "str=!str:^=!"
 
-        @echo !str! | find "*" > NUL 2>&1 && (
+        @echo !str! | find "*" > NUL 2>&1 & (
             echo Please remove ^* ^(unsupported charcater^) from !str!
             exit /b 50
         )
-        @echo !str! | find "=" > NUL 2>&1 && (
+        @echo !str! | find "=" > NUL 2>&1 & (
             echo Please remove ^= ^(unsupported charcater^) from !str!
             exit /b 50
         )
@@ -1216,7 +1216,7 @@ REM : functions
     :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!logFile:"=!.tmp""
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
@@ -1347,10 +1347,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1366,9 +1366,9 @@ REM : functions
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" && goto:eof
-        if !vit! LSS !vir! set "%3=2" && goto:eof
-        if !vit! GTR !vir! set "%3=1" && goto:eof
+        if !vit! EQU !vir! set "%3=0" & goto:eof
+        if !vit! LSS !vir! set "%3=2" & goto:eof
+        if !vit! GTR !vir! set "%3=1" & goto:eof
 
        :loopSep
         set /A "minNbSep+=1"
@@ -1378,15 +1378,15 @@ REM : functions
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" && goto:eof
-        if !lt! LSS !lr! set "%3=2" && goto:eof
-        if !lt! GTR !lr! set "%3=1" && goto:eof
+        if !lt! EQU !lr! set "%3=0" & goto:eof
+        if !lt! LSS !lr! set "%3=2" & goto:eof
+        if !lt! GTR !lr! set "%3=1" & goto:eof
 
         set "%3=50"
 
@@ -1403,9 +1403,9 @@ REM : functions
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" && goto:eof
-        if !dt! GTR !dr! set "%2=1" && goto:eof
-        if !dt! EQU !dr! set "%2=0" && goto:eof
+        if !dt! LSS !dr! set "%2=2" & goto:eof
+        if !dt! GTR !dr! set "%2=1" & goto:eof
+        if !dt! EQU !dr! set "%2=0" & goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length
@@ -1588,7 +1588,7 @@ REM : functions
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 & set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
@@ -1651,7 +1651,7 @@ REM : functions
         if [!lastHostLog!] == ["NONE"] goto:eof
         
         REM : get registered users list from the last modified Host log
-        type !lastHostLog! | find /I "USER_REGISTERED" > NUL && (
+        type !lastHostLog! | find /I "USER_REGISTERED" > NUL & (
             @echo =========================================================
             @echo New installation for host !USERDOMAIN!
             @echo -------------------------------------------------
@@ -1699,7 +1699,7 @@ REM : functions
         set "resolved=%value:"=%"
 
         REM : check if value is a path
-        echo %resolved% | find ":" > NUL 2>&1 && (
+        echo %resolved% | find ":" > NUL 2>&1 & (
             REM : check if it is only a device letter issue (in case of portable library)
             set "tmpStr='!drive!%resolved:~3%"
 

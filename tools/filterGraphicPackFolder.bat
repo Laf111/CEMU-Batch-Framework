@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -62,7 +62,7 @@ REM : main
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !tidLog!
+        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" & echo %%i >> !tidLog!
 
     )
 
@@ -100,7 +100,7 @@ REM : functions
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" && (
+            echo !gp! | find "\" & (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_TMP:"=!\!gp:"=!""
 

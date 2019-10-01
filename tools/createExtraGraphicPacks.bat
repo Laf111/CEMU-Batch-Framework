@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -80,10 +80,10 @@ REM : main
     @echo Please select a reference graphicPacks folder
 
     :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" & set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -263,13 +263,13 @@ REM : main
         set "gpName=!gpName:rules=!"
         set "gpName=!gpName:\=!"
 
-        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 && (
+        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 & (
             set "gpName=!gpName:_graphicPacksV2=_graphicPacksV2\!"
-            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
+            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 & set "v2Name=!gpName:_%resX2%p=!" & call:createExtraV2Gp "!gpName!"
         )
 
         REM : creating V3 graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 & (type !rules! | find "$height" > NUL 2>&1 & set "gpV3exist=1" & call:createExtraV3Gp "!gpName!")
 
     )
     if %gpV3exist% EQU 1 goto:ending
@@ -278,7 +278,7 @@ REM : main
 
     REM : search a V2 2xres graphic pack if found v2Name
 
-    if [!v2Name!] == ["NOT_FOUND"] set "v3name="!GAME_TITLE!"" && goto:createNewV3
+    if [!v2Name!] == ["NOT_FOUND"] set "v3name="!GAME_TITLE!"" & goto:createNewV3
 
     set "gpResX2="!BFW_GP_FOLDER:"=!\!v2Name!_%resX2%p""
     set "v3name=!v2Name:_graphicPacksV2\=!"
@@ -324,7 +324,7 @@ REM : main
 
     call:waitChildrenProcessesEnd
 
-    if %nbArgs% EQU 0 endlocal && pause
+    if %nbArgs% EQU 0 endlocal & pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 
     exit /b 0
@@ -418,7 +418,7 @@ REM : functions
         set "gpFolderName="%~1""
         set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 && goto:eof
+        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 & goto:eof
 
         set "rulesFile="!gpV3:"=!\rules.txt""
 
@@ -456,7 +456,7 @@ REM : functions
         set "ed="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\n"
 
-        if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
+        if not ["!ed!"] == [""] echo extra directives detected ^: & echo !ed! & echo.
 
         REM : complete 16/9 (if here => COMPLETE_GP=YES)
         call:createV3Gp169
@@ -508,7 +508,7 @@ REM : functions
 
         if !firstSetFlag! EQU 0 for /F "tokens=1 delims=~=" %%j in ("%%i") do set "first=%%j"
 
-        if !firstSetFlag! EQU 1 echo %%i | find "!first!" > NUL 2>&1 && goto:eof
+        if !firstSetFlag! EQU 1 echo %%i | find "!first!" > NUL 2>&1 & goto:eof
         echo %%i
         set /A "firstSetFlag=1"
 
@@ -628,7 +628,7 @@ REM : functions
         call:divfloat %nativeHeight% !resRatio! 1 result
 
         REM : check if targetHeight is an integer
-        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" && goto:beginLoopRes
+        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" & goto:beginLoopRes
 
         set "targetHeight=!result:.0=!"
         REM compute targetWidth (16/9 = 1.7777777)
@@ -795,7 +795,7 @@ REM : functions
         goto:eof
 
         :169_windowedV2
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
         @echo Create 16^/9 windowed missing V2 resolution packs
 
         REM : 16/9 windowed graphic packs
@@ -1071,7 +1071,7 @@ REM pause
         REM : search for resX2p43
         set "gpResX2p_43="!gp:"=!43""
 
-        if exist !gpResX2p_43! set "gp=!gpResX2p_43!" && set "description=" goto:setdHeight
+        if exist !gpResX2p_43! set "gp=!gpResX2p_43!" & set "description=" goto:setdHeight
 
         REM : if found 219, duplicate 1440p219
         set "gpResX2p_219="!gp:"=!219""

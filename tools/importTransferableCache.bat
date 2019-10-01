@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -64,10 +64,10 @@ REM : main
     :askInputFile
     @echo Please browse to the transferable cache file
 
-    for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
+    for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" & set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askInputFile
     )
 
@@ -77,10 +77,10 @@ REM : main
     :askGameFolder
     @echo Please browse to the game^'s folder
 
-    for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" & set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askGameFolder
     )
     REM : check if folder name contains forbiden character for batch file

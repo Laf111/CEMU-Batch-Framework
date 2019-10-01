@@ -10,7 +10,7 @@ REM : main
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -86,7 +86,7 @@ REM : main
     call:divfloat %nativeHeight% !resRatioV2! 1 resultV2
 
     REM : check if targetHeight is an integer
-    for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" && goto:beginLoopResV2
+    for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" & goto:beginLoopResV2
     set "targetHeightV2=!resultV2:.0=!"
 
 

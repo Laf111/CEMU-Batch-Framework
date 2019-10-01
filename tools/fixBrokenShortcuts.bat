@@ -8,7 +8,7 @@ REM : main
     color F0
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "shortcutsToolsFolder=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "shortcutsToolsFolder=!SCRIPT_FOLDER:\"="!"
 
     REM : Last installation path
     set "LAST_GAMES_FOLDER_PATH="TO_BE_REPLACED""
@@ -33,10 +33,10 @@ REM : main
     call:createBrowser
 
     :askGamesFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Enter the new location of your games"') do set "folder=%%b" && set "NEW_GAMES_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Enter the new location of your games"') do set "folder=%%b" & set "NEW_GAMES_FOLDER_PATH=!folder:?= !"
     if [!NEW_GAMES_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 & exit 75
         goto:askGamesFolder
     )
 

@@ -19,7 +19,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -220,10 +220,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -239,9 +239,9 @@ REM : functions
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" && goto:eof
-        if !vit! LSS !vir! set "%3=2" && goto:eof
-        if !vit! GTR !vir! set "%3=1" && goto:eof
+        if !vit! EQU !vir! set "%3=0" & goto:eof
+        if !vit! LSS !vir! set "%3=2" & goto:eof
+        if !vit! GTR !vir! set "%3=1" & goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -251,15 +251,15 @@ REM : functions
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" && goto:eof
-        if !lt! LSS !lr! set "%3=2" && goto:eof
-        if !lt! GTR !lr! set "%3=1" && goto:eof
+        if !lt! EQU !lr! set "%3=0" & goto:eof
+        if !lt! LSS !lr! set "%3=2" & goto:eof
+        if !lt! GTR !lr! set "%3=1" & goto:eof
 
         set "%3=50"
 
@@ -276,9 +276,9 @@ REM : functions
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" && goto:eof
-        if !dt! GTR !dr! set "%2=1" && goto:eof
-        if !dt! EQU !dr! set "%2=0" && goto:eof
+        if !dt! LSS !dr! set "%2=2" & goto:eof
+        if !dt! GTR !dr! set "%2=1" & goto:eof
+        if !dt! EQU !dr! set "%2=0" & goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

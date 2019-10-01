@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -73,10 +73,10 @@ REM : main
     @echo Please select a reference graphicPacks folder
 
     :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" & set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -215,7 +215,7 @@ REM : main
     REM : waiting all children processes ending
     call:waitChildrenProcessesEnd
 
-    if %nbArgs% EQU 0 endlocal && pause
+    if %nbArgs% EQU 0 endlocal & pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
@@ -288,7 +288,7 @@ REM : functions
         call:divfloat %nativeHeight% !resRatio! 1 result
 
         REM : check if targetHeight is an integer
-        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" && goto:beginLoopRes
+        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" & goto:beginLoopRes
 
         set "targetHeight=!result:.0=!"
         REM compute targetWidth (16/9 = 1.7777777)
@@ -605,7 +605,7 @@ REM : functions
 
         if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
 
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -626,7 +626,7 @@ REM : functions
         :169_windowed
 
         REM : create windowed packs only if user chosen it during setup
-        echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        echo !ARLIST! | find /I /V "169" > NUL 2>&1 & goto:eof
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"

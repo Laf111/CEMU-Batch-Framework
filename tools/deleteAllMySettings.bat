@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -89,7 +89,7 @@ REM : main
         set "HOST=!args[0]!"
         set "HOST=!HOST:"=!"
         set "HOST=!HOST: =!"
-        if %nbArgs% EQU 1 @echo Delete all my settings for each game ^(for all CEMU versions^) saved for !HOST! host
+        if %nbArgs% EQU 1 @echo Delete all my settings for each game ^(for all CEMU versions^) saved for !USERDOMAIN! host
     )
 
     REM : CEMU version given
@@ -97,7 +97,7 @@ REM : main
         set "CEMU_FOLDER_NAME=!args[1]!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME: =!"
-        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved for host !HOST!
+        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved for host !USERDOMAIN!
     )
 
 
@@ -181,7 +181,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -206,7 +206,7 @@ REM : main
     REM if %nbArgs% GEQ 1 set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all settings stored for all CEMU version""
     REM REM : HOST given
     REM if %nbArgs% EQU 2 (
-        REM set "msg="!GAME_TITLE!:!DATE!-!HOST! delete all settings stored for !CEMU_FOLDER_NAME!""
+        REM set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all settings stored for !CEMU_FOLDER_NAME!""
 
         REM REM : reset Cemu install folder to default
         REM set "CEMU_FOLDER="NONE""
@@ -256,20 +256,27 @@ REM : functions
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        if ["!HOST!"] == ["*"] goto:removeAllHost
+        REM : check if at least one setting for this game was saved (no matter the host is)
+        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+        dir /b !rootDir! | findStr /R "." > NUL 2>&1
+        if !ERRORLEVEL! EQU 1 goto:eof
 
-        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!HOST!""
+        if ["!USERDOMAIN!"] == ["*"] goto:removeAllHost
+
+        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!""
         if not exist !rootDir! goto:eof
-        pushd !rootDir!
 
         if ["!CEMU_FOLDER_NAME!"] == ["*"] goto:removeAllSettings
 
-        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!HOST!\!CEMU_FOLDER_NAME!""
+        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
         if not exist !rootDir! goto:eof
+
+         pushd !rootDir!
+         REM : remove !CEMU_FOLDER_NAME! settings on !USERDOMAIN!
         @echo =========================================================
         @echo - !GAME_TITLE!
         @echo ---------------------------------------------------------
-        @echo Deleting settings saved for !CEMU_FOLDER_NAME!^?
+        @echo Deleting !CEMU_FOLDER_NAME! settings on !USERDOMAIN!^?
         @echo   ^(n^) ^: skip
         @echo   ^(y^) ^: default value after 15s timeout
         @echo ---------------------------------------------------------
@@ -279,61 +286,51 @@ REM : functions
             echo Skip this GAME
             goto:eof
         )
+        rmdir /S /Q !rootDir! > NUL 2>&1
+        @echo %%j deleted ^^!
+        set /A NB_SETTINGS_TREATED+=1
+        goto:eof
 
-        for /F "delims=~" %%j in ('dir /o:n /a:d /b * ^| find "!CEMU_FOLDER_NAME!" 2^>NUL') do (
-            rmdir /S /Q "%%j" > NUL 2>&1
-            @echo %%j deleted ^^!
-        )
-        goto:endTreatment
-
-       :removeAllSettings
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
-        @echo Deleting all settings saved for all versions^?
-        @echo  ^(n^) ^: skip
-        @echo  ^(y^) ^: default value after 15s timeout
-        @echo.
-        @echo ---------------------------------------------------------
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
-        if [!ANSWER!] == ["n"] (
-            REM : skip this game
-            echo Skip this GAME
-            goto:eof
-        )
+        :removeAllSettings
+        pushd !rootDir!
+        REM : all settings of versions
         for /F "delims=~" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
-            rmdir /S /Q "%%j" > NUL 2>&1
-            @echo %%j deleted ^^!
-        )
-        goto:endTreatment
+            @echo =========================================================
+            @echo - !GAME_TITLE!
+            @echo ---------------------------------------------------------
+            @echo Deleting settings saved on !USERDOMAIN! for %%j ^?
+            @echo   ^(n^) ^: skip
+            @echo   ^(y^) ^: default value after 15s timeout
+            @echo ---------------------------------------------------------
+            call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
+            if [!ANSWER!] == ["y"] (
 
+                rmdir /S /Q "%%j" > NUL 2>&1
+                @echo %%j deleted ^^!
+                set /A NB_SETTINGS_TREATED+=1
+            )
+        )
+        goto:eof
         :removeAllHost
 
-        REM : all Hosts, all settings
-        set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-        if not exist !rootDir! goto:eof
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
-        @echo Deleting all settings saved for all host^?
-        @echo   ^(n^) ^: skip
-        @echo   ^(y^) ^: default value after 15s timeout
-        @echo ---------------------------------------------------------
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
-        if [!ANSWER!] == ["n"] (
-            REM : skip this game
-            echo Skip this GAME
-            goto:eof
-        )
-
+        REM : all Hosts, all settings of versions
         pushd !rootDir!
         for /F "delims=~" %%j in ('dir /o:n /a:d /b * 2^>NUL') do (
-            rmdir /S /Q "%%j" > NUL 2>&1
-            @echo %%j deleted ^^!
-        )
 
-        :endTreatment
-        set /A NB_SETTINGS_TREATED+=1
+            @echo =========================================================
+            @echo - !GAME_TITLE!
+            @echo ---------------------------------------------------------
+            @echo Deleting settings saved on %%j for all Cemu Version^?
+            @echo   ^(n^) ^: skip
+            @echo   ^(y^) ^: default value after 15s timeout
+            @echo ---------------------------------------------------------
+            call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
+            if [!ANSWER!] == ["y"] (
+                rmdir /S /Q "%%j" > NUL 2>&1
+                @echo %%j deleted ^^!
+                set /A NB_SETTINGS_TREATED+=1
+            )
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------

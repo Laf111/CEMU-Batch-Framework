@@ -11,7 +11,7 @@ rem    color 4F
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -76,8 +76,8 @@ REM : functions
             for /F "delims=~" %%i in (!firstArg!) do set "argPiece=%%~nxi"
 
             REM : stop the program if it is not already running
-            if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate && exit 0
-            if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate && exit 0
+            if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate & exit 0
+            if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate & exit 0
 
         )
 

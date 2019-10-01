@@ -12,7 +12,7 @@ REM : ------------------------------------------------------------------
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -148,7 +148,7 @@ REM : ------------------------------------------------------------------
             call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -261,7 +261,7 @@ REM : ------------------------------------------------------------------
 
         REM : minimize all windows befaore launching in full screen
         set "psCommand="Get-ChildItem -recurse -Path !folder:"='! -Filter !pattern:"='! ^| Sort-Object LastAccessTime -Descending ^| Select-Object !way! 1 ^| Select -ExpandProperty FullName""
-        for /F "delims=~" %%a in ('powershell !psCommand! 2^>NUL') do set "%4="%%a"" && goto:eof
+        for /F "delims=~" %%a in ('powershell !psCommand! 2^>NUL') do set "%4="%%a"" & goto:eof
         set "%4="NOT_FOUND""
     goto:eof
     REM : ------------------------------------------------------------------
@@ -296,7 +296,7 @@ REM : ------------------------------------------------------------------
 
             REM : rebuild it
             call:getModifiedFile !sf! "!user:"=!_settings.xml" last css
-            if not exist !css! del /F !lls! > NUL 2>&1 && goto:eof
+            if not exist !css! del /F !lls! > NUL 2>&1 & goto:eof
             call:resolveSettingsPath ltarget
             @echo !ltarget!> !lls!
 
@@ -322,7 +322,7 @@ REM : ------------------------------------------------------------------
 
         if [!gamePath!] == [!gamePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && (
+            echo !gamePath! | find /V "_BatchFW_Install" > NUL 2>&1 & (
                 set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
                 if [!gamePath!] == [!gamePath_LOGS!] goto:eof
                 set "gamePath=!gamePath_LOGS!"
@@ -366,10 +366,10 @@ REM : ------------------------------------------------------------------
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -385,9 +385,9 @@ REM : ------------------------------------------------------------------
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" && goto:eof
-        if !vit! LSS !vir! set "%3=2" && goto:eof
-        if !vit! GTR !vir! set "%3=1" && goto:eof
+        if !vit! EQU !vir! set "%3=0" & goto:eof
+        if !vit! LSS !vir! set "%3=2" & goto:eof
+        if !vit! GTR !vir! set "%3=1" & goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -397,15 +397,15 @@ REM : ------------------------------------------------------------------
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" && goto:eof
-        if !lt! LSS !lr! set "%3=2" && goto:eof
-        if !lt! GTR !lr! set "%3=1" && goto:eof
+        if !lt! EQU !lr! set "%3=0" & goto:eof
+        if !lt! LSS !lr! set "%3=2" & goto:eof
+        if !lt! GTR !lr! set "%3=1" & goto:eof
 
         set "%3=50"
 
@@ -422,9 +422,9 @@ REM : ------------------------------------------------------------------
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" && goto:eof
-        if !dt! GTR !dr! set "%2=1" && goto:eof
-        if !dt! EQU !dr! set "%2=0" && goto:eof
+        if !dt! LSS !dr! set "%2=2" & goto:eof
+        if !dt! GTR !dr! set "%2=1" & goto:eof
+        if !dt! EQU !dr! set "%2=0" & goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length
@@ -608,7 +608,7 @@ REM : ------------------------------------------------------------------
         set "msg=%~1"
 
         REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 & set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

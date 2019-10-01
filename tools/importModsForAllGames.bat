@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -56,10 +56,10 @@ REM : main
     @echo Please select your mods source folder
 
     :askModFolder
-    for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" & set "MODS_FOLDER_PATH=!folder:?= !"
     if [!MODS_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
         goto:askModFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -154,7 +154,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -257,7 +257,7 @@ REM : functions
             REM : rules.txt
             set "rulesFile="!MODS_FOLDER_PATH:"=!%%i.%%j""
 
-            type !rulesFile! | find "path =" | find /I "Mod" > NUL 2>&1 && (
+            type !rulesFile! | find "path =" | find /I "Mod" > NUL 2>&1 & (
                 REM : V2 graphic pack
                 set "str=%%i"
                 set "str=!str:rules=!"

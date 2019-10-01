@@ -18,7 +18,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -101,7 +101,7 @@ REM : main
     @echo HostName=!portRead!
     @echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" & goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -132,7 +132,7 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
+    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 & (
         @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         @echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
@@ -216,7 +216,7 @@ REM : main
     if !ERRORLEVEL! NEQ 0 goto:getList
     @echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting & timeout /T 3 > NUL 2>&1 & exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -335,7 +335,7 @@ REM : ------------------------------------------------------------------
 
         REM : search if this game has an update
         set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
-        type !srcRemoteUpdate! | find "%endTitleId%" > NUL 2>&1 && (
+        type !srcRemoteUpdate! | find "%endTitleId%" > NUL 2>&1 & (
 
             @echo - dumping update
 
@@ -345,7 +345,7 @@ REM : ------------------------------------------------------------------
         )
         REM : search if this game has a DLC
         set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
-        type !srcRemoteDlc! | find "%endTitleId%" > NUL 2>&1 && (
+        type !srcRemoteDlc! | find "%endTitleId%" > NUL 2>&1 & (
 
             @echo - dumping DLC
 
@@ -356,7 +356,7 @@ REM : ------------------------------------------------------------------
 
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
-        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 && (
+        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 & (
             @echo - dumping saves
             
             REM : Import Wii-U saves
@@ -366,7 +366,7 @@ REM : ------------------------------------------------------------------
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
-        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do timeout /T 2 > NUL 2>&1 && goto:waitingLoop
+        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do timeout /T 2 > NUL 2>&1 & goto:waitingLoop
         
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"

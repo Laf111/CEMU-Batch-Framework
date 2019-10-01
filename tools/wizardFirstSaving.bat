@@ -20,7 +20,7 @@ REM : main
     )
 
     REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+    set "SCRIPT_FOLDER="%~dp0"" & set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
@@ -228,7 +228,10 @@ REM : main
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
     REM : handling user game profiles
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v11515! LEQ 1 set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v11515! LEQ 1 (
+        set "userGameProfile="%CEMU_FOLDER:"=%\gameProfiles\default\%titleId%.ini""
+        if exist !userGameProfile! set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
+    )
     
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
@@ -247,12 +250,12 @@ REM : main
     if not exist !PROFILE_FILE! call:createGameProfile
 
     :completeGameProfile
-    REM : settings.xml files
+    REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
-    set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
-    set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
-    set "backup="!CEMU_FOLDER:"=!\settings.bfw_old""
+    set "csTmp0="!CEMU_FOLDER:"=!\settings.bfww_tmp0""
+    set "csTmp1="!CEMU_FOLDER:"=!\settings.bfww_tmp1""
+    set "csTmp="!CEMU_FOLDER:"=!\settings.bfww_tmp""
+
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
     REM : GFX type to provide
@@ -299,9 +302,6 @@ REM : main
 
     REM : check the file size
     for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
-
-    REM : backup settings.xml
-    copy /Y !cs! !backup! > NUL 2>&1
 
     REM : create a link to GAME_FOLDER_PATH in log folder
     set "TMP_GAME_FOLDER_PATH="!BFW_LOGS:"=!\!GAME_TITLE!""
@@ -361,11 +361,12 @@ REM : main
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
 
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" & set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
     REM : check that profile file exist in
-    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
-    if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+    set "refUserProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+    if exist !refUserProfileFile! set "refProfileFile=!refUserProfileFile!"
 
     if not exist !refProfileFile! (
         @echo No game^'s profile file found ^!
@@ -436,7 +437,7 @@ REM : main
     :waitingLoop
     for /F "delims=" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks.bat" ^| find /I /V "find" 2^>NUL') do (
         if !disp! EQU 0 (
-            set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
+            set "disp=1" & cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
         )
         timeout /T 1 > NUL 2>&1
         goto:waitingLoop
@@ -483,7 +484,7 @@ REM : main
 
         set "gpV3="!BFW_GP_FOLDER:"=!\!tName:"=!_Resolution"
         set "rulesFile="!gpV3:"=!\rules.txt""
-        if exist !rulesFile! type !rulesFile! | find /I "heightfix" > NUL 2>&1 && (
+        if exist !rulesFile! type !rulesFile! | find /I "heightfix" > NUL 2>&1 & (
             @echo Graphic pack for this game use a height fix to avoid black borders
             @echo By default^, BatchFw complete presets with ^$heightfix=0
             @echo Switch this value to 1 if you encounter black border for the preset choosen
@@ -550,7 +551,7 @@ REM : main
             if ["!v1153b!"] == [""] @echo Error when comparing versions
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! EQU 50 @echo Error when comparing versions
-            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
+            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:launchCemu
         ) else (
             set /A "v1153b=2"
         )
@@ -569,9 +570,19 @@ REM : main
     REM : remove the node //GamePaths/Entry
     !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp0! > !cs!
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
     del /F !csTmp0! > NUL 2>&1
 
+    REM : set !GAMES_FOLDER! for //GamePaths in the backup also
+    set "csbu="!CEMU_FOLDER:"=!\settings.xml_bfwl_old""
+    if exist !csbu! (
+        REM : remove the node //GamePaths/Entry
+        !xmlS! ed -d "//GamePaths/Entry" !csbu! > !csTmp0!
+        REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
+        !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp0! > !csbu!
+        del /F !csTmp0! > NUL 2>&1
+    )
+    
     :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
     if not exist !scp! mkdir !scp! > NUL 2>&1
@@ -692,7 +703,7 @@ REM : functions
            )
         )
 
-        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfww_tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
@@ -707,8 +718,8 @@ REM : functions
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
-        set "t1o="!CEMU_FOLDER:"=!\otp.bfw_old""
-        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfw_old""
+        set "t1o="!CEMU_FOLDER:"=!\otp.bfww_old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfww_old""
 
         set "s1="!BFW_ONLINE:"=!\otp.bin""
         set "s2="!BFW_ONLINE:"=!\seeprom.bin""
@@ -883,14 +894,14 @@ REM : functions
         @echo Current CemuHook^'s settings ^:
         @echo ---------------------------------------------------------
         type !chs! | find /I /V "#" | find /I /V "["
-        type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL 2>&1 && (
-            type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" > NUL 2>&1 && goto:eof
+        type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL 2>&1 & (
+            type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" > NUL 2>&1 & goto:eof
             @echo ---------------------------------------------------------
-            @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
-            @echo one ^(RDTSC^) is not disabled in the game^'s profile
-            @echo Be aware that might cause crash for some games since 1^.14
-            @echo.
             if !v1156! EQU 2 (
+                @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
+                @echo one ^(RDTSC^) is not disabled in the game^'s profile
+                @echo Be aware that might cause crash for some games since 1^.14
+                @echo.
                 @echo If you really want to use a custom timer^, You^'d better
                 @echo had the following lines in the game^'s profile
                 @echo.
@@ -915,7 +926,7 @@ REM : functions
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 & (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -947,7 +958,7 @@ REM : functions
 
             set "gp=!str:\rules=!"
 
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
+            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 & (
                 REM : V3 graphic pack with more than one folder's level
                 set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
 
@@ -969,7 +980,7 @@ REM : functions
 
         )
         REM : check that at least one GFX pack was listed
-        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
+        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 & goto:eof
 
         REM : stop execution something wrong happens
         REM : warn user
@@ -1067,10 +1078,10 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
-        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vir=!vir!00"
+        echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vir! vir
+        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 & set "vit=!vit!00"
+        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 & call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)
         set "sep=."
@@ -1086,9 +1097,9 @@ REM : functions
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" && goto:eof
-        if !vit! LSS !vir! set "%3=2" && goto:eof
-        if !vit! GTR !vir! set "%3=1" && goto:eof
+        if !vit! EQU !vir! set "%3=0" & goto:eof
+        if !vit! LSS !vir! set "%3=2" & goto:eof
+        if !vit! GTR !vir! set "%3=1" & goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -1098,15 +1109,15 @@ REM : functions
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" && goto:eof
-        if !lt! LSS !lr! set "%3=2" && goto:eof
-        if !lt! GTR !lr! set "%3=1" && goto:eof
+        if !lt! EQU !lr! set "%3=0" & goto:eof
+        if !lt! LSS !lr! set "%3=2" & goto:eof
+        if !lt! GTR !lr! set "%3=1" & goto:eof
 
         set "%3=50"
 
@@ -1123,9 +1134,9 @@ REM : functions
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" && goto:eof
-        if !dt! GTR !dr! set "%2=1" && goto:eof
-        if !dt! EQU !dr! set "%2=0" && goto:eof
+        if !dt! LSS !dr! set "%2=2" & goto:eof
+        if !dt! GTR !dr! set "%2=1" & goto:eof
+        if !dt! EQU !dr! set "%2=0" & goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length
