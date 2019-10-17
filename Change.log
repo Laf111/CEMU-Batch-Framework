@@ -1,4 +1,9 @@
 XX/09/2019 V15 :
+- add : a progressbar to monitor Pre and Post processing
+- add : handle a list for aspect ratios 
+- fix : GFX packs completion take all hosts settings into account (aspect ratios defined)
+- fix : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
+        an active connection is found) 
 - add : support of user's game profiles (Cemu 1.15.15)
 - add : BatchFw now propgates games'stats through versions of CEMU AND Hosts used for each user
         A script updateGameStats.bat is added
@@ -497,9 +502,9 @@ XX/09/2019 V15 :
 
 
 2018/08/16 V9 :
-    - can now ouput executables that can be “shortcuted” by STEAM and so you can use all BatchFW features with launching from STEAM
+    - can now ouput executables that can be Â“shortcutedÂ” by STEAM and so you can use all BatchFW features with launching from STEAM
     - automatic graphic pack update
-    - auto-import settings from last version reset by default with comparing the two game’s profiles lines side by side (if needed)
+    - auto-import settings from last version reset by default with comparing the two gameÂ’s profiles lines side by side (if needed)
     - fix openGL Cache backup for AMD users (looking for a folder and nor for files in the GLCache folder)
 
 2018/07/03 V8-6 :
@@ -628,7 +633,7 @@ XX/09/2019 V15 :
     
     
 2018/04/04 V5 : Install Icons automatically, open dialog boxes
-    - now only the following characters are forbiden in paths : (,),&,%,£,! and ^
+    - now only the following characters are forbiden in paths : (,),&,%,Â£,! and ^
     - improved specials characters support by : 
         getting and setting the char code set of the host
         delay expansion in all code and closing variables visibility
