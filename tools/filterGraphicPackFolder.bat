@@ -62,7 +62,7 @@ REM : main
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" & echo %%i >> !tidLog!
+        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !tidLog!
 
     )
 

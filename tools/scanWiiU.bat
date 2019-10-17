@@ -107,7 +107,7 @@ REM : main
 
     choice /C yn /N /M "Use this setup (y, n)? : "
 
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" & goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "

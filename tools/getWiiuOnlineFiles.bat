@@ -83,10 +83,10 @@ REM : main
     pause
 
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Browse to the folder containing those files"') do set "folder=%%b" & set "BUP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Browse to the folder containing those files"') do set "folder=%%b" && set "BUP_FOLDER=!folder:?= !"
     if [!BUP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit /b 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askOutputFolder
     )
     robocopy !BUP_FOLDER! !BFW_ONLINE_FOLDER! "otp.bin" > NUL 2>&1
@@ -140,7 +140,7 @@ REM : main
     @echo HostName=!portRead!
     @echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" & goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -168,7 +168,7 @@ REM : main
     if !state! EQU 0 (
         @echo ERROR^: !wiiuIp! was not found on your network ^!
         @echo exiting 2
-        if %nbArgs% EQU 0 pause & exit 2
+        if %nbArgs% EQU 0 pause && exit 2
         if %nbArgs% NEQ 0 exit /b 2
     )
 
@@ -267,7 +267,7 @@ REM : main
     REM : wait all transfert end
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "winScp.com" ^| find /I /V "find"') do (
+    wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && (
         goto:waitingLoop
     )
 

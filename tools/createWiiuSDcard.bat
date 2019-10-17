@@ -70,10 +70,10 @@ REM : main
 
     :askDrive
     set "SDCARD="NONE""
-    for /F %%b in ('cscript /nologo !browseFolder! "Select the drive of your SDCard"') do set "folder=%%b" & set "SDCARD=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select the drive of your SDCard"') do set "folder=%%b" && set "SDCARD=!folder:?= !"
     if [!SDCARD!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askDrive
     )
 

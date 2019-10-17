@@ -155,10 +155,10 @@ REM : main
     if [!ANSWER!] == ["n"] goto:restoreTransShaderCache
 
     :askMlc01Folder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" & set "MLC01_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askMlc01Folder
     )
     REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
@@ -195,10 +195,10 @@ REM : main
     if [!ANSWER!] == ["n"] goto:restoreSaves
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" & set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
@@ -236,10 +236,10 @@ REM : main
         set "user="%%a""
 
         :askSaveFolder
-        for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" & set "MLC01_FOLDER_PATH=!folder:?= !"
+        for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
         if [!MLC01_FOLDER_PATH!] == ["NONE"] (
             choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-            if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+            if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
             goto:askSaveFolder
         )
         REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!

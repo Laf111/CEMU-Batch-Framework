@@ -165,7 +165,7 @@ REM : main
     )
 
     @echo Waiting the end of all child processes before ending ^.^.^. >> !myLog!
-    if %nbArgs% EQU 0 endlocal & pause & exit 0
+    if %nbArgs% EQU 0 endlocal && pause && exit 0
     if %ERRORLEVEL% NEQ 0 exit %ERRORLEVEL%
 
     exit 0

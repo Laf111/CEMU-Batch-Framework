@@ -116,10 +116,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo Please select CEMU install folder
 
     :askCemuFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" & set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
 
@@ -149,10 +149,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" & set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -540,7 +540,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
             call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -549,7 +549,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if !QUIET_MODE! EQU 1 goto:log
     @echo =========================================================
 
-    if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result & set /A "NB_GAMES_TREATED=!result!"
+    if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result && set /A "NB_GAMES_TREATED=!result!"
 
     @echo Treated !NB_GAMES_TREATED! games
 
@@ -612,7 +612,7 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "rar.exe" ^| find /I /V "find"') do (
+        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Still extracting V2 GFX packs^, please wait ^.^.^.
@@ -629,9 +629,9 @@ REM : functions
         set /A "needImport=0"
 
         set "pat=*(DLC)*"
-        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
         set "pat=*(UPDATE DATA)*"
-        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
 
         REM : if need call import script and wait
         if !needImport! EQU 0 goto:eof
@@ -927,6 +927,15 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to progressBar.bat (if needed)
+        set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar.lnk""
+        set "LINK_DESCRIPTION="Link to progressBar""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\progressBar.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\BatchFw.ico""
+        if not exist !LINK_PATH! (
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons\Convert all jpg files to centered icons.lnk""
         set "LINK_DESCRIPTION="Convert all jpg files find in the Cemu subfolder of the game's folder, to centered icon in order to be used by createShortcuts.bat""
@@ -1256,7 +1265,7 @@ REM : functions
         pushd "%LOCALAPPDATA%"
         set "cache="NOT_FOUND""
         for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" & for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+        if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
         if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
         pushd !BFW_TOOLS_PATH!
 
@@ -1622,9 +1631,9 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" & goto:eof
-        if !vit! LSS !vir! set "%3=2" & goto:eof
-        if !vit! GTR !vir! set "%3=1" & goto:eof
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -1634,15 +1643,15 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" & goto:eof
-        if !lt! LSS !lr! set "%3=2" & goto:eof
-        if !lt! GTR !lr! set "%3=1" & goto:eof
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
 
         set "%3=50"
 
@@ -1659,9 +1668,9 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" & goto:eof
-        if !dt! GTR !dr! set "%2=1" & goto:eof
-        if !dt! EQU !dr! set "%2=0" & goto:eof
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

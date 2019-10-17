@@ -37,7 +37,7 @@ REM : main
     REM : monitor LaunchGame.bat until cemu is launched
 
     :waitingLoopProcesses
-    for /F "delims=~" %%i in ('wmic process get Commandline ^| find /I "LaunchGame" ^| find /I /V "wmic" ^| find /I /V "find"') do (
+    wmic process get Commandline | find /I "LaunchGame" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
 
         REM : set BatchFw processes to priority to high
         wmic process where "CommandLine like '%%!GAMES_FOLDER_NAME!%%'" call setpriority 128 > NUL 2>&1
@@ -54,7 +54,7 @@ REM : main
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
             cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
-            if !ERRORLEVEL! EQU 4 set /A "duration-=30" & goto:waitingLoopProcesses
+            if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:waitingLoopProcesses
 
             call !killBatchFw!
             exit 1

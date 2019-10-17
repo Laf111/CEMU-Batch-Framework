@@ -13,6 +13,14 @@ REM : main
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
 
+    REM : directory of this script
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -22,28 +30,16 @@ REM : main
         exit 1
     )
 
-    REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
-
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
 
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
-    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
-
-    REM : check if file system is NTFS
-    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value ^| find /I /V "NTFS"') do (
-
-        @echo This volume is not an NTFS one^^!
-        @echo BatchFw use Symlinks and need to be installed on a NTFS volume
-        pause
-        exit 2
-    )
 
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
@@ -65,6 +61,15 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : check if file system is NTFS
+    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value ^| find /I /V "NTFS"') do (
+
+        @echo This volume is not an NTFS one^^!
+        @echo BatchFw use Symlinks and need to be installed on a NTFS volume
+        pause
+        exit 2
+    )
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -227,7 +232,7 @@ REM : main
             call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -261,56 +266,11 @@ REM : main
 
        :wiiuOK
         call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
-        if [!ANSWER!] == ["n"] goto:externalGP
+        if [!ANSWER!] == ["n"] goto:importModForGames
 
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
-    :externalGP
-    REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-
-    REM : check if an internet connection is active
-    set "ACTIVE_ADAPTER=NOT_FOUND"
-    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
-
-    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
-
-    @echo ---------------------------------------------------------
-    @echo Checking latest graphics packs^'update
-
-    REM : update graphic packs
-    set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
-    call !ugp!
-    set /A "cr=!ERRORLEVEL!"
-    REM : if user cancelled the update
-    if !cr! EQU 1 if not exist !BFW_GP_FOLDER! goto:beginExtraction
-
-    if !cr! EQU 0 goto:importModForGames
-
-    :extractV3pack
-    if %QUIET_MODE% EQU 1 goto:importModForGames
-
-    :beginExtraction
-    REM : first launch of setup.bat
-    if exist !BFW_GP_FOLDER!  goto:importModForGames
-    mkdir !BFW_GP_FOLDER! > NUL 2>&1
-
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Extracting integrated graphics packs^.^.^.
-    @echo ---------------------------------------------------------
-    REM : extract embeded V3 packs
-    set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
-
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! GTR 1 (
-        @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
-        pause
-        exit /b 1
-    )
-
-    @echo ^> Graphic packs installed from archive
 
     :importModForGames
     cls
@@ -344,12 +304,39 @@ REM : main
     goto:askScreenMode
 
     :askRatios
+    REM : get the users list
+    set "ratiosList=EMPTY"
+    set /A "changeArList=0"
+
+    REM : search in all Host_*.log
+    set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+    for /F %%i in ('dir /S /B !pat! 2^>NUL') do (
+        set "currentLogFile="%%i""
+
+        REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
+        set "ARLIST="
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+            REM : add to the list if not already present
+            echo !ARLIST! | find /V "%%i" > NUL 2>&1 && set "ARLIST=%%i !ARLIST!"
+        )
+    )
+
+    if ["%ratiosList%"] == ["EMPTY"] goto:getRatios
+
+    set "ratiosList=!ratiosList:EMPTY=!"
+    @echo Aspect ratios already defined in BatchFW: !ratiosList!
+    choice /C ny /N /M "Change this list? (y,n): "
+    if !ERRORLEVEL! EQU 1 goto:askScreenMode
+
     REM : flush logFile of DESIRED_ASPECT_RATIO
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "DESIRED_ASPECT_RATIO" 2^>NUL') do call:cleanHostLogFile DESIRED_ASPECT_RATIO
-    REM :? 1366*768
+
+    :getRatios
+    set /A "changeArList=1"
+
     @echo ---------------------------------------------------------
-    @echo Choose your display ratio ^(for extra graphic packs^)
-    @echo Ratios availables:
+    @echo Choose your display ratio ^(for extra graphic packs^) ^:
+    @echo.
     @echo     ^(1^)^: 16/9
     @echo     ^(2^)^: 16/10
     @echo     ^(3^)^: 21/9
@@ -394,6 +381,61 @@ REM : main
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
 
+    :externalGP
+    REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+
+    REM : check if an internet connection is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
+
+    @echo ---------------------------------------------------------
+    @echo Checking latest graphics packs^'update
+
+    REM : update graphic packs
+    set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
+    call !ugp!
+    set /A "cr=!ERRORLEVEL!"
+    REM : if user cancelled the update
+    if !cr! EQU 1 if not exist !BFW_GP_FOLDER! goto:beginExtraction
+    if !cr! EQU 1 if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+        REM : force a graphic pack update
+        @echo Forcing a GFX pack update to add GFX packs for new ratios^.^.^.
+        @echo.
+
+        REM : forcing a GFX pack update to add GFX packs for new games
+        set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
+        call !gfxUpdate! -silent
+    )
+
+    if !cr! EQU 0 goto:getUserMode
+
+    :extractV3pack
+    if %QUIET_MODE% EQU 1 goto:getUserMode
+
+    :beginExtraction
+    REM : first launch of setup.bat
+    if exist !BFW_GP_FOLDER!  goto:getUserMode
+    mkdir !BFW_GP_FOLDER! > NUL 2>&1
+
+    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @echo Extracting integrated graphics packs^.^.^.
+    @echo ---------------------------------------------------------
+    REM : extract embeded V3 packs
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
+
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
+        pause
+        exit /b 1
+    )
+
+    @echo ^> Graphic packs installed from archive
+
     REM : get users
     :getUserMode
 
@@ -434,7 +476,7 @@ REM : main
     @echo ftpiiU server on your Wii-U^.
     @echo.
     choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
-    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" & goto:batchFwUsers
+    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
     REM : get online files and accounts
     pushd !BFW_TOOLS_PATH!
@@ -543,7 +585,7 @@ REM : main
 
     REM : browse to the file
     :browse3rdP
-    for /F %%b in ('cscript /nologo !browseFile! "Please browse to 3rd party program"') do set "file=%%b" & set "spath=!file:?= !"
+    for /F %%b in ('cscript /nologo !browseFile! "Please browse to 3rd party program"') do set "file=%%b" && set "spath=!file:?= !"
     if [!spath!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
@@ -642,10 +684,10 @@ REM : main
     @echo Define target folder for shortcuts ^(a Wii-U Games subfolder will be created^)
     @echo ---------------------------------------------------------
     :askOutputFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" & set "OUTPUT_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -768,10 +810,10 @@ REM : main
     :askCemuFolder
     set /A "NBCV+=1"
 
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" & set "CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
 
@@ -897,9 +939,9 @@ REM : functions
         set /A "needImport=0"
 
         set "pat=*(DLC)*"
-        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
         set "pat=*(UPDATE DATA)*"
-        for /F %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
+        for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
 
         REM : if need call import script and wait
         if !needImport! EQU 0 goto:eof
@@ -1017,7 +1059,7 @@ REM : functions
         wscript /nologo !StartWait! !cemu!
 
        :getCemuVersion
-        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button && goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         set /A "v1151=2"
@@ -1366,9 +1408,9 @@ REM : functions
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" & goto:eof
-        if !vit! LSS !vir! set "%3=2" & goto:eof
-        if !vit! GTR !vir! set "%3=1" & goto:eof
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
 
        :loopSep
         set /A "minNbSep+=1"
@@ -1378,15 +1420,15 @@ REM : functions
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" & goto:eof
-        if !lt! LSS !lr! set "%3=2" & goto:eof
-        if !lt! GTR !lr! set "%3=1" & goto:eof
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
 
         set "%3=50"
 
@@ -1403,9 +1445,9 @@ REM : functions
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" & goto:eof
-        if !dt! GTR !dr! set "%2=1" & goto:eof
-        if !dt! EQU !dr! set "%2=0" & goto:eof
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

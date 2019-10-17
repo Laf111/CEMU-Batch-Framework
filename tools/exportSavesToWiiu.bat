@@ -91,7 +91,7 @@ REM : Main
     @echo HostName=!portRead!
     @echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" & goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -138,7 +138,7 @@ REM : Main
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         set "scanNow="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
@@ -173,7 +173,7 @@ REM : Main
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" & echo %%i >> !localTid!
+        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !localTid!
     )
 
     :getList
@@ -221,7 +221,7 @@ REM : Main
     if !ERRORLEVEL! NEQ 0 goto:getList
     @echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting & timeout /T 3 > NUL 2>&1 & exit 98
+    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -299,7 +299,7 @@ REM : Main
         choice /C yn /N /M "Retry (y, n)? : "
         if !ERRORLEVEL! EQU 2 (
             @echo Canceled by user^, exiting
-            if %nbArgs% EQU 0 pause & exit 98
+            if %nbArgs% EQU 0 pause && exit 98
             exit /b 98
         )
         goto:treatments
@@ -485,7 +485,7 @@ REM : functions
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             @echo ERROR when exporting common saves ^!
-            if %nbArgs% EQU 0 pause & exit 61
+            if %nbArgs% EQU 0 pause && exit 61
             exit /b 61
         )
         REM : delete user's save folder
@@ -536,7 +536,7 @@ REM : functions
         if !cr! NEQ 0 (
             @echo ERROR when exporting existing saves for !user:"=! ^!
             del /F /S !cemuUserSaveFolder! > NUL 2>&1
-            if %nbArgs% EQU 0 pause & exit 51
+            if %nbArgs% EQU 0 pause && exit 51
             exit /b 51
         )
 

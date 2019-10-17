@@ -138,6 +138,13 @@ REM : main
 
 
     :noMsg
+
+    REM : clean old packs
+    for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! ^| find /I /V "_graphicPacksV2" 2^>NUL ') do (
+        set "pack="!BFW_GP_FOLDER:"=!\%%a""
+        if exist !pack! rmdir /Q /S !pack! > NUL 2>&1
+    )
+
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateGP.ps1""
 

@@ -24,6 +24,23 @@ REM : main
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=~" %%i in (!GAMES_FOLDER!) do set "GAMES_FOLDER_NAME=%%~nxi"
 
+    @echo ---------------------------------------------------------
+    @echo killing BatchFw^'s process^.^.^.
+
+    for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%!GAMES_FOLDER_NAME!%%^'^" get ProcessID^,commandline') do (
+        set "line=%%p"
+        set "line2=!line:""="!"
+        set "pid=NOT_FOUND"
+        echo !line2! | find /V "wmic" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! > NUL 2>&1
+    )
+
+    @echo ---------------------------------------------------------
+    @echo killing CEMU^.^.^.
+
+    REM : kill CEMU's running process
+    wmic process where "Name like '%%cemu.exe%%'" call terminate > NUL 2>&1
+
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && (
 
@@ -35,17 +52,13 @@ REM : main
         wscript /nologo !StartHiddenWait! !stopThirdPartySoftware!
     )
 
-    @echo ---------------------------------------------------------
-    @echo killing CEMU^.^.^.
-    @echo ---------------------------------------------------------
-
-    REM : kill CEMU's running process
-    wmic process where "Name like '%%cemu.exe%%'" call terminate
-
-    @echo ---------------------------------------------------------
-    @echo killing BatchFw^'s process^.^.^.
-    @echo ---------------------------------------------------------
-
-    wmic process where "CommandLine like '%%!GAMES_FOLDER_NAME!%%'" call terminate
-
+    REM : a second time to kill processes that might have been missed
+    for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%!GAMES_FOLDER_NAME!%%^'^" get ProcessID^,commandline') do (
+        set "line=%%p"
+        set "line2=!line:""="!"
+        set "pid=NOT_FOUND"
+        echo !line2! | find /V "wmic" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! > NUL 2>&1
+    )
+    timeout /T 3 > NUL 2>&1
 exit 0

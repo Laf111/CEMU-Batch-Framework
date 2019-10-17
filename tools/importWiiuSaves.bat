@@ -94,7 +94,7 @@ REM : games that exist in local AND remote locations
     @echo HostName=!portRead!
     @echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" & goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -144,7 +144,7 @@ REM : games that exist in local AND remote locations
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         set "scanNow="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
@@ -179,7 +179,7 @@ REM : games that exist in local AND remote locations
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" & echo %%i >> !localTid!
+        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !localTid!
     )
 
     :getList
@@ -225,7 +225,7 @@ REM : games that exist in local AND remote locations
     if !ERRORLEVEL! NEQ 0 goto:getList
     @echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting & timeout /T 3 > NUL 2>&1 & exit 98
+    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls

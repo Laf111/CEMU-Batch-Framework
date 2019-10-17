@@ -148,7 +148,7 @@ REM : ------------------------------------------------------------------
             call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
@@ -261,7 +261,7 @@ REM : ------------------------------------------------------------------
 
         REM : minimize all windows befaore launching in full screen
         set "psCommand="Get-ChildItem -recurse -Path !folder:"='! -Filter !pattern:"='! ^| Sort-Object LastAccessTime -Descending ^| Select-Object !way! 1 ^| Select -ExpandProperty FullName""
-        for /F "delims=~" %%a in ('powershell !psCommand! 2^>NUL') do set "%4="%%a"" & goto:eof
+        for /F "delims=~" %%a in ('powershell !psCommand! 2^>NUL') do set "%4="%%a"" && goto:eof
         set "%4="NOT_FOUND""
     goto:eof
     REM : ------------------------------------------------------------------
@@ -296,7 +296,7 @@ REM : ------------------------------------------------------------------
 
             REM : rebuild it
             call:getModifiedFile !sf! "!user:"=!_settings.xml" last css
-            if not exist !css! del /F !lls! > NUL 2>&1 & goto:eof
+            if not exist !css! del /F !lls! > NUL 2>&1 && goto:eof
             call:resolveSettingsPath ltarget
             @echo !ltarget!> !lls!
 
@@ -385,9 +385,9 @@ REM : ------------------------------------------------------------------
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" & goto:eof
-        if !vit! LSS !vir! set "%3=2" & goto:eof
-        if !vit! GTR !vir! set "%3=1" & goto:eof
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -397,15 +397,15 @@ REM : ------------------------------------------------------------------
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" & goto:eof
-        if !lt! LSS !lr! set "%3=2" & goto:eof
-        if !lt! GTR !lr! set "%3=1" & goto:eof
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
 
         set "%3=50"
 
@@ -422,9 +422,9 @@ REM : ------------------------------------------------------------------
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" & goto:eof
-        if !dt! GTR !dr! set "%2=1" & goto:eof
-        if !dt! EQU !dr! set "%2=0" & goto:eof
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

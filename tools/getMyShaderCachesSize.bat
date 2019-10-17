@@ -60,7 +60,7 @@ REM : main
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" & for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
+    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
     pushd !BFW_TOOLS_PATH!
 

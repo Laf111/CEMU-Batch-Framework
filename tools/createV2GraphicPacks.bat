@@ -86,7 +86,7 @@ REM : main
     call:divfloat %nativeHeight% !resRatioV2! 1 resultV2
 
     REM : check if targetHeight is an integer
-    for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" & goto:beginLoopResV2
+    for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" && goto:beginLoopResV2
     set "targetHeightV2=!resultV2:.0=!"
 
 

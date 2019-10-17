@@ -33,10 +33,10 @@ REM : main
     call:createBrowser
 
     :askGamesFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Enter the new location of your games"') do set "folder=%%b" & set "NEW_GAMES_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Enter the new location of your games"') do set "folder=%%b" && set "NEW_GAMES_FOLDER_PATH=!folder:?= !"
     if [!NEW_GAMES_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
         goto:askGamesFolder
     )
 
@@ -63,6 +63,10 @@ REM : main
 
     REM : Loop on every shorcuts found recursively
     for /F "delims=~" %%i in ('dir /S /B "*.lnk"') do call:fixShortcut "%%i"
+
+    REM : fix prpgress bar shortcut
+    set "progressBar="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\progressBar.lnk""
+    call:fixShortcut !progressBar!
 
     REM : update this script
     set "fnrLog="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\logs\fnr_brokenShortcuts.log""

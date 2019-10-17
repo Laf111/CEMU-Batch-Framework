@@ -73,10 +73,10 @@ REM : main
     @echo Please select a reference graphicPacks folder
 
     :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" & set "BFW_GP_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -215,7 +215,7 @@ REM : main
     REM : waiting all children processes ending
     call:waitChildrenProcessesEnd
 
-    if %nbArgs% EQU 0 endlocal & pause
+    if %nbArgs% EQU 0 endlocal && pause
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
@@ -231,7 +231,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        for /F "delims=~" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "fnr.exe" ^| find /I "_BatchFW_Graphic_Packs" ^| find /I /V "find"') do (
+        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "fnr.exe" | find /I "_BatchFW_Graphic_Packs" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
@@ -288,7 +288,7 @@ REM : functions
         call:divfloat %nativeHeight% !resRatio! 1 result
 
         REM : check if targetHeight is an integer
-        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" & goto:beginLoopRes
+        for /F "tokens=1-2 delims=." %%a in ("!result!") do if not ["%%b"] == ["0"] set /A "resRatio+=1" && goto:beginLoopRes
 
         set "targetHeight=!result:.0=!"
         REM compute targetWidth (16/9 = 1.7777777)
@@ -742,12 +742,21 @@ REM : functions
     goto:eof
 
     :createResGP
-
-        REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-        set "ARLIST="
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
         REM : if not defined, here fix it to 16/9
         if ["!ARLIST!"] == [""] set "ARLIST=169"
+
+        REM : search in all Host_*.log
+        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+        for /F %%i in ('dir /S /B !pat! 2^>NUL') do (
+            set "currentLogFile="%%i""
+
+            REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
+            set "ARLIST="
+            for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+                REM : add to the list if not already present
+                echo !ARLIST! | find /V "%%i" > NUL 2>&1 && set "ARLIST=%%i !ARLIST!"
+            )
+        )
 
         REM : initialize V3 graphic pack
         set "gpv3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""

@@ -56,10 +56,10 @@ REM : main
     @echo Please select your mods source folder
 
     :askModFolder
-    for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" & set "MODS_FOLDER_PATH=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"
     if [!MODS_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 & exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askModFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -154,7 +154,7 @@ REM : main
             call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 & goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )

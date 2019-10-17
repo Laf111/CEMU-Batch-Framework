@@ -180,6 +180,13 @@ REM : main
         @echo Edit and fix !wiiTitlesDataBase! if needed
         @echo ---------------------------------------------------------
         pause
+
+        REM : search game's graphic pack folder
+        set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
+        if exist !fnrLogLggp! del /F !fnrLogLggp!
+        REM : Re launching the search (to get the freshly created packs)
+        wscript /nologo !StartHidden! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!
+
     )
 
     REM : _BatchFW_Missing_Games_Profiles folder to store missing games profiles in CEMU_FOLDER\GamesProfiles
@@ -361,7 +368,7 @@ REM : main
     :askRefCemuFolder
     REM : get cemu install folder for existing game's profile
 
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" & set "REF_CEMU_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -435,9 +442,9 @@ REM : main
     :wait
     set "disp=0"
     :waitingLoop
-    for /F "delims=" %%j in ('wmic process get Commandline ^| find /I "_BatchFW_Install" ^| find /I /V "wmic" ^| find /I "updateGamesGraphicPacks.bat" ^| find /I /V "find" 2^>NUL') do (
+    wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 0 (
-            set "disp=1" & cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
+            set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
         )
         timeout /T 1 > NUL 2>&1
         goto:waitingLoop
@@ -456,7 +463,7 @@ REM : main
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
 
     REM : clean links in game's graphic pack folder
-    if exist !GAME_GP_FOLDER! for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+    for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         if exist !gpLink! rmdir /Q /S !gpLink! > NUL 2>&1
     )
@@ -528,7 +535,7 @@ REM : main
 
     REM : check if it is already a link (case of crash) : delete-it
     set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
-    for /F %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
+    for /F "delims=~" %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
 
     if exist !graphicPacksBackup! (
         if exist !graphicPacks! rmdir /Q !graphicPacks! > NUL 2>&1
@@ -551,7 +558,7 @@ REM : main
             if ["!v1153b!"] == [""] @echo Error when comparing versions
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! EQU 50 @echo Error when comparing versions
-            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 & goto:launchCemu
+            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             set /A "v1153b=2"
         )
@@ -979,12 +986,17 @@ REM : functions
             if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
 
         )
+        set /A "alreadyChecked=0"
+        :checkLinks
         REM : check that at least one GFX pack was listed
         dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
+        if !alreadyChecked! EQU 0 set /A "alreadyChecked=1" & timeout /T 1 > NUL 2>&1 & goto:checkLinks
 
         REM : stop execution something wrong happens
         REM : warn user
-        @echo ERROR ^: No GFX packs were found ^!^, cancelling and killing process
+        @echo ERROR ^: No GFX packs were found ^!^, check what happened
+        @echo ERROR ^: cancelling and killing process
+        pause
         REM : kill all running process
         set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
         wscript /nologo !StartHidden! !killBatchFw!
@@ -1097,9 +1109,9 @@ REM : functions
 
         if !minNbSep! NEQ 0 goto:loopSep
 
-        if !vit! EQU !vir! set "%3=0" & goto:eof
-        if !vit! LSS !vir! set "%3=2" & goto:eof
-        if !vit! GTR !vir! set "%3=1" & goto:eof
+        if !vit! EQU !vir! set "%3=0" && goto:eof
+        if !vit! LSS !vir! set "%3=2" && goto:eof
+        if !vit! GTR !vir! set "%3=1" && goto:eof
 
         :loopSep
         set /A "minNbSep+=1"
@@ -1109,15 +1121,15 @@ REM : functions
 
             call:compareDigits %%l result
 
-            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" & goto:eof
+            if not ["!result!"] == [""] if !result! NEQ 0 set "%3=!result!" && goto:eof
         )
         REM : check the length of string
         call:strLength !vit! lt
         call:strLength !vir! lr
 
-        if !lt! EQU !lr! set "%3=0" & goto:eof
-        if !lt! LSS !lr! set "%3=2" & goto:eof
-        if !lt! GTR !lr! set "%3=1" & goto:eof
+        if !lt! EQU !lr! set "%3=0" && goto:eof
+        if !lt! LSS !lr! set "%3=2" && goto:eof
+        if !lt! GTR !lr! set "%3=1" && goto:eof
 
         set "%3=50"
 
@@ -1134,9 +1146,9 @@ REM : functions
 
         set "%2=50"
 
-        if !dt! LSS !dr! set "%2=2" & goto:eof
-        if !dt! GTR !dr! set "%2=1" & goto:eof
-        if !dt! EQU !dr! set "%2=0" & goto:eof
+        if !dt! LSS !dr! set "%2=2" && goto:eof
+        if !dt! GTR !dr! set "%2=1" && goto:eof
+        if !dt! EQU !dr! set "%2=0" && goto:eof
     goto:eof
 
     REM : COMPARE VERSION : function to compute string length

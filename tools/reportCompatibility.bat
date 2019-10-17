@@ -131,7 +131,7 @@ REM : main
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
 
     set "libFileLine="NONE""
-    for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "REGION=%%i" & set "EXIST_IN_DATABASE=yes"
+    for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "REGION" 2^>NUL') do set "REGION=%%i" && set "EXIST_IN_DATABASE=yes"
     set "REGION=%REGION:"=%"
 
     set "beginTitleId=%titleId:~0,8%"
