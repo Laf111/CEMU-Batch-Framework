@@ -314,10 +314,9 @@ REM : main
         set "currentLogFile="%%i""
 
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-        set "ARLIST="
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
             REM : add to the list if not already present
-            echo !ARLIST! | find /V "%%i" > NUL 2>&1 && set "ARLIST=%%i !ARLIST!"
+            echo !ratiosList! | find /V "%%i" > NUL 2>&1 && set "ratiosList=%%i !ratiosList!"
         )
     )
 
@@ -400,9 +399,9 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     REM : if user cancelled the update
     if !cr! EQU 1 if not exist !BFW_GP_FOLDER! goto:beginExtraction
-    if !cr! EQU 1 if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+    if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         REM : force a graphic pack update
-        @echo Forcing a GFX pack update to add GFX packs for new ratios^.^.^.
+        @echo Forcing a GFX pack update to take new ratios into account^.^.^.
         @echo.
 
         REM : forcing a GFX pack update to add GFX packs for new games

@@ -366,7 +366,6 @@ REM : main
     rmdir /Q /S !BFW_PATH! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof

@@ -112,7 +112,7 @@ REM : main
     REM : add a step more to never progress back
     if !p2! NEQ 100 set "valuecore=!valuecore!Û"
 
-    mode %l%,4 > NUL 2>&1
+    mode %l%,3 > NUL 2>&1
     !cmdOw! @ /mov !w! !h! > NUL 2>&1
 
     REM : first draw
@@ -120,17 +120,14 @@ REM : main
 
     REM : show the window
     title BatchFw !phase! !p1!%% ^: !step!
-    !cmdOw! @ /res /top > NUL 2>&1
+    !cmdOw! @ /res > NUL 2>&1
 
     pushd !BFW_RESOURCES_PATH!
-    for /F "tokens=3" %%i in ('cmdOw.exe @ /P ^| find "cmd" ^| find "BatchFw" ^| find "!p1!"') do set "myPid=%%i"
-
     set /A "first=!dlp1!+10"
     set /A "last=!dlp2!-10"
 
-    set /A "check=(!last!-!first!)/3"
-
-    set /A "killed=0"
+    set "logFileTmp="!BFW_PATH:"=!\Logs\BatchFw_process_!step!.list""
+    !cmdOw! @ /top > NUL 2>&1
 
     for /L %%i in (!first!,10,!last!) do (
 
@@ -141,9 +138,17 @@ REM : main
         if !length! LEQ !lm2! set "valuecore=!valuecore!Û"
         call:refreshProgressBar
 
-        if !killed! EQU 0 if %%i GTR !check! for /F "tokens=3" %%j in ('cmdOw.exe /T ^| find "cmd" ^| find "BatchFw" ^| find /V "!step!"') do (
-            wscript /nologo !StartHidden! !killPid! !myPid! !wait!
-            set /A "killed=1"
+        cmdOw.exe /T | find "cmd" | find "BatchFw" | find "%%" > !logFileTmp!
+
+        REM : token=12 because of 2 word for phase "pre/post processing"
+        for /F "tokens=12" %%j in ('type !logFileTmp!') do (
+
+            set "pr=%%j"
+            set /A "pr=!pr:%%=!"
+
+REM if !pr! GTR !p! timeout /t !wait! > NUL 2>&1 & exit 0
+            if !pr! GTR !p! del /F !logFileTmp! > NUL 2>&1 & exit 0
+
         )
 
         for /L %%j in (1,1,!count!) do set "counting=%%j"
@@ -156,26 +161,30 @@ REM : main
     call:strLength !valuecore! length
     if !length! LSS !lm2! set "valuecore=!valuecore!Û"
     call:refreshProgressBar
+    for /L %%j in (1,1,!count!) do set "counting=%%j"
     if !length! LSS !lm2! goto:complete
-
+    
     REM : p2=100% close all instances, then exit
-    !cmdOw! @ /top
 
     :killingLoop
     REM : use () after do (wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C taskkill /F /pid %%i > NUL 2>&1 & goto:killingLoop does nothing)
-    for /F "tokens=3" %%i in ('cmdOw.exe /T ^| find "cmd" ^| find "BatchFw" ^| find /V "100" ^| sort') do (
-        wscript /nologo !StartHidden! !killPid! %%i 1 > NUL 2>&1
+    cmdOw.exe /T | find "cmd" | find "BatchFw" | find "%%" | find /V "100" > !logFileTmp!
+    for /F "tokens=3" %%i in ('type !logFileTmp!') do (
+        taskkill /F /pid %%i > NUL 2>&1
         goto:killingLoop
     )
-    timeout /T 2 > NUL 2>&1
+REM    timeout /T 2 > NUL 2>&1
     exit 0
 
     :waitNextWindow
 
     :loop
-    cmdOw.exe /T | find "cmd" | find "BatchFw" | sort | find /V "!step!" > NUL 2>&1 && (
-        timeout /T !wait! > NUL 2>&1
-        exit 0
+    cmdOw.exe /T | find "cmd" | find "BatchFw" | find "%%" > !logFileTmp!
+    for /F "tokens=12" %%j in ('type !logFileTmp!') do (
+        set "pr=%%j"
+        set /A "pr=!pr:%%=!"
+REM        if !pr! GTR !p2! timeout /t !wait! > NUL 2>&1 & exit 0
+        if !pr! GTR !p2! del /F !logFileTmp! > NUL 2>&1 & exit 0
     )
     goto:loop
 
@@ -203,7 +212,7 @@ goto:eof
     cls
     echo.!upb!
     echo. !valuecore!
-    echo.!dpb!
+    echo|set /p="!dpb!"
 goto:eof
 
 :closePrevious

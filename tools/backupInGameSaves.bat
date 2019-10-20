@@ -174,7 +174,7 @@ REM : main
 
     for /F "delims=~" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
         set "folder="!emulatorSaveFolder:"=!\%%i""
-        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFileEmuSave! !folder! > NUL 2>&1
+        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul  !rarFileEmuSave! !folder! > NUL 2>&1
     )
 
     :done
@@ -193,7 +193,6 @@ REM : main
 
 
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof

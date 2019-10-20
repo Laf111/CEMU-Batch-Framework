@@ -216,7 +216,6 @@ REM : main
     call:waitChildrenProcessesEnd
 
     if %nbArgs% EQU 0 endlocal && pause
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     exit /b 0
@@ -231,7 +230,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "fnr.exe" | find /I "_BatchFW_Graphic_Packs" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "fnr.exe" | find /I "_BatchFW_Graphic_Packs" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )

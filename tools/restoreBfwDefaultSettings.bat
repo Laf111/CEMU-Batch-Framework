@@ -101,7 +101,6 @@ REM : main
     @echo This windows will close automatically in 2s
     timeout /T 2 > NUL 2>&1
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof

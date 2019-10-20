@@ -180,7 +180,6 @@ REM : main
     )
     :exiting
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit !ERRORLEVEL!
     exit 0
 
     goto:eof

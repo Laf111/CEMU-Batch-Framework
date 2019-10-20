@@ -600,7 +600,6 @@ REM : main
     call:waitProcessesEnd
 
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof
@@ -615,7 +614,7 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Still extracting V2 GFX packs^, please wait ^.^.^.

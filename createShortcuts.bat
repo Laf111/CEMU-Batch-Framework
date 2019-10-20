@@ -401,7 +401,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1
@@ -597,7 +597,6 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call:waitProcessesEnd
 
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof
@@ -612,7 +611,7 @@ REM : functions
 
         set "disp=0"
         :waitingLoopProcesses
-        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set "disp=1"
                 @echo Still extracting V2 GFX packs^, please wait ^.^.^.

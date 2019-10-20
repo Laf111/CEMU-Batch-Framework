@@ -63,7 +63,7 @@ REM : functions
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
 
-        rem if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE! > NUL 2>&1
+        if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
 

@@ -35,21 +35,25 @@ REM : main
     set /A "duration=0"
 
     REM : monitor LaunchGame.bat until cemu is launched
+    set "logFileTmp="!BFW_PATH:"=!\Logs\monitor_process.list""
 
     :waitingLoopProcesses
-    wmic process get Commandline | find /I "LaunchGame" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+    timeout /T 1 > NUL 2>&1
+    wmic process get Commandline | find ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    type !logFileTmp! | find  /I "LaunchGame" > NUL 2>&1 && (
 
         REM : set BatchFw processes to priority to high
         wmic process where "CommandLine like '%%!GAMES_FOLDER_NAME!%%'" call setpriority 128 > NUL 2>&1
 
         REM : if wizard is running, don't count
-        wmic process where "Name like '%%cmd.exe%%' and CommandLine like '%%wizardFirstSaving.bat%%'" goto:waitingLoopProcesses
+        type !logFileTmp! | find /I "wizardFirstSaving.bat" > NUL 2>&1 && goto:waitingLoopProcesses
 
         REM : if rar is running, don't count
-        wmic process where "Name like '%%rar.exe%%' and CommandLine like '%%_BatchFw_Graphic_Packs%%'" goto:waitingLoopProcesses
+        type !logFileTmp! | find /I "rar.exe" | find /I "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:waitingLoopProcesses
         
         REM : monitor Cemu launch
-        for /F "delims=~" %%j in ('tasklist /FI "STATUS eq RUNNING" ^| find /I "cemu"') do set /A "duration=-1"
+        type !logFileTmp! | find /I "cemu.exe" > NUL 2>&1 && set /A "duration=-1"
+
         if !duration! GEQ 0 set /A "duration+=1"
         if !duration! GTR !timeOut! (
             REM : warn user with a retry/cancel msgBox
@@ -59,8 +63,7 @@ REM : main
             call !killBatchFw!
             exit 1
         )
-        timeout /T 1 > NUL 2>&1
         goto:waitingLoopProcesses
     )
-
+    call !killBatchFw!
 exit 0

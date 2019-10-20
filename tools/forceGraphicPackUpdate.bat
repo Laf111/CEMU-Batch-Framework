@@ -117,17 +117,15 @@ REM : main
         call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
 
-    @echo =========================================================
-    @echo Done
-    @echo #########################################################
-
-
     if !QUIET_MODE! EQU 0 (
+        @echo =========================================================
+        @echo Done
+        @echo #########################################################
+
         @echo This windows will close automatically in 8s
         timeout /T 8 > NUL 2>&1
     )
     if %nbArgs% EQU 0 endlocal
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     exit /b 0
 
     goto:eof

@@ -258,7 +258,6 @@ REM : main
     @echo !GAME_TITLE! dumped successfully
     pause
     
-    if !ERRORLEVEL! NEQ 0 exit !ERRORLEVEL!
     exit 0
 
     goto:eof
@@ -366,7 +365,7 @@ REM : ------------------------------------------------------------------
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
-        wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 & goto:waitingLoop
+        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 & goto:waitingLoop
         
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"

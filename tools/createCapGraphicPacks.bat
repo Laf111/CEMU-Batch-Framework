@@ -308,7 +308,6 @@ REM : main
     if %v3ExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeV3CapGP
 
     if %nbArgs% EQU 0 endlocal && pause
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 
     exit /b 0
 goto:eof

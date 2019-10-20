@@ -267,7 +267,7 @@ REM : main
     REM : wait all transfert end
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && (
+    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && (
         goto:waitingLoop
     )
 

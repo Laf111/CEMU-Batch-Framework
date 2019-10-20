@@ -442,7 +442,7 @@ REM : main
     :wait
     set "disp=0"
     :waitingLoop
-    wmic process get Commandline | find /I "_BatchFW_Install" | find /I /V "wmic" | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 0 (
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
         )
@@ -883,7 +883,7 @@ REM : functions
 
         call:getValueInXml "//Audio/TVVolume/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            @echo Audio TV Volume set to [!value! ms]
+            @echo Audio TV Volume set to [!value! %]
         )
 
         REM : online mode
