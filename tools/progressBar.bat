@@ -31,9 +31,9 @@ REM : main
         goto:continue
     :end
 
-    if %nbArgs% NEQ 6 (
+    if %nbArgs% NEQ 4 (
         @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" p1 p2 phase step wait count
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" p1 p2 phase step
         @echo given {%*}
         pause
         exit 99
@@ -69,14 +69,6 @@ REM : main
     REM : get the phase
     set "step=!args[3]!"
     set "step=!step:"=!"
-
-    REM : get the waiting time
-    set "wait=!args[4]!"
-    set /A "wait=!wait:"=!"
-
-    REM : get the counting number
-    set "count=!args[5]!"
-    set /A "count=!count:"=!"
 
     REM : get screen resolution from log
     for /F "tokens=2,3 delims=~=x" %%i in ('type !logFile! ^| find /I "RESOLUTION" 2^>NUL') do set /A "WIDTH=%%i" & set /A "HEIGHT=%%j"
@@ -126,7 +118,8 @@ REM : main
     set /A "first=!dlp1!+10"
     set /A "last=!dlp2!-10"
 
-    set "logFileTmp="!BFW_PATH:"=!\Logs\BatchFw_process_!step!.list""
+rem    set "logFileTmp="!BFW_PATH:"=!\Logs\BatchFw_process_!step!.list""
+    set "logFileTmp="!TMP:"=!\BatchFw_process_!step!.list""
     !cmdOw! @ /top > NUL 2>&1
 
     for /L %%i in (!first!,10,!last!) do (
@@ -138,20 +131,21 @@ REM : main
         if !length! LEQ !lm2! set "valuecore=!valuecore!Û"
         call:refreshProgressBar
 
-        cmdOw.exe /T | find "cmd" | find "BatchFw" | find "%%" > !logFileTmp!
+        if !p2! NEQ 100 (
+            cmdOw.exe /T | find "cmd" | find "BatchFw" | find "%%" > !logFileTmp!
 
-        REM : token=12 because of 2 word for phase "pre/post processing"
-        for /F "tokens=12" %%j in ('type !logFileTmp!') do (
+            REM : token=12 because of 2 word for phase "pre/post processing"
+            for /F "tokens=12" %%j in ('type !logFileTmp!') do (
 
-            set "pr=%%j"
-            set /A "pr=!pr:%%=!"
+                set "pr=%%j"
+                set /A "pr=!pr:%%=!"
 
-REM if !pr! GTR !p! timeout /t !wait! > NUL 2>&1 & exit 0
-            if !pr! GTR !p! del /F !logFileTmp! > NUL 2>&1 & exit 0
-
+                if !pr! GTR !p! del /F !logFileTmp! > NUL 2>&1 & exit 0
+            )
+        ) else (
+            for /L %%j in (1,1,100) do set "counting=%%j"
         )
-
-        for /L %%j in (1,1,!count!) do set "counting=%%j"
+        for /L %%j in (1,1,1000) do set "counting=%%j"
     )
     title BatchFw !phase! !p2!%% ^: !step!^.^.^.
 
@@ -161,7 +155,7 @@ REM if !pr! GTR !p! timeout /t !wait! > NUL 2>&1 & exit 0
     call:strLength !valuecore! length
     if !length! LSS !lm2! set "valuecore=!valuecore!Û"
     call:refreshProgressBar
-    for /L %%j in (1,1,!count!) do set "counting=%%j"
+    for /L %%j in (1,1,100) do set "counting=%%j"
     if !length! LSS !lm2! goto:complete
     
     REM : p2=100% close all instances, then exit
@@ -173,7 +167,6 @@ REM if !pr! GTR !p! timeout /t !wait! > NUL 2>&1 & exit 0
         taskkill /F /pid %%i > NUL 2>&1
         goto:killingLoop
     )
-REM    timeout /T 2 > NUL 2>&1
     exit 0
 
     :waitNextWindow
@@ -183,7 +176,6 @@ REM    timeout /T 2 > NUL 2>&1
     for /F "tokens=12" %%j in ('type !logFileTmp!') do (
         set "pr=%%j"
         set /A "pr=!pr:%%=!"
-REM        if !pr! GTR !p2! timeout /t !wait! > NUL 2>&1 & exit 0
         if !pr! GTR !p2! del /F !logFileTmp! > NUL 2>&1 & exit 0
     )
     goto:loop

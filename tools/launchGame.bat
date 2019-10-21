@@ -46,11 +46,10 @@ REM : main
     for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe"') do (
 
         cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^. If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 4112
-        wscript /nologo !StartHidden! !killBatchFw!
         exit 70
     )
 
-    call:setProgressBar 0 12 "pre processing" "initializing and checking"
+    call:setProgressBar 0 15 "pre processing" "initializing and checking"
 
     REM : get DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -238,7 +237,7 @@ REM : main
     set "ml="!BFW_TOOLS_PATH:"=!\monitorBatchFw.bat""
     wscript /nologo !StartHidden! !ml!
 
-    call:setProgressBar 12 32 "pre processing" "searching for a new GFX packs release"
+    call:setProgressBar 15 34 "pre processing" "searching for a new GFX packs release"
     
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
@@ -287,7 +286,7 @@ REM : main
 
     cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, close this popup to continue^." 4160
 
-    call:setProgressBar 32 36 "pre processing" "installing V2 GFX packs"
+    call:setProgressBar 34 36 "pre processing" "installing V2 GFX packs"
 
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
@@ -313,20 +312,18 @@ REM : main
     if [!titleLine!] == ["NONE"] goto:getScreenMode
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
-    REM : search game's graphic pack folder
-    set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
-    if exist !fnrLogLggp! del /F !fnrLogLggp!
-    REM : Re launching the search (to get the freshly created packs)
+    REM : link game's packs
 
-    REM : TODO only search in the needed folder
-    if ["!gfxType!"] == ["V3"] (
-        wscript /nologo !StartHidden! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find %titleId:~3% --logFile !fnrLogLggp!
-    ) else (
-        wscript /nologo !StartHidden! !fnrPath! --cl --dir !gfxv2!  --includeSubDirectories --fileMask "rules.txt" --find %titleId:~3% --logFile !fnrLogLggp!
-    )
+    @echo Loading packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+    @echo Loading packs for !GAME_TITLE! ^.^.^.
 
+    set "lgp="!BFW_TOOLS_PATH:"=!\linkGamePacks.bat""
+    wscript /nologo !StartHidden! !lgp! !titleId! !gfxType! "!GAME_TITLE!"
+    @echo !lgp! !titleId! !gfxType! "!GAME_TITLE!" >> !batchFwLog!
+
+    
     :updateGameGraphicPack
-    call:setProgressBar 36 40 "pre processing" "checking game graphic packs availability"
+    call:setProgressBar 36 38 "pre processing" "checking game graphic packs availability"
 
     REM : update Game's Graphic Packs (also done in wizard so call it here to avoid double call)
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
@@ -527,7 +524,7 @@ REM : main
         goto:loadOptions
     )
 
-    call:setProgressBar 40 46 "pre processing" "backup and provide transferable cache"
+    call:setProgressBar 38 48 "pre processing" "backup and provide transferable cache"
     
     REM : backup transferable cache in case of CEMU corrupt it
     set "transF="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!cacheFile:"=!""
@@ -537,7 +534,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL 2>&1
+    if exist !backup! copy /Y !backup! !lastValid! > NUL 2>&1
 
     wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
@@ -574,9 +571,9 @@ REM : main
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
     if !useThirdPartySoft! EQU 1 (
-        call:setProgressBar 46 48 "pre processing" "launching third party software"
+        call:setProgressBar 48 50 "pre processing" "launching third party software"
     ) else (
-        call:setProgressBar 46 48 "pre processing" "getting CEMU options saved for !currentUser!"
+        call:setProgressBar 48 50 "pre processing" "getting CEMU options saved for !currentUser!"
     )
 
     REM : launching user's software
@@ -639,7 +636,7 @@ REM : main
     exit 15
 
     :openGlCache
-    call:setProgressBar 54 56 "pre processing" "installing OpenGL cache"
+    call:setProgressBar 58 60 "pre processing" "installing OpenGL cache"
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
     set "GLCacheBackupFolder="NOT_FOUND""
@@ -758,82 +755,42 @@ REM : main
         cscript /nologo !MessageBox! "ERROR when creating !blf:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
         exit 3
     )
-    set /A "gfxCompletionFlag=0"
-    type !logFile! | find /I "COMPLETE_GP" > NUL 2>&1 && set /A "gfxCompletionFlag=1"
 
     REM : if wizard was launched,  links are already created
-    if %wizardLaunched% EQU 1 (
-        if !gfxCompletionFlag! EQU 1 (
-            call:setProgressBar
-            60 "pre processing" "installing mods packs, waiting for game GFX packs completion"
-        ) else (
-            call:setProgressBar 56 60 "pre processing" "installing mods and GFX packs"
-        )
-
-        REM : create links to mods
-        if ["!gfxType!"] == ["V3"] (
-            @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-            @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
-            REM : import mods for the game as graphic packs
-            call:importMods > NUL 2>&1
-        )
+    if !wizardLaunched! EQU 1 (
         call:waitProcessesEnd
         goto:launchCemu
     )
 
-    call:setProgressBar 60 63 "pre processing" "searching for GFX and mods packs"
+    REM : check that at least one GFX pack was listed
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:waitChildProcesses
 
-    REM : clean links in game's graphic pack folder
-    for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
-        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        rmdir /Q /S !gpLink! > NUL 2>&1
-    )
+    REM : stop execution something wrong happens
+    REM : warn user
+    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
 
-    REM : create links to mods
-    if ["!gfxType!"] == ["V3"] (
-        @echo Searching and load mods found for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-        @echo Searching and load mods found for !GAME_TITLE! ^.^.^.
-        REM : import mods for the game as graphic packs
-        call:importMods > NUL 2>&1
-    )
+    REM : delete lock file in CEMU_FOLDER
+    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
+    del /F !blf! > NUL > 2>&1
 
-    if !gfxCompletionFlag! EQU 1 (
-        call:setProgressBar 63 92 "pre processing" "waiting for game GFX packs update/completion"
-    ) else (
-        call:setProgressBar 63 92 "pre processing" "waiting for game GFX packs gathering"
-    )
+    REM : kill all running process
+    wscript /nologo !StartHidden! !killBatchFw!
+
+
+    :waitChildProcesses
+    call:setProgressBar 60 94 "pre processing" "waiting all child processes end"
     
     REM : waiting all pre requisities are ready
     call:waitProcessesEnd
     if not ["!versionRead!"] == ["NOT_FOUND"] (
-        call:setProgressBar 92 98 "pre processing" "providing GFX and mods packs to Cemu !versionRead!"
+        call:setProgressBar 94 98 "pre processing" "providing GFX and mods packs to Cemu !versionRead!"
     ) else (
-        call:setProgressBar 92 98 "pre processing" "providing GFX and mods packs to !CEMU_FOLDER_NAME!"
+        call:setProgressBar 94 98 "pre processing" "providing GFX and mods packs to !CEMU_FOLDER_NAME!"
     )
 
-    @echo Loading graphic packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-    @echo Loading graphic packs for !GAME_TITLE! ^.^.^.
-    REM : link all missing graphic packs
-    REM : always import 16/9 graphic packs
+    @echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+    @echo Linking packs for !GAME_TITLE! ^.^.^.
 
-    call:importGraphicPacks > NUL 2>&1
-
-    if ["!gfxType!"] == ["V3"] goto:patchGfx
-
-    REM : get user defined ratios list
-    set "ARLIST="
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
-    if ["!ARLIST!"] == [""] goto:patchGfx
-
-    REM : import user defined ratios graphic packs
-    for %%a in (!ARLIST!) do (
-        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610 > NUL 2>&1
-        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219 > NUL 2>&1
-        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL 2>&1
-        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL 2>&1
-    )
-
-    :patchGfx
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
     REM : when using a simlink with a the target on another partition
@@ -897,7 +854,7 @@ REM : main
     REM : remove lock file
     del /F /S !blf! > NUL 2>&1
 
-    call:setProgressBar 0 10 "post processing" "analysing Cemu return code"
+    call:setProgressBar 0 20 "post processing" "analysing Cemu return code"
 
     REM : analyse CEMU's return code
     :analyseCemuStatus
@@ -929,7 +886,8 @@ REM : main
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu%
     )
 
-    call:setProgressBar 10 20 "post processing" "backup and remove !currentUser! save"
+    if %cr_cemu% NEQ 0 goto:hangleGlCache
+    call:setProgressBar 20 40 "post processing" "backup and remove !currentUser! save"
     
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
@@ -938,7 +896,7 @@ REM : main
 
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
-
+    :hangleGlCache
     REM : search in logFile, getting only the last occurence
     set "OPENGL_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
@@ -972,7 +930,11 @@ REM : main
 
     :searchCacheFolder
 
-    call:setProgressBar 20 30 "post processing" "backup openGL cache"
+    if %cr_cemu% NEQ 0 (
+        call:setProgressBar 40 60 "post processing" "backup openGL cache"
+    ) else (
+        call:setProgressBar 20 60 "post processing" "backup openGL cache"
+    )
     
     REM : backup of GLCache, get the last modified folder under GLCache
     pushd !OPENGL_CACHE_PATH!
@@ -1081,7 +1043,8 @@ REM : main
 
     call:createLogShorcut
 
-    call:setProgressBar 30 45 "post processing" "analyse and move back transferable cache"
+    if %cr_cemu% NEQ 0 goto:filReports
+    call:setProgressBar 60 75 "post processing" "analyse and move back transferable cache"
 
     REM : analyse CEMU's log
     if not exist !cemuLog! goto:titleIdChecked
@@ -1117,8 +1080,13 @@ REM : main
     set "FPS=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "native FPS" 2^>NUL') do set "FPS=%%i"
 
-    call:setProgressBar 45 55 "post processing" "fil in compatibility reports"
-
+    :filReports
+    if %cr_cemu% NEQ 0 (
+        call:setProgressBar 60 85 "post processing" "fil in compatibility reports"
+    ) else (
+        call:setProgressBar 75 85 "post processing" "fil in compatibility reports"
+    )
+    
     REM : report compatibility for CEMU_FOLDER_NAME and GAME on USERDOMAIN
     set "rc="!BFW_TOOLS_PATH:"=!\reportCompatibility.bat""
 
@@ -1128,6 +1096,7 @@ REM : main
 
     @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
     @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS!
+
     REM : check that CEMU recognize the game
     set "UNKNOW_GAME=00050000ffffffff"
     set "cemuTitleLine="NONE""
@@ -1137,7 +1106,7 @@ REM : main
         goto:firstOcTitle
     )
     :firstOcTitle
-    call:setProgressBar 55 62 "post processing" "analysing Cemu titleId"
+    call:setProgressBar 85 92 "post processing" "analysing Cemu titleId"
 
     if not [!cemuTitleLine!] == ["NONE"] goto:cemuTitleIdExist
 
@@ -1230,6 +1199,8 @@ REM : main
         wscript /nologo !StartHidden! !stopThirdPartySoftware!
     )
 
+    if %cr_cemu% NEQ 0 goto:endMain
+
     @echo compress game's saves
     set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
@@ -1244,11 +1215,12 @@ REM : main
         @echo GAME_CONFIGURATION after launching !CEMU_FOLDER_NAME! ^: >> !tscl!
         if exist !gameInfoFile! type !gameInfoFile! >> !tscl!
     )
-    call:setProgressBar 62 80 "post processing" "saving settings for !currentUser!"
+    call:setProgressBar 92 96 "post processing" "saving settings for !currentUser!"
 
     call:saveCemuOptions
 
     :endMain
+
 
     REM : copy otp.bin and seeprom.bin if needed
     set "t1="!CEMU_FOLDER:"=!\otp.bin""
@@ -1308,13 +1280,16 @@ REM : main
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
-    call:setProgressBar 80 100 "post processing" "waiting the end of all child processes"
-
     @echo =========================================================>> !batchFwLog!
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
     @echo =========================================================
     @echo Waiting the end of all child processes before ending ^.^.^.
 
+    if %cr_cemu% NEQ 0 (
+        call:setProgressBar 92 100 "post processing" "waiting the end of all child processes"
+    ) else (
+        call:setProgressBar 96 100 "post processing" "waiting the end of all child processes"
+    )    
     exit !ERRORLEVEL!
 
     goto:eof
@@ -1330,18 +1305,14 @@ REM : functions
         set "phase="%~3""
         set "step="%~4""
 
-        set /A "wait=0"
-        set /A "count=10"
-
-        if [!phase!] == ["post processing"] (
-            set /A "wait=0"
-            set /A "count=10"
-        )
-
         if !p2! NEQ 100 (
-            wscript /nologo !StartHidden! !progressBar! !p1! !p2! !phase! !step! !wait! !count!
+            wscript /nologo !StartHidden! !progressBar! !p1! !p2! !phase! !step!
         ) else (
-            wscript /nologo !StartHiddenWait! !progressBar! !p1! 100 !phase! !step! !wait! !count!
+            if [!phase!] == ["pre processing"] (
+                wscript /nologo !StartHiddenWait! !progressBar! !p1! 100 !phase! !step!
+            ) else (
+                wscript /nologo !StartHidden! !progressBar! !p1! 100 !phase! !step!
+            )
         )
 
         goto:eof
@@ -1390,18 +1361,18 @@ REM : functions
     :waitProcessesEnd
 
         REM : TODO remove trace
-        set "logFileTmp="!BFW_PATH:"=!\logs\process.beforeWaiting""
-        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+rem        set "logFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
+rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
         set "disp=0"
-        set "logFileTmp="!BFW_PATH:"=!\logs\process.list""
+        set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
         :waitingLoopProcesses
         timeout /T 1 > NUL 2>&1
 
         wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
-        type !logFileTmp!  | find /I "robocopy" > NUL 2>&1 && (
+        type !logFileTmp! | find /I "robocopy" > NUL 2>&1 && (
 echo waitProcessesEnd : robocopy still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
@@ -1417,6 +1388,11 @@ echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
 echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
+        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "linkGamePacks.bat" > NUL 2>&1 && (
+echo waitProcessesEnd : linkGamePacks still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
+
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
             echo Found updateGamesGraphicPacks still running >> !batchFwLog!
             if !disp! EQU 0 (
@@ -1429,97 +1405,9 @@ echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
 
-        REM : TODO remove trace
-        REM set "logFileTmp="!BFW_PATH:"=!\logs\process.afterWaiting""
-        REM wmic process get Commandline > !logFileTmp!
+        REM : remove trace
+        del /F !logFileTmp! > NUL 2>&1
 
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :importMods
-        REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods
-        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\mods""
-        if not exist !pat! mkdir !pat! > NUL 2>&1
-        for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do (
-            set "modName="%%a""
-            set "mod="!GAME_FOLDER_PATH:"=!\Cemu\mods\!modName:"=!""
-            set "tName="MOD_!modName:"=!""
-
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
-
-            REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
-            mklink /J /D !linkPath! !mod! > NUL 2>&1
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :importOtherGraphicPacks
-
-        set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do (
-
-            set "str=%%i"
-            set "str=!str:~1!"
-
-            set "gp=!str:\rules=!"
-
-            set "tName=!gp:_graphicPacksV2=!"
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
-
-            REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
-            set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :importGraphicPacks
-
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do (
-
-            set "str=%%i"
-            set "str=!str:~1!"
-
-            set "gp=!str:\rules=!"
-
-            @echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
-                REM : V3 graphic pack with more than one folder's level
-                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
-
-                for %%a in (!fp!) do set "parentFolder="%%~dpa""
-                set "pfp=!parentFolder:~0,-2!""
-
-                for /F "delims=~" %%i in (!pfp!) do set "gp=%%~nxi"
-            )
-
-            set "tName=!gp:_graphicPacksV2=!"
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
-
-            set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-
-        )
-        :checkLinks
-        REM : check that at least one GFX pack was listed
-        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
-
-        REM : stop execution something wrong happens
-        REM : warn user
-        cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
-
-        REM : delete lock file in CEMU_FOLDER
-        del /F !blf! > NUL > 2>&1
-
-        REM : kill all running process
-        wscript /nologo !StartHidden! !killBatchFw!
-
-        exit 80
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1647,7 +1535,7 @@ echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             for /F "delims=~" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
         )
 
-        call:setProgressBar 48 50 "pre processing" "installing settings, saves for !currentUser!"
+        call:setProgressBar 50 52 "pre processing" "installing settings, saves for !currentUser!"
 
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
@@ -1847,9 +1735,9 @@ echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
         If not exist !BFW_ONLINE_ACC! (
-            call:setProgressBar 50 54 "pre processing" "updating games stats"
+            call:setProgressBar 52 58 "pre processing" "updating games stats"
         ) else (
-            call:setProgressBar 50 54 "pre processing" "updating games stats, installing online files"
+            call:setProgressBar 52 58 "pre processing" "updating games stats, installing online files"
         )
         if ["!versionRead!"] == ["NOT_FOUND"] goto:cemuHookSettings
 

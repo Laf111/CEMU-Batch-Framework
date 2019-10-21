@@ -21,7 +21,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
-    REM : basename of GAME FOLDER PATH (used to name shorcut)
+    REM : basename of GAME FOLDER PATH
     for /F "delims=~" %%i in (!GAMES_FOLDER!) do set "GAMES_FOLDER_NAME=%%~nxi"
 
     @echo ---------------------------------------------------------

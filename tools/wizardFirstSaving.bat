@@ -33,7 +33,10 @@ REM : main
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
 
+    !cmdOw! @ /top > NUL 2>&1
+    
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
@@ -296,6 +299,11 @@ REM : main
         )
     )
 
+    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
+    set "lgp="!BFW_TOOLS_PATH:"=!\linkGamePacks.bat""
+    wscript /nologo !StartHidden! !lgp! !titleId! !gfxType! "!GAME_TITLE!"
+    
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
@@ -441,62 +449,39 @@ REM : main
     REM : waiting updateGamesGraphicPacks processes ending
     :wait
     set "disp=0"
+    set "logFileTmp="!TMP:"=!\BatchFw_process.list""
+
     :waitingLoop
-    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+    timeout /T 1 > NUL 2>&1
+    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
+
+    type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 0 (
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
         )
-        timeout /T 1 > NUL 2>&1
         goto:waitingLoop
     )
+    type !logFileTmp! | find /I "_BatchFW_Install" | find /I "linkGamePacks.bat" > NUL 2>&1 && goto:waitingLoop
 
-    REM : create links in game's graphic pack folder
-    set "fnrLogWgp="!BFW_PATH:"=!\logs\fnr_wizardGraphicPacks.log""
-    if exist !fnrLogWgp! del /F !fnrLogWgp!
-    REM : BatchFW graphic pack folder
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    REM : remove trace
+    del /F !logFileTmp! > NUL 2>&1
 
-    REM : Re launching the search (to get the freshly created packs)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogWgp!
+    REM : check that at least one GFX pack was listed
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:syncCP
 
-    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
-    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
+    REM : stop execution something wrong happens
+    REM : warn user
+    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
 
-    REM : clean links in game's graphic pack folder
-    for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
-        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
-        if exist !gpLink! rmdir /Q /S !gpLink! > NUL 2>&1
-    )
+    REM : delete lock file in CEMU_FOLDER
+    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
+    del /F !blf! > NUL > 2>&1
 
-    REM : always import 16/9 graphic packs
-    call:importGraphicPacks
+    REM : kill all running process
+    wscript /nologo !StartHidden! !killBatchFw!
+    exit 80
 
-    if ["!gfxType!"] == ["V3"] goto:checkHeightFix
-
-    REM : get user defined ratios list
-    set "ARLIST="
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
-    if ["!ARLIST!"] == [""] goto:checkHeightFix
-
-    REM : import user defined ratios graphic packs
-    for %%a in (!ARLIST!) do (
-        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610 > NUL 2>&1
-        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219 > NUL 2>&1
-        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43 > NUL 2>&1
-        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489 > NUL 2>&1
-    )
-
-    :checkHeightFix
-    if not ["!tName!"] == ["NOT_FOUND"] (
-
-        set "gpV3="!BFW_GP_FOLDER:"=!\!tName:"=!_Resolution"
-        set "rulesFile="!gpV3:"=!\rules.txt""
-        if exist !rulesFile! type !rulesFile! | find /I "heightfix" > NUL 2>&1 && (
-            @echo Graphic pack for this game use a height fix to avoid black borders
-            @echo By default^, BatchFw complete presets with ^$heightfix=0
-            @echo Switch this value to 1 if you encounter black border for the preset choosen
-        )
-    )
+    :syncCP
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
 
@@ -1234,6 +1219,27 @@ REM : functions
         set "%2=!str!"
 
     goto:eof
+
+    REM : ------------------------------------------------------------------
+
+    :checkLinks
+        REM : check that at least one GFX pack was listed
+        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
+
+        REM : stop execution something wrong happens
+        REM : warn user
+        cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
+
+        REM : delete lock file in CEMU_FOLDER
+        set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
+        del /F !blf! > NUL > 2>&1
+
+        REM : kill all running process
+        wscript /nologo !StartHidden! !killBatchFw!
+
+        exit 80
+    goto:eof
+    REM : ------------------------------------------------------------------
         
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos

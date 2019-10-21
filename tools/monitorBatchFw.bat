@@ -35,7 +35,7 @@ REM : main
     set /A "duration=0"
 
     REM : monitor LaunchGame.bat until cemu is launched
-    set "logFileTmp="!BFW_PATH:"=!\Logs\monitor_process.list""
+    set "logFileTmp="!TMP:"=!\BatchFw_monitor_process.list""
 
     :waitingLoopProcesses
     timeout /T 1 > NUL 2>&1

@@ -25,6 +25,8 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
