@@ -122,6 +122,7 @@ REM : main
         @echo.
         @echo Please^, launch the game at least one time and
         @echo relaunch this script^.
+        exit 50
     )
 
     for /F "tokens=2 delims=~=" %%i in ('type !infoFile! ^| find /I "ShaderCache Id" 2^>NUL') do set "sci=%%i"

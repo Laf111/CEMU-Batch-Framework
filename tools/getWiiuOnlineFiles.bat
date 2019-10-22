@@ -254,7 +254,7 @@ REM : main
     set "BFW_MLC01_ONLINE_FOLDER="!BFW_ONLINE_FOLDER:"=!\mlc01""
     set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
 
-    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !mlc01OnlineFiles! !BFW_MLC01_ONLINE_FOLDER!
+    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul -inul -w"!BFW_PATH:"=!\logs" !mlc01OnlineFiles! !BFW_MLC01_ONLINE_FOLDER!
 
     @echo.
     @echo ---------------------------------------------------------

@@ -399,7 +399,7 @@ REM : main
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1
@@ -1510,7 +1510,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         @echo @echo off> !BATCH_FILE!
         @echo powershell ^(new-object -COM ^'shell.Application^'^)^.minimizeall^(^)>> !BATCH_FILE!
         @echo setlocal EnableExtensions>> !BATCH_FILE!
-        @echo chcp %CHARSET% ^> NUL 2>&1>> !BATCH_FILE!
+        @echo chcp %CHARSET%>> !BATCH_FILE!
         @echo pushd !TOOLS_PATH!>> !BATCH_FILE!
         @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
         @echo exit %%ERRORLEVEL%%>> !BATCH_FILE!

@@ -241,7 +241,7 @@ REM : main
     
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
-    wscript /nologo !StartHiddenWait! !script! -silent
+    wscript /nologo !StartHidden! !script! -warn
 
     REM : GFX type to provide
     set "gfxType=V3"
@@ -288,7 +288,7 @@ REM : main
 
     call:setProgressBar 34 36 "pre processing" "installing V2 GFX packs"
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
@@ -536,7 +536,7 @@ REM : main
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
     if exist !backup! copy /Y !backup! !lastValid! > NUL 2>&1
 
-    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
+    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul -inul -w"!BFW_PATH:"=!\logs" !backup! !transF!
 
     REM : get backup files sizes
     if exist !backup! (
@@ -785,7 +785,7 @@ REM : main
 
     REM : kill all running process
     wscript /nologo !StartHidden! !killBatchFw!
-    
+
     :providePacks
     @echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Linking packs for !GAME_TITLE! ^.^.^.
@@ -1387,6 +1387,10 @@ echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
 echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
+        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
+echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "linkGamePacks.bat" > NUL 2>&1 && (
 echo waitProcessesEnd : linkGamePacks still running >> !batchFwLog!
             goto:waitingLoopProcesses
@@ -1437,7 +1441,7 @@ echo waitProcessesEnd : linkGamePacks still running >> !batchFwLog!
             set "parentFolder=!parentFolder:~0,-2!""
             if exist !target! rmdir /Q /S !target! > NUL 2>&1
 
-            REM : use move command (much type faster)
+            REM : use move command (much more faster)
             move /Y !source! !parentFolder! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! EQU 1 (
@@ -1590,7 +1594,7 @@ echo waitProcessesEnd : linkGamePacks still running >> !batchFwLog!
         pushd !BFW_TOOLS_PATH!
         @echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
         @echo Loading saves for !currentUser!^.^.^.
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul !rarFile! !EXTRACT_PATH!
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !EXTRACT_PATH!
 
         :savesLoaded
         if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
@@ -2113,7 +2117,7 @@ echo waitProcessesEnd : linkGamePacks still running >> !batchFwLog!
 
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""

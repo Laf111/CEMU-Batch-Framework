@@ -60,10 +60,12 @@ REM : main
         goto:continue
     :end
 
-    REM : silent mode
+    REM : execution modes
+    set /A "WARN_MODE=0"
     set /A "QUIET_MODE=0"
     set /A "FORCED_MODE=0"
     if !nbArgs! NEQ 0 (
+        if [!args[0]!] == ["-warn"] set /A "WARN_MODE=1" & set /A "QUIET_MODE=1"
         if [!args[0]!] == ["-silent"] set /A "QUIET_MODE=1"
         if [!args[0]!] == ["-forced"] set /A "FORCED_MODE=1"
     )
@@ -126,9 +128,14 @@ REM : main
     goto:updateGP
 
     :msgBox
-    cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
-    if !ERRORLEVEL! EQU 2 exit /b 0
 
+    if !WARN_MODE! EQU 1 (
+        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!" 4160
+        exit /b 0
+    ) else (
+        cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
+        if !ERRORLEVEL! EQU 2 exit /b 0
+    )
     :updateGP
 
     REM : launch graphic pack update

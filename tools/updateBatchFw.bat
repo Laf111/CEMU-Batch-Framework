@@ -92,6 +92,12 @@ REM : main
         @echo Failed to get the last BatchFw version available
         exit /b 12
     )
+    REM : ignore RC versions
+    echo !bfwVR! | find "RC" > NUL 2>&1 && (
+        @echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
+        @echo if you want to update manually^.
+        exit /b 14
+    )
     call:compareVersions %bfwVR% %BFW_VERSION% result > NUL 2>&1
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
