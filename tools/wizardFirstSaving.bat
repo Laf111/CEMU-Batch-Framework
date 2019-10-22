@@ -310,7 +310,7 @@ REM : main
     REM : clean links in game's graphic pack folder
     for /F "delims=~" %%a in ('dir /A:L /B !BFW_LOGS! 2^>NUL') do (
         set "link="!BFW_LOGS:"=!\%%a""
-        rmdir /Q /S !link! > NUL 2>&1
+        rmdir /Q !link! > NUL 2>&1
     )
 
     if not exist !cs! goto:displayGameProfile
@@ -475,7 +475,7 @@ REM : main
 
     REM : delete lock file in CEMU_FOLDER
     set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
-    del /F !blf! > NUL > 2>&1
+    del /F !blf! > NUL 2>&1
 
     REM : kill all running process
     wscript /nologo !StartHidden! !killBatchFw!
@@ -1232,7 +1232,7 @@ REM : functions
 
         REM : delete lock file in CEMU_FOLDER
         set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
-        del /F !blf! > NUL > 2>&1
+        del /F !blf! > NUL 2>&1
 
         REM : kill all running process
         wscript /nologo !StartHidden! !killBatchFw!

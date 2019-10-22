@@ -762,22 +762,6 @@ REM : main
         goto:launchCemu
     )
 
-    REM : check that at least one GFX pack was listed
-    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:waitChildProcesses
-
-    REM : stop execution something wrong happens
-    REM : warn user
-    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
-
-    REM : delete lock file in CEMU_FOLDER
-    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
-    del /F !blf! > NUL > 2>&1
-
-    REM : kill all running process
-    wscript /nologo !StartHidden! !killBatchFw!
-
-
-    :waitChildProcesses
     call:setProgressBar 60 94 "pre processing" "waiting all child processes end"
     
     REM : waiting all pre requisities are ready
@@ -788,6 +772,21 @@ REM : main
         call:setProgressBar 94 98 "pre processing" "providing GFX and mods packs to !CEMU_FOLDER_NAME!"
     )
 
+    REM : check that at least one GFX pack was listed
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:providePacks
+
+    REM : stop execution something wrong happens
+    REM : warn user
+    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
+
+    REM : delete lock file in CEMU_FOLDER
+    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
+    del /F !blf! > NUL 2>&1
+
+    REM : kill all running process
+    wscript /nologo !StartHidden! !killBatchFw!
+    
+    :providePacks
     @echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
     @echo Linking packs for !GAME_TITLE! ^.^.^.
 

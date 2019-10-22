@@ -21,7 +21,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
+    set "myLog="!BFW_PATH:"=!\logs\linkGamePacks.log""
     
     REM : checking arguments
     set /A "nbArgs=0"
