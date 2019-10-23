@@ -88,7 +88,7 @@ REM : main
     REM : install content
     set "sdCardContent="!BFW_RESOURCES_PATH:"=!\WiiuSDcard.rar""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !sdCardContent! !SDCARD! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !sdCardContent! !SDCARD! > NUL 2>&1
     @echo done
     @echo =========================================================
 

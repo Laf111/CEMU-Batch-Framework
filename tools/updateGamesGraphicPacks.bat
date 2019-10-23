@@ -29,10 +29,13 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+
+    set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
 
     REM : optional second arg
     set "GAME_FOLDER_PATH="NONE""
@@ -40,6 +43,7 @@ REM : main
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
+    set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
@@ -70,12 +74,11 @@ REM : main
 
     @echo ========================================================= > !myLog!
 
-    if %nbArgs% NEQ 2 (
+    if %nbArgs% NEQ 4 (
         @echo ERROR ^: on arguments passed ^!  >> !myLog!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CREATE_LEGACY GAME_FOLDER_PATH  >> !myLog!
-
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CREATE_LEGACY GAME_FOLDER_PATH
-
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile >> !myLog!
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile
+        @echo given {%*} >> !myLog!
         @echo given {%*}
 
         exit /b 99
@@ -95,8 +98,8 @@ REM : main
     REM : check if GFX pack folder was treated to be DOS compliant
     call:checkGpFolders
 
-    set "createLegacyPacks=!args[0]!"
-    set "createLegacyPacks=%createLegacyPacks:"=%"
+    set "gfxType=!args[0]!"
+    set "gfxType=%gfxType:"=%"
 
     REM : get and check BFW_GP_FOLDER
     set "GAME_FOLDER_PATH=!args[1]!"
@@ -106,6 +109,10 @@ REM : main
 
         exit /b 2
     )
+    set "titleId=!args[2]!"
+    set "titleId=%titleId:"=%"
+
+    set "lockFile=!args[3]!"
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
@@ -165,10 +172,60 @@ REM : main
     )
 
     @echo Waiting the end of all child processes before ending ^.^.^. >> !myLog!
-    if %nbArgs% EQU 0 endlocal && pause && exit 0
-    if %ERRORLEVEL% NEQ 0 exit %ERRORLEVEL%
+    @echo Waiting the end of all child processes before ending ^.^.^.
+
+    :linkPacks
+
+    REM : BatchFW folders
+    set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+
+    REM : clean links in game's graphic pack folder
+    for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
+        set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
+        rmdir /Q !gpLink! > NUL 2>&1
+    )
+
+    REM : import GFX packs
+    call:importGraphicPacks
+
+    if ["!gfxType!"] == ["V3"] (
+        call:importMods
+        goto:checkPackLinks
+    )
+
+    REM : get user defined ratios list
+    set "ARLIST="
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
+    if ["!ARLIST!"] == [""] goto:checkPackLinks
+
+    REM : import user defined ratios graphic packs
+    for %%a in (!ARLIST!) do (
+        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610
+        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219
+        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43
+        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489
+    )
+
+    :checkPackLinks
+
+    REM : check that at least one GFX pack was listed
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
+
+    REM : stop execution something wrong happens
+    REM : warn user
+    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
+
+    REM : delete lock file in CEMU_FOLDER
+    if exist !lockFile! del /F !lockFile! > NUL 2>&1
+
+    REM : kill all running process
+    wscript /nologo !StartHidden! !killBatchFw!
+    exit 80
+
+    :endMain
 
     exit 0
+
     goto:eof
 
     REM : ------------------------------------------------------------------
@@ -176,6 +233,88 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :importMods
+        REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods
+        set "pat="!GAME_FOLDER_PATH:"=!\Cemu\mods""
+        if not exist !pat! mkdir !pat! > NUL 2>&1
+        for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do (
+            set "modName="%%a""
+            set "mod="!GAME_FOLDER_PATH:"=!\Cemu\mods\!modName:"=!""
+            set "tName="MOD_!modName:"=!""
+
+            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
+
+            REM : if link exist , delete it
+            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
+            mklink /J /D !linkPath! !mod!
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFirstFolder
+
+        set "firstFolder=!gp!"
+        :getFirstLevel
+        echo !firstFolder! | find "\" > NUL 2>&1 && (
+
+            set "tfp="!BFW_GP_FOLDER:"=!\!firstFolder:"=!""
+            for %%a in (!tfp!) do set "parentFolder="%%~dpa""
+            set "tfp=!parentFolder:~0,-2!""
+
+            for /F "delims=~" %%i in (!tfp!) do set "firstFolder=%%~nxi"
+
+            goto:getFirstLevel
+        )
+        set "rgp=!firstFolder!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :createGpLinks
+        set "str="%~1""
+        set "str=!str:~2!"
+
+        set "gp="!str:\rules=!"
+
+
+        REM : if more than one folder level exist (V3 packs, get only the first level
+        call:getFirstFolder rgp
+
+
+        set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
+        set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
+        if ["!gfxType!"] == ["V2"] set "targetPath="!BFW_GP_FOLDER:"=!\_graphicPacksV2\!gp:"=!""
+
+        if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :importOtherGraphicPacks
+
+        set "filter=%~1"
+
+        if ["!gfxType!"] == ["V2"] (
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I "_graphicPacksV2" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        ) else (
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "_graphicPacksV2" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :importGraphicPacks
+
+        if ["!gfxType!"] == ["V2"] (
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I "_graphicPacksV2" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        ) else (
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "_graphicPacksV2" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :checkGpFolders
 
@@ -225,20 +364,7 @@ REM : functions
         set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
         if not exist !ggp! mkdir !ggp! > NUL 2>&1
 
-        REM : Get Game information using titleId
-        set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
-        REM : get Title Id from meta.xml
-        set "titleLine="NONE""
-        for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        if [!titleLine!] == ["NONE"] (
-            cscript /nologo !MessageBox! "ERROR ^: unable to find titleId from meta^.xml^, please check ^! exiting^.^.^." 4112
-            goto:eof
-        )
-        for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-
-        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-
-        REM : get information on game using WiiU Library File
+        REM : get game's data for wii-u database file
         set "libFileLine="NONE""
         for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
@@ -282,7 +408,6 @@ REM : functions
         REM : check if V3 graphic pack is present for this game (if the game is not supported
         REM : in Slashiee repo, it was deleted last graphic pack's update) => re-create game's graphic packs
 
-        set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
         if exist !fnrLogUggp! del /F !fnrLogUggp!
 
         REM : launching the search

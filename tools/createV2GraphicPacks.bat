@@ -114,7 +114,6 @@ REM : main
     type !utf8v2! > !rulesFileV2!
     del /F !utf8v2! > NUL 2>&1
 
-    if %ERRORLEVEL% NEQ 0 exit %ERRORLEVEL%
     exit 0
     goto:eof
 

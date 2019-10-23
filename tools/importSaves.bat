@@ -338,7 +338,7 @@ REM : functions
         @echo.
 
         pushd !inGameSavesFolder!
-        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !saveFolder!
+        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -w"!BFW_PATH:"=!logs" !rarFile! !saveFolder!
         pushd !GAMES_FOLDER!
         set /A NB_SAVES_TREATED+=1
 

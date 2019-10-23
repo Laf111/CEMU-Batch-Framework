@@ -401,7 +401,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     @echo ---------------------------------------------------------
     @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs"  !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs"  !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1

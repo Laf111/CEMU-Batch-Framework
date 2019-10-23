@@ -33,9 +33,6 @@ REM : main
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
-    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
-
-    !cmdOw! @ /top > NUL 2>&1
     
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -174,22 +171,11 @@ REM : main
         @echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
         @echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
 
-        REM : update Game's Graphic Packs (wasn't launched in LaunchGame.bat in this case)
-        set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-        wscript /nologo !StartHidden! !ugp! true !GAME_FOLDER_PATH!
-
         @echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
         @echo and if 60FPS is the FPS when playing the game
         @echo Edit and fix !wiiTitlesDataBase! if needed
         @echo ---------------------------------------------------------
         pause
-
-        REM : search game's graphic pack folder
-        set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_launchGameGraphicPacks.log""
-        if exist !fnrLogLggp! del /F !fnrLogLggp!
-        REM : Re launching the search (to get the freshly created packs)
-        wscript /nologo !StartHidden! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!
-
     )
 
     REM : _BatchFW_Missing_Games_Profiles folder to store missing games profiles in CEMU_FOLDER\GamesProfiles
@@ -301,18 +287,10 @@ REM : main
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
-    set "lgp="!BFW_TOOLS_PATH:"=!\linkGamePacks.bat""
-    wscript /nologo !StartHidden! !lgp! !titleId! !gfxType! "!GAME_TITLE!"
     
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
-    REM : clean links in game's graphic pack folder
-    for /F "delims=~" %%a in ('dir /A:L /B !BFW_LOGS! 2^>NUL') do (
-        set "link="!BFW_LOGS:"=!\%%a""
-        rmdir /Q !link! > NUL 2>&1
-    )
-
     if not exist !cs! goto:displayGameProfile
 
     REM : check the file size
@@ -461,27 +439,10 @@ REM : main
         )
         goto:waitingLoop
     )
-    type !logFileTmp! | find /I "_BatchFW_Install" | find /I "linkGamePacks.bat" > NUL 2>&1 && goto:waitingLoop
 
     REM : remove trace
     del /F !logFileTmp! > NUL 2>&1
 
-    REM : check that at least one GFX pack was listed
-    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:syncCP
-
-    REM : stop execution something wrong happens
-    REM : warn user
-    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
-
-    REM : delete lock file in CEMU_FOLDER
-    set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
-    del /F !blf! > NUL 2>&1
-
-    REM : kill all running process
-    wscript /nologo !StartHidden! !killBatchFw!
-    exit 80
-
-    :syncCP
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
 
@@ -527,7 +488,6 @@ REM : main
         move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     )
 
-    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
 
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
@@ -705,7 +665,7 @@ REM : functions
         )
 
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
@@ -904,89 +864,6 @@ REM : functions
             cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
         )
 
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    :importOtherGraphicPacks
-
-        set "filter=%~1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do (
-
-            set "str=%%i"
-            set "str=!str:~1!"
-
-            set "gp=!str:\rules=!"
-
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
-                REM : V3 graphic pack with more than one folder's level
-                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
-
-                for %%a in (!fp!) do set "parentFolder="%%~dpa""
-                set "pfp=!parentFolder:~0,-2!""
-
-                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
-            )
-
-            set "tName=!gp:_graphicPacksV2=!"
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
-
-            REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
-            set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :importGraphicPacks
-
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogWgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do (
-
-            set "str=%%i"
-            set "str=!str:~1!"
-
-            set "gp=!str:\rules=!"
-
-            echo !gp! | find "\" | find /V "_graphicPacksV2" > NUL 2>&1 && (
-                REM : V3 graphic pack with more than one folder's level
-                set "fp="!BFW_GP_FOLDER:"=!\!gp:"=!""
-
-                for %%a in (!fp!) do set "parentFolder="%%~dpa""
-                set "pfp=!parentFolder:~0,-2!""
-
-                for /F "delims=" %%i in (!pfp!) do set "gp=%%~nxi"
-            )
-
-            set "tName=!gp:_graphicPacksV2=!"
-            set "linkPath="!GAME_GP_FOLDER:"=!\!tName:"=!""
-
-            REM : if link exist , delete it
-            if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
-            set "targetPath="!BFW_GP_FOLDER:"=!\!gp:_graphicPacksV2=_graphicPacksV2\!""
-
-            if not ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V2"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-            if ["!tName!"] == ["!gp!"] if ["!gfxType!"] == ["V3"] mklink /J /D !linkPath! !targetPath! > NUL 2>&1
-
-        )
-        set /A "alreadyChecked=0"
-        :checkLinks
-        REM : check that at least one GFX pack was listed
-        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
-        if !alreadyChecked! EQU 0 set /A "alreadyChecked=1" & timeout /T 1 > NUL 2>&1 & goto:checkLinks
-
-        REM : stop execution something wrong happens
-        REM : warn user
-        @echo ERROR ^: No GFX packs were found ^!^, check what happened
-        @echo ERROR ^: cancelling and killing process
-        pause
-        REM : kill all running process
-        set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
-        wscript /nologo !StartHidden! !killBatchFw!
-
-        exit 80
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1222,25 +1099,6 @@ REM : functions
 
     REM : ------------------------------------------------------------------
 
-    :checkLinks
-        REM : check that at least one GFX pack was listed
-        dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:eof
-
-        REM : stop execution something wrong happens
-        REM : warn user
-        cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
-
-        REM : delete lock file in CEMU_FOLDER
-        set "blf="!CEMU_FOLDER:"=!\BatchFw_!currentUser!-!USERNAME!.lock""
-        del /F !blf! > NUL 2>&1
-
-        REM : kill all running process
-        wscript /nologo !StartHidden! !killBatchFw!
-
-        exit 80
-    goto:eof
-    REM : ------------------------------------------------------------------
-        
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
 

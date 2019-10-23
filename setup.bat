@@ -425,7 +425,7 @@ REM : main
     REM : extract embeded V3 packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
@@ -1091,7 +1091,7 @@ REM : functions
         @echo ---------------------------------------------------------
         @echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -inul -w"!BFW_PATH:"=!\logs" !rarFile! !gfxv2! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !gfxv2! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             @echo ERROR while extracting V2_GFX_Packs, exiting 1
