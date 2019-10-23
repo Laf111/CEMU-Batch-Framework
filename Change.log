@@ -9,8 +9,7 @@ XX/09/2019 V15 :
 - add : BatchFw now propgates games'stats through versions of CEMU AND Hosts used for each user
         A script updateGameStats.bat is added
 - add : script displayMyGamesStats.bat and a shortcut for each users
-- add : import games stats in launchGame.bat
- (using the last modified settings.xml
+- add : import games stats in launchGame.bat (using the last modified settings.xml
         no matter the host was) and update settings.xml of the current version with stats
 - add : WII-U / creasteSdCard.bat call in first launch of setup.bat
 - add : WII-U / if a Wii-U is used on first launch of setup.bat, add a call to importWiiuSaves.bat
