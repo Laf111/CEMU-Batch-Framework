@@ -159,6 +159,11 @@ REM : main
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
 
+    if exist !fnrLogUggp! del /F !fnrLogUggp!
+
+    REM : launching the search
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -407,11 +412,6 @@ REM : functions
 
         REM : check if V3 graphic pack is present for this game (if the game is not supported
         REM : in Slashiee repo, it was deleted last graphic pack's update) => re-create game's graphic packs
-
-        if exist !fnrLogUggp! del /F !fnrLogUggp!
-
-        REM : launching the search
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
 
         set /A "resX2=%nativeHeight%*2"
 

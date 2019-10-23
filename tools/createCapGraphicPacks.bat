@@ -376,6 +376,17 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :dosToUnix
+    REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+
+        REM : replace all \n by \n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
     :initV3CapGP
 
         @echo [Definition] > !rulesFileV3!
@@ -427,6 +438,9 @@ REM : functions
 
         @echo [Control] >> !rulesFileV3!
         @echo vsyncFrequency = $FPS >> !rulesFileV3!
+
+        REM : Windows formating (LF -> CRLF)
+        call:dosToUnix
 
         REM : force UTF8 format
         set "utf8=!rulesFileV3:rules.txt=rules.bfw_tmp!"

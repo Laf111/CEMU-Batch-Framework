@@ -238,6 +238,15 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :dosToUnix
+    REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+
+        REM : replace all \n by \n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :initV3ResGraphicPack
 
@@ -302,6 +311,9 @@ REM : functions
         goto:beginLoopRes
 
         :formatUtf8
+
+        REM : Windows formating (LF -> CRLF)
+        call:dosToUnix
 
         REM : add commonly used 16/9 res filters
         @echo # add commonly used 16/9 res filters >> !rulesFileV3!

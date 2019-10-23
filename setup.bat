@@ -440,7 +440,7 @@ REM : main
 
     REM : rename GFX folders that contains forbiden characters : & ! .
     wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
-    
+
     REM : by default: create shortcuts
     @echo ---------------------------------------------------------
 
