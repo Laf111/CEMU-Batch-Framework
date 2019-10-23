@@ -190,6 +190,18 @@ REM : main
         rmdir /Q !gpLink! > NUL 2>&1
     )
 
+    REM : search game's graphic pack folder
+    set "fnrLogLgp="!BFW_PATH:"=!\logs\fnr_linkGamePacks.log""
+    if exist !fnrLogLgp! del /F !fnrLogLgp!
+    REM : Re launching the search (to get the freshly created packs)
+
+    REM : search in the needed folder
+    if ["!gfxType!"] == ["V3"] (
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
+    ) else (
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
+    )
+    
     REM : import GFX packs
     call:importGraphicPacks
 
@@ -281,10 +293,8 @@ REM : functions
 
         set "gp="!str:\rules=!"
 
-
         REM : if more than one folder level exist (V3 packs, get only the first level
         call:getFirstFolder rgp
-
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
@@ -300,11 +310,7 @@ REM : functions
 
         set "filter=%~1"
 
-        if ["!gfxType!"] == ["V2"] (
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I "_graphicPacksV2" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        ) else (
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "_graphicPacksV2" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        )
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -312,11 +318,7 @@ REM : functions
 
     :importGraphicPacks
 
-        if ["!gfxType!"] == ["V2"] (
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I "_graphicPacksV2" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        ) else (
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "_graphicPacksV2" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        )
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
 
     goto:eof
     REM : ------------------------------------------------------------------

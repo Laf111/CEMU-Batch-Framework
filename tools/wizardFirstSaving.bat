@@ -426,7 +426,7 @@ REM : main
 
     REM : waiting updateGamesGraphicPacks processes ending
     :wait
-    set "disp=0"
+    set /A "disp=0"
     set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
     :waitingLoop
@@ -434,9 +434,11 @@ REM : main
     wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
     type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-        if !disp! EQU 0 (
-            set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
-            @echo Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^.
+        if !disp! EQU 3 (
+            @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
+            cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
+        ) else (
+            set /A "disp=disp+1"
         )
         goto:waitingLoop
     )

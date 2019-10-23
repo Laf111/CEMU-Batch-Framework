@@ -609,11 +609,11 @@ REM : functions
 
     :waitProcessesEnd
 
-        set "disp=0"
+        set /A "disp=0"
         :waitingLoopProcesses
         wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
-                set "disp=1"
+                set /A "disp=1"
                 @echo Still extracting V2 GFX packs^, please wait ^.^.^.
             )
             goto:waitingLoopProcesses

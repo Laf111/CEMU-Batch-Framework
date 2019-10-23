@@ -80,7 +80,7 @@ REM : main
 
     set /A "w=(%WIDTH%-!pw!)/2"
     set /A "w=!w!-8"
-    set /A "h=(%HEIGHT%/4)"
+    set /A "h=(%HEIGHT%/3)"
 
     set /A "lm2=!l!-2"
 

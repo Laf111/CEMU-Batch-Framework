@@ -405,7 +405,7 @@ REM : main
 
     REM : copy transferable shader cache, if exist in GAME_FOLDER_PATH
     set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
-    if not exist !gtscf! goto::glCacheInit
+    if not exist !gtscf! goto:getSettings
 
     set "cacheFile=NONE"
     pushd !gtscf!
@@ -416,7 +416,7 @@ REM : main
     REM : if not file found
     if ["!cacheFile!"] == ["NONE"] (
         call:getTransferableCache
-        goto::glCacheInit
+        goto:getSettings
     )
 
     call:setProgressBar 36 68 "pre processing" "backup and provide transferable cache"
@@ -475,6 +475,7 @@ REM : main
         call:setProgressBar 68 70 "pre processing" "getting CEMU options saved for !currentUser!"
     )
 
+    :getSettings
     REM : Settings folder for CEMU_FOLDER_NAME
     set "SETTINGS_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
 
@@ -1341,7 +1342,7 @@ REM : functions
 rem        set "logFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
 rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
-        set "disp=0"
+        set /A "disp=0"
         set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
         :waitingLoopProcesses
@@ -1371,15 +1372,13 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         )
 
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
-            if !disp! EQU 0 goto:waitingLoopProcesses
+
             echo Found updateGamesGraphicPacks still running >> !batchFwLog!
-            if !disp! EQU 0 (
-                set "disp=1"
+            if !disp! EQU 3 (
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
                 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
-                call:setProgressBar 66 66 "pre processing" "completing game graphic packs before continue, please wait"
-
             )
+            set /A "disp=disp+1"
             goto:waitingLoopProcesses
         )
 
