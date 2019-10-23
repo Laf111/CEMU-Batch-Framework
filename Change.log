@@ -1,14 +1,16 @@
 XX/09/2019 V15 :
-- add : a progressbar to monitor Pre and Post processing
+- add : a progressbar to monitor Pre and Post processing for shortcuts mode (not executables 
+        where a minimized console can be used to monitor the execution)
 - add : handle a list for aspect ratios 
-- fix : GFX packs completion take all hosts settings into account (aspect ratios defined)
-- fix : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
+- add : GFX packs completion take all hosts settings into account (aspect ratios defined)
+- add : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
         an active connection is found) 
-- add : support of user's game profiles (Cemu 1.15.15)
+- add : support of user's game profiles (Cemu 1.15.15)        
 - add : BatchFw now propgates games'stats through versions of CEMU AND Hosts used for each user
         A script updateGameStats.bat is added
 - add : script displayMyGamesStats.bat and a shortcut for each users
-- add : import games stats in launchGame.bat (using the last modified settings.xml
+- add : import games stats in launchGame.bat
+ (using the last modified settings.xml
         no matter the host was) and update settings.xml of the current version with stats
 - add : WII-U / creasteSdCard.bat call in first launch of setup.bat
 - add : WII-U / if a Wii-U is used on first launch of setup.bat, add a call to importWiiuSaves.bat
@@ -29,8 +31,12 @@ XX/09/2019 V15 :
 - add : setup.bat now removes a third party software with invalid path and also modify the
         path to software installed on an USB drive for whose driver letter had changed
 - add : a check on GFX packs links build that cancel the run if no GFX pack were found
+- add : update embeded V3 GFX packs to v542
 - opt : pre-post processing times was reduced by running asynchronous treatments earlier
 - opt : monitorBatchFw don't close after CEMU anymore (to enhance priority of post treatments process)
+- opt : optimize game GFX packs gathering
+- opt : externalize GFX packs import (to be launched earlier in launchGame.bat and re-use in wizardFirstSaving.bat)
+- opt : only warn user of a new GFX pack release when launching a game
 - fix : regression ignore precompiled shaders did not work on latests releases
 - fix : wait for the end of V2 GFX pack extraction in Create*.bat 
 - fix : still some unwanted message sent to console when completing/creating extra GFX packs
@@ -42,6 +48,9 @@ XX/09/2019 V15 :
 - fix : bug when comparing CEMU versions with a version without a letter in and do not re-computed
         formated version read everytime
 - fix : WII-U / online files are compressed to not appear in games list in CEMU UI
+- fix : force temporary files location to !TMP! 
+- fix : set rar.exe working directory to BFW_PATH\logs
+- fix : ignore RC versions of BatchFw when searching for an update
 
 20/09/2019 V14-13 :
 - hotfix : GFX pack update failure (URL changed)
