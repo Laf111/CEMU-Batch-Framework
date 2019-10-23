@@ -436,6 +436,7 @@ REM : main
     type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 0 (
             set "disp=1" && cscript /nologo !MessageBox! "Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^." 4160
+            @echo Graphic packs for this game are currently processed^, waiting before open CEMU UI^.^.^.
         )
         goto:waitingLoop
     )
