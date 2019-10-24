@@ -74,7 +74,6 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         @echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr! >> !batchFwLog!
-        @echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 1
@@ -109,10 +108,6 @@ REM : main
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^*>> !batchFwLog!
         @echo ^(^* for optionnal^ argument^)>> !batchFwLog!
         @echo given {%*} >> !batchFwLog!
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
-        @echo given {%*}
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 99
@@ -123,9 +118,6 @@ REM : main
         @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^* >> !batchFwLog!
         @echo ^(^* for optionnal^ argument^) >> !batchFwLog!
         @echo given {%*} >> !batchFwLog!
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER PRX_FILE_PATH OUTPUT_FOLDER ICO_PATH MLC01_FOLDER_PATH user -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optionnal^ argument^)
         @echo given {%*}
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
@@ -177,7 +169,6 @@ REM : main
     set "OUTPUT_FOLDER=!args[2]!"
     if not exist !OUTPUT_FOLDER! (
         @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^! >> !batchFwLog!
-        @echo ERROR ^: shortcut folder !OUTPUT_FOLDER! does not exist ^!
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 3
@@ -189,7 +180,6 @@ REM : main
     REM : check RPX_FILE_PATH
     if not exist !RPX_FILE_PATH! (
         @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable >> !batchFwLog!
-        @echo ERROR ^: game's rpx file path !RPX_FILE_PATH! does not exist ^! please delete this shortcut^/executable
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 2
@@ -256,24 +246,19 @@ REM : main
     if ["!versionRead!"] == ["NOT_FOUND"] set "gfxType=V2" & goto:getTitleId
 
     @echo Version read in log ^: !versionRead! >> !batchFwLog!
-    @echo Version read in log ^: !versionRead!
 
     set "versionReadFormated=NONE"
     REM : comparing version to V1.15.15
     set "v11515="
     call:compareVersions !versionRead! "1.15.15" v11515
     if ["!v11515!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-    if ["!v11515!"] == [""] @echo Error when comparing versions
     if !v11515! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-    if !v11515! EQU 50 @echo Error when comparing versions
 
     set "v114=1"
     if !v11515! EQU 2 (
         call:compareVersions !versionRead! "1.14.0" v114
         if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-        if ["!v114!"] == [""] @echo Error when comparing versions
         if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-        if !v114! EQU 50 @echo Error when comparing versions
         if !v114! EQU 2 set "gfxType=V2"
         if !v114! LEQ 1 goto:getTitleId
     )
@@ -294,14 +279,12 @@ REM : main
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
-        @echo ERROR while extracting V2_GFX_Packs, exiting 1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 21
     )
 
     :getTitleId
     @echo Version of GFX pack required ^: !gfxType! >> !batchFwLog!
-    @echo Version of GFX pack required ^: !gfxType!
 
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -317,7 +300,6 @@ REM : main
     REM : link game's packs
 
     @echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
-    @echo Checking !GAME_TITLE! graphic packs availability ^.^.^.
 
     :updateGameGraphicPack
     call:setProgressBar 34 36 "pre processing" "checking game graphic packs availability"
@@ -326,7 +308,6 @@ REM : main
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
     wscript /nologo !StartHidden! !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !lockFile!
     @echo !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !lockFile! >> !batchFwLog!
-    @echo !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !lockFile!
 
     :getScreenMode
 
@@ -367,7 +348,6 @@ REM : main
     set "ICO_PATH=!args[3]!"
     if not exist !ICO_PATH! (
         @echo ERROR ^: game's icon file path !ICO_PATH! does not exist ^! >> !batchFwLog!
-        @echo ERROR ^: game's icon file path !ICO_PATH! does not exist ^!
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 4
@@ -377,22 +357,13 @@ REM : main
     set "MLC01_FOLDER_PATH=!args[4]!"
     if not exist !MLC01_FOLDER_PATH! (
         @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^! >> !batchFwLog!
-        @echo ERROR ^: mlc01 folder !MLC01_FOLDER_PATH! does not exist ^!
         timeout /t 8 > NUL 2>&1
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 5
     )
 
-
-    @echo Don^'t close this windows^, it will stop CEMU ^!
-    @echo It will be closed automatically after closing CEMU
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     @echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
-    @echo Don^'t close this windows^, it will stop CEMU ^!
-    @echo It will be closed automatically after closing CEMU
-    @echo =========================================================
-    @echo Automatic settings import ^: !IMPORT_MODE!
 
     REM : Batch Game info file
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
@@ -457,7 +428,6 @@ REM : main
 
     REM : first launch the transferable cache copy in background before
     @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
-    @echo Copying transferable cache to !CEMU_FOLDER! ^.^.^.
     REM : copy all *.bin file (2 files if separable and conventionnal)
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.bfwl_old /XF *emu* /XF *.rar
 
@@ -596,11 +566,6 @@ REM : main
         @echo --------------------------------------------------------- >> !batchFwLog!
         type !LOCK_FILE!>> !batchFwLog!
         @echo --------------------------------------------------------- >> !batchFwLog!
-        @echo ERROR when launching !GAME_TITLE! ^: A lock file was found under !CEMU_FOLDER:"=! ^!
-        @echo Please close^/kill runing CEMU executable and remove !LOCK_FILE:"=!
-        @echo ---------------------------------------------------------
-        type !LOCK_FILE!
-        @echo ---------------------------------------------------------
         wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
 
         cscript /nologo !MessageBox! "A lock file was found under !CEMU_FOLDER:"=!^, if no other windows user ^(session left openned^) is running CEMU ^: delete-it then close this windows" 4112
@@ -656,7 +621,6 @@ REM : main
     REM : if GPU_VENDOR not match goto:lockCemu ignore the file
     if not ["!gpuVendorRead!"] == ["!GPU_VENDOR!"] (
         @echo Found a GLCache backup !IdGpuFolder! that is not for your current GPU Vendor^, delete-it ^! >> !batchFwLog!
-        @echo Found a GLCache backup !IdGpuFolder! that is not for your current GPU Vendor^, delete-it ^!
         REM : log to host log file
         set "msg="!DATE!-non matching GPU Vendor GLCache backup deleted=!IdGpuFolder!""
         call:log2HostFile !msg!
@@ -679,9 +643,6 @@ REM : main
         @echo Display drivers update detected ^! >> !batchFwLog!
         @echo from display drivers version    = [%gpuDriversVersionRead%] >> !batchFwLog!
         @echo current display drivers version = [%GPU_DRIVERS_VERSION%] >> !batchFwLog!
-        @echo Display drivers update detected ^!
-        @echo from display drivers version    = [%gpuDriversVersionRead%]
-        @echo current display drivers version = [%GPU_DRIVERS_VERSION%]
 
         REM : log to host log file
         set "msg="Detected %GPU_VENDOR% drivers version upgrade from %gpuDriversVersionRead% to =%GPU_DRIVERS_VERSION%""
@@ -716,7 +677,6 @@ REM : main
 
     REM : using backup
     @echo Using !shaderCacheFileName! >> !batchFwLog!
-    @echo Using !shaderCacheFileName!
     goto:lockCemu
 
     :subfolderFound
@@ -736,7 +696,6 @@ REM : main
 
     REM : using backup
     @echo Using !GlCacheSaved! as OpenGL cache >> !batchFwLog!
-    @echo Using !GlCacheSaved! as OpenGL cache
 
     REM : Launching CEMU (for old versions -mlc will be ignored)
     :lockCemu
@@ -748,7 +707,6 @@ REM : main
         exit 3
     )
     @echo --------------------------------------------------------- >> !batchFwLog!
-    @echo ---------------------------------------------------------
 
     if !wizardLaunched! EQU 0 (
         call:setProgressBar 82 90 "pre processing" "waiting all child processes end"
@@ -770,7 +728,6 @@ REM : main
     )
 
     @echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
-    @echo Linking packs for !GAME_TITLE! ^.^.^.
 
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
@@ -784,9 +741,7 @@ REM : main
             call:compareVersions !versionRead! "1.15.3b" v1153b
 
             if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-            if ["!v1153b!"] == [""] @echo Error when comparing versions
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-            if !v1153b! EQU 50 @echo Error when comparing versions
             if !v1153b! LEQ 1 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             set /A "v1153b=2"
@@ -797,7 +752,6 @@ REM : main
 
     :launchCemu
     @echo --------------------------------------------------------- >> !batchFwLog!
-    @echo ---------------------------------------------------------
 
     if not ["!versionRead!"] == ["NOT_FOUND"] (
         call:setProgressBar 96 100 "pre processing" "launching Cemu !versionRead!"
@@ -813,28 +767,22 @@ REM : main
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     @echo Starting !CEMU_FOLDER_NAME! with the following command ^: >> !batchFwLog!
     @echo --------------------------------------------------------- >> !batchFwLog!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Starting !CEMU_FOLDER_NAME! with the following command ^:
-    @echo ---------------------------------------------------------
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
 
     set /a cr_cemu=0
     if [!MLC01_FOLDER_PATH!] == [!cml01!] (
         @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg! >> !batchFwLog!
-        @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg!
         wscript /nologo !StartMaximizedWait! !cemu! %screenMode% -g !RPX_FILE_PATH! !noLeg!
         set /a cr_cemu=!ERRORLEVEL!
     ) else (
         @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! -mlc !MLC01_FOLDER_PATH! !noLeg! >> !batchFwLog!
-        @echo start !cemu! %screenMode% -g !RPX_FILE_PATH! -mlc !MLC01_FOLDER_PATH! !noLeg!
         wscript /nologo !StartMaximizedWait! !cemu! %screenMode% -g !RPX_FILE_PATH! -mlc !MLC01_FOLDER_PATH! !noLeg!
         set /a cr_cemu=!ERRORLEVEL!
     )
     pushd !BFW_TOOLS_PATH!
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     REM : remove lock file
     del /F /S !lockFile! > NUL 2>&1
 
@@ -845,7 +793,6 @@ REM : main
     set "CEMU_STATUS=Loads"
     if %cr_cemu% NEQ 0 (
         @echo !CEMU_FOLDER_NAME! failed^, return code ^: %cr_cemu% >> !batchFwLog!
-        @echo !CEMU_FOLDER_NAME! failed^, return code ^: %cr_cemu%
 
         REM : is settingsImported = 1, delete shortcut and msbBox
         if !settingsImported! EQU 1 (
@@ -867,7 +814,6 @@ REM : main
 
     ) else (
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
-        @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu%
     )
 
 
@@ -876,7 +822,6 @@ REM : main
     for /F "delims=~" %%i in ('type !cemuLog! ^| find /I "UseSeparableShaders: false"') do set "SHADER_MODE=CONVENTIONAL"
 
     @echo SHADER_MODE=%SHADER_MODE%>> !batchFwLog!
-    @echo SHADER_MODE=%SHADER_MODE%
     set "NEW_SHADER_CACHE_ID=UNKNOWN"
     REM : saving shaderCache
     call:transShaderCache
@@ -884,8 +829,6 @@ REM : main
     REM : let file name with SHADER_MODE suffix
     if not ["%OLD_TRANS_SHADER%"] == ["NONE"] @echo OLD_TRANS_SHADER=%OLD_TRANS_SHADER%>> !batchFwLog!
     @echo NEW_TRANS_SHADER=%NEW_TRANS_SHADER%>> !batchFwLog!
-    if not ["%OLD_TRANS_SHADER%"] == ["NONE"] @echo OLD_TRANS_SHADER=%OLD_TRANS_SHADER%
-    @echo NEW_TRANS_SHADER=%NEW_TRANS_SHADER%
 
     REM : Recreate "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
     del /F /S !gameInfoFile! > NUL 2>&1
@@ -904,10 +847,8 @@ REM : main
 
     wscript /nologo !StartHidden! !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS!
     @echo Compatibility reports updated for !GAME_TITLE! with !CEMU_FOLDER_NAME!>> !batchFwLog!
-    @echo Compatibility reports updated for !GAME_TITLE! with !CEMU_FOLDER_NAME!
 
     @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
-    @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS!
 
     if %cr_cemu% NEQ 0 goto:hangleGlCache
     call:setProgressBar 38 55 "post processing" "backup and remove !currentUser! save"
@@ -940,7 +881,6 @@ REM : main
     pushd !BFW_TOOLS_PATH!
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
         @echo Unable to find your GPU GLCache folder ^? backup will be disabled >> !batchFwLog!
-        @echo Unable to find your GPU GLCache folder ^? backup will be disabled
         goto:analyseCemuLog
     )
     REM : save path to log file
@@ -994,7 +934,6 @@ REM : main
     :warning
     REM : if no files were found:
     @echo WARNING ^: unable to find a last shaders cache under !OPENGL_CACHE_PATH!^, cancel GLCache backup ^! >> !batchFwLog!
-    @echo WARNING ^: unable to find a last shaders cache under !OPENGL_CACHE_PATH!^, cancel GLCache backup ^!
     goto:moveBack
 
     :whatToDo
@@ -1008,7 +947,6 @@ REM : main
 
     if not ["%oldOGLCacheId%"] == ["NOT_FOUND"] (
         @echo WARNING ^: Your display drivers have change OpenGL id for !CEMU_FOLDER_NAME! from %oldOGLCacheId% to %newOGLCacheId% ^! >> !batchFwLog!
-        @echo WARNING ^: Your display drivers have change OpenGL id for !CEMU_FOLDER_NAME! from %oldOGLCacheId% to %newOGLCacheId% ^!
 
         REM : log to host log file
         set "msg="!DATE!-your display drivers have change !CEMU_FOLDER_NAME! GLCache Id from %oldOGLCacheId% to %newOGLCacheId%=%folderName%""
@@ -1044,10 +982,8 @@ REM : main
     call:moveFolder !newOGLCache! !newFolder! cr
     if !cr! NEQ 0 (
         @echo ERROR when moving !newOGLCache! !newFolder!^, cr=%cr% >> !batchFwLog!
-        @echo ERROR when moving !newOGLCache! !newFolder!^, cr=%cr%
     ) else (
         @echo Update GLCache in !newFolder!>> !batchFwLog!
-        @echo Update GLCache in !newFolder!
         goto:analyseCemuLog
     )
 
@@ -1104,8 +1040,6 @@ REM : main
 
     @echo metaTitleId=%titleId%>> !batchFwLog!
     @echo cemuTitleId=%cemuTitleId%>> !batchFwLog!
-    @echo metaTitleId=%titleId%
-    @echo cemuTitleId=%cemuTitleId%
     if /I ["%cemuTitleId%"] == ["%UNKNOW_GAME%"] goto:unknownGame
 
     if /I [!PROFILE_FILE!] == ["NOT_FOUND"] (
@@ -1128,16 +1062,9 @@ REM : main
     @echo meta file titleId = %titleId%>> !batchFwLog!
     @echo cemu titleId = %cemuTitleId%>> !batchFwLog!
     @echo Have you updated the game or installed a DLC for another version ^(US^/EUR^/JPN^) ^?>> !batchFwLog!
-    @echo ---------------------------------------------------------
-    @echo Warning ^: CEMU and GAME Title Id not matching  ^!^, disabling saving options ^!
-    @echo meta file titleId = %titleId%
-    @echo cemu titleId = %cemuTitleId%
-    @echo Have you updated the game or installed a DLC for another version ^(US^/EUR^/JPN^) ^?
     if %wizardLaunched% EQU 1 (
         @echo CEMU log.txt    : %cemuTitleId%>> !batchFwLog!
         @echo meta/metax.xml  : %titleId%>> !batchFwLog!
-        @echo CEMU log.txt    : %cemuTitleId%
-        @echo meta/metax.xml  : %titleId%
         rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
     cscript /nologo !MessageBox! "ERROR ^: CEMU and GAME TitleId not matching ^!^, disable saving options" 4112
@@ -1154,15 +1081,9 @@ REM : main
     @echo ERROR ^: UNKNOWN GAME TitleId detected in CEMU Log.txt ^!^, disabling saving options ^!>> !batchFwLog!
     @echo Have you updated the game or installed a DLC ^?>> !batchFwLog!
     @echo TOFIX ^: reinstall game^'s update over ^!>> !batchFwLog!
-    @echo ---------------------------------------------------------
-    @echo ERROR ^: UNKNOWN GAME TitleId detected in CEMU Log.txt ^!^, disabling saving options ^!
-    @echo Have you updated the game or installed a DLC ^?
-    @echo TOFIX ^: reinstall game^'s update over ^!
     if %wizardLaunched% EQU 1 (
         @echo CEMU log.txt    ^: %cemuTitleId%>> !batchFwLog!
         @echo meta/metax.xml  ^: %titleId%>> !batchFwLog!
-        @echo CEMU log.txt    ^: %cemuTitleId%
-        @echo meta/metax.xml  ^: %titleId%
         rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
     cscript /nologo !MessageBox! "ERROR ^: UNKNOWN GAME TitleId detected in CEMU Log^.txt ^!^, disable saving options" 4112
@@ -1170,7 +1091,6 @@ REM : main
 
     :titleIdChecked
 
-    @echo Stop 3rd party software
     @echo Stop 3rd party software ^!>> !batchFwLog!
 
     REM : stoping user's software
@@ -1182,12 +1102,10 @@ REM : main
 
     if %cr_cemu% NEQ 0 goto:endMain
 
-    @echo compress game's saves
     set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
     if exist !userGameSave! (
         @echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar>> !batchFwLog!
-        @echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar
     )
 
     REM : if exist, a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
@@ -1236,23 +1154,6 @@ REM : main
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
-    REM @echo =========================================================>> !batchFwLog!
-    REM @echo This windows will close automatically in 8s>> !batchFwLog!
-    REM @echo     ^(n^) ^: don^'t close^, i want to read history log first>> !batchFwLog!
-    REM @echo     ^(q^) ^: close it now and quit>> !batchFwLog!
-    REM @echo --------------------------------------------------------->> !batchFwLog!
-    REM @echo =========================================================
-    REM @echo This windows will close automatically in 8s
-    REM @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    REM @echo     ^(q^) ^: close it now and quit
-    REM @echo ---------------------------------------------------------
-    REM call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
-    REM if [!ANSWER!] == ["n"] (
-        REM REM : Waiting before exiting
-        REM pause
-    REM
-
-
     REM :restoreBackups
     if exist !cs! call:restoreFile !cs!
     if exist !csb! call:restoreFile !csb!
@@ -1263,8 +1164,6 @@ REM : main
 
     @echo =========================================================>> !batchFwLog!
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
-    @echo =========================================================
-    @echo Waiting the end of all child processes before ending ^.^.^.
 
     call:setProgressBar 96 100 "post processing" "waiting the end of all child processes"
     
@@ -1351,29 +1250,29 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
         type !logFileTmp! | find /I "robocopy" > NUL 2>&1 && (
-echo waitProcessesEnd : robocopy still running >> !batchFwLog!
+            echo waitProcessesEnd : robocopy still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
         type !logFileTmp! | find /I "rar.exe" | find /I !GAMES_FOLDER! > NUL 2>&1 && (
-echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
+            echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
         type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && (
-echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
+            echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGameStats.bat" > NUL 2>&1 && (
-echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
+            echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
-echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
+            echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
 
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
-            echo Found updateGamesGraphicPacks still running >> !batchFwLog!
+            echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
             if !disp! EQU 3 (
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
                 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
@@ -1567,7 +1466,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
         pushd !BFW_TOOLS_PATH!
         @echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
-        @echo Loading saves for !currentUser!^.^.^.
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !EXTRACT_PATH!
 
         :savesLoaded
@@ -1614,7 +1512,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
 
             @echo !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!>> !batchFwLog!
-            @echo !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
 
             goto:beforeLoad
         )
@@ -1660,11 +1557,9 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         REM : synchronized controller profiles (import)
         call:syncControllerProfiles
         @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
-        @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
         @echo Import settings from !previousSettingsFolder:"=! >> !batchFwLog!
-        @echo Import settings from !previousSettingsFolder:"=!
 
         set /A "settingsImported=1"
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !previousSettingsFolder! !nsf! /S > NUL 2>&1
@@ -1683,7 +1578,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         for /F "delims=~" %%i in (!SETTINGS_FOLDER!) do set "settingsFolderName=%%~nxi"
 
         @echo Using settings from !settingsFolderName! for !currentUser! ^!>> !batchFwLog!
-        @echo Using settings from !settingsFolderName! for !currentUser! ^!
 
         REM : looking for last modified *settings to create !user!_settings
         call:setSettingsForUser
@@ -1722,9 +1616,7 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         if !v114! EQU 0 (
             call:compareVersions !versionRead! "1.12.0" result
             if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-            if ["!result!"] == [""] @echo Error when comparing versions
             if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-            if !result! EQU 50 @echo Error when comparing versions
             if !result! EQU 2 goto:cemuHookSettings
         )
 
@@ -1734,7 +1626,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
         if not exist !lls! (
             @echo Warning ^: no last settings file found >> !batchFwLog!
-            @echo Warning ^: no last settings file found
             goto:cemuHookSettings
         )
         pushd !sf!
@@ -1743,7 +1634,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
         if not exist !ls!  (
             @echo Warning ^: last settings folder was not found^, !ls! does not exist  >> !batchFwLog!
-            @echo Warning ^: last settings folder was not found^, !ls! does not exist
 
             REM : rebuild it
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
@@ -1784,7 +1674,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
         @echo !toBeLaunch! !lst! !cs! !gid! >> !batchFwLog!
-        @echo !toBeLaunch! !lst! !cs! !gid!
 
         wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
 
@@ -1994,7 +1883,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         :patchGp
 
         @echo Ignoring precompiled shader = %value%>> !batchFwLog!
-        @echo Ignoring precompiled shader = %value%
 
         if ["!versionRead!"] == ["NOT_FOUND"] call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value% && goto:eof
         if !v1153b! EQU 1 (
@@ -2041,7 +1929,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
         if ["!accId!"] == ["NONE"] (
             @echo WARNING^: AccountId not found for !currentUser! >> !batchFwLog!
-            @echo WARNING^: AccountId not found for !currentUser!
             cscript /nologo !MessageBox! "AccountId not found for !currentUser!, cancel online files installation" 4160
             goto:eof
         )
@@ -2075,7 +1962,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
             if !css! EQU 0 (
                 @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^! >> !batchFwLog!
-                @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^!
                 goto:eof
            )
         )
@@ -2109,7 +1995,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
         @echo Online account for !currentUser! enabled ^: !accId! >> !batchFwLog!
-        @echo Online account for !currentUser! enabled ^: !accId!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2436,7 +2321,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             move /Y !src! !target!
 
             @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !currentUser! ^!>> !batchFwLog!
-            @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !currentUser! ^!
         )
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
@@ -2495,7 +2379,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
         if ["!strTmp!"] == ["NONE"] (
             @echo Unable to get shaderCacheId line in !cemuLog!^, skip saving shader cache ^!>> !batchFwLog!
-            @echo Unable to get shaderCacheId line in !cemuLog!^, skip saving shader cache ^!
             goto:eof
         )
         set "NEW_SHADER_CACHE_ID=%strTmp: =%"
@@ -2515,7 +2398,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         mkdir !gtscf! > NUL 2>&1
         REM :  move CEMU transferable shader cache file to GAME_FOLDER_PATH
         @echo move !ctscf! to !gtscf!>> !batchFwLog!
-        @echo move !ctscf! to !gtscf!
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
         goto:eof
 
@@ -2539,8 +2421,8 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             set "oldSize=0"
         )
 
-        @echo CEMU transferable cache file !NEW_TRANS_SHADER! have a size of  ^:  %newSize%
-        @echo Saved transferable cache file !OLD_TRANS_SHADER! have a size of ^:  %oldSize%
+        @echo CEMU transferable cache file !NEW_TRANS_SHADER! have a size of  ^:  %newSize%>> !batchFwLog!
+        @echo Saved transferable cache file !OLD_TRANS_SHADER! have a size of ^:  %oldSize%>> !batchFwLog!
 
         REM : prepare log to edit it
         @echo --------------------------------------------------- >> !tscl!
@@ -2610,7 +2492,7 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         @echo - >> !tscl!
         @echo ^(close notepad to continue^) >> !tscl!
         @echo ^(close notepad to continue^)>> !batchFwLog!
-        @echo ^(close notepad to continue^)
+
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tscl!
 
         goto:eof
@@ -2623,7 +2505,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
 
             REM : CEMU file bigger than saved one (nominal case)  : overwrite saved by moving CEMU file
             @echo move !ntscf! to !otscf!>> !batchFwLog!
-            @echo move !ntscf! to !otscf!
             goto:copyBackShaderCache
         )
 
@@ -2649,7 +2530,7 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         @echo - >> !tscl!
         @echo ^(close notepad to continue^) >> !tscl!
         @echo ^(close notepad to continue^)>> !batchFwLog!
-        @echo ^(close notepad to continue^)
+
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tscl!
 
         :copyBackShaderCache
@@ -2892,14 +2773,12 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
             @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13>> !batchFwLog!
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11>> !batchFwLog!
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
@@ -2907,7 +2786,6 @@ echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 

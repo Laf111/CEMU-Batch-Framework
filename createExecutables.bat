@@ -31,6 +31,7 @@ REM : main
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -1507,8 +1508,8 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         set "BatchFwCall=!lg! !ARGS!"
 
         REM : create the batch file to launch LaunchGame.bat
-        @echo @echo off> !BATCH_FILE!
-        @echo powershell ^(new-object -COM ^'shell.Application^'^)^.minimizeall^(^)>> !BATCH_FILE!
+        @echo !cmdOw! @ ^/HID ^> NUL > !BATCH_FILE!
+        @echo off>> !BATCH_FILE!
         @echo setlocal EnableExtensions>> !BATCH_FILE!
         @echo chcp %CHARSET%>> !BATCH_FILE!
         @echo pushd !TOOLS_PATH!>> !BATCH_FILE!
