@@ -35,13 +35,13 @@ REM : main
         @echo !title!
         @echo #########################################################
 
-        echo "E:\Wii-U\Loadiine Games\_BatchFw_Install\tools\createExtraGraphicPacks.bat" "E:\Wii-U\Loadiine Games\_BatchFw_Graphic_Packs" !tid! !title!
+        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         echo.
-        call "E:\Wii-U\Loadiine Games\_BatchFw_Install\tools\createExtraGraphicPacks.bat" "E:\Wii-U\Loadiine Games\_BatchFw_Graphic_Packs" !tid! !title!
+        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
 
-        echo "E:\Wii-U\Loadiine Games\_BatchFw_Install\tools\createCapGraphicPacks.bat" "E:\Wii-U\Loadiine Games\_BatchFw_Graphic_Packs" !tid! !title!
+        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         echo.
-        call "E:\Wii-U\Loadiine Games\_BatchFw_Install\tools\createCapGraphicPacks.bat" "E:\Wii-U\Loadiine Games\_BatchFw_Graphic_Packs" !tid! !title!
+        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         @echo #########################################################
 
     goto:eof

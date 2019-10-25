@@ -521,7 +521,7 @@ REM : functions
 
         
         REM extract the CEMU saves for current user
-        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !TMP_DLSAVE_PATH! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !TMP_DLSAVE_PATH! > NUL 2>&1
 
         REM : CEMU 80000001 folder for the current user
         set "cemuUserSaveFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\80000001""

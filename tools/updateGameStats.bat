@@ -81,7 +81,7 @@ REM : ------------------------------------------------------------------
 
         pushd !BFW_RESOURCES_PATH!
         REM : get game's stats
-        "xml.exe" sel -t -c "//content/GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
+        "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
 
         for /f "usebackq tokens=*" %%a in (!csTmp!) do (
           set "node=!node!%%a"
@@ -95,15 +95,15 @@ REM : ------------------------------------------------------------------
 
         REM : delete node in csTgt
         set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
-        "xml.exe" ed -d "//content/GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
+        "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Node ^:
-    @echo !node!
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo Node ^:
+        @echo !node!
 
-        "xml.exe" ed -s "//content/GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo replacing in temporary file
+        "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo replacing in temporary file
 
         rem : replace in file
         set "BfwSettingsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSettings.log""
@@ -111,12 +111,12 @@ REM : ------------------------------------------------------------------
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog! > NUL
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog! > NUL
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo pretty indent !scTgt!
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo pretty indent !scTgt!
 
         xml fo -t !csTmp! > !csTgt!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo done
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo done
 
         del /F !csTmp! > NUL 2>&1
         del /F !csTgtTmp! > NUL 2>&1

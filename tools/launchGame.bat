@@ -249,12 +249,12 @@ REM : main
 
     set "versionReadFormated=NONE"
     REM : comparing version to V1.15.15
-    set "v11515="
+    set /A "v11515=2"
     call:compareVersions !versionRead! "1.15.15" v11515
     if ["!v11515!"] == [""] @echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 @echo Error when comparing versions >> !batchFwLog!
 
-    set "v114=1"
+    set /A "v114=1"
     if !v11515! EQU 2 (
         call:compareVersions !versionRead! "1.14.0" v114
         if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
@@ -275,7 +275,7 @@ REM : main
 
     call:setProgressBar 34 34 "pre processing" "installing V2 GFX packs"
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         @echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
@@ -368,6 +368,9 @@ REM : main
     REM : Batch Game info file
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
 
+    REM : CEMU's shaderCache subfolder
+    set "cemuShaderCache="!CEMU_FOLDER:"=!\shaderCache""
+
     REM : check if a saved transferable cache file exist
     set "OLD_SHADER_CACHE_ID=NONE"
 
@@ -402,7 +405,7 @@ REM : main
     set "lastValid="!transF:"=!-backupLaunchN-1.rar""
     if exist !backup! copy /Y !backup! !lastValid! > NUL 2>&1
 
-    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul -w"!BFW_PATH:"=!logs" !backup! !transF!
+    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
 
     REM : get backup files sizes
     if exist !backup! (
@@ -463,8 +466,7 @@ REM : main
 
     REM : handling GLCache backup
     REM : ----------------------------
-    REM : CEMU's shaderCache subfolder
-    set "cemuShaderCache="!CEMU_FOLDER:"=!\shaderCache""
+
     REM : saved GLCache folder
     set "GLCACHE_BACKUP="NOT_FOUND""
 
@@ -735,7 +737,7 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    set "v1153b="
+    set /A "v1153b=1"
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
             call:compareVersions !versionRead! "1.15.3b" v1153b
@@ -1273,7 +1275,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
             echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
-            if !disp! EQU 3 (
+            if !disp! EQU 7 (
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
                 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
             )
@@ -1393,7 +1395,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if exist !chs! call:backupFile !chs!
 
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+        if not exist !cemuProfile! set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+
         if exist !cemuProfile! set "PROFILE_FILE=!cemuProfile!"
+        REM : left at NOT_FOUND, it will be created in wizardFirstLaunch.bat
 
         REM : check if it is already a link (case of crash) : delete-it
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
@@ -1466,7 +1471,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         pushd !BFW_TOOLS_PATH!
         @echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !rarFile! !EXTRACT_PATH!
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !rarFile! !EXTRACT_PATH!
 
         :savesLoaded
         if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
@@ -1483,8 +1488,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : import from MISSING_PROFILES_FOLDER
         set "PROFILE_FOLDER="!CEMU_FOLDER:"=!\gameProfiles""
-        set "PROFILE_FOLDERV2="!CEMU_FOLDER:"=!\gameProfiles\default""
-        if exist !PROFILE_FOLDERV2! set "PROFILE_FOLDER=!PROFILE_FOLDERV2!"
 
         robocopy !MISSING_PROFILES_FOLDER! !PROFILE_FOLDER! "%titleId%.ini"
         set "PROFILE_FILE="!PROFILE_FOLDER:"=!\%titleId%.ini""
@@ -1508,15 +1511,13 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             set /A "wizardLaunched=1"
             REM : PROFILE_FILE for game that still not exist in CEMU folder = NOT_FOUND (first run on a given host)
 
-            set "ws="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
-            wscript /nologo !StartMaximizedWait! !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!
-
-            @echo !ws! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user!>> !batchFwLog!
+            set "wfs="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
+            @echo !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH!>> !batchFwLog!
+            wscript /nologo !StartMaximizedWait! !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH!
 
             goto:beforeLoad
         )
 
-        REM : Compare the two game's profile with winmerge :
         REM : patching files for ignoring precompiled cache before diff
         if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
         if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
@@ -1537,9 +1538,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if ["!lastPath!"] == ["NONE"] goto:bypassComparison
 
         set "OLD_PROFILE_FILE="!lastPath!\gameProfiles\%titleId%.ini""
-        set "OldUserGameProfile="!lastPath!\gameProfiles\default\%titleId%.ini""
-
-        if exist !OldUserGameProfile! set "OLD_PROFILE_FILE=!OldUserGameProfile!"
+        if not exist !OLD_PROFILE_FILE! set "OLD_PROFILE_FILE="!lastPath!\gameProfiles\default\%titleId%.ini""
 
         if not exist !OLD_PROFILE_FILE! goto:bypassComparison
 
@@ -1601,7 +1600,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 move /Y !src! !cs! > NUL 2>&1
             )
         )
-        set "gamePath=!RPX_FILE_PATH!"
+        set "rpxFilePath=!RPX_FILE_PATH!"
 
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
@@ -1651,17 +1650,17 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : if the file is the same
         if [!xmlUser!] == [!lst!] pushd !BFW_TOOLS_PATH! && goto:cemuHookSettings
 
-        call:getValueInXml "//GameCache/Entry[path='!gamePath:"=!']/title_id/text()" !lst! gid
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
         if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
 
-        set "gamePath_USB="!drive!!gamePath:~3!"
+        set "rpxFilePath_USB="!drive!!rpxFilePath:~3!"
 
-        if [!gamePath!] == [!gamePath_USB!] (
+        if [!rpxFilePath!] == [!rpxFilePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find "_BatchFW_Install" > NUL 2>&1 && (
-                set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
-                if [!gamePath!] == [!gamePath_LOGS!] goto:cemuHookSettings
-                set "gamePath=!gamePath_LOGS!"
+            echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
+                set "rpxFilePath_LOGS=!rpxFilePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:cemuHookSettings
+                set "rpxFilePath=!rpxFilePath_LOGS!"
                 goto:getRpx
             )
             goto:cemuHookSettings
@@ -1690,15 +1689,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !controllersProfilesSaved! !controllersProfiles! > NUL 2>&1
-
-        if ["!versionRead!"] == ["NOT_FOUND"] goto:ignorePrecomp
-        REM support 1.15.15 and older
-        if !v11515! EQU 1 (
-            set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\gameProfiles\!USERDOMAIN!\gameProfiles\default""
-            set "cgp="!CEMU_FOLDER:"=!\gameProfiles\default""
-            set "epf="!cgp:"=!\%titleId%.ini""
-            if not exist !epf! if exist !cgp! robocopy !ggp! !cgp! "%titleId%.ini"
-        )
 
         :ignorePrecomp
         REM : patching files for ignoring precompiled cache
@@ -1977,7 +1967,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
@@ -2019,15 +2009,15 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "strTargetWithoutSpace=!strTarget: =!"
 
         REM : if strTarget found in file : exit
-        for /F "delims=~" %%i in ('type !file! ^| find /I "!strTarget!"') do goto:eof
+        type !file! | find /I "!strTarget!" > NUL 2>&1 && goto:eof
         REM : if strTargetWithoutSpace found in file : exit
-        for /F "delims=~" %%i in ('type !file! ^| find /I "!strTargetWithoutSpace!"') do goto:eof
+        type !file! | find /I "!strTargetWithoutSpace!" > NUL 2>&1 && goto:eof
 
         REM : if [Graphics] is found in file and is commented : goto patchGraphic
-        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]"') do for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
+        type !file! | find /I "[Graphics]" > NUL 2>&1 && for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
 
         REM : if disablePrecompiledShaders=false found in !file!, replace in file
-        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]"') do (
+        type !file! | find /I "[Graphics]" > NUL 2>&1 && (
             call:replaceInFile
             goto:eof
         )

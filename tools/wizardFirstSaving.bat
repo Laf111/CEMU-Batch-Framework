@@ -65,16 +65,9 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
-    if %nbArgs% GTR 5 (
+    if %nbArgs% NEQ 6 (
         @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user
-        @echo given {%*}
-        pause
-        exit 99
-    )
-    if %nbArgs% LEQ 4 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user RPX_FILE_PATH
         @echo given {%*}
         pause
         exit 99
@@ -99,6 +92,13 @@ REM : main
     set "user=!args[4]!"
     set "currentUser=!user:"=!"
 
+    set "RPX_FILE_PATH=!args[5]!"
+    if not exist !RPX_FILE_PATH! (
+        @echo ERROR ^: RPX_FILE_PATH does not exist ^!
+        pause
+        exit 2
+    )
+ 
     @echo =========================================================
     @echo - CEMU_FOLDER     ^: !CEMU_FOLDER!
     @echo - GAME_TITLE      ^: !GAME_TITLE!
@@ -111,7 +111,6 @@ REM : main
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
 
     set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
-
     REM : check game profile
     :checkGameProfile
     REM : Get Game information using titleId
@@ -138,7 +137,6 @@ REM : main
         cls
         @echo ---------------------------------------------------------
     )
-
 
     REM : get Title Id from meta.xml
     set "titleLine="NONE""
@@ -194,22 +192,22 @@ REM : main
     if ["!versionRead!"] == ["NOT_FOUND"] goto:checkProfile
 
     REM : comparing version to V1.15.15
-    set "v11515="
+    set /A "v11515=2"
     call:compareVersions !versionRead! "1.15.15" v11515
     if ["!v11515!"] == [""] @echo Error when comparing versions
     if !v11515! EQU 50 @echo Error when comparing versions
 
-    set "v1156=1"
-    set "v1116=1"
-    set "v114=1"
+    set /A "v1156=1"
+    set /A "v1116=1"
+    set /A "v114=1"
 
     if !v11515! LEQ 1 goto:checkProfile
 
-    set "v1156="
+    set /A "v1156=2"
     call:compareVersions !versionRead! "1.15.6" v1156
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
-    set "v1116="
+    set /A "v1116=2"
     if !v1156! EQU 2 (
         call:compareVersions !versionRead! "1.11.6" v1116
         if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
@@ -225,8 +223,8 @@ REM : main
 
     REM : handling user game profiles
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v11515! LEQ 1 (
-        set "userGameProfile="%CEMU_FOLDER:"=%\gameProfiles\default\%titleId%.ini""
-        if exist !userGameProfile! set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
+        set "userGameProfile="%CEMU_FOLDER:"=%\gameProfiles\%titleId%.ini""
+        if not exist !userGameProfile! set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
     )
     
     REM : Creating game profile if needed
@@ -246,6 +244,7 @@ REM : main
     if not exist !PROFILE_FILE! call:createGameProfile
 
     :completeGameProfile
+
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
     set "csTmp0="!CEMU_FOLDER:"=!\settings.bfww_tmp0""
@@ -291,6 +290,7 @@ REM : main
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
+
     if not exist !cs! goto:displayGameProfile
 
     REM : check the file size
@@ -301,6 +301,9 @@ REM : main
 
     if not exist !TMP_GAME_FOLDER_PATH! mklink /D /J !TMP_GAME_FOLDER_PATH! !GAME_FOLDER_PATH! > NUL 2>&1
 
+    REM : patch !cs! before launching CEMU
+    REM : but not for game stats because UI games'list refresh is needed
+    
     REM : remove the node //GamePaths/Entry
     !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
 
@@ -347,7 +350,6 @@ REM : main
 
     :diffProfileFile
 
-    if [!PROFILE_FILE!] == ["NOT_FOUND"] goto:askRefCemuFolder
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:openProfileFile
 
@@ -434,12 +436,11 @@ REM : main
     wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
     type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-        if !disp! EQU 3 (
+        if !disp! EQU 7 (
             @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
             cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
-        ) else (
-            set /A "disp=disp+1"
         )
+        set /A "disp=disp+1"
         goto:waitingLoop
     )
 
@@ -498,7 +499,7 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    set "v1153b="
+    set /A "v1153b=2"
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
             call:compareVersions !versionRead! "1.15.3b" v1153b
@@ -521,23 +522,31 @@ REM : main
 
     if not exist !cs! goto:saveOptions
 
-    REM : set !GAMES_FOLDER! for //GamePaths
-    REM : remove the node //GamePaths/Entry
-    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
-    REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
+    REM : update !cs! games stats for !GAME_TITLE!
+    set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+    set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
+
+    if not exist !lls! (
+        @echo Warning ^: no last settings file found >> !batchFwLog!
+        goto:patchOutputCs
+    )
+
+    set "lst="NOT_FOUND""
+    call:getLastSettings
+
+    REM : if exist game's stats, patch !cs! with
+    if exist !lst! call:setGameStats
+
+    :patchOutputCs
+    REM : patch @//GameCache/Entry/Path with replacing !GAMES_FOLDER! by !BFW_LOGS!
+    REM : (becaus it was removed earlier, there is only one entry //GameCache/Entry/Path)
+    !xmlS! ed -u "//GameCache/Entry/Path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
+
+    REM : set GamePaths to !GAMES_FOLDER!
+    REM : (becaus it was removed earlier, there is only one entry //GamePaths/Entry)
+    !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
     del /F !csTmp0! > NUL 2>&1
 
-    REM : set !GAMES_FOLDER! for //GamePaths in the backup also
-    set "csbu="!CEMU_FOLDER:"=!\settings.xml_bfwl_old""
-    if exist !csbu! (
-        REM : remove the node //GamePaths/Entry
-        !xmlS! ed -d "//GamePaths/Entry" !csbu! > !csTmp0!
-        REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-        !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp0! > !csbu!
-        del /F !csTmp0! > NUL 2>&1
-    )
-    
     :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
     if not exist !scp! mkdir !scp! > NUL 2>&1
@@ -564,13 +573,11 @@ REM : main
     REM : controller profiles
     set "pat="!CEMU_FOLDER:"=!\controllerProfiles\controller*.*""
     copy /A /Y !pat! !scp! > NUL 2>&1
-    cls
 
     REM : create transferable schader cache folder
     set "tsc="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
     if not exist !tsc! mkdir !tsc! > NUL 2>&1
 
-    :done
     REM : if a TMP_GAME_FOLDER_PATH was used, delete it
     if exist !TMP_GAME_FOLDER_PATH! rmdir /Q !TMP_GAME_FOLDER_PATH! > NUL 2>&1
 
@@ -598,6 +605,88 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :resolveSettingsPath
+        set "prefix=%GAME_FOLDER_PATH:"=%\Cemu\settings\"
+        set "%1=!css:%prefix%=!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getModifiedFile
+        set "folder="%~1""
+        set "pattern="%~2""
+        set "way=-First"
+
+        if ["%~3"] == ["first"] set "way=-Last"
+
+        set "psCommand="Get-ChildItem -recurse -Path !folder:"='! -Filter !pattern:"='! ^| Sort-Object LastAccessTime -Descending ^| Select-Object !way! 1 ^| Select -ExpandProperty FullName""
+        for /F "delims=~" %%a in ('powershell !psCommand! 2^>NUL') do set "%4="%%a"" && goto:eof
+        set "%4="NOT_FOUND""
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getLastSettings
+
+        pushd !sf!
+        :getLastModifiedSettings
+        for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
+
+        if not exist !ls!  (
+            @echo Warning ^: last settings folder was not found^, !ls! does not exist  >> !batchFwLog!
+
+            REM : rebuild it
+            call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
+            if not exist !css! del /F !lls! > NUL 2>&1 && goto:endFctGls
+            call:resolveSettingsPath ltarget
+            @echo !ltarget!> !lls!
+
+            goto:getLastModifiedSettings
+        )
+        set "lst="!sf:"=!\!ls:"=!""
+
+        :endFctGls
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :setGameStats
+
+        pushd !BFW_RESOURCES_PATH!
+        set "rpxFilePath=!RPX_FILE_PATH!"
+
+        REM : get game Id with RPX path
+        :getRpx
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
+        if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
+
+        set "rpxFilePath_USB="!drive!!rpxFilePath:~3!"
+
+        if [!rpxFilePath!] == [!rpxFilePath_USB!] (
+            REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
+            echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
+                set "rpxFilePath_LOGS=!rpxFilePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:endFctSgs
+                set "rpxFilePath=!rpxFilePath_LOGS!"
+                goto:getRpx
+            )
+            goto:endFctSgs
+        )
+        goto:getRpx
+
+        :updateGameStats
+        REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
+
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
+
+        :endFctSgs
+
+        pushd !BFW_TOOLS_PATH!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :setOnlineFiles
 
@@ -668,7 +757,7 @@ REM : functions
         )
 
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w"!BFW_PATH:"=!logs" !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
