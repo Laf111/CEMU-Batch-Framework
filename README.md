@@ -180,7 +180,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
     
     - If you install a single version of CEMU : 
         - you'll have to change most of the settings on every hosts (and need to backup them manually)
-        - you'll have to recompile all shader caches each time host change
+        - you'll have to recompile all shader caches each time on each host
         
     - If you install a version for each host (and use a specific mlc01 folder location) : 
         - you'll have to update your settings if the driver letter of your USB device is changed
