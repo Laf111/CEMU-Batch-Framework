@@ -79,6 +79,8 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Automatic GLCache cleanup when updating display drivers;
 
+- Handling game stats\* (for every user taking all CEMU's versions and all hosts);
+
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
 - Push the CEMU process priority to "above nromal" to "high" to minimize FPS drops while in game;
@@ -99,6 +101,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Automatic update (check availability);
 
+\* when CEMU bug 206 will be fixed (http://bugs.cemu.info/issues/206)
 
 
 ## Install: 
@@ -157,12 +160,41 @@ V13-6 (online files installation for all users) : https://1drv.ms/v/s!Apr2zdKB1g
 V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/cc606b/batchfw_v14_sync_saves_with_wiiu_for_all_wiiu/
 
 
+## FAQ: 
+
+- Why backup/restore GLCache? 
+
+    - CEMU version earlier than 1.15.1 does not protect the GLCache in shaderCache/driver/nvidia
+    
+    - GLCache is saved per game and so for versions >= 1.15.1 it avoids to handle only one big cache that could lead in extra RAM/VRAM         consumption and generate stutters even with a full transferable shader cache
+
+
+- Playing with my games on a USB drive will not cripple performances? 
+
+    - When you have a full cache (transferable) for each games : NO. CEMU load all in RAM and so it will only lower opening/closing times.
+    
+    
+- CEMU is already portable, what about install CEMU on a USB drive directlty? 
+
+    - First, it might heavily drop performances especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time)
+    
+    - If you install a single version of CEMU : 
+        - you'll have to change most of the settings on every hosts (and need to backup them manually)
+        - you'll have to recompile all shader caches each time host change
+        
+    - If you install a version for each host (and use a specific mlc01 folder location) : 
+        - you'll have to update your settings if the driver letter of your USB device change
+        
+
+
 ## Recommendations: 
 
 If you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
 
 I recommend to not clone the repository : use the last released version.
+Using the main branch could lead in regressions and troubles as bacth scripting is really difficult to check (no IDE, no compilation, poorly and unchecked syntax, file format issues...)  
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
+
 
 If you have any trouble, send me a private message on CEMU's reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
