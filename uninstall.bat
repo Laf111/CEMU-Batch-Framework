@@ -22,12 +22,13 @@ REM : main
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
-
-    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
 

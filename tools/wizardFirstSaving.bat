@@ -65,9 +65,9 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
-    if %nbArgs% NEQ 6 (
+    if %nbArgs% NEQ 7 (
         @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user RPX_FILE_PATH
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user RPX_FILE_PATH IGNORE_PRECOMP
         @echo given {%*}
         pause
         exit 99
@@ -83,6 +83,7 @@ REM : main
     REM : get and check GAME_TITLE
     set "GAME_TITLE=!args[1]!"
     set "GAME_TITLE=!GAME_TITLE:"=!"
+
     REM : get and check PROFILE_FILE
     set "PROFILE_FILE=!args[2]!"
 
@@ -98,6 +99,9 @@ REM : main
         pause
         exit 2
     )
+
+    set "IGNORE_PRECOMP=!args[6]!"
+    set "IGNORE_PRECOMP=!IGNORE_PRECOMP:"=!"
  
     @echo =========================================================
     @echo - CEMU_FOLDER     ^: !CEMU_FOLDER!
@@ -193,7 +197,7 @@ REM : main
 
     REM : comparing version to V1.15.15
     set /A "v11515=2"
-    call:compareVersions !versionRead! "1.15.15" v11515
+    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
     if ["!v11515!"] == [""] @echo Error when comparing versions
     if !v11515! EQU 50 @echo Error when comparing versions
 
@@ -204,12 +208,12 @@ REM : main
     if !v11515! LEQ 1 goto:checkProfile
 
     set /A "v1156=2"
-    call:compareVersions !versionRead! "1.15.6" v1156
+    call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
     set /A "v1116=2"
     if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.11.6" v1116
+        call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
         if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
     ) else (
         set /A "v1116=1"
@@ -259,7 +263,7 @@ REM : main
     if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
 
     if !v1116! EQU 1 if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114
+        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
         if ["!v114!"] == [""] echo Error when comparing versions
         if !v114! EQU 50 echo Error when comparing versions
         if !v114! EQU 2 set "gfxType=V2"
@@ -269,13 +273,13 @@ REM : main
             set "gfxType=V2"
         ) else (
             if !v1156! EQU 2 (
-                call:compareVersions !versionRead! "1.14.0" v114
+                call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
                 if ["!v114!"] == [""] echo Error when comparing versions
                 if !v114! EQU 50 echo Error when comparing versions
                 if !v114! EQU 2 set "gfxType=V2"
 
                 REM : if CEMU version < 1.12.0 (add games' list in UI)
-                call:compareVersions !versionRead! "1.12.0" v112
+                call:compareVersions !versionRead! "1.12.0" v112 > NUL 2>&1
                 if ["!v112!"] == [""] echo Error when comparing versions
 
                 if !v112! EQU 50 echo Error when comparing versions
@@ -290,6 +294,23 @@ REM : main
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
+    REM : path to cemuHook Ssettings
+    set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
+
+    set /A "v1153b=2"
+    if !v1156! EQU 2 (
+        call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
+        if ["!v1153b!"] == [""] @echo Error when comparing versions
+        if !v1153b! EQU 50 @echo Error when comparing versions
+    ) else (
+        set /A "v1153b=2"
+    )
+
+    REM : TODO bypass if version > X (since CEMU auto mode)
+
+    REM : patching files for ignoring precompiled cache
+    if ["!IGNORE_PRECOMP!"] == ["DISABLED"] call:ignorePrecompiled false
+    if ["!IGNORE_PRECOMP!"] == ["ENABLED"] call:ignorePrecompiled true
 
     if not exist !cs! goto:displayGameProfile
 
@@ -400,8 +421,7 @@ REM : main
     REM : if just created, copy it in MISSING_PROFILES_FOLDER
     if not exist !missingProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
 
-    REM : check CEMU options (and controollers settings)
-    set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
+    REM : check CEMU options (and controllers settings)
 
     REM : set online files
     REM : check if an internet connexion is active
@@ -502,7 +522,7 @@ REM : main
     set /A "v1153b=2"
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
-            call:compareVersions !versionRead! "1.15.3b" v1153b
+            call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
             if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if ["!v1153b!"] == [""] @echo Error when comparing versions
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
@@ -540,7 +560,7 @@ REM : main
     :patchOutputCs
     REM : patch @//GameCache/Entry/Path with replacing !GAMES_FOLDER! by !BFW_LOGS!
     REM : (becaus it was removed earlier, there is only one entry //GameCache/Entry/Path)
-    !xmlS! ed -u "//GameCache/Entry/Path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
+    !xmlS! ed -u "//GameCache/Entry/path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
 
     REM : set GamePaths to !GAMES_FOLDER!
     REM : (becaus it was removed earlier, there is only one entry //GamePaths/Entry)
@@ -605,6 +625,129 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :patchGraphicSection
+        REM : arg1 : file
+        set "file="%~1""
+
+        REM : arg2 : label
+        set "label=%~2"
+
+        REM : boolean value to set
+        set "value=%3"
+
+        if ["%value%"] == ["true"]  set "valueB=false"
+        if ["%value%"] == ["false"] set "valueB=true"
+
+        set "str=%label% = %valueB%"
+        set "strWithoutSpace=!str: =!"
+        set "strTarget=%label% = %value%"
+        set "strTargetWithoutSpace=!strTarget: =!"
+
+        REM : if strTarget found in file : exit
+        type !file! | find /I "!strTarget!" > NUL 2>&1 && goto:eof
+        REM : if strTargetWithoutSpace found in file : exit
+        type !file! | find /I "!strTargetWithoutSpace!" > NUL 2>&1 && goto:eof
+
+        REM : if [Graphics] is found in file and is commented : goto patchGraphic
+        type !file! | find /I "[Graphics]" > NUL 2>&1 && for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
+
+        REM : if disablePrecompiledShaders=false found in !file!, replace in file
+        type !file! | find /I "[Graphics]" > NUL 2>&1 && (
+            call:replaceInFile
+            goto:eof
+        )
+
+        :patchGraphic
+        REM : if [Graphics] not found
+        @echo. >> !file!
+        @echo # add by batchFw>> !file!
+        @echo [Graphics]>> !file!
+        @echo !strTarget!>> !file!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :replaceInFile
+
+        REM get file name to create file filter for fnr.exe
+        for /F "delims=~" %%a in (!file!) do set "filter=%%~nxa"
+        for %%a in (!file!) do set "tmpStr="%%~dpa""
+        set "parentFolder=!tmpStr:~0,-2!""
+
+        REM : log file
+        set "fnrLogFile="!fnrLogFolder:"=!\%filter:"=%.log""
+
+        REM : if str found in file : replace it with strTarget
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!str!" 2^>NUL') do (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!str!" --replace "!strTarget!" --logFile !fnrLogFile!
+
+            goto:eof
+        )
+
+        REM : if strWithoutSpace found in file : strTargetWithoutSpace
+        if exist !fnrLogFile! del /F !fnrLogFile!
+        for /F "delims=~" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
+
+            goto:eof
+        )
+
+        REM : if [Graphics] found in file :
+        if exist !fnrLogFile! del /F !fnrLogFile!
+        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
+
+            goto:eof
+        )
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
+
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :ignorePrecompiled
+
+        set "value=%1"
+
+        set /A "v1158=2"
+        if ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 1 (
+            call:compareVersions !versionRead! "1.15.8" v1158 > NUL 2>&1
+            if ["!v1158!"] == [""] @echo Error when comparing versions
+            if !v1158! EQU 50 @echo Error when comparing versions
+        )
+        REM : v > 1.15.8 precomp auto in CEMU and no effect of cemuHook settings
+        if !v1158! LEQ 1 goto:eof
+
+        REM : check if cemuHook.ini exist
+        if not exist !chs! goto:patchGp
+
+        REM : else verifiy cemu hook install
+        set dllFile="!CEMU_FOLDER:"=!\keystone.dll""
+
+        REM : if not exit exit
+        if not exist !dllFile! goto:patchGp
+
+        REM : force ignorePrecompiledShaderCache = true in cemuHook.ini
+        call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
+
+        :patchGp
+
+        if ["!versionRead!"] == ["NOT_FOUND"] call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value% && goto:eof
+
+        if !v1158! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
+        if !v1158! LEQ 1 (
+            set "value=false"
+            call:patchGraphicSection !PROFILE_FILE! "precompiledShaders" !value!
+        ) else (
+            call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :resolveSettingsPath
         set "prefix=%GAME_FOLDER_PATH:"=%\Cemu\settings\"

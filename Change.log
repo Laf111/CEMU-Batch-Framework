@@ -1,7 +1,6 @@
-XX/09/2019 V15 :
-- add : a progressbar to monitor Pre and Post processing for shortcuts mode (not executables 
-        where a minimized console can be used to monitor the execution)
-- add : handle a list for aspect ratios 
+27/10/2019 V15RC1 :
+- add : a progressbar to monitor BatchFw Pre and Post processing 
+- add : handle a list for user aspect ratios 
 - add : GFX packs completion take all hosts settings into account (aspect ratios defined)
 - add : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
         an active connection is found) 
@@ -40,7 +39,7 @@ XX/09/2019 V15 :
 - fix : wait for the end of V2 GFX pack extraction in Create*.bat 
 - fix : still some unwanted message sent to console when completing/creating extra GFX packs
 - fix : disable the delayed expansion on game's profile path (when the file does not exist, it leads 
-        in a warning displayed in the console : the process tried to write on an non existing channel)
+        in a warning displayed in the console : the process tried to write on a nonexistent pipe)
 - fix : when a game's profile file was created (not existing) on versions >= 1.15.6, it wasn't 
         copied in _BatchFw_Missing_Games_Profiles        
 - fix : launchThirdPartySoftware.bat not removing a third party software with invalid path
@@ -510,9 +509,9 @@ XX/09/2019 V15 :
 
 
 2018/08/16 V9 :
-    - can now ouput executables that can be Â“shortcutedÂ” by STEAM and so you can use all BatchFW features with launching from STEAM
+    - can now ouput executables that can be “shortcuted” by STEAM and so you can use all BatchFW features with launching from STEAM
     - automatic graphic pack update
-    - auto-import settings from last version reset by default with comparing the two gameÂ’s profiles lines side by side (if needed)
+    - auto-import settings from last version reset by default with comparing the two game’s profiles lines side by side (if needed)
     - fix openGL Cache backup for AMD users (looking for a folder and nor for files in the GLCache folder)
 
 2018/07/03 V8-6 :
@@ -641,7 +640,7 @@ XX/09/2019 V15 :
     
     
 2018/04/04 V5 : Install Icons automatically, open dialog boxes
-    - now only the following characters are forbiden in paths : (,),&,%,Â£,! and ^
+    - now only the following characters are forbiden in paths : (,),&,%,£,! and ^
     - improved specials characters support by : 
         getting and setting the char code set of the host
         delay expansion in all code and closing variables visibility

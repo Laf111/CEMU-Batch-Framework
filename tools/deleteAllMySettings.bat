@@ -69,7 +69,8 @@ REM : main
     set "CEMU_FOLDER_NAME=*"
 
     if %nbArgs% EQU 0 (
-        @echo Delete all my settings for each game ^(for all CEMU versions^) saved for all host
+        @echo Delete all my settings for each game saved
+        @echo ^(for all CEMU versions^) for all hosts
         goto:del
     )
 
@@ -89,7 +90,9 @@ REM : main
         set "HOST=!args[0]!"
         set "HOST=!HOST:"=!"
         set "HOST=!HOST: =!"
-        if %nbArgs% EQU 1 @echo Delete all my settings for each game ^(for all CEMU versions^) saved for !USERDOMAIN! host
+        if %nbArgs% EQU 1 (
+            @echo Delete all my settings for each game saved
+            @echo ^(for all CEMU versions^) on the host !USERDOMAIN!
     )
 
     REM : CEMU version given
@@ -97,7 +100,8 @@ REM : main
         set "CEMU_FOLDER_NAME=!args[1]!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
         set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME: =!"
-        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved for host !USERDOMAIN!
+        @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved
+        @echo on the host !USERDOMAIN!
     )
 
 

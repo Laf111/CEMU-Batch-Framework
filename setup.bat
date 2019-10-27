@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15"
+    set "BFW_VERSION=V15RC1"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -1073,12 +1073,12 @@ REM : functions
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
-        call:compareVersions !versionRead! "1.15.1" v1151
+        call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
         if ["!v1151!"] == [""] echo Error when comparing versions
         if !v1151! EQU 50 echo Error when comparing versions
 
         if !v1151! EQU 2 (
-            call:compareVersions !versionRead! "1.14.0" result
+            call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
             if ["!result!"] == [""] echo Error when comparing versions
             if !result! EQU 50 echo Error when comparing versions
             if !result! EQU 1 goto:autoImportMode

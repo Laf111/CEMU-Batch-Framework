@@ -788,7 +788,7 @@ REM : main
     REM : remove lock file
     del /F /S !lockFile! > NUL 2>&1
 
-    call:setProgressBar 0 30 "post processing" "analysing Cemu return code"
+    call:setProgressBar 0 10 "post processing" "analysing Cemu return code"
 
     REM : analyse CEMU's return code
     :analyseCemuStatus
@@ -818,7 +818,16 @@ REM : main
         @echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
     )
 
+    if %cr_cemu% NEQ 0 goto:getTransCacheBack
 
+    call:setProgressBar 10 30 "post processing" "Compress save for !currentUser!"
+
+    REM : saving game's saves for user
+    set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
+    @echo !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! >> !batchFwLog!
+    wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
+
+    :getTransCacheBack
     REM : get SHADER_MODE
     set "SHADER_MODE=SEPARABLE"
     for /F "delims=~" %%i in ('type !cemuLog! ^| find /I "UseSeparableShaders: false"') do set "SHADER_MODE=CONVENTIONAL"
@@ -842,7 +851,11 @@ REM : main
     set "FPS=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "native FPS" 2^>NUL') do set "FPS=%%i"
 
-    call:setProgressBar 30 38 "post processing" "fil in compatibility reports"
+    if %cr_cemu% EQU 0 (
+        call:setProgressBar 30 38 "post processing" "fil in compatibility reports"
+    ) else (
+        call:setProgressBar 10 38 "post processing" "fil in compatibility reports"
+    )
 
     REM : report compatibility for CEMU_FOLDER_NAME and GAME on USERDOMAIN
     set "rc="!BFW_TOOLS_PATH:"=!\reportCompatibility.bat""
@@ -852,14 +865,8 @@ REM : main
 
     @echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
 
-    if %cr_cemu% NEQ 0 goto:hangleGlCache
     call:setProgressBar 38 55 "post processing" "backup and remove !currentUser! save"
     
-    REM : saving game's saves for user
-    set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
-    @echo !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! >> !batchFwLog!
-    wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
-
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
     :hangleGlCache
@@ -1156,18 +1163,19 @@ REM : main
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
+    call:setProgressBar 96 100 "post processing" "waiting the end of all child processes"
+
     REM :restoreBackups
     if exist !cs! call:restoreFile !cs!
     if exist !csb! call:restoreFile !csb!
     if exist !chs! call:restoreFile !chs!
-
+    
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
     @echo =========================================================>> !batchFwLog!
     @echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
 
-    call:setProgressBar 96 100 "post processing" "waiting the end of all child processes"
     
     exit 0
 
@@ -1255,10 +1263,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : robocopy still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /I "rar.exe" | find /I !GAMES_FOLDER! > NUL 2>&1 && (
-            echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
-            goto:waitingLoopProcesses
-        )
         type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && (
             echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
@@ -1271,7 +1275,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-
+        type !logFileTmp! | find /I "rar.exe" | find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
+            echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
             echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
@@ -1494,6 +1501,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
 
         :isSettingsExist
+        @echo Ignoring the precompiled cache ^: !IGNORE_PRECOMP!>> !batchFwLog!
+
         if exist !SETTINGS_FOLDER! goto:loaded
 
         REM : search for the last modified settings folder
@@ -1512,15 +1521,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             REM : PROFILE_FILE for game that still not exist in CEMU folder = NOT_FOUND (first run on a given host)
 
             set "wfs="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
-            @echo !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH!>> !batchFwLog!
-            wscript /nologo !StartMaximizedWait! !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH!
+            @echo !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH! !IGNORE_PRECOMP!>> !batchFwLog!
+            wscript /nologo !StartMaximizedWait! !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH! !IGNORE_PRECOMP!
 
             goto:beforeLoad
         )
-
-        REM : patching files for ignoring precompiled cache before diff
-        if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
-        if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
 
         REM : get path to CEMU installs folder
         for %%a in (!CEMU_FOLDER!) do set "parentFolder="%%~dpa""
@@ -1568,6 +1573,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         call:log2GamesLibraryFile !msg!
 
         :beforeLoad
+
+        @echo Ignoring precompiled shader = %value%>> !batchFwLog!
 
         REM : if wizard was launched set PROFILE_FILE because it was not found earlier
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -1689,11 +1696,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !controllersProfilesSaved! !controllersProfiles! > NUL 2>&1
-
-        :ignorePrecomp
-        REM : patching files for ignoring precompiled cache
-        if ["%IGNORE_PRECOMP%"] == ["DISABLED"] call:ignorePrecompiled false
-        if ["%IGNORE_PRECOMP%"] == ["ENABLED"] call:ignorePrecompiled true
 
         REM : set onlines files for user if an active connection was found
         if !wizardLaunched! EQU 0 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
@@ -1852,45 +1854,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    :ignorePrecompiled
-
-        set "value=%1"
-
-        set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
-        REM : check if cemuHook.ini exist
-        if not exist !chs! goto:patchGp
-
-        REM : else verifiy cemu hook install
-        set dllFile="!CEMU_FOLDER:"=!\keystone.dll""
-
-        REM : if not exit exit
-        if not exist !dllFile! goto:patchGp
-
-        REM : force ignorePrecompiledShaderCache = true in cemuHook.ini
-        call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
-
-        :patchGp
-
-        @echo Ignoring precompiled shader = %value%>> !batchFwLog!
-
-        if ["!versionRead!"] == ["NOT_FOUND"] call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value% && goto:eof
-        if !v1153b! EQU 1 (
-            call:compareVersions !versionRead! "1.15.8" result
-            if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-            if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-            if !result! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
-            if !result! LEQ 1 (
-                set "value=false"
-                call:patchGraphicSection !PROFILE_FILE! "precompiledShaders" !value!
-            )
-        ) else (
-            call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :getHostState
         set "ipaddr=%~1"
         set /A "state=0"
@@ -1989,87 +1952,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    :patchGraphicSection
-        REM : arg1 : file
-        set "file="%~1""
-
-        REM : arg2 : label
-        set "label=%~2"
-
-        REM : boolean value to set
-        set "value=%3"
-
-        if ["%value%"] == ["true"]  set "valueB=false"
-        if ["%value%"] == ["false"] set "valueB=true"
-
-        set "str=%label% = %valueB%"
-        set "strWithoutSpace=!str: =!"
-        set "strTarget=%label% = %value%"
-        set "strTargetWithoutSpace=!strTarget: =!"
-
-        REM : if strTarget found in file : exit
-        type !file! | find /I "!strTarget!" > NUL 2>&1 && goto:eof
-        REM : if strTargetWithoutSpace found in file : exit
-        type !file! | find /I "!strTargetWithoutSpace!" > NUL 2>&1 && goto:eof
-
-        REM : if [Graphics] is found in file and is commented : goto patchGraphic
-        type !file! | find /I "[Graphics]" > NUL 2>&1 && for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
-
-        REM : if disablePrecompiledShaders=false found in !file!, replace in file
-        type !file! | find /I "[Graphics]" > NUL 2>&1 && (
-            call:replaceInFile
-            goto:eof
-        )
-
-        :patchGraphic
-        REM : if [Graphics] not found
-        @echo. >> !file!
-        @echo # add by batchFw>> !file!
-        @echo [Graphics]>> !file!
-        @echo !strTarget!>> !file!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :replaceInFile
-
-        REM get file name to create file filter for fnr.exe
-        for /F "delims=~" %%a in (!file!) do set "filter=%%~nxa"
-        for %%a in (!file!) do set "tmpStr="%%~dpa""
-        set "parentFolder=!tmpStr:~0,-2!""
-
-        REM : log file
-        set "fnrLogFile="!fnrLogFolder:"=!\%filter:"=%.log""
-
-        REM : if str found in file : replace it with strTarget
-        for /F "delims=~" %%i in ('type !file! ^| find /I "!str!" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!str!" --replace "!strTarget!" --logFile !fnrLogFile!
-
-            goto:eof
-        )
-
-        REM : if strWithoutSpace found in file : strTargetWithoutSpace
-        if exist !fnrLogFile! del /F !fnrLogFile!
-        for /F "delims=~" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
-
-            goto:eof
-        )
-
-        REM : if [Graphics] found in file :
-        if exist !fnrLogFile! del /F !fnrLogFile!
-        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
-
-            goto:eof
-        )
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
-
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :syncControllerProfiles
 

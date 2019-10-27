@@ -26,6 +26,8 @@ REM : main
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
@@ -381,12 +383,12 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
-    call:compareVersions !versionRead! "1.15.1" v1151
+    call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
     if ["!v1151!"] == [""] echo Error when comparing versions
     if !v1151! EQU 50 echo Error when comparing versions
 
     if !v1151! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" result
+        call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 1 goto:autoImportMode

@@ -61,7 +61,7 @@ REM : ------------------------------------------------------------------
     REM : get the last Cemu installation on this host
     REM : search in logFile, getting only the last occurence
     set "CEMU_FOLDER="NOT_FOUND""
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" ^| sort /R 2^>NUL') do (
         set "CEMU_FOLDER="NOT_FOUND""
         call:getCemuInstall "%%i" CEMU_FOLDER
         if not [!CEMU_FOLDER!] == ["NOT_FOUND"] goto:backupCs
@@ -216,7 +216,7 @@ REM : ------------------------------------------------------------------
         )
 
         REM : if current version >=1.12.0
-        call:compareVersions !versionRead! "1.12.0" result
+        call:compareVersions !versionRead! "1.12.0" result > NUL 2>&1
         if ["!result!"] == [""] @echo Error when comparing versions
         if !result! EQU 50 @echo Error when comparing versions
         if !result! EQU 2 (
