@@ -4,7 +4,7 @@ BatchFw is a free framework for the CEMU emulator (WII-U) based on batch, powers
 
 Versions of CEMU supported : 1.11.0 to 1.15.17
 
-Last GFX packs checked (presets completion) : V543
+Last GFX packs checked (presets completion) : V544
 
 
 ## Main purpose:
@@ -162,6 +162,11 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
 
 ## FAQ: 
 
+- Do i need a Wii-U? 
+
+    - No you don't. You can define users but obviously you'll cannot play online
+    
+    
 - Why backup/restore GLCache? 
 
     - CEMU version earlier than 1.15.1 does not protect the GLCache in shaderCache/driver/nvidia
