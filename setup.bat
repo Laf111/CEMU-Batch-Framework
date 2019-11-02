@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15RC1"
+    set "BFW_VERSION=V15RC2"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -274,7 +274,17 @@ REM : main
     )
 
     :importModForGames
-    cls
+
+    if %nbArgs% EQU 0 (
+        @echo ---------------------------------------------------------
+        call:getUserInput "BatchFw launching mode? (p = use progress bar OR s = silent, default in 10sec): " "p,s" ANSWER 10
+
+        if [!ANSWER!] == ["p"] (
+            set "msg="USE_PROGRESSBAR=YES""
+            call:log2HostFile !msg!
+        )
+    )
+
     @echo ---------------------------------------------------------
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
@@ -315,13 +325,13 @@ REM : main
         set "currentLogFile="%%i""
 
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
             REM : add to the list if not already present
-            echo !ratiosList! | find /V "%%i" > NUL 2>&1 && set "ratiosList=%%i !ratiosList!"
+            echo !ratiosList! | find /V "%%j" > NUL 2>&1 && set "ratiosList=%%j !ratiosList!"
         )
     )
 
-    if ["%ratiosList%"] == ["EMPTY"] goto:getRatios
+    if ["!ratiosList!"] == ["EMPTY"] goto:getRatios
 
     set "ratiosList=!ratiosList:EMPTY=!"
     @echo Aspect ratios already defined in BatchFW: !ratiosList!

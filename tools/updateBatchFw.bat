@@ -96,6 +96,7 @@ REM : main
     echo !bfwVR! | find "RC" > NUL 2>&1 && (
         @echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
         @echo if you want to update manually^.
+        timeout /T 4 > NUL 2>&1
         exit /b 14
     )
     call:compareVersions %bfwVR% %BFW_VERSION% result > NUL 2>&1

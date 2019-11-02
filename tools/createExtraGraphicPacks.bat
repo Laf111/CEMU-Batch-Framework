@@ -222,6 +222,8 @@ REM : main
     set "titleIdList="
     call:getAllTitleIds
 
+    REM : SCREEN_MODE
+    set "screenMode=fullscreen"
     set "ARLIST="
 
     REM : search in all Host_*.log
@@ -231,10 +233,12 @@ REM : main
 
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         set "ARLIST="
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
             REM : add to the list if not already present
-            echo !ARLIST! | find /V "%%i" > NUL 2>&1 && set "ARLIST=%%i !ARLIST!"
+            echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
         )
+        REM : get the SCREEN_MODE
+        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
     )
 
     if ["!ARLIST!"] == [""] (
@@ -243,10 +247,6 @@ REM : main
         if !QUIET_MODE! EQU 0 pause
         exit /b 2
     )
-
-    REM : get the SCREEN_MODE from logHOSTNAME file
-    set "screenMode=fullscreen"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%i"
 
     pushd !BFW_GP_FOLDER!
 
@@ -784,7 +784,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:169_windowedV2
         @echo Create 16^/9 missing V2 resolution packs
 
         REM : 16/9 fullscreen graphic packs
@@ -803,7 +802,7 @@ REM : functions
             set /A "mod4=%%p%%4"
             if !mod4! EQU 0 call:waitChildrenProcessesEnd
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :169_windowedV2
         echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
@@ -855,8 +854,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
-
         @echo Complete 16^/9 presets in V3 GFX resolution pack
         set "edu=!ed!"
 
@@ -902,7 +899,7 @@ REM pause
             set /A "w=!w!-%dw%"
         )
 
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         REM : create windowed presets only if user chosen it during setup
 
@@ -957,7 +954,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:219_windowedV2
         @echo Create 21^/9 missing V2 resolution packs
 
         REM : 21/9 fullscreen graphic packs
@@ -976,7 +972,7 @@ REM pause
             set /A "mod4=%%p%%4"
             if !mod4! EQU 0 call:waitChildrenProcessesEnd
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :219_windowedV2
         REM : 21/9 windowed graphic packs
@@ -1007,7 +1003,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:219_windowed
         @echo Complete 21^/9 presets in V3 GFX resolution pack
 
         set "edu=!ed!"
@@ -1038,7 +1033,7 @@ REM pause
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :219_windowed
         @echo Create 21^/9 windowed presets in V3 GFX resolution pack
@@ -1105,7 +1100,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:43_windowedV2
         @echo Create 4^/3 missing V2 resolution packs
 
         REM : 4/3 fullscreen graphic packs
@@ -1124,7 +1118,7 @@ REM pause
             set /A "mod4=%%p%%4"
             if !mod4! EQU 0 call:waitChildrenProcessesEnd
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :43_windowedV2
         REM : 4/3 windowed graphic packs
@@ -1155,7 +1149,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:43_windowed
         @echo Complete 4^/3 presets in V3 GFX resolution pack
 
         set "edu=!ed!"
@@ -1185,7 +1178,7 @@ REM pause
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :43_windowed
         REM : 4/3 windowed graphic packs
@@ -1236,7 +1229,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:489_windowedV2
         @echo Create 48^/9 missing V2 resolution packs
 
         REM : 48/9 fullscreen graphic packs
@@ -1255,7 +1247,7 @@ REM pause
             set /A "mod4=%%p%%4"
             if !mod4! EQU 0 call:waitChildrenProcessesEnd
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :489_windowedV2
         REM : 48/9 windowed graphic packs
@@ -1285,7 +1277,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:489_windowed
         @echo Complete 48^/9 presets in V3 GFX resolution pack
 
         set "edu=!ed!"
@@ -1316,7 +1307,7 @@ REM pause
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :489_windowed
         REM : 49/9 windowed graphic packs
@@ -1360,7 +1351,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowedV2
         @echo Create 16^/10 missing V2 resolution packs
 
         REM : 16/10 full screen graphic packs
@@ -1379,7 +1369,7 @@ REM pause
             set /A "mod4=%%p%%4"
             if !mod4! EQU 0 call:waitChildrenProcessesEnd
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :1610_windowedV2
         REM : 16/10 windowed graphic packs
@@ -1410,7 +1400,6 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowed
         @echo Create 16^/10 presets in V3 GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1440,7 +1429,7 @@ REM pause
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
         )
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :1610_windowed
         REM : 16/10 windowed graphic packs

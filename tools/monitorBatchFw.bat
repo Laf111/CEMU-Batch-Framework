@@ -29,7 +29,7 @@ REM : main
     set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
 
     REM : timeout value in seconds
-    set /A "timeOut=180"
+    set /A "timeOut=100"
 
     REM : duration value in seconds
     set /A "duration=0"
@@ -50,20 +50,35 @@ REM : main
 
         REM : if rar is running, don't count
         type !logFileTmp! | find /I "rar.exe" | find /I "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:waitingLoopProcesses
-        
+
         REM : monitor Cemu launch
         type !logFileTmp! | find /I "cemu.exe" > NUL 2>&1 && set /A "duration=-1"
 
         if !duration! GEQ 0 set /A "duration+=1"
-        if !duration! GTR !timeOut! (
-            REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ? (you might, if batchFw is building graphic packs, mostly if V2 ones are needed)" 4117
-            if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:waitingLoopProcesses
-
-            call !killBatchFw!
-            exit 1
-        )
+        if !duration! GTR !timeOut! call:askToKill
         goto:waitingLoopProcesses
     )
     call !killBatchFw!
 exit 0
+
+REM : ------------------------------------------------------------------
+REM : functions
+
+    :askToKill
+
+        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+
+            REM : warn user with a retry/cancel msgBox
+            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 30sec more. (if you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk)" 4144
+            set /A "duration-=30"
+            goto:eof
+        )
+
+        REM : warn user with a retry/cancel msgBox
+        cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ?" 4117
+        if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:eof
+
+        call !killBatchFw!
+        exit 1
+
+    goto:eof

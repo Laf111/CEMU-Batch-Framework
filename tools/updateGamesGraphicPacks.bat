@@ -472,7 +472,7 @@ REM : functions
         set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
-        call !toBeLaunch! !BFW_GP_FOLDER! %titleId% > !cgpLogFile!
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% > !cgpLogFile!
 
         goto:createCapGP
 
@@ -493,7 +493,7 @@ REM : functions
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
         echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
 
-        call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile! 2>&1
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile! 2>&1
 
         :createCapGP
 
@@ -503,7 +503,7 @@ REM : functions
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
         echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
 
-        call !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! > !cfcgpLog! 2>&1
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! > !cfcgpLog! 2>&1
 
 
     goto:eof

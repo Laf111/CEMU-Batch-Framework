@@ -1,5 +1,5 @@
 @echo off
-color f
+color 08
 setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main

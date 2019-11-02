@@ -205,10 +205,6 @@ REM : main
     REM compute native width (16/9 = 1.7777777)
     call:mulfloat "%nativeHeight%.000" "1.777" 3 nativeWidth
 
-    REM : get the SCREEN_MODE from logHOSTNAME file
-    set "screenMode=fullscreen"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%i"
-
     REM : create resolution graphic packs
     call:createResGP
 
@@ -532,8 +528,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:1610_windowed
-
         REM : 16/10 full screen graphic packs
         set /A "h=360"
         set /A "w=576"
@@ -549,7 +543,7 @@ REM : functions
 
         @echo 16^/10 fullscreen graphic packs created ^!
 
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :1610_windowed
         REM : 16/10 windowed graphic packs
@@ -572,8 +566,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:219_windowed
-
         REM : 21/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=840"
@@ -589,7 +581,7 @@ REM : functions
 
         @echo 21^/9 graphic packs created ^!
 
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :219_windowed
         REM : 21/9 windowed graphic packs
@@ -614,8 +606,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:169_windowed
-
         echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
 
         REM : 16/9 fullscreen graphic packs
@@ -632,7 +622,7 @@ REM : functions
         )
 
         @echo 16^/9 graphic packs created ^!
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :169_windowed
 
@@ -661,7 +651,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:43_windowed
         REM : 4/3 fullscreen graphic packs
         set /A "h=360"
         set /A "w=480"
@@ -676,7 +665,7 @@ REM : functions
         )
 
         @echo 4^/3 graphic packs created ^!
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :43_windowed
         REM : 4/3 windowed graphic packs
@@ -701,8 +690,6 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        if not ["%screenMode%"] == ["fullscreen"] goto:489_windowed
-
         REM : 48/9 fullscreen graphic packs
         set /A "h=360"
         set /A "w=1920"
@@ -718,7 +705,7 @@ REM : functions
 
         @echo 48^/9 graphic packs created ^!
 
-        goto:eof
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :489_windowed
         REM : 48/9 windowed graphic packs
@@ -753,6 +740,10 @@ REM : functions
     goto:eof
 
     :createResGP
+
+        REM : SCREEN_MODE
+        set "screenMode=fullscreen"
+
         REM : if not defined, here fix it to 16/9
         if ["!ARLIST!"] == [""] set "ARLIST=169"
 
@@ -763,10 +754,12 @@ REM : functions
 
             REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
             set "ARLIST="
-            for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+            for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
                 REM : add to the list if not already present
-                echo !ARLIST! | find /V "%%i" > NUL 2>&1 && set "ARLIST=%%i !ARLIST!"
+                echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
             )
+            REM : get the SCREEN_MODE
+            for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
         )
 
         REM : initialize V3 graphic pack
