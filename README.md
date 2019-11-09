@@ -9,7 +9,9 @@ Last GFX packs checked (presets completion) : **V549**
 
 ## Main purpose:
 
-- **Handle more than one user/save and for Wii-U owners: install online files, sync saves between CEMU with the Wii-U;**
+- **Handle more than one user/save;**
+
+- **For Wii-U owners: install online files, sync friend list saves between CEMU with the Wii-U;**
 
 - **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
 
