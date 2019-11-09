@@ -1426,7 +1426,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             for /F "delims=~" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
         )
 
-        if !usePbFlag! EQU 1 call:setProgressBar 70 74 "pre processing" "installing settings, saves for !currentUser!"
+        if !usePbFlag! EQU 1 call:setProgressBar 70 76 "pre processing" "installing settings, saves for !currentUser!"
 
         REM : importing game's saves for !user!
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
@@ -1612,23 +1612,18 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
         set "rpxFilePath=!RPX_FILE_PATH!"
 
-        set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
-
-        if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! (
-            call:setProgressBar 74 80 "pre processing" "updating games stats"
-        ) else (
-            call:setProgressBar 74 80 "pre processing" "updating games stats, installing online files"
-        )
         if ["!versionRead!"] == ["NOT_FOUND"] goto:cemuHookSettings
 
-        REM : if current version >=1.12.0
-        if !v114! EQU 0 (
-            call:compareVersions !versionRead! "1.12.0" result
+        REM : if current version >=1.15.15
+        if !v11515! GEQ 1 (
+            call:compareVersions !versionRead! "1.15.18" result
             if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 2 goto:cemuHookSettings
-        )
+        ) else goto:cemuHookSettings
 
+        if !usePbFlag! EQU 1 call:setProgressBar 76 78 "pre processing" "updating games stats"
+        
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
         set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
@@ -1687,6 +1682,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
 
         :cemuHookSettings
+
+
+        set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
+        if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! call:setProgressBar 78 80 "pre processing" "installing online files"
+
         pushd !BFW_TOOLS_PATH!
         set "chIniUser="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
         if exist !chIniUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_cemuhook.ini"

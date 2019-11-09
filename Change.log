@@ -1,15 +1,14 @@
-fix hostLog searches
-fix third party software not launched when progress bar disabled
-
-
-28/10/2019 V15RC2 :
-- add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing 
+handle game stats only if version of CEMU >= 1.15.18
+09/11/2019 V15RC3 :
+- add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
+        if BatchFw is installed on a removable device => always use progress bar
 - add : handle a list for user aspect ratios 
 - add : GFX packs completion take all hosts settings into account (aspect ratios defined)
 - add : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
         an active connection is found) 
 - add : support of user's game profiles (Cemu 1.15.15)        
-- add : *BatchFw now propgates games'stats through versions of CEMU AND Hosts used for each user
+- add : BatchFw now propgates games'stats through versions of CEMU ( > 1.15.18) AND all
+        Hosts used for each user.
         A script updateGameStats.bat is added 
 - add : script displayMyGamesStats.bat and a shortcut for each users
 - add : import games stats in launchGame.bat (using the last modified settings.xml
@@ -54,8 +53,6 @@ fix third party software not launched when progress bar disabled
 - fix : force temporary files location to !TMP! 
 - fix : set rar.exe working directory to BFW_PATH\logs
 - fix : ignore RC versions of BatchFw when searching for an update
-
-*when CEMU bug 206 will be fixed (http://bugs.cemu.info/issues/206)
 
 20/09/2019 V14-13 :
 - hotfix : GFX pack update failure (URL changed)

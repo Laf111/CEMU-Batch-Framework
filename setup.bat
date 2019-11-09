@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15RC2"
+    set "BFW_VERSION=V15RC3"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -267,24 +267,16 @@ REM : main
 
        :wiiuOK
         call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
-        if [!ANSWER!] == ["n"] goto:importModForGames
+        if [!ANSWER!] == ["n"] goto:useProgressBar
 
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
     )
 
+    :useProgressBar
+    if %nbArgs% EQU 0 call:setProgressBar
+
     :importModForGames
-
-    if %nbArgs% EQU 0 (
-        @echo ---------------------------------------------------------
-        call:getUserInput "BatchFw launching mode? (p = use progress bar OR s = silent, default in 10sec): " "p,s" ANSWER 10
-
-        if [!ANSWER!] == ["p"] (
-            set "msg="USE_PROGRESSBAR=YES""
-            call:log2HostFile !msg!
-        )
-    )
-
     @echo ---------------------------------------------------------
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
@@ -321,13 +313,14 @@ REM : main
 
     REM : search in all Host_*.log
     set "pat="!BFW_PATH:"=!\logs\Host_*.log""
-    for /F %%i in ('dir /S /B !pat! 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
         set "currentLogFile="%%i""
 
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
             REM : add to the list if not already present
-            echo !ratiosList! | find /V "%%j" > NUL 2>&1 && set "ratiosList=%%j !ratiosList!"
+            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+            if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
         )
     )
 
@@ -409,8 +402,8 @@ REM : main
     call !ugp!
     set /A "cr=!ERRORLEVEL!"
     REM : if user cancelled the update
-    if !cr! EQU 1 if not exist !BFW_GP_FOLDER! goto:beginExtraction
-    if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+    if !cr! EQU 2 if not exist !BFW_GP_FOLDER! goto:beginExtraction
+    if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if !cr! NEQ 1 (
         REM : force a graphic pack update
         @echo Forcing a GFX pack update to take new ratios into account^.^.^.
         @echo.
@@ -525,7 +518,7 @@ REM : main
     wscript /nologo !StartWait! !tobeLaunch!
     pushd !GAMES_FOLDER!
     goto:getSoftware
-    
+
     :batchFwUsers
     set /P "input=Please enter BatchFw's user name : "
     call:secureUserNameForBfw "!input!" safeInput
@@ -559,7 +552,7 @@ REM : main
     for /F "tokens=2 delims=~@" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do (
 
         set "command=%%i"
-   
+
         call:isSoftwareValid "!command!" program valid
 
         if !valid! EQU 1 (
@@ -944,7 +937,28 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-    
+
+    REM : function to set or ask for using progressbar
+    :setProgressBar
+        REM : enable progress bar if installed on a removable device
+        for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value ^| find "="') do (
+            set "caption=%%i"
+            set "usbDrive=!caption:~0,-1!"
+            if ["!usbDrive!"] == ["!drive!"] (
+                set "msg="USE_PROGRESSBAR=YES""
+                call:log2HostFile !msg!
+                goto:eof
+            )
+        )
+
+        @echo ---------------------------------------------------------
+        call:getUserInput "BatchFw launching mode? (p = use progress bar OR s = silent, default in 10sec): " "p,s" ANSWER 10
+        if [!ANSWER!] == ["p"] (
+            set "msg="USE_PROGRESSBAR=YES""
+            call:log2HostFile !msg!
+        )
+    goto:eof
+
     REM : check if (DLC) or (UPDATE DATA) folders exist
     :checkGamesToBePrepared
 
@@ -1268,7 +1282,7 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
@@ -1705,7 +1719,7 @@ REM : functions
 
         REM : if no file found
         if [!lastHostLog!] == ["NONE"] goto:eof
-        
+
         REM : get registered users list from the last modified Host log
         type !lastHostLog! | find /I "USER_REGISTERED" > NUL && (
             @echo =========================================================

@@ -62,7 +62,7 @@ REM : main
         exit /b 9
     )
 
-    REM : get and check CEMU_FOLDER
+    REM : get and check wiiuIp
     set "wiiuIp=!args[0]!"
     ping -n 1 !wiiuIp! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (

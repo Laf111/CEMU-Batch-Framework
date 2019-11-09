@@ -227,17 +227,56 @@ REM : main
     )
     set /A "nbGamesSelected-=1"
 
+    @echo ---------------------------------------------------------
+    set /A "dumpOnSD=0"
+    set "rootTarget=!GAMES_FOLDER!"
+
+    choice /C sn /N /M "Dump game throught network (n) or on the SD card plugged on the wii-U (s)? : "
+    if !ERRORLEVEL! EQU 1 (
+        @echo WARNING ^: BatchFw does not check available space on SD card
+        @echo            Make sure that you have enought space left on your SD card
+        @echo.
+        choice /C yc /N /M "Continue (y) or cancel (c)? : "
+        if !ERRORLEVEL! EQU 2 @echo cancel by user & pause & exit 12
+
+        @echo.
+        @echo When done copy the CONTENT of each game^'s folder from the SD card
+        @echo to the one created in your games library
+        @echo.
+
+        set /A "dumpOnSD=1"
+        set "rootTarget="/sd/dumps""
+    )
+
+
     REM : loop on the games selected
     for /L %%i in (0,1,!nbGamesSelected!) do (
 
-        set "name=!selectedTitles[%%i]!"
+        set "GAME_TITLE=!selectedTitles[%%i]!"
+        set "endTitleId=!selectedEndTitlesId[%%i]!"
 
-        REM : create local folders
-        set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!name!""
-        call:createLocalFolders %%i
+        REM : define local folders
+        if !dumpOnSD! EQU 0 (
+            set "targetFolder="!rootTarget:"=!\!GAME_TITLE!""
+            set "codeFolder="!targetFolder:"=!\code""
+            set "contentFolder="!targetFolder:"=!\content""
+            set "metaFolder="!targetFolder:"=!\meta""
+            set "updateFolder="!targetFolder:"=!\mlc01\usr\title\0050000\%endTitleId%""
+            set "dlcFolder="!targetFolder:"=!\mlc01\usr\title\0050000\%endTitleId%\aoc""
+        ) else (
+            REM : on sd card (linux path)
+            set "targetFolder="!rootTarget:"=!/!GAME_TITLE: =_!""
+            set "codeFolder="!targetFolder:"=!/code""
+            set "contentFolder="!targetFolder:"=!/content""
+            set "metaFolder="!targetFolder:"=!/meta""
+            set "updateFolder="!targetFolder:"=!/mlc01/usr/title/0050000/%endTitleId%""
+            set "dlcFolder="!targetFolder:"=!/mlc01/usr/title/0050000/%endTitleId%/aoc""
+        )
+
+        call:createRequieredFolders > NUL 2>&1
 
         REM : dump the game by FTP
-        call:getGame !selectedtitlesSrc[%%i]! !selectedEndTitlesId[%%i]!
+        call:getGame !selectedtitlesSrc[%%i]!
     )
 
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -303,14 +342,9 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
     
-
-REM : ------------------------------------------------------------------
     :getGame
         REM : source (mlc or usb)
         set "src=%~1"
-
-        REM : end part of the title Id
-        set "endTitleId=%~2"
 
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -322,14 +356,10 @@ REM : ------------------------------------------------------------------
         @echo - dumping game
 
         REM : Import the game (minimized + no wait)
-        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
-
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/code" "!name! (code)"
 
-        set "contentFolder="!GAME_FOLDER_PATH:"=!\content""
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/content" "!name! (content)"
 
-        set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/meta" "!name! (meta)"
 
         REM : search if this game has an update
@@ -339,7 +369,6 @@ REM : ------------------------------------------------------------------
             @echo - dumping update
 
             REM : YES : import update in mlc01/usr/title (minimized + no wait)
-            set "updateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0050000\%endTitleId%""
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000E/%endTitleId%" "!name! (update)"
         )
         REM : search if this game has a DLC
@@ -349,17 +378,16 @@ REM : ------------------------------------------------------------------
             @echo - dumping DLC
 
             REM : YES : import dlc in mlc01/usr/title/0050000/%endTitleId%/aoc (minimized + no wait)
-            set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0050000\%endTitleId%\aoc""
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/%endTitleId%" "!name! (DLC)"
         )
 
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 && (
-            @echo - dumping saves
+            @echo - dumping saves by ftp on !USERDOMAIN!
             
             REM : Import Wii-U saves
-            wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_FOLDER_PATH! %endTitleId% %src%
+            wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_TITLE! %endTitleId% %src%
         )
 
         :waitingLoop
@@ -375,29 +403,48 @@ REM : ------------------------------------------------------------------
         @echo end of transferts at !DATE!
 
     goto:eof
-REM : ------------------------------------------------------------------
 
+    REM : ------------------------------------------------------------------
+    :createRequieredFolders
 
+        REM : in all case (using SD card or not)
+        set "gameFolder="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+        if not exist !gameFolder! mkdir !gameFolder! > NUL 2>&1
+        set "cemuSaveFolder="!gameFolder:"=!\Cemu\inGameSaves""
+        if not exist !cemuSaveFolder! mkdir !cemuSaveFolder! > NUL 2>&1
 
-REM : ------------------------------------------------------------------
-    :createLocalFolders
-        set /A "num=%~1"
+        if !dumpOnSD! EQU 0 (
+            if not exist !codeFolder! mkdir !codeFolder! > NUL 2>&1
+            if not exist !contentFolder! mkdir !contentFolder! > NUL 2>&1
+            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
+            REM : updateFolder is created with dlc one
+            if not exist !dlcFolder! mkdir !dlcFolder! > NUL 2>&1
+            goto:eof
+        )
 
-        set "CODE_PATH="!GAME_FOLDER_PATH:"=!\code""
-        if not exist !CODE_PATH! mkdir !CODE_PATH! > NUL 2>&1
-        set "CONTENT_PATH="!GAME_FOLDER_PATH:"=!\content""
-        if not exist !CONTENT_PATH! mkdir !CONTENT_PATH! > NUL 2>&1
-        set "META_PATH="!GAME_FOLDER_PATH:"=!\meta""
-        if not exist !META_PATH! mkdir !META_PATH! > NUL 2>&1
+        REM : create remote folders on SD card
+        call:createRemoteFolder !rootTarget! > NUL 2>&1
+        call:createRemoteFolder !targetFolder! > NUL 2>&1
+        call:createRemoteFolder !codeFolder! > NUL 2>&1
+        call:createRemoteFolder !metaFolder! > NUL 2>&1
+        call:createRemoteFolder !dlcFolder! > NUL 2>&1
 
-        set "SAVES_ARCHIVES_PATH="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-        if not exist !SAVES_ARCHIVES_PATH! mkdir !SAVES_ARCHIVES_PATH! > NUL 2>&1
-
-        set "DLC_PATH="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0050000\!selectedEndTitlesId[%num%]!\aoc""
-        if not exist !DLC_PATH! mkdir !DLC_PATH! > NUL 2>&1
     goto:eof
+    
+    REM : ------------------------------------------------------------------
+    :createRemoteFolder
 
-REM : ------------------------------------------------------------------
+        set "remoteFolder=%~1"
+        set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
+
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls !remoteFolder!" "exit" > !ftplogFile! 2>&1
+        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
+            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir !remoteFolder!" "exit"  > !ftplogFile! 2>&1
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :checkPathForDos
 

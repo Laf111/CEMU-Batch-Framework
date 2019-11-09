@@ -102,7 +102,7 @@ REM : main
     if exist !zipLogFile! (
         @echo No new graphics packs update available^, last version is still !zipFile:.zip=!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
-        exit /b 0
+        exit /b 1
     )
     if ["!zipFile!"] == ["graphicPacks.zip"] (
         @echo Searching for a new graphic packs release failed ^!
@@ -123,7 +123,7 @@ REM : main
     if [!ANSWER!] == ["n"] (
         @echo Cancelled by user
         timeout /T 4 > NUL 2>&1
-        exit /b 1
+        exit /b 2
     )
     goto:updateGP
 
@@ -134,7 +134,7 @@ REM : main
         exit /b 0
     ) else (
         cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
-        if !ERRORLEVEL! EQU 2 exit /b 0
+        if !ERRORLEVEL! EQU 2 exit /b 2
     )
     :updateGP
 

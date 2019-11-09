@@ -743,20 +743,22 @@ REM : functions
 
         REM : SCREEN_MODE
         set "screenMode=fullscreen"
-
+        set "ARLIST="
+        
         REM : if not defined, here fix it to 16/9
         if ["!ARLIST!"] == [""] set "ARLIST=169"
 
         REM : search in all Host_*.log
         set "pat="!BFW_PATH:"=!\logs\Host_*.log""
-        for /F %%i in ('dir /S /B !pat! 2^>NUL') do (
+        for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
             set "currentLogFile="%%i""
 
             REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-            set "ARLIST="
+
             for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
                 REM : add to the list if not already present
-                echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+                if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+                if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
             )
             REM : get the SCREEN_MODE
             for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
