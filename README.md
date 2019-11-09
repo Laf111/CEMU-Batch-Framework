@@ -4,7 +4,7 @@ BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, po
 
 Versions of CEMU supported : **1.11.0 to 1.15.17**
 
-Last GFX packs checked (presets completion) : **V549**
+Last GFX packs checked (presets completion) : **V552**
 
 
 ## Main purpose:
