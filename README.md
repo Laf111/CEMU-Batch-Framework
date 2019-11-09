@@ -17,7 +17,11 @@ Last GFX packs checked (presets completion) : V544
 
 - Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
 
-- Make your loadiine games library portable and save settings per user and per host.
+- Make your loadiine games library portable and save settings per user and per host;
+
+- Ease install, backup (game+upate+DLC+saves+settings) and uninstalling games
+
+- Complete/create GFX packs for ALL games (even if they are still not officialy supported)
 
 
 ## How it works:
