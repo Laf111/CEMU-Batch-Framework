@@ -81,7 +81,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Automatic GLCache cleanup when updating display drivers;
 
-- Handling game stats\* (for every user taking all CEMU's versions >= 1.15.18 and all hosts into account);
+- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
 
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
