@@ -19,7 +19,7 @@ Last GFX packs checked (presets completion) : V544
 
 - Make your loadiine games library portable and save settings per user and per host;
 
-- Ease install, backup (game+upate+DLC+saves+settings) and uninstalling games
+- Ease install, backup (game+update+DLC+saves+settings) and uninstall games
 
 - Complete/create GFX packs for ALL games (even if they are still not officialy supported)
 
