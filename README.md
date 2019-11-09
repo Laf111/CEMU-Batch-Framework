@@ -9,19 +9,19 @@ Last GFX packs checked (presets completion) : **V549**
 
 ## Main purpose:
 
-- **Handle more than one user/save and for Wii-U owners : install online files, sync saves between CEMU with the Wii-U;
+- **Handle more than one user/save and for Wii-U owners : install online files, sync saves between CEMU with the Wii-U;**
 
-- **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;
+- **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
 
-- **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; 
+- **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one; **
 
-- **Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;
+- **Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;**
 
-- **Make your loadiine games library portable and save settings per user and per host;
+- **Make your loadiine games library portable and save settings per user and per host;**
 
-- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games
+- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
 
-- **Complete/create GFX packs for ALL games (even if they are still not officialy supported)
+- **Complete/create GFX packs for ALL games (even if they are still not officialy supported).**
 
 
 ## How it works:
