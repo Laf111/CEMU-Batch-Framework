@@ -93,6 +93,7 @@ REM : main
         if %nbArgs% EQU 1 (
             @echo Delete all my settings for each game saved
             @echo ^(for all CEMU versions^) on the host !USERDOMAIN!
+        )
     )
 
     REM : CEMU version given
@@ -103,7 +104,6 @@ REM : main
         @echo Delete my !CEMU_FOLDER_NAME! settings for each game saved
         @echo on the host !USERDOMAIN!
     )
-
 
     :del
     @echo =========================================================
