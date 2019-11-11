@@ -5,7 +5,6 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
-
 REM : ------------------------------------------------------------------
     REM : No verification is made regarding CEMU's version here
     REM : (game stats were added in CEMU V1.12.0
@@ -21,6 +20,7 @@ REM : ------------------------------------------------------------------
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -76,54 +76,10 @@ REM : ------------------------------------------------------------------
     @echo temporary file ^: !csTmp!
 
     REM : if GameCache node exist in csTgt (CEMU >= 1.12.0)
-    type !csTgt! | find /I "GameCache" > NUL 2>&1 && (
+    type !csTgt! | find /I "GameCache" > NUL 2>&1 && call:update
 
 
-        pushd !BFW_RESOURCES_PATH!
-        REM : get game's stats
-        "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
-
-        for /f "usebackq tokens=*" %%a in (!csTmp!) do (
-          set "node=!node!%%a"
-        )
-
-        if ["!node!"] == [""] (
-            @echo ERROR ^: no stats were found for !GameId! in !csSrc:"=!
-            timeout /t 4 > NUL 2>&1
-            exit 53
-        )
-
-        REM : delete node in csTgt
-        set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
-        "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
-
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo Node ^:
-        @echo !node!
-
-        "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo replacing in temporary file
-
-        rem : replace in file
-        set "BfwSettingsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSettings.log""
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog! > NUL
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog! > NUL
-
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo pretty indent !scTgt!
-
-        xml fo -t !csTmp! > !csTgt!
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo done
-
-        del /F !csTmp! > NUL 2>&1
-        del /F !csTgtTmp! > NUL 2>&1
-        del /F !BfwSettingsLog!> NUL 2>&1
-    )
-
-    exit 0
+    exit /b !cr!
     goto:eof
 
 REM : ------------------------------------------------------------------
@@ -154,4 +110,61 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+    :update
+
+        pushd !BFW_RESOURCES_PATH!
+        REM : get game's stats
+        "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
+
+        for /f "usebackq tokens=*" %%k in (!csTmp!) do (
+          set "node=!node!%%k"
+        )
+
+        if ["!node!"] == [""] (
+            @echo ERROR ^: no stats were found for !GameId! in !csSrc:"=!
+            timeout /t 4 > NUL 2>&1
+            exit 53
+        )
+
+        REM : delete node in csTgt
+        set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
+        "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
+
+        REM : CLUE
+        set "node=!node:check_update=!"
+
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo Node ^:
+        @echo !node!
+
+        "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo replacing in temporary file
+
+        rem : replace in file
+        set "BfwSettingsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSettings.log""
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog! > NUL
+
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        @echo pretty indent !scTgt!
+
+        xml fo -t !csTmp! > !csTgt!
+        set /A "cr=%ERRORLEVEL%"
+        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if !cr! EQU 0 (
+            @echo done
+            del /F !csTmp! > NUL 2>&1
+            del /F !csTgtTmp! > NUL 2>&1
+            del /F !BfwSettingsLog!> NUL 2>&1
+        ) else (
+            @echo done with error ^!
+            cscript /nologo !MessageBox! "ERROR ^: when patching settings^.xml^. Restoring settings^.xml backup^, game stats computation ignored ^!" 4112
+            @echo see !csTmp! and !csTgtTmp!
+            set "backup="!cs:"=!_bfwl_old""
+            if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------

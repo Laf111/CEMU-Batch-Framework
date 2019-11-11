@@ -174,7 +174,7 @@ REM : main
     REM : DLC
     @echo DLC installed    ="%DLC%" >> !gameInfoFile!
     REM : ShaderCache Id
-    @echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
+    if not ["%SHADER_CACHE_ID%"] == ["NOT_FOUND"] @echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
 
     if ["!versionRead!"] == ["NOT_FOUND"] (
         call:getVersion

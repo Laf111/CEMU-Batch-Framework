@@ -1120,7 +1120,7 @@ REM : main
         @echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar>> !batchFwLog!
     )
 
-    REM : if exist, a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
+    REM : if exist a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
     if exist !tscl! (
         @echo --------------------------------------------------- >> !tscl!
         @echo GAME_CONFIGURATION after launching !CEMU_FOLDER_NAME! ^: >> !tscl!
@@ -1225,6 +1225,9 @@ REM : functions
     REM : function to restore an EXISTANT file
     :restoreFile
         set "file="%~1%""
+        set "tmpFile="!file:"=!_bfwl_tmp""
+        if exist !tmpFile! del /F !tmpFile! > NUL 2>&1
+        
         set "backup="!file:"=!_bfwl_old""
 
         if not exist !backup! goto:eof
@@ -1610,7 +1613,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 move /Y !src! !cs! > NUL 2>&1
             )
         )
-        set "rpxFilePath=!RPX_FILE_PATH!"
+        if !wizardLaunched! EQU 1 goto:cemuHookSettings
 
         if ["!versionRead!"] == ["NOT_FOUND"] goto:cemuHookSettings
 
@@ -1621,6 +1624,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 2 goto:cemuHookSettings
         ) else goto:cemuHookSettings
+
+        set "rpxFilePath=!RPX_FILE_PATH!"
 
         if !usePbFlag! EQU 1 call:setProgressBar 76 78 "pre processing" "updating games stats"
         
@@ -1663,7 +1668,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if [!rpxFilePath!] == [!rpxFilePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
             echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
-                set "rpxFilePath_LOGS=!rpxFilePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                set "rpxFilePathTmp=!rpxFilePath:"=!"
+                set "rpxFilePath_LOGS="!rpxFilePathTmp:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!""
                 if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:cemuHookSettings
                 set "rpxFilePath=!rpxFilePath_LOGS!"
                 goto:getRpx
@@ -1682,7 +1688,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
 
         :cemuHookSettings
-
 
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
         if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! call:setProgressBar 78 80 "pre processing" "installing online files"

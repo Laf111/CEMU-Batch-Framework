@@ -364,8 +364,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     @echo ---------------------------------------------------------
     @echo Opening CEMU^.^.^.
-    @echo Set your REGION^,language
-    @echo Download sharedFonts using Cemuhook button^, if they are missing
+    if not exist !cs! @echo Set your REGION^, language
+    if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button^, if they are missing
     @echo Then close CEMU to continue
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""

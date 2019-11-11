@@ -37,7 +37,6 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
 
-    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     REM : checking GAMES_FOLDER folder

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15RC3"
+    set "BFW_VERSION=V15RC4"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -1079,8 +1079,9 @@ REM : functions
 
         @echo ---------------------------------------------------------
         @echo Openning CEMU^.^.^.
-        @echo Set your REGION^, language
-        @echo Download sharedFonts using Cemuhook button^, if they are missing
+        if not exist !cs! @echo Set your REGION^, language
+        if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button^, if they are missing
+
         @echo Then close CEMU to continue
 
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""

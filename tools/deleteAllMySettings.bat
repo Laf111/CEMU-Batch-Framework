@@ -106,7 +106,6 @@ REM : main
     )
 
     :del
-    @echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
     @echo Launching in 30s
@@ -289,8 +288,11 @@ REM : functions
             echo Skip this GAME
             goto:eof
         )
+        cd ..
         rmdir /S /Q !rootDir! > NUL 2>&1
-        @echo %%j deleted ^^!
+        if %ERRORLEVEL% EQU 0 @echo !rootDir! deleted ^^!
+        if %ERRORLEVEL% NEQ 0 @echo ERROR^: when deleting !rootDir! ^^!
+
         set /A NB_SETTINGS_TREATED+=1
         goto:eof
 
@@ -307,9 +309,9 @@ REM : functions
             @echo ---------------------------------------------------------
             call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["y"] (
-
-                rmdir /S /Q "%%j" > NUL 2>&1
-                @echo %%j deleted ^^!
+                 rmdir /S /Q %%j > NUL 2>&1
+                if %ERRORLEVEL% EQU 0 @echo %%j deleted ^^!
+                if %ERRORLEVEL% NEQ 0 @echo ERROR^: when deleting %%j ^^!
                 set /A NB_SETTINGS_TREATED+=1
             )
         )
@@ -329,8 +331,9 @@ REM : functions
             @echo ---------------------------------------------------------
             call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["y"] (
-                rmdir /S /Q "%%j" > NUL 2>&1
-                @echo %%j deleted ^^!
+                 rmdir /S /Q %%j > NUL 2>&1
+                if %ERRORLEVEL% EQU 0 @echo %%j deleted ^^!
+                if %ERRORLEVEL% NEQ 0 @echo ERROR^: when deleting %%j ^^!
                 set /A NB_SETTINGS_TREATED+=1
             )
         )

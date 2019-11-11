@@ -30,7 +30,9 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! BatchFw* /MIN
+    
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
     
@@ -84,6 +86,8 @@ REM : main
     set "GAME_TITLE=!args[1]!"
     set "GAME_TITLE=!GAME_TITLE:"=!"
 
+    title Collecting settings of !GAME_TITLE!
+
     REM : get and check PROFILE_FILE
     set "PROFILE_FILE=!args[2]!"
 
@@ -92,6 +96,8 @@ REM : main
 
     set "user=!args[4]!"
     set "currentUser=!user:"=!"
+
+    title Collecting settings of !GAME_TITLE! for !currentUser!
 
     set "RPX_FILE_PATH=!args[5]!"
     if not exist !RPX_FILE_PATH! (
@@ -113,6 +119,8 @@ REM : main
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
+
+    title Collecting !CEMU_FOLDER_NAME! settings of !GAME_TITLE! for !currentUser!
 
     set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
     REM : check game profile
@@ -193,7 +201,12 @@ REM : main
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:checkProfile
+    if ["!versionRead!"] == ["NOT_FOUND"] (
+            goto:checkProfile
+    ) else (
+            title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
+    )
+
 
     REM : comparing version to V1.15.15
     set /A "v11515=2"
@@ -259,6 +272,8 @@ REM : main
     
     REM : GFX type to provide
     set "gfxType=V3"
+    set /A "v114=1"
+    set /A "v112=1"
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
 
@@ -271,6 +286,8 @@ REM : main
     ) else (
         if !v1116! EQU 2 (
             set "gfxType=V2"
+            set /A "v114=2"
+            set /A "v112=2"
         ) else (
             if !v1156! EQU 2 (
                 call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
@@ -380,8 +397,8 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
     REM : check that profile file exist in
-    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-    set "refUserProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+    set "refUserProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
     if exist !refUserProfileFile! set "refProfileFile=!refUserProfileFile!"
 
     if not exist !refProfileFile! (
@@ -486,8 +503,11 @@ REM : main
     @echo    - select graphic pack^(s^)
     @echo    - select amiibo paths^(NFC Tags^)
 
+    REM : if version of CEMU >= 1.12 (v112<=1)
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 @echo    - refresh games^'list  ^(right click^)
+    
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game^)
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game in the list^)
 
     REM : if version of CEMU < 1.11.6 (v1116<=1)
     if not ["!versionRead!"] == ["NOT_FOUND"] (
@@ -542,41 +562,53 @@ REM : main
 
     if not exist !cs! goto:saveOptions
 
+    REM : patch @//GameCache/Entry/Path with replacing !BFW_LOGS! by !GAMES_FOLDER!
+    REM : (because it was removed earlier, there is only one entry //GameCache/Entry/Path)
+    !xmlS! ed -u "//GameCache/Entry/path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
+
+    REM : set GamePaths to !GAMES_FOLDER!
+    REM : (because it was removed earlier, there is only one entry //GamePaths/Entry)
+    !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
+
+    del /F !csTmp0! > NUL 2>&1
+
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:saveOptions
+
+    REM : if current version >=1.15.18 get las game stats
+    if !v1153b! GEQ 1 (
+        call:compareVersions !versionRead! "1.15.18" result
+        if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+        if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+        if !result! EQU 2 goto:saveOptions
+    ) else goto:saveOptions
+    
     REM : update !cs! games stats for !GAME_TITLE!
     set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
         @echo Warning ^: no last settings file found >> !batchFwLog!
-        goto:patchOutputCs
+        goto:saveOptions
     )
 
     set "lst="NOT_FOUND""
     call:getLastSettings
 
     REM : if exist game's stats, patch !cs! with
-    if exist !lst! call:setGameStats
-
-    :patchOutputCs
-    REM : patch @//GameCache/Entry/Path with replacing !GAMES_FOLDER! by !BFW_LOGS!
-    REM : (becaus it was removed earlier, there is only one entry //GameCache/Entry/Path)
-    !xmlS! ed -u "//GameCache/Entry/path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
-
-    REM : set GamePaths to !GAMES_FOLDER!
-    REM : (becaus it was removed earlier, there is only one entry //GamePaths/Entry)
-    !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
-    del /F !csTmp0! > NUL 2>&1
+    if exist !lst! call:setGameStats > NUL 2>&1
 
     :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
     if not exist !scp! mkdir !scp! > NUL 2>&1
+
+    if not exist !SETTINGS_FOLDER! mkdir !SETTINGS_FOLDER! > NUL 2>&1
 
     REM : saving CEMU an cemuHook settings
     robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
     set "src="!SETTINGS_FOLDER:"=!\settings.bin""
     set "target="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
     if exist !src! move /Y !src! !target! > NUL 2>&1
-
+    
     if exist !cs! (
         robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
         set "src="!SETTINGS_FOLDER:"=!\settings.xml""
@@ -713,12 +745,13 @@ REM : functions
         set "value=%1"
 
         set /A "v1158=2"
-        if ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 1 (
+        if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 1 (
             call:compareVersions !versionRead! "1.15.8" v1158 > NUL 2>&1
             if ["!v1158!"] == [""] @echo Error when comparing versions
             if !v1158! EQU 50 @echo Error when comparing versions
         )
-        REM : v > 1.15.8 precomp auto in CEMU and no effect of cemuHook settings
+        
+        REM : v >= 1.15.8 precomp auto in CEMU and no effect of cemuHook settings
         if !v1158! LEQ 1 goto:eof
 
         REM : check if cemuHook.ini exist
@@ -808,7 +841,8 @@ REM : functions
         if [!rpxFilePath!] == [!rpxFilePath_USB!] (
             REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
             echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
-                set "rpxFilePath_LOGS=!rpxFilePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
+                set "rpxFilePathTmp=!rpxFilePath:"=!"
+                set "rpxFilePath_LOGS="!rpxFilePathTmp:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!""
                 if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:endFctSgs
                 set "rpxFilePath=!rpxFilePath_LOGS!"
                 goto:getRpx
@@ -820,8 +854,9 @@ REM : functions
         :updateGameStats
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
+        set "tmpLogFile="!BFW_LOGS:"=!\updateGameStats.log""
 
-        wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
+        !toBeLaunch! !lst! !cs! !gid! > !tmpLogFile! 2>&1
 
         :endFctSgs
 
