@@ -1,5 +1,4 @@
-handle game stats only if version of CEMU >= 1.15.18
-09/11/2019 V15RC3 :
+11/11/2019 V15RC5 :
 - add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
         if BatchFw is installed on a removable device => always use progress bar
 - add : handle a list for user aspect ratios 

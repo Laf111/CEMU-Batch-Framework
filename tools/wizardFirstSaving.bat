@@ -472,9 +472,9 @@ REM : main
     timeout /T 1 > NUL 2>&1
     wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
-    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+    type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
-            @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
+            @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
             cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
         )
         set /A "disp=disp+1"
@@ -543,9 +543,8 @@ REM : main
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
             call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
-            if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+
             if ["!v1153b!"] == [""] @echo Error when comparing versions
-            if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! EQU 50 @echo Error when comparing versions
             if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
@@ -577,8 +576,8 @@ REM : main
     REM : if current version >=1.15.18 get las game stats
     if !v1153b! GEQ 1 (
         call:compareVersions !versionRead! "1.15.18" result
-        if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-        if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+        if ["!result!"] == [""] @echo Error when comparing versions
+        if !result! EQU 50 @echo Error when comparing versions
         if !result! EQU 2 goto:saveOptions
     ) else goto:saveOptions
     
@@ -587,7 +586,7 @@ REM : main
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
-        @echo Warning ^: no last settings file found >> !batchFwLog!
+        @echo Warning ^: no last settings file found
         goto:saveOptions
     )
 
@@ -808,7 +807,7 @@ REM : functions
         for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
 
         if not exist !ls!  (
-            @echo Warning ^: last settings folder was not found^, !ls! does not exist  >> !batchFwLog!
+            @echo Warning ^: last settings folder was not found^, !ls! does not exist
 
             REM : rebuild it
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
@@ -1098,7 +1097,7 @@ REM : functions
 
         call:getValueInXml "//Audio/TVVolume/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            @echo Audio TV Volume set to [!value! %]
+            @echo Audio TV Volume set to [!value! %%]
         )
 
         REM : online mode
