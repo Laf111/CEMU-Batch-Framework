@@ -116,7 +116,6 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 - move or copy your mlc01 data when asked;
     - if you use external mlc01 folders per user, import all of them
     - if you use a CEMU installs per user, register all installs with importing mlc01 data   
-- launch all your games a first time (boot to the menu is sufficient) using the shortcuts created to let BatchFw collect your transferable cache.
 
 When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to create shortcuts (users already defined on another host are imported automatically, online files as well). 
 
