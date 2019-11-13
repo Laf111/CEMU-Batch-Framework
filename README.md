@@ -54,6 +54,8 @@ The mlc01 path is in the game folder so:
 
 - Save separate CEMU settings per users (allow users to use differents mods);
 
+- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
+
 - Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
@@ -84,8 +86,6 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 - GLCache backup/restore per game (AMD, NVIDIA);
 
 - Automatic GLCache cleanup when updating display drivers;
-
-- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
 
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
