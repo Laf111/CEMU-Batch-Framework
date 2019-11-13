@@ -40,19 +40,33 @@ REM : main
 
     set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
 
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     REM : check if cemu if not already running
-    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe"') do (
+    set /A "nbI=0"
 
+    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" ^| find /I /V " " /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
         cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^. If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 4112
         exit 70
     )
 
-    if !usePbFlag! EQU 1 call:setProgressBar 0 22 "pre processing" "initializing and checking"
+    if !usePbFlag! EQU 0 goto:getDate
+    set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
+    :waitInitPb
+    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
+    type !logFileTmp! | find /I "initProgessBar.bat" | find /I /V "find"  > NUL 2>&1 && goto:waitInitPb
+
+    REM : remove trace
+    del /F !logFileTmp! > NUL 2>&1
+
+    call:setProgressBar 0 22 "pre processing" "initializing and checking"
+
+    :getDate
     REM : get DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
@@ -207,10 +221,10 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" ^| find /I /V " " /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GEQ 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running. If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running (nbI=%nbI%). If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
             exit 20
         )
     )
@@ -812,6 +826,8 @@ REM : main
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed, openning its log ^.^.^." 4144
             timeout /T 1 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
+            timeout /T 1 > NUL 2>&1
+            !cmdOw! log* /top
 
         )
         REM : set status to unplayable
@@ -1225,7 +1241,7 @@ REM : functions
     REM : function to restore an EXISTANT file
     :restoreFile
         set "file="%~1%""
-        set "tmpFile="!file:"=!_bfwl_tmp""
+        set "tmpFile="!file:"=!_bfw_tmp""
         if exist !tmpFile! del /F !tmpFile! > NUL 2>&1
         
         set "backup="!file:"=!_bfwl_old""
@@ -1241,7 +1257,7 @@ REM : functions
 
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!logFile:"=!.bfwl_tmp""
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 
@@ -1720,17 +1736,17 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     REM : function to valid a settings.xml for automatic import
     :isValid
 
-        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.bfwl_tmp""
+        set "fileTmp="!BFW_PATH:"=!\logs\settings_target.bfw_tmp""
 
         REM : delete ignored nodes
-        set "file0=!fileTmp:.bfwl_tmp=.bfwl_tmp0!"
+        set "file0=!fileTmp:.bfw_tmp=.bfw_tmp0!"
         !xmlS! ed -d "//GamePaths" !cs! > !file0!
 
-        set "file1=!fileTmp:.bfwl_tmp=.bfwl_tmp1!"
+        set "file1=!fileTmp:.bfw_tmp=.bfw_tmp1!"
         !xmlS! ed -d "//GameCache" !file0! > !file1!
 
         !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
-        set "pat="!BFW_PATH:"=!\logs\settings_target.bfwl_tmp*""
+        set "pat="!BFW_PATH:"=!\logs\settings_target.bfw_tmp*""
 
         REM : initialize to false = 0
         set /A "%1=0"
@@ -1927,7 +1943,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
            )
         )
 
-        set "csTmp="!CEMU_FOLDER:"=!\settings.bfwl_tmp""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
@@ -2715,7 +2731,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         :logMsg2GamesLibraryFile
         @echo !msg! >> !glogFile!
         REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfwl_tmp""
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
         type !glogFile! | sort > !gLogFileTmp!
         del /F /S !glogFile! > NUL 2>&1
         move /Y !gLogFileTmp! !glogFile! > NUL 2>&1

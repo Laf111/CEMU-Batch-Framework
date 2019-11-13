@@ -269,7 +269,8 @@ REM : ------------------------------------------------------------------
 
 
     :getStats
-
+        set "currentUser=!user:"=!"
+    
         REM : get bigger rpx file present under game folder
         set "RPX_FILE="NONE""
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
@@ -284,7 +285,7 @@ REM : ------------------------------------------------------------------
 
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-        set "lls="!sf:"=!\!user:"=!_lastSettings.txt"
+        set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
         if not exist !lls! goto:eof
 
         pushd !sf!
@@ -295,7 +296,7 @@ REM : ------------------------------------------------------------------
             @echo Warning ^: last settings folder was not found^, !ls! does not exist
 
             REM : rebuild it
-            call:getModifiedFile !sf! "!user:"=!_settings.xml" last css
+            call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
             if not exist !css! del /F !lls! > NUL 2>&1 && goto:eof
             call:resolveSettingsPath ltarget
             @echo !ltarget!> !lls!

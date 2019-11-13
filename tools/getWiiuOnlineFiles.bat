@@ -372,12 +372,13 @@ REM : functions
             @echo.
 
             call:getUser user
+            set "currentUser=!user:"=!"
 
-            set "msg="USER_REGISTERED=!user:"=!""
+            set "msg="USER_REGISTERED=!currentUser!""
             call:log2HostFile !msg!
 
             REM : copy the file
-            set "uf="!usersFolderAccount:"=!\!user:"=!%%d.dat""
+            set "uf="!usersFolderAccount:"=!\!currentUser!%%d.dat""
 
             copy /Y !af! !uf! > NUL 2>&1
             @echo saving %%d\account.dat to !uf!

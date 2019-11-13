@@ -29,8 +29,9 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
+
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
@@ -119,11 +120,18 @@ REM : main
     REM : basename of MLC01_FOLDER_PATH
     for /F "delims=~" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"
     set CEMU_FOLDER=!MLC01_FOLDER_PATH:\%basename%=!
+    set /A "cemuFolderDetected=0"
+    set "ctscf="!CEMU_FOLDER:"=!\shaderCache\transferable""
+    if exist !ctscf! set /A "cemuFolderDetected=1"
 
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
 
     @echo =========================================================
-    @echo Copy Game data from mlc01 folder to each game^'s folder
+    if !cemuFolderDetected! EQU 0 (
+        @echo Copy Game data from mlc01 folder to each game^'s folder
+    ) else (
+        @echo Copy Game data from cemu folder to each game^'s folder
+    )
     @echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
     @echo  - source mlc01 folder^: !MLC01_FOLDER_PATH!
     @echo =========================================================
@@ -227,6 +235,17 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :getShaderCacheName
+
+        pushd !getShaderCacheFolder!
+        set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
+
+        for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"
+
+        pushd !GAMES_FOLDER!
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :cpGameData
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
@@ -245,6 +264,34 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
+
+        REM : compute shaderCache id to seek for the transferable cache
+        set "sci=NOT_FOUND"
+        call:getShaderCacheName
+        if ["!sci!"] == ["NOT_FOUND"] (
+            @echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
+            goto:treatMlc01Data
+        )
+        REM : import transferable cache (check size)
+        set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
+        if not exist !gtscf! mkdir !gtscf! > NUL 2>&1
+
+        set "srcScf="!ctscf:"=!\!sci!.bin""
+        set "tgtScf="!gtscf:"=!\!sci!.bin""
+
+        if not exist !srcScf! goto:treatMlc01Data
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1 & goto:treatMlc01Data
+
+        set /A "srcSize=0"
+        for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
+        set /A "tgtSize=0"
+        for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
+
+        REM : compare their size : copy only if greater
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1
+
+        :treatMlc01Data
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 

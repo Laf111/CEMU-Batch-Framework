@@ -167,6 +167,7 @@ rem    set "logFileTmp="!BFW_PATH:"=!\Logs\BatchFw_process_!step!.list""
         taskkill /F /pid %%i > NUL 2>&1
         goto:killingLoop
     )
+    del /F !logFileTmp! > NUL 2>&1
     exit 0
 
     :waitNextWindow

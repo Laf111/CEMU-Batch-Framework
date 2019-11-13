@@ -409,6 +409,9 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :exportSaves
+
+        set "currentUser=!user:"=!"
+
         set /A "num=%~1"
 
         REM : set GAME_TITLE (used for naming user's rar file)
@@ -448,7 +451,7 @@ REM : functions
                 @echo before this script ^^!
             ) else (
                 REM : treatment for the user
-                @echo Treating !user:"=! ^(!folder!^)
+                @echo Treating !currentUser! ^(!folder!^)
                 call:treatUser
             )
         )
@@ -502,20 +505,20 @@ REM : functions
 
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/save/00050000/!endTitleId!/user/!folder!" "exit" > !ftplogFile! 2>&1
         type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-            @echo No Wii-U saves were found for !user:"=!
+            @echo No Wii-U saves were found for !currentUser!
             goto:eof
         )
 
         REM : for the current user : extract rar file in TMP_DLSAVE_PATH
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
         if not exist !rarFile! (
-            @echo No CEMU saves were found for !user:"=!
+            @echo No CEMU saves were found for !currentUser!
             goto:eof
         )
 
         if %nbArgs% EQU 0 (
-            choice /C yn /N /M "Upload !user:"=! saves on Wii-U's SD card (y, n)? : "
+            choice /C yn /N /M "Upload !currentUser! saves on Wii-U's SD card (y, n)? : "
             if !ERRORLEVEL! EQU 2 goto:eof
         )
 
@@ -526,15 +529,15 @@ REM : functions
         REM : CEMU 80000001 folder for the current user
         set "cemuUserSaveFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\80000001""
 
-        @echo Transfert CEMU saves for !GAME_TITLE! and !user:"=! to
+        @echo Transfert CEMU saves for !GAME_TITLE! and !currentUser! to
         @echo ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!^/!folder!
         @echo ---------------------------------------------------------
 
         REM : launching transfert
-        call !ftpReplaceFolders! !wiiuIp! remote !cemuUserSaveFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/!folder!" "Export !GAME_TITLE! saves for !user:"=! to Wii-U"
+        call !ftpReplaceFolders! !wiiuIp! remote !cemuUserSaveFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/!folder!" "Export !GAME_TITLE! saves for !currentUser! to Wii-U"
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
-            @echo ERROR when exporting existing saves for !user:"=! ^!
+            @echo ERROR when exporting existing saves for !currentUser! ^!
             del /F /S !cemuUserSaveFolder! > NUL 2>&1
             if %nbArgs% EQU 0 pause && exit 51
             exit /b 51

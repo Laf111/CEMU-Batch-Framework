@@ -153,10 +153,11 @@ REM : main
     set "user=NONE"
     set /A "index=!cr!-1"
     set "user=!users[%index%]!"
+    set "currentUser=!user:"=!"
 
     :displayHeader        
     IF !QUIET_MODE! EQU 0 @echo =========================================================
-    @echo Import saves for !user:"=! from ^: !MLC01_FOLDER_PATH!
+    @echo Import saves for !currentUser! from ^: !MLC01_FOLDER_PATH!
     IF !QUIET_MODE! EQU 0 @echo =========================================================
 
     :scanGamesFolder
@@ -323,16 +324,16 @@ REM : functions
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         @echo =========================================================
-        @echo !user:"=! save detected for !GAME_TITLE!
+        @echo !currentUser! save detected for !GAME_TITLE!
         @echo ---------------------------------------------------------
 
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
         if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
         if exist !rarFile! (
-            choice /C yn /N /M "A save already exists for !user:"=!, overwrite ? (y, n)"
+            choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
             if !ERRORLEVEL! EQU 2 @echo Cancel^! && goto:eof
         )
         @echo.

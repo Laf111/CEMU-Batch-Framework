@@ -1,4 +1,8 @@
-11/11/2019 V15RC5 :
+13/11/2019 V15RC6 :
+- add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
+        import transferable caches (compute shaderCache name : thanks Exzap !)
+        That means that there's no need to launch the game with CEMU to get 
+        the transferable cache when importings mlc01 data any more (install step) 
 - add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
         if BatchFw is installed on a removable device => always use progress bar
 - add : handle a list for user aspect ratios 

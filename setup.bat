@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15RC5"
+    set "BFW_VERSION=V15RC6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -952,7 +952,7 @@ REM : functions
         )
 
         @echo ---------------------------------------------------------
-        call:getUserInput "BatchFw launching mode? (p = use progress bar OR s = silent, default in 10sec): " "p,s" ANSWER 10
+        call:getUserInput "BatchFw launching mode? (s = silent, OR p = use progress bar : default in 10sec): " "p,s" ANSWER 10
         if [!ANSWER!] == ["p"] (
             set "msg="USE_PROGRESSBAR=YES""
             call:log2HostFile !msg!
@@ -1288,6 +1288,10 @@ REM : functions
         REM : pattern to ignore in log file
         set "pat=%~1"
         set "logFileTmp="!logFile:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !logFile! > NUL 2>&1
+            move /Y !logFileTmp! !logFile! > NUL 2>&1
+        )
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 

@@ -444,6 +444,7 @@ REM : functions
         REM : get BatchFw users list
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%i""
+            set "currentUser=!user:"=!"
 
             set "pat="!USERS_ACCOUNTS_FOLDER:"=!\%%i*.dat""
             set "folder=NONE"
@@ -465,22 +466,22 @@ REM : functions
             pushd !localFolderUser!
                 
             if not exist !folder! (
-                @echo WARNING ^: no Wii-U saves found for !user:"=!
+                @echo WARNING ^: no Wii-U saves found for !currentUser!
                 goto:eof
             )
 
             if %nbArgs% EQU 0 (
-                choice /C yn /N /M "Import !user! saves from Wii-U (y, n)? : "
+                choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
                 if !ERRORLEVEL! EQU 2 goto:eof
             )
             set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
             if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
 
             REM : for the current user :
-            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!user:"=!.rar""
+            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
 
             REM : backup the CEMU save
-            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!_Cemu_!DATE!.rar""
+            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
             if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
 
             REM : delete the user's save

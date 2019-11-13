@@ -70,7 +70,11 @@ REM : functions
     :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
-        set "logFileTmp="!logFile:"=!.tmp""
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !logFile! > NUL 2>&1
+            move /Y !logFileTmp! !logFile! > NUL 2>&1
+        )
 
         type !logFile! | find /I /V "!pat!" > !logFileTmp!
 

@@ -30,6 +30,8 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
+
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
@@ -114,21 +116,27 @@ REM : main
 
     REM : search for BatchFw game info file
     set "infoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
+    set "sci=NOT_FOUND"
+    if not exist !infoFile! call:getShaderCacheName & goto:checkSizes
 
-    if not exist !infoFile! (
-        @echo BatchFw^'^s game info file was not found
-        @echo The shader cache id is read from Cemu^'s log and
-        @echo write in !infoFile! after the first launch
-        @echo.
-        @echo Please^, launch the game at least one time and
-        @echo relaunch this script^.
-        exit 50
-    )
+    type !infoFile! | find "ShaderCache Id" > NUL 2>&1
+    if %ERRORLEVEL% NEQ 0 call:getShaderCacheName & goto:checkSizes
 
     for /F "tokens=2 delims=~=" %%i in ('type !infoFile! ^| find /I "ShaderCache Id" 2^>NUL') do set "sci=%%i"
     set "sci=!sci:"=!"
     set "sci=!sci: =!"
 
+    :checkSizes
+
+    if ["!sci!"] == ["NOT_FOUND"] (
+        @echo Error when computing shader cache name^.
+        @echo.
+        @echo Please^, launch the game at least one time
+        @echo ^(to let CEMU compute it^)
+        @echo and relaunch this script^.
+        exit 50
+    )
+    
     REM : check the files sizes
     for /F "tokens=*" %%a in (!TRANSF_CACHE!)  do set "newSize=%%~za"
 
@@ -190,6 +198,18 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+
+    :getShaderCacheName
+
+        pushd !getShaderCacheFolder!
+        set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
+
+        for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"
+
+        pushd !GAMES_FOLDER!
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
