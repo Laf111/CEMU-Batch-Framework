@@ -64,8 +64,7 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    set "currentUser=!user:"=!"
-    title Restore all saves of !currentUser! to a mlc01 target folder
+    title Restore all saves to a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -89,10 +88,10 @@ REM : main
         goto:askMlc01Folder
     )
 
-    REM : check if a usr/title exist
-    set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
-    if not exist !usrTitle! (
-        @echo !usrTitle! not found ^?
+    REM : check if a usr/save exist
+    set usrFolder="!MLC01_FOLDER_PATH:"=!\usr"
+    if not exist !usrFolder! (
+        @echo !usrFolder! not found ^?
         goto:askMlc01Folder
     )
 
@@ -120,6 +119,7 @@ REM : main
         set "user=!args[1]!"
         set /A "nbUsers=1"
     )
+
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
 
@@ -161,6 +161,8 @@ REM : main
     set "user=!users[%index%]!"
 
     :displayHeader
+    set "currentUser=!user:"=!"
+    title Restore all saves for !currentUser! to a mlc01 target folder
     @echo =========================================================
     @echo Restore saves of !user:"! to a mlc01 folder for each game^'s chosen
     @echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!

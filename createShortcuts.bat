@@ -829,7 +829,7 @@ REM : functions
             set "WD_FOLDER=!parentFolder:~0,-2!""
 
             REM : create a shortcut (if needed)
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\3rdParty\!name:.exe=^.lnk!""
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\3rdParty\!name:.exe=.lnk!""
             set "LINK_DESCRIPTION="!name:.exe=!""
             set "TARGET_PATH=!program!"
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\!name:.exe=.ico!""

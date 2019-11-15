@@ -182,7 +182,7 @@ REM : functions
         if not exist !inGameSavesFolder!  goto:eof
 
         REM : search zip file under inGameSaves folder
-        set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_*.rar""
+        set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!*_*_*.rar""
         set "ZIP_FILE="NONE""
         for /F "delims=~" %%i in ('dir /S /B /O:S !pat! 2^>NUL') do (
             set "ZIP_FILE="%%i""
@@ -206,8 +206,7 @@ REM : functions
             goto:eof
         )
 
-        del /F /S !pat! > NUL 2>&1
-        @echo !pat! deleted ^^!
+        del /P /F !pat!
         set /A NB_SAVES_TREATED+=1
 
     goto:eof

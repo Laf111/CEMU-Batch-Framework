@@ -149,18 +149,20 @@ REM : functions
         @echo Size of !CEMU_FOLDER_NAME:"=! subfolders ^(Mo^) ^:
         @echo ---------------------------------------------------------
 
-
-        :precompiled
         set "precompiled="!CEMU_FOLDER:"=!\ShaderCache\precompiled""
         set "sizeP=0"
         if exist !precompiled! call:getFolderSize !precompiled! sizeP
         @echo - precompiled     ^: !sizeP!
 
-        :transferable
         set "transferable="!CEMU_FOLDER:"=!\ShaderCache\transferable""
         set "sizeT=0"
         if exist !transferable! call:getFolderSize !transferable! sizeT
         @echo - transferable    ^: !sizeT!
+
+        set "glcache="!CEMU_FOLDER:"=!\ShaderCache\driver""
+        set "sizeT=0"
+        if exist !glcache! call:getFolderSize !glcache! sizeT
+        @echo - GLCache    ^: !sizeT!
         @echo =========================================================
 
     goto:eof

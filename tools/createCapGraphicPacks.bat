@@ -394,7 +394,19 @@ REM : functions
 
         @echo name = Speed Adjustment >> !rulesFileV3!
         @echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !rulesFileV3!
-        @echo description = Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV3!
+
+        if !nativeFps! EQU 30 (
+            @echo description = Adjust the speed in game when engine model is FPS based^. ^
+You need to disable vsync^. BatchFw assume that the native FPS is 30^. ^
+If it is not^,change the native FPS to 60 in ^
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+        ) else (
+            @echo description = Adjust the speed in game when engine model is FPS based^. ^
+You need to disable vsync^. BatchFw assume that the native FPS is 60^. ^
+If it is not^,change the native FPS to 30 in ^
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+        )
+
         @echo version = 3 >> !rulesFileV3!
         @echo # >> !rulesFileV3!
         @echo [Preset] >> !rulesFileV3!

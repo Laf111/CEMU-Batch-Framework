@@ -87,10 +87,10 @@ REM : main
         goto:askMlc01Folder
     )
 
-    REM : check if a usr/title exist
-    set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
-    if not exist !usrTitle! (
-        @echo !usrTitle! not found
+    REM : check if a usr/save exist
+    set usrFolder="!MLC01_FOLDER_PATH:"=!\usr"
+    if not exist !usrFolder! (
+        @echo !usrFolder! not found ^?
         goto:askMlc01Folder
     )
     cls

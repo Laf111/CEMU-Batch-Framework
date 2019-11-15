@@ -48,7 +48,7 @@ REM : main
     REM : check if cemu if not already running
     set /A "nbI=0"
 
-    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" ^| find /I /V " " /C') do set /A "nbI=%%f"
+    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" /C') do set /A "nbI=%%j"
     if %nbI% NEQ 0 (
         cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^!^. If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 4112
         exit 70
@@ -221,13 +221,14 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" ^| find /I /V " " /C') do set /A "nbI=%%f"
+    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GEQ 2 (
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running (nbI=%nbI%). If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
             exit 20
         )
     )
+    rem echo nbI=!nbI! >> !batchFwLog!
 
     REM : CEMU's log
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
@@ -2409,7 +2410,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         @echo - As the saved one was copied before launching the game in cemu FOLDER >> !tscl!
         @echo - there^'s no doubts that !CEMU_FOLDER_NAME! broke the shaderCache compatibility >> !tscl!
         @echo - >> !tscl!
-        @echo - Browse to "!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable >> !tscl!
+        @echo - Browse to !GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable >> !tscl!
         @echo - Keep the !OLD_SHADER_CACHE_ID!^.bfwl_old if necessary^, delete it otherwise>> !tscl!
         @echo - >> !tscl!
 

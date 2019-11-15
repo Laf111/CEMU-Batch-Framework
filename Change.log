@@ -1,4 +1,4 @@
-13/11/2019 V15RC6 :
+15/11/2019 V15RC7 :
 - add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
         import transferable caches (compute shaderCache name : thanks Exzap !)
         That means that there's no need to launch the game with CEMU to get 
@@ -6,6 +6,7 @@
 - add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
         if BatchFw is installed on a removable device => always use progress bar
 - add : handle a list for user aspect ratios 
+- add : support in GFX packs files for the packs created by BatchFw
 - add : GFX packs completion take all hosts settings into account (aspect ratios defined)
 - add : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
         an active connection is found) 
@@ -36,6 +37,7 @@
 - add : setup.bat now removes a third party software with invalid path and also modify the
         path to software installed on an USB drive for whose driver letter had changed
 - add : a check on GFX packs links build that cancel the run if no GFX pack were found
+- add : GLCache handling in getMyShaderCachesSize.bat
 - add : update embeded V3 GFX packs to v542
 - opt : pre-post processing times was reduced by running asynchronous treatments earlier
 - opt : monitorBatchFw don't close after CEMU anymore (to enhance priority of post treatments process)
@@ -54,8 +56,10 @@
         formated version read everytime
 - fix : WII-U / online files are compressed to not appear in games list in CEMU UI
 - fix : force temporary files location to !TMP! 
-- fix : set rar.exe working directory to BFW_PATH\logs
 - fix : ignore RC versions of BatchFw when searching for an update
+- fix : change mlc01 folder validity check with using mlc01/usr (remain after moving mlc01)
+- fix : createGameGraphicPacks.bat failed when launch with its shortcut
+- fix : deleteAllInGameSavesBackup.bat to treat only backup files
 
 20/09/2019 V14-13 :
 - hotfix : GFX pack update failure (URL changed)

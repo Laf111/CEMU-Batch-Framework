@@ -29,6 +29,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "createV2GraphicPacks="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
 
@@ -251,7 +252,17 @@ REM : functions
 
         @echo name = Resolution >> !rulesFileV3!
         @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !rulesFileV3!
-        @echo description = Created by BatchFW. Changes the resolution of the game >> !rulesFileV3!
+        if %nativeHeight% EQU 720 (
+            @echo description = Created by BatchFW considering that the native resolution is 720p^. ^
+Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. ^
+If it is not^, change the native resolution to 1080p in ^
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+        ) else (
+            @echo description = Created by BatchFW considering that the native resolution is 1080p. ^
+Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. ^
+If it is not^, change the native resolution to 720p in ^
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+        )
         @echo version = 3 >> !rulesFileV3!
         @echo # >> !rulesFileV3!
         @echo [Preset] >> !rulesFileV3!
