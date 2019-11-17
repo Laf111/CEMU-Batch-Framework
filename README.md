@@ -29,7 +29,7 @@ Last GFX packs checked (presets completion) : **V554**
     - install online files, 
     - sync friend list, 
     - sync saves between CEMU with the Wii-U,
-    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb) **
+    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb)**
 
 
 
