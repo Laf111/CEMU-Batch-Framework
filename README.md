@@ -11,13 +11,15 @@ Last GFX packs checked (presets completion) : **V554**
 
 - **Handle more than one user/save;**
 
+- **Make your loadiine games library portable :**
+    - **save settings PER user (including GFX and mods packs) and per host,**
+    - **game stats per user (using all CEMU version that supports it) for all hosts used** 
+
 - **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
 
 - **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one;**
 
 - **Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;**
-
-- **Make your loadiine games library portable and save settings per user and per host;**
 
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
 
