@@ -25,11 +25,11 @@ Last GFX packs checked (presets completion) : **V554**
 
 - **create FPS packs for ALL games (to run the games at 105, 110 or 120% for games using a FPS engine model. V-sync need to be disabled).**
 
-- **For Wii-U owners: 
-    - install online files, 
-    - sync friend list, 
-    - sync saves between CEMU with the Wii-U,
-    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb)**
+- **For Wii-U owners:** 
+    - **install online files,** 
+    - **sync friend list,** 
+    - **sync saves between CEMU with the Wii-U,**
+    - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb)**
 
 
 
