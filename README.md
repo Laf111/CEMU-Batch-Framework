@@ -9,7 +9,7 @@ Last GFX packs checked (presets completion) : **V554**
 
 ## Main purpose:
 
-- **Handle more than one user/save (for versions >= 1.15.19 : each user can use accounts as extra saves slots);**
+- **Handle more than one user/save;**
 
 - **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
 
