@@ -11,8 +11,6 @@ Last GFX packs checked (presets completion) : **V554**
 
 - **Handle more than one user/save (for versions >= 1.15.19 : each user can use accounts as extra saves slots);**
 
-- **For Wii-U owners: install online files, sync friend list, saves between CEMU with the Wii-U;**
-
 - **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
 
 - **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one;**
@@ -26,6 +24,13 @@ Last GFX packs checked (presets completion) : **V554**
 - **Complete/create GFX packs for ALL games (even if they are still not officially supported).**
 
 - **create FPS packs for ALL games (to run the games at 105, 110 or 120% for games using a FPS engine model. V-sync need to be disabled).**
+
+- **For Wii-U owners: 
+    - install online files, 
+    - sync friend list, 
+    - sync saves between CEMU with the Wii-U,
+    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb) **
+
 
 
 ## How it works:
