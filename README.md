@@ -9,7 +9,7 @@ Last GFX packs checked (presets completion) : **V554**
 
 ## Main purpose:
 
-- **Handle more than one user/save (for versions >= 1.15.19 : use accounts as extra memory slots and so you can continue to use your saves on earlier versions);**
+- **Handle more than one user/save (for versions >= 1.15.19 : each user can use accounts as extra saves slots);**
 
 - **For Wii-U owners: install online files, sync friend list, saves between CEMU with the Wii-U;**
 
