@@ -25,8 +25,7 @@
         else try to changed the drive's letter and if it is valid import the setting 
 - add : script to fix broken shortcuts in case of drive letter changing (installation on 
         an USB device) or if you have moved your games'library.
-        Missing CEMU's install folder is already handle in LaunchGame.bat (shortcuts are 
-        deleted automatically)
+        Game's shortcut with a missing CEMU's install folder is already deleted in LaunchGame.bat
 - add : add a file browsing option when defining a 3rd party software to be launched 
         before (and optionnaly closed after) CEMU.
 - add : add an existance check for 3rd Party Software when entering its command line
@@ -40,26 +39,27 @@
 - add : GLCache handling in getMyShaderCachesSize.bat
 - add : update embeded V3 GFX packs to v542
 - opt : pre-post processing times was reduced by running asynchronous treatments earlier
-- opt : monitorBatchFw don't close after CEMU anymore (to enhance priority of post treatments process)
+- opt : monitorBatchFw don't close after CEMU's launch anymore (to continue to enhance 
+        priority of post treatments process)
 - opt : optimize game GFX packs gathering
-- opt : externalize GFX packs import (to be launched earlier in launchGame.bat and re-use in wizardFirstSaving.bat)
+- opt : externalize GFX packs import (to be launched earlier in launchGame.bat and re-used in wizardFirstSaving.bat)
 - opt : only warn user of a new GFX pack release when launching a game
-- fix : regression ignore precompiled shaders did not work on latests releases
-- fix : wait for the end of V2 GFX pack extraction in Create*.bat 
-- fix : still some unwanted message sent to console when completing/creating extra GFX packs
+- fix : regression on ignoring precompiled shaders did not work on latests releases
+- fix : wait for the end of V2 GFX pack extraction in Create*.bat and launchGame.bat 
+- fix : still some unwanted messages were sent to console when completing/creating extra GFX packs
 - fix : disable the delayed expansion on game's profile path (when the file does not exist, it leads 
         in a warning displayed in the console : the process tried to write on a nonexistent pipe)
-- fix : when a game's profile file was created (not existing) on versions >= 1.15.6, it wasn't 
+- fix : when a game's profile file was created (that not already exists) on versions >= 1.15.6, it wasn't 
         copied in _BatchFw_Missing_Games_Profiles        
-- fix : launchThirdPartySoftware.bat not removing a third party software with invalid path
-- fix : bug when comparing CEMU versions with a version without a letter in and do not re-computed
+- fix : launchThirdPartySoftware.bat did not remove a third party software with an invalid path
+- fix : bug when comparing CEMU versions with a version without a letter in. Do not re-computed
         formated version read everytime
-- fix : WII-U / online files are compressed to not appear in games list in CEMU UI
+- fix : WII-U / compress online files (else friend list appear in games list in CEMU)
 - fix : force temporary files location to !TMP! 
 - fix : ignore RC versions of BatchFw when searching for an update
-- fix : change mlc01 folder validity check with using mlc01/usr (remain after moving mlc01)
-- fix : createGameGraphicPacks.bat failed when launch with its shortcut
-- fix : deleteAllInGameSavesBackup.bat to treat only backup files
+- fix : change mlc01 folder validity check with using mlc01/usr
+- fix : createGameGraphicPacks.bat failed when launch from its shortcut
+- fix : deleteAllInGameSavesBackup.bat modified to treat only backup files
 
 20/09/2019 V14-13 :
 - hotfix : GFX pack update failure (URL changed)
@@ -520,9 +520,9 @@
 
 
 2018/08/16 V9 :
-    - can now ouput executables that can be “shortcuted” by STEAM and so you can use all BatchFW features with launching from STEAM
+    - can now ouput executables that can be Â“shortcutedÂ” by STEAM and so you can use all BatchFW features with launching from STEAM
     - automatic graphic pack update
-    - auto-import settings from last version reset by default with comparing the two game’s profiles lines side by side (if needed)
+    - auto-import settings from last version reset by default with comparing the two gameÂ’s profiles lines side by side (if needed)
     - fix openGL Cache backup for AMD users (looking for a folder and nor for files in the GLCache folder)
 
 2018/07/03 V8-6 :
@@ -651,7 +651,7 @@
     
     
 2018/04/04 V5 : Install Icons automatically, open dialog boxes
-    - now only the following characters are forbiden in paths : (,),&,%,£,! and ^
+    - now only the following characters are forbiden in paths : (,),&,%,Â£,! and ^
     - improved specials characters support by : 
         getting and setting the char code set of the host
         delay expansion in all code and closing variables visibility
