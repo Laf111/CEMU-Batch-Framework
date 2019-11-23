@@ -9,7 +9,7 @@ Last GFX packs checked (presets completion) : **V554**
 
 ## Main purpose:
 
-- **Handle more than one user/save;**
+- **Handle more than one user/save (on versions of CEMU < 1.15.19);**
 
 - **Make your loadiine games library portable :**
     - **save settings PER user (including GFX and mods packs) and per host,**
