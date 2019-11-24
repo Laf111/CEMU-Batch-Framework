@@ -203,7 +203,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
         
 - How BatchFw will mess around with CEMU accounts (> 1.15.19) ? 
 
-    - Same as it does with earlier version. Continue to use BatchFw user as usual. You can use the CEMU feature to create extra slots saves.
+    - Same as it does with earlier version. Continue to use BatchFw user as usual (do not use the CEMU's feature). You can use the new CEMU feature to create extra slots saves if you want.
     
 
 ## Recommendations: 
