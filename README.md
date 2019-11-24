@@ -2,9 +2,9 @@
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, powershell, vbs scripts and 3rd party tools.
 
-Versions of CEMU supported : **1.11.0 to 1.15.18**
+Versions of CEMU supported : **1.11.0 to 1.15.19**
 
-Last GFX packs checked (presets completion) : **V554**
+Last GFX packs checked (presets completion) : **V557**
 
 
 ## Main purpose:
@@ -201,7 +201,10 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
         - you'll have to update your settings if the driver letter of your USB device is changed
         - BatchFw fix broken shortcuts (Wii-U Games\\fix broken shortcuts.lnk can be also use if you move your games'folder)
         
+- How BatchFw will mess around with CEMU accounts (> 1.15.19) ? 
 
+    - Same as it does with earlier version. Continue to use BatchFw user as usual. You can use the CEMU feature to create extra slots saves.
+    
 
 ## Recommendations: 
 
