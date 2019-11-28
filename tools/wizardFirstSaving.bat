@@ -234,22 +234,17 @@ REM : main
 
     :checkProfile
 
+    REM : Creating game profile if needed
+    if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
+    
+    REM : PROFILE_FILE=NOT_FOUND
+    REM : define cemu profile path
+    
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
-
-    REM : handling user game profiles
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v11515! LEQ 1 (
-        set "userGameProfile="%CEMU_FOLDER:"=%\gameProfiles\%titleId%.ini""
-        if not exist !userGameProfile! set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles\default""
-    )
     
-    REM : Creating game profile if needed
-    if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
-
-    REM : PROFILE_FILE=NOT_FOUND
-    REM : define cemu profile path
-    set "PROFILE_FILE="%CEMU_PF:"=%\%titleId%.ini""
+    set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
 
     REM : if you already generated a profile under MISSING_PROFILES_FOLDER, use it
     if not exist !PROFILE_FILE! if exist !missingProfile! (
@@ -573,9 +568,9 @@ REM : main
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:saveOptions
 
-    REM : if current version >=1.15.18 get las game stats
+    REM : if current version >=1.15.18 get last game stats
     if !v1153b! GEQ 1 (
-        call:compareVersions !versionRead! "1.15.18" result
+        call:compareVersions !versionRead! "1.15.18" result > NUL 2>&1
         if ["!result!"] == [""] @echo Error when comparing versions
         if !result! EQU 50 @echo Error when comparing versions
         if !result! EQU 2 goto:saveOptions
@@ -807,8 +802,6 @@ REM : functions
         for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
 
         if not exist !ls!  (
-            @echo Warning ^: last settings folder was not found^, !ls! does not exist
-
             REM : rebuild it
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
             if not exist !css! del /F !lls! > NUL 2>&1 && goto:endFctGls

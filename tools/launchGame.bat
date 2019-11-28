@@ -253,7 +253,7 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHidden! !script! -warn
 
-    REM : GFX type to provide
+    REM : GFX type to provides
     set "gfxType=V3"
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
 
@@ -268,13 +268,13 @@ REM : main
     set "versionReadFormated=NONE"
     REM : comparing version to V1.15.15
     set /A "v11515=2"
-    call:compareVersions !versionRead! "1.15.15" v11515
+    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
     if ["!v11515!"] == [""] @echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 @echo Error when comparing versions >> !batchFwLog!
 
     set /A "v114=1"
     if !v11515! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114
+        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
         if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
         if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
         if !v114! EQU 2 set "gfxType=V2"
@@ -758,7 +758,7 @@ REM : main
     set /A "v1153b=1"
     if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
         if !v114! EQU 1 (
-            call:compareVersions !versionRead! "1.15.3b" v1153b
+            call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
 
             if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
@@ -1428,7 +1428,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if not exist !cemuProfile! set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
 
         if exist !cemuProfile! set "PROFILE_FILE=!cemuProfile!"
-        REM : left at NOT_FOUND, it will be created in wizardFirstLaunch.bat
+        REM : else leave at NOT_FOUND, it will be created in wizardFirstLaunch.bat
 
         REM : check if it is already a link (case of crash) : delete-it
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
@@ -1570,6 +1570,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         if not exist !OLD_PROFILE_FILE! goto:bypassComparison
 
+        set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+        
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
@@ -1636,7 +1638,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : if current version >=1.15.15
         if !v11515! GEQ 1 (
-            call:compareVersions !versionRead! "1.15.18" result
+            call:compareVersions !versionRead! "1.15.18" result > NUL 2>&1
             if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 2 goto:cemuHookSettings
@@ -2040,18 +2042,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "cugp="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
         if exist !cugp! set "cgp=!cugp!"
 
-        REM : backup in game's folder
-        set "ugp="!GAME_FOLDER_PATH:"=!\Cemu\gameProfiles\!USERDOMAIN!\gameProfiles\%titleId%.ini""
 
         REM : if game profile does not exist in CEMU subfolder
         REM : AND if exist in_BatchFW_Missing_Games_Profiles copy it to cemu folder
-        if not exist !cgp! (
-            if exist !ugp! (
-                copy /Y !ugp! !cgp! > NUL 2>&1
-            ) else (
-                if exist !mgp! copy /Y !mgp! !cgp! > NUL 2>&1
-            )
-        )
+        if not exist !cgp! if exist !mgp! copy /Y !mgp! !cgp! > NUL 2>&1
+        
         REM : temporary vbs file for creating a windows shortcut
         set "TMP_VBS_FILE="!TEMP!\CEMU_!DATE!.vbs""
 
