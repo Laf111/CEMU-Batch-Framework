@@ -397,19 +397,31 @@ REM : main
         call:getLastSettings
 
         REM : use this one
-        if exist !lst! set "REF_CEMU_FOLDER=!lst!"
-
+        if exist !lst! (
+        
+            for %%a in (!lst!) do set "parentFolder="%%~dpa""
+            set "REF_CEMU_FOLDER=!parentFolder:~0,-2!""
+        )
     )
 
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:openProfileFile
 
     if exist !REF_CEMU_FOLDER! (
-        REM : basename of REF_CEMU_FOLDER (used to name shorcut)
+        REM : basename of REF_CEMU_FOLDER (used to name shortcut)
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
         choice /C yn /CS /N /M "!GAME_TITLE! was last played with !proposedVersion!, use its game profile file ? (y, n) : "
         if !ERRORLEVEL! EQU 2 goto:askRefCemuFolder
+        
+        REM : search in logFile, getting only the last occurence
+        set "pat="!proposedVersion! install folder path""
+        set "lastPath=NONE"
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath=%%i"
+
+        if ["!lastPath!"] == ["NONE"] goto::step2    
+        set "REF_CEMU_FOLDER=!lastPath!"
+        
         goto:launchDiff
     )
 
@@ -420,8 +432,11 @@ REM : main
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
 
     :launchDiff
+    
+    
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+
     if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
 
     if not exist !refProfileFile! (
