@@ -274,14 +274,11 @@ REM : main
     if ["!v11515!"] == [""] @echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 @echo Error when comparing versions >> !batchFwLog!
 
-    set /A "v114=1"
-    if !v11515! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-        if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-        if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-        if !v114! EQU 2 set "gfxType=V2"
-        if !v114! LEQ 1 goto:getTitleId
-    )
+    call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+    if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+    if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+    if !v114! EQU 2 set "gfxType=V2"
+    if !v114! LEQ 1 goto:getTitleId
 
     if exist !gfxv2! goto:getTitleId
 
