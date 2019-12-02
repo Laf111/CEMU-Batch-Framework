@@ -13,21 +13,25 @@ REM : main
     REM : Last installation path
     set "LAST_GAMES_FOLDER_PATH="TO_BE_REPLACED""
     
+    set "lastBfwInstall="!LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\setup.bat""
+    if not exist !lastBfwInstall! goto:fix
+
+    @echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
+    @echo There^'s no need to fix shortcuts.
+    @echo.
+    choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games (y, n)? : "
+    if !ERRORLEVEL! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
+    @echo.
+    @echo done
+    @echo.
+    @echo =========================================================
+    pause & exit 0
+
     @echo =========================================================
     @echo Fix broken shorcuts created from
     @echo !LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install
     @echo =========================================================
     @echo.
-
-    set "lastBfwInstall="!LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\setup.bat""
-    if exist !lastBfwInstall! (
-        @echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
-        @echo There^'s no need to fix shortcuts ^!
-        @echo.
-        @echo =========================================================
-        pause
-        exit 0
-    )
 
     set "browseFolder="!TEMP!\browseFolder.vbs""
     call:createBrowser
@@ -42,6 +46,7 @@ REM : main
 
     del /F !browseFolder! > NUL 2>&1
 
+    :fix
     set "fnrPath="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\fnr.exe""
     if not exist !fnrPath! (
         @echo BatchFw not seems to be installed in !NEW_GAMES_FOLDER_PATH!
@@ -52,7 +57,7 @@ REM : main
         exit 10
     )
 
-    @echo Fixing shortcuts by using now !NEW_GAMES_FOLDER_PATH!^.^.^.
+    @echo Fixing shortcuts for !NEW_GAMES_FOLDER_PATH!^.^.^.
     @echo.
 
     REM : get the Wii-Games folder
@@ -77,7 +82,8 @@ REM : main
     @echo done
     @echo.
     @echo =========================================================
-    pause
+    pause & exit 0
+
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     goto:eof
 
@@ -144,7 +150,20 @@ REM : functions
         echo oSc^.WorkingDirectory = Replace^(oSc^.WorkingDirectory^,!LAST_GAMES_FOLDER_PATH!^,!NEW_GAMES_FOLDER_PATH!^) >> !TMP_VBS_FILE!
         echo oSc^.IconLocation = Replace^(oSc^.IconLocation^,!LAST_GAMES_FOLDER_PATH!^,!NEW_GAMES_FOLDER_PATH!^) >> !TMP_VBS_FILE!
 
-        echo oSc^.Save >> !TMP_VBS_FILE!
+        echo findpos = InStr^(oSc^.Arguments^, "launchGame") >> !TMP_VBS_FILE!
+        echo If findpos ^<^> 0 Then >> !TMP_VBS_FILE!
+        echo     Dim rpxPath  >> !TMP_VBS_FILE!
+        echo     rpxPath=Split^(oSc^.Arguments^, Chr^(34^)^) >> !TMP_VBS_FILE!
+        echo     Set fso = CreateObject^("Scripting.FileSystemObject"^)  >> !TMP_VBS_FILE!
+        echo     If fso^.FileExists^(rpxPath^(5^)^) Then  >> !TMP_VBS_FILE!
+        echo        oSc^.Save  >> !TMP_VBS_FILE!
+        echo     Else  >> !TMP_VBS_FILE!
+        echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
+        echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
+        echo     End If  >> !TMP_VBS_FILE!
+        echo Else >> !TMP_VBS_FILE!
+        echo     oSc^.Save  >> !TMP_VBS_FILE!
+        echo End If     >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!

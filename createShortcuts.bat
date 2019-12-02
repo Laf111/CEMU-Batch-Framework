@@ -1030,8 +1030,8 @@ REM : functions
         )
 
         REM : create a shortcut to getTitleDataFromLibrary.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's data\Get GAME data with titleId^.lnk""
-        set "LINK_DESCRIPTION="Get GAME data with titleId from WiiU-Titles-Library^.csv""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's data\Get game data with titleId^.lnk""
+        set "LINK_DESCRIPTION="Get game data using its titleId from WiiU-Titles-Library^.csv""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getTitleDataFromLibrary.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getTitleDataFromLibrary.ico""
         if not exist !LINK_PATH! (
@@ -1090,8 +1090,8 @@ REM : functions
         )
 
         REM : create a shortcut to forceGraphicPackUpdate.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Force Graphic Packs folder update^.lnk""
-        set "LINK_DESCRIPTION="Force Graphic Packs folder update and BatchFw extra GFX packs rebuild""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Force GFX packs folder update^.lnk""
+        set "LINK_DESCRIPTION="Force a graphic packs folder update""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\forceGraphicPackUpdate.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
         if not exist !LINK_PATH! (
@@ -1140,8 +1140,8 @@ REM : functions
         )
 
         REM : create a shortcut to importGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Import Games with updates and DLC^.lnk""
-        set "LINK_DESCRIPTION="Import Games with updates and DLC and prepare them to emulation""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Import games with updates and DLC^.lnk""
+        set "LINK_DESCRIPTION="Import games with updates and DLC and prepare them to emulation""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importGames.ico""
         if not exist !LINK_PATH! (
@@ -1190,7 +1190,7 @@ REM : functions
         )
 
         REM : create a shortcut to importModsForAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Import Mods for my games^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Import mods for my games^.lnk""
         set "LINK_DESCRIPTION="Search and import mods folder into game^'s one""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importModsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importModsForAllGames.ico""
@@ -1205,7 +1205,7 @@ REM : functions
             mkdir "!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!" > NUL 2>&1
 
             REM : create a shortcut to displayGamesStats.bat (if needed)
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\Display Games stats^.lnk""
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\Display games stats^.lnk""
             set "LINK_DESCRIPTION="Display the golbal games^'stats for !ARGS:"=!""
             set "TARGET_PATH="!BFW_PATH:"=!\tools\displayGamesStats.bat""
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\displayGamesStats.ico""
@@ -1294,12 +1294,26 @@ REM : functions
 
         REM : create a shortcut to explore OpenGL Cache saved
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore OpenGL caches saved^.lnk""
-        set "LINK_DESCRIPTION="Explore OpenGL caches saved""
+        set "LINK_DESCRIPTION="Explore OpenGL shader caches saved""
         set "TARGET_PATH=!GLCacheSavesFolder!"
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to OpenGL caches saves
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        set "VkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
+        if not exist !VkCacheSavesFolder! mkdir -p !VkCacheSavesFolder!
+
+        REM : create a shortcut to explore Vulkan Cache saved
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore Vulkan caches saved^.lnk""
+        set "LINK_DESCRIPTION="Explore Vulkan shader caches saved""
+        set "TARGET_PATH=!VkCacheSavesFolder!"
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
+
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to Vulkan caches saves
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
     goto:eof
@@ -1592,6 +1606,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if not exist !icoBaseFile! goto:eof
 
         :copyIcoFile
+        REM : copy and renaming the ico file
         set "newLocation="!GAME_FOLDER_PATH:"=!\Cemu""
         robocopy !icoBase! !newLocation! "%titleIdIco%.ico" > NUL 2>&1
 

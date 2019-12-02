@@ -235,27 +235,32 @@ REM : main
     :checkProfile
 
     REM : Creating game profile if needed
-    if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:completeGameProfile
-    
-    REM : PROFILE_FILE=NOT_FOUND
+    if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
+
+    REM : profile file can be NOT_FOUND or \%titleId%.ini or \default\%titleId%.ini
+
     REM : define cemu profile path
-    
+
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
-    
+
     set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
 
-    REM : if you already generated a profile under MISSING_PROFILES_FOLDER, use it
-    if not exist !PROFILE_FILE! if exist !missingProfile! (
+    REM : check if a ddefault profile exist
+    set "upf="!CEMU_PF:"=!\default\%titleId%.ini""
+
+    REM : if you already generated a profile under MISSING_PROFILES_FOLDER
+    REM : and if not default profile exists, use it
+    if exist !missingProfile! if not exist !PROFILE_FILE! if not exist !upf! (
         robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
-        goto:completeGameProfile
+        goto:handleVersions
     )
 
     REM : else, create profile file in CEMU_FOLDER
-    if not exist !PROFILE_FILE! call:createGameProfile
+    if not exist !PROFILE_FILE! call:createGameProfile > NUL 2>&1
 
-    :completeGameProfile
+    :handleVersions
 
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
@@ -295,7 +300,7 @@ REM : main
                 if ["!v112!"] == [""] echo Error when comparing versions
 
                 if !v112! EQU 50 echo Error when comparing versions
-                if !v112! EQU 2 goto:displayGameProfile
+                if !v112! EQU 2 goto:backupDefaultSettings
             )
         )
     )
@@ -310,7 +315,7 @@ REM : main
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
     set /A "v1153b=2"
-    if !v1156! EQU 2 (
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
         call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
         if ["!v1153b!"] == [""] @echo Error when comparing versions
         if !v1153b! EQU 50 @echo Error when comparing versions
@@ -383,18 +388,41 @@ REM : main
 
     :diffProfileFile
 
+    REM : saved settings folder path for this game
+    set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+    set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
+
+    if exist !lls! (
+        set "lst="NOT_FOUND""
+        call:getLastSettings
+
+        REM : use this one
+        if exist !lst! set "REF_CEMU_FOLDER=!lst!"
+
+    )
+
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:openProfileFile
 
-    :askRefCemuFolder
-    REM : get cemu install folder for existing game's profile
+    if exist !REF_CEMU_FOLDER! (
+        REM : basename of REF_CEMU_FOLDER (used to name shorcut)
+        for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
+        choice /C yn /CS /N /M "!GAME_TITLE! was last played with !proposedVersion!, use its game profile file ? (y, n) : "
+        if !ERRORLEVEL! EQU 2 goto:askRefCemuFolder
+        goto:launchDiff
+    )
+
+
+    REM : get cemu install folder for existing game's profile
+    :askRefCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
+
+    :launchDiff
     REM : check that profile file exist in
-    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
-    set "refUserProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-    if exist !refUserProfileFile! set "refProfileFile=!refUserProfileFile!"
+    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+    if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
 
     if not exist !refProfileFile! (
         @echo No game^'s profile file found ^!
@@ -585,10 +613,7 @@ REM : main
         goto:saveOptions
     )
 
-    set "lst="NOT_FOUND""
-    call:getLastSettings
-
-    REM : if exist game's stats, patch !cs! with
+    REM : if exist game's stats (last settings file)
     if exist !lst! call:setGameStats > NUL 2>&1
 
     :saveOptions

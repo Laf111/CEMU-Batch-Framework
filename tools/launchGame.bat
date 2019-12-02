@@ -73,10 +73,12 @@ REM : main
     set "DATE=%ldt%"
 
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""
+    set "setup="!BFW_PATH:"=!\setup.bat""
     @echo ========================================================= > !batchFwLog!
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
     @echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     @echo ========================================================= >> !batchFwLog!
 
@@ -253,7 +255,7 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHidden! !script! -warn
 
-    REM : GFX type to provides
+    REM : GFX type to provide
     set "gfxType=V3"
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
 
@@ -302,7 +304,7 @@ REM : main
     )
 
     :getTitleId
-    @echo Version of GFX pack required ^: !gfxType! >> !batchFwLog!
+    @echo Minimal version of GFX pack required ^: !gfxType! >> !batchFwLog!
 
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
@@ -482,17 +484,17 @@ REM : main
     REM : load Cemu's options
     call:loadCemuOptions
 
-    REM : handling GLCache backup
+    REM : handling GPU shader cache backup
     REM : ----------------------------
 
-    REM : saved GLCache folder
+    REM : saved GpuCache folder
     set "GLCACHE_BACKUP="NOT_FOUND""
 
-    REM : openGLCacheID
-    set "oldOGLCacheId=NOT_FOUND"
-    set "OPENGL_CACHE="NOT_FOUND""
-    set "GlCache="NOT_FOUND""
-    set "GlCacheSaved="NOT_FOUND""
+    REM : openGpuCacheID
+    set "oldGpuCacheId=NOT_FOUND"
+    set "GPU_CACHE="NOT_FOUND""
+    set "GpuCache="NOT_FOUND""
+    set "gpuCacheSaved="NOT_FOUND""
 
     set "driversUpdateFlag=0"
 
@@ -506,8 +508,8 @@ REM : main
             set "GPU_VENDOR=!string: =!"
         )
     )
-    @echo gpuType = %gpuType%>> !batchFwLog!
-    @echo gpuType = %gpuType%
+    @echo gpuType ^: %gpuType%>> !batchFwLog!
+    @echo gpuType ^: %gpuType%
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
@@ -518,50 +520,66 @@ REM : main
 
     set "GPU_DRIVERS_VERSION=!string: =!"
 
-    REM : search your current GLCache
+    REM : check graphic API set
+    set "graphicApi=OpenGL"
+    if exist !cs! (
+        pushd !BFW_RESOURCES_PATH!
+        call:getValueInXml "//Graphic/api/text()" !cs! value
+        if not ["!value!"] == ["NOT_FOUND"] if ["!value!"] == ["1"] (
+            set "graphicApi=Vulkan"
+            pushd !BFW_TOOLS_PATH!
+        )
+    )
+
+    REM : search your current GpuCache
     REM : check last path saved in log file
 
     REM : search in logFile, getting only the last occurence
+    set "GPU_CACHE="NOT_FOUND""
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "GPU_CACHE=%%i"
+echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
+    REM : when updating drivers GpuCache is deleted
 
-    set "OPENGL_CACHE="NOT_FOUND""
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
-
-    REM : when updating drivers GLCache is deleted
-
-    if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:handlingGame
+    if not [!GPU_CACHE!] == ["NOT_FOUND"] if exist !GPU_CACHE! goto:handlingGame
 
     REM : else search it
     pushd "%LOCALAPPDATA%"
     set "cache="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
+    if not [!cache!] == ["NOT_FOUND"] set "GPU_CACHE=!cache!"
+
+echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
 
     pushd !BFW_TOOLS_PATH!
 
-    if [!OPENGL_CACHE!] == ["NOT_FOUND"] goto:handlingGame
+    if [!GPU_CACHE!] == ["NOT_FOUND"] goto:handlingGame
 
     REM : save path to log file
-    set "msg="OPENGL_CACHE=!OPENGL_CACHE:"=!""
+    set "msg="OPENGL_CACHE=!GPU_CACHE:"=!""
     call:log2HostFile !msg!
 
     REM : handling Game
     REM : ----------------------------
-
     :handlingGame
-    set "OPENGL_CACHE_PATH=!OPENGL_CACHE!"
+    echo Grapic API used ^: !graphicApi!
+    echo Grapic API used ^: !graphicApi! >> !batchFwLog!
+    set "GPU_CACHE_PATH=!GPU_CACHE!"
 
     REM : CEMU >= 1.15.1
     set "cemuGLcache="!CEMU_FOLDER:"=!\shaderCache\driver\nvidia""
 
-    REM : CEMU >= 1.16 : check which API is activated
-
     :createGLcacheFolder
-    if ["%gpuType%"]==["NVIDIA"] if exist !cemuGLcache! (
-        set "OPENGL_CACHE_PATH="!cemuGLcache:"=!\GLCache""
-        REM : create the GLcache subfolder
-        if not exist !OPENGL_CACHE_PATH! if not [!OPENGL_CACHE!] == ["NOT_FOUND"] mkdir !OPENGL_CACHE_PATH!
-    )
+    if ["%gpuType%"]==["NVIDIA"] if exist !cemuGLcache! set "GPU_CACHE_PATH="!cemuGLcache:"=!\GLCache""
+
+    REM : Vulkan cache (CEMU >= 1.16)
+    if ["!graphicApi!"] == ["Vulkan"] set "GPU_CACHE_PATH="!CEMU_FOLDER:"=!\shaderCache\driver\vk""
+
+    echo GPU_CACHE_PATH=!GPU_CACHE_PATH!
+    echo GPU_CACHE_PATH=!GPU_CACHE_PATH! >> !batchFwLog!
+
+    REM : create the GLcache subfolder
+    if not exist !GPU_CACHE_PATH! if not [!GPU_CACHE!] == ["NOT_FOUND"] mkdir !GPU_CACHE_PATH!
 
     REM also create default folder (not exist when you've just updated your display drivers)
     set "folder="%LOCALAPPDATA%\%gpuType%\GLCache""
@@ -602,50 +620,55 @@ REM : main
     set "cml01="!CEMU_FOLDER:"=!\mlc01""
 
     REM : check mlc01 consistency
-    if not [!MLC01_FOLDER_PATH!] == [!cml01!] goto:openGlCache
+    if not [!MLC01_FOLDER_PATH!] == [!cml01!] goto:openGpuCache
     REM : if arg MLC01_FOLDER_PATH is pointing to CEMU_FOLDER
 
     REM : and a local mlc01 folder exist
     set "gml01="!GAME_FOLDER_PATH:"=!\mlc01""
 
-    if not exist !gml01! goto:openGlCache
+    if not exist !gml01! goto:openGpuCache
 
     cscript /nologo !MessageBox! "ERROR ^: Please delete and recreate this shortcut ^(if !CEMU_FOLDER_NAME:"=! newer than 1^.11^) OR rename^/move !gml01:"=! ^(if !CEMU_FOLDER_NAME:"=! is an older than 1^.10 and so mlc01 is in CEMU folder^)" 4112
     exit 15
 
-    :openGlCache
+    :openGpuCache
     if !usePbFlag! EQU 1 call:setProgressBar 80 82 "pre processing" "installing OpenGL cache"
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
-    set "GLCacheBackupFolder="NOT_FOUND""
-    if [!OPENGL_CACHE_PATH!] == ["NOT_FOUND"] goto:lockCemu
+    set "gpuCacheBackupFolder="NOT_FOUND""
+    if [!GPU_CACHE_PATH!] == ["NOT_FOUND"] goto:lockCemu
 
-    set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!"
+    set "gpuCacheSavesFolder=!GPU_CACHE:GLCache=_BatchFW_CemuGLCache!"
 
-    if not exist !GLCacheSavesFolder! goto:lockCemu
+    if ["!graphicApi!"] == ["Vulkan"] (
+        set "gpuCacheSavesFolder=!GPU_CACHE:GLCache=_BatchFW_CemuVkCache!"
+        set "GPU_CACHE=!GPU_CACHE_PATH!"
+    )
 
-    set "IdGpuFolder="NOT_FOUND""
-    pushd !GLCacheSavesFolder!
+    if not exist !gpuCacheSavesFolder! goto:lockCemu
+
+    set "idGpuFolder="NOT_FOUND""
+    pushd !gpuCacheSavesFolder!
     set "pat=!GPU_VENDOR!*"
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "IdGpuFolder="%%x""
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "idGpuFolder="%%x""
     pushd !BFW_TOOLS_PATH!
 
     REM : if no backup found for your GPU VENDOR goto:lockCemu
-    if [!IdGpuFolder!] == ["NOT_FOUND"] goto:lockCemu
+    if [!idGpuFolder!] == ["NOT_FOUND"] goto:lockCemu
     REM : get gpuVendor and gpuDriversVersion from folder's name
-    for /F "tokens=1-2 delims=@" %%i in (!IdGpuFolder!) do (
+    for /F "tokens=1-2 delims=@" %%i in (!idGpuFolder!) do (
         set "gpuVendorRead=%%i"
         set "gpuDriversVersionRead=%%j"
     )
 
     REM : if GPU_VENDOR not match goto:lockCemu ignore the file
     if not ["!gpuVendorRead!"] == ["!GPU_VENDOR!"] (
-        @echo Found a GLCache backup !IdGpuFolder! that is not for your current GPU Vendor^, delete-it ^! >> !batchFwLog!
+        @echo Found a GLCache backup !idGpuFolder! that is not for your current GPU Vendor^, delete-it ^! >> !batchFwLog!
         REM : log to host log file
-        set "msg="!DATE!-non matching GPU Vendor GLCache backup deleted=!IdGpuFolder!""
+        set "msg="!DATE!-non matching GPU Vendor GLCache backup deleted=!idGpuFolder!""
         call:log2HostFile !msg!
 
-        rmdir /Q /S !IdGpuFolder! > NUL 2>&1
+        rmdir /Q /S !idGpuFolder! > NUL 2>&1
         goto:lockCemu
     )
     REM : secure string for diff
@@ -661,61 +684,61 @@ REM : main
     REM : if GPU_DRIVERS_VERSION match goto:lockCemu use the file
     if not ["%old%"] == ["%new%"] (
         @echo Display drivers update detected ^! >> !batchFwLog!
-        @echo from display drivers version    = [%gpuDriversVersionRead%] >> !batchFwLog!
-        @echo current display drivers version = [%GPU_DRIVERS_VERSION%] >> !batchFwLog!
+        @echo from display drivers version    ^: [%gpuDriversVersionRead%] >> !batchFwLog!
+        @echo current display drivers version ^: [%GPU_DRIVERS_VERSION%] >> !batchFwLog!
 
         REM : log to host log file
         set "msg="Detected %GPU_VENDOR% drivers version upgrade from %gpuDriversVersionRead% to =%GPU_DRIVERS_VERSION%""
         call:log2HostFile !msg!
         set "driversUpdateFlag=1"
     )
-    set "IdGpuFolder="!GLCacheSavesFolder:"=!\!IdGpuFolder:"=!""
+    set "idGpuFolder="!gpuCacheSavesFolder:"=!\!idGpuFolder:"=!""
 
-    set "GLCacheBackupFolder="!IdGpuFolder:"=!\!GAME_TITLE!""
+    set "gpuCacheBackupFolder="!idGpuFolder:"=!\!GAME_TITLE!""
 
     REM : if no backup folder is found for this game goto:lockCemu
-    if not exist %GLCacheBackupFolder% goto:lockCemu
+    if not exist %gpuCacheBackupFolder% goto:lockCemu
 
-    REM : openGLCacheID
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B !GLCacheBackupFolder!') do set "oldOGLCacheId=%%x"
-    if not ["%oldOGLCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
+    REM : openGpuCacheID
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B !gpuCacheBackupFolder!') do set "oldGpuCacheId=%%x"
+    if not ["%oldGpuCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
 
     REM : search for shader files
-    pushd !GLCacheBackupFolder!
+    pushd !gpuCacheBackupFolder!
     set "shaderCacheFileName=NOT_FOUND"
     for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:lockCemu
 
-    pushd !GLCacheBackupFolder!
-    REM OPENGL_CACHE_PATH already created before (if missing)
+    pushd !gpuCacheBackupFolder!
+    REM GPU_CACHE_PATH already created before (if missing)
     for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GLCacheBackupFolder! !OPENGL_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
     REM : using backup
-    @echo Using !shaderCacheFileName! >> !batchFwLog!
+    @echo Using !shaderCacheFileName! as GPU cache ^(!graphicApi!^)>> !batchFwLog!
     goto:lockCemu
 
     :subfolderFound
-    set "GlCache="!OPENGL_CACHE_PATH:"=!\%oldOGLCacheId%""
+    set "gpuCache="!GPU_CACHE_PATH:"=!\%oldGpuCacheId%""
 
-    if exist !GlCache! rmdir /Q /S !GlCache! > NUL 2>&1
+    if exist !gpuCache! rmdir /Q /S !gpuCache! > NUL 2>&1
 
-    set "GlCacheSaved="!GLCacheBackupFolder:"=!\%oldOGLCacheId%""
+    set "gpuCacheSaved="!gpuCacheBackupFolder:"=!\%oldGpuCacheId%""
 
     REM : moving folder (NVIDIA specific)
     :moveGl
-    call:moveFolder !GlCacheSaved! !GlCache! cr
+    call:moveFolder !gpuCacheSaved! !gpuCache! cr
     if !cr! NEQ 0 (
         cscript /nologo !MessageBox! "ERROR While moving openGL save^, close all explorer^.exe that might interfer ^!" 4117
         if !ERROLRLEVEL! EQU 4 goto:moveGl
     )
 
     REM : using backup
-    @echo Using !GlCacheSaved! as OpenGL cache >> !batchFwLog!
+    @echo Using !gpuCacheSaved! as GPU cache ^(!graphicApi!^)>> !batchFwLog!
 
     REM : Launching CEMU (for old versions -mlc will be ignored)
     :lockCemu
@@ -889,13 +912,17 @@ REM : main
     
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
-    :hangleGlCache
-    REM : search in logFile, getting only the last occurence
-    set "OPENGL_CACHE="NOT_FOUND""
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
+    :hangleGpuCache
 
-    if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:searchCacheFolder
-    if not exist !OPENGL_CACHE! set "OPENGL_CACHE="NOT_FOUND""
+    REM : Vulkan cache (CEMU >= 1.16)
+    if ["!graphicApi!"] == ["Vulkan"] goto:searchCacheFolder
+    
+    REM : search in logFile, getting only the last occurence
+    set "GPU_CACHE="NOT_FOUND""
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "GPU_CACHE=%%i"
+
+    if not [!GPU_CACHE!] == ["NOT_FOUND"] if exist !GPU_CACHE! goto:searchCacheFolder
+    if not exist !GPU_CACHE! set "GPU_CACHE="NOT_FOUND""
 
     REM : else search it
     REM : first in CEMU folder
@@ -905,20 +932,20 @@ REM : main
     set "cache="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
+    if not [!cache!] == ["NOT_FOUND"] set "GPU_CACHE=!cache!"
 
     pushd !BFW_TOOLS_PATH!
-    if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
+    if [!GPU_CACHE!] == ["NOT_FOUND"] (
         @echo Unable to find your GPU GLCache folder ^? backup will be disabled >> !batchFwLog!
         goto:analyseCemuLog
     )
     REM : save path to log file
     call:cleanHostLogFile OPENGL_CACHE
-    set "msg="OPENGL_CACHE=!OPENGL_CACHE:"=!""
+    set "msg="OPENGL_CACHE=!GPU_CACHE:"=!""
     call:log2HostFile !msg!
 
-    REM set OPENGL_CACHE_PATH to OPENGL_CACHE
-    set "OPENGL_CACHE_PATH=!OPENGL_CACHE!"
+    REM set GPU_CACHE_PATH to GPU_CACHE
+    set "GPU_CACHE_PATH=!GPU_CACHE!"
 
     :searchCacheFolder
 
@@ -928,31 +955,32 @@ REM : main
         call:setProgressBar 55 60 "post processing" "backup openGL cache"
     )
     
-    REM : backup of GLCache, get the last modified folder under GLCache
-    pushd !OPENGL_CACHE_PATH!
-    set "newOGLCacheId=NOT_FOUND"
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B * 2^>NUL') do set "newOGLCacheId=%%x"
+    REM : backup of GpuCache, get the last modified folder under GpuCache
+    pushd !GPU_CACHE_PATH!
+    set "newGpuCacheId=NOT_FOUND"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /B * 2^>NUL') do set "newGpuCacheId=%%x"
     pushd !BFW_TOOLS_PATH!
 
-    if not ["%newOGLCacheId%"] == ["NOT_FOUND"] goto:whatToDo
+    if not ["%newGpuCacheId%"] == ["NOT_FOUND"] goto:whatToDo
 
     REM : if no shader cache folder is found
-    REM : search for last modified bin file under OPENGL_CACHE (AMD GPU cache shaders without subfolders)
-    pushd !OPENGL_CACHE!
+    REM : search for last modified bin file under GPU_CACHE (AMD GPU cache shaders without subfolders)
+    pushd !GPU_CACHE!
+
     set "shaderCacheFileName=NOT_FOUND"
     for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
 
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:warning
 
-    REM : create a new folder to save OGLCache
-    set "targetFolder="!GLCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!""
+    REM : create a new folder to save GpuCache
+    set "targetFolder="!gpuCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!""
     if not exist !targetFolder! mkdir !targetFolder! > NUL 2>&1
 
-    pushd !OPENGL_CACHE!
+    pushd !GPU_CACHE!
     for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !OPENGL_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -962,69 +990,69 @@ REM : main
 
     :warning
     REM : if no files were found:
-    @echo WARNING ^: unable to find a last shaders cache under !OPENGL_CACHE_PATH!^, cancel GLCache backup ^! >> !batchFwLog!
+    @echo WARNING ^: unable to find a last shaders cache under !GPU_CACHE_PATH!^, cancel GpuCache backup ^! >> !batchFwLog!
     goto:moveBack
 
     :whatToDo
-    if ["%newOGLCacheId%"] == ["NOT_FOUND"] goto:moveBack
-    if ["%oldOGLCacheId%"] == ["NOT_FOUND"] goto:getGLCache
-    if ["%oldOGLCacheId%"] == ["%newOGLCacheId%"] goto:moveBack
+    if ["%newGpuCacheId%"] == ["NOT_FOUND"] goto:moveBack
+    if ["%oldGpuCacheId%"] == ["NOT_FOUND"] goto:getGpuCache
+    if ["%oldGpuCacheId%"] == ["%newGpuCacheId%"] goto:moveBack
 
-    REM : if OGLCacheId changed or oldOGLCacheId NOT_FOUND
-    :getGLCache
-    set "newOGLCache="!OPENGL_CACHE_PATH:"=!\%newOGLCacheId%""
+    REM : if GpuCacheId changed or oldGpuCacheId NOT_FOUND
+    :getGpuCache
+    set "newGpuCache="!GPU_CACHE_PATH:"=!\%newGpuCacheId%""
 
-    if not ["%oldOGLCacheId%"] == ["NOT_FOUND"] (
-        @echo WARNING ^: Your display drivers have change OpenGL id for !CEMU_FOLDER_NAME! from %oldOGLCacheId% to %newOGLCacheId% ^! >> !batchFwLog!
+    if not ["%oldGpuCacheId%"] == ["NOT_FOUND"] (
+        @echo WARNING ^: Your display drivers have change OpenGL id for !CEMU_FOLDER_NAME! from %oldGpuCacheId% to %newGpuCacheId% ^! >> !batchFwLog!
 
         REM : log to host log file
-        set "msg="!DATE!-your display drivers have change !CEMU_FOLDER_NAME! GLCache Id from %oldOGLCacheId% to %newOGLCacheId%=%folderName%""
+        set "msg="!DATE!-your display drivers have change !CEMU_FOLDER_NAME! GLCache Id from %oldGpuCacheId% to %newGpuCacheId%=%folderName%""
         call:log2HostFile !msg!
 
     ) else (
 
         REM : log to host log file : detected OGLCacheId
-        set "msg="Detected GLCache Id for !CEMU_FOLDER_NAME! launching !GAME_TITLE!=%newOGLCacheId%""
+        set "msg="Detected GLCache Id for !CEMU_FOLDER_NAME! launching !GAME_TITLE!=%newGpuCacheId%""
         call:log2HostFile !msg!
     )
 
     REM : if a display drivers update was detected
     if %driversUpdateFlag% EQU 1 (
-        if exist !IdGpuFolder! rmdir /Q /S !IdGpuFolder! > NUL 2>&1
+        if exist !idGpuFolder! rmdir /Q /S !idGpuFolder! > NUL 2>&1
     )
 
-    if not [!GlCacheSaved!] == ["NOT_FOUND"] (
+    if not [!gpuCacheSaved!] == ["NOT_FOUND"] (
         REM : remove old folder
-        if exist !GlCacheSaved! rmdir /Q /S !GlCacheSaved! > NUL 2>&1
+        if exist !gpuCacheSaved! rmdir /Q /S !gpuCacheSaved! > NUL 2>&1
     )
-    if not [!GlCache!] == ["NOT_FOUND"] (
+    if not [!GpuCache!] == ["NOT_FOUND"] (
         REM : remove folder
-        if exist !GlCache! rmdir /Q /S !GlCache! > NUL 2>&1
+        if exist !GpuCache! rmdir /Q /S !GpuCache! > NUL 2>&1
     )
 
-    REM : create a new folder to save OGLCache
-    set "newFolder="!GLCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!\%newOGLCacheId%""
+    REM : create a new folder to save GpuCache
+    set "newFolder="!gpuCacheSavesFolder:"=!\%GPU_VENDOR%@%GPU_DRIVERS_VERSION%\!GAME_TITLE!\%newGpuCacheId%""
 
     if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
 
     REM : robocopy
-    call:moveFolder !newOGLCache! !newFolder! cr
+    call:moveFolder !newGpuCache! !newFolder! cr
     if !cr! NEQ 0 (
-        @echo ERROR when moving !newOGLCache! !newFolder!^, cr=%cr% >> !batchFwLog!
+        @echo ERROR when moving !newGpuCache! !newFolder!^, cr=%cr% >> !batchFwLog!
     ) else (
-        @echo Update GLCache in !newFolder!>> !batchFwLog!
+        @echo Update GPU Cache in !newFolder!>> !batchFwLog!
         goto:analyseCemuLog
     )
 
     REM : move back
     :moveBack
 
-    if [!GlCache!] == ["NOT_FOUND"] goto:analyseCemuLog
-    if exist !GlCache! call:moveFolder !GlCache! !GlCacheSaved! cr
+    if [!GpuCache!] == ["NOT_FOUND"] goto:analyseCemuLog
+    if exist !GpuCache! call:moveFolder !GpuCache! !gpuCacheSaved! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving back GLCache save^, please close all explorer^.exe open in openGL cache folder" 4117
+        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in openGL cache folder" 4117
         if !ERRORLEVEL! EQU 4 goto:moveBack
-        cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GLCache is backup sucessfully^, if it persists close your session and retry" 4144
+        cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GPU Cache is backup sucessfully^, if it persists close your session and retry" 4144
     )
 
     :analyseCemuLog
@@ -1088,8 +1116,8 @@ REM : main
     REM : if title id does not macth between CEMU and game's meta folder
     @echo --------------------------------------------------------->> !batchFwLog!
     @echo Warning ^: CEMU and GAME Title Id not matching  ^!^, disabling saving options ^!>> !batchFwLog!
-    @echo meta file titleId = %titleId%>> !batchFwLog!
-    @echo cemu titleId = %cemuTitleId%>> !batchFwLog!
+    @echo meta file titleId ^: %titleId%>> !batchFwLog!
+    @echo cemu titleId      ^: %cemuTitleId%>> !batchFwLog!
     @echo Have you updated the game or installed a DLC for another version ^(US^/EUR^/JPN^) ^?>> !batchFwLog!
     if %wizardLaunched% EQU 1 (
         @echo CEMU log.txt    : %cemuTitleId%>> !batchFwLog!
@@ -1425,8 +1453,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if exist !chs! call:backupFile !chs!
 
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-        if not exist !cemuProfile! set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
-
+        REM : do not consult default subfolder
         if exist !cemuProfile! set "PROFILE_FILE=!cemuProfile!"
         REM : else leave at NOT_FOUND, it will be created in wizardFirstLaunch.bat
 
@@ -1506,25 +1533,21 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         :savesLoaded
         if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
 
-        REM : if game profile exist, create a shortcut to edit it with notepad
+        REM : IF GAME PROFILE EXIST and in case of auto-import check if missingProfile exists
         set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
 
         REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
-        if not exist !MISSING_PROFILES_FOLDER! goto:isSettingsExist
+        if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
 
         REM : its path if already saved under _BatchFW_Missing_Games_Profiles
         set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-        if not exist !missingProfile! goto:isSettingsExist
+        if exist !missingProfile! goto:isSettingsExist
 
-        REM : import from MISSING_PROFILES_FOLDER
-        set "PROFILE_FOLDER="!CEMU_FOLDER:"=!\gameProfiles""
-
-        robocopy !MISSING_PROFILES_FOLDER! !PROFILE_FOLDER! "%titleId%.ini"
-        set "PROFILE_FILE="!PROFILE_FOLDER:"=!\%titleId%.ini""
-
+        REM : copy profile file in MISSING_PROFILES_FOLDER
+        set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
+        robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
 
         :isSettingsExist
-        @echo Ignoring the precompiled cache ^: !IGNORE_PRECOMP!>> !batchFwLog!
 
         if exist !SETTINGS_FOLDER! goto:loaded
 
@@ -1535,7 +1558,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if ["!IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : search for valid settings
-        call:getSettings
+        call:getSettingsFolder
 
         :continueLoad
         if [!previousSettingsFolder!] == ["NONE"] (
@@ -1566,12 +1589,12 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if ["!lastPath!"] == ["NONE"] goto:bypassComparison
 
         set "OLD_PROFILE_FILE="!lastPath!\gameProfiles\%titleId%.ini""
-        if not exist !OLD_PROFILE_FILE! set "OLD_PROFILE_FILE="!lastPath!\gameProfiles\default\%titleId%.ini""
-
         if not exist !OLD_PROFILE_FILE! goto:bypassComparison
+        REM : if PROFILE_FILE does not exist use
+        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:bypassComparison
 
         set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-        
+
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
@@ -1599,7 +1622,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         :beforeLoad
 
-        @echo Ignoring precompiled shader = %value%>> !batchFwLog!
+        @echo Ignoring precompiled shader ^: %value%>> !batchFwLog!
 
         REM : if wizard was launched set PROFILE_FILE because it was not found earlier
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -1672,10 +1695,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             goto:getLastModifiedSettings
         )
         set "lst="!sf:"=!\!ls:"=!""
-        pushd !BFW_RESOURCES_PATH!
-
+       
         REM : get game Id with RPX path
         :getRpx
+        pushd !BFW_RESOURCES_PATH!
+
         REM : if the file is the same
         if [!xmlUser!] == [!lst!] pushd !BFW_TOOLS_PATH! && goto:cemuHookSettings
 
@@ -1775,7 +1799,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
 
 
-    :getSettings
+    :getSettingsFolder
 
         REM : get the size of the settings.bin of the launched version
         set "csbSize=0"
@@ -1858,20 +1882,20 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!currentUser!_settings.bin"
+            copy /Y !f! "!currentUser!_settings.bin" > NUL 2>&1
             REM : remove old saved settings
             if [!f!] == ["settings.bin"] del /F !f! > NUL 2>&1
         )
         for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!currentUser!_settings.xml"
+            copy /Y !f! "!currentUser!_settings.xml" > NUL 2>&1
             REM : remove old saved settings
             if [!f!] == ["settings.xml"] del /F !f! > NUL 2>&1
         )
         set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
         for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini 2^> NUL') do (
             set "f="%%i""
-            copy /Y !f! "!currentUser!_cemuhook.ini"
+            copy /Y !f! "!currentUser!_cemuhook.ini" > NUL 2>&1
             REM : remove old saved settings
             if [!f!] == ["cemuhook.ini"] del /F !f! > NUL 2>&1
         )
@@ -2027,30 +2051,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "profileShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk""
         if exist !profileShortcut! goto:eof
 
-        REM : if game profile exist, create a shortcut to edit it with notepad
-        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
-
-        REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
-        if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
-        REM : in wizardFirstSaving.bat profile file is first created in _BatchFW_Missing_Games_Profiles subfolder, then copied to cemu one
-
-        REM : its path if already saved under _BatchFW_Missing_Games_Profiles
-        set "mgp="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-
-        REM : not using !PROFILE_FILE! could be always at NOT_FOUND, search for freshly created profile in cemu folder
-        set "cgp="!CEMU_FOLDER:"=!\gameProfiles\Default\%titleId%.ini""
-        set "cugp="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-        if exist !cugp! set "cgp=!cugp!"
-
-
-        REM : if game profile does not exist in CEMU subfolder
-        REM : AND if exist in_BatchFW_Missing_Games_Profiles copy it to cemu folder
-        if not exist !cgp! if exist !mgp! copy /Y !mgp! !cgp! > NUL 2>&1
-        
         REM : temporary vbs file for creating a windows shortcut
         set "TMP_VBS_FILE="!TEMP!\CEMU_!DATE!.vbs""
 
-        set "ARGS=!cgp:"=!"
+        set "ARGS=!gpf:"=!"
 
         REM : create a shortcut to game's profile
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
@@ -2193,12 +2197,12 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.bin""
             set "st="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
-            move /Y !src! !st!
+            move /Y !src! !st! > NUL 2>&1
 
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.xml""
             set "css="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
-            move /Y !src! !css!
+            move /Y !src! !css! > NUL 2>&1
 
             REM : update the last modified setting file
             set "lls="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
@@ -2210,7 +2214,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
             set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
-            move /Y !src! !target!
+            move /Y !src! !target! > NUL 2>&1
 
             @echo CEMU options saved to !SETTINGS_FOLDER:"=! for !currentUser! ^!>> !batchFwLog!
         )
@@ -2320,10 +2324,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         @echo --------------------------------------------------- >> !tscl!
         @echo - [!DATE!] !currentUser!@!USERDOMAIN! >> !tscl!
         @echo - >> !tscl!
-        @echo - CEMU install = !CEMU_FOLDER! >> !tscl!
+        @echo - CEMU install ^: !CEMU_FOLDER! >> !tscl!
         @echo - >> !tscl!
-        @echo - CEMU transferable cache file size  !NEW_TRANS_SHADER! = %newSize% >> !tscl!
-        @echo - Saved transferable cache file size !OLD_TRANS_SHADER! = %oldSize% >> !tscl!
+        @echo - CEMU transferable cache file size  !NEW_TRANS_SHADER! ^: %newSize% >> !tscl!
+        @echo - Saved transferable cache file size !OLD_TRANS_SHADER! ^: %oldSize% >> !tscl!
         @echo - >> !tscl!
 
         REM : OLD_TRANS_SHADER cache file renamed

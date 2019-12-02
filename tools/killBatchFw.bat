@@ -41,6 +41,8 @@ REM : main
     REM : kill CEMU's running process
     wmic process where "Name like '%%cemu.exe%%'" call terminate > NUL 2>&1
 
+    taskkill /TFIM "Cemu.exe" > NUL 2>&1
+    
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && (
 
