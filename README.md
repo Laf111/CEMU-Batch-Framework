@@ -203,7 +203,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
         
 - How BatchFw will mess around with CEMU accounts (> 1.15.19) ? 
 
-    - Same as it does with earlier version. Continue to use BatchFw user as usual (do not use the CEMU's feature).
+    - Same as it does with earlier version. In fact, it ignores them so continue to use BatchFw user as usual (do not use the CEMU's feature) and so all users will be able to play on versions earlier than 1.15.19. 
     
 
 ## Recommendations: 
