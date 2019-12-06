@@ -210,7 +210,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
 
 If you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
 
-I recommend to not clone the repository : use the last released version.
+I recommend to not clone the repository : use the last released version (i also recommend to skip release candidates versions which are not fully validated).
 Using the main branch could lead in regressions and troubles as bacth scripting is really difficult to check (no IDE, no compilation, poorly and unchecked syntax, file format issues...)  
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
