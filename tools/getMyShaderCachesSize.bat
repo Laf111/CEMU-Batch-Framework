@@ -87,6 +87,21 @@ REM : main
         set "gpuVersion="!GLCacheSavesFolder:"=!\%%x""
         call:getGameCacheSize
     )
+
+    @echo =========================================================
+
+    set "vkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
+
+    set "size=0"
+    if exist !vkCacheSavesFolder! call:getFolderSize !vkCacheSavesFolder! size
+    @echo Global Vulkan Cache size ^(Mo^) ^: %size%
+    @echo ---------------------------------------------------------
+
+    for /F "delims=~" %%x in ('dir /b /o:n /a:d !vkCacheSavesFolder! 2^>NUL') do (
+
+        set "gpuVersion="!vkCacheSavesFolder:"=!\%%x""
+        call:getGameCacheSize
+    )
     pushd !BFW_TOOLS_PATH!
 
     @echo =========================================================
@@ -118,13 +133,12 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :getGameCacheSize
-
         pushd !gpuVersion!
         for /F "delims=~" %%y in ('dir /b /o:n /a:d * 2^>NUL') do (
 
-            set "gameGLCacheFolder="!gpuVersion:"=!\%%y""
+            set "folder="!gpuVersion:"=!\%%y""
             set "sizeG=0"
-            call:getFolderSize !gameGLCacheFolder! sizeG
+            call:getFolderSize !folder! sizeG
             @echo - %%y shader cache size ^: !sizeG!
         )
         cd ..
