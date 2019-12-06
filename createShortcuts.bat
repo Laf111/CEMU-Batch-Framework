@@ -143,15 +143,16 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         goto:askCemuFolder
     )
 
-
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
-    set "OUTPUT_FOLDER=!OUTPUT_FOLDER:\Wii-U Games=!"
+    set "folder=NOT_FOUND"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "folder=%%i"
+    if ["!folder!"] == ["NOT_FOUND"] goto:askOutputFolder
+    set "OUTPUT_FOLDER=!folder:\Wii-U Games=!"
 
     REM : if called with shortcut, OUTPUT_FOLDER already set, goto:inputsAvailables
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
 
-    @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     :askOutputFolder
+    @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
@@ -1304,7 +1305,7 @@ REM : functions
         )
 
         set "VkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
-        if not exist !VkCacheSavesFolder! mkdir -p !VkCacheSavesFolder!
+        if not exist !VkCacheSavesFolder! mkdir !VkCacheSavesFolder! > NUL 2>&1
 
         REM : create a shortcut to explore Vulkan Cache saved
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore Vulkan caches saved^.lnk""
