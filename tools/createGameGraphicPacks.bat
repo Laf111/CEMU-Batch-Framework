@@ -39,6 +39,7 @@ REM : main
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
@@ -116,9 +117,10 @@ REM : main
 
     REM : titleID and BFW_GP_FOLDER
     :getArgsValue
-
+    echo. > !cgpLogFile!
     if %nbArgs% NEQ 2 (
         @echo ERROR ^: on arguments passed ^!
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID >> !cgpLogFile!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID
         @echo given {%*}
         exit /b 99
@@ -128,6 +130,7 @@ REM : main
     set "BFW_GP_FOLDER=!args[0]!"
 
     if not exist !BFW_GP_FOLDER! (
+        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
         exit /b 1
     )
@@ -158,7 +161,9 @@ REM : main
         cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
+    @echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cgpLogFile!
     @echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
+    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
     @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
@@ -186,11 +191,14 @@ REM : main
     set "titleIdList="
     call:getAllTitleIds
 
-    if !QUIET_MODE! EQU 1 goto:begin
-    @echo =========================================================
-    @echo Create graphic packs for !GAME_TITLE!
-    @echo =========================================================
 
+    @echo ========================================================= >> !cgpLogFile!
+    @echo =========================================================
+    @echo Create graphic packs for !GAME_TITLE! >> !cgpLogFile!
+    @echo Create graphic packs for !GAME_TITLE!
+    @echo ========================================================= >> !cgpLogFile!
+    @echo =========================================================
+    if !QUIET_MODE! EQU 1 goto:begin
     @echo Launching in 30s
     @echo     ^(y^) ^: launch now
     @echo     ^(n^) ^: cancel
@@ -240,59 +248,59 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :initV3ResGraphicPack
+    :initlgfxpvResGraphicPack
 
-        @echo [Definition] > !rulesFileV3!
-        @echo titleIds = !titleIdList! >> !rulesFileV3!
+        @echo [Definition] > !bfwRulesFile!
+        @echo titleIds = !titleIdList! >> !bfwRulesFile!
 
-        @echo name = Resolution >> !rulesFileV3!
-        @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !rulesFileV3!
+        @echo name = Resolution >> !bfwRulesFile!
+        @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
         if %nativeHeight% EQU 720 (
             @echo description = Created by BatchFW considering that the native resolution is 720p^. ^
 Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. ^
 If it is not^, change the native resolution to 1080p in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
             @echo description = Created by BatchFW considering that the native resolution is 1080p. ^
 Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. ^
 If it is not^, change the native resolution to 720p in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
+_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
-        @echo version = 3 >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
-        @echo [Preset] >> !rulesFileV3!
-        @echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !rulesFileV3!
-        @echo $width = %nativeWidth% >> !rulesFileV3!
-        @echo $height = %nativeHeight% >> !rulesFileV3!
-        @echo $gameWidth = %nativeWidth% >> !rulesFileV3!
-        @echo $gameHeight = %nativeHeight% >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
+        @echo version = 3 >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
+        @echo [Preset] >> !bfwRulesFile!
+        @echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !bfwRulesFile!
+        @echo $width = %nativeWidth% >> !bfwRulesFile!
+        @echo $height = %nativeHeight% >> !bfwRulesFile!
+        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :fillResV3GP
+    :fillReslgfxpv
         set "overwriteWidth=%~1"
         set "overwriteHeight=%~2"
         set "desc=%~3"
 
-        @echo [Preset] >> !rulesFileV3!
-        @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !rulesFileV3!
-        @echo $width = %overwriteWidth% >> !rulesFileV3!
-        @echo $height = %overwriteHeight% >> !rulesFileV3!
-        @echo $gameWidth = %nativeWidth% >> !rulesFileV3!
-        @echo $gameHeight = %nativeHeight% >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
+        @echo [Preset] >> !bfwRulesFile!
+        @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !bfwRulesFile!
+        @echo $width = %overwriteWidth% >> !bfwRulesFile!
+        @echo $height = %overwriteHeight% >> !bfwRulesFile!
+        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :finalizeResV3GP
+    :finalizeReslgfxpv
 
 
         REM : res ratios instructions ------------------------------------------------------
@@ -310,7 +318,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         call:mulfloat "!targetHeight!.000" "1.777" 3 targetWidth
 
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
-        call:writeRoundedV3Filters >> !rulesFileV3!
+        call:writeRoundedlgfxpvFilters >> !bfwRulesFile!
 
         if !targetHeight! LEQ 8 goto:formatUtf8
         if !resRatio! GEQ 8 goto:formatUtf8
@@ -323,93 +331,93 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         call:dosToUnix
 
         REM : add commonly used 16/9 res filters
-        @echo # add commonly used 16/9 res filters >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # add commonly used 16/9 res filters >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
         if %nativeHeight% EQU 720 (
             REM : (1080/2 = 540, for 1080 treated when resRatio = 2)
 
-            @echo # 960 x 540 Res >> !rulesFileV3!
-            @echo [TextureRedefine] >> !rulesFileV3!
-            @echo width = 960 >> !rulesFileV3!
-            @echo height = 540 >> !rulesFileV3!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-            @echo formatsExcluded = 0x431 >> !rulesFileV3!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !rulesFileV3!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !rulesFileV3!
-            @echo #  >> !rulesFileV3!
+            @echo # 960 x 540 Res >> !bfwRulesFile!
+            @echo [TextureRedefine] >> !bfwRulesFile!
+            @echo width = 960 >> !bfwRulesFile!
+            @echo height = 540 >> !bfwRulesFile!
+            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !bfwRulesFile!
+            @echo #  >> !bfwRulesFile!
 
-            @echo # 960 x 544 Res >> !rulesFileV3!
-            @echo [TextureRedefine] >> !rulesFileV3!
-            @echo width = 960 >> !rulesFileV3!
-            @echo height = 544 >> !rulesFileV3!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-            @echo formatsExcluded = 0x431 >> !rulesFileV3!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !rulesFileV3!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !rulesFileV3!
-            @echo #  >> !rulesFileV3!
+            @echo # 960 x 544 Res >> !bfwRulesFile!
+            @echo [TextureRedefine] >> !bfwRulesFile!
+            @echo width = 960 >> !bfwRulesFile!
+            @echo height = 544 >> !bfwRulesFile!
+            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !bfwRulesFile!
+            @echo #  >> !bfwRulesFile!
         )
 
-        @echo # 1137 x 640 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 1137 >> !rulesFileV3!
-        @echo height = 640 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 1137 x 640 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 1137 >> !bfwRulesFile!
+        @echo height = 640 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 1152 x 640 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 1152 >> !rulesFileV3!
-        @echo height = 640 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 1152 x 640 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 1152 >> !bfwRulesFile!
+        @echo height = 640 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 896 x 504 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 896 >> !rulesFileV3!
-        @echo height = 504 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 896 x 504 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 896 >> !bfwRulesFile!
+        @echo height = 504 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 768 x 432 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 768 >> !rulesFileV3!
-        @echo height = 432 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 768 x 432 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 768 >> !bfwRulesFile!
+        @echo height = 432 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 512 x 288 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 512 >> !rulesFileV3!
-        @echo height = 288 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !rulesFileV3!
+        @echo # 512 x 288 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 512 >> !bfwRulesFile!
+        @echo height = 288 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !bfwRulesFile!
 
         REM : force UTF8 format
-        set "utf8=!rulesFileV3:rules.txt=rules.bfw_tmp!"
-        copy /Y !rulesFileV3! !utf8! > NUL 2>&1
-        type !utf8! > !rulesFileV3!
+        set "utf8=!bfwRulesFile:rules.txt=rules.bfw_tmp!"
+        copy /Y !bfwRulesFile! !utf8! > NUL 2>&1
+        type !utf8! > !bfwRulesFile!
         del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :writeRoundedV3Filters
+    :writeRoundedlgfxpvFilters
 
         REM : loop on -8,-4,0,4,12 (rounded values)
         set /A "rh=0"
@@ -448,11 +456,13 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numA% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numA% does not have %decimals% decimals
             exit /b 1
         )
 
         if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numB% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numB% does not have %decimals% decimals
             exit /b 2
         )
@@ -546,12 +556,13 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
 
         for /L %%p in (1,1,31) do (
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p1610" !GAME_TITLE! "(16:10)"
-            call:fillResV3GP !w! !h! "^(16^:10^)"
+            call:fillReslgfxpv !w! !h! "^(16^:10^)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
 
+        @echo 16^/10 fullscreen graphic packs created ^! >> !cgpLogFile!
         @echo 16^/10 fullscreen graphic packs created ^!
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
@@ -565,10 +576,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p1610_windowed" !GAME_TITLE! "(16:10) windowed"
-            call:fillResV3GP !w! !h! "^(16^:10^) windowed"
+            call:fillReslgfxpv !w! !h! "^(16^:10^) windowed"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        @echo 16^/10 windowed graphic packs created ^! >> !cgpLogFile!
         @echo 16^/10 windowed graphic packs created ^!
     goto:eof
     REM : ------------------------------------------------------------------
@@ -585,11 +597,12 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p219" !GAME_TITLE! "(21:9)"
-            call:fillResV3GP !w! !h! "^(21^:9^)"
+            call:fillReslgfxpv !w! !h! "^(21^:9^)"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
 
+        @echo 21^/9 graphic packs created ^! >> !cgpLogFile!
         @echo 21^/9 graphic packs created ^!
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
@@ -603,10 +616,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p219_windowed" !GAME_TITLE! "(21:9) windowed"
-            call:fillResV3GP !w! !h! "^(21^:9^) windowed"
+            call:fillReslgfxpv !w! !h! "^(21^:9^) windowed"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        @echo 21^/9 windowed graphic packs created ^! >> !cgpLogFile!
         @echo 21^/9 windowed graphic packs created ^!
 
     goto:eof
@@ -627,11 +641,12 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p" !GAME_TITLE!
-            call:fillResV3GP !w! !h! ""
+            call:fillReslgfxpv !w! !h! ""
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
 
+        @echo 16^/9 graphic packs created ^! >> !cgpLogFile!
         @echo 16^/9 graphic packs created ^!
         if ["!screenMode!"] == ["fullscreen"] goto:eof
 
@@ -648,10 +663,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p169_windowed" !GAME_TITLE! "(16:9) windowed"
-            call:fillResV3GP !w! !h! "^(16^:9^) windowed"
+            call:fillReslgfxpv !w! !h! "^(16^:9^) windowed"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        @echo 16^/9 windowed graphic packs created ^! >> !cgpLogFile!
         @echo 16^/9 windowed graphic packs created ^!
 
     goto:eof
@@ -670,11 +686,12 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p43" !GAME_TITLE! "(4:3)"
-            call:fillResV3GP !w! !h! "^(4^:3^)"
+            call:fillReslgfxpv !w! !h! "^(4^:3^)"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
 
+        @echo 4^/3 graphic packs created ^! >> !cgpLogFile!
         @echo 4^/3 graphic packs created ^!
         if ["!screenMode!"] == ["fullscreen"] goto:eof
 
@@ -687,10 +704,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p43_windowed" !GAME_TITLE! "(4:3) windowed"
-            call:fillResV3GP !w! !h! "^(4^:3^) windowed"
+            call:fillReslgfxpv !w! !h! "^(4^:3^) windowed"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        @echo 4^/3 windowed graphic packs created ^! >> !cgpLogFile!
         @echo 4^/3 windowed graphic packs created ^!
 
     goto:eof
@@ -709,11 +727,12 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p489" !GAME_TITLE! "(48:9)"
-            call:fillResV3GP !w! !h! "^(48^:9^)"
+            call:fillReslgfxpv !w! !h! "^(48^:9^)"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
 
+        @echo 48^/9 graphic packs created ^! >> !cgpLogFile!
         @echo 48^/9 graphic packs created ^!
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
@@ -727,10 +746,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
         for /L %%p in (1,1,31) do (
 
             wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeHeight! !w! !h! "!GAME_TITLE!_!h!p489_windowed" !GAME_TITLE! "(48:9) windowed"
-            call:fillResV3GP !w! !h! "^(48^:9^) windowed"
+            call:fillReslgfxpv !w! !h! "^(48^:9^) windowed"
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
+        @echo 48^/9 windowed graphic packs created ^! >> !cgpLogFile!
         @echo 48^/9 windowed graphic packs created ^!
 
     goto:eof
@@ -775,16 +795,17 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
             for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
         )
 
-        REM : initialize V3 graphic pack
-        set "gpv3="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""
-        if exist !gpv3! (
+        REM : initialize lgfxpv graphic pack
+        set "gplgfxpv="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""
+        if exist !gplgfxpv! (
+            @echo ^^! !GAME_TITLE! already exists, skipped ^^! >> !cgpLogFile!
             @echo ^^! !GAME_TITLE! already exists, skipped ^^!
             goto:eof
         )
-        if not exist !gpv3! mkdir !gpv3! > NUL 2>&1
-        set "rulesFileV3="!gpv3:"=!\rules.txt""
+        if not exist !gplgfxpv! mkdir !gplgfxpv! > NUL 2>&1
+        set "bfwRulesFile="!gplgfxpv:"=!\rules.txt""
 
-        call:initV3ResGraphicPack %nativeHeight% %nativeWidth% !GAME_TITLE!
+        call:initlgfxpvResGraphicPack %nativeHeight% %nativeWidth% !GAME_TITLE!
 
         REM : create 16/9 fullscreen graphic packs
         call:create169
@@ -807,7 +828,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !rulesFileV3!
             call:waitChildrenProcessesEnd
         )
 
-        call:finalizeResV3GP
+        call:finalizeReslgfxpv
 
     goto:eof
     REM : ------------------------------------------------------------------

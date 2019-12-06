@@ -19,7 +19,7 @@ INSTALL :
         - browse to a folder containing mods for your games so they will be copied under each game's folder;
         - if you want to run CEMU in fullscreen or in windowed mode;
         - if you let BatchFw completes your graphic packs (GFX) presets (V3) or create intermediates packs (V2);
-        - your desired diplay aspect ratios (only if you has chosen the previous option);
+        - your desired display aspect ratios (only if you has chosen the previous option);
         - the number of users to create (each user uses his own saves when launching his shortcut);
         - to define an ordered list of third party software (DS4windows, CemuGyro, SepeedHack...) to launch before CEMU in 
           the order defined after checking if the program is not already running;

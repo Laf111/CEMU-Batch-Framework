@@ -60,10 +60,11 @@ REM : main
         goto:begin
     )
 
-    REM : get the current version from the log file
+    REM : get the current version from setup
     set "BFW_VERSION=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
-
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
+    set "BFW_VERSION=%BFW_VERSION:"=%"
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -134,7 +135,7 @@ REM : main
 
     pushd !GAMES_FOLDER!
 
-    REM : launching powerShell script to downaload and extract GFX archive
+    REM : launching powerShell script to downaload and extract archive
     Powershell -executionpolicy remotesigned -File updateBFW.ps1 *> updateBFW.log
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
@@ -197,7 +198,12 @@ REM : functions
         REM : move each USERDOMAIN folder contain ..
         for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
             move /Y "%%x\*" . > NUL 2>&1
+            del /F /S "%%x" > NUL 2>&1
         )
+
+        REM : delete old GFX packs archive
+        set "gfxRar="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
+        del /F /S !gfxRar! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

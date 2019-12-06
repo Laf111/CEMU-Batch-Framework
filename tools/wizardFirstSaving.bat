@@ -31,7 +31,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
-    !cmdOw! BatchFw* /MIN
+    !cmdOw! BatchFw* /MIN > NUL 2>&1
     
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
@@ -207,30 +207,29 @@ REM : main
             title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
     )
 
-
     REM : comparing version to V1.15.15
     set /A "v11515=2"
     call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
     if ["!v11515!"] == [""] @echo Error when comparing versions
     if !v11515! EQU 50 @echo Error when comparing versions
 
+    REM : suppose that version > 1.15.6
     set /A "v1156=1"
     set /A "v1116=1"
-    set /A "v114=1"
 
+    REM : version > 1.15.15 => > v1.15.6
     if !v11515! LEQ 1 goto:checkProfile
-
+    REM : else compare
     set /A "v1156=2"
     call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
+    REM : version > 1.15.6 => > v1.11.6
+    if !v1156! LEQ 1 goto:checkProfile
+    REM : else compare
     set /A "v1116=2"
-    if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
-        if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
-    ) else (
-        set /A "v1116=1"
-    )
+    call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
+    if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
 
     :checkProfile
 
@@ -270,65 +269,66 @@ REM : main
 
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
-    REM : GFX type to provide
-    set "gfxType=V3"
+    REM : GFX version to set
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    set "lgfxpv=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
+    set "lgfxpv=!lgfxpv:"=!"
+    
+    set "gfxType=!lgfxpv!"
+
+    REM : suppose that version > 1.14 => > v1.12
     set /A "v114=1"
     set /A "v112=1"
 
     if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
-
-    if !v1116! EQU 1 if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-        if ["!v114!"] == [""] echo Error when comparing versions
-        if !v114! EQU 50 echo Error when comparing versions
-        if !v114! EQU 2 set "gfxType=V2"
-
-    ) else (
-        if !v1116! EQU 2 (
-            set "gfxType=V2"
-            set /A "v114=2"
-            set /A "v112=2"
-        ) else (
-            if !v1156! EQU 2 (
-                call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-                if ["!v114!"] == [""] echo Error when comparing versions
-                if !v114! EQU 50 echo Error when comparing versions
-                if !v114! EQU 2 set "gfxType=V2"
-
-                REM : if CEMU version < 1.12.0 (add games' list in UI)
-                call:compareVersions !versionRead! "1.12.0" v112 > NUL 2>&1
-                if ["!v112!"] == [""] echo Error when comparing versions
-
-                if !v112! EQU 50 echo Error when comparing versions
-                if !v112! EQU 2 goto:backupDefaultSettings
-            )
-        )
+    REM : version > 1.15.6 => > 1.14 => > v1.12
+    if !v1156! LEQ 1 goto:backupDefaultSettings
+    REM : version < v1.11.6 => < 1.14 et < 1.12
+    if !v1116! EQU 2 (
+        set /A "v114=2"
+        set /A "v112=2"
+        set "gfxType=V2"
+        goto:backupDefaultSettings
     )
 
-    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
-    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
-    
+    REM : 1.15.6 > version > 1.11.6
+    call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+    if ["!v114!"] == [""] echo Error when comparing versions
+    if !v114! EQU 50 echo Error when comparing versions
+    if !v114! EQU 2 (
+        REM : version < 1.14
+        set "gfxType=V2"
+
+        REM : compare with 1.12.0 (add games' list in UI)
+        call:compareVersions !versionRead! "1.12.0" v112 > NUL 2>&1
+        if ["!v112!"] == [""] echo Error when comparing versions
+        if !v112! EQU 50 echo Error when comparing versions
+        if !v112! EQU 2 goto:backupDefaultSettings
+    )
+
     REM : else using CEMU UI for the game profile
 
     :backupDefaultSettings
+
+    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
+
     REM : path to cemuHook Ssettings
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
-    set /A "v1153b=2"
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
-        call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
-        if ["!v1153b!"] == [""] @echo Error when comparing versions
-        if !v1153b! EQU 50 @echo Error when comparing versions
-    ) else (
-        set /A "v1153b=2"
-    )
+    REM : old versions
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:patchForIgnorePrecomp
 
-    REM : TODO bypass if version > X (since CEMU auto mode)
+    REM : version >= 1.15.6 ignoring the precompile cache is handle by CEMU throught the game's profile
+    if !v1156! LEQ 1 goto:patchCemuSetting
 
+    :patchForIgnorePrecomp
     REM : patching files for ignoring precompiled cache
     if ["!IGNORE_PRECOMP!"] == ["DISABLED"] call:ignorePrecompiled false
     if ["!IGNORE_PRECOMP!"] == ["ENABLED"] call:ignorePrecompiled true
 
+    :patchCemuSetting
     if not exist !cs! goto:displayGameProfile
 
     REM : check the file size
@@ -398,7 +398,7 @@ REM : main
 
         REM : use this one
         if exist !lst! (
-        
+
             for %%a in (!lst!) do set "parentFolder="%%~dpa""
             set "REF_CEMU_FOLDER=!parentFolder:~0,-2!""
         )
@@ -413,15 +413,15 @@ REM : main
 
         choice /C yn /CS /N /M "!GAME_TITLE! was last played with !proposedVersion!, use its game profile file ? (y, n) : "
         if !ERRORLEVEL! EQU 2 goto:askRefCemuFolder
-        
+
         REM : search in logFile, getting only the last occurence
         set "pat="!proposedVersion! install folder path""
         set "lastPath=NONE"
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath=%%i"
 
-        if ["!lastPath!"] == ["NONE"] goto::step2    
+        if ["!lastPath!"] == ["NONE"] goto:step2
         set "REF_CEMU_FOLDER=!lastPath!"
-        
+
         goto:launchDiff
     )
 
@@ -432,8 +432,8 @@ REM : main
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
 
     :launchDiff
-    
-    
+
+
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
 
@@ -451,7 +451,7 @@ REM : main
 
     :openProfileFile
 
-    REM : if version of CEMU >= 1.15.6 (v1156<=1)
+    REM : if version of CEMU >= 1.15.6 (v1156<=1) : use CEMU to open profile file
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:step2
 
     @echo Openning !PROFILE_FILE:"=! ^.^.^.
@@ -513,7 +513,7 @@ REM : main
     type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
             @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
-            cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
+            cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
         )
         set /A "disp=disp+1"
         goto:waitingLoop
@@ -577,20 +577,30 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    set /A "v1153b=2"
-    if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
+    REM : on very first versions
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:linkGpFolder
+
+    REM : suppose that version > 1.15.3b
+    set /A "v1153b=1"
+    REM : if on the same partition
+    if not ["%d1%"] == ["%d2%"] (
+        REM : if version > 1.14
         if !v114! EQU 1 (
+            REM : compare to 1.15.3b
             call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
 
-            if ["!v1153b!"] == [""] @echo Error when comparing versions
-            if !v1153b! EQU 50 @echo Error when comparing versions
+            if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+            if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
+            REM : version < 1.14 => version < 1.15.3b
             set /A "v1153b=2"
         )
     )
+    :linkGpFolder
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
+
     :launchCemu
 
     REM : launching CEMU
@@ -841,7 +851,7 @@ REM : functions
         :getLastModifiedSettings
         for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
 
-        if not exist !ls!  (
+        if not exist !ls! (
             REM : rebuild it
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
             if not exist !css! del /F !lls! > NUL 2>&1 && goto:endFctGls
@@ -850,8 +860,14 @@ REM : functions
 
             goto:getLastModifiedSettings
         )
-        set "lst="!sf:"=!\!ls:"=!""
+        if not exist !ls! goto:eof
 
+        REM : specific to wizardFirstSaving.bat : use the lase setting to get game profile
+        REM : => last setting must be from USERDOMAIN
+        echo !ls! | find /I "!USERDOMAIN!" > NUL 2>&1 && (
+            set "lst="!sf:"=!\!ls:"=!""
+        )
+        
         :endFctGls
 
     goto:eof
@@ -934,7 +950,7 @@ REM : functions
 
         call:getHostState !ipRead! state
         if !state! EQU 1 (
-            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort using online feature" 4112
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now before continue" 4112
             if !ERRORLEVEL! EQU 2 goto:eof
         )
 

@@ -55,10 +55,9 @@ REM : main
         type !logFileTmp! | find /I "cemu.exe" > NUL 2>&1 && set /A "duration=-1"
 
         if !duration! GEQ 0 set /A "duration+=1"
-        if !duration! GTR !timeOut! call:askToKill
+        if !duration! GTR !timeOut! del /F !logFileTmp! > NUL 2>&1 & call:askToKill
         goto:waitingLoopProcesses
     )
-    call !killBatchFw!
 exit 0
 
 REM : ------------------------------------------------------------------
@@ -69,16 +68,15 @@ REM : functions
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
 
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 30sec more. (if you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk)" 4144
+            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 30sec more. If you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk"
             set /A "duration-=30"
             goto:eof
         )
 
         REM : warn user with a retry/cancel msgBox
-        cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? (Cancel) or wait a little longer (Retry) ?" 4117
-        if !ERRORLEVEL! EQU 4 set /A "duration-=30" && goto:eof
+        cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? Wait a little longer [Yes] or kill it [No] ?" 4100
+        if !ERRORLEVEL! EQU 6 set /A "duration-=30" && goto:eof
 
-        call !killBatchFw!
-        exit 1
+        call !killBatchFw! & exit 1
 
     goto:eof

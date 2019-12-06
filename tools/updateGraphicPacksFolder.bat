@@ -130,7 +130,7 @@ REM : main
     :msgBox
 
     if !WARN_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!" 4160
+        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!"
         exit /b 0
     ) else (
         cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161

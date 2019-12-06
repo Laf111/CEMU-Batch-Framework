@@ -1,11 +1,14 @@
-02/12/2019 V15RC8 :
+06/12/2019 V15RC8 :
 - add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
         import transferable caches (compute shaderCache name : thanks Exzap !)
         That means that there's no need to launch the game with CEMU to get 
         the transferable cache when importings mlc01 data any more (install step) 
 - add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
         if BatchFw is installed on a removable device => always use progress bar
-- add : start of Vulkan shader cache backup implementation, add shortcut to access to caches backup
+- add : Vulkan shader cache backup implementation + add a shortcut to access to caches backup
+- add : update embeded GFX packs to v563, rename V3_GFX_packs.rar to GFX_Packs.rar    
+- add : support V4 GFX packs for presets completion
+- add : volatiles messages boxes (popup with timeout to avoid stopping treatments)
 - add : handle a list for user aspect ratios 
 - add : support in GFX packs files for the packs created by BatchFw
 - add : GFX packs completion take all hosts settings into account (aspect ratios defined)

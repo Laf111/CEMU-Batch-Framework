@@ -98,6 +98,12 @@ REM : main
     REM : check if GFX pack folder was treated to be DOS compliant
     call:checkGpFolders
 
+    REM : GFX version to set
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    set "lgfxpv=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
+    set "lgfxpv=!lgfxpv:"=!"
+
     set "gfxType=!args[0]!"
     set "gfxType=%gfxType:"=%"
 
@@ -156,6 +162,8 @@ REM : main
     set "newVersion=!newVersion: =!"
 
     :treatOneGame
+    @echo lastVersion ^: !lastVersion!
+    @echo newVersion  ^: !newVersion!
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
 
@@ -163,7 +171,6 @@ REM : main
 
     REM : launching the search
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
-
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -176,8 +183,18 @@ REM : main
         call:log2GamesLibraryFile !msg!
     )
 
-    @echo Waiting the end of all child processes before ending ^.^.^. >> !myLog!
-    @echo Waiting the end of all child processes before ending ^.^.^.
+    REM : monitor LaunchGame.bat until cemu is launched
+    set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
+
+    REM : wait the create*.bat end before continue
+    echo Waiting all child processes end >> !myLog!
+    echo Waiting all child processes end
+
+    :waitLoop
+    wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && goto:waitLoop
+
+    del /F !logFileTmp! > NUL 2>&1
 
     :linkPacks
 
@@ -196,7 +213,7 @@ REM : main
     REM : Re launching the search (to get the freshly created packs)
 
     REM : search in the needed folder
-    if ["!gfxType!"] == ["V3"] (
+    if ["!gfxType!"] == ["!lgfxpv!"] (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     ) else (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
@@ -205,15 +222,30 @@ REM : main
     REM : import GFX packs
     call:importGraphicPacks
 
-    if ["!gfxType!"] == ["V3"] (
+    if ["!gfxType!"] == ["!lgfxpv!"] (
         call:importMods
         goto:checkPackLinks
     )
 
-    REM : get user defined ratios list
-    set "ARLIST="
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do set "ARLIST=%%i !ARLIST!"
+    REM : search in all Host_*.log
+    set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+    for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
+        set "currentLogFile="%%i""
+
+        REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
+
+        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+            REM : add to the list if not already present
+            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+            if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
+        )
+        REM : get the SCREEN_MODE
+        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
+    )
     if ["!ARLIST!"] == [""] goto:checkPackLinks
+
+    echo ARLIST=!ARLIST! >> !myLog!
+    echo ARLIST=!ARLIST!
 
     REM : import user defined ratios graphic packs
     for %%a in (!ARLIST!) do (
@@ -230,13 +262,11 @@ REM : main
 
     REM : stop execution something wrong happens
     REM : warn user
-    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!^, cancelling and killing process" 4112
+    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!, let CEMU start but check what happens" 4112
 
     REM : delete lock file in CEMU_FOLDER
     if exist !lockFile! del /F !lockFile! > NUL 2>&1
 
-    REM : kill all running process
-    wscript /nologo !StartHidden! !killBatchFw!
     exit 80
 
     :endMain
@@ -293,7 +323,7 @@ REM : functions
 
         set "gp="!str:\rules=!"
 
-        REM : if more than one folder level exist (V3 packs, get only the first level
+        REM : if more than one folder level exist (lgfxpv packs, get only the first level
         call:getFirstFolder rgp
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
@@ -371,6 +401,7 @@ REM : functions
         set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
         if not exist !ggp! mkdir !ggp! > NUL 2>&1
 
+        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
         REM : get game's data for wii-u database file
         set "libFileLine="NONE""
         for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
@@ -390,17 +421,20 @@ REM : functions
            set "nativeFps=%%k"
         )
 
-        REM : check if V3 gp exist for this game
+        REM : check if a gp exist for this game (for the last version of GFX pack)
         for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find /V "_Performance_" ^| find /I /V "_Resolution_" ^| find /I "_Resolution" 2^>NUL') do (
 
             set "gpFolder="!BFW_GP_FOLDER:"=!\%%i""
             set "rulesFile="!gpFolder:"=!\rules.txt""
 
             REM : launching the search
-            if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do if ["!lastVersion!"] == ["!newVersion!"] goto:eof
-
+            if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do (
+                if ["!lastVersion!"] == ["!newVersion!"] goto:eof
+                call:updateGPFolder !ggp!
+                pushd !GAMES_FOLDER!
+                goto:eof
+            )
         )
-        call:updateGPFolder !ggp!
 
         pushd !GAMES_FOLDER!
 
@@ -412,15 +446,15 @@ REM : functions
 
         set "GAME_GP_FOLDER="%~1""
 
-        REM : check if V3 graphic pack is present for this game (if the game is not supported
+        REM : check if lgfxpv graphic pack is present for this game (if the game is not supported
         REM : in Slashiee repo, it was deleted last graphic pack's update) => re-create game's graphic packs
 
         set /A "resX2=%nativeHeight%*2"
 
         set "gpfound=0"
-        set "v3Gpfound=0"
+        set "lgfxpvfound=0"
         set "gameName=NONE"
-        set "gpV3Res="NONE""
+        set "gplgfxpvRes="NONE""
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
             set "gpfound=1"
@@ -437,42 +471,42 @@ REM : functions
                 set "gameName=!gameName:_%resX2%p=!"
             )
 
-            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = 3"') do (
-                REM : V3 graphic pack
-                set "v3Gpfound=1"
-                REM : if a V3 gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
+            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = !lgfxpv!"') do (
+                REM : lgfxpv graphic pack
+                set "lgfxpvfound=1"
+                REM : if a lgfxpv gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpV3Res=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gplgfxpvRes=!rulesFile:\rules.txt=!"
             )
         )
 
-        REM : if a v3 graphic pack was found get the game's name from it
-        if not [!gpV3Res!] == ["NONE"] (
-            for /F "delims=~" %%i in (!gpV3Res!) do set "str=%%~nxi"
+        REM : if a lgfxpv graphic pack was found get the game's name from it
+        if not [!gplgfxpvRes!] == ["NONE"] (
+            for /F "delims=~" %%i in (!gplgfxpvRes!) do set "str=%%~nxi"
             set "gameName=!str:_Resolution=!"
         )
 
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
 
-        REM : no V3 Gp were found but other version packs found
+        REM : no lgfxpv Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
 
         echo titleId=!titleId! >> !myLog!
         echo gpfound=!gpfound! >> !myLog!
-        echo v3Gpfound=!v3Gpfound! >> !myLog!
+        echo lgfxpvfound=!lgfxpvfound! >> !myLog!
         echo createLegacyPacks=%createLegacyPacks% >> !myLog!
 
-        if %gpfound% EQU 1 if %v3Gpfound% EQU 1 goto:createExtraGP
-        REM : if V3 GP found, get the last update version
-        if %v3Gpfound% EQU 1 goto:checkRecentUpdate
+        if %gpfound% EQU 1 if %lgfxpvfound% EQU 1 goto:createExtraGP
+        REM : if lgfxpv GP found, get the last update version
+        if %lgfxpvfound% EQU 1 goto:checkRecentUpdate
 
         @echo Create BatchFW graphic packs for this game ^.^.^.
         REM : Create game's graphic pack
-        set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
-        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% > !cgpLogFile!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId%
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId%
 
         goto:createCapGP
 
@@ -483,28 +517,24 @@ REM : functions
         @echo Extra graphic packs for this game was built using !lastVersion!^, !newVersion! is the last downloaded
 
         :createExtraGP
+
         if [!completeGP!] == ["NONE"] goto:eof
 
         if ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
         if not ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
 
-        set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
-        echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-
-        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! > !cgpLogFile! 2>&1
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup!
 
         :createCapGP
 
         REM : create FPS cap graphic packs
-        set "cfcgpLog="!BFW_PATH:"=!\logs\createCapGraphicPacks.log""
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
-        echo !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-
-        wscript /nologo !StartHiddenWait! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! > !cfcgpLog! 2>&1
-
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
 
     goto:eof
     REM : ------------------------------------------------------------------

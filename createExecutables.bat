@@ -1506,8 +1506,6 @@ REM : functions
         if not exist !MLC01_FOLDER_PATH! (
 
             REM : create mlc01 in game's folder
-            REM : TODO : check if cemu version does not support the -mlc options, what happen?
-            REM : if stops -> limit the versions for BatchFW
             set "sysFolder="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
             call:createFolder !sysFolder!
             set "saveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\00050000\%titleId:00050000=%""
@@ -1544,9 +1542,11 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         @echo wscript !StartHidden! !BatchFwCall!>> !BATCH_FILE!
         @echo exit %%ERRORLEVEL%%>> !BATCH_FILE!
 
-        REM : search in logFile, getting only the last occurence
+        REM : get BatchFw version
         set "bfwVersion=NONE"
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+        set "bfwVersion=%bfwVersion:"=%"
 
         REM : arguments to Bat_To_Exe_Converter
         set "ARGS=/bat !BATCH_FILE! /exe !EXE_FILE! /icon !ICO_PATH! /x64 /overwrite /productName BatchFW /productVersion %bfwVersion%"

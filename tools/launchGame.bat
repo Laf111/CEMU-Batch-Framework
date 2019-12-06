@@ -26,7 +26,7 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set /A "usePbFlag=0"
-    type !logFile! | find "USE_PROGRESSBAR" > NUL 2>&1 && (
+    type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && (
         REM : init progressBar
         wscript /nologo !StartHidden! !initProgressBar!
         set /A "usePbFlag=1"
@@ -79,6 +79,7 @@ REM : main
     set "bfwVersion=NONE"
 
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+    set "bfwVersion=%bfwVersion:"=%"
     @echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     @echo ========================================================= >> !batchFwLog!
 
@@ -255,8 +256,12 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHidden! !script! -warn
 
-    REM : GFX type to provide
-    set "gfxType=V3"
+    REM : GFX version to set
+    set "lgfxpv=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
+    set "lgfxpv=!lgfxpv:"=!"
+
+    set "gfxType=!lgfxpv!"
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
 
     set "versionRead=NOT_FOUND"
@@ -274,12 +279,20 @@ REM : main
     if ["!v11515!"] == [""] @echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 @echo Error when comparing versions >> !batchFwLog!
 
-    call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-    if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-    if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
-    if !v114! EQU 2 set "gfxType=V2"
-    if !v114! LEQ 1 goto:getTitleId
-
+    REM : suppose that version > 1.14
+    set "v114=1"
+    REM : if version < 1.15.15 : compare to 1.14 and update v114
+    if !v11515! EQU 2 (
+        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+        if ["!v114!"] == [""] @echo Error when comparing versions >> !batchFwLog!
+        if !v114! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+        if !v114! EQU 2 set "gfxType=V2"
+        if !v114! LEQ 1 goto:getTitleId
+    ) else (
+        REM : version > 1.15.15 => version > 1.14
+        set "v114=2"
+        goto:getTitleId
+    )
     if exist !gfxv2! goto:getTitleId
 
     mkdir !gfxv2! > NUL 2>&1
@@ -288,7 +301,7 @@ REM : main
     @echo --------------------------------------------------------- >> !batchFwLog!
     @echo graphic pack V2 are needed for this version^, extracting^.^.^. >> !batchFwLog!
 
-    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, close this popup to continue^." 4160
+    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, close this popup to continue^."
 
     if !usePbFlag! EQU 1 call:setProgressBar 34 34 "pre processing" "installing V2 GFX packs"
 
@@ -301,8 +314,6 @@ REM : main
     )
 
     :getTitleId
-    @echo Minimal version of GFX pack required ^: !gfxType! >> !batchFwLog!
-
     REM : META.XML file
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
 
@@ -341,7 +352,7 @@ REM : main
         REM : shortcut to game's profile
         set "profileShortcuts="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
 
-        cscript /nologo !MessageBox! "CEMU folder !CEMU_FOLDER:"=! does not exist anymore^, you might have move or delete this version^. Removing shortcuts" 4160
+        cscript /nologo !MessageBox! "CEMU folder !CEMU_FOLDER:"=! does not exist anymore^, you might have move or delete this version^. Removing shortcuts"
 
         REM : delete shortcuts
         if exist !gameShortcut! del /F !gameShortcut! >NUL
@@ -497,7 +508,7 @@ REM : main
 
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
-    set "gpuType=OTHER"
+    set "gpuType=NO_NVIDIA"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
         set "string=%%i"
         @echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
@@ -505,9 +516,10 @@ REM : main
             set "GPU_VENDOR=!string: =!"
         )
     )
-    @echo gpuType ^: %gpuType%>> !batchFwLog!
-    @echo gpuType ^: %gpuType%
+
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
+    @echo gpuType ^: !GPU_VENDOR! >> !batchFwLog!
+    @echo gpuType ^: !GPU_VENDOR!
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
@@ -534,10 +546,12 @@ REM : main
     REM : search in logFile, getting only the last occurence
     set "GPU_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "GPU_CACHE=%%i"
-echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
-    REM : when updating drivers GpuCache is deleted
 
-    if not [!GPU_CACHE!] == ["NOT_FOUND"] if exist !GPU_CACHE! goto:handlingGame
+    REM : when updating drivers GpuCache is deleted
+    if not [!GPU_CACHE!] == ["NOT_FOUND"] (
+        if not exist !GPU_CACHE! mkdir !GPU_CACHE! > NUL 2>&1
+        goto:handlingGame
+    )
 
     REM : else search it
     pushd "%LOCALAPPDATA%"
@@ -545,8 +559,6 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
     for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
     if not [!cache!] == ["NOT_FOUND"] set "GPU_CACHE=!cache!"
-
-echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
 
     pushd !BFW_TOOLS_PATH!
 
@@ -575,15 +587,8 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH!
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH! >> !batchFwLog!
 
-    REM : create the GLcache subfolder
+    REM : create the default GLcache subfolder if GPU_CACHE <> NOT_FOUND
     if not exist !GPU_CACHE_PATH! if not [!GPU_CACHE!] == ["NOT_FOUND"] mkdir !GPU_CACHE_PATH!
-
-    REM also create default folder (not exist when you've just updated your display drivers)
-    set "folder="%LOCALAPPDATA%\%gpuType%\GLCache""
-    if not exist !folder! mkdir !folder! > NUL 2>&1
-    REM : also in APPDATA
-    set "folder="%APPDATA%\%gpuType%\GLCache""
-    if not exist !folder! mkdir !folder! > NUL 2>&1
 
     REM : check if another instance of CEMU is running
     :searchLockFile
@@ -730,8 +735,9 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
     :moveGl
     call:moveFolder !gpuCacheSaved! !gpuCache! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving openGL save^, close all explorer^.exe that might interfer ^!" 4117
-        if !ERROLRLEVEL! EQU 4 goto:moveGl
+        cscript /nologo !MessageBox! "ERROR While moving openGL save^, close all explorer^.exe that might interfer ^!" 4113
+        if !ERROLRLEVEL! EQU 1 goto:moveGl
+        if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving openGL save !"
     )
 
     REM : using backup
@@ -775,18 +781,27 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
+    REM : on very first versions
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:linkGpFolder
+
+    REM : suppose that version > 1.15.3b
     set /A "v1153b=1"
-    if not ["%d1%"] == ["%d2%"] if not ["!versionRead!"] == ["NOT_FOUND"] (
+    REM : if on the same partition
+    if not ["%d1%"] == ["%d2%"] (
+        REM : if version > 1.14
         if !v114! EQU 1 (
+            REM : compare to 1.15.3b
             call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
 
             if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
             if !v1153b! LEQ 1 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
+            REM : version < 1.14 => version < 1.15.3b
             set /A "v1153b=2"
         )
     )
+    :linkGpFolder
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -844,7 +859,7 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
                             automatic import^, to be sure that is not related^." 4144
         ) else (
             REM : open log.txt
-            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed, openning its log ^.^.^." 4144
+            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed, openning its log ^.^.^."
             timeout /T 1 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
             timeout /T 1 > NUL 2>&1
@@ -1047,9 +1062,9 @@ echo GPU_CACHE=!GPU_CACHE! >> !batchFwLog!
     if [!GpuCache!] == ["NOT_FOUND"] goto:analyseCemuLog
     if exist !GpuCache! call:moveFolder !GpuCache! !gpuCacheSaved! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in openGL cache folder" 4117
-        if !ERRORLEVEL! EQU 4 goto:moveBack
-        cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GPU Cache is backup sucessfully^, if it persists close your session and retry" 4144
+        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in openGL cache folder" 4113
+        if !ERROLRLEVEL! EQU 1 goto:moveBack
+        cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GPU Cache is backup sucessfully^, if it persists close your session and retry"
     )
 
     :analyseCemuLog
@@ -1295,7 +1310,7 @@ REM : functions
 
     :waitProcessesEnd
 
-        REM : TODO remove trace
+        REM : debug trace
 rem        set "logFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
 rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
@@ -1332,7 +1347,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
             if !disp! EQU 0 type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
                 @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
-                cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^." 4160
+                cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
                 set /A "disp=1"
             )
             goto:waitingLoopProcesses
@@ -1596,11 +1611,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^." 4160
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^."
         goto:syncCP
 
         :bypassComparison
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^." 4160
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^."
 
         :syncCP
         REM : synchronized controller profiles (import)
@@ -1618,8 +1633,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         call:log2GamesLibraryFile !msg!
 
         :beforeLoad
-
-        @echo Ignoring precompiled shader ^: %value%>> !batchFwLog!
 
         REM : if wizard was launched set PROFILE_FILE because it was not found earlier
         set "cemuProfile="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -1658,6 +1671,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : if current version >=1.15.15
         if !v11515! GEQ 1 (
+            REM : compare with 1.15.18
             call:compareVersions !versionRead! "1.15.18" result > NUL 2>&1
             if ["!result!"] == [""] @echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 50 @echo Error when comparing versions >> !batchFwLog!
@@ -1944,8 +1958,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         call:getHostState !ipRead! state
         if !state! EQU 1 (
-            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now^. Cancel to abort using online feature" 4112
-            if !ERRORLEVEL! EQU 2 goto:eof
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now before continue^." 4112
         )
 
         :installAccount
@@ -2235,7 +2248,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
         if !ERRORLEVEL! EQU 2 (
-            cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you" 4144
+            cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you"
             goto:eof
         )
 
@@ -2253,7 +2266,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : open a google search
         wscript /nologo !Start! !defaultBrowser! "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
 
-        cscript /nologo !MessageBox! "Let CEMU launch the game a first time then close it and use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache'. Browse to the file downloaded, no need to rename-it, BatchFw will do it for you" 4144
+        cscript /nologo !MessageBox! "Let CEMU launch the game a first time then close it and use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache'. Browse to the file downloaded, no need to rename-it, BatchFw will do it for you"
 
     goto:eof
     REM : ------------------------------------------------------------------

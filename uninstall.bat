@@ -31,7 +31,6 @@ REM : main
     
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
-
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -40,11 +39,12 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
-    REM : get batch version from log file
-    REM : search in logFile, getting only the last occurence
+    REM : get BatchFw version
     set "bfwVersion=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
-    set "bfwVersion=!bfwVersion: =!"
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
+    set "bfwVersion=%bfwVersion:"=%"
+
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!

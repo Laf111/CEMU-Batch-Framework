@@ -29,6 +29,7 @@ REM : main
 
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
@@ -127,8 +128,10 @@ REM : main
     REM : titleID and BFW_GP_FOLDER
     :getArgsValue
 
+    echo. > !cgpLogFile!
     if %nbArgs% GTR 4 (
         @echo ERROR ^: on arguments passed ^!
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
         @echo given {%*}
 
@@ -136,6 +139,7 @@ REM : main
     )
     if %nbArgs% LSS 3 (
         @echo ERROR ^: on arguments passed ^!
+        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
         @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
         @echo given {%*}
 
@@ -145,6 +149,7 @@ REM : main
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
     if not exist !BFW_GP_FOLDER! (
+        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
         @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
 
         exit /b 1
@@ -184,7 +189,9 @@ REM : main
         cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
+    @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cgpLogFile!
     @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
+    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
     @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
@@ -213,12 +220,16 @@ REM : main
 
     if not ["%gameName%"] == ["NONE"] set "GAME_TITLE=%gameName%"
 
+    @echo ========================================================= >> !cgpLogFile!
     @echo =========================================================
+    @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE! >> !cgpLogFile!
     @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE!
+    @echo ========================================================= >> !cgpLogFile!
     @echo =========================================================
-    @echo Native height set to !nativeHeight! in WiiU-Titles-Library.csv
+    @echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
+    @echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv
 
-    REM get all title Id for this game (in case of a new V3 res gp creation)
+    REM get all title Id for this game (in case of a new lgfxpv res gp creation)
     set "titleIdList="
     call:getAllTitleIds
 
@@ -244,7 +255,9 @@ REM : main
     )
     
     if ["!ARLIST!"] == [""] (
+        @echo Unable to get desired aspect ratio ^(choosen during setup^) ^? >> !cgpLogFile!
         @echo Unable to get desired aspect ratio ^(choosen during setup^) ^?
+        @echo Delete batchFW outputs and relaunch >> !cgpLogFile!
         @echo Delete batchFW outputs and relaunch
         if !QUIET_MODE! EQU 0 pause
         exit /b 2
@@ -258,11 +271,12 @@ REM : main
     set "fnrLogCegp="!BFW_PATH:"=!\logs\fnr_createExtraGraphicPacks.log""
     if exist !fnrLogCegp! del /F !fnrLogCegp!
 
-    REM : flag for V3 graphic packs existence
-    set "gpV3exist=0"
+    REM : flag for lgfxpv graphic packs existence
+    set "gplgfxpvexist=0"
     set "v2Name="NOT_FOUND""
     REM : launching the search
-    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% > !fnrLogCegp!
+    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId%
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% --logFile !fnrLogCegp!
 
 
@@ -282,49 +296,52 @@ REM : main
             echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
         )
 
-        REM : creating V3 graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gpV3exist=1" && call:createExtraV3Gp "!gpName!")
+        REM : creating lgfxpv graphic packs
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gplgfxpvexist=1" && call:createExtralgfxpv "!gpName!")
 
     )
-    if %gpV3exist% EQU 1 goto:ending
+    if %gplgfxpvexist% EQU 1 goto:ending
 
-    REM : create V3 res graphic pack (game support in slahiee repository but not present in gfx pack)
+    REM : create lgfxpv res graphic pack (game support in slahiee repository but not present in gfx pack)
 
     REM : search a V2 2xres graphic pack if found v2Name
 
-    if [!v2Name!] == ["NOT_FOUND"] set "v3name="!GAME_TITLE!"" && goto:createNewV3
+    if [!v2Name!] == ["NOT_FOUND"] set "lgfxpvname="!GAME_TITLE!"" && goto:createNewlgfxpv
 
     set "gpResX2="!BFW_GP_FOLDER:"=!\!v2Name!_%resX2%p""
-    set "v3name=!v2Name:_graphicPacksV2\=!"
+    set "lgfxpvname=!v2Name:_graphicPacksV2\=!"
 
-    :createNewV3
+    :createNewlgfxpv
 
-    set "gpV3="!BFW_GP_FOLDER:"=!\!v3name!_Resolution""
+    set "gplgfxpv="!BFW_GP_FOLDER:"=!\!lgfxpvname!_Resolution""
 
-    if not exist !gpV3! mkdir !gpV3! > NUL 2>&1
-    set "rulesFileV3="!gpV3:"=!\rules.txt""
+    if not exist !gplgfxpv! mkdir !gplgfxpv! > NUL 2>&1
+    set "bfwRulesFile="!gplgfxpv:"=!\rules.txt""
 
-    call:initV3ResGraphicPack
-    call:createExtraV3Gp "!v3name!"
-    call:finalizeResV3GP
+    call:initlgfxpvResGraphicPack
+    call:createExtralgfxpv "!lgfxpvname!"
+    call:finalizeReslgfxpv
 
     if not exist !gpResX2! goto:ending
 
     REM : copy files near the rules.txt files
-    robocopy !gpResX2! !gpV3! /S /XF rules.txt
+    robocopy !gpResX2! !gplgfxpv! /S /XF rules.txt
 
     REM : replacing float Scale = 2.0
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resXScale.log""
-    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" > !fnrLogFile!
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resXScale.log""
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"  >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
 
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resYScale.log""
-    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" > !fnrLogFile!
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resYScale.log""
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
 
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpV3-resScale.log""
-    echo !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" > !fnrLogFile!
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resScale.log""
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
 
 
     :ending
@@ -332,8 +349,10 @@ REM : main
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
     set "DATE=%ldt%"
+    @echo ending date = %date% >> !cgpLogFile!
     @echo ending date = %date%
 
+    @echo =========================================================  >> !cgpLogFile!
     @echo =========================================================
 
     call:waitChildrenProcessesEnd
@@ -419,36 +438,53 @@ REM : functions
 
         set "name=!gpFolderName:_%resX2%p=!"
         set "name=!name:_graphicPacksV2\=!"
+        @echo --------------------------------------------------------- >> !cgpLogFile!
         @echo ---------------------------------------------------------
+        @echo ^> !name:"=!^'s V2 extra graphic packs created successfully >> !cgpLogFile!
         @echo ^> !name:"=!^'s V2 extra graphic packs created successfully
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     REM : function to create extra graphic packs for a game
-    :createExtraV3Gp
+    :createExtralgfxpv
 
         set "gpFolderName="%~1""
-        set "gpV3="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
+        set "gplgfxpv="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gpv3! | find /V "_Resolution" > NUL 2>&1 && goto:eof
+        echo !gplgfxpv! | find /V "_Resolution" > NUL 2>&1 && goto:eof
 
-        set "rulesFile="!gpV3:"=!\rules.txt""
+        set "rulesFile="!gplgfxpv:"=!\rules.txt""
 
         REM : Windows formating (LF -> CRLF)
         call:dosToUnix
 
+        REM : Get the version of the GFX pack
+        set "versionRead=NOT_FOUND"
+        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "versionRead=%%i"
+        set "versionRead=%versionRead: =%"
+        if ["!versionRead!"] == ["NOT_FOUND"] (
+            echo ERROR : version was not found in !rulesFile! >> !cgpLogFile!
+            echo ERROR : version was not found in !rulesFile!
+            goto:eof
+        )
+
+        
         REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
         set "gpNativeHeight=NOT_FOUND"
         for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
 
         if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
+            echo WARNING : Native Height was not found in !rulesFile! >> !cgpLogFile!
             echo WARNING : Native Height was not found in !rulesFile!
         )
 
+        echo Native height set to !gpNativeHeight! in rules.txt >> !cgpLogFile!
         echo Native height set to !gpNativeHeight! in rules.txt
+        echo. >> !cgpLogFile!
         echo.
         if not ["!gpNativeHeight!"] == ["NOT_FOUND"] if !gpNativeHeight! NEQ !nativeHeight! (
+            echo WARNING : Native Height in rules.txt does not match >> !cgpLogFile!
             echo WARNING : Native Height in rules.txt does not match
         )
 
@@ -469,10 +505,11 @@ REM : functions
         set "ed="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\n"
 
+        if not ["!ed!"] == [""] echo extra directives detected ^:  >> !cgpLogFile! && echo !ed! >> !cgpLogFile! && echo. >> !cgpLogFile!
         if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
 
         REM : complete 16/9 (if here => COMPLETE_GP=YES)
-        call:createV3Gp169
+        call:createlgfxpv169
 
         REM : reset extra directives file
         if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
@@ -480,20 +517,22 @@ REM : functions
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
 
-            if ["%%a"] == ["1610"] call:createV3Gp1610
+            if ["%%a"] == ["1610"] call:createlgfxpv1610
 
-            if ["%%a"] == ["219"]  call:createV3Gp219
+            if ["%%a"] == ["219"]  call:createlgfxpv219
 
-            if ["%%a"] == ["43"]   call:createV3Gp43
+            if ["%%a"] == ["43"]   call:createlgfxpv43
 
-            if ["%%a"] == ["489"]   call:createV3Gp489
+            if ["%%a"] == ["489"]   call:createlgfxpv489
 
             REM : reset extra directives file
             if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
 
+        @echo --------------------------------------------------------- >> !cgpLogFile!
         @echo ---------------------------------------------------------
-        @echo ^> !gpFolderName:"=!^'s V3 extra presets created successfully
+        @echo ^> !gpFolderName:"=!^'s !versionRead! extra presets created successfully >> !cgpLogFile!
+        @echo ^> !gpFolderName:"=!^'s !versionRead! extra presets created successfully
 
         del /F !extraDirectives! > NUL 2>&1
         del /F !extraDirectives169! > NUL 2>&1
@@ -506,7 +545,7 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -591,46 +630,52 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : The for next method are only used in case of a not supported game in Shlashiee repo (if %gpV3exist% EQU 0)
+    REM : The for next method are only used in case of a not supported game in Shlashiee repo (if %gplgfxpvexist% EQU 0)
 
-    :initV3ResGraphicPack
+    :initlgfxpvResGraphicPack
 
-        @echo [Definition] > !rulesFileV3!
-        @echo titleIds = !titleIdList! >> !rulesFileV3!
+        REM : GFX version to set
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        set "lgfxpv=NONE"
+        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
+        set "lgfxpv=!lgfxpv:"=!"
 
-        @echo name = Resolution >> !rulesFileV3!
-        @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !rulesFileV3!
-        @echo description = Created by BatchFW. Changes the resolution of the game >> !rulesFileV3!
-        @echo version = 3 >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
-        @echo [Preset] >> !rulesFileV3!
-        @echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !rulesFileV3!
-        @echo $width = %nativeWidth% >> !rulesFileV3!
-        @echo $height = %nativeHeight% >> !rulesFileV3!
-        @echo $gameWidth = %nativeWidth% >> !rulesFileV3!
-        @echo $gameHeight = %nativeHeight% >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
+        @echo [Definition] > !bfwRulesFile!
+        @echo titleIds = !titleIdList! >> !bfwRulesFile!
+
+        @echo name = Resolution >> !bfwRulesFile!
+        @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
+        @echo description = Created by BatchFW. Changes the resolution of the game >> !bfwRulesFile!
+        @echo version = !lgfxpv! >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
+        @echo [Preset] >> !bfwRulesFile!
+        @echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !bfwRulesFile!
+        @echo $width = %nativeWidth% >> !bfwRulesFile!
+        @echo $height = %nativeHeight% >> !bfwRulesFile!
+        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :fillResV3GP
+    :fillReslgfxpv
         set "overwriteWidth=%~1"
         set "overwriteHeight=%~2"
         set "desc=%~3"
 
-        @echo [Preset] >> !rulesFileV3!
-        @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !rulesFileV3!
-        @echo $width = %overwriteWidth% >> !rulesFileV3!
-        @echo $height = %overwriteHeight% >> !rulesFileV3!
-        @echo $gameWidth = %nativeWidth% >> !rulesFileV3!
-        @echo $gameHeight = %nativeHeight% >> !rulesFileV3!
-        @echo # >> !rulesFileV3!
+        @echo [Preset] >> !bfwRulesFile!
+        @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !bfwRulesFile!
+        @echo $width = %overwriteWidth% >> !bfwRulesFile!
+        @echo $height = %overwriteHeight% >> !bfwRulesFile!
+        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        @echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :finalizeResV3GP
+    :finalizeReslgfxpv
 
 
         REM : res ratios instructions ------------------------------------------------------
@@ -648,7 +693,7 @@ REM : functions
         call:mulfloat "!targetHeight!.000" "1.777" 3 targetWidth
 
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
-        call:writeRoundedV3Filters >> !rulesFileV3!
+        call:writeRoundedlgfxpvFilters >> !bfwRulesFile!
 
         if !targetHeight! LEQ 8 goto:formatUtf8
         if !resRatio! GEQ 8 goto:formatUtf8
@@ -657,93 +702,93 @@ REM : functions
 
         :formatUtf8
         REM : add commonly used 16/9 res filters
-        @echo # add commonly used 16^/9 res filters >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # add commonly used 16^/9 res filters >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
         if %nativeHeight% EQU 720 (
             REM : (1080/2 = 540, for 1080 treated when resRatio = 2)
 
-            @echo # 960 x 540 Res >> !rulesFileV3!
-            @echo [TextureRedefine] >> !rulesFileV3!
-            @echo width = 960 >> !rulesFileV3!
-            @echo height = 540 >> !rulesFileV3!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-            @echo formatsExcluded = 0x431 >> !rulesFileV3!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !rulesFileV3!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !rulesFileV3!
-            @echo #  >> !rulesFileV3!
+            @echo # 960 x 540 Res >> !bfwRulesFile!
+            @echo [TextureRedefine] >> !bfwRulesFile!
+            @echo width = 960 >> !bfwRulesFile!
+            @echo height = 540 >> !bfwRulesFile!
+            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !bfwRulesFile!
+            @echo #  >> !bfwRulesFile!
 
-            @echo # 960 x 544 Res >> !rulesFileV3!
-            @echo [TextureRedefine] >> !rulesFileV3!
-            @echo width = 960 >> !rulesFileV3!
-            @echo height = 544 >> !rulesFileV3!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-            @echo formatsExcluded = 0x431 >> !rulesFileV3!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !rulesFileV3!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !rulesFileV3!
-            @echo #  >> !rulesFileV3!
+            @echo # 960 x 544 Res >> !bfwRulesFile!
+            @echo [TextureRedefine] >> !bfwRulesFile!
+            @echo width = 960 >> !bfwRulesFile!
+            @echo height = 544 >> !bfwRulesFile!
+            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !bfwRulesFile!
+            @echo #  >> !bfwRulesFile!
         )
 
-        @echo # 1137 x 640 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 1137 >> !rulesFileV3!
-        @echo height = 640 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 1137 x 640 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 1137 >> !bfwRulesFile!
+        @echo height = 640 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 1152 x 640 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 1152 >> !rulesFileV3!
-        @echo height = 640 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 1152 x 640 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 1152 >> !bfwRulesFile!
+        @echo height = 640 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 896 x 504 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 896 >> !rulesFileV3!
-        @echo height = 504 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 896 x 504 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 896 >> !bfwRulesFile!
+        @echo height = 504 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 768 x 432 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 768 >> !rulesFileV3!
-        @echo height = 432 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !rulesFileV3!
-        @echo #  >> !rulesFileV3!
+        @echo # 768 x 432 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 768 >> !bfwRulesFile!
+        @echo height = 432 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !bfwRulesFile!
+        @echo #  >> !bfwRulesFile!
 
-        @echo # 512 x 288 Res >> !rulesFileV3!
-        @echo [TextureRedefine] >> !rulesFileV3!
-        @echo width = 512 >> !rulesFileV3!
-        @echo height = 288 >> !rulesFileV3!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !rulesFileV3!
-        @echo formatsExcluded = 0x431 >> !rulesFileV3!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !rulesFileV3!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !rulesFileV3!
+        @echo # 512 x 288 Res >> !bfwRulesFile!
+        @echo [TextureRedefine] >> !bfwRulesFile!
+        @echo width = 512 >> !bfwRulesFile!
+        @echo height = 288 >> !bfwRulesFile!
+        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !bfwRulesFile!
+        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !bfwRulesFile!
 
         REM : force UTF8 format
-        set "utf8=!rulesFileV3:rules.txt=rules.bfw_tmp!"
-        copy /Y !rulesFileV3! !utf8! > NUL 2>&1
-        type !utf8! > !rulesFileV3!
+        set "utf8=!bfwRulesFile:rules.txt=rules.bfw_tmp!"
+        copy /Y !bfwRulesFile! !utf8! > NUL 2>&1
+        type !utf8! > !bfwRulesFile!
         del /F !utf8! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :writeRoundedV3Filters
+    :writeRoundedlgfxpvFilters
 
         REM : loop on -8,-4,0,4,12 (rounded values)
         set /A "rh=0"
@@ -786,6 +831,7 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
+        @echo Create 16^/9 missing V2 resolution packs >> !cgpLogFile!
         @echo Create 16^/9 missing V2 resolution packs
 
         REM : 16/9 fullscreen graphic packs
@@ -808,6 +854,7 @@ REM : functions
 
         :169_windowedV2
         echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
+        @echo Create 16^/9 windowed missing V2 resolution packs >> !cgpLogFile!
         @echo Create 16^/9 windowed missing V2 resolution packs
 
         REM : 16/9 windowed graphic packs
@@ -844,6 +891,7 @@ REM echo replacing
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src! --replace !target! --logFile !logFileED!
 REM more !logFileED!
 REM pause
+        REM : flag to update extraDirectives
         set "edu="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "edu=!edu!%%j\n"
 
@@ -851,12 +899,13 @@ REM pause
     REM : ------------------------------------------------------------------
 
 
-    :createV3Gp169
+    :createlgfxpv169
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 16^/9 presets in V3 GFX resolution pack
+        @echo Complete 16^/9 presets in GFX resolution pack >> !cgpLogFile!
+        @echo Complete 16^/9 presets in GFX resolution pack
         set "edu=!ed!"
 
         REM : 16/9 fullscreen graphic packs
@@ -866,12 +915,12 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if !h! NEQ %nativeHeight% if %gpV3exist% EQU 0 call:fillResV3GP !w! !h! " (16:9)"
+            if !h! NEQ %nativeHeight% if %gplgfxpvexist% EQU 0 call:fillReslgfxpv !w! !h! " (16:9)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        if %gpV3exist% EQU 0 goto:eof
+        if %gplgfxpvexist% EQU 0 goto:eof
 
         REM : complete existing 16/9 resolution
         set /A "h=360"
@@ -883,7 +932,7 @@ REM pause
 
         for /L %%p in (1,1,%downIter%) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP169 " (16:9)"
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv169 " (16:9)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -895,7 +944,7 @@ REM pause
         set /A "dw=320"
         for /L %%p in (%supIter%,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP169 " (16:9)"
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv169 " (16:9)"
 
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
@@ -906,7 +955,8 @@ REM pause
         REM : create windowed presets only if user chosen it during setup
 
         :169_windowed
-        @echo Create 16^/9 windowed presets in V3 GFX resolution pack
+        @echo Create 16^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 16^/9 windowed presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -926,11 +976,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (16:9) windowed"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:9) windowed"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*344-!w!"
-                call:fillResV3GP !iw! !ih! "^(16^:9^) windowed"
+                call:fillReslgfxpv !iw! !ih! "^(16^:9^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -956,6 +1006,7 @@ REM pause
         REM : height step
         set /A "dh=180"
 
+        @echo Create 21^/9 missing V2 resolution packs >> !cgpLogFile!
         @echo Create 21^/9 missing V2 resolution packs
 
         REM : 21/9 fullscreen graphic packs
@@ -978,6 +1029,7 @@ REM pause
 
         :219_windowedV2
         REM : 21/9 windowed graphic packs
+        @echo Create 21^/9 windowed V2 resolution packs >> !cgpLogFile!
         @echo Create 21^/9 windowed V2 resolution packs
 
         set /A "h=360"
@@ -1000,12 +1052,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createV3Gp219
+    :createlgfxpv219
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 21^/9 presets in V3 GFX resolution pack
+        @echo Complete 21^/9 presets in GFX resolution pack >> !cgpLogFile!
+        @echo Complete 21^/9 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1025,11 +1078,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (21:9)"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (21:9)"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*420-!w!"
-                call:fillResV3GP !iw! !ih! "^(21^:9^)"
+                call:fillReslgfxpv !iw! !ih! "^(21^:9^)"
         )
 
             set /A "h=!h!-%dh%"
@@ -1038,7 +1091,8 @@ REM pause
         if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :219_windowed
-        @echo Create 21^/9 windowed presets in V3 GFX resolution pack
+        @echo Create 21^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 21^/9 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1057,11 +1111,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (21:9) windowed"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (21:9) windowed"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*452-!w!"
-                call:fillResV3GP !iw! !ih! "^(21^:9^) windowed"
+                call:fillReslgfxpv !iw! !ih! "^(21^:9^) windowed"
         )
 
             set /A "h=!h!-%dh%"
@@ -1102,6 +1156,7 @@ REM pause
         REM : height step
         set /A "dh=180"
 
+        @echo Create 4^/3 missing V2 resolution packs >> !cgpLogFile!
         @echo Create 4^/3 missing V2 resolution packs
 
         REM : 4/3 fullscreen graphic packs
@@ -1124,6 +1179,7 @@ REM pause
 
         :43_windowedV2
         REM : 4/3 windowed graphic packs
+        @echo Create 4^/3 windowed missing V2 resolution packs >> !cgpLogFile!
         @echo Create 4^/3 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=516"
@@ -1146,12 +1202,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createV3Gp43
+    :createlgfxpv43
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 4^/3 presets in V3 GFX resolution pack
+        @echo Complete 4^/3 presets in GFX resolution pack >> !cgpLogFile!
+        @echo Complete 4^/3 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1170,11 +1227,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (4:3)"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (4:3)"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*540-!w!"
-                call:fillResV3GP !iw! !ih! "^(4^:3^)"
+                call:fillReslgfxpv !iw! !ih! "^(4^:3^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1184,7 +1241,8 @@ REM pause
 
         :43_windowed
         REM : 4/3 windowed graphic packs
-        @echo Create 4^/3 windowed presets in V3 GFX resolution pack
+        @echo Create 4^/3 windowed presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 4^/3 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1202,11 +1260,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (4:3) windowed"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (4:3) windowed"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*582-!w!"
-                call:fillResV3GP !iw! !ih! "^(4^:3^) windowed"
+                call:fillReslgfxpv !iw! !ih! "^(4^:3^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1231,6 +1289,7 @@ REM pause
         REM : height step
         set /A "dh=180"
 
+        @echo Create 48^/9 missing V2 resolution packs >> !cgpLogFile!
         @echo Create 48^/9 missing V2 resolution packs
 
         REM : 48/9 fullscreen graphic packs
@@ -1253,6 +1312,7 @@ REM pause
 
         :489_windowedV2
         REM : 48/9 windowed graphic packs
+        @echo Create 48^/9 windowed missing V2 resolution packs >> !cgpLogFile!
         @echo Create 48^/9 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=2066"
@@ -1274,12 +1334,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createV3Gp489
+    :createlgfxpv489
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 48^/9 presets in V3 GFX resolution pack
+        @echo Complete 48^/9 presets in GFX resolution pack >> !cgpLogFile!
+        @echo Complete 48^/9 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1299,11 +1360,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (48:9)"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (48:9)"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*960-!w!"
-                call:fillResV3GP !iw! !ih! "^(48^:9^)"
+                call:fillReslgfxpv !iw! !ih! "^(48^:9^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1313,7 +1374,8 @@ REM pause
 
         :489_windowed
         REM : 49/9 windowed graphic packs
-        @echo Create 48^/9 windowed presets in V3 GFX resolution pack
+        @echo Create 48^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 48^/9 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1331,11 +1393,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " 48:9) windowed"
-                      if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " 48:9) windowed"
+                      if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*1034-!w!"
-                call:fillResV3GP !iw! !ih! "^(48^:9^) windowed"
+                call:fillReslgfxpv !iw! !ih! "^(48^:9^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1353,6 +1415,7 @@ REM pause
         REM : height step
         set /A "dh=180"
 
+        @echo Create 16^/10 missing V2 resolution packs >> !cgpLogFile!
         @echo Create 16^/10 missing V2 resolution packs
 
         REM : 16/10 full screen graphic packs
@@ -1375,6 +1438,7 @@ REM pause
 
         :1610_windowedV2
         REM : 16/10 windowed graphic packs
+        @echo Create 16^/10 windowed missing V2 resolution packs >> !cgpLogFile!
         @echo Create 16^/10 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=620"
@@ -1396,13 +1460,14 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createV3Gp1610
+    :createlgfxpv1610
 
 
         REM : height step
         set /A "dh=180"
 
-        @echo Create 16^/10 presets in V3 GFX resolution pack
+        @echo Create 16^/10 presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 16^/10 presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1421,11 +1486,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (16:10)"
-                      if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:10)"
+                      if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*288-!w!"
-                call:fillResV3GP !iw! !ih! "^(16^:10^)"
+                call:fillReslgfxpv !iw! !ih! "^(16^:10^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1435,7 +1500,8 @@ REM pause
 
         :1610_windowed
         REM : 16/10 windowed graphic packs
-        @echo Create 16^/10 windowed presets in V3 GFX resolution pack
+        @echo Create 16^/10 windowed presets in GFX resolution pack >> !cgpLogFile!
+        @echo Create 16^/10 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1453,11 +1519,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gpV3exist% EQU 1 call:addResoV3GP " (16:10) windowed"
-            if %gpV3exist% EQU 0 (
+            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:10) windowed"
+            if %gplgfxpvexist% EQU 0 (
                 set /A "ih=34*180-!h!"
                 set /A "iw=34*310-!w!"
-                call:fillResV3GP !iw! !ih! "^(16^:10^) windowed"
+                call:fillReslgfxpv !iw! !ih! "^(16^:10^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1470,9 +1536,9 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFilelgfxpv!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\n\$height = !h!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\n\$height = !h!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1480,32 +1546,35 @@ REM pause
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFilelgfxpv!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
 
-    REM : function to add an extra 16/9 preset in V3 graphic pack of the game
-    :addResoV3GP169
+    REM : function to add an extra 16/9 preset in lgfxpv graphic pack of the game
+    :addResolgfxpv169
 
         set "desc="%~1""
 
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
-        set "fnrLogAddResoV3GP169="!fnrLogFolder:"=!\addResoV3GP169_!w!x!h!.log""
-        if exist !fnrLogAddResoV3GP169! del /F !fnrLogAddResoV3GP169! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP169!
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP169! ^| find /I /V "^!" ^| find "File:"') do (
+        set "fnrLogAddResolgfxpv169="!fnrLogFolder:"=!\addResolgfxpv169_!w!x!h!.log""
+        if exist !fnrLogAddResolgfxpv169! del /F !fnrLogAddResolgfxpv169! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResolgfxpv169!
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResolgfxpv169! ^| find /I /V "^!" ^| find "File:"') do (
+            @echo Preset !w!x!h! already exists >> !cgpLogFile!
             @echo Preset !w!x!h! already exists
             goto:eof
         )
-REM @echo Adding !w!x!h!!desc:"=! preset
+
+        @echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
+        @echo Adding !w!x!h!!desc:"=! preset
 
         REM : replacing %wToReplace%xresX2 in rules.txt
-        set "logFileV3="!fnrLogFolder:"=!\!gpFolderName:"=!-V3_!h!x!w!.log""
-        if exist !logFileV3! del /F !logFileV3! > NUL 2>&1
+        set "logFilelgfxpv="!fnrLogFolder:"=!\!gpFolderName:"=!-lgfxpv_!h!x!w!.log""
+        if exist !logFilelgfxpv! del /F !logFilelgfxpv! > NUL 2>&1
 
         if !h! GTR !nativeHeight! call:pushBack
         if !h! LSS !nativeHeight! call:pushFront
@@ -1513,34 +1582,36 @@ REM @echo Adding !w!x!h!!desc:"=! preset
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to add an extra preset in V3 graphic pack of the game
-    :addResoV3GP
+    REM : function to add an extra preset in lgfxpv graphic pack of the game
+    :addResolgfxpv
         set "desc="%~1""
 
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
 
-        set "fnrLogAddResoV3GP="!fnrLogFolder:"=!\addResoV3GP_!w!x!h!.log""
-        if exist !fnrLogAddResoV3GP! del /F !fnrLogAddResoV3GP! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoV3GP!
+        set "fnrLogAddResolgfxpv="!fnrLogFolder:"=!\addResolgfxpv_!w!x!h!.log""
+        if exist !fnrLogAddResolgfxpv! del /F !fnrLogAddResolgfxpv! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResolgfxpv!
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoV3GP! ^| find /I /V "^!" ^| find "File:"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResolgfxpv! ^| find /I /V "^!" ^| find "File:"') do (
+            @echo Preset !w!x!h!!desc:"=! already exists >> !cgpLogFile!
             @echo Preset !w!x!h!!desc:"=! already exists
             goto:eof
         )
 
-REM @echo Adding !w!x!h!!desc:"=! preset
+        @echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
+        @echo Adding !w!x!h!!desc:"=! preset
 
         REM : Adding !h!x!w! in rules.txt
-        set "logFileV3="!fnrLogFolder:"=!\!gpFolderName:"=!-V3_!h!x!w!.log""
-        if exist !logFileV3! del /F !logFileV3! > NUL 2>&1
+        set "logFilelgfxpv="!fnrLogFolder:"=!\!gpFolderName:"=!-lgfxpv_!h!x!w!.log""
+        if exist !logFilelgfxpv! del /F !logFilelgfxpv! > NUL 2>&1
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileV3!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !versionRead![ ]*" --replace "version = !versionRead!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpV3! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = 3[ ]*" --replace "version = 3\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileV3!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !versionRead![ ]*" --replace "version = !versionRead!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFilelgfxpv!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1560,12 +1631,14 @@ REM @echo Adding !w!x!h!!desc:"=! preset
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numA% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numA% does not have %decimals% decimals
             if %QUIET_MODE% EQU 0 pause
             exit /b 1
         )
 
         if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numB% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numB% does not have %decimals% decimals
             if %QUIET_MODE% EQU 0 pause
             exit /b 2
@@ -1663,12 +1736,14 @@ REM @echo Adding !w!x!h!!desc:"=! preset
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numA% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numA% does not have %decimals% decimals
 
             exit /b 1
         )
 
         if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
+            echo ERROR ^: the number %numB% does not have %decimals% decimals >> !cgpLogFile!
             echo ERROR ^: the number %numB% does not have %decimals% decimals
 
             exit /b 2

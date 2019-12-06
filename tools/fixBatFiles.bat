@@ -71,6 +71,9 @@ REM : ------------------------------------------------------------------
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "!THIS_SCRIPT!"') do (
 
         set "filePath="%%f""
+
+        call:checkFile
+
         set "tmpFile=!filePath:.bat=.bfw_tmp!"
         type !filePath! > !tmpFile!
         del /F !filePath! > NUL 2>&1
@@ -106,3 +109,10 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+
+    :checkFile
+
+        type !filePath! | find /I "goto::" && echo ERROR^: syntax error in !filePath!
+        type !filePath! | find "TODO" && echo WARNING^: TODO found in !filePath!
+
+    goto:eof

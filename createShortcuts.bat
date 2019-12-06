@@ -1498,8 +1498,6 @@ REM : functions
         if not exist !MLC01_FOLDER_PATH! (
 
             REM : create mlc01 in game's folder
-            REM : TODO : check if cemu version does not support the -mlc options, what happen?
-            REM : if stops -> limit the versions for BatchFW
             set "sysFolder="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
             call:createFolder !sysFolder!
             set "saveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\00050000\%titleId:00050000=%""

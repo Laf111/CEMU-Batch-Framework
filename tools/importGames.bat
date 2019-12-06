@@ -298,8 +298,9 @@ REM : functions
         :moveGame
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4112
-            if !ERROLRLEVEL! EQU 4 goto:moveGame
+            cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
+            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
+            if !ERROLRLEVEL! EQU 1 goto:moveGame
         )
 
         REM : creating mlc01 folder structure
@@ -359,8 +360,9 @@ REM : functions
         :moveUpdate
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4112
-            if !ERROLRLEVEL! EQU 4 goto:moveUpdate
+            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4113
+            if !ERROLRLEVEL! EQU 1 goto:moveUpdate
+            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
         )
         @echo update installed
 
@@ -399,8 +401,10 @@ REM : functions
         :moveDlc
         call:moveFolder !source! !target! cr
         if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC ^, close all explorer^.exe that might interfer ^!" 4112
-            if !ERROLRLEVEL! EQU 4 goto:moveDlc
+            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC ^, close all explorer^.exe that might interfer ^!" 4113
+            if !ERROLRLEVEL! EQU 1 goto:moveDlc
+            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
+
         )
 
         move /Y !target! !target:%endTitleId%_=! > NUL 2>&1

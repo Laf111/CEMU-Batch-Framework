@@ -10,6 +10,9 @@ REM : main
     REM : CEMU's Batch FrameWork Version
     set "BFW_VERSION=V15RC8"
 
+    REM : version of GFX packs created
+    set "BFW_GFXP_VERSION=3"
+
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
 
@@ -392,7 +395,7 @@ REM : main
     set "ACTIVE_ADAPTER=NOT_FOUND"
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
-    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractV3pack
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractlgfxp
 
     @echo ---------------------------------------------------------
     @echo Checking latest graphics packs^'update
@@ -415,7 +418,7 @@ REM : main
 
     if !cr! EQU 0 goto:getUserMode
 
-    :extractV3pack
+    :extractlgfxp
     if %QUIET_MODE% EQU 1 goto:getUserMode
 
     :beginExtraction
@@ -424,15 +427,15 @@ REM : main
     mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Extracting integrated graphics packs^.^.^.
+    @echo Extracting embeded graphics packs^.^.^.
     @echo ---------------------------------------------------------
-    REM : extract embeded V3 packs
-    set "rarFile="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
+    REM : extract embeded lgfxpv packs
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\GFX_Packs.rar""
 
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo ERROR while extracting V3_GFX_Packs^.rar^, exiting 1
+        @echo ERROR while extracting GFX_Packs^.rar^, exiting 1
         pause
         exit /b 1
     )
