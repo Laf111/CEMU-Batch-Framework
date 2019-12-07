@@ -146,7 +146,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "folder=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "folder=%%i"
     if ["!folder!"] == ["NOT_FOUND"] goto:askOutputFolder
-    set "OUTPUT_FOLDER=!folder:\Wii-U Games=!"
+    set "OUTPUT_FOLDER="!folder:\Wii-U Games=!""
 
     REM : if called with shortcut, OUTPUT_FOLDER already set, goto:inputsAvailables
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
