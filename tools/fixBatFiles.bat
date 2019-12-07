@@ -68,7 +68,7 @@ REM : ------------------------------------------------------------------
     
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "!THIS_SCRIPT!"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fix"') do (
 
         set "filePath="%%f""
 

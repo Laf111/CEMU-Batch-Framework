@@ -411,7 +411,7 @@ REM : main
         REM : basename of REF_CEMU_FOLDER (used to name shortcut)
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
-        choice /C yn /CS /N /M "!GAME_TITLE! was last played with !proposedVersion!, use its game profile file ? (y, n) : "
+        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, use its game profile file ? (y, n) : "
         if !ERRORLEVEL! EQU 2 goto:askRefCemuFolder
 
         REM : search in logFile, getting only the last occurence

@@ -61,7 +61,7 @@ REM : main
     )
     cls
 
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
 
     @echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
     pushd !BFW_LOGS!

@@ -14,7 +14,7 @@ REM : main
     set "LAST_GAMES_FOLDER_PATH="TO_BE_REPLACED""
     
     set "lastBfwInstall="!LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\setup.bat""
-    if not exist !lastBfwInstall! goto:fix
+    if not exist !lastBfwInstall! goto:begin
 
     @echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
     @echo There^'s no need to fix shortcuts.
@@ -27,6 +27,7 @@ REM : main
     @echo =========================================================
     pause & exit 0
 
+    :begin
     @echo =========================================================
     @echo Fix broken shorcuts created from
     @echo !LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install
@@ -69,7 +70,7 @@ REM : main
     REM : Loop on every shorcuts found recursively
     for /F "delims=~" %%i in ('dir /S /B "*.lnk"') do call:fixShortcut "%%i"
 
-    REM : fix prpgress bar shortcut
+    REM : fix progress bar shortcut
     set "progressBar="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\progressBar.lnk""
     call:fixShortcut !progressBar!
 

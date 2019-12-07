@@ -742,7 +742,7 @@ REM : main
     @echo.
     REM : display only if shortcuts have already been created
     set /A "alreadyInstalled=0"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set /A "alreadyInstalled=1"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set /A "alreadyInstalled=1"
     if %alreadyInstalled% EQU 1 (
         @echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
         @echo.
@@ -765,7 +765,7 @@ REM : main
         set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
         if exist !fbsf! goto:registerCemuInstalls
 
-        mkdir !fbsf! > NUL 2>&1
+        if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
         robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
 
         set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""

@@ -205,6 +205,21 @@ REM : functions
         set "gfxRar="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
         del /F /S !gfxRar! > NUL 2>&1
 
+        REM : update fixBrokenSHortcuts in ALL shortcuts folder
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do (
+            REM : instanciate a fixBrokenShortcut.bat
+            set "fbsf="%%i\BatchFw\Tools\Shortcuts""
+            if exist !fbsf! (
+
+                if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
+                robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+
+                set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
+                !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+                del /F !fnrLog! > NUL 2>&1
+            )
+        )
+
     goto:eof
     REM : ------------------------------------------------------------------
 
