@@ -27,8 +27,6 @@ REM : ------------------------------------------------------------------
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
-    set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
-
     REM : set current char codeset
     call:setCharSet
 

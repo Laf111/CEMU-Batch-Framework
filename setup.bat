@@ -47,7 +47,6 @@ REM : main
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-    set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""

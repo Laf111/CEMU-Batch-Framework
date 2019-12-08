@@ -132,6 +132,7 @@ REM : functions
 
         REM : CLUE
         set "node=!node:check_update=!"
+        set "node=!node:logflag=!"
 
         @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         @echo Node ^:
@@ -156,15 +157,21 @@ REM : functions
 
         if !cr! EQU 0 (
             @echo done
-            del /F !csTmp! > NUL 2>&1
-            del /F !csTgtTmp! > NUL 2>&1
-            del /F !BfwSettingsLog!> NUL 2>&1
-        ) else (
-            @echo done with error ^!
-            cscript /nologo !MessageBox! "ERROR ^: when patching settings^.xml^. Restoring settings^.xml backup^, game stats computation ignored ^!" 4112
-            @echo see !csTmp! and !csTgtTmp!
-            set "backup="!cs:"=!_bfwl_old""
-            if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1
+            goto:done
         )
+
+        REM : else check size
+        for /F "tokens=*" %%a in (!csTgt!) do if %%~za NEQ 0 @echo done & goto:done
+
+        @echo done with error ^!
+        cscript /nologo !MessageBox! "ERROR ^: when patching settings^.xml^. Restoring settings^.xml backup^, game stats computation ignored ^!" 4112
+        @echo see !csTmp! and !csTgtTmp!
+        set "backup="!cs:"=!_bfwl_old""
+        if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1
+
+        :done
+        del /F !csTmp! > NUL 2>&1
+        del /F !csTgtTmp! > NUL 2>&1
+        del /F !BfwSettingsLog!> NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------

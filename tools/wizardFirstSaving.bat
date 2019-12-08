@@ -404,15 +404,12 @@ REM : main
         )
     )
 
-    choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:openProfileFile
-
     if exist !REF_CEMU_FOLDER! (
         REM : basename of REF_CEMU_FOLDER (used to name shortcut)
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
-        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, use its game profile file ? (y, n) : "
-        if !ERRORLEVEL! EQU 2 goto:askRefCemuFolder
+        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, compare or use ^(if no differences were found^) this game profile file ? (y, n) : "
+        if !ERRORLEVEL! EQU 2 goto:askToCompare
 
         REM : search in logFile, getting only the last occurence
         set "pat="!proposedVersion! install folder path""
@@ -425,14 +422,17 @@ REM : main
         goto:launchDiff
     )
 
-
+    :askToCompare
+    choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
+    if !ERRORLEVEL! EQU 2 goto:openProfileFile
+    
     REM : get cemu install folder for existing game's profile
     :askRefCemuFolder
+
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
     if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
 
     :launchDiff
-
 
     REM : check that profile file exist in
     set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
@@ -445,7 +445,7 @@ REM : main
     )
     REM : open winmerge on files
     set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
-    wscript /nologo !StartMaximizedWait! !WinMergeU! !refProfileFile! !PROFILE_FILE!
+    call !WinMergeU! /xq !refProfileFile! !PROFILE_FILE!
 
     goto:step2
 
@@ -537,12 +537,15 @@ REM : main
     )
 
     @echo    CEMU settings ^:
-    @echo    - all controller profiles for all players
+    @echo.
+    REM : if version of CEMU >= 1.12 (v112<=1)
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 @echo    REFRESH games^'list  ^(right click^)
+    @echo.
+
+    @echo    - set all controller profiles for all players
     @echo    - select graphic pack^(s^)
     @echo    - select amiibo paths^(NFC Tags^)
 
-    REM : if version of CEMU >= 1.12 (v112<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 @echo    - refresh games^'list  ^(right click^)
     
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game in the list^)
