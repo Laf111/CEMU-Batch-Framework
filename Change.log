@@ -1,4 +1,4 @@
-XX/12/2019 V15RC9 :
+11/12/2019 V15RC9 :
 - add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
         import transferable caches (compute shaderCache name : thanks Exzap !)
         That means that there's no need to launch the game with CEMU to get 
@@ -11,11 +11,12 @@ XX/12/2019 V15RC9 :
 - add : volatiles messages boxes (popup with timeout to avoid stopping treatments)
 - add : handle a list for user aspect ratios 
 - add : support in GFX packs files for the packs created by BatchFw
+- add : 32/9 aspect ratio support
 - add : GFX packs completion take all hosts settings into account (aspect ratios defined)
 - add : in setup.bat, defining a new aspect ratios list will force a GFX pack update (only if 
         an active connection is found) 
 - add : support of user's game profiles (Cemu 1.15.15)        
-- add : BatchFw now propgates games'stats through versions of CEMU ( > 1.15.18) AND all
+- add : BatchFw now propgates games'stats through versions of CEMU ( > 1.15.18) for all
         Hosts used for each user.
         A script updateGameStats.bat is added 
 - add : script displayMyGamesStats.bat and a shortcut for each users
@@ -24,7 +25,7 @@ XX/12/2019 V15RC9 :
 - add : WII-U / creasteSdCard.bat call in first launch of setup.bat
 - add : WII-U / if a Wii-U is used on first launch of setup.bat, add a call to importWiiuSaves.bat
         after registering CEMU's installs
-- add : WII-U / add HIDtoVPAD-v0.9k in resources\WiiuSDcard.rar (to create SD card)
+- add : WII-U / add HIDtoVPAD-v0.9k in resources\WiiuSDcard.rar (used to create a SD card)
 - add : import 3rd party software from the last other host configuration if the path is valid
         else try to changed the drive's letter and if it is valid import the setting 
 - add : script to fix broken shortcuts in case of drive letter changing (installation on 
