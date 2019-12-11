@@ -74,7 +74,7 @@ REM : main
         goto:getTitleId
     )
 
-    @echo Please select a reference graphics packs folder
+    echo Please select a reference graphics packs folder
     :askGpFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
@@ -87,7 +87,7 @@ REM : main
     call !tobeLaunch! !BFW_GP_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askGpFolder
     )
@@ -103,14 +103,14 @@ REM : main
     set "checkLenght=!titleId:~15,1!"
 
     if ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
     REM : check too long
     set "checkLenght=!titleId:~16,1!"
 
     if not ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^^! must have 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
 
@@ -120,17 +120,17 @@ REM : main
     :getArgsValue
     echo. > !cgpLogFile!
     if %nbArgs% GTR 3 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
+        echo given {%*}
         exit /b 99
     )
     if %nbArgs% LSS 2 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
+        echo given {%*}
         exit /b 99
     )
 
@@ -138,8 +138,8 @@ REM : main
     set "BFW_GP_FOLDER=!args[0]!"
 
     if not exist !BFW_GP_FOLDER! (
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
         exit /b 1
     )
     REM : get titleId
@@ -175,10 +175,10 @@ REM : main
         cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
-    @echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^? >> !cgpLogFile!
-    @echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
-    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
+    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^? >> !cgpLogFile!
+    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
 
@@ -201,7 +201,7 @@ REM : main
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =_%"
 
-    REM get all title Id for this game (in case of a new lgfxpv res gp creation)
+    REM get all title Id for this game (in case of a new res gp creation)
     set "titleIdList="
     call:getAllTitleIds
 
@@ -209,21 +209,21 @@ REM : main
     REM : create FPS CAP graphic packs
     if not ["!gameName!"] == ["NONE"] set "GAME_TITLE=!gameName!"
 
-    @echo ========================================================= >> !cgpLogFile!
-    @echo =========================================================
-    @echo Create FPS cap graphic packs for !GAME_TITLE! >> !cgpLogFile!
-    @echo Create FPS cap graphic packs for !GAME_TITLE!
-    @echo ========================================================= >> !cgpLogFile!
-    @echo =========================================================
+    echo ========================================================= >> !cgpLogFile!
+    echo =========================================================
+    echo Create FPS cap graphic packs for !GAME_TITLE! >> !cgpLogFile!
+    echo Create FPS cap graphic packs for !GAME_TITLE!
+    echo ========================================================= >> !cgpLogFile!
+    echo =========================================================
     if !QUIET_MODE! EQU 1 goto:begin
 
-    @echo Launching in 30s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
     choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
-        @echo Cancelled by user ^!
+        echo Cancelled by user ^!
         goto:eof
     )
 
@@ -232,14 +232,14 @@ REM : main
     set /A "fpsPpOld=0"
     set /A "fpsPP=0"
 
-    REM : initialize lgfxpv graphic pack
-    set "gplgfxpv="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
+    REM : initialize graphic pack
+    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
-    set "bfwRulesFile="!gplgfxpv:"=!\rules.txt""
-    set "lgfxpvExistFlag=1"
+    set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
+    set "LastVersionExistFlag=1"
 
     echo Native FPS set in WiiU-Titles-Library.csv to = %nativeFps%
     echo.
@@ -268,11 +268,11 @@ REM : main
 
     )
 
-    REM : when a FPS++ or a 60FPS GFX is found on rules.txt lgfxpv or next, vsync is defined in => exit
-    if !fpsPP! EQU 1 @echo FPS^+^+ or 60FPS GFX pack was found >> !cgpLogFile! & @echo FPS^+^+ or 60FPS GFX pack was found & goto:computeFactor
-    if !fpsPpOld! EQU 1 @echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & @echo Old FPS^+^+ GFX pack was found & goto:computeFactor
-    @echo no FPS^+^+ or 60FPS GFX pack found >> !cgpLogFile!
-    @echo no FPS^+^+ or 60FPS GFX pack found
+    REM : when a FPS++ or a 60FPS GFX is found on rules.txt, vsync is defined in => exit
+    if !fpsPP! EQU 1 echo FPS^+^+ or 60FPS GFX pack was found >> !cgpLogFile! & echo FPS^+^+ or 60FPS GFX pack was found & goto:computeFactor
+    if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
+    echo no FPS^+^+ or 60FPS GFX pack found >> !cgpLogFile!
+    echo no FPS^+^+ or 60FPS GFX pack found
 
     :computeFactor
     REM : initialized for 60FPS games running @60FPS on WiiU
@@ -300,25 +300,25 @@ REM : main
     set /A "newNativeFps=!nativeFps!*!factor!"
 
 
-    @echo nativeFps=!nativeFps! >> !cgpLogFile!
-    @echo nativeFps=!nativeFps!
-    @echo newNativeFps=!newNativeFps! >> !cgpLogFile!
-    @echo newNativeFps=!newNativeFps!
-    @echo newNativeFpsOldGp=!newNativeFpsOldGp! >> !cgpLogFile!
-    @echo newNativeFpsOldGp=!newNativeFpsOldGp!
+    echo nativeFps=!nativeFps! >> !cgpLogFile!
+    echo nativeFps=!nativeFps!
+    echo newNativeFps=!newNativeFps! >> !cgpLogFile!
+    echo newNativeFps=!newNativeFps!
+    echo newNativeFpsOldGp=!newNativeFpsOldGp! >> !cgpLogFile!
+    echo newNativeFpsOldGp=!newNativeFpsOldGp!
     
-    if not exist !gplgfxpv! if !fpsPP! EQU 0 (
-        set "lgfxpvExistFlag=0"
-        mkdir !gplgfxpv! > NUL 2>&1
-        call:initlgfxpvCapGP
+    if not exist !gpLastVersion! if !fpsPP! EQU 0 (
+        set "LastVersionExistFlag=0"
+        mkdir !gpLastVersion! > NUL 2>&1
+        call:initLastVersionCapGP
     )
 
     REM : create FPS cap graphic packs
     call:createCapGP
 
-    REM : finalize lgfxpv graphic packs if a FPS++ pack was not found
-    if !fpsPP! EQU 1 rmdir /Q /S !gplgfxpv! > NUL 2>&1 && set "lgfxpvExistFlag=1"
-    if %lgfxpvExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizelgfxpvCapGP
+    REM : finalize graphic packs if a FPS++ pack was not found
+    if !fpsPP! EQU 1 rmdir /Q /S !gpLastVersion! > NUL 2>&1 && set "LastVersionExistFlag=1"
+    if %LastVersionExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeLastVersionCapGP
 
     if %nbArgs% EQU 0 endlocal && pause
 
@@ -396,54 +396,54 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
 
-    :initlgfxpvCapGP
+    :initLastVersionCapGP
 
-        @echo [Definition] > !bfwRulesFile!
-        @echo titleIds = !titleIdList! >> !bfwRulesFile!
+        echo [Definition] > !bfwRulesFile!
+        echo titleIds = !titleIdList! >> !bfwRulesFile!
 
-        @echo name = Speed Adjustment >> !bfwRulesFile!
-        @echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
+        echo name = Speed Adjustment >> !bfwRulesFile!
+        echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
 
         if !nativeFps! EQU 30 (
-            @echo description = Adjust the speed in game when engine model is FPS based^. ^
+            echo description = Adjust the speed in game when engine model is FPS based^. ^
 You need to disable vsync^. BatchFw assume that the native FPS is 30^. ^
 If it is not^,change the native FPS to 60 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
-            @echo description = Adjust the speed in game when engine model is FPS based^. ^
+            echo description = Adjust the speed in game when engine model is FPS based^. ^
 You need to disable vsync^. BatchFw assume that the native FPS is 60^. ^
 If it is not^,change the native FPS to 30 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
 
-        @echo version = 3 >> !bfwRulesFile!
-        @echo # >> !bfwRulesFile!
-        @echo [Preset] >> !bfwRulesFile!
-        @echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
-        @echo $FPS = !newNativeFps! >> !bfwRulesFile!
-        @echo # >> !bfwRulesFile!
+        echo version = 3 >> !bfwRulesFile!
+        echo # >> !bfwRulesFile!
+        echo [Preset] >> !bfwRulesFile!
+        echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
+        echo $FPS = !newNativeFps! >> !bfwRulesFile!
+        echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :fillCaplgfxpv
+    :fillCapLastVersion
 
         set "desc1=%~1"
         set "desc2=%~2"
 
         set "desc=!desc1!%% !desc2!"
-        if %lgfxpvExistFlag% EQU 0 (
+        if %LastVersionExistFlag% EQU 0 (
 
-            @echo [Preset] >> !bfwRulesFile!
-            @echo name = !desc! >> !bfwRulesFile!
-            @echo $FPS = !fps! >> !bfwRulesFile!
-            @echo # >> !bfwRulesFile!
+            echo [Preset] >> !bfwRulesFile!
+            echo name = !desc! >> !bfwRulesFile!
+            echo $FPS = !fps! >> !bfwRulesFile!
+            echo # >> !bfwRulesFile!
             goto:eof
         )
 
@@ -453,18 +453,18 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM : not found add it by replacing a [Preset] bloc
 
         REM : Adding !fps! preset in rules.txt
-        set "logFilelgfxpv="!fnrLogFolder:"=!\!gameName:"=!-lgfxpv_!fps!cap.log""
-        if exist !logFilelgfxpv! del /F !logFilelgfxpv!
+        set "logFileLastVersion="!fnrLogFolder:"=!\!gameName:"=!-LastVersion_!fps!cap.log""
+        if exist !logFileLastVersion! del /F !logFileLastVersion!
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFilelgfxpv! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileLastVersion! > NUL
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :finalizelgfxpvCapGP
+    :finalizeLastVersionCapGP
 
-        @echo [Control] >> !bfwRulesFile!
-        @echo vsyncFrequency = $FPS >> !bfwRulesFile!
+        echo [Control] >> !bfwRulesFile!
+        echo vsyncFrequency = $FPS >> !bfwRulesFile!
 
         REM : Windows formating (LF -> CRLF)
         call:dosToUnix
@@ -489,25 +489,25 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         set "gp="!bfwgpv2:"=!\_BatchFw_%description: =_%""
 
         if exist !gp! (
-            @echo !gp! already exists, skipped ^^^! >> !cgpLogFile!
-            @echo !gp! already exists, skipped ^^^!
+            echo !gp! already exists, skipped ^^^! >> !cgpLogFile!
+            echo !gp! already exists, skipped ^^^!
             goto:eof
         )
         if not exist !gp! mkdir !gp! > NUL 2>&1
 
         set "rulesFileV2="!gp:"=!\rules.txt""
 
-        @echo [Definition] > !rulesFileV2!
-        @echo titleIds = !titleIdList! >> !rulesFileV2!
+        echo [Definition] > !rulesFileV2!
+        echo titleIds = !titleIdList! >> !rulesFileV2!
 
-        @echo name = "%description:"=%" >> !rulesFileV2!
-        @echo version = 2 >> !rulesFileV2!
-        @echo # >> !rulesFileV2!
+        echo name = "%description:"=%" >> !rulesFileV2!
+        echo version = 2 >> !rulesFileV2!
+        echo # >> !rulesFileV2!
 
-        @echo # Cap FPS to %displayedValue% Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV2!
-        @echo [Control] >> !rulesFileV2!
+        echo # Cap FPS to %displayedValue% Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV2!
+        echo [Control] >> !rulesFileV2!
 
-        @echo vsyncFrequency = %syncValue% >> !rulesFileV2!
+        echo vsyncFrequency = %syncValue% >> !rulesFileV2!
 
         REM : force UTF8 format
         set "utf8=!rulesFileV2:rules.txt=rules.bfw_tmp!"
@@ -520,204 +520,204 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
     :createCapGP
 
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 99%% ^(online compibility issue^) >> !cgpLogFile!
-        @echo cap to 99%% ^(online compibility issue^)
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 99%% ^(online compibility issue^) >> !cgpLogFile!
+        echo cap to 99%% ^(online compibility issue^)
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 100%-1FPS (online compatibility)
         set /A "fpsOldGp=!newNativeFpsOldGp!-1"
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
 
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOldGp=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOldGp=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         set /A "fps=!newNativeFps!-1"
         set /A "targetFps=!fps!/!factor!"
-        @echo fps=!fps! >> !cgpLogFile!
-        @echo fps=!fps!
-        @echo targetFps=!targetFps! >> !cgpLogFile!
-        @echo targetFps=!targetFps!
+        echo fps=!fps! >> !cgpLogFile!
+        echo fps=!fps!
+        echo targetFps=!targetFps! >> !cgpLogFile!
+        echo targetFps=!targetFps!
 
-        if !fpsPP! EQU 0 type !bfwRulesFile! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCaplgfxpv "99" "Speed (!targetFps!FPS)"
+        if !fpsPP! EQU 0 type !bfwRulesFile! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
 
         if !fpsPpOld! EQU 1 goto:capMenu
 
         if !g30! EQU 1 goto:cap110
 
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 105%% >> !cgpLogFile!
-        @echo cap to 105%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 105%% >> !cgpLogFile!
+        echo cap to 105%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 105%
         call:mulfloat "!newNativeFpsOldGp!.00" "1.04" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOldGp=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOldGp=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "1.04" 2 fps
             set /A "targetFps=!fps!/!factor!"
-        @echo fps=!fps! >> !cgpLogFile!
-        @echo fps=!fps!
-        @echo targetFps=!targetFps! >> !cgpLogFile!
-        @echo targetFps=!targetFps!
+        echo fps=!fps! >> !cgpLogFile!
+        echo fps=!fps!
+        echo targetFps=!targetFps! >> !cgpLogFile!
+        echo targetFps=!targetFps!
 
-            call:fillCaplgfxpv "105" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "105" "Speed (!targetFps!FPS)"
         )
 
         :cap110
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 110%% >> !cgpLogFile!
-        @echo cap to 110%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 110%% >> !cgpLogFile!
+        echo cap to 110%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 110%
         call:mulfloat "!newNativeFpsOldGp!.00" "1.09" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOld=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOld=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "1.09" 2 fps
             set /A "targetFps=!fps!/!factor!"
-            @echo fps=!fps! >> !cgpLogFile!
-            @echo fps=!fps!
+            echo fps=!fps! >> !cgpLogFile!
+            echo fps=!fps!
 
-            @echo targetFps=!targetFps! >> !cgpLogFile!
-            @echo targetFps=!targetFps!
+            echo targetFps=!targetFps! >> !cgpLogFile!
+            echo targetFps=!targetFps!
 
 
-            call:fillCaplgfxpv "110" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "110" "Speed (!targetFps!FPS)"
         )
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 120%% >> !cgpLogFile!
-        @echo cap to 120%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 120%% >> !cgpLogFile!
+        echo cap to 120%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 120%
         call:mulfloat "!newNativeFpsOldGp!.00" "1.19" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOld=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOld=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "1.19" 2 fps
             set /A "targetFps=!fps!/!factor!"
-            @echo fps=!fps! >> !cgpLogFile!
-            @echo fps=!fps!
-            @echo targetFps=!targetFps! >> !cgpLogFile!
-            @echo targetFps=!targetFps!
+            echo fps=!fps! >> !cgpLogFile!
+            echo fps=!fps!
+            echo targetFps=!targetFps! >> !cgpLogFile!
+            echo targetFps=!targetFps!
 
 
-            call:fillCaplgfxpv "120" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "120" "Speed (!targetFps!FPS)"
         )
         :capMenu
         if !g30! EQU 0 if !fpsPP! EQU 0 goto:done
 
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 150%% >> !cgpLogFile!
-        @echo cap to 150%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 150%% >> !cgpLogFile!
+        echo cap to 150%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 150%
         call:mulfloat "!newNativeFpsOldGp!.00" "1.49" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOld=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOld=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "1.49" 2 fps
             set /A "targetFps=!fps!/!factor!"
-            @echo fps=!fps! >> !cgpLogFile!
-            @echo fps=!fps!
-            @echo targetFps=!targetFps! >> !cgpLogFile!
-            @echo targetFps=!targetFps!
+            echo fps=!fps! >> !cgpLogFile!
+            echo fps=!fps!
+            echo targetFps=!targetFps! >> !cgpLogFile!
+            echo targetFps=!targetFps!
 
-            call:fillCaplgfxpv "150" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "150" "Speed (!targetFps!FPS)"
         )
         if !fpsPpOld! EQU 0 goto:done
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 200%% >> !cgpLogFile!
-        @echo cap to 200%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 200%% >> !cgpLogFile!
+        echo cap to 200%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 200%
         call:mulfloat "!newNativeFpsOldGp!.00" "1.99" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!*2"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOld=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOld=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "1.99" 2 fps
             set /A "targetFps=!fps!*2"
-            @echo fps=!fps! >> !cgpLogFile!
-            @echo fps=!fps!
-            @echo targetFps=!targetFps! >> !cgpLogFile!
-            @echo targetFps=!targetFps!
+            echo fps=!fps! >> !cgpLogFile!
+            echo fps=!fps!
+            echo targetFps=!targetFps! >> !cgpLogFile!
+            echo targetFps=!targetFps!
 
-            call:fillCaplgfxpv "200" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "200" "Speed (!targetFps!FPS)"
         )
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
-        @echo cap to 250%% >> !cgpLogFile!
-        @echo cap to 250%%
-        @echo ---------------------------------- >> !cgpLogFile!
-        @echo ----------------------------------
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo cap to 250%% >> !cgpLogFile!
+        echo cap to 250%%
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
         REM : cap to 250%
         call:mulfloat "!newNativeFpsOldGp!.00" "2.49" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!*2"
-        @echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
-        @echo fpsOldGp=!fpsOldGp!
-        @echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
-        @echo targetFpsOld=!targetFpsOldGp!
+        echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+        echo fpsOldGp=!fpsOldGp!
+        echo targetFpsOld=!targetFpsOldGp! >> !cgpLogFile!
+        echo targetFpsOld=!targetFpsOldGp!
 
         call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "2.49" 2 fps
             set /A "targetFps=!fps!*2"
-            @echo fps=!fps! >> !cgpLogFile!
-            @echo fps=!fps!
-            @echo targetFps=!targetFps! >> !cgpLogFile!
-            @echo targetFps=!targetFps!
+            echo fps=!fps! >> !cgpLogFile!
+            echo fps=!fps!
+            echo targetFps=!targetFps! >> !cgpLogFile!
+            echo targetFps=!targetFps!
 
-            call:fillCaplgfxpv "200" "Speed (!targetFps!FPS)"
+            call:fillCapLastVersion "200" "Speed (!targetFps!FPS)"
         )
         :done
-        @echo ========================================================= >> !cgpLogFile!
-        @echo =========================================================
-        @echo FPS cap graphic packs created ^! >> !cgpLogFile!
-        @echo FPS cap graphic packs created ^!
+        echo ========================================================= >> !cgpLogFile!
+        echo =========================================================
+        echo FPS cap graphic packs created ^! >> !cgpLogFile!
+        echo FPS cap graphic packs created ^!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -741,14 +741,14 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
         if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
-        @echo Ooops it look like your game have a problem ^:
-        @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        @echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        @echo   will help you to create one^.
-        @echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        @echo   you might have made a mistake when applying a DLC over game^'s files
-        @echo   to fix^, overwrite game^'s file with its last update or if no update
-        @echo   are available^, re-dump the game ^!
+        echo Ooops it look like your game have a problem ^:
+        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
+        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
+        echo   will help you to create one^.
+        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
+        echo   you might have made a mistake when applying a DLC over game^'s files
+        echo   to fix^, overwrite game^'s file with its last update or if no update
+        echo   are available^, re-dump the game ^!
         exit /b 2
     goto:eof
     REM : ------------------------------------------------------------------
@@ -761,20 +761,20 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -790,7 +790,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             exit /b 9
         )
         REM : set char code set, output to host log file

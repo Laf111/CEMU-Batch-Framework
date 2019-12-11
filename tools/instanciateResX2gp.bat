@@ -35,16 +35,16 @@ REM : main
     :end
 
     if %nbArgs% GTR 7 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" nativeWidth nativeHeight gp width height halfw halfh description
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" nativeWidth nativeHeight gp width height halfw halfh description
+        echo given {%*}
         exit /b 99
     )
 
     if %nbArgs% LSS 6 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!"  nativeWidth nativeHeight gp width height halfw halfh description
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!"  nativeWidth nativeHeight gp width height halfw halfh description
+        echo given {%*}
         exit /b 99
     )
 
@@ -272,7 +272,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             exit /b 9
         )
         REM : set char code set, output to host log file

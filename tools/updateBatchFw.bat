@@ -75,7 +75,7 @@ REM : main
 
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        @echo No active connection was found, cancel updating
+        echo No active connection was found, cancel updating
         exit /b 10
     )
 
@@ -85,17 +85,17 @@ REM : main
     set "bfwVR=NONE"
     for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do set "bfwVR=%%i"
     if !ERRORLEVEL! EQU 1 (
-        @echo Failed to get the last BatchFw version available
+        echo Failed to get the last BatchFw version available
         exit /b 11
     )
     if ["!bfwVR!"] == ["NONE"] (
-        @echo Failed to get the last BatchFw version available
+        echo Failed to get the last BatchFw version available
         exit /b 12
     )
     REM : ignore RC versions
     echo !bfwVR! | find "RC" > NUL 2>&1 && (
-        @echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
-        @echo if you want to update^, do it manually^.
+        echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
+        echo if you want to update^, do it manually^.
         timeout /T 4 > NUL 2>&1
         exit /b 14
     )
@@ -104,22 +104,22 @@ REM : main
     if !result! EQU 50 echo Error when comparing versions
 
     if !result! EQU 1 goto:newVersion
-    @echo No new BatchFw update^(s^) available^, last version is still !BFW_VERSION!
+    echo No new BatchFw update^(s^) available^, last version is still !BFW_VERSION!
     exit /b 13
 
     :newVersion
-    @echo New version available, do you want to update BatchFW to !bfwVR!^?
+    echo New version available, do you want to update BatchFW to !bfwVR!^?
     call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
     if [!ANSWER!] == ["n"] (
-        @echo Cancelled by user
+        echo Cancelled by user
         timeout /T 4 > NUL 2>&1
         exit /b 14
     )
 
     REM : launch graphic pack update
-    @echo =========================================================
-    @echo Updating BatchFW to !bfwVR!^.^.^.
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo Updating BatchFW to !bfwVR!^.^.^.
+    echo ---------------------------------------------------------
 
     REM : copy powerShell script in _BatchFW_Graphic_Packs
     set "pws_src="!BFW_RESOURCES_PATH:"=!\ps1\updateBFW.ps1""
@@ -129,7 +129,7 @@ REM : main
     copy /Y !pws_src! !pws_target! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        @echo Error when copying !pws_src!
+        echo Error when copying !pws_src!
         exit /b 6
     )
 
@@ -139,7 +139,7 @@ REM : main
     Powershell -executionpolicy remotesigned -File updateBFW.ps1 *> updateBFW.log
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        @echo ERROR While getting and extracting batchFw !bfwVR! ^!
+        echo ERROR While getting and extracting batchFw !bfwVR! ^!
         if exist !pws_target! del /F !pws_target! > NUL 2>&1
         if exist updateBFW.log del /F updateBFW.log > NUL 2>&1
         exit /b 7
@@ -254,8 +254,8 @@ REM : functions
 
         REM : versioning separator (init to .)
         set "sep=."
-        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -455,20 +455,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -484,7 +484,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

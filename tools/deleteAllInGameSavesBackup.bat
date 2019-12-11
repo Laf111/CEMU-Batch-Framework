@@ -41,14 +41,14 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    @echo =========================================================
-    @echo Delete all games^'s saves backuped
-    @echo =========================================================
+    echo =========================================================
+    echo Delete all games^'s saves backuped
+    echo =========================================================
 
-    @echo Launching in 30s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -64,16 +64,16 @@ REM : main
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^) ^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^) ^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by ^?
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name by ^?
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         pause
         goto:eof
     )
@@ -95,15 +95,15 @@ REM : main
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
 
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:delSaves
 
         ) else (
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -122,18 +122,18 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
-    @echo =========================================================
-    @echo Treated !NB_SAVES_TREATED! saves
-    @echo #########################################################
-    @echo This windows will close automatically in 12s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo Treated !NB_SAVES_TREATED! saves
+    echo #########################################################
+    echo This windows will close automatically in 12s
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
@@ -145,7 +145,7 @@ REM : main
         call:log2GamesLibraryFile !msg!
     )
 
-    @echo done
+    echo done
 
     if %nbArgs% EQU 0 endlocal
     exit /b 0
@@ -190,15 +190,15 @@ REM : functions
         REM : if no zip file found, skip game
         if [!ZIP_FILE!] == ["NONE"] goto:eof
 
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
-        @echo.
-        @echo Deleting all saved backuped under !inGameSavesFolder! ^?
-        @echo   ^(n^) ^: skip
-        @echo   ^(y^) ^: default value after 15s timeout
-        @echo.
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
+        echo.
+        echo Deleting all saved backuped under !inGameSavesFolder! ^?
+        echo   ^(n^) ^: skip
+        echo   ^(y^) ^: default value after 15s timeout
+        echo.
+        echo ---------------------------------------------------------
         call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
             REM : skip this game
@@ -218,20 +218,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -287,7 +287,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

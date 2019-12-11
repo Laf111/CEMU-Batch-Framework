@@ -40,8 +40,8 @@ REM : main
     set "USERSLIST="
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do set "USERSLIST=%%i !USERSLIST!"
     if ["!USERSLIST!"] == [""] (
-        @echo No BatchFW^'s users registered ^^!
-        @echo Delete _BatchFw_Install folder and reinstall
+        echo No BatchFW^'s users registered ^^!
+        echo Delete _BatchFw_Install folder and reinstall
         pause
         exit /b 9
     )
@@ -50,8 +50,8 @@ REM : main
     pushd !GAMES_FOLDER!
 
     cls
-    @echo =========================================================
-    @echo Save all games progression files
+    echo =========================================================
+    echo Save all games progression files
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -77,16 +77,16 @@ REM : main
 
     :getArgsValue
     if %nbArgs% NEQ 1 (
-        @echo ERROR on arguments passed^!
-        @echo SYNTAXE^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
-        @echo given {%*}
+        echo ERROR on arguments passed^!
+        echo SYNTAXE^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
+        echo given {%*}
         pause
         exit /b 99
     )
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[0]!"
     if not exist !MLC01_FOLDER_PATH! (
-        @echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
+        echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
         pause
         exit /b 1
     )
@@ -96,13 +96,13 @@ REM : main
 
     :inputsAvailables
 
-    @echo =========================================================
+    echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo Launching in 30s
-    @echo     ^(y^)^: launch now
-    @echo     ^(n^)^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^)^: launch now
+    echo     ^(n^)^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -118,16 +118,16 @@ REM : main
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR^: Unknown characters found in game^'s folder^(s^) that are not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^)^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR^: Unknown characters found in game^'s folder^(s^) that are not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^)^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         pause
         goto:eof
     )
@@ -149,15 +149,15 @@ REM : main
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
 
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:saveGameProgressionFiles
 
         ) else (
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -176,20 +176,20 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
-    @echo =========================================================
-    @echo Treated !NB_SAVES_TREATED! saves
+    echo =========================================================
+    echo Treated !NB_SAVES_TREATED! saves
     if !QUIET_MODE! EQU 1 goto:exiting
 
-    @echo #########################################################
-    @echo This windows will close automatically in 12s
-    @echo     ^(n^)^: don^'t close^, i want to read history log first
-    @echo     ^(q^)^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo #########################################################
+    echo This windows will close automatically in 12s
+    echo     ^(n^)^: don^'t close^, i want to read history log first
+    echo     ^(q^)^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
@@ -231,7 +231,7 @@ REM : functions
             goto:treatThisGame
         )
 
-        @echo WARNING^: MLC01_FOLDER_PATH does not exist and no mlc01 was found under !GAME_FOLDER_PATH!^?
+        echo WARNING^: MLC01_FOLDER_PATH does not exist and no mlc01 was found under !GAME_FOLDER_PATH!^?
         goto:eof
 
         :treatThisGame
@@ -239,9 +239,9 @@ REM : functions
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
 
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
 
@@ -253,11 +253,11 @@ REM : functions
             set "str=!rarFile:"=!"
             set backup="!str:.rar=!_%DATE%.rar"
 
-            @echo Game saves found, backuping under !backup!
+            echo Game saves found, backuping under !backup!
             copy /Y !rarFile! !backup! > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! NEQ 0 (
-                @echo ERROR when copying !rarFile! to !backup!
+                echo ERROR when copying !rarFile! to !backup!
                 pause
             )
             :skipUser
@@ -280,20 +280,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -350,7 +350,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

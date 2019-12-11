@@ -49,38 +49,38 @@ REM : main
 
     set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
     if not exist !USERS_ACCOUNTS_FOLDER! (
-        @echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!^
-        @echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
-        @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-        @echo before this script
+        echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!^
+        echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
+        echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
+        echo before this script
         pause
         exit 99
     )
 
     cls
     title Dump games installed on your Wii-U
-    @echo =========================================================
-    @echo Dump games installed on your Wii-U
-    @echo =========================================================
-    @echo.
-    @echo WARNING ^: it is impossible to get the space left on your Wii-U
-    @echo storage device^. Be sure that there^'s sufficient space ^!
-    @echo.
+    echo =========================================================
+    echo Dump games installed on your Wii-U
+    echo =========================================================
+    echo.
+    echo WARNING ^: it is impossible to get the space left on your Wii-U
+    echo storage device^. Be sure that there^'s sufficient space ^!
+    echo.
     pause
-    @echo.
-    @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping^/shutdown features
-    @echo - if you^'re using a permanent hack ^(CBHC^)^:
-    @echo    ^* launch HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you^'re not^:
-    @echo    ^* first run Mocha CFW HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for MOCHA
-    @echo.
-    @echo - get the IP adress displayed on Wii-U gamepad
-    @echo.
-    @echo Press any key to continue when you^'re ready
-    @echo ^(CTRL-C^) to abort
+    echo.
+    echo On your Wii-U^, you need to ^:
+    echo - disable the sleeping^/shutdown features
+    echo - if you^'re using a permanent hack ^(CBHC^)^:
+    echo    ^* launch HomeBrewLauncher
+    echo    ^* then ftp-everywhere for CBHC
+    echo - if you^'re not^:
+    echo    ^* first run Mocha CFW HomeBrewLauncher
+    echo    ^* then ftp-everywhere for MOCHA
+    echo.
+    echo - get the IP adress displayed on Wii-U gamepad
+    echo.
+    echo Press any key to continue when you^'re ready
+    echo ^(CTRL-C^) to abort
     pause
     cls
 
@@ -95,11 +95,11 @@ REM : main
     REM : and teh port
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
 
-    @echo Found an existing FTP configuration ^:
-    @echo.
-    @echo PortNumber=!ipRead!
-    @echo HostName=!portRead!
-    @echo.
+    echo Found an existing FTP configuration ^:
+    echo.
+    echo PortNumber=!ipRead!
+    echo HostName=!portRead!
+    echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
     if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
@@ -125,7 +125,7 @@ REM : main
     call:getHostState !wiiuIp! state
 
     if !state! EQU 0 (
-        @echo ERROR^: !wiiuIp! was not found on your network ^!
+        echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
         exit 2
     )
@@ -133,8 +133,8 @@ REM : main
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-        @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
-        @echo Pause this script until you fix it ^(CTRL-C to abort^)
+        echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection
     )
@@ -155,14 +155,14 @@ REM : main
     for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
-        @echo ERROR^: last scan results were not found
+        echo ERROR^: last scan results were not found
         pause
         exit 90
     )
     cls
     if !noOldScan! EQU 1 goto:getList
 
-    @echo The last WiiU^'s scan found is !LAST_SCAN!
+    echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
     if !ERRORLEVEL! EQU 1 goto:getList
 
@@ -182,9 +182,9 @@ REM : main
     set /A "nbGames=0"
     
     cls
-    @echo =========================================================
-    @echo Games found on the Wii-U
-    @echo =========================================================
+    echo =========================================================
+    echo Games found on the Wii-U
+    echo =========================================================
     REM : loop on games
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
 
@@ -199,12 +199,12 @@ REM : main
             set "titles[!nbGames!]=%%i"
             set "endTitlesId[!nbGames!]=!endTitleId!"
             set "titlesSrc[!nbGames!]=%%k"
-            @echo !nbGames!	: %%i
+            echo !nbGames!	: %%i
 
             set /A "nbGames+=1"
         )
     )
-    @echo =========================================================
+    echo =========================================================
 
     REM : list of selected games
     REM : selected games
@@ -214,9 +214,9 @@ REM : main
     call:secureStringPathForDos !listGamesSelected! listGamesSelected
     call:checkListOfGames !listGamesSelected!
     if !ERRORLEVEL! NEQ 0 goto:getList
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -227,22 +227,22 @@ REM : main
     )
     set /A "nbGamesSelected-=1"
 
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     set /A "dumpOnSD=0"
     set "rootTarget=!GAMES_FOLDER!"
 
     choice /C sn /N /M "Dump game throught network (n) or on the SD card plugged on the wii-U (s)? : "
     if !ERRORLEVEL! EQU 1 (
-        @echo WARNING ^: BatchFw does not check available space on SD card
-        @echo            Make sure that you have enought space left on your SD card
-        @echo.
+        echo WARNING ^: BatchFw does not check available space on SD card
+        echo            Make sure that you have enought space left on your SD card
+        echo.
         choice /C yc /N /M "Continue (y) or cancel (c)? : "
-        if !ERRORLEVEL! EQU 2 @echo cancel by user & pause & exit 12
+        if !ERRORLEVEL! EQU 2 echo cancel by user & pause & exit 12
 
-        @echo.
-        @echo When done copy the CONTENT of each game^'s folder from the SD card
-        @echo to the one created in your games library
-        @echo.
+        echo.
+        echo When done copy the CONTENT of each game^'s folder from the SD card
+        echo to the one created in your games library
+        echo.
 
         set /A "dumpOnSD=1"
         set "rootTarget="/sd/dumps""
@@ -283,18 +283,18 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
     
-    @echo =========================================================
-    @echo All transferts ended^, done at !DATE!
-    @echo ---------------------------------------------------------
-    @echo.
-    @echo Forcing a GFX pack update to add GFX packs for new games^.^.^.
-    @echo.
+    echo =========================================================
+    echo All transferts ended^, done at !DATE!
+    echo ---------------------------------------------------------
+    echo.
+    echo Forcing a GFX pack update to add GFX packs for new games^.^.^.
+    echo.
 
     REM : forcing a GFX pack update to add GFX packs for new games
     set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
     call !gfxUpdate! -silent
-    @echo =========================================================
-    @echo !GAME_TITLE! dumped successfully
+    echo =========================================================
+    echo !GAME_TITLE! dumped successfully
     pause
     
     exit 0
@@ -325,12 +325,12 @@ REM : functions
     REM : check list of games and create selection
     :checkListOfGames
 
-        @echo ---------------------------------------------------------
-        @echo Dump ^:
-        @echo.
+        echo ---------------------------------------------------------
+        echo Dump ^:
+        echo.
         for %%l in (!listGamesSelected!) do (
             if %%l GEQ !nbGames! exit /b 1
-            @echo - !titles[%%l]!
+            echo - !titles[%%l]!
             set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
             set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
             set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
@@ -351,9 +351,9 @@ REM : functions
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         set "DATE=%ldt%"
 
-        @echo ---------------------------------------------------------
-        @echo !name! ^: starting at !DATE!
-        @echo - dumping game
+        echo ---------------------------------------------------------
+        echo !name! ^: starting at !DATE!
+        echo - dumping game
 
         REM : Import the game (minimized + no wait)
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/code" "!name! (code)"
@@ -366,7 +366,7 @@ REM : functions
         set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
         type !srcRemoteUpdate! | find "%endTitleId%" > NUL 2>&1 && (
 
-            @echo - dumping update
+            echo - dumping update
 
             REM : YES : import update in mlc01/usr/title (minimized + no wait)
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000E/%endTitleId%" "!name! (update)"
@@ -375,7 +375,7 @@ REM : functions
         set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
         type !srcRemoteDlc! | find "%endTitleId%" > NUL 2>&1 && (
 
-            @echo - dumping DLC
+            echo - dumping DLC
 
             REM : YES : import dlc in mlc01/usr/title/0050000/%endTitleId%/aoc (minimized + no wait)
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/%endTitleId%" "!name! (DLC)"
@@ -384,7 +384,7 @@ REM : functions
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 && (
-            @echo - dumping saves by ftp on !USERDOMAIN!
+            echo - dumping saves by ftp on !USERDOMAIN!
             
             REM : Import Wii-U saves
             wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_TITLE! %endTitleId% %src%
@@ -400,7 +400,7 @@ REM : functions
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         set "DATE=%ldt%"
 
-        @echo end of transferts at !DATE!
+        echo end of transferts at !DATE!
 
     goto:eof
 
@@ -452,20 +452,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -481,7 +481,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

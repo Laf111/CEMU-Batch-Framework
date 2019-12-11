@@ -79,7 +79,7 @@ REM : main
 
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        @echo No active connection was found, cancel updating
+        echo No active connection was found, cancel updating
         exit /b 20
     )
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
@@ -91,7 +91,7 @@ REM : main
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
     if !ERRORLEVEL! EQU 1 (
-        @echo Failed to get the last graphic Packs update available
+        echo Failed to get the last graphic Packs update available
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 10
@@ -100,28 +100,28 @@ REM : main
 
     set "zipLogFile="!BFW_GP_FOLDER:"=!\!zipFile:.zip=.doNotDelete!""
     if exist !zipLogFile! (
-        @echo No new graphics packs update available^, last version is still !zipFile:.zip=!
+        echo No new graphics packs update available^, last version is still !zipFile:.zip=!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 1
     )
     if ["!zipFile!"] == ["graphicPacks.zip"] (
-        @echo Searching for a new graphic packs release failed ^!
-        @echo Network connection was refused^, please check you powerscript policy
+        echo Searching for a new graphic packs release failed ^!
+        echo Network connection was refused^, please check you powerscript policy
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 30
     )
     if ["!zipFile!"] == [""] (
-        @echo Searching for a new graphic packs release failed ^!
-        @echo Network connection was refused^, please check you powerscript policy
+        echo Searching for a new graphic packs release failed ^!
+        echo Network connection was refused^, please check you powerscript policy
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
         exit /b 31
     )
     if !FORCED_MODE! EQU 1 goto:noMsg
     if !QUIET_MODE! EQU 1 goto:msgBox
-    @echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
+    echo Do you want to update BatchFW^'s graphic pack folder to !zipFile:.zip=! ^?
     call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
     if [!ANSWER!] == ["n"] (
-        @echo Cancelled by user
+        echo Cancelled by user
         timeout /T 4 > NUL 2>&1
         exit /b 2
     )
@@ -139,9 +139,9 @@ REM : main
     :updateGP
 
     REM : launch graphic pack update
-    if !QUIET_MODE! EQU 0 @echo =========================================================
-    if !QUIET_MODE! EQU 0 @echo Updating BatchFW^'s graphic packs
-    if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
+    if !QUIET_MODE! EQU 0 echo =========================================================
+    if !QUIET_MODE! EQU 0 echo Updating BatchFW^'s graphic packs
+    if !QUIET_MODE! EQU 0 echo ---------------------------------------------------------
 
 
     :noMsg
@@ -164,12 +164,12 @@ REM : main
     copy /Y !pws_src! !pws_target! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        @echo Error when copying !pws_src!
+        echo Error when copying !pws_src!
         exit /b 9
     )
 
-    if !FORCED_MODE! EQU 0 @echo Launching graphic pack update to !zipFile!^.^.^.
-    if !FORCED_MODE! EQU 1 @echo Installing !zipFile!^.^.^.
+    if !FORCED_MODE! EQU 0 echo Launching graphic pack update to !zipFile!^.^.^.
+    if !FORCED_MODE! EQU 1 echo Installing !zipFile!^.^.^.
 
     pushd !BFW_GP_FOLDER!
 
@@ -177,7 +177,7 @@ REM : main
     Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        @echo ERROR While getting and extracting graphic packs folder ^!
+        echo ERROR While getting and extracting graphic packs folder ^!
         if !QUIET_MODE! EQU 0 pause
         pushd !GAMES_FOLDER!
         rmdir /Q /S !BFW_GP_FOLDER! > NUL 2>&1
@@ -250,20 +250,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -279,7 +279,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

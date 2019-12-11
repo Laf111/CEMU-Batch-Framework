@@ -45,14 +45,14 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    @echo =========================================================
-    @echo Reset BatchFw to factory settings ^?
-    @echo =========================================================
+    echo =========================================================
+    echo Reset BatchFw to factory settings ^?
+    echo =========================================================
 
-    @echo Launching in 30s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -63,7 +63,7 @@ REM : main
 
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
 
-    @echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
+    echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
     pushd !BFW_LOGS!
     del /F /S *.log > NUL 2>&1
 
@@ -72,33 +72,33 @@ REM : main
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
         rmdir /Q /S !BFW_GP_FOLDER!
-        @echo ---------------------------------------------------------
-        @echo ^> Delete graphic pack folder !BFW_GP_FOLDER! ^.^.^.
+        echo ---------------------------------------------------------
+        echo ^> Delete graphic pack folder !BFW_GP_FOLDER! ^.^.^.
     )
 
     if exist !WIIU_GAMES_FOLDER! (
         rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
-        @echo ---------------------------------------------------------
-        @echo ^> Delete shortcuts created ^.^.^.
+        echo ---------------------------------------------------------
+        echo ^> Delete shortcuts created ^.^.^.
     )
 
 
     set "bfrf="!BFW_PATH:"=!\BatchFw_readme.txt""
     if exist !bfrf! (
-        @echo ---------------------------------------------------------
-        @echo ^> Delete BatchFW_readme.txt ^.^.^.
+        echo ---------------------------------------------------------
+        echo ^> Delete BatchFW_readme.txt ^.^.^.
         del /F !bfrf! > NUL 2>&1
     )
 
     REM : convert all bat files to AINSI, remove trailling spaces
     set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFile.bat""
     !StartHidden! !fixBatFile!
-    @echo =========================================================
-    @echo Done
-    @echo #########################################################
+    echo =========================================================
+    echo Done
+    echo #########################################################
 
 
-    @echo This windows will close automatically in 2s
+    echo This windows will close automatically in 2s
     timeout /T 2 > NUL 2>&1
     if %nbArgs% EQU 0 endlocal
     exit /b 0
@@ -117,20 +117,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -187,7 +187,7 @@ REM : functions
         for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

@@ -28,7 +28,7 @@ REM : main
 
         set "command=%%i"
         for /F "tokens=* delims=~" %%j in ("!command!") do call:resolveVenv "%%j" command
-        @echo command=!command!
+        echo command=!command!
 
         set "program="NONE""
         set "firstArg="NONE""
@@ -37,8 +37,8 @@ REM : main
         for /F "tokens=1 delims=~'" %%j in ("!command!") do set "program="%%j""
         for /F "tokens=3 delims=~'" %%j in ("!command!") do set "firstArg="%%j""
 
-        @echo program=!program!
-        @echo firstArg=!firstArg!
+        echo program=!program!
+        echo firstArg=!firstArg!
 
         if not [!program!] == ["NONE"]  if not exist !program! (
 

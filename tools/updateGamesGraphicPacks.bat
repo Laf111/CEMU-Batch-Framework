@@ -72,14 +72,14 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
-    @echo ========================================================= > !myLog!
+    echo ========================================================= > !myLog!
 
     if %nbArgs% NEQ 4 (
-        @echo ERROR ^: on arguments passed ^!  >> !myLog!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile >> !myLog!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile
-        @echo given {%*} >> !myLog!
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!  >> !myLog!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile >> !myLog!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile
+        echo given {%*} >> !myLog!
+        echo given {%*}
 
         exit /b 99
     )
@@ -90,8 +90,8 @@ REM : main
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !myLog!
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !myLog!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
 
         exit /b 1
     )
@@ -100,9 +100,9 @@ REM : main
 
     REM : GFX version to set
     set "setup="!BFW_PATH:"=!\setup.bat""
-    set "lgfxpv=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
-    set "lgfxpv=!lgfxpv:"=!"
+    set "LastVersion=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
+    set "LastVersion=!LastVersion:"=!"
 
     set "gfxType=!args[0]!"
     set "gfxType=%gfxType:"=%"
@@ -111,7 +111,7 @@ REM : main
     set "GAME_FOLDER_PATH=!args[1]!"
 
     if not exist !GAME_FOLDER_PATH! (
-        @echo ERROR ^: !GAME_FOLDER_PATH! does not exist ^!
+        echo ERROR ^: !GAME_FOLDER_PATH! does not exist ^!
 
         exit /b 2
     )
@@ -123,8 +123,8 @@ REM : main
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-    @echo Update all graphic packs for !GAME_TITLE! >> !myLog!
-    @echo ========================================================= >> !myLog!
+    echo Update all graphic packs for !GAME_TITLE! >> !myLog!
+    echo ========================================================= >> !myLog!
 
     REM : check if BatchFw have to complete graphic packs for this game
     set "completeGP="NONE""
@@ -140,7 +140,7 @@ REM : main
     if not [!gpl!] == ["NOT_FOUND"] set "zipLogFile="!BFW_GP_FOLDER:"=!\!gpl:"=!""
 
     if [!gpl!] == ["NOT_FOUND"] (
-        @echo WARNING ^: !pat! not found^, force extra pack creation ^! >> !myLog!
+        echo WARNING ^: !pat! not found^, force extra pack creation ^! >> !myLog!
         goto:treatOneGame
     )
 
@@ -152,18 +152,18 @@ REM : main
     REM : get the last version used for launching this game
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
 
-    set "lastVersion=NOT_FOUND"
+    set "lastInstalledVersion=NOT_FOUND"
     if not exist !glogFile! goto:treatOneGame
 
-    for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find /I "!GAME_TITLE!" ^| find /I "graphic packs version" 2^>NUL') do set "lastVersion=%%i"
+    for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find /I "!GAME_TITLE!" ^| find /I "graphic packs version" 2^>NUL') do set "lastInstalledVersion=%%i"
 
-    if ["!lastVersion!"] == ["NOT_FOUND"] goto:treatOneGame
-    set "lastVersion=!lastVersion: =!"
+    if ["!lastInstalledVersion!"] == ["NOT_FOUND"] goto:treatOneGame
+    set "lastInstalledVersion=!lastInstalledVersion: =!"
     set "newVersion=!newVersion: =!"
 
     :treatOneGame
-    @echo lastVersion ^: !lastVersion!
-    @echo newVersion  ^: !newVersion!
+    echo lastInstalledVersion ^: !lastInstalledVersion!
+    echo newVersion  ^: !newVersion!
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
 
@@ -213,7 +213,7 @@ REM : main
     REM : Re launching the search (to get the freshly created packs)
 
     REM : search in the needed folder
-    if ["!gfxType!"] == ["!lgfxpv!"] (
+    if ["!gfxType!"] == ["!LastVersion!"] (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     ) else (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
@@ -222,7 +222,7 @@ REM : main
     REM : import GFX packs
     call:importGraphicPacks
 
-    if ["!gfxType!"] == ["!lgfxpv!"] (
+    if ["!gfxType!"] == ["!LastVersion!"] (
         call:importMods
         goto:checkPackLinks
     )
@@ -323,7 +323,7 @@ REM : functions
 
         set "gp="!str:\rules=!"
 
-        REM : if more than one folder level exist (lgfxpv packs, get only the first level
+        REM : if more than one folder level exist (LastVersion packs, get only the first level
         call:getFirstFolder rgp
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
@@ -356,7 +356,7 @@ REM : functions
     :checkGpFolders
 
         for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find "^!" 2^>NUL') do (
-            @echo Treat GFX pack folder to be DOS compliant
+            echo Treat GFX pack folder to be DOS compliant
             wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
             goto:eof
         )
@@ -429,7 +429,7 @@ REM : functions
 
             REM : launching the search
             if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do (
-                if ["!lastVersion!"] == ["!newVersion!"] goto:eof
+                if ["!lastInstalledVersion!"] == ["!newVersion!"] goto:eof
                 call:updateGPFolder !ggp!
                 pushd !GAMES_FOLDER!
                 goto:eof
@@ -446,15 +446,15 @@ REM : functions
 
         set "GAME_GP_FOLDER="%~1""
 
-        REM : check if lgfxpv graphic pack is present for this game (if the game is not supported
+        REM : check if graphic pack is present for this game (if the game is not supported
         REM : in Slashiee repo, it was deleted last graphic pack's update) => re-create game's graphic packs
 
         set /A "resX2=%nativeHeight%*2"
 
         set "gpfound=0"
-        set "lgfxpvfound=0"
+        set "LastVersionfound=0"
         set "gameName=NONE"
-        set "gplgfxpvRes="NONE""
+        set "gpLastVersionRes="NONE""
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
             set "gpfound=1"
@@ -471,37 +471,37 @@ REM : functions
                 set "gameName=!gameName:_%resX2%p=!"
             )
 
-            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = !lgfxpv!"') do (
-                REM : lgfxpv graphic pack
-                set "lgfxpvfound=1"
-                REM : if a lgfxpv gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
+            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = !LastVersion!"') do (
+                REM : graphic pack
+                set "LastVersionfound=1"
+                REM : if a gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gplgfxpvRes=!rulesFile:\rules.txt=!"
+                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpLastVersionRes=!rulesFile:\rules.txt=!"
             )
         )
 
-        REM : if a lgfxpv graphic pack was found get the game's name from it
-        if not [!gplgfxpvRes!] == ["NONE"] (
-            for /F "delims=~" %%i in (!gplgfxpvRes!) do set "str=%%~nxi"
+        REM : if a graphic pack was found get the game's name from it
+        if not [!gpLastVersionRes!] == ["NONE"] (
+            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
             set "gameName=!str:_Resolution=!"
         )
 
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
 
-        REM : no lgfxpv Gp were found but other version packs found
+        REM : no Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
 
         echo titleId=!titleId! >> !myLog!
         echo gpfound=!gpfound! >> !myLog!
-        echo lgfxpvfound=!lgfxpvfound! >> !myLog!
+        echo found=!LastVersionfound! >> !myLog!
         echo createLegacyPacks=%createLegacyPacks% >> !myLog!
 
-        if %gpfound% EQU 1 if %lgfxpvfound% EQU 1 goto:createExtraGP
-        REM : if lgfxpv GP found, get the last update version
-        if %lgfxpvfound% EQU 1 goto:checkRecentUpdate
+        if %gpfound% EQU 1 if %LastVersionfound% EQU 1 goto:createExtraGP
+        REM : if GP found, get the last update version
+        if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        @echo Create BatchFW graphic packs for this game ^.^.^.
+        echo Create BatchFW graphic packs for this game ^.^.^.
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
@@ -513,15 +513,15 @@ REM : functions
         :checkRecentUpdate
 
         REM : check if a version were used for this game
-        if ["!lastVersion!"] == ["NOT_FOUND"] goto:createExtraGP
-        @echo Extra graphic packs for this game was built using !lastVersion!^, !newVersion! is the last downloaded
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] goto:createExtraGP
+        echo Extra graphic packs for this game was built using !lastInstalledVersion!^, !newVersion! is the last downloaded
 
         :createExtraGP
 
         if [!completeGP!] == ["NONE"] goto:eof
 
-        if ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
-        if not ["!newVersion!"] == ["NOT_FOUND"] @echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
+        if ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
+        if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
 
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
@@ -547,20 +547,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -617,7 +617,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

@@ -30,15 +30,15 @@ REM : ------------------------------------------------------------------
     for /F "delims=~= tokens=2" %%i in ('type setup.bat ^| find "BFW_VERSION=V"') do set "value=%%i"
     set "BFW_OLD_VERSION=!value:"=!"
 
-    @echo =========================================================
+    echo =========================================================
     if ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
-        @echo Produce BatchFw !BFW_NEXT_VERSION!
+        echo Produce BatchFw !BFW_NEXT_VERSION!
         title Produce BatchFw !BFW_NEXT_VERSION!
     ) else (
-        @echo Produce BatchFw !BFW_NEXT_VERSION! from !BFW_OLD_VERSION!
+        echo Produce BatchFw !BFW_NEXT_VERSION! from !BFW_OLD_VERSION!
         title Produce BatchFw !BFW_NEXT_VERSION! from !BFW_OLD_VERSION!
     )
-    @echo =========================================================
+    echo =========================================================
 REM : ------------------------------------------------------------------
 
     set "changeLog="!BFW_PATH:"=!\Change.log""
@@ -46,7 +46,7 @@ REM : ------------------------------------------------------------------
     REM : Check that the new version appear in the Change.log
     type !changeLog! | find "!BFW_NEXT_VERSION!" > NUL 2>&1 && goto:patchSetup
 
-    @echo ERROR^: Change.log does not contains !BFW_NEXT_VERSION!
+    echo ERROR^: Change.log does not contains !BFW_NEXT_VERSION!
     pause
     exit /b 1
 
@@ -59,7 +59,7 @@ REM : ------------------------------------------------------------------
     REM : ------------------------------------------------------------------
     REM : Patch version in setup.bat
     if not ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
-        @echo Replacing !BFW_OLD_VERSION! with !BFW_NEXT_VERSION! in setup.bat
+        echo Replacing !BFW_OLD_VERSION! with !BFW_NEXT_VERSION! in setup.bat
         !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
     )
 
@@ -98,7 +98,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

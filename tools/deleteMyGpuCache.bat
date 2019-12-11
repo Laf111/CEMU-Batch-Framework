@@ -57,7 +57,7 @@ REM : main
     pushd !BFW_TOOLS_PATH!
 
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
-        @echo Unable to find your GPU GLCache folder ^? cancelling
+        echo Unable to find your GPU GLCache folder ^? cancelling
         goto:eof
     )
 
@@ -75,7 +75,7 @@ REM : main
     rmdir /Q /S !OPENGL_CACHE! > NUL 2>&1
     mkdir !OPENGL_CACHE! > NUL 2>&1
 
-    @echo ^> !OPENGL_CACHE:"=! was cleared ^!
+    echo ^> !OPENGL_CACHE:"=! was cleared ^!
 
     :cemuInstalls
 
@@ -92,9 +92,9 @@ REM : main
 
         set "installPath="%%i""
         set "GLCache="!installPath:"=!\shaderCache\driver""
-        if exist !GLCache! @echo ^> Clearing !GLCache! && rmdir /S /Q  !GLCache! > NUL 2>&1
+        if exist !GLCache! echo ^> Clearing !GLCache! && rmdir /S /Q  !GLCache! > NUL 2>&1
         set "pcCache="!installPath:"=!\shaderCache\precompiled""
-        @echo ^> Clearing !pcCache!
+        echo ^> Clearing !pcCache!
         for /F "delims=~" %%i in ('dir /B /S !pcCache! 2^>NUL') do del /F "%%i" > NUL 2>&1
     )
 
@@ -123,7 +123,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )
@@ -141,20 +141,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 

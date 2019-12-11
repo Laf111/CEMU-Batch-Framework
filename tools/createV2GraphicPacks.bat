@@ -38,15 +38,15 @@ REM : main
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     if %nbArgs% GTR 6 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
+        echo given {%*}
         exit /b 99
     )
     if %nbArgs% LSS 5 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
+        echo given {%*}
         exit /b 98
     )
     REM : get and check BFW_GP_FOLDER
@@ -62,19 +62,19 @@ REM : main
 
     set "gp="!bfwgpv2:"=!\_BatchFW %description%""
     if exist !gp! (
-        @echo ^^! _BatchFW %description% already exists, skipped ^^!
+        echo ^^! _BatchFW %description% already exists, skipped ^^!
         exit 1
     )
     if not exist !gp! mkdir !gp! > NUL 2>&1
 
     set "rulesFileV2="!gp:"=!\rules.txt""
 
-    @echo [Definition] > !rulesFileV2!
-    @echo titleIds = !titleIdList! >> !rulesFileV2!
+    echo [Definition] > !rulesFileV2!
+    echo titleIds = !titleIdList! >> !rulesFileV2!
 
-    @echo name = "BatchFW %overwriteWidth%x%overwriteHeight% %ratio%" >> !rulesFileV2!
-    @echo version = 2 >> !rulesFileV2!
-    @echo # >> !rulesFileV2!
+    echo name = "BatchFW %overwriteWidth%x%overwriteHeight% %ratio%" >> !rulesFileV2!
+    echo version = 2 >> !rulesFileV2!
+    echo # >> !rulesFileV2!
 
 
     REM : res ratios instructions ------------------------------------------------------
@@ -124,16 +124,16 @@ REM : functions
 
     :writeV2Filters
 
-        @echo # 1/!resRatioV2! Res
-        @echo [TextureRedefine]
-        @echo width = !targetWidthV2!
-        @echo height = !targetHeightV2!
-        @echo tileModesExcluded = 0x001 # For Video Playback
-        @echo formatsExcluded = 0x431
-        @echo overwriteWidth = !widthV2!
-        @echo overwriteHeight = !heightV2!
-        @echo #
-        @echo #
+        echo # 1/!resRatioV2! Res
+        echo [TextureRedefine]
+        echo width = !targetWidthV2!
+        echo height = !targetHeightV2!
+        echo tileModesExcluded = 0x001 # For Video Playback
+        echo formatsExcluded = 0x431
+        echo overwriteWidth = !widthV2!
+        echo overwriteHeight = !heightV2!
+        echo #
+        echo #
 
     goto:eof
 
@@ -290,7 +290,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

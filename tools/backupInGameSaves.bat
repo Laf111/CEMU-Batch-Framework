@@ -58,9 +58,9 @@ REM : main
     :end
 
     if %nbArgs% NEQ 3 (
-        @echo ERROR on arguments passed^!
-        @echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
-        @echo given {%*}
+        echo ERROR on arguments passed^!
+        echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
+        echo given {%*}
         pause
         exit /b 99
     )
@@ -68,7 +68,7 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "GAME_FOLDER_PATH=!args[0]!"
     if not exist !GAME_FOLDER_PATH! (
-        @echo ERROR^: game^'s folder !GAME_FOLDER_PATH! does not exist^!
+        echo ERROR^: game^'s folder !GAME_FOLDER_PATH! does not exist^!
         pause
         exit /b 1
     )
@@ -76,7 +76,7 @@ REM : main
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[1]!"
     if not exist !MLC01_FOLDER_PATH! (
-        @echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
+        echo ERROR^: mlc01 folder !MLC01_FOLDER_PATH! does not exist^!
         pause
         exit /b 3
     )
@@ -97,7 +97,7 @@ REM : main
 
     set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
     if not exist !META_FILE! (
-        @echo No meta folder not found under game folder^?^, aborting ^^!
+        echo No meta folder not found under game folder^?^, aborting ^^!
         goto:metaFix
     )
 
@@ -106,25 +106,25 @@ REM : main
     set "titleLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
     if [!titleLine!] == ["NONE"] (
-        @echo No titleId found in the meta^.xml file
+        echo No titleId found in the meta^.xml file
         :metafix
-        @echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder
+        echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
         if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
-        @echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
-        @echo "Then close notepad to continue"
+        echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
+        echo "Then close notepad to continue"
 
         set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
 
         REM : create the meta.xml file
-        @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
-        @echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
-        @echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
-        @echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
-        @echo ^<^/menu^> >> !META_FILE!
-        @echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
-        @echo "Then close notepad to continue"
+        echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
+        echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
+        echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
+        echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
+        echo ^<^/menu^> >> !META_FILE!
+        echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
+        echo "Then close notepad to continue"
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
         goto:getTitleLine
     )
@@ -180,7 +180,7 @@ REM : main
     :done
     if !cr! EQU 0 (
         if exist !rarFile! (
-            @echo Backup in !rarFile!
+            echo Backup in !rarFile!
             del /F !oldFile! > NUL 2>&1
         ) else (
             move /Y !oldFile! !rarFile! > NUL 2>&1
@@ -188,7 +188,7 @@ REM : main
     ) else (
         if exist !oldFile! if exist !rarFile! del /F !rarFile! > NUL 2>&1
         move /Y !oldFile! !rarFile! > NUL 2>&1
-        @echo Error when backup !rarFile!^, restoring it
+        echo Error when backup !rarFile!^, restoring it
     )
 
 
@@ -221,7 +221,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )
@@ -239,20 +239,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove special characters from %1 ^(such as ^&, ^(,^), ^!^)^, exiting 13
+            echo Remove special characters from %1 ^(such as ^&, ^(,^), ^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 

@@ -57,16 +57,16 @@ REM : main
     REM : initialize QUIET_MODE to 0 (inactive)
     set /A "QUIET_MODE=0"
     if %nbArgs% EQU 0 (
-        @echo Creating icons for all games
+        echo Creating icons for all games
         goto:createIcons
     )
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
 
     if %nbArgs% NEQ 1 (
-        @echo ERROR on arguments passed^!
-        @echo SYNTAX^: "!THIS_SCRIPT!"  GAME_FOLDER_PATH
-        @echo given {%*}
+        echo ERROR on arguments passed^!
+        echo SYNTAX^: "!THIS_SCRIPT!"  GAME_FOLDER_PATH
+        echo given {%*}
         pause
         exit /b 99
     )
@@ -74,19 +74,19 @@ REM : main
     REM : get and check GAME_FOLDER_PATH
     set GAME_FOLDER_PATH=!args[0]!
     if not exist !GAME_FOLDER_PATH! (
-        @echo ERROR^: CEMU folder !GAME_FOLDER_PATH! does not exist ^^!
+        echo ERROR^: CEMU folder !GAME_FOLDER_PATH! does not exist ^^!
         pause
         exit /b 1
     )
 
     :createIcons
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
-    @echo =========================================================
+    echo =========================================================
 
-    @echo Launching in 30s
-    @echo     ^(y^)^: launch now
-    @echo     ^(n^)^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^)^: launch now
+    echo     ^(n^)^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -100,16 +100,16 @@ REM : main
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^)^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^)^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by^?
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name by^?
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         pause
         goto:eof
     )
@@ -134,15 +134,15 @@ REM : main
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
 
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:jpg2Ico
 
         ) else (
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName!^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -161,8 +161,8 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
     goto:ending
@@ -179,7 +179,7 @@ REM : main
         call !tobeLaunch! !GAME_FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
 
-        if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+        if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
         if !cr! EQU 1 goto:treatOneGame
         call:jpg2Ico
     )
@@ -187,13 +187,13 @@ REM : main
     :ending
     if !QUIET_MODE! EQU 1 goto:exiting
 
-    @echo =========================================================
-    @echo Treated !NB_GAMES_TREATED! games
-    @echo #########################################################
-    @echo This windows will close automatically in 15s
-    @echo     ^(n^)^: don^'t close^, i want to read history log first
-    @echo     ^(q^)^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo Treated !NB_GAMES_TREATED! games
+    echo #########################################################
+    echo This windows will close automatically in 15s
+    echo     ^(n^)^: don^'t close^, i want to read history log first
+    echo     ^(q^)^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
@@ -218,20 +218,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove special characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove special characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -375,14 +375,14 @@ REM : functions
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\*.jpg""
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "JPG_FILE="%%i""
 
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
-        @echo.
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
+        echo.
 
         REM : if a ico file alread exist, exit
         if [!JPG_FILE!] == ["NONE"] (
-            @echo No jpg file found in the Cemu folder^, skip this game^!
+            echo No jpg file found in the Cemu folder^, skip this game^!
             goto:eof
         )
 
@@ -390,7 +390,7 @@ REM : functions
         set "INPUT_IMG="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.jpg""
         REM : rename JPEG_FILE with GAME_TITLE (if needed)
         if not exist !INPUT_IMG! (
-            @echo Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
+            echo Renaming !JPG_FILE:"=!" to !GAME_TITLE!.jpg
             move /Y !OLD_JPG_PATH! !INPUT_IMG! > NUL 2>&1
         )
         :convert
@@ -398,17 +398,17 @@ REM : functions
         if not exist !CemuSubFolder! mkdir !CemuSubFolder! > NUL 2>&1
         set "ICO_PATH="!CemuSubFolder:"=!\%titleId%.ico""
 
-        @echo Creating !GAME_TITLE! icon
+        echo Creating !GAME_TITLE! icon
         REM : convert-it in ICO centered format
         call !imgConverter! !INPUT_IMG! -resize 256x256 !ICO_PATH!
 
         if !ERRORLEVEL! EQU 0 (
-            @echo !GAME_TITLE! icon created^!
+            echo !GAME_TITLE! icon created^!
             if !tgaFound! EQU 0 del /F !NEW_JPG_PATH! > NUL 2>&1
             set /A NB_GAMES_TREATED+=1
             del /F !INPUT_IMG! > NUL 2>&1
         ) else (
-            @echo Error when launching Conversion^!
+            echo Error when launching Conversion^!
             pause
         )
 
@@ -416,7 +416,7 @@ REM : functions
         REM : copy ico to dadabase if needed
         if !tgaFound! EQU 0 if not exist !dataBaseIco! copy /Y !ICO_PATH! !dataBaseIco! > NUL 2>&1
 
-        @echo.
+        echo.
 
     goto:eof
 
@@ -428,7 +428,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

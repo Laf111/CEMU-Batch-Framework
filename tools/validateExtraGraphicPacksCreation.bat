@@ -31,9 +31,9 @@ REM : main
         for /F "tokens=1 delims=_" %%j in ("!name!") do set "title=%%j"
 
         for /F "tokens=2 delims=~=," %%k in ('type "%~1\rules.txt" ^| find "titleIds"') do set "tid=%%k"
-        @echo #########################################################
-        @echo !title!
-        @echo #########################################################
+        echo #########################################################
+        echo !title!
+        echo #########################################################
 
         echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         echo.
@@ -42,7 +42,7 @@ REM : main
         echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         echo.
         call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
-        @echo #########################################################
+        echo #########################################################
 
     goto:eof
     

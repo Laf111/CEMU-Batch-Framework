@@ -42,27 +42,27 @@ REM : main
     :end
 
     if %nbArgs% GTR 1 (
-        @echo ERROR ^: 1 arguments are required
-        @echo SYNTAXE ^: !THIS_SCRIPT! FOLDER_PATH
-        @echo given {%*}
+        echo ERROR ^: 1 arguments are required
+        echo SYNTAXE ^: !THIS_SCRIPT! FOLDER_PATH
+        echo given {%*}
         goto:eof
     )
 
     REM : get and check FOLDER_PATH
     set "FOLDER_PATH=!args[0]!"
     if ["!FOLDER_PATH!"] == [""] (
-        @echo FOLDER_PATH empty ^?^, exit 6
+        echo FOLDER_PATH empty ^?^, exit 6
         exit /b 6
     )
 
     if not exist !FOLDER_PATH! (
-        @echo This folder !FOLDER_PATH! does not exist.^^!
+        echo This folder !FOLDER_PATH! does not exist.^^!
         exit /b 2
     )
 
     dir !FOLDER_PATH! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
-        @echo This folder !FOLDER_PATH! is not compatible with DOS^. Remove ^^! from this path.
+        echo This folder !FOLDER_PATH! is not compatible with DOS^. Remove ^^! from this path.
         exit /b 3
     )
 
@@ -97,20 +97,20 @@ REM : main
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -141,7 +141,7 @@ REM : main
 
         if [!newName!] == [!FOLDER_PATH!] goto:eof
 
-        @echo !folderName! ^: Unsupported characters found ^!
+        echo !folderName! ^: Unsupported characters found ^!
         call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
         if [!ANSWER!] == ["n"] (
 
@@ -153,7 +153,7 @@ REM : main
         pushd !basename!
         move /Y !FOLDER_PATH! !newName!
         if !ERRORLEVEL! NEQ 0 (
-            @echo Failed to rename !FOLDER_PATH! to !newName!^, please do it by yourself ^!
+            echo Failed to rename !FOLDER_PATH! to !newName!^, please do it by yourself ^!
 
             set cr=4
             goto:eof
@@ -212,7 +212,7 @@ REM : main
         for /F "tokens=2 delims==" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             exit /b 9
         )
         REM : set char code set, output to host log file

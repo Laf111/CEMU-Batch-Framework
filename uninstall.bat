@@ -64,28 +64,28 @@ REM : main
     if %nbArgs% EQU 0 goto:uninstall
 
     if %nbArgs% NEQ 1 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" WIIU_GAMES_FOLDER
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" WIIU_GAMES_FOLDER
+        echo given {%*}
         pause
         exit 99
     )
     REM : get and check WIIU_GAMES_FOLDER
     set "WIIU_GAMES_FOLDER=!args[0]!"
     if not exist !WIIU_GAMES_FOLDER! (
-        @echo ERROR ^: WIIU_GAMES_FOLDER folder !WIIU_GAMES_FOLDER! does not exist ^!
+        echo ERROR ^: WIIU_GAMES_FOLDER folder !WIIU_GAMES_FOLDER! does not exist ^!
         pause
         exit 1
     )
 
     :uninstall
-    @echo =========================================================
-    @echo         CEMU^'s Batch Framework !bfwVersion! uninstaller
-    @echo =========================================================
-    @echo ^(in case of false input ^: close this main window to cancel^)
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo =========================================================
+    echo         CEMU^'s Batch Framework !bfwVersion! uninstaller
+    echo =========================================================
+    echo ^(in case of false input ^: close this main window to cancel^)
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     call:getUserInput "Are you sure you want to uninstall Batch FW ? (y, n)" "y,n" ANSWER
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:eof
 
     set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
@@ -93,41 +93,41 @@ REM : main
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeWiiuFolder
     rmdir /Q /S !BatchFW_Graphic_Packs!  > NUL 2>&1
-    @echo ^> _BatchFW_Graphic_Packs deleted ^!
-    @echo ---------------------------------------------------------
+    echo ^> _BatchFW_Graphic_Packs deleted ^!
+    echo ---------------------------------------------------------
     :removeWiiuFolder
     set "BatchFW_WiiU="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
     if not exist !BatchFW_WiiU! goto:removeReports
     call:getUserInput "Remove _BatchFw_WiiU folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeReports
     rmdir /Q /S !BatchFW_WiiU!  > NUL 2>&1
-    @echo ^> _BatchFw_WiiU deleted ^!
-    @echo ---------------------------------------------------------
+    echo ^> _BatchFw_WiiU deleted ^!
+    echo ---------------------------------------------------------
     :removeReports
     set "BatchFW_Games_Compatibility_Reports="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports""
     if not exist !BatchFW_Games_Compatibility_Reports! goto:removeMissing
     call:getUserInput "Remove _BatchFW_Games_Compatibility_Reports folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeMissing
     rmdir /Q /S !BatchFW_Games_Compatibility_Reports!  > NUL 2>&1
-    @echo ^> _BatchFW_Games_Compatibility_Reports deleted ^!
-    @echo ---------------------------------------------------------
+    echo ^> _BatchFW_Games_Compatibility_Reports deleted ^!
+    echo ---------------------------------------------------------
     :removeMissing
     set "BatchFW_Missing_Games_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
     if not exist !BatchFW_Missing_Games_Profiles! goto:removeController
     call:getUserInput "Remove _BatchFW_Missing_Games_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeController
     rmdir /Q /S !BatchFW_Missing_Games_Profiles! > NUL 2>&1
-    @echo ^> _BatchFW_Missing_Games_Profiles deleted ^!
-    @echo ---------------------------------------------------------
+    echo ^> _BatchFW_Missing_Games_Profiles deleted ^!
+    echo ---------------------------------------------------------
     :removeController
     set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
     if not exist !BatchFW_Controller_Profiles! goto:removeGLCache
     call:getUserInput "Remove _BatchFW_Controller_Profiles folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:removeGLCache
     rmdir /Q /S !BatchFW_Controller_Profiles! > NUL 2>&1
-    @echo ^> _BatchFW_Controller_Profiles deleted ^!
+    echo ^> _BatchFW_Controller_Profiles deleted ^!
 
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     :removeGLCache
     call:getUserInput "Remove your OpenGL cache backup ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:restoreMlc01
@@ -149,9 +149,9 @@ REM : main
     if not exist !GLCacheSavesFolder! goto:restoreMlc01
     rmdir /Q /S !GLCacheSavesFolder! > NUL 2>&1
 
-    @echo ^> OpenGL cache backup was removed ^!
+    echo ^> OpenGL cache backup was removed ^!
 
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     :restoreMlc01
     set "mlc01Restored=0"
     call:getUserInput "Restore mlc01 data of each games ? (y, n)" "y,n" ANSWER
@@ -169,7 +169,7 @@ REM : main
     call !tobeLaunch! !MLC01_FOLDER_PATH!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+        echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
         pause
         goto:askMlc01Folder
     )
@@ -177,7 +177,7 @@ REM : main
     REM : check if a usr/title exist
     set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
     if not exist !usrTitle! (
-        @echo !usrTitle! not found ^?
+        echo !usrTitle! not found ^?
         goto:askMlc01Folder
     )
 
@@ -188,8 +188,8 @@ REM : main
     call:getUserInput "Do you want to define another mlc01 target folder ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["y"] goto:askMlc01Folder
 
-    @echo ^> mlc01 data restored
-    @echo ---------------------------------------------------------
+    echo ^> mlc01 data restored
+    echo ---------------------------------------------------------
 
     :restoreTransShaderCache
     set "TransShaderCacheRestored=0"
@@ -209,7 +209,7 @@ REM : main
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askCemuFolder
     )
@@ -217,7 +217,7 @@ REM : main
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if not exist !cemuExe! (
-        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
 
@@ -225,8 +225,8 @@ REM : main
   
     wscript /nologo !StartWait! !script! !CEMU_FOLDER!
     set "TransShaderCacheRestored=1"
-    @echo ^> transferable shader caches restored
-    @echo ---------------------------------------------------------
+    echo ^> transferable shader caches restored
+    echo ---------------------------------------------------------
 
     :restoreSaves
     set "restoreUserSavesOfAllGames=0"
@@ -250,7 +250,7 @@ REM : main
         call !tobeLaunch! !MLC01_FOLDER_PATH!
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
-            @echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+            echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
             pause
             goto:askSaveFolder
         )
@@ -258,7 +258,7 @@ REM : main
         REM : check if a usr/title exist
         set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
         if not exist !usrTitle! (
-            @echo !usrTitle! not found ^?
+            echo !usrTitle! not found ^?
             goto:askSaveFolder
         )
 
@@ -269,18 +269,18 @@ REM : main
     )
 
     set "restoreUserSavesOfAllGames=1"
-    @echo ^> all saves of all users for all games were restored
-    @echo ---------------------------------------------------------
+    echo ^> all saves of all users for all games were restored
+    echo ---------------------------------------------------------
 
     :removeExtraFolders
 
     for /F "delims=~" %%x in ('dir /b /a:d /s mlc01 2^>NUL') do (
-        @echo At least one mlc01 subfolder still exist in your games library^.
-        @echo If you restored previously each mlc01^'s data, you can choose to delete them all^.
-        @echo Otherwise^, keep them^. It contain update^,DLC and your last game^'s saves ^^!
-        @echo ---------------------------------------------------------
+        echo At least one mlc01 subfolder still exist in your games library^.
+        echo If you restored previously each mlc01^'s data, you can choose to delete them all^.
+        echo Otherwise^, keep them^. It contain update^,DLC and your last game^'s saves ^^!
+        echo ---------------------------------------------------------
         call:getUserInput "Delete all mlc01 game's subfolders ? (y, n)" "y,n" ANSWER
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
         if [!ANSWER!] == ["n"] goto:removeShaderCache
         REM : get out of the loop
         goto:removeMlc01
@@ -292,12 +292,12 @@ REM : main
 
     :removeShaderCache
     for /F "delims=~" %%x in ('dir /b /a:d /s shaderCache 2^>NUL') do (
-        @echo At least one shaderCache subfolder still exist in your games library^.
-        @echo If you restored previously each shaderCache, you can choose to delete them all^.
-        @echo Otherwise^, keep them^. It contain your last game^'s transferable cache ^^!
-        @echo ---------------------------------------------------------
+        echo At least one shaderCache subfolder still exist in your games library^.
+        echo If you restored previously each shaderCache, you can choose to delete them all^.
+        echo Otherwise^, keep them^. It contain your last game^'s transferable cache ^^!
+        echo ---------------------------------------------------------
         call:getUserInput "Delete all shaderCache games subfolders ? (y, n)" "y,n" ANSWER
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
         if [!ANSWER!] == ["n"] goto:removeFoldersLeft
         REM : get out of the loop
         goto:removeTransCache
@@ -307,22 +307,22 @@ REM : main
         rmdir /Q /S "%%x" > NUL 2>&1
     )
     :removeFoldersLeft
-    @echo Do you want to remove all Cemu extra subfolders created^?
-    @echo That^'s included ^:
-    @echo - all controllers profiles
-    @echo - all CEMU saved settings
-    @echo - your own graphic packs if created ones in Cemu game^'s subfolder
-    @echo That^'s excluded ^:
-    @echo - mods ^(founded ones will be moved in the game^'s folder before deleting Cemu subfolder^)
-    @echo ---------------------------------------------------------
+    echo Do you want to remove all Cemu extra subfolders created^?
+    echo That^'s included ^:
+    echo - all controllers profiles
+    echo - all CEMU saved settings
+    echo - your own graphic packs if created ones in Cemu game^'s subfolder
+    echo That^'s excluded ^:
+    echo - mods ^(founded ones will be moved in the game^'s folder before deleting Cemu subfolder^)
+    echo ---------------------------------------------------------
 
     call:getUserInput "Remove all Cemu extra subfolders created ? (y, n)" "y,n" ANSWER
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:removeShortcuts
 
     for /F "delims=~" %%x in ('dir /b /a:d /s mods ^| find "Cemu" 2^>NUL') do (
-        @echo At least one mods subfolder still exist in your games library^.
-        @echo Moving all mods folders in game^'s folders ^.^.^.
+        echo At least one mods subfolder still exist in your games library^.
+        echo Moving all mods folders in game^'s folders ^.^.^.
 
         REM : move it under game folder
         for %%a in ("%%i") do set "parentFolder="%%~dpa""
@@ -341,8 +341,8 @@ REM : main
         set "cemuFolder="!gf:"=!\Cemu""
         rmdir /Q /S !cemuFolder! > NUL 2>&1
     )
-    @echo ^> Batch FW^'s extra files and folders were removed
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo ^> Batch FW^'s extra files and folders were removed
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     :removeShortcuts
     pushd !GAMES_FOLDER!
@@ -356,13 +356,13 @@ REM : main
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
         rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
-        @echo ^> !WIIU_GAMES_FOLDER! deleted ^!
-        @echo ---------------------------------------------------------
+        echo ^> !WIIU_GAMES_FOLDER! deleted ^!
+        echo ---------------------------------------------------------
     )
 
-    @echo ^> Done^.
-    @echo =========================================================
-    @echo This windows will close automatically in 15s
+    echo ^> Done^.
+    echo =========================================================
+    echo This windows will close automatically in 15s
     timeout /T 4 > NUL 2>&1
 
     REM remove this folder
@@ -386,20 +386,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -455,7 +455,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

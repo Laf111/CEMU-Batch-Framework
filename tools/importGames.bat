@@ -62,27 +62,27 @@ REM : main
     if %nbArgs% EQU 0 (
         title Import Games with updates and DLC
 
-        @echo =========================================================
-        @echo Import new games in your library and prepare them for
-        @echo emulation with CEMU using BatchFw^.
-        @echo.
-        @echo If folders ^(DLC^) and ^(UPDATE^) are found^, batchFw will
-        @echo install them in each game^'s folder^.
-        @echo.
-        @echo If DLC or UPDATE folders are found without the game in the
-        @echo folder^, they will be skipped^.
-        @echo In this case BatchFw has already built the mlc01 folder
-        @echo structure^, just move their content to the right place^:
-        @echo.
-        @echo - update in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]
-        @echo - dlc    in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]/aoc
-        @echo.
-        @echo =========================================================
+        echo =========================================================
+        echo Import new games in your library and prepare them for
+        echo emulation with CEMU using BatchFw^.
+        echo.
+        echo If folders ^(DLC^) and ^(UPDATE^) are found^, batchFw will
+        echo install them in each game^'s folder^.
+        echo.
+        echo If DLC or UPDATE folders are found without the game in the
+        echo folder^, they will be skipped^.
+        echo In this case BatchFw has already built the mlc01 folder
+        echo structure^, just move their content to the right place^:
+        echo.
+        echo - update in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]
+        echo - dlc    in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]/aoc
+        echo.
+        echo =========================================================
 
-        @echo Launching in 40s
-        @echo     ^(y^) ^: launch now
-        @echo     ^(n^) ^: cancel
-        @echo ---------------------------------------------------------
+        echo Launching in 40s
+        echo     ^(y^) ^: launch now
+        echo     ^(n^) ^: cancel
+        echo ---------------------------------------------------------
         call:getUserInput "Enter your choice ? : " "y,n" ANSWER 40
         if [!ANSWER!] == ["n"] (
             REM : Cancelling
@@ -94,9 +94,9 @@ REM : main
     )
 
     if %nbArgs% NEQ 1 (
-        @echo ERROR on arguments passed^(%nbArgs%^)
-        @echo SYNTAXE^: "!THIS_SCRIPT!" INPUT_FOLDER
-        @echo given {%*}
+        echo ERROR on arguments passed^(%nbArgs%^)
+        echo SYNTAXE^: "!THIS_SCRIPT!" INPUT_FOLDER
+        echo given {%*}
         pause
         exit 9
     )
@@ -121,7 +121,7 @@ REM : main
     call !tobeLaunch! !INPUT_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !INPUT_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !INPUT_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askInputFolder
     )
@@ -141,16 +141,16 @@ REM : main
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^) ^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^) ^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by ^?
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name by ^?
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         pause
         goto:eof
     )
@@ -179,7 +179,7 @@ REM : main
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
 
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible ^,otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible ^,otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
@@ -192,9 +192,9 @@ REM : main
         ) else (
             pushd !GAMES_FOLDER!
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -212,21 +212,21 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
     if %nbArgs% EQU 1 goto:exiting
 
-    @echo =========================================================
-    @echo Treated !NB_GAMES_TREATED! games
-    @echo #########################################################
+    echo =========================================================
+    echo Treated !NB_GAMES_TREATED! games
+    echo #########################################################
 
 
-    @echo This windows will close automatically in 15s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo This windows will close automatically in 15s
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
@@ -268,15 +268,15 @@ REM : functions
 
         if exist !target! goto:eof
 
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
-        @echo.
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
+        echo.
 
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
-            @echo No meta folder not found under game folder !GAME_TITLE! ^?^, skipping ^!
-            @echo ---------------------------------------------------------
+            echo No meta folder not found under game folder !GAME_TITLE! ^?^, skipping ^!
+            echo ---------------------------------------------------------
             goto:eof
         )
 
@@ -307,18 +307,18 @@ REM : functions
         set "sysFolder="!target:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysFolder! (
-            @echo Creating system save^'s folder
+            echo Creating system save^'s folder
             mkdir !sysFolder! > NUL 2>&1
         )
         set "saveFolder="!target:"=!\mlc01\usr\save\00050000\%endTitleId%""
 
         if not exist !saveFolder! (
-            @echo Creating saves folder
+            echo Creating saves folder
             mkdir !saveFolder! > NUL 2>&1
         )
 
         set /A NB_GAMES_TREATED+=1
-        @echo.
+        echo.
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -327,8 +327,8 @@ REM : functions
 
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
-            @echo No meta folder not found under update folder !GAME_FOLDER_NAME! ^?^, skipping ^!
-            @echo ---------------------------------------------------------
+            echo No meta folder not found under update folder !GAME_FOLDER_NAME! ^?^, skipping ^!
+            echo ---------------------------------------------------------
             goto:eof
         )
 
@@ -341,8 +341,8 @@ REM : functions
         set "endTitleIdU=%titleIdU:~8,8%"
 
         if not ["!endTitleIdU!"] == ["!endTitleId!"] (
-            @echo This update is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
-            @echo ---------------------------------------------------------
+            echo This update is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
+            echo ---------------------------------------------------------
             goto:eof
         )
 
@@ -350,7 +350,7 @@ REM : functions
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%""
 
         if not exist !target! (
-            @echo Creating update^'s folder
+            echo Creating update^'s folder
             mkdir !target! > NUL 2>&1
         )
         set "source="!INPUT_FOLDER:"=!\%endTitleId%""
@@ -364,7 +364,7 @@ REM : functions
             if !ERROLRLEVEL! EQU 1 goto:moveUpdate
             if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
         )
-        @echo update installed
+        echo update installed
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -373,8 +373,8 @@ REM : functions
 
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
-            @echo No meta folder not found under DLC folder !GAME_FOLDER_NAME! ^?^, skipping ^!
-            @echo ---------------------------------------------------------
+            echo No meta folder not found under DLC folder !GAME_FOLDER_NAME! ^?^, skipping ^!
+            echo ---------------------------------------------------------
             goto:eof
         )
 
@@ -387,8 +387,8 @@ REM : functions
         set "endTitleIdDlc=!titleIdDlc:~8,8!"
 
         if not ["!endTitleIdDlc!"] == ["!endTitleId!"] (
-            @echo this DLC is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
-            @echo ---------------------------------------------------------
+            echo this DLC is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
+            echo ---------------------------------------------------------
             goto:eof
         )
 
@@ -408,7 +408,7 @@ REM : functions
         )
 
         move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
-        @echo DLC installed
+        echo DLC installed
 
     goto:eof
 
@@ -467,20 +467,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -537,7 +537,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

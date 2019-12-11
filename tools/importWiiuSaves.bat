@@ -58,22 +58,22 @@ REM : games that exist in local AND remote locations
 
     title Import CEMU saves to WiiU
 
-    @echo =========================================================
-    @echo Import Wii-U saves to CEMU
-    @echo =========================================================
-    @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping^/shutdown features
-    @echo - if you^'re using a permanent hack ^(CBHC^)^:
-    @echo    ^* launch HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you^'re not^:
-    @echo    ^* first run Mocha CFW HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for MOCHA
-    @echo.
-    @echo - get the IP adress displayed on Wii-U gamepad
-    @echo.
-    @echo Press any key to continue when you^'re ready
-    @echo ^(CTRL-C^) to abort
+    echo =========================================================
+    echo Import Wii-U saves to CEMU
+    echo =========================================================
+    echo On your Wii-U^, you need to ^:
+    echo - disable the sleeping^/shutdown features
+    echo - if you^'re using a permanent hack ^(CBHC^)^:
+    echo    ^* launch HomeBrewLauncher
+    echo    ^* then ftp-everywhere for CBHC
+    echo - if you^'re not^:
+    echo    ^* first run Mocha CFW HomeBrewLauncher
+    echo    ^* then ftp-everywhere for MOCHA
+    echo.
+    echo - get the IP adress displayed on Wii-U gamepad
+    echo.
+    echo Press any key to continue when you^'re ready
+    echo ^(CTRL-C^) to abort
     pause
     cls
 
@@ -88,11 +88,11 @@ REM : games that exist in local AND remote locations
     REM : and teh port
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
 
-    @echo Found an existing FTP configuration ^:
-    @echo.
-    @echo PortNumber=!ipRead!
-    @echo HostName=!portRead!
-    @echo.
+    echo Found an existing FTP configuration ^:
+    echo.
+    echo PortNumber=!ipRead!
+    echo HostName=!portRead!
+    echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
     if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
@@ -117,7 +117,7 @@ REM : games that exist in local AND remote locations
     call:getHostState !wiiuIp! state
 
     if !state! EQU 0 (
-        @echo ERROR^: !wiiuIp! was not found on your network ^!
+        echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
         exit 2
     )
@@ -125,8 +125,8 @@ REM : games that exist in local AND remote locations
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-        @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
-        @echo Pause this script until you fix it ^(CTRL-C to abort^)
+        echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection
     )
@@ -155,7 +155,7 @@ REM : games that exist in local AND remote locations
     cls
     if !noOldScan! EQU 1 goto:getLocalTitleId
 
-    @echo The last WiiU^'s scan found is !LAST_SCAN!
+    echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
     if !ERRORLEVEL! EQU 1 goto:getLocalTitleId
 
@@ -191,7 +191,7 @@ REM : games that exist in local AND remote locations
     set /A "nbGames=0"
 
     cls
-    @echo =========================================================
+    echo =========================================================
 
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
 
@@ -203,12 +203,12 @@ REM : games that exist in local AND remote locations
             set "titles[!nbGames!]=%%i"
             set "endTitlesId[!nbGames!]=!endTitleId!"
             set "titlesSrc[!nbGames!]=%%k"
-            @echo !nbGames!	: %%i
+            echo !nbGames!	: %%i
 
             set /A "nbGames+=1"
         )
     )
-    @echo =========================================================
+    echo =========================================================
 
     REM : list of selected games
     REM : selected games
@@ -217,15 +217,15 @@ REM : games that exist in local AND remote locations
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
     call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
-        @echo Invalid numbers or forbiden characters found^, please retry
+        echo Invalid numbers or forbiden characters found^, please retry
         pause
         goto:getList
     )
     call:checkListOfGames !listGamesSelected!
     if !ERRORLEVEL! NEQ 0 goto:getList
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 @echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -252,9 +252,9 @@ REM : games that exist in local AND remote locations
 
     :getArgsValue
     if %nbArgs% NEQ 4 (
-        @echo ERROR on arguments passed ^(%nbArgs%^)
-        @echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE endTitleId src
-        @echo given {%*}
+        echo ERROR on arguments passed ^(%nbArgs%^)
+        echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE endTitleId src
+        echo given {%*}
         pause
         if %nbArgs% EQU 0 exit 9
         if %nbArgs% NEQ 0 exit /b 9
@@ -274,7 +274,7 @@ REM : games that exist in local AND remote locations
     set "src=!args[3]!"
     set "src=!src:"=!"
     if not ["!src!"] == ["mlc"] if not ["!src!"] == ["usb"] (
-        @echo ERROR^: !src! is not a valid storage source ^!
+        echo ERROR^: !src! is not a valid storage source ^!
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
     )
@@ -294,10 +294,10 @@ REM : games that exist in local AND remote locations
 
     set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
     if not exist !USERS_ACCOUNTS_FOLDER! (
-        @echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!
-        @echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
-        @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-        @echo before this script
+        echo ERROR^: !USERS_ACCOUNTS_FOLDER! does not exist ^!
+        echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
+        echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
+        echo before this script
         pause
         if %nbArgs% EQU 0 exit 99
         if %nbArgs% NEQ 0 exit /b 99
@@ -305,7 +305,7 @@ REM : games that exist in local AND remote locations
     )
 
     for /L %%n in (0,1,!nbGamesSelected!) do call:importSaves %%n
-    @echo =========================================================
+    echo =========================================================
     if %nbArgs% EQU 0 pause
 
     if !ERRORLEVEL! NEQ 0 (
@@ -350,12 +350,12 @@ REM : functions
     REM : check list of games and create selection
     :checkListOfGames
 
-        @echo ---------------------------------------------------------
-        @echo Import saves for ^:
-        @echo.
+        echo ---------------------------------------------------------
+        echo Import saves for ^:
+        echo.
         for %%l in (!listGamesSelected!) do (
             if %%l GEQ !nbGames! exit /b 1
-            @echo - !titles[%%l]!
+            echo - !titles[%%l]!
             set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
             set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
             set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
@@ -387,10 +387,10 @@ REM : functions
         set "endTitleId=!selectedEndTitlesId[%num%]!"
         set "src=!selectedtitlesSrc[%num%]!"
 
-        @echo =========================================================
-        @echo Import saves for !GAME_TITLE! ^(%endTitleId%^)
-        @echo Source location ^: ^/storage_!src!
-        @echo =========================================================
+        echo =========================================================
+        echo Import saves for !GAME_TITLE! ^(%endTitleId%^)
+        echo Source location ^: ^/storage_!src!
+        echo =========================================================
 
         REM : (re) compute GAME_FOLDER_PATH (in function of the presence of args or not)
         set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
@@ -409,21 +409,21 @@ REM : functions
         call !ftpReplaceFolders! !wiiuIp! local !localFolder! "/storage_!src!/usr/save/00050000/!endTitleId!" "!GAME_TITLE! (saves)"
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
-            @echo ERROR when downloading existing saves ^!
+            echo ERROR when downloading existing saves ^!
             pause
             exit /b 50
         )
 
         set "localFolderUser="!localFolder:"=!\user""
         if not exist !localFolderUser! (
-            @echo WARNING ^: no saves found for !GAME_TITLE!
+            echo WARNING ^: no saves found for !GAME_TITLE!
             rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
             goto:eof
         )        
         REM : creates saves for each users
         call:createUsersSaves
 
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
 
         pushd !GAMES_FOLDER!
         rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
@@ -455,10 +455,10 @@ REM : functions
                 set "folder=!folder:"=!"
             )
             if ["!folder!"] == ["NONE"] (
-                @echo WARNING^: no account associated with %%i
-                @echo You should use Wii-U Games^\Wii-U^\Get online files^.lnk
-                @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-                @echo before this script
+                echo WARNING^: no account associated with %%i
+                echo You should use Wii-U Games^\Wii-U^\Get online files^.lnk
+                echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
+                echo before this script
                 goto:eof
             )
 
@@ -466,7 +466,7 @@ REM : functions
             pushd !localFolderUser!
                 
             if not exist !folder! (
-                @echo WARNING ^: no Wii-U saves found for !currentUser!
+                echo WARNING ^: no Wii-U saves found for !currentUser!
                 goto:eof
             )
 
@@ -518,20 +518,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -547,7 +547,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

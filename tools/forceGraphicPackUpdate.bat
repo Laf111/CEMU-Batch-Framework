@@ -64,7 +64,7 @@ REM : main
 
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        @echo No active connection was found, cancel updating
+        echo No active connection was found, cancel updating
         pause
         if !QUIET_MODE! EQU 1 exit /b 20
         if !QUIET_MODE! EQU 0 exit 20
@@ -72,19 +72,19 @@ REM : main
 
     if !QUIET_MODE! EQU 1 goto:launchUpdate
 
-    @echo =========================================================
-    @echo Force graphic packs update ^?
-    @echo.
-    @echo Note that :
-    @echo     - V2 graphic packs will be untouched
-    @echo     - If you^'ve chosen to let BatchFw complete your GFX
-    @echo       It will rebuild all the first time you launch a game
-    @echo =========================================================
+    echo =========================================================
+    echo Force graphic packs update ^?
+    echo.
+    echo Note that :
+    echo     - V2 graphic packs will be untouched
+    echo     - If you^'ve chosen to let BatchFw complete your GFX
+    echo       It will rebuild all the first time you launch a game
+    echo =========================================================
 
-    @echo Launching in 30s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -105,10 +105,10 @@ REM : main
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         call !ugp! -forced
         set /A "cr=!ERRORLEVEL!"
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
 
         if !cr! NEQ 0 (
-            @echo ERROR ^: Graphic pack folder update failed ^!
+            echo ERROR ^: Graphic pack folder update failed ^!
         )
         set "BFW_LOGS="!BFW_PATH:"=!\logs""
         set "GLFile="!BFW_LOGS:"=!\gamesLibrary.log""
@@ -118,11 +118,11 @@ REM : main
     )
 
     if !QUIET_MODE! EQU 0 (
-        @echo =========================================================
-        @echo Done
-        @echo #########################################################
+        echo =========================================================
+        echo Done
+        echo #########################################################
 
-        @echo This windows will close automatically in 8s
+        echo This windows will close automatically in 8s
         timeout /T 8 > NUL 2>&1
     )
     if %nbArgs% EQU 0 endlocal
@@ -155,20 +155,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -225,7 +225,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

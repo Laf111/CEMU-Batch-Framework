@@ -55,9 +55,9 @@ REM : main
 
     REM : check args
     if %nbArgs% NEQ 8 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" GAME_FOLDER_PATH CEMU_FOLDER USER TITLE_ID MLC01_FOLDER_PATH CEMU_STATUS SHADER_CACHE_ID FPS
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" GAME_FOLDER_PATH CEMU_FOLDER USER TITLE_ID MLC01_FOLDER_PATH CEMU_STATUS SHADER_CACHE_ID FPS
+        echo given {%*}
         pause
         exit /b 99
     )
@@ -81,17 +81,17 @@ REM : main
 
     REM : check GAME_FOLDER_PATH
     if not exist !GAME_FOLDER_PATH! (
-        @echo GAME_FOLDER_PATH does not exist ^: !GAME_FOLDER_PATH!
+        echo GAME_FOLDER_PATH does not exist ^: !GAME_FOLDER_PATH!
         exit /b 1
     )
     REM : check MLC01_FOLDER_PATH
     if not exist !MLC01_FOLDER_PATH! (
-        @echo MLC01_FOLDER_PATH does not exist ^: !MLC01_FOLDER_PATH!
+        echo MLC01_FOLDER_PATH does not exist ^: !MLC01_FOLDER_PATH!
         exit /b 2
     )
     REM : check CEMU_FOLDER
     if not exist !CEMU_FOLDER! (
-        @echo CEMU_FOLDER does not exist ^: !CEMU_FOLDER!
+        echo CEMU_FOLDER does not exist ^: !CEMU_FOLDER!
         exit /b 3
     )
 
@@ -170,17 +170,17 @@ REM : main
     move /Y !gameInfoFileTmp! !gameInfoFile! > NUL 2>&1
 
     REM : GAME_VERSION
-    @echo game version     ="%GAME_VERSION%" >> !gameInfoFile!
+    echo game version     ="%GAME_VERSION%" >> !gameInfoFile!
     REM : DLC
-    @echo DLC installed    ="%DLC%" >> !gameInfoFile!
+    echo DLC installed    ="%DLC%" >> !gameInfoFile!
     REM : ShaderCache Id
-    if not ["%SHADER_CACHE_ID%"] == ["NOT_FOUND"] @echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
+    if not ["%SHADER_CACHE_ID%"] == ["NOT_FOUND"] echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
 
     if ["!versionRead!"] == ["NOT_FOUND"] (
         call:getVersion
         if not ["!VERSION!"] == ["NONE"] (
             REM : ShaderCache Id
-            @echo Last launch with ="!VERSION!" >> !gameInfoFile!
+            echo Last launch with ="!VERSION!" >> !gameInfoFile!
         ) else (
             REM : using folder name
             set "VERSION=!CEMU_FOLDER_NAME!"
@@ -258,10 +258,10 @@ REM : main
 
     REM : if report doesn't exist, creating it
     if not exist !GAMES_REPORT_PATH! (
-        @echo Working games on !USERDOMAIN!; > !GAMES_REPORT_PATH!
-        @echo ; >> !GAMES_REPORT_PATH!
-        @echo ; >> !GAMES_REPORT_PATH!
-        @echo Game Title;Cemu Version;OS Version;Region;CPU[RAM];GPU;Tester;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library^.csv;Game Version;DLC installed;Saves found;ShaderCacheId >> !GAMES_REPORT_PATH!
+        echo Working games on !USERDOMAIN!; > !GAMES_REPORT_PATH!
+        echo ; >> !GAMES_REPORT_PATH!
+        echo ; >> !GAMES_REPORT_PATH!
+        echo Game Title;Cemu Version;OS Version;Region;CPU[RAM];GPU;Tester;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library^.csv;Game Version;DLC installed;Saves found;ShaderCacheId >> !GAMES_REPORT_PATH!
     )
 
     REM : report exist, find in !GAME_TITLE!
@@ -269,7 +269,7 @@ REM : main
     if !ERRORLEVEL! EQU 0 goto:gameReportUpToDate
 
     REM : add line for current game
-    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%;%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID% >> !GAMES_REPORT_PATH!
+    echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%;%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID% >> !GAMES_REPORT_PATH!
 
     :gameReportUpToDate
 
@@ -277,18 +277,18 @@ REM : main
 
     REM : if report doesn't exist, creating it
     if not exist !CEMU_REPORT_PATH! (
-        @echo !CEMU_FOLDER_NAME! games compatibility list report; > !CEMU_REPORT_PATH!
-        @echo ; >> !CEMU_REPORT_PATH!
-        @echo ;CEMU satus enums :  ; >> !CEMU_REPORT_PATH!
-        @echo ; >> !CEMU_REPORT_PATH!
-        @echo ;Perfect;Game can be played with no issues.; >> !CEMU_REPORT_PATH!
-        @echo ;Playable;Game can be played through with minor audio or graphical glitches.; >> !CEMU_REPORT_PATH!
-        @echo ;Runs;Starts, maybe runs well, but major glitches/issues prevent game from being completed.; >> !CEMU_REPORT_PATH!
-        @echo ;Loads;Game loads, but crashes in title screen/menu/in-game.; >> !CEMU_REPORT_PATH!
-        @echo ;Unplayable;Crashes when booting/infinite black screen.; >> !CEMU_REPORT_PATH!
-        @echo ; >> !CEMU_REPORT_PATH!
-        @echo ; >> !CEMU_REPORT_PATH!
-        @echo Game Title;Cemu Version;OS Version;Region;CPU[RAM];GPU;Tester;FPS;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library^.csv;Game Version;DLC installed;Saves found;ShaderCacheId;ReportRow  >> !CEMU_REPORT_PATH!
+        echo !CEMU_FOLDER_NAME! games compatibility list report; > !CEMU_REPORT_PATH!
+        echo ; >> !CEMU_REPORT_PATH!
+        echo ;CEMU satus enums :  ; >> !CEMU_REPORT_PATH!
+        echo ; >> !CEMU_REPORT_PATH!
+        echo ;Perfect;Game can be played with no issues.; >> !CEMU_REPORT_PATH!
+        echo ;Playable;Game can be played through with minor audio or graphical glitches.; >> !CEMU_REPORT_PATH!
+        echo ;Runs;Starts, maybe runs well, but major glitches/issues prevent game from being completed.; >> !CEMU_REPORT_PATH!
+        echo ;Loads;Game loads, but crashes in title screen/menu/in-game.; >> !CEMU_REPORT_PATH!
+        echo ;Unplayable;Crashes when booting/infinite black screen.; >> !CEMU_REPORT_PATH!
+        echo ; >> !CEMU_REPORT_PATH!
+        echo ; >> !CEMU_REPORT_PATH!
+        echo Game Title;Cemu Version;OS Version;Region;CPU[RAM];GPU;Tester;FPS;Status;Additional Notes;title Id;Exist in WiiU-Titles-Library^.csv;Game Version;DLC installed;Saves found;ShaderCacheId;ReportRow  >> !CEMU_REPORT_PATH!
     )
 
     REM : report exist, find in !GAME_TITLE!
@@ -302,7 +302,7 @@ REM : main
     if ["!VERSION!"] == ["!CEMU_FOLDER_NAME!"] set "REPORT_LINE="^{^{testsection^|%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%^|collapsed^}^}^{^{testline^|version=%CEMU_1ST_DIGIT%.%CEMU_2ND_DIGIT%.%CEMU_3RD_DIGIT%^|OS=!OS_VERSION!^|region=!REGION!^|CPU=%CPU:"=%^[%RAM:"=%]^|GPU=%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%^|user=!user!^|FPS=%FPS%^|rating=%CEMU_STATUS%^|notes=!ADD_NOTES:"=!^}^}^{^{testend^}^}""
 
     REM : add line for current game
-    @echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%[!RAM:"=!];%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID%;!REPORT_LINE:"=!  >> !CEMU_REPORT_PATH!
+    echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%[!RAM:"=!];%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID%;!REPORT_LINE:"=!  >> !CEMU_REPORT_PATH!
 
     :reportUpToDate
 
@@ -359,20 +359,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -388,7 +388,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "=" 2^>NUL') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

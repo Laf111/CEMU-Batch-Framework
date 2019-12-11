@@ -40,12 +40,12 @@ REM : main
 
 
     if not exist !logFile! (
-        @echo !logFile:"=! not found^, cancelling
+        echo !logFile:"=! not found^, cancelling
         pause
         goto:eof
     )
     cls
-    @echo =========================================================
+    echo =========================================================
     REM : search your current GLCache
     REM : check last path saved in log file
 
@@ -65,7 +65,7 @@ REM : main
     pushd !BFW_TOOLS_PATH!
 
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
-        @echo Unable to find your GPU GLCache folder ^? cancelling
+        echo Unable to find your GPU GLCache folder ^? cancelling
         goto:eof
     )
     REM : save path to log file
@@ -79,8 +79,8 @@ REM : main
 
     set "size=0"
     if exist !GLCacheSavesFolder! call:getFolderSize !GLCacheSavesFolder! size
-    @echo Global OpenGL Cache size ^(Mo^) ^: %size%
-    @echo ---------------------------------------------------------
+    echo Global OpenGL Cache size ^(Mo^) ^: %size%
+    echo ---------------------------------------------------------
 
     for /F "delims=~" %%x in ('dir /b /o:n /a:d !GLCacheSavesFolder! 2^>NUL') do (
 
@@ -88,14 +88,14 @@ REM : main
         call:getGameCacheSize
     )
 
-    @echo =========================================================
+    echo =========================================================
 
     set "vkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
 
     set "size=0"
     if exist !vkCacheSavesFolder! call:getFolderSize !vkCacheSavesFolder! size
-    @echo Global Vulkan Cache size ^(Mo^) ^: %size%
-    @echo ---------------------------------------------------------
+    echo Global Vulkan Cache size ^(Mo^) ^: %size%
+    echo ---------------------------------------------------------
 
     for /F "delims=~" %%x in ('dir /b /o:n /a:d !vkCacheSavesFolder! 2^>NUL') do (
 
@@ -104,17 +104,17 @@ REM : main
     )
     pushd !BFW_TOOLS_PATH!
 
-    @echo =========================================================
+    echo =========================================================
 
     REM : search in logFile
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
         call:getCachesSizes "%%i"
     )
 
-    @echo This windows will close automatically in 12s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo This windows will close automatically in 12s
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
@@ -139,7 +139,7 @@ REM : functions
             set "folder="!gpuVersion:"=!\%%y""
             set "sizeG=0"
             call:getFolderSize !folder! sizeG
-            @echo - %%y shader cache size ^: !sizeG!
+            echo - %%y shader cache size ^: !sizeG!
         )
         cd ..
 
@@ -155,29 +155,29 @@ REM : functions
 
         REM : if CEMU_FOLDER not exist anymore
         if not exist !CEMU_FOLDER! (
-            @echo !CEMU_FOLDER:"=! doesn^'t exist anymore^, cleaning logFile
+            echo !CEMU_FOLDER:"=! doesn^'t exist anymore^, cleaning logFile
             call:cleanHostLogFile !CEMU_FOLDER_NAME!
             goto:eof
         )
 
-        @echo Size of !CEMU_FOLDER_NAME:"=! subfolders ^(Mo^) ^:
-        @echo ---------------------------------------------------------
+        echo Size of !CEMU_FOLDER_NAME:"=! subfolders ^(Mo^) ^:
+        echo ---------------------------------------------------------
 
         set "precompiled="!CEMU_FOLDER:"=!\ShaderCache\precompiled""
         set "sizeP=0"
         if exist !precompiled! call:getFolderSize !precompiled! sizeP
-        @echo - precompiled     ^: !sizeP!
+        echo - precompiled     ^: !sizeP!
 
         set "transferable="!CEMU_FOLDER:"=!\ShaderCache\transferable""
         set "sizeT=0"
         if exist !transferable! call:getFolderSize !transferable! sizeT
-        @echo - transferable    ^: !sizeT!
+        echo - transferable    ^: !sizeT!
 
         set "glcache="!CEMU_FOLDER:"=!\ShaderCache\driver""
         set "sizeT=0"
         if exist !glcache! call:getFolderSize !glcache! sizeT
-        @echo - GLCache    ^: !sizeT!
-        @echo =========================================================
+        echo - GLCache    ^: !sizeT!
+        echo =========================================================
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -286,20 +286,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -315,7 +315,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

@@ -78,7 +78,7 @@ REM : main
     if exist !BFW_GP_FOLDER! (
         goto:getTitleId
     )
-    @echo Please select a reference graphicPacks folder
+    echo Please select a reference graphicPacks folder
 
     :askGpFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
@@ -92,7 +92,7 @@ REM : main
     call !tobeLaunch! !BFW_GP_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askGpFolder
     )
@@ -111,14 +111,14 @@ REM : main
     set "checkLenght=!titleId:~15,1!"
 
     if ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
     REM : check too long
     set "checkLenght=!titleId:~16,1!"
 
     if not ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^^! must have 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
     set "titleId=%titleId%"
@@ -130,18 +130,18 @@ REM : main
 
     echo. > !cgpLogFile!
     if %nbArgs% GTR 4 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
+        echo given {%*}
 
         exit /b 99
     )
     if %nbArgs% LSS 3 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
+        echo given {%*}
 
         exit /b 99
     )
@@ -149,8 +149,8 @@ REM : main
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
     if not exist !BFW_GP_FOLDER! (
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
-        @echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
+        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
 
         exit /b 1
     )
@@ -189,10 +189,10 @@ REM : main
         cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
-    @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cgpLogFile!
-    @echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
-    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
-    @echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
+    echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cgpLogFile!
+    echo createExtraGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
     goto:getTitleId
 
@@ -220,16 +220,16 @@ REM : main
 
     if not ["%gameName%"] == ["NONE"] set "GAME_TITLE=%gameName%"
 
-    @echo ========================================================= >> !cgpLogFile!
-    @echo =========================================================
-    @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE! >> !cgpLogFile!
-    @echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE!
-    @echo ========================================================= >> !cgpLogFile!
-    @echo =========================================================
-    @echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
-    @echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv
+    echo ========================================================= >> !cgpLogFile!
+    echo =========================================================
+    echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE! >> !cgpLogFile!
+    echo Create extra graphic packs ^(missing resolutions^) for !GAME_TITLE!
+    echo ========================================================= >> !cgpLogFile!
+    echo =========================================================
+    echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
+    echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv
 
-    REM get all title Id for this game (in case of a new lgfxpv res gp creation)
+    REM get all title Id for this game (in case of a new res gp creation)
     set "titleIdList="
     call:getAllTitleIds
 
@@ -255,10 +255,10 @@ REM : main
     )
     
     if ["!ARLIST!"] == [""] (
-        @echo Unable to get desired aspect ratio ^(choosen during setup^) ^? >> !cgpLogFile!
-        @echo Unable to get desired aspect ratio ^(choosen during setup^) ^?
-        @echo Delete batchFW outputs and relaunch >> !cgpLogFile!
-        @echo Delete batchFW outputs and relaunch
+        echo Unable to get desired aspect ratio ^(choosen during setup^) ^? >> !cgpLogFile!
+        echo Unable to get desired aspect ratio ^(choosen during setup^) ^?
+        echo Delete batchFW outputs and relaunch >> !cgpLogFile!
+        echo Delete batchFW outputs and relaunch
         if !QUIET_MODE! EQU 0 pause
         exit /b 2
     )
@@ -271,8 +271,8 @@ REM : main
     set "fnrLogCegp="!BFW_PATH:"=!\logs\fnr_createExtraGraphicPacks.log""
     if exist !fnrLogCegp! del /F !fnrLogCegp!
 
-    REM : flag for lgfxpv graphic packs existence
-    set "gplgfxpvexist=0"
+    REM : flag for graphic packs existence
+    set "gpLastVersionExist=0"
     set "v2Name="NOT_FOUND""
     REM : launching the search
     echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId% >> !cgpLogFile!
@@ -296,52 +296,52 @@ REM : main
             echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
         )
 
-        REM : creating lgfxpv graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gplgfxpvexist=1" && call:createExtralgfxpv "!gpName!")
+        REM : creating graphic packs
+        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "gpLastVersionExist=1" && call:createExtraLastVersion "!gpName!")
 
     )
-    if %gplgfxpvexist% EQU 1 goto:ending
+    if %gpLastVersionExist% EQU 1 goto:ending
 
-    REM : create lgfxpv res graphic pack (game support in slahiee repository but not present in gfx pack)
+    REM : create res graphic pack (game support in slahiee repository but not present in gfx pack)
 
     REM : search a V2 2xres graphic pack if found v2Name
 
-    if [!v2Name!] == ["NOT_FOUND"] set "lgfxpvname="!GAME_TITLE!"" && goto:createNewlgfxpv
+    if [!v2Name!] == ["NOT_FOUND"] set "LastVersionname="!GAME_TITLE!"" && goto:createNewLastVersion
 
     set "gpResX2="!BFW_GP_FOLDER:"=!\!v2Name!_%resX2%p""
-    set "lgfxpvname=!v2Name:_graphicPacksV2\=!"
+    set "LastVersionname=!v2Name:_graphicPacksV2\=!"
 
-    :createNewlgfxpv
+    :createNewLastVersion
 
-    set "gplgfxpv="!BFW_GP_FOLDER:"=!\!lgfxpvname!_Resolution""
+    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!LastVersionname!_Resolution""
 
-    if not exist !gplgfxpv! mkdir !gplgfxpv! > NUL 2>&1
-    set "bfwRulesFile="!gplgfxpv:"=!\rules.txt""
+    if not exist !gpLastVersion! mkdir !gpLastVersion! > NUL 2>&1
+    set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
 
-    call:initlgfxpvResGraphicPack
-    call:createExtralgfxpv "!lgfxpvname!"
-    call:finalizeReslgfxpv
+    call:initLastVersionResGraphicPack
+    call:createExtraLastVersion "!LastVersionname!"
+    call:finalizeResLastVersion
 
     if not exist !gpResX2! goto:ending
 
     REM : copy files near the rules.txt files
-    robocopy !gpResX2! !gplgfxpv! /S /XF rules.txt
+    robocopy !gpResX2! !gpLastVersion! /S /XF rules.txt
 
     REM : replacing float Scale = 2.0
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resXScale.log""
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"  >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpLastVersion-resXScale.log""
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"  >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
 
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resYScale.log""
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpLastVersion-resYScale.log""
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
 
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gplgfxpv-resScale.log""
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gplgfxpv! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_gpLastVersion-resScale.log""
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gpLastVersion! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
 
 
     :ending
@@ -349,11 +349,11 @@ REM : main
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
     set "DATE=%ldt%"
-    @echo ending date = %date% >> !cgpLogFile!
-    @echo ending date = %date%
+    echo ending date = %date% >> !cgpLogFile!
+    echo ending date = %date%
 
-    @echo =========================================================  >> !cgpLogFile!
-    @echo =========================================================
+    echo =========================================================  >> !cgpLogFile!
+    echo =========================================================
 
     call:waitChildrenProcessesEnd
 
@@ -400,14 +400,14 @@ REM : functions
         if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
         if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
-        @echo Ooops it look like your game have a problem ^:
-        @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        @echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        @echo   will help you to create one^.
-        @echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        @echo   you might have made a mistake when applying a DLC over game^'s files
-        @echo   to fix^, overwrite game^'s file with its last update or if no update
-        @echo   are available^, re-dump the game ^!
+        echo Ooops it look like your game have a problem ^:
+        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
+        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
+        echo   will help you to create one^.
+        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
+        echo   you might have made a mistake when applying a DLC over game^'s files
+        echo   to fix^, overwrite game^'s file with its last update or if no update
+        echo   are available^, re-dump the game ^!
 
         exit /b 2
     goto:eof
@@ -432,38 +432,39 @@ REM : functions
         for %%a in (!ARLIST!) do (
             if ["%%a"] == ["1610"] call:createV2Gp1610 !gpResX2!
             if ["%%a"] == ["219"]  call:createV2Gp219 !gpResX2!
+            if ["%%a"] == ["219"]  call:createV2Gp329 !gpResX2!
             if ["%%a"] == ["43"]   call:createV2Gp43 !gpResX2!
             if ["%%a"] == ["489"]  call:createV2Gp489 !gpResX2!
         )
 
         set "name=!gpFolderName:_%resX2%p=!"
         set "name=!name:_graphicPacksV2\=!"
-        @echo --------------------------------------------------------- >> !cgpLogFile!
-        @echo ---------------------------------------------------------
-        @echo ^> !name:"=!^'s V2 extra graphic packs created successfully >> !cgpLogFile!
-        @echo ^> !name:"=!^'s V2 extra graphic packs created successfully
+        echo --------------------------------------------------------- >> !cgpLogFile!
+        echo ---------------------------------------------------------
+        echo ^> !name:"=!^'s V2 extra graphic packs created successfully >> !cgpLogFile!
+        echo ^> !name:"=!^'s V2 extra graphic packs created successfully
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     REM : function to create extra graphic packs for a game
-    :createExtralgfxpv
+    :createExtraLastVersion
 
         set "gpFolderName="%~1""
-        set "gplgfxpv="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
+        set "gpLastVersion="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
 
-        echo !gplgfxpv! | find /V "_Resolution" > NUL 2>&1 && goto:eof
+        echo !gpLastVersion! | find /V "_Resolution" > NUL 2>&1 && goto:eof
 
-        set "rulesFile="!gplgfxpv:"=!\rules.txt""
+        set "rulesFile="!gpLastVersion:"=!\rules.txt""
 
         REM : Windows formating (LF -> CRLF)
         call:dosToUnix
 
         REM : Get the version of the GFX pack
-        set "versionRead=NOT_FOUND"
-        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "versionRead=%%i"
-        set "versionRead=%versionRead: =%"
-        if ["!versionRead!"] == ["NOT_FOUND"] (
+        set "vGfxPacks=NOT_FOUND"
+        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "vGfxPacks=%%i"
+        set "vGfxPacks=%vGfxPacks: =%"
+        if ["!vGfxPacks!"] == ["NOT_FOUND"] (
             echo ERROR : version was not found in !rulesFile! >> !cgpLogFile!
             echo ERROR : version was not found in !rulesFile!
             goto:eof
@@ -509,7 +510,7 @@ REM : functions
         if not ["!ed!"] == [""] echo extra directives detected ^: && echo !ed! && echo.
 
         REM : complete 16/9 (if here => COMPLETE_GP=YES)
-        call:createlgfxpv169
+        call:createGfxPacks169
 
         REM : reset extra directives file
         if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
@@ -517,22 +518,24 @@ REM : functions
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
 
-            if ["%%a"] == ["1610"] call:createlgfxpv1610
+            if ["%%a"] == ["1610"] call:createGfxPacks1610
 
-            if ["%%a"] == ["219"]  call:createlgfxpv219
+            if ["%%a"] == ["219"]  call:createGfxPacks219
 
-            if ["%%a"] == ["43"]   call:createlgfxpv43
+            if ["%%a"] == ["329"]  call:createGfxPacks329
 
-            if ["%%a"] == ["489"]   call:createlgfxpv489
+            if ["%%a"] == ["43"]   call:createGfxPacks43
+
+            if ["%%a"] == ["489"]   call:createGfxPacks489
 
             REM : reset extra directives file
             if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
 
-        @echo --------------------------------------------------------- >> !cgpLogFile!
-        @echo ---------------------------------------------------------
-        @echo ^> !gpFolderName:"=!^'s !versionRead! extra presets created successfully >> !cgpLogFile!
-        @echo ^> !gpFolderName:"=!^'s !versionRead! extra presets created successfully
+        echo --------------------------------------------------------- >> !cgpLogFile!
+        echo ---------------------------------------------------------
+        echo ^> !gpFolderName:"=!^'s !vGfxPacks! extra presets created successfully >> !cgpLogFile!
+        echo ^> !gpFolderName:"=!^'s !vGfxPacks! extra presets created successfully
 
         del /F !extraDirectives! > NUL 2>&1
         del /F !extraDirectives169! > NUL 2>&1
@@ -545,7 +548,7 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -572,9 +575,9 @@ REM : functions
     REM : force 169 values in case of BatchFw already treated the rules.txt for this game
 
         REM : 16/9 windowed
-        call:updateExtraDirectives "aspectRatio = \(11016.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
-        call:updateExtraDirectives "UIAspectY = \(11016.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
-        call:updateExtraDirectives "GameAspect = \(11016.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+        call:updateExtraDirectives "aspectRatio = \(11022.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectY = \(11022.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectY = 1.0"
+        call:updateExtraDirectives "GameAspect = \(11022.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
 
         REM : 21/9
         call:updateExtraDirectives "aspectRatio = \(13760.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
@@ -585,6 +588,16 @@ REM : functions
         call:updateExtraDirectives "aspectRatio = \(14812.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
         call:updateExtraDirectives "UIAspectX = \(14812.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
         call:updateExtraDirectives "GameAspect = \(14812.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+
+        REM : 32/9
+        call:updateExtraDirectives "aspectRatio = \(20480.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(20480.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(20480.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
+
+        REM : 32/9 windowed
+        call:updateExtraDirectives "aspectRatio = \(22044.0\/5760.0\)" "aspectRatio = (16.0/9.0)"
+        call:updateExtraDirectives "UIAspectX = \(22044.0\/5760.0\)\/\(!nativeWidth!.0\/!nativeHeight!.0\)" "UIAspectX = 1.0"
+        call:updateExtraDirectives "GameAspect = \(22044.0\/5760.0\)" "GameAspect=(!nativeWidtht!/!nativeHeight!)"
 
         REM : 4/3
         call:updateExtraDirectives "aspectRatio = \(4.0\/3.0\)" "aspectRatio = (16.0/9.0)"
@@ -630,52 +643,52 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : The for next method are only used in case of a not supported game in Shlashiee repo (if %gplgfxpvexist% EQU 0)
+    REM : The for next method are only used in case of a not supported game in Shlashiee repo (if %gpLastVersionExist% EQU 0)
 
-    :initlgfxpvResGraphicPack
+    :initLastVersionResGraphicPack
 
         REM : GFX version to set
         set "setup="!BFW_PATH:"=!\setup.bat""
-        set "lgfxpv=NONE"
-        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
-        set "lgfxpv=!lgfxpv:"=!"
+        set "LastVersion=NONE"
+        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
+        set "LastVersion=!LastVersion:"=!"
 
-        @echo [Definition] > !bfwRulesFile!
-        @echo titleIds = !titleIdList! >> !bfwRulesFile!
+        echo [Definition] > !bfwRulesFile!
+        echo titleIds = !titleIdList! >> !bfwRulesFile!
 
-        @echo name = Resolution >> !bfwRulesFile!
-        @echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
-        @echo description = Created by BatchFW. Changes the resolution of the game >> !bfwRulesFile!
-        @echo version = !lgfxpv! >> !bfwRulesFile!
-        @echo # >> !bfwRulesFile!
-        @echo [Preset] >> !bfwRulesFile!
-        @echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !bfwRulesFile!
-        @echo $width = %nativeWidth% >> !bfwRulesFile!
-        @echo $height = %nativeHeight% >> !bfwRulesFile!
-        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
-        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
-        @echo # >> !bfwRulesFile!
+        echo name = Resolution >> !bfwRulesFile!
+        echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
+        echo description = Created by BatchFW. Changes the resolution of the game >> !bfwRulesFile!
+        echo version = !LastVersion! >> !bfwRulesFile!
+        echo # >> !bfwRulesFile!
+        echo [Preset] >> !bfwRulesFile!
+        echo name = %nativeWidth%x%nativeHeight% ^(Default^) >> !bfwRulesFile!
+        echo $width = %nativeWidth% >> !bfwRulesFile!
+        echo $height = %nativeHeight% >> !bfwRulesFile!
+        echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :fillReslgfxpv
+    :fillResLastVersion
         set "overwriteWidth=%~1"
         set "overwriteHeight=%~2"
         set "desc=%~3"
 
-        @echo [Preset] >> !bfwRulesFile!
-        @echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !bfwRulesFile!
-        @echo $width = %overwriteWidth% >> !bfwRulesFile!
-        @echo $height = %overwriteHeight% >> !bfwRulesFile!
-        @echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
-        @echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
-        @echo # >> !bfwRulesFile!
+        echo [Preset] >> !bfwRulesFile!
+        echo name = %overwriteWidth%x%overwriteHeight% %desc% >> !bfwRulesFile!
+        echo $width = %overwriteWidth% >> !bfwRulesFile!
+        echo $height = %overwriteHeight% >> !bfwRulesFile!
+        echo $gameWidth = %nativeWidth% >> !bfwRulesFile!
+        echo $gameHeight = %nativeHeight% >> !bfwRulesFile!
+        echo # >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :finalizeReslgfxpv
+    :finalizeResLastVersion
 
 
         REM : res ratios instructions ------------------------------------------------------
@@ -693,7 +706,7 @@ REM : functions
         call:mulfloat "!targetHeight!.000" "1.777" 3 targetWidth
 
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
-        call:writeRoundedlgfxpvFilters >> !bfwRulesFile!
+        call:writeRoundedLastVersionFilters >> !bfwRulesFile!
 
         if !targetHeight! LEQ 8 goto:formatUtf8
         if !resRatio! GEQ 8 goto:formatUtf8
@@ -702,82 +715,82 @@ REM : functions
 
         :formatUtf8
         REM : add commonly used 16/9 res filters
-        @echo # add commonly used 16^/9 res filters >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
+        echo # add commonly used 16^/9 res filters >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
 
         if %nativeHeight% EQU 720 (
             REM : (1080/2 = 540, for 1080 treated when resRatio = 2)
 
-            @echo # 960 x 540 Res >> !bfwRulesFile!
-            @echo [TextureRedefine] >> !bfwRulesFile!
-            @echo width = 960 >> !bfwRulesFile!
-            @echo height = 540 >> !bfwRulesFile!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !bfwRulesFile!
-            @echo #  >> !bfwRulesFile!
+            echo # 960 x 540 Res >> !bfwRulesFile!
+            echo [TextureRedefine] >> !bfwRulesFile!
+            echo width = 960 >> !bfwRulesFile!
+            echo height = 540 >> !bfwRulesFile!
+            echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !bfwRulesFile!
+            echo #  >> !bfwRulesFile!
 
-            @echo # 960 x 544 Res >> !bfwRulesFile!
-            @echo [TextureRedefine] >> !bfwRulesFile!
-            @echo width = 960 >> !bfwRulesFile!
-            @echo height = 544 >> !bfwRulesFile!
-            @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-            @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !bfwRulesFile!
-            @echo #  >> !bfwRulesFile!
+            echo # 960 x 544 Res >> !bfwRulesFile!
+            echo [TextureRedefine] >> !bfwRulesFile!
+            echo width = 960 >> !bfwRulesFile!
+            echo height = 544 >> !bfwRulesFile!
+            echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+            echo formatsExcluded = 0x431 >> !bfwRulesFile!
+            echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
+            echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !bfwRulesFile!
+            echo #  >> !bfwRulesFile!
         )
 
-        @echo # 1137 x 640 Res >> !bfwRulesFile!
-        @echo [TextureRedefine] >> !bfwRulesFile!
-        @echo width = 1137 >> !bfwRulesFile!
-        @echo height = 640 >> !bfwRulesFile!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !bfwRulesFile!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
+        echo # 1137 x 640 Res >> !bfwRulesFile!
+        echo [TextureRedefine] >> !bfwRulesFile!
+        echo width = 1137 >> !bfwRulesFile!
+        echo height = 640 >> !bfwRulesFile!
+        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !bfwRulesFile!
+        echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
 
-        @echo # 1152 x 640 Res >> !bfwRulesFile!
-        @echo [TextureRedefine] >> !bfwRulesFile!
-        @echo width = 1152 >> !bfwRulesFile!
-        @echo height = 640 >> !bfwRulesFile!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !bfwRulesFile!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
+        echo # 1152 x 640 Res >> !bfwRulesFile!
+        echo [TextureRedefine] >> !bfwRulesFile!
+        echo width = 1152 >> !bfwRulesFile!
+        echo height = 640 >> !bfwRulesFile!
+        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !bfwRulesFile!
+        echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
 
-        @echo # 896 x 504 Res >> !bfwRulesFile!
-        @echo [TextureRedefine] >> !bfwRulesFile!
-        @echo width = 896 >> !bfwRulesFile!
-        @echo height = 504 >> !bfwRulesFile!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !bfwRulesFile!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
+        echo # 896 x 504 Res >> !bfwRulesFile!
+        echo [TextureRedefine] >> !bfwRulesFile!
+        echo width = 896 >> !bfwRulesFile!
+        echo height = 504 >> !bfwRulesFile!
+        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !bfwRulesFile!
+        echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
 
-        @echo # 768 x 432 Res >> !bfwRulesFile!
-        @echo [TextureRedefine] >> !bfwRulesFile!
-        @echo width = 768 >> !bfwRulesFile!
-        @echo height = 432 >> !bfwRulesFile!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !bfwRulesFile!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !bfwRulesFile!
-        @echo #  >> !bfwRulesFile!
+        echo # 768 x 432 Res >> !bfwRulesFile!
+        echo [TextureRedefine] >> !bfwRulesFile!
+        echo width = 768 >> !bfwRulesFile!
+        echo height = 432 >> !bfwRulesFile!
+        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !bfwRulesFile!
+        echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !bfwRulesFile!
+        echo #  >> !bfwRulesFile!
 
-        @echo # 512 x 288 Res >> !bfwRulesFile!
-        @echo [TextureRedefine] >> !bfwRulesFile!
-        @echo width = 512 >> !bfwRulesFile!
-        @echo height = 288 >> !bfwRulesFile!
-        @echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        @echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        @echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !bfwRulesFile!
-        @echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !bfwRulesFile!
+        echo # 512 x 288 Res >> !bfwRulesFile!
+        echo [TextureRedefine] >> !bfwRulesFile!
+        echo width = 512 >> !bfwRulesFile!
+        echo height = 288 >> !bfwRulesFile!
+        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
+        echo formatsExcluded = 0x431 >> !bfwRulesFile!
+        echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !bfwRulesFile!
+        echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !bfwRulesFile!
 
         REM : force UTF8 format
         set "utf8=!bfwRulesFile:rules.txt=rules.bfw_tmp!"
@@ -788,25 +801,25 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :writeRoundedlgfxpvFilters
+    :writeRoundedLastVersionFilters
 
         REM : loop on -8,-4,0,4,12 (rounded values)
         set /A "rh=0"
         for /L %%i in (-8,4,12) do (
 
-            @echo # 1/!resRatio! Res rounded at %%i
-            @echo [TextureRedefine]
-            @echo width = !targetWidth!
+            echo # 1/!resRatio! Res rounded at %%i
+            echo [TextureRedefine]
+            echo width = !targetWidth!
 
             set /A "rh=!targetHeight!+%%i"
-            @echo height = !rh!
-            @echo tileModesExcluded = 0x001 # For Video Playback
-            @echo formatsExcluded = 0x431
-            @echo overwriteWidth = ^($width^/$gameWidth^) ^* !targetWidth!
-            @echo overwriteHeight = ^($height^/$gameHeight^) ^* !rh!
-            @echo #
+            echo height = !rh!
+            echo tileModesExcluded = 0x001 # For Video Playback
+            echo formatsExcluded = 0x431
+            echo overwriteWidth = ^($width^/$gameWidth^) ^* !targetWidth!
+            echo overwriteHeight = ^($height^/$gameHeight^) ^* !rh!
+            echo #
         )
-        @echo #
+        echo #
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -831,8 +844,8 @@ REM : functions
         REM : height step
         set /A "dh=180"
 
-        @echo Create 16^/9 missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 16^/9 missing V2 resolution packs
+        echo Create 16^/9 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 16^/9 missing V2 resolution packs
 
         REM : 16/9 fullscreen graphic packs
         set /A "h=360"
@@ -854,8 +867,8 @@ REM : functions
 
         :169_windowedV2
         echo !ARLIST! | find /I /V "169" > NUL 2>&1 && goto:eof
-        @echo Create 16^/9 windowed missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 16^/9 windowed missing V2 resolution packs
+        echo Create 16^/9 windowed missing V2 resolution packs >> !cgpLogFile!
+        echo Create 16^/9 windowed missing V2 resolution packs
 
         REM : 16/9 windowed graphic packs
         set /A "h=360"
@@ -899,13 +912,13 @@ REM pause
     REM : ------------------------------------------------------------------
 
 
-    :createlgfxpv169
+    :createGfxPacks169
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 16^/9 presets in GFX resolution pack >> !cgpLogFile!
-        @echo Complete 16^/9 presets in GFX resolution pack
+        echo Complete 16^/9 presets in GFX resolution pack >> !cgpLogFile!
+        echo Complete 16^/9 presets in GFX resolution pack
         set "edu=!ed!"
 
         REM : 16/9 fullscreen graphic packs
@@ -915,12 +928,12 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if !h! NEQ %nativeHeight% if %gplgfxpvexist% EQU 0 call:fillReslgfxpv !w! !h! " (16:9)"
+            if !h! NEQ %nativeHeight% if %gpLastVersionExist% EQU 0 call:fillResLastVersion !w! !h! " (16:9)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
         )
-        if %gplgfxpvexist% EQU 0 goto:eof
+        if %gpLastVersionExist% EQU 0 goto:eof
 
         REM : complete existing 16/9 resolution
         set /A "h=360"
@@ -932,7 +945,7 @@ REM pause
 
         for /L %%p in (1,1,%downIter%) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv169 " (16:9)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion169 " (16:9)"
 
             set /A "h=!h!+%dh%"
             set /A "w=!w!+%dw%"
@@ -944,7 +957,7 @@ REM pause
         set /A "dw=320"
         for /L %%p in (%supIter%,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv169 " (16:9)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion169 " (16:9)"
 
             set /A "h=!h!-%dh%"
             set /A "w=!w!-%dw%"
@@ -955,32 +968,32 @@ REM pause
         REM : create windowed presets only if user chosen it during setup
 
         :169_windowed
-        @echo Create 16^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 16^/9 windowed presets in GFX resolution pack
+        echo Create 16^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 16^/9 windowed presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
-            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (11016.0/5760.0)"
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (11022.0/5760.0)"
 
             REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
-            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (11016.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+            call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (11022.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
-            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (11016.0/5760.0)"
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (11022.0/5760.0)"
         )
 
         REM : 16/9 windowed graphic packs
         set /A "h=5760"
-        set /A "w=11016"
+        set /A "w=11022"
         set /A "dw=344"
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:9) windowed"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*344-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(16^:9^) windowed"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (16:9) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(16^:9^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1006,8 +1019,8 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        @echo Create 21^/9 missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 21^/9 missing V2 resolution packs
+        echo Create 21^/9 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 21^/9 missing V2 resolution packs
 
         REM : 21/9 fullscreen graphic packs
         set /A "h=360"
@@ -1029,8 +1042,8 @@ REM pause
 
         :219_windowedV2
         REM : 21/9 windowed graphic packs
-        @echo Create 21^/9 windowed V2 resolution packs >> !cgpLogFile!
-        @echo Create 21^/9 windowed V2 resolution packs
+        echo Create 21^/9 windowed V2 resolution packs >> !cgpLogFile!
+        echo Create 21^/9 windowed V2 resolution packs
 
         set /A "h=360"
         set /A "w=904"
@@ -1052,13 +1065,75 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createlgfxpv219
+    :createV2Gp329
+
+        set "gp="%~1""
+        set "gpName=!gp:_%resX2%p=!"
+        set "description= (32:9)"
+
+        REM : search for resX2p329
+        set "gpResX2p_329="!gp:"=!329""
+        if exist !gpResX2p_329! (
+            set "gp=!gpResX2p_329!"
+            set "description="
+        )
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 21^/9 presets in GFX resolution pack >> !cgpLogFile!
-        @echo Complete 21^/9 presets in GFX resolution pack
+        echo Create 32^/9 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 32^/9 missing V2 resolution packs
+
+        REM : 32/9 fullscreen graphic packs
+        set /A "h=360"
+        set /A "w=1280"
+        set /A "dw=640"
+
+        for /L %%p in (1,1,31) do (
+
+            set "newGp="!gpName:"=!_!h!p329""
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description% > NUL 2>&1
+
+            set /A "h=!h!+%dh%"
+            set /A "w=!w!+%dw%"
+
+            set /A "mod4=%%p%%4"
+            if !mod4! EQU 0 call:waitChildrenProcessesEnd
+        )
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
+
+        :329_windowedV2
+        REM : 32/9 windowed graphic packs
+        echo Create 32^/9 windowed V2 resolution packs >> !cgpLogFile!
+        echo Create 32^/9 windowed V2 resolution packs
+
+        set /A "h=360"
+        set /A "w=1378"
+        set /A "dw=692"
+
+        set "description=%description% windowed"
+
+        for /L %%p in (1,1,31) do (
+
+            set "newGp="!gpName:"=!_!h!p329_windowed""
+            if not exist !newGp! wscript /nologo !StartHidden! !instanciateResX2gp! %nativeWidth% %nativeHeight% !gp! !newGp! !w! !h! %description% > NUL 2>&1
+
+            set /A "h=!h!+%dh%"
+            set /A "w=!w!+%dw%"
+
+            set /A "mod4=%%p%%4"
+            if !mod4! EQU 0 call:waitChildrenProcessesEnd
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :createGfxPacks219
+
+        REM : height step
+        set /A "dh=180"
+
+        echo Complete 21^/9 presets in GFX resolution pack >> !cgpLogFile!
+        echo Complete 21^/9 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1078,11 +1153,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (21:9)"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*420-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(21^:9^)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (21:9)"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(21^:9^)"
         )
 
             set /A "h=!h!-%dh%"
@@ -1091,8 +1166,8 @@ REM pause
         if ["!screenMode!"] == ["fullscreen"] goto:eof
 
         :219_windowed
-        @echo Create 21^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 21^/9 windowed presets in GFX resolution pack
+        echo Create 21^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 21^/9 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1111,11 +1186,83 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (21:9) windowed"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*452-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(21^:9^) windowed"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (21:9) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(21^:9^) windowed"
+        )
+
+            set /A "h=!h!-%dh%"
+            set /A "w=!w!-%dw%"
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :createGfxPacks329
+
+        REM : height step
+        set /A "dh=180"
+
+        echo Complete 32^/9 presets in GFX resolution pack >> !cgpLogFile!
+        echo Complete 32^/9 presets in GFX resolution pack
+
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (20480.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (20480.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (20480.0/5760.0)"
+        )
+
+        REM : 32/9 fullscreen graphic packs
+        set /A "h=5760"
+        set /A "w=20480"
+        set /A "dw=640"
+
+        for /L %%p in (1,1,31) do (
+
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (32:9)"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(32^:9^)"
+        )
+
+            set /A "h=!h!-%dh%"
+            set /A "w=!w!-%dw%"
+        )
+        if ["!screenMode!"] == ["fullscreen"] goto:eof
+
+        :329_windowed
+        echo Create 32^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 32^/9 windowed presets in GFX resolution pack
+        set "edu=!ed!"
+        if not ["!ed!"] == [""] (
+
+            call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (22044.0/5760.0)"
+
+            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
+            call:updateExtraDirectives "UIAspectX[ ]*=[ ]*1.0" "UIAspectX = (22044.0/5760.0)/(!nativeWidth!.0/!nativeHeight!.0)"
+
+            call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (22044.0/5760.0)"
+        )
+
+        REM : 32/9 windowed graphic packs
+        set /A "h=5760"
+        set /A "w=22044"
+        set /A "dw=452"
+
+        for /L %%p in (1,1,31) do (
+
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (32:9) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(32^:9^) windowed"
         )
 
             set /A "h=!h!-%dh%"
@@ -1156,8 +1303,8 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        @echo Create 4^/3 missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 4^/3 missing V2 resolution packs
+        echo Create 4^/3 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 4^/3 missing V2 resolution packs
 
         REM : 4/3 fullscreen graphic packs
         set /A "h=360"
@@ -1179,8 +1326,8 @@ REM pause
 
         :43_windowedV2
         REM : 4/3 windowed graphic packs
-        @echo Create 4^/3 windowed missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 4^/3 windowed missing V2 resolution packs
+        echo Create 4^/3 windowed missing V2 resolution packs >> !cgpLogFile!
+        echo Create 4^/3 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=516"
         set /A "dw=258"
@@ -1202,13 +1349,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createlgfxpv43
+    :createGfxPacks43
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 4^/3 presets in GFX resolution pack >> !cgpLogFile!
-        @echo Complete 4^/3 presets in GFX resolution pack
+        echo Complete 4^/3 presets in GFX resolution pack >> !cgpLogFile!
+        echo Complete 4^/3 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1227,11 +1374,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (4:3)"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*540-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(4^:3^)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (4:3)"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(4^:3^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1241,8 +1388,8 @@ REM pause
 
         :43_windowed
         REM : 4/3 windowed graphic packs
-        @echo Create 4^/3 windowed presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 4^/3 windowed presets in GFX resolution pack
+        echo Create 4^/3 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 4^/3 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1260,11 +1407,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (4:3) windowed"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*582-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(4^:3^) windowed"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (4:3) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(4^:3^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1289,8 +1436,8 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        @echo Create 48^/9 missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 48^/9 missing V2 resolution packs
+        echo Create 48^/9 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 48^/9 missing V2 resolution packs
 
         REM : 48/9 fullscreen graphic packs
         set /A "h=360"
@@ -1312,8 +1459,8 @@ REM pause
 
         :489_windowedV2
         REM : 48/9 windowed graphic packs
-        @echo Create 48^/9 windowed missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 48^/9 windowed missing V2 resolution packs
+        echo Create 48^/9 windowed missing V2 resolution packs >> !cgpLogFile!
+        echo Create 48^/9 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=2066"
         set /A "dw=1032"
@@ -1334,13 +1481,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createlgfxpv489
+    :createGfxPacks489
 
         REM : height step
         set /A "dh=180"
 
-        @echo Complete 48^/9 presets in GFX resolution pack >> !cgpLogFile!
-        @echo Complete 48^/9 presets in GFX resolution pack
+        echo Complete 48^/9 presets in GFX resolution pack >> !cgpLogFile!
+        echo Complete 48^/9 presets in GFX resolution pack
 
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
@@ -1360,11 +1507,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (48:9)"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*960-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(48^:9^)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (48:9)"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(48^:9^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1374,8 +1521,8 @@ REM pause
 
         :489_windowed
         REM : 49/9 windowed graphic packs
-        @echo Create 48^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 48^/9 windowed presets in GFX resolution pack
+        echo Create 48^/9 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 48^/9 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1393,11 +1540,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " 48:9) windowed"
-                      if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*1034-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(48^:9^) windowed"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " 48:9) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(48^:9^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1415,8 +1562,8 @@ REM pause
         REM : height step
         set /A "dh=180"
 
-        @echo Create 16^/10 missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 16^/10 missing V2 resolution packs
+        echo Create 16^/10 missing V2 resolution packs >> !cgpLogFile!
+        echo Create 16^/10 missing V2 resolution packs
 
         REM : 16/10 full screen graphic packs
         set /A "h=360"
@@ -1438,8 +1585,8 @@ REM pause
 
         :1610_windowedV2
         REM : 16/10 windowed graphic packs
-        @echo Create 16^/10 windowed missing V2 resolution packs >> !cgpLogFile!
-        @echo Create 16^/10 windowed missing V2 resolution packs
+        echo Create 16^/10 windowed missing V2 resolution packs >> !cgpLogFile!
+        echo Create 16^/10 windowed missing V2 resolution packs
         set /A "h=360"
         set /A "w=620"
         set /A "dw=310"
@@ -1460,14 +1607,14 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :createlgfxpv1610
+    :createGfxPacks1610
 
 
         REM : height step
         set /A "dh=180"
 
-        @echo Create 16^/10 presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 16^/10 presets in GFX resolution pack
+        echo Create 16^/10 presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 16^/10 presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1486,11 +1633,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:10)"
-                      if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*288-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(16^:10^)"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (16:10)"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(16^:10^)"
             )
 
             set /A "h=!h!-%dh%"
@@ -1500,8 +1647,8 @@ REM pause
 
         :1610_windowed
         REM : 16/10 windowed graphic packs
-        @echo Create 16^/10 windowed presets in GFX resolution pack >> !cgpLogFile!
-        @echo Create 16^/10 windowed presets in GFX resolution pack
+        echo Create 16^/10 windowed presets in GFX resolution pack >> !cgpLogFile!
+        echo Create 16^/10 windowed presets in GFX resolution pack
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
 
@@ -1519,11 +1666,11 @@ REM pause
 
         for /L %%p in (1,1,31) do (
 
-            if %gplgfxpvexist% EQU 1 call:addResolgfxpv " (16:10) windowed"
-            if %gplgfxpvexist% EQU 0 (
-                set /A "ih=34*180-!h!"
-                set /A "iw=34*310-!w!"
-                call:fillReslgfxpv !iw! !ih! "^(16^:10^) windowed"
+            if %gpLastVersionExist% EQU 1 call:addResoLastVersion " (16:10) windowed"
+            if %gpLastVersionExist% EQU 0 (
+                set /A "ih=34*!dh!-!h!"
+                set /A "iw=34*!dw!-!w!"
+                call:fillResLastVersion !iw! !ih! "^(16^:10^) windowed"
             )
 
             set /A "h=!h!-%dh%"
@@ -1536,9 +1683,9 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFilelgfxpv!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileLastVersion!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\n\$height = !h!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !w!\n\$height = !h!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileLastVersion!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1546,35 +1693,35 @@ REM pause
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFilelgfxpv!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*%nativeWidth%[ ]*\n\$gameHeight[ ]*=[ ]*%nativeHeight%" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileLastVersion!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
+        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = %nativeWidth%\n\$gameHeight = %nativeHeight%" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileLastVersion!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
 
-    REM : function to add an extra 16/9 preset in lgfxpv graphic pack of the game
-    :addResolgfxpv169
+    REM : function to add an extra 16/9 preset in graphic pack of the game
+    :addResoLastVersion169
 
         set "desc="%~1""
 
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
-        set "fnrLogAddResolgfxpv169="!fnrLogFolder:"=!\addResolgfxpv169_!w!x!h!.log""
-        if exist !fnrLogAddResolgfxpv169! del /F !fnrLogAddResolgfxpv169! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResolgfxpv169!
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResolgfxpv169! ^| find /I /V "^!" ^| find "File:"') do (
-            @echo Preset !w!x!h! already exists >> !cgpLogFile!
-            @echo Preset !w!x!h! already exists
+        set "fnrLogAddResoLastVersion169="!fnrLogFolder:"=!\addResoLastVersion169_!w!x!h!.log""
+        if exist !fnrLogAddResoLastVersion169! del /F !fnrLogAddResoLastVersion169! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoLastVersion169!
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoLastVersion169! ^| find /I /V "^!" ^| find "File:"') do (
+            echo Preset !w!x!h! already exists >> !cgpLogFile!
+            echo Preset !w!x!h! already exists
             goto:eof
         )
 
-        @echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
-        @echo Adding !w!x!h!!desc:"=! preset
+        echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
+        echo Adding !w!x!h!!desc:"=! preset
 
         REM : replacing %wToReplace%xresX2 in rules.txt
-        set "logFilelgfxpv="!fnrLogFolder:"=!\!gpFolderName:"=!-lgfxpv_!h!x!w!.log""
-        if exist !logFilelgfxpv! del /F !logFilelgfxpv! > NUL 2>&1
+        set "logFileLastVersion="!fnrLogFolder:"=!\!gpFolderName:"=!-LastVersion_!h!x!w!.log""
+        if exist !logFileLastVersion! del /F !logFileLastVersion! > NUL 2>&1
 
         if !h! GTR !nativeHeight! call:pushBack
         if !h! LSS !nativeHeight! call:pushFront
@@ -1582,36 +1729,36 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to add an extra preset in lgfxpv graphic pack of the game
-    :addResolgfxpv
+    REM : function to add an extra preset in graphic pack of the game
+    :addResoLastVersion
         set "desc="%~1""
 
         REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
 
-        set "fnrLogAddResolgfxpv="!fnrLogFolder:"=!\addResolgfxpv_!w!x!h!.log""
-        if exist !fnrLogAddResolgfxpv! del /F !fnrLogAddResolgfxpv! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResolgfxpv!
+        set "fnrLogAddResoLastVersion="!fnrLogFolder:"=!\addResoLastVersion_!w!x!h!.log""
+        if exist !fnrLogAddResoLastVersion! del /F !fnrLogAddResoLastVersion! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoLastVersion!
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResolgfxpv! ^| find /I /V "^!" ^| find "File:"') do (
-            @echo Preset !w!x!h!!desc:"=! already exists >> !cgpLogFile!
-            @echo Preset !w!x!h!!desc:"=! already exists
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoLastVersion! ^| find /I /V "^!" ^| find "File:"') do (
+            echo Preset !w!x!h!!desc:"=! already exists >> !cgpLogFile!
+            echo Preset !w!x!h!!desc:"=! already exists
             goto:eof
         )
 
-        @echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
-        @echo Adding !w!x!h!!desc:"=! preset
+        echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
+        echo Adding !w!x!h!!desc:"=! preset
 
         REM : Adding !h!x!w! in rules.txt
-        set "logFilelgfxpv="!fnrLogFolder:"=!\!gpFolderName:"=!-lgfxpv_!h!x!w!.log""
-        if exist !logFilelgfxpv! del /F !logFilelgfxpv! > NUL 2>&1
+        set "logFileLastVersion="!fnrLogFolder:"=!\!gpFolderName:"=!-LastVersion_!h!x!w!.log""
+        if exist !logFileLastVersion! del /F !logFileLastVersion! > NUL 2>&1
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !versionRead![ ]*" --replace "version = !versionRead!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFilelgfxpv!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPacks![ ]*" --replace "version = !vGfxPacks!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileLastVersion!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gplgfxpv! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !versionRead![ ]*" --replace "version = !versionRead!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFilelgfxpv!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPacks![ ]*" --replace "version = !vGfxPacks!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileLastVersion!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1771,20 +1918,20 @@ REM pause
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -1801,7 +1948,7 @@ REM pause
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             exit /b 9
         )
         REM : set char code set, output to host log file

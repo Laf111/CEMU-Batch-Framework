@@ -48,16 +48,16 @@ REM : main
     :end
 
     if %nbArgs% GTR 5 (
-        @echo ERROR on arguments passed ^(%nbArgs%^)
-        @echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER TITLE
-        @echo given {%*}
+        echo ERROR on arguments passed ^(%nbArgs%^)
+        echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER TITLE
+        echo given {%*}
         pause
         exit /b 9
     )
     if %nbArgs% LSS 4 (
-        @echo ERROR on arguments passed ^(%nbArgs%^)
-        @echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER TITLE
-        @echo given {%*}
+        echo ERROR on arguments passed ^(%nbArgs%^)
+        echo SYNTAX^: "!THIS_SCRIPT!" WII-U_IP SYNC_TYPE LOCAL_FOLDER REMOTE_FOLDER TITLE
+        echo given {%*}
         pause
         exit /b 9
     )
@@ -66,7 +66,7 @@ REM : main
     set "wiiuIp=!args[0]!"
     ping -n 1 !wiiuIp! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
-        @echo ERROR^: !wiiuIp! was not found on your network ^!
+        echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
         exit /b 1
     )
@@ -74,7 +74,7 @@ REM : main
 
     set "SYNC_TYPE=!args[1]!"
     if not [!SYNC_TYPE!] == ["local"] if not [!SYNC_TYPE!] == ["remote"] (
-        @echo ERROR ^: !SYNC_TYPE! not equal to ^'local^' neither ^'remote^'"
+        echo ERROR ^: !SYNC_TYPE! not equal to ^'local^' neither ^'remote^'"
         pause
         exit /b 2
     )
@@ -82,17 +82,17 @@ REM : main
     set "LOCAL_FOLDER=!args[2]!"
     set "REMOTE_FOLDER=!args[3]!"
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if %nbArgs% EQU 5 (
         set "SITENAME=!args[4]!"
         set "SITENAME=!SITENAME:"=!"
 
-        @echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp!
-        @echo !SITENAME!
+        echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp!
+        echo !SITENAME!
     ) else (
-        @echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp! ^:
+        echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp! ^:
     )
-    @echo ----------------------------------------------------------
+    echo ----------------------------------------------------------
 
     REM : create localFolder if needed
     if not exist !LOCAL_FOLDER! mkdir !LOCAL_FOLDER! > NUL 2>&1
@@ -102,20 +102,20 @@ REM : main
             rmdir /Q /S !LOCAL_FOLDER! > NUL 2>&1
         )
         mkdir !LOCAL_FOLDER! > NUL 2>&1
-        @echo ^> Replacing !LOCAL_FOLDER! content with !REMOTE_FOLDER! one
+        echo ^> Replacing !LOCAL_FOLDER! content with !REMOTE_FOLDER! one
     ) else (
         REM : if remote mode, delete remote folder
         set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "rm "!REMOTE_FOLDER!"" "exit"  > !ftplogFile! 2>&1
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir "!REMOTE_FOLDER!"" "exit"  > !ftplogFile! 2>&1
-        @echo ^> Replacing !REMOTE_FOLDER! content with !LOCAL_FOLDER! one
+        echo ^> Replacing !REMOTE_FOLDER! content with !LOCAL_FOLDER! one
     )
 
     REM : run ftp transferts ^:
     !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "exit"
     set "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 @echo ERROR detected when transferring ^!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if !cr! NEQ 0 echo ERROR detected when transferring ^!
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if !cr! NEQ 0 exit /b !cr!
     exit /b 0
@@ -134,20 +134,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -163,7 +163,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

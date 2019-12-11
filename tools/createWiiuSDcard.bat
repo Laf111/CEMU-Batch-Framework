@@ -41,31 +41,31 @@ REM : main
     call:setCharSet
     cls
 
-    @echo =========================================================
-    @echo Prepare a SDcard for the Wii-U
-    @echo =========================================================
-    @echo.
-    @echo - format your device in FAT32 (32K clusters size)
-    @echo - install ^:
-    @echo       ^* HBL ^(HomeBrew Launcher^)
-    @echo       ^* appStore ^(HomeBrew AppStore^)
-    @echo       ^* DDD ^(WiiU Disk itle Dumper^)
-    @echo       ^* MOCHA ^(MOCHA CFW^)
-    @echo       ^* FTP everywhere for MOCHA ^(ftpiiu^)
-    @echo       ^* FTP everywhere for CBHC ^(ftpiiu^)
-    @echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)
-    @echo       ^* nanddumper ^(to dump your NAND and get online files^)
-    @echo       ^* sigpatcher2sysmenu ^(DLC patch with non permanent CFW^)
-    @echo       ^* wup_installer_gx2 ^(installer for WUP format^)
-    @echo.
-    @echo Once plugged in your Wii-U^, open the internet browser
-    @echo and enter the following adress ^: http^:^/^/wiiuexploit^.xyz
-    @echo ^(you might add this URL to your favorites^)
-    @echo.
-    @echo if your wiiu is connected to internet^, you can use
-    @echo appStore to update^/install other apps.
-    @echo.
-    @echo =========================================================
+    echo =========================================================
+    echo Prepare a SDcard for the Wii-U
+    echo =========================================================
+    echo.
+    echo - format your device in FAT32 (32K clusters size)
+    echo - install ^:
+    echo       ^* HBL ^(HomeBrew Launcher^)
+    echo       ^* appStore ^(HomeBrew AppStore^)
+    echo       ^* DDD ^(WiiU Disk itle Dumper^)
+    echo       ^* MOCHA ^(MOCHA CFW^)
+    echo       ^* FTP everywhere for MOCHA ^(ftpiiu^)
+    echo       ^* FTP everywhere for CBHC ^(ftpiiu^)
+    echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)
+    echo       ^* nanddumper ^(to dump your NAND and get online files^)
+    echo       ^* sigpatcher2sysmenu ^(DLC patch with non permanent CFW^)
+    echo       ^* wup_installer_gx2 ^(installer for WUP format^)
+    echo.
+    echo Once plugged in your Wii-U^, open the internet browser
+    echo and enter the following adress ^: http^:^/^/wiiuexploit^.xyz
+    echo ^(you might add this URL to your favorites^)
+    echo.
+    echo if your wiiu is connected to internet^, you can use
+    echo appStore to update^/install other apps.
+    echo.
+    echo =========================================================
     pause
 
     :askDrive
@@ -82,15 +82,15 @@ REM : main
     REM : format %SDCARD% with fat32format.exe
     !ffat32! -c64 %SDCARD%
     if !ERRORLEVEL! NEQ 0 goto:formatDrive
-    @echo.
-    @echo ---------------------------------------------------------
-    @echo Installing content^.^.^.
+    echo.
+    echo ---------------------------------------------------------
+    echo Installing content^.^.^.
     REM : install content
     set "sdCardContent="!BFW_RESOURCES_PATH:"=!\WiiuSDcard.rar""
 
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !sdCardContent! !SDCARD! > NUL 2>&1
-    @echo done
-    @echo =========================================================
+    echo done
+    echo =========================================================
 
     pause
 
@@ -110,20 +110,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -139,7 +139,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

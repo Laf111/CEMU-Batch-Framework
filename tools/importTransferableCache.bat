@@ -58,13 +58,13 @@ REM : main
     set "DATE=%ldt%"
 
     cls
-    @echo =========================================================
-    @echo Import a transferable cache file
-    @echo =========================================================
+    echo =========================================================
+    echo Import a transferable cache file
+    echo =========================================================
 
     REM : browse to the file
     :askInputFile
-    @echo Please browse to the transferable cache file
+    echo Please browse to the transferable cache file
 
     for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
@@ -77,7 +77,7 @@ REM : main
     set "SOURCE_FOLDER=!folder:~0,-2!""
 
     :askGameFolder
-    @echo Please browse to the game^'s folder
+    echo Please browse to the game^'s folder
 
     for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
@@ -90,7 +90,7 @@ REM : main
     call !tobeLaunch! !GAME_FOLDER_PATH!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !GAME_FOLDER_PATH! is not DOS compatible^!^, please choose another location
+        echo Path to !GAME_FOLDER_PATH! is not DOS compatible^!^, please choose another location
         pause
         goto:askGameFolder
     )
@@ -107,7 +107,7 @@ REM : main
     pushd !GAMES_FOLDER!
     REM : if no rpx file found, ignore GAME
     if [!RPX_FILE!] == ["NONE"] (
-        @echo This folder does not contain rpx file under a code subfolder
+        echo This folder does not contain rpx file under a code subfolder
         goto:askGameFolder
     )
 
@@ -129,11 +129,11 @@ REM : main
     :checkSizes
 
     if ["!sci!"] == ["NOT_FOUND"] (
-        @echo Error when computing shader cache name^.
-        @echo.
-        @echo Please^, launch the game at least one time
-        @echo ^(to let CEMU compute it^)
-        @echo and relaunch this script^.
+        echo Error when computing shader cache name^.
+        echo.
+        echo Please^, launch the game at least one time
+        echo ^(to let CEMU compute it^)
+        echo and relaunch this script^.
         exit 50
     )
     
@@ -159,10 +159,10 @@ REM : main
     for /F "tokens=*" %%a in (!oldCache!)  do set "oldSize=%%~za"
 
     if %newSize% LSS %oldSize% (
-        @echo WARNING the size of the new file is lower than your current cache
+        echo WARNING the size of the new file is lower than your current cache
         call:getUserInput "Do you want to continue? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] (
-            @echo Cancelled by user
+            echo Cancelled by user
             timout /T 3 > NUL 2>&1
             exit 1
         )
@@ -174,14 +174,14 @@ REM : main
     move /Y !TRANSF_CACHE! !newName! > NUL 2>&1
     robocopy !SOURCE_FOLDER! !TARGET_FOLDER! !sci!.bin > NUL 2>&1
 
-    @echo !TRANSF_CACHE! successfully copied to
-    @echo !TARGET_FOLDER! as !sci!.bin
+    echo !TRANSF_CACHE! successfully copied to
+    echo !TARGET_FOLDER! as !sci!.bin
 
-    @echo =========================================================
-    @echo This windows will close automatically in 12s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo This windows will close automatically in 12s
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
@@ -219,20 +219,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -289,7 +289,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

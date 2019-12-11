@@ -60,11 +60,11 @@ REM : main
 
     set "wiiuScanFolder="!BFW_WIIUSCAN_FOLDER:"=!\!DATE!""
 
-    @echo =========================================================
-    @echo Take a snapshot of Games^, updates and DLC and saves
-    @echo installed on your PC and on your Wii-U
-    @echo =========================================================
-    @echo.
+    echo =========================================================
+    echo Take a snapshot of Games^, updates and DLC and saves
+    echo installed on your PC and on your Wii-U
+    echo =========================================================
+    echo.
 
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
@@ -76,19 +76,19 @@ REM : main
         goto:checkConnection
     )
 
-    @echo On your Wii-U^, you need to ^:
-    @echo - disable the sleeping^/shutdown features
-    @echo - if you^'re using a permanent hack ^(CBHC^)^:
-    @echo    ^* launch HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for CBHC
-    @echo - if you^'re not^:
-    @echo    ^* first run Mocha CFW HomeBrewLauncher
-    @echo    ^* then ftp-everywhere for MOCHA
-    @echo.
-    @echo - get the IP adress displayed on Wii-U gamepad
-    @echo.
-    @echo Press any key to continue when you^'re ready
-    @echo ^(CTRL-C^) to abort
+    echo On your Wii-U^, you need to ^:
+    echo - disable the sleeping^/shutdown features
+    echo - if you^'re using a permanent hack ^(CBHC^)^:
+    echo    ^* launch HomeBrewLauncher
+    echo    ^* then ftp-everywhere for CBHC
+    echo - if you^'re not^:
+    echo    ^* first run Mocha CFW HomeBrewLauncher
+    echo    ^* then ftp-everywhere for MOCHA
+    echo.
+    echo - get the IP adress displayed on Wii-U gamepad
+    echo.
+    echo Press any key to continue when you^'re ready
+    echo ^(CTRL-C^) to abort
     pause
     cls
 
@@ -99,11 +99,11 @@ REM : main
     REM : and teh port
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
 
-    @echo Found an existing FTP configuration ^:
-    @echo.
-    @echo PortNumber=!ipRead!
-    @echo HostName=!portRead!
-    @echo.
+    echo Found an existing FTP configuration ^:
+    echo.
+    echo PortNumber=!ipRead!
+    echo HostName=!portRead!
+    echo.
 
     choice /C yn /N /M "Use this setup (y, n)? : "
 
@@ -130,7 +130,7 @@ REM : main
     call:getHostState !wiiuIp! state
 
     if !state! EQU 0 (
-        @echo ERROR^: !wiiuIp! was not found on your network ^!
+        echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
         exit 2
     )
@@ -138,8 +138,8 @@ REM : main
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-        @echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
-        @echo Pause this script until you fix it ^(CTRL-C to abort^)
+        echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection
     )
@@ -183,7 +183,7 @@ REM : main
 
         mkdir !WIIU_ACCOUNTS_FOLDER! > NUL 2>&1
 
-        @echo synchronize WII-U accounts
+        echo synchronize WII-U accounts
 
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize local "!WIIU_ACCOUNTS_FOLDER!" /storage_mlc/usr/save/system/act" "exit"
 
@@ -200,13 +200,13 @@ REM : main
     for %%i in (mlc usb) do (
         set "src=%%i"
 
-        @echo Scanning wii-u storage_!src!^.^.^.
+        echo Scanning wii-u storage_!src!^.^.^.
 
         REM : get saves list
         set "outputFile=!remoteSaves:SRC=%%i!"
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/save/00050000" "exit" > !outputFile!
         if !ERRORLEVEL! NEQ 0 (
-            @echo WARNING when getting saves list on storage_!src!
+            echo WARNING when getting saves list on storage_!src!
         )
 
         REM : get games list
@@ -215,21 +215,21 @@ REM : main
 
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/00050000"  "exit" > !outputFile!
         if !ERRORLEVEL! NEQ 0 (
-            @echo WARNING when getting games list on storage_!src!
+            echo WARNING when getting games list on storage_!src!
         )
 
         REM : get updates list
         set "outputFile=!remoteUpdates:SRC=%%i!"
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000E"  "exit" > !outputFile!
         if !ERRORLEVEL! NEQ 0 (
-            @echo WARNING when getting updates list on storage_!src!
+            echo WARNING when getting updates list on storage_!src!
         )
 
         REM : get DLC list
         set "outputFile=!remoteDlc:SRC=%%i!"
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000C"  "exit" > !outputFile!
         if !ERRORLEVEL! NEQ 0 (
-            @echo WARNING when getting DLC list on storage_!src!
+            echo WARNING when getting DLC list on storage_!src!
         )
 
         REM : parsing the %src%GamesList.txt and get the titleIds
@@ -275,16 +275,16 @@ REM : main
     set "tmpFile=!gamesList:csv=tmp!"
     cls
 
-    @echo =========================================================
-    @echo List of games found ^:
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo List of games found ^:
+    echo ---------------------------------------------------------
 
     REM : loop on the games found
     set /A "nbg=!nbGames!-1"
 
     for /L %%i in (0,1,!nbg!) do (
 
-        @echo !titles[%%i]! [!endTitlesId[%%i]!] found on !titlesSrc[%%i]!
+        echo !titles[%%i]! [!endTitlesId[%%i]!] found on !titlesSrc[%%i]!
 
         set "save="
         set "file=!remoteSaves:SRC=!"
@@ -298,19 +298,19 @@ REM : main
         set "dlc="
         type !file! | find /I "!endTitlesId[%%i]!" > NUL 2>&1 && set "dlc=X"
 
-        @echo !titles[%%i]!;^'!endTitlesId[%%i]!^';!titlesSrc[%%i]!;!save!;!update!;!dlc! >> !tmpFile!
+        echo !titles[%%i]!;^'!endTitlesId[%%i]!^';!titlesSrc[%%i]!;!save!;!update!;!dlc! >> !tmpFile!
     )
 
     REM : create gamesList
-    @echo title;endTitleId;source;save;update;dlc > !gamesList!
+    echo title;endTitleId;source;save;update;dlc > !gamesList!
     type !tmpFile! | sort >> !gamesList!
     del /F !tmpFile!
 
-    @echo =========================================================
-    @echo Total ^: !nbGames! games found ^(mlc ^: %nbGamesMlc%^, usb ^: %nbGamesUsb%^)
-    @echo =========================================================
-    @echo Results folder ^: !wiiuScanFolder!
-    @echo ---------------------------------------------------------
+    echo =========================================================
+    echo Total ^: !nbGames! games found ^(mlc ^: %nbGamesMlc%^, usb ^: %nbGamesUsb%^)
+    echo =========================================================
+    echo Results folder ^: !wiiuScanFolder!
+    echo ---------------------------------------------------------
     pause
 
     exit /b 0
@@ -329,20 +329,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -358,7 +358,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

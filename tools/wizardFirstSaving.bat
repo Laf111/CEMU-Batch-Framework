@@ -68,16 +68,16 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 7 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user RPX_FILE_PATH IGNORE_PRECOMP
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER GAME_TITLE PROFILE_FILE SETTINGS_FOLDER user RPX_FILE_PATH IGNORE_PRECOMP
+        echo given {%*}
         pause
         exit 99
     )
     REM : get and check CEMU_FOLDER
     set "CEMU_FOLDER=!args[0]!"
     if not exist !CEMU_FOLDER! (
-        @echo ERROR ^: CEMU folder !CEMU_FOLDER! does not exist ^!
+        echo ERROR ^: CEMU folder !CEMU_FOLDER! does not exist ^!
         pause
         exit 1
     )
@@ -101,7 +101,7 @@ REM : main
 
     set "RPX_FILE_PATH=!args[5]!"
     if not exist !RPX_FILE_PATH! (
-        @echo ERROR ^: RPX_FILE_PATH does not exist ^!
+        echo ERROR ^: RPX_FILE_PATH does not exist ^!
         pause
         exit 2
     )
@@ -109,12 +109,12 @@ REM : main
     set "IGNORE_PRECOMP=!args[6]!"
     set "IGNORE_PRECOMP=!IGNORE_PRECOMP:"=!"
  
-    @echo =========================================================
-    @echo - CEMU_FOLDER     ^: !CEMU_FOLDER!
-    @echo - GAME_TITLE      ^: !GAME_TITLE!
-    @echo - PROFILE_FILE    ^: !PROFILE_FILE!
-    @echo - SETTINGS_FOLDER ^: !SETTINGS_FOLDER!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo =========================================================
+    echo - CEMU_FOLDER     ^: !CEMU_FOLDER!
+    echo - GAME_TITLE      ^: !GAME_TITLE!
+    echo - PROFILE_FILE    ^: !PROFILE_FILE!
+    echo - SETTINGS_FOLDER ^: !SETTINGS_FOLDER!
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
@@ -130,24 +130,24 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     if not exist !META_FILE! (
-        @echo No meta^/meta^.xml file exist under game^'s folder ^!
+        echo No meta^/meta^.xml file exist under game^'s folder ^!
         set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
         if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
-        @echo Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv
-        @echo ^(if the game is not listed^, search internet to get its title Id and add a row in WiiU-Titles-Library^.csv^)
-        @echo Then close notepad to continue
+        echo Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv
+        echo ^(if the game is not listed^, search internet to get its title Id and add a row in WiiU-Titles-Library^.csv^)
+        echo Then close notepad to continue
 
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
-        @echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
-        @echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
-        @echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
-        @echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
-        @echo ^<^/menu^> >> !META_FILE!
-        @echo Paste-it in !META_FILE! file ^(replacing ################ by the title id of the game ^(16 characters^)^)
-        @echo Then close notepad to continue and relaunch
+        echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
+        echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
+        echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
+        echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
+        echo ^<^/menu^> >> !META_FILE!
+        echo Paste-it in !META_FILE! file ^(replacing ################ by the title id of the game ^(16 characters^)^)
+        echo Then close notepad to continue and relaunch
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
         cls
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
     )
 
     REM : get Title Id from meta.xml
@@ -176,15 +176,15 @@ REM : main
     for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] (
-        @echo ---------------------------------------------------------
-        @echo No informations found on the game with a titleId %titleId%
-        @echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
-        @echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
+        echo ---------------------------------------------------------
+        echo No informations found on the game with a titleId %titleId%
+        echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
+        echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
 
-        @echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
-        @echo and if 60FPS is the FPS when playing the game
-        @echo Edit and fix !wiiTitlesDataBase! if needed
-        @echo ---------------------------------------------------------
+        echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
+        echo and if 60FPS is the FPS when playing the game
+        echo Edit and fix !wiiTitlesDataBase! if needed
+        echo ---------------------------------------------------------
         pause
     )
 
@@ -210,15 +210,16 @@ REM : main
     REM : comparing version to V1.15.15
     set /A "v11515=2"
     call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
-    if ["!v11515!"] == [""] @echo Error when comparing versions
-    if !v11515! EQU 50 @echo Error when comparing versions
+    if ["!v11515!"] == [""] echo Error when comparing versions
+    if !v11515! EQU 50 echo Error when comparing versions
 
-    REM : suppose that version > 1.15.6
+    REM : suppose that version > 1.15.6 => > 1.11.6
     set /A "v1156=1"
     set /A "v1116=1"
 
-    REM : version > 1.15.15 => > v1.15.6
+    REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
     if !v11515! LEQ 1 goto:checkProfile
+
     REM : else compare
     set /A "v1156=2"
     call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
@@ -226,6 +227,7 @@ REM : main
 
     REM : version > 1.15.6 => > v1.11.6
     if !v1156! LEQ 1 goto:checkProfile
+
     REM : else compare
     set /A "v1116=2"
     call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
@@ -263,19 +265,19 @@ REM : main
 
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "csTmp0="!CEMU_FOLDER:"=!\settings.bfww_tmp0""
-    set "csTmp1="!CEMU_FOLDER:"=!\settings.bfww_tmp1""
-    set "csTmp="!CEMU_FOLDER:"=!\settings.bfww_tmp""
+    set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+    set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+    set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
     REM : GFX version to set
     set "setup="!BFW_PATH:"=!\setup.bat""
-    set "lgfxpv=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lgfxpv=%%i"
-    set "lgfxpv=!lgfxpv:"=!"
+    set "LastVersion=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
+    set "LastVersion=!LastVersion:"=!"
     
-    set "gfxType=!lgfxpv!"
+    set "gfxType=!LastVersion!"
 
     REM : suppose that version > 1.14 => > v1.12
     set /A "v114=1"
@@ -306,6 +308,7 @@ REM : main
         if !v112! EQU 50 echo Error when comparing versions
         if !v112! EQU 2 goto:backupDefaultSettings
     )
+    REM : else v112 still = 1
 
     REM : else using CEMU UI for the game profile
 
@@ -360,23 +363,23 @@ REM : main
 
     :displayGameProfile
 
-    @echo SET THE GAME^'S PROFILE
-    @echo ---------------------------------------------------------
-    @echo.
-    @echo All settings defined in the game^'s profile override CEMU^'s UI ones ^!
-    @echo.
-    @echo To see which parameters are handled in this version^, you can
-    @echo choose to open the example^.ini below^.
-    @echo Define at least ^:
-    @echo.
-    @echo [Graphics]
-    @echo GPUBufferCacheAccuracy = 1 ^(2^:low^, 1^:medium^, 0^:high^)
-    @echo.
-    @echo [CPU]
-    @echo cpuMode = Singlecore-Recompiler ^(Singlecore-Interpreter^, Singlecore-Recompiler^, Dualcore-Recompiler^, Triplecore-Recompiler^)
-    @echo cpuTimer = hostBased ^(cycleCounter^, hostBased^)
-    @echo.
-    @echo ---------------------------------------------------------
+    echo SET THE GAME^'S PROFILE
+    echo ---------------------------------------------------------
+    echo.
+    echo All settings defined in the game^'s profile override CEMU^'s UI ones ^!
+    echo.
+    echo To see which parameters are handled in this version^, you can
+    echo choose to open the example^.ini below^.
+    echo Define at least ^:
+    echo.
+    echo [Graphics]
+    echo GPUBufferCacheAccuracy = 1 ^(2^:low^, 1^:medium^, 0^:high^)
+    echo.
+    echo [CPU]
+    echo cpuMode = Singlecore-Recompiler ^(Singlecore-Interpreter^, Singlecore-Recompiler^, Dualcore-Recompiler^, Triplecore-Recompiler^)
+    echo cpuTimer = hostBased ^(cycleCounter^, hostBased^)
+    echo.
+    echo ---------------------------------------------------------
 
     REM : ask to open example.ini of this version
     if not exist !exampleFile! goto:openProfileFile
@@ -416,13 +419,17 @@ REM : main
         set "lastPath=NONE"
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath=%%i"
 
-        if ["!lastPath!"] == ["NONE"] goto:step2
+        if ["!lastPath!"] == ["NONE"] (
+            echo Cancel ^: !proposedVersion! install path not found ^!
+            goto:askToCompare
+        )
         set "REF_CEMU_FOLDER=!lastPath!"
 
         goto:launchDiff
     )
 
     :askToCompare
+
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:openProfileFile
     
@@ -440,9 +447,10 @@ REM : main
     if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
 
     if not exist !refProfileFile! (
-        @echo No game^'s profile file found ^!
+        echo No game^'s profile file found ^!
         goto:askRefCemuFolder
     )
+
     REM : open winmerge on files
     set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
     call !WinMergeU! /xq !refProfileFile! !PROFILE_FILE!
@@ -454,10 +462,10 @@ REM : main
     REM : if version of CEMU >= 1.15.6 (v1156<=1) : use CEMU to open profile file
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:step2
 
-    @echo Openning !PROFILE_FILE:"=! ^.^.^.
-    @echo Complete it ^(if needed^) then close notepad to continue
+    echo Openning !PROFILE_FILE:"=! ^.^.^.
+    echo Complete it ^(if needed^) then close notepad to continue
     wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !PROFILE_FILE!
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
 
     :step2
     cls
@@ -492,7 +500,7 @@ REM : main
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:wait
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:reopen
 
@@ -512,7 +520,7 @@ REM : main
 
     type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
-            @echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
+            echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
             cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
         )
         set /A "disp=disp+1"
@@ -525,40 +533,40 @@ REM : main
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo LAUNCHING CEMU^, set your parameters for this game
-    @echo ^(no need to set those defined in the game^s profile^)
-    @echo ---------------------------------------------------------
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo LAUNCHING CEMU^, set your parameters for this game
+    echo ^(no need to set those defined in the game^s profile^)
+    echo ---------------------------------------------------------
     timeout /t 1 > NUL 2>&1
 
     REM : create a function check cemuHook consistency
     if exist !chs! (
-        @echo    CemuHook settings ^: Custom Timer^,timer value
+        echo    CemuHook settings ^: Custom Timer^,timer value
     )
 
-    @echo    CEMU settings ^:
-    @echo.
+    echo    CEMU settings ^:
+    echo.
     REM : if version of CEMU >= 1.12 (v112<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 @echo    REFRESH games^'list  ^(right click^)
-    @echo.
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 echo    REFRESH games^'list  ^(right click^)
+    echo.
 
-    @echo    - set all controller profiles for all players
-    @echo    - select graphic pack^(s^)
-    @echo    - select amiibo paths^(NFC Tags^)
+    echo    - set all controller profiles for all players
+    echo    - select graphic pack^(s^)
+    echo    - select amiibo paths^(NFC Tags^)
 
     
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 @echo    - set game^'s profile ^(right click on the game in the list^)
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 echo    - set game^'s profile ^(right click on the game in the list^)
 
     REM : if version of CEMU < 1.11.6 (v1116<=1)
     if not ["!versionRead!"] == ["NOT_FOUND"] (
-        if !v1116! EQU 2 @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+        if !v1116! EQU 2 echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
     ) else (
-        @echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
+        echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
     )
 
-    @echo ---------------------------------------------------------
-    @echo Then close CEMU to continue
+    echo ---------------------------------------------------------
+    echo Then close CEMU to continue
 
     REM : link to graphic pack folder
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
@@ -585,6 +593,7 @@ REM : main
 
     REM : suppose that version > 1.15.3b
     set /A "v1153b=1"
+
     REM : if on the same partition
     if not ["%d1%"] == ["%d2%"] (
         REM : if version > 1.14
@@ -592,8 +601,8 @@ REM : main
             REM : compare to 1.15.3b
             call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
 
-            if ["!v1153b!"] == [""] @echo Error when comparing versions >> !batchFwLog!
-            if !v1153b! EQU 50 @echo Error when comparing versions >> !batchFwLog!
+            if ["!v1153b!"] == [""] echo Error when comparing versions >> !batchFwLog!
+            if !v1153b! EQU 50 echo Error when comparing versions >> !batchFwLog!
             if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             REM : version < 1.14 => version < 1.15.3b
@@ -627,8 +636,8 @@ REM : main
     REM : if current version >=1.15.18 get last game stats
     if !v1153b! GEQ 1 (
         call:compareVersions !versionRead! "1.15.18" result > NUL 2>&1
-        if ["!result!"] == [""] @echo Error when comparing versions
-        if !result! EQU 50 @echo Error when comparing versions
+        if ["!result!"] == [""] echo Error when comparing versions
+        if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 2 goto:saveOptions
     ) else goto:saveOptions
     
@@ -637,7 +646,8 @@ REM : main
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
-        @echo Warning ^: no last settings file found
+        echo Warning ^: no last settings file found
+        timeout /T 3 > NUL 2>&1
         goto:saveOptions
     )
 
@@ -681,22 +691,22 @@ REM : main
     if exist !TMP_GAME_FOLDER_PATH! rmdir /Q !TMP_GAME_FOLDER_PATH! > NUL 2>&1
 
     cls
-    @echo DONE^, CEMU setting are saved under !SETTINGS_FOLDER:"=! ^!
-    @echo ---------------------------------------------------------
-    @echo - From now^, if you modify your settings during the game they will be saved when closing CEMU^.
-    @echo ---------------------------------------------------------
-    @echo If you encounter any issues or have made a mistake when
-    @echo collecting settings for a game^:
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
-    @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
-    @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
-    @echo ^> or delete !SETTINGS_FOLDER:"=! manually
-    @echo ---------------------------------------------------------
+    echo DONE^, CEMU setting are saved under !SETTINGS_FOLDER:"=! ^!
+    echo ---------------------------------------------------------
+    echo - From now^, if you modify your settings during the game they will be saved when closing CEMU^.
+    echo ---------------------------------------------------------
+    echo If you encounter any issues or have made a mistake when
+    echo collecting settings for a game^:
+    echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
+    echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
+    echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
+    echo ^> or delete !SETTINGS_FOLDER:"=! manually
+    echo ---------------------------------------------------------
     pause
-    @echo =========================================================
-    @echo - Continue with launching the game in a 2s seconds
+    echo =========================================================
+    echo - Continue with launching the game in a 2s seconds
     timeout /T 2 > NUL 2>&1
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
 
     exit 0
 
@@ -739,10 +749,10 @@ REM : functions
 
         :patchGraphic
         REM : if [Graphics] not found
-        @echo. >> !file!
-        @echo # add by batchFw>> !file!
-        @echo [Graphics]>> !file!
-        @echo !strTarget!>> !file!
+        echo. >> !file!
+        echo # add by batchFw>> !file!
+        echo [Graphics]>> !file!
+        echo !strTarget!>> !file!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -794,8 +804,8 @@ REM : functions
         set /A "v1158=2"
         if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 1 (
             call:compareVersions !versionRead! "1.15.8" v1158 > NUL 2>&1
-            if ["!v1158!"] == [""] @echo Error when comparing versions
-            if !v1158! EQU 50 @echo Error when comparing versions
+            if ["!v1158!"] == [""] echo Error when comparing versions
+            if !v1158! EQU 50 echo Error when comparing versions
         )
         
         REM : v >= 1.15.8 precomp auto in CEMU and no effect of cemuHook settings
@@ -859,11 +869,11 @@ REM : functions
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
             if not exist !css! del /F !lls! > NUL 2>&1 && goto:endFctGls
             call:resolveSettingsPath ltarget
-            @echo !ltarget!> !lls!
+            echo !ltarget!> !lls!
 
             goto:getLastModifiedSettings
         )
-        if not exist !ls! goto:eof
+        if not exist !ls! goto:endFctGls
 
         REM : specific to wizardFirstSaving.bat : use the lase setting to get game profile
         REM : => last setting must be from USERDOMAIN
@@ -872,6 +882,7 @@ REM : functions
         )
         
         :endFctGls
+        pushd !BFW_TOOLS_PATH!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -937,11 +948,11 @@ REM : functions
         )
 
         if ["!accId!"] == ["NONE"] (
-            @echo WARNING^: AccountId not found for !currentUser!^, cancel online files installation ^!
+            echo WARNING^: AccountId not found for !currentUser!^, cancel online files installation ^!
             pause
         )
-        @echo ---------------------------------------------------------
-        @echo AccountId found for !currentUser!
+        echo ---------------------------------------------------------
+        echo AccountId found for !currentUser!
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
@@ -971,12 +982,12 @@ REM : functions
             set /A "css=%%~za"
 
             if !css! EQU 0 (
-                @echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^!
+                echo WARNING ^: No Setting^.xml found^, cancelling online files installation ^!
                 goto:eof
            )
         )
 
-        set "csTmp="!CEMU_FOLDER:"=!\settings.bfww_tmp""
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
         !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
 
@@ -991,8 +1002,8 @@ REM : functions
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
-        set "t1o="!CEMU_FOLDER:"=!\otp.bfww_old""
-        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfww_old""
+        set "t1o="!CEMU_FOLDER:"=!\otp.bfw_old""
+        set "t2o="!CEMU_FOLDER:"=!\seeprom.bfw_old""
 
         set "s1="!BFW_ONLINE:"=!\otp.bin""
         set "s2="!BFW_ONLINE:"=!\seeprom.bin""
@@ -1003,7 +1014,7 @@ REM : functions
         if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
 
-        @echo Online account for !currentUser! enabled ^: !accId!
+        echo Online account for !currentUser! enabled ^: !accId!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1029,14 +1040,14 @@ REM : functions
         if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
         if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
-        @echo Ooops it look like your game have a problem ^:
-        @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        @echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        @echo   will help you to create one^.
-        @echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        @echo   you might have made a mistake when applying a DLC over game^'s files
-        @echo   to fix^, overwrite game^'s file with its last update or if no update
-        @echo   are available^, re-dump the game ^!
+        echo Ooops it look like your game have a problem ^:
+        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
+        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
+        echo   will help you to create one^.
+        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
+        echo   you might have made a mistake when applying a DLC over game^'s files
+        echo   to fix^, overwrite game^'s file with its last update or if no update
+        echo   are available^, re-dump the game ^!
         pause
         exit /b 2
     goto:eof
@@ -1067,120 +1078,120 @@ REM : functions
         REM : check CEMU options (and controollers settings)
         if not exist !cs! goto:checkCemuHook
         for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:checkCemuHook
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo Main current CEMU^'s settings ^:
-        @echo ---------------------------------------------------------
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo Main current CEMU^'s settings ^:
+        echo ---------------------------------------------------------
 
         pushd !BFW_RESOURCES_PATH!
 
         REM : get graphic settings
         call:getValueInXml "//Graphic/api/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["0"] @echo Graphics API [OpenGL]
-            if ["!value!"] == ["1"] @echo Graphics API [Vulkan]
+            if ["!value!"] == ["0"] echo Graphics API [OpenGL]
+            if ["!value!"] == ["1"] echo Graphics API [Vulkan]
         )
 
         call:getValueInXml "//Graphic/fullscreen_menubar/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["true"] @echo Fullscreen Menubar [ON]
-            if ["!value!"] == ["false"] @echo Fullscreen Menubar [OFF]
+            if ["!value!"] == ["true"] echo Fullscreen Menubar [ON]
+            if ["!value!"] == ["false"] echo Fullscreen Menubar [OFF]
         )
 
         call:getValueInXml "//Graphic/VSync/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["true"] @echo VSync [ON]
-            if ["!value!"] == ["false"] @echo VSync [OFF]
+            if ["!value!"] == ["true"] echo VSync [ON]
+            if ["!value!"] == ["false"] echo VSync [OFF]
         )
 
         call:getValueInXml "//Graphic/GX2DrawdoneSync/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["true"] @echo Full sync @GX2DrawDone [ON]
-            if ["!value!"] == ["false"] @echo Full sync @GX2DrawDone [OFF]
+            if ["!value!"] == ["true"] echo Full sync @GX2DrawDone [ON]
+            if ["!value!"] == ["false"] echo Full sync @GX2DrawDone [OFF]
         )
 
         call:getValueInXml "//Graphic/SeparableShaders/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["true"] @echo Using separable shaders
-            if ["!value!"] == ["false"] @echo Using conventional shaders
+            if ["!value!"] == ["true"] echo Using separable shaders
+            if ["!value!"] == ["false"] echo Using conventional shaders
         )
 
         call:getValueInXml "//Graphic/UpscaleFilter/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["0"] @echo Upscale filter [bilinear]
-            if ["!value!"] == ["1"] @echo Upscale filter [bicubic]
-            if ["!value!"] == ["2"] @echo Upscale filter [hermithe]
-            if ["!value!"] == ["3"] @echo Upscale filter [nearest neighbor]
+            if ["!value!"] == ["0"] echo Upscale filter [bilinear]
+            if ["!value!"] == ["1"] echo Upscale filter [bicubic]
+            if ["!value!"] == ["2"] echo Upscale filter [hermithe]
+            if ["!value!"] == ["3"] echo Upscale filter [nearest neighbor]
         )
 
         call:getValueInXml "//Graphic/DownscaleFilter/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["0"] @echo Downscale filter [bilinear]
-            if ["!value!"] == ["1"] @echo Downscale filter [bicubic]
-            if ["!value!"] == ["2"] @echo Downscale filter [hermithe]
-            if ["!value!"] == ["3"] @echo Downscale filter [nearest neighbor]
+            if ["!value!"] == ["0"] echo Downscale filter [bilinear]
+            if ["!value!"] == ["1"] echo Downscale filter [bicubic]
+            if ["!value!"] == ["2"] echo Downscale filter [hermithe]
+            if ["!value!"] == ["3"] echo Downscale filter [nearest neighbor]
         )
 
         call:getValueInXml "//Graphic/FullscreenScaling/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["true"] @echo Fullscreen Scaling [keep aspect ratio]
-            if ["!value!"] == ["false"] @echo Fullscreen Scaling [stretch]
+            if ["!value!"] == ["true"] echo Fullscreen Scaling [keep aspect ratio]
+            if ["!value!"] == ["false"] echo Fullscreen Scaling [stretch]
         )
 
         REM : get audio settings
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
         call:getValueInXml "//Audio/api/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == ["0"] @echo Audio API [Direct sound]
-            if ["!value!"] == ["1"] @echo Audio API [XAudio2]
-            if ["!value!"] == ["2"] @echo Audio API [XAudio2]
+            if ["!value!"] == ["0"] echo Audio API [Direct sound]
+            if ["!value!"] == ["1"] echo Audio API [XAudio2]
+            if ["!value!"] == ["2"] echo Audio API [XAudio2]
         )
 
         call:getValueInXml "//Audio/delay/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            @echo Latency set to [!value! ms]
+            echo Latency set to [!value! ms]
         )
 
         call:getValueInXml "//Audio/TVDevice/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == [""] @echo Audio TV device [OFF]
-            if ["!value!"] == ["default"] @echo Audio TV device [primary sound driver]
-            if not ["!value!"] == [""] if not ["!value!"] == ["default"] @echo Audio TV device [use specific user device]
+            if ["!value!"] == [""] echo Audio TV device [OFF]
+            if ["!value!"] == ["default"] echo Audio TV device [primary sound driver]
+            if not ["!value!"] == [""] if not ["!value!"] == ["default"] echo Audio TV device [use specific user device]
         )
 
         call:getValueInXml "//Audio/TVVolume/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            @echo Audio TV Volume set to [!value! %%]
+            echo Audio TV Volume set to [!value! %%]
         )
 
         REM : online mode
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
         call:getValueInXml "//AccountId/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
-            if ["!value!"] == [""] (@echo Online mode [OFF]) else (@echo Online mode [ON using !value! account])
+            if ["!value!"] == [""] (echo Online mode [OFF]) else (echo Online mode [ON using !value! account])
         )
 
         pushd !BFW_TOOLS_PATH!
         
         :checkCemuHook
         if not exist !chs! goto:eof
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo Current CemuHook^'s settings ^:
-        @echo ---------------------------------------------------------
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo Current CemuHook^'s settings ^:
+        echo ---------------------------------------------------------
         type !chs! | find /I /V "#" | find /I /V "["
         type !chs! | find /I /V "#" | find /I /V "[" | find /I "customTimerMode" | find /I /V "default" | find /I /V "none" > NUL 2>&1 && (
             type !PROFILE_FILE! | find /I /V "#" | find /I "useRDTSC" | find /I "false" > NUL 2>&1 && goto:eof
-            @echo ---------------------------------------------------------
+            echo ---------------------------------------------------------
             if !v1156! EQU 2 (
-                @echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
-                @echo one ^(RDTSC^) is not disabled in the game^'s profile
-                @echo Be aware that might cause crash for some games since 1^.14
-                @echo.
-                @echo If you really want to use a custom timer^, You^'d better
-                @echo had the following lines in the game^'s profile
-                @echo.
-                @echo [General]
-                @echo useRDTSC = false
-                @echo.
+                echo WARNING ^: custom timer declared in CemuHook and CEMU^'s default
+                echo one ^(RDTSC^) is not disabled in the game^'s profile
+                echo Be aware that might cause crash for some games since 1^.14
+                echo.
+                echo If you really want to use a custom timer^, You^'d better
+                echo had the following lines in the game^'s profile
+                echo.
+                echo [General]
+                echo useRDTSC = false
+                echo.
             )
             cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
         )
@@ -1190,30 +1201,30 @@ REM : functions
 
     :createGameProfile
        
-        @echo # !GAME_TITLE! > %PROFILE_FILE%
-        @echo [Graphics] >> %PROFILE_FILE%
+        echo # !GAME_TITLE! > %PROFILE_FILE%
+        echo [Graphics] >> %PROFILE_FILE%
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
         if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
-            @echo GPUBufferCacheAccuracy = 1 >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = 1 >> %PROFILE_FILE%
         ) else (
-            @echo GPUBufferCacheAccuracy = medium >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = medium >> %PROFILE_FILE%
         )
 
         REM : if version of CEMU < 1.11.6 (v1116<=1)
         if not ["!versionRead!"] == ["NOT_FOUND"] (
-            if !v1116! EQU 2 @echo disableGPUFence = true >> %PROFILE_FILE%
+            if !v1116! EQU 2 echo disableGPUFence = true >> %PROFILE_FILE%
         ) else (
-            @echo disableGPUFence = true >> %PROFILE_FILE%
+            echo disableGPUFence = true >> %PROFILE_FILE%
         )
 
-        @echo accurateShaderMul = min >> %PROFILE_FILE%
-        @echo [CPU] >> %PROFILE_FILE%
-        @echo cpuTimer = hostBased >> %PROFILE_FILE%
-        @echo cpuMode = Singlecore-Recompiler >> %PROFILE_FILE%
-        @echo threadQuantum = 45000 >> %PROFILE_FILE%
+        echo accurateShaderMul = min >> %PROFILE_FILE%
+        echo [CPU] >> %PROFILE_FILE%
+        echo cpuTimer = hostBased >> %PROFILE_FILE%
+        echo cpuMode = Singlecore-Recompiler >> %PROFILE_FILE%
+        echo threadQuantum = 45000 >> %PROFILE_FILE%
 
-        @echo Creating a Game profile for tilte Id ^: %titleId%
+        echo Creating a Game profile for tilte Id ^: %titleId%
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1232,8 +1243,8 @@ REM : functions
             set "ccpf="!ccp:"=!\%%x""
             if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
         )
-        @echo ---------------------------------------------------------
-        @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
+        echo ---------------------------------------------------------
+        echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
 
         pushd !BFW_TOOLS_PATH!
 
@@ -1280,8 +1291,8 @@ REM : functions
 
         REM : versioning separator (init to .)
         set "sep=."
-        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -1427,20 +1438,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 12
             exit /b 12
         )
 
@@ -1456,7 +1467,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

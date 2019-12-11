@@ -39,9 +39,9 @@ REM : ------------------------------------------------------------------
     :end
 
     if %nbArgs% NEQ 3 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" settingsSrcFile settingsTargetFile GameId
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" settingsSrcFile settingsTargetFile GameId
+        echo given {%*}
         timeout /t 4 > NUL 2>&1
         exit 99
     )
@@ -49,13 +49,13 @@ REM : ------------------------------------------------------------------
     REM : args 1
     set "csSrc=!args[0]!"
     if not exist !csSrc! (
-        @echo ERROR ^: settingsSrcFile !csSrc:"=! not exist
+        echo ERROR ^: settingsSrcFile !csSrc:"=! not exist
         timeout /t 4 > NUL 2>&1
         exit 51
     )
     set "csTgt=!args[1]!"
     if not exist !csTgt! (
-        @echo ERROR ^: settingsTargetFile !csTgt:"=! not exist
+        echo ERROR ^: settingsTargetFile !csTgt:"=! not exist
         timeout /t 4 > NUL 2>&1
         exit 52
     )
@@ -67,13 +67,13 @@ REM : ------------------------------------------------------------------
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
     set "DATE=%ldt%"
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo Updating game with id !GameId! in !csTgt!
-    @echo using !csSrc!
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo Updating game with id !GameId! in !csTgt!
+    echo using !csSrc!
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     set "csTmp="!TMP:"=!\BfwSettings_!DATE!.xml""
-    @echo temporary file ^: !csTmp!
+    echo temporary file ^: !csTmp!
 
     REM : if GameCache node exist in csTgt (CEMU >= 1.12.0)
     type !csTgt! | find /I "GameCache" > NUL 2>&1 && call:update
@@ -94,8 +94,8 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )
@@ -113,15 +113,26 @@ REM : functions
     :update
 
         pushd !BFW_RESOURCES_PATH!
+echo csSrc=!csSrc!
+echo -------------------------------------------------------
+type !csSrc!
+echo -------------------------------------------------------
+echo ^"xml^.exe^" sel -t -c ^"^/^/GameCache^/Entry^[title_id=^'!GameId!^'^]^" !csSrc!
+
         REM : get game's stats
         "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
 
+echo csTmp=!csTmp!
+echo -------------------------------------------------------
+type !csTmp!
+echo -------------------------------------------------------
+        set "node="
         for /f "usebackq tokens=*" %%k in (!csTmp!) do (
           set "node=!node!%%k"
         )
 
         if ["!node!"] == [""] (
-            @echo ERROR ^: no stats were found for !GameId! in !csSrc:"=!
+            echo ERROR ^: no stats were found for !GameId! in !csSrc:"=!
             timeout /t 4 > NUL 2>&1
             exit 53
         )
@@ -130,17 +141,13 @@ REM : functions
         set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
         "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
 
-        REM : CLUE
-        set "node=!node:check_update=!"
-        set "node=!node:logflag=!"
-
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo Node ^:
-        @echo !node!
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo Node ^:
+        echo !node!
 
         "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo replacing in temporary file
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo replacing in temporary file
 
         rem : replace in file
         set "BfwSettingsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSettings.log""
@@ -148,25 +155,25 @@ REM : functions
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog! > NUL
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog! > NUL
 
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        @echo pretty indent !scTgt!
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo pretty indent !scTgt!
 
         xml fo -t !csTmp! > !csTgt!
         set /A "cr=%ERRORLEVEL%"
-        @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if !cr! EQU 0 (
-            @echo done
+            echo done
             goto:done
         )
 
         REM : else check size
-        for /F "tokens=*" %%a in (!csTgt!) do if %%~za NEQ 0 @echo done & goto:done
+        for /F "tokens=*" %%a in (!csTgt!) do if %%~za NEQ 0 echo done & goto:done
 
-        @echo done with error ^!
+        echo done with error ^!
         cscript /nologo !MessageBox! "ERROR ^: when patching settings^.xml^. Restoring settings^.xml backup^, game stats computation ignored ^!" 4112
-        @echo see !csTmp! and !csTgtTmp!
-        set "backup="!cs:"=!_bfwl_old""
+        echo see !csTmp! and !csTgtTmp!
+        set "backup="!cs:"=!_bfw_old""
         if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1
 
         :done

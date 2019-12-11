@@ -70,26 +70,26 @@ REM : main
     set "checkLenght=!titleId:~15,1!"
 
     if ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^! must have at least 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^! must have at least 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
     REM : check too long
     set "checkLenght=!titleId:~16,1!"
 
     if not ["x!checkLenght!x"] == ["xx"] (
-        @echo Bad titleId ^! must have 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^! must have 16 hexadecimal characters^, given %titleId%
         goto:getTitleId
     )
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     goto:inputsAvailables
 
 
     :getArgsValue
 
     if %nbArgs% NEQ 1 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" TITLE_ID
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" TITLE_ID
+        echo given {%*}
         pause
         exit /b 99
     )
@@ -118,7 +118,7 @@ REM : main
         cscript /nologo !MessageBox! "Unable to get those informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     ) else (
-        @echo getTitleDataFromLibrary ^: unable to get informations on the game for titleId %titleId% ^?
+        echo getTitleDataFromLibrary ^: unable to get informations on the game for titleId %titleId% ^?
         exit 3
     )
 
@@ -141,15 +141,15 @@ REM : main
     )
     set "titleId=%titleId:'=%"
 
-    @echo titleId          ="%titleId%"
-    @echo description      ="%desc%"
-    @echo productCode      ="%productCode%"
-    @echo companyCode      ="%companyCode%"
-    @echo notes            ="%notes%"
-    @echo versions         ="%versions%"
-    @echo region           ="%region%"
-    @echo native Res       ="%nativeHeight%"
-    @echo native FPS       ="%nativeFps%"
+    echo titleId          ="%titleId%"
+    echo description      ="%desc%"
+    echo productCode      ="%productCode%"
+    echo companyCode      ="%companyCode%"
+    echo notes            ="%notes%"
+    echo versions         ="%versions%"
+    echo region           ="%region%"
+    echo native Res       ="%nativeHeight%"
+    echo native FPS       ="%nativeFps%"
 
     if !QUIET_MODE! EQU 0 pause
 
@@ -182,14 +182,14 @@ REM : functions
         if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
         if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
 
-        @echo Ooops it look like your game have a problem ^:
-        @echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        @echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        @echo   will help you to create one^.
-        @echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        @echo   you might have made a mistake when applying a DLC over game^'s files
-        @echo   to fix^, overwrite game^'s file with its last update or if no update
-        @echo   are available^, re-dump the game ^!
+        echo Ooops it look like your game have a problem ^:
+        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
+        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
+        echo   will help you to create one^.
+        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
+        echo   you might have made a mistake when applying a DLC over game^'s files
+        echo   to fix^, overwrite game^'s file with its last update or if no update
+        echo   are available^, re-dump the game ^!
         pause
         exit /b 2
     goto:eof
@@ -200,20 +200,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -229,7 +229,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

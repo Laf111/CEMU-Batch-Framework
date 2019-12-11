@@ -32,9 +32,9 @@ REM : main
     :end
 
     if %nbArgs% NEQ 4 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" p1 p2 phase step
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" p1 p2 phase step
+        echo given {%*}
         pause
         exit 99
     )

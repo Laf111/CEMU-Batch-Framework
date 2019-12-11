@@ -42,18 +42,18 @@ REM : main
 
     set "WIIU_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\wiiuAccounts\usr\save\system\act""
     if not exist !WIIU_ACCOUNTS_FOLDER! (
-        @echo ERROR^: !WIIU_ACCOUNTS_FOLDER! does not exist ^!^
-        @echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
-        @echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-        @echo before this script
+        echo ERROR^: !WIIU_ACCOUNTS_FOLDER! does not exist ^!^
+        echo Use Wii-U Games^\Wii-U^\Get online files^.lnk
+        echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
+        echo before this script
         pause
         exit 99
     )
     cls
 
-    @echo =========================================================
-    @echo Associate BatchFw^'s users to Wii-U accounts
-    @echo =========================================================
+    echo =========================================================
+    echo Associate BatchFw^'s users to Wii-U accounts
+    echo =========================================================
 
     REM : display BatchFw users list
     set "USERSARRAY="
@@ -63,13 +63,13 @@ REM : main
         set /A "nbUsers+=1"
     )
     if !nbUsers! EQU 0 (
-        @echo No users were found^!^. Please restore BatchFw factory settings
+        echo No users were found^!^. Please restore BatchFw factory settings
         pause
         exit 50
     )
     set /A "nbUsers-=1"
 
-    @echo =========================================================
+    echo =========================================================
 
     set "usersFolderAccount="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
     if  exist !usersFolderAccount! rmdir /Q /S !usersFolderAccount!
@@ -83,23 +83,23 @@ REM : main
         set "af="!WIIU_ACCOUNTS_FOLDER:"=!\%%d\account.dat""
 
         for /F "delims=~= tokens=2" %%n in ('type !af! ^| find /I "IsPasswordCacheEnabled=0"') do (
-            @echo WARNING^: this account seems to not have "Save password" option checked ^(auto login^) ^!
-            @echo it might be unusable with CEMU
-            @echo.
+            echo WARNING^: this account seems to not have "Save password" option checked ^(auto login^) ^!
+            echo it might be unusable with CEMU
+            echo.
         )
 
         REM : get AccountId from account.dat
         set "accId=NONE"
         for /F "delims=~= tokens=2" %%n in ('type !af! ^| find /I "AccountId="') do set "accId=%%n"
         if ["%accId%"] == ["NONE"] (
-            @echo ERROR^: fail to parse !af!
+            echo ERROR^: fail to parse !af!
             pause
         )
         REM : Ask for Batch's user
-        @echo Which batchFw^'s user use the accountId
-        @echo ^> !accId!
-        @echo on the Wii-U ^(folder^'s name is %%d^) ^?
-        @echo.
+        echo Which batchFw^'s user use the accountId
+        echo ^> !accId!
+        echo on the Wii-U ^(folder^'s name is %%d^) ^?
+        echo.
 
         set "user=NONE"
         call:getUser user
@@ -108,16 +108,16 @@ REM : main
         set "uf="!usersFolderAccount:"=!\!user!%%d.dat""
 
         copy /Y !af! !uf! > NUL 2>&1
-        @echo saving \%%d\account.dat to !uf!
-        @echo ---------------------------------------------------------
+        echo saving \%%d\account.dat to !uf!
+        echo ---------------------------------------------------------
     )
-    @echo =========================================================
-    @echo if you had mistaken^, relaunch this script to change the
-    @echo association
-    @echo.
-    @echo if an account was not listed^, you might have to relaunch
-    @echo Wii-U Games\Wii-U\Get online files^.lnk
-    @echo to synchronize folders with your Wii-U first
+    echo =========================================================
+    echo if you had mistaken^, relaunch this script to change the
+    echo association
+    echo.
+    echo if an account was not listed^, you might have to relaunch
+    echo Wii-U Games\Wii-U\Get online files^.lnk
+    echo to synchronize folders with your Wii-U first
 
     pause
 
@@ -133,8 +133,8 @@ REM : functions
 
     :getUser
 
-        for /L %%i in (0,1,!nbUsers!) do @echo %%i ^: !USERSARRAY[%%i]!
-        @echo.
+        for /L %%i in (0,1,!nbUsers!) do echo %%i ^: !USERSARRAY[%%i]!
+        echo.
         :askUser
         set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
 
@@ -151,20 +151,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
+            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
+            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
 
@@ -180,7 +180,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

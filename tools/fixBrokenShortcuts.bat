@@ -16,23 +16,23 @@ REM : main
     set "lastBfwInstall="!LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\setup.bat""
     if not exist !lastBfwInstall! goto:begin
 
-    @echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
-    @echo There^'s no need to fix shortcuts.
-    @echo.
+    echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
+    echo There^'s no need to fix shortcuts.
+    echo.
     choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games (y, n)? : "
     if !ERRORLEVEL! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
-    @echo.
-    @echo done
-    @echo.
-    @echo =========================================================
+    echo.
+    echo done
+    echo.
+    echo =========================================================
     pause & exit 0
 
     :begin
-    @echo =========================================================
-    @echo Fix broken shorcuts created from
-    @echo !LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install
-    @echo =========================================================
-    @echo.
+    echo =========================================================
+    echo Fix broken shorcuts created from
+    echo !LAST_GAMES_FOLDER_PATH:"=!\_BatchFw_Install
+    echo =========================================================
+    echo.
 
     set "browseFolder="!TEMP!\browseFolder.vbs""
     call:createBrowser
@@ -50,16 +50,16 @@ REM : main
     :fix
     set "fnrPath="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\fnr.exe""
     if not exist !fnrPath! (
-        @echo BatchFw not seems to be installed in !NEW_GAMES_FOLDER_PATH!
-        @echo Cancelling^.^.^.
-        @echo.
-        @echo =========================================================
+        echo BatchFw not seems to be installed in !NEW_GAMES_FOLDER_PATH!
+        echo Cancelling^.^.^.
+        echo.
+        echo =========================================================
         pause
         exit 10
     )
 
-    @echo Fixing shortcuts for !NEW_GAMES_FOLDER_PATH!^.^.^.
-    @echo.
+    echo Fixing shortcuts for !NEW_GAMES_FOLDER_PATH!^.^.^.
+    echo.
 
     REM : get the Wii-Games folder
     set "wiiuGF=!shortcutsToolsFolder:\BatchFw\Tools\Shortcuts=!"
@@ -79,10 +79,10 @@ REM : main
     !fnrPath! --cl --dir !shortcutsToolsFolder! --fileMask "fixBrokenShortcuts.bat" --find !LAST_GAMES_FOLDER_PATH! --replace !NEW_GAMES_FOLDER_PATH! --logFile !fnrLog! > NUL 2>&1
     del /F !fnrLog! > NUL 2>&1
 
-    @echo.
-    @echo done
-    @echo.
-    @echo =========================================================
+    echo.
+    echo done
+    echo.
+    echo =========================================================
     pause & exit 0
 
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
@@ -96,41 +96,41 @@ REM : functions
 
     :createBrowser
 
-        @echo Option Explicit > !browseFolder!
-        @echo. >> !browseFolder!
-        @echo Dim strPath^, objArgs^, messageText^, myStartFolder >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo Set objArgs = WScript^.Arguments >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo messageText = objArgs^(0^) >> !browseFolder!
-        @echo myStartFolder="" >> !browseFolder!
-        @echo If objArgs^.Count=2 Then >> !browseFolder!
-        @echo     myStartFolder = objArgs^(1^) >> !browseFolder!
-        @echo End If >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo strPath = SelectFolder^( myStartFolder^, messageText ^) >> !browseFolder!
-        @echo If strPath = vbNull Then >> !browseFolder!
-        @echo     WScript^.Echo """NONE""" >> !browseFolder!
-        @echo Else >> !browseFolder!
-        @echo     WScript^.Echo """" ^& Replace^(strPath^," "^,"?"^) ^& """" >> !browseFolder!
-        @echo End If >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo Function SelectFolder^( myStartFolder^, messageText ^) >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo     Dim objFolder^, objItem^, objShell >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo     On Error Resume Next >> !browseFolder!
-        @echo     SelectFolder = vbNull >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo     Set objShell  = CreateObject^( "Shell.Application" ^) >> !browseFolder!
-        @echo     Set objFolder = objShell^.BrowseForFolder^( 0^, messageText^, 0^, myStartFolder ^) >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo     If IsObject^( objfolder ^) Then SelectFolder = objFolder^.Self^.Path >> !browseFolder!
-        @echo. >> !browseFolder!
-        @echo End Function >> !browseFolder!
+        echo Option Explicit > !browseFolder!
+        echo. >> !browseFolder!
+        echo Dim strPath^, objArgs^, messageText^, myStartFolder >> !browseFolder!
+        echo. >> !browseFolder!
+        echo Set objArgs = WScript^.Arguments >> !browseFolder!
+        echo. >> !browseFolder!
+        echo messageText = objArgs^(0^) >> !browseFolder!
+        echo myStartFolder="" >> !browseFolder!
+        echo If objArgs^.Count=2 Then >> !browseFolder!
+        echo     myStartFolder = objArgs^(1^) >> !browseFolder!
+        echo End If >> !browseFolder!
+        echo. >> !browseFolder!
+        echo strPath = SelectFolder^( myStartFolder^, messageText ^) >> !browseFolder!
+        echo If strPath = vbNull Then >> !browseFolder!
+        echo     WScript^.Echo """NONE""" >> !browseFolder!
+        echo Else >> !browseFolder!
+        echo     WScript^.Echo """" ^& Replace^(strPath^," "^,"?"^) ^& """" >> !browseFolder!
+        echo End If >> !browseFolder!
+        echo. >> !browseFolder!
+        echo Function SelectFolder^( myStartFolder^, messageText ^) >> !browseFolder!
+        echo. >> !browseFolder!
+        echo. >> !browseFolder!
+        echo     Dim objFolder^, objItem^, objShell >> !browseFolder!
+        echo. >> !browseFolder!
+        echo     On Error Resume Next >> !browseFolder!
+        echo     SelectFolder = vbNull >> !browseFolder!
+        echo. >> !browseFolder!
+        echo. >> !browseFolder!
+        echo. >> !browseFolder!
+        echo     Set objShell  = CreateObject^( "Shell.Application" ^) >> !browseFolder!
+        echo     Set objFolder = objShell^.BrowseForFolder^( 0^, messageText^, 0^, myStartFolder ^) >> !browseFolder!
+        echo. >> !browseFolder!
+        echo     If IsObject^( objfolder ^) Then SelectFolder = objFolder^.Self^.Path >> !browseFolder!
+        echo. >> !browseFolder!
+        echo End Function >> !browseFolder!
 
     goto:eof
 
@@ -171,7 +171,7 @@ REM : functions
 
         if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
-            @echo ^> !shortcut:%tobeRemoved%=!
+            echo ^> !shortcut:%tobeRemoved%=!
         )
     goto:eof
         

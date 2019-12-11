@@ -63,7 +63,7 @@ REM : main
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
-    @echo Please select CEMU target folder
+    echo Please select CEMU target folder
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] goto:eof
@@ -73,7 +73,7 @@ REM : main
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askCemuFolder
     )
@@ -81,7 +81,7 @@ REM : main
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if not exist !cemuExe! (
-        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
     cls
@@ -89,16 +89,16 @@ REM : main
 
     :getArgsValue
     if %nbArgs% NEQ 1 (
-        @echo ERROR ^: on arguments passed ^!
-        @echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER
-        @echo given {%*}
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" CEMU_FOLDER
+        echo given {%*}
         pause
         exit /b 99
     )
     REM : get and check CEMU_FOLDER
     set "CEMU_FOLDER=!args[0]!"
     if not exist !CEMU_FOLDER! (
-        @echo ERROR ^: !CEMU_FOLDER! does not exist ^!
+        echo ERROR ^: !CEMU_FOLDER! does not exist ^!
         pause
         exit /b 1
     )
@@ -110,17 +110,17 @@ REM : main
 
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
 
-    @echo =========================================================
-    @echo Restore transferable shader cache to a CEMU install folder for each game^'s chosen
-    @echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
-    @echo  - target CEMU folder ^: !CEMU_FOLDER!
-    @echo =========================================================
+    echo =========================================================
+    echo Restore transferable shader cache to a CEMU install folder for each game^'s chosen
+    echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
+    echo  - target CEMU folder ^: !CEMU_FOLDER!
+    echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo Launching in 30s
-    @echo     ^(y^) ^: launch now
-    @echo     ^(n^) ^: cancel
-    @echo ---------------------------------------------------------
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Cancelling
@@ -134,16 +134,16 @@ REM : main
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^) ^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^) ^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by ^?
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name by ^?
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         if !QUIET_MODE! EQU 0 pause
     )
     set /A NB_GAMES_TREATED=0
@@ -163,15 +163,15 @@ REM : main
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
 
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:mvGameData
 
         ) else (
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName! ^: Unsupported characters found^, rename-it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -190,23 +190,23 @@ REM : main
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
-    @echo =========================================================
-    @echo Treated !NB_GAMES_TREATED! games
-    @echo #########################################################
+    echo =========================================================
+    echo Treated !NB_GAMES_TREATED! games
+    echo #########################################################
     if !QUIET_MODE! EQU 1 goto:exiting
-    @echo ---------------------------------------------------------
-    @echo Delete and recreate shortcut for the treated games
-    @echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
-    @echo ---------------------------------------------------------
-    @echo This windows will close automatically in 12s
-    @echo     ^(n^) ^: don^'t close^, i want to read history log first
-    @echo     ^(q^) ^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
+    echo Delete and recreate shortcut for the treated games
+    echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
+    echo ---------------------------------------------------------
+    echo This windows will close automatically in 12s
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
@@ -241,14 +241,14 @@ REM : functions
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        @echo =========================================================
-        @echo - !GAME_TITLE!
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
 
-        @echo Moving transferable cache to !CEMU_FOLDER! ^?
-        @echo   ^(n^) ^: no^, skip
-        @echo   ^(y^) ^: yes ^(default value after 15s timeout^)
-        @echo.
+        echo Moving transferable cache to !CEMU_FOLDER! ^?
+        echo   ^(n^) ^: no^, skip
+        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
+        echo.
 
         call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
         if [!ANSWER!] == ["n"] (
@@ -256,12 +256,12 @@ REM : functions
             echo Skip this GAME
             goto:eof
         )
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
 
 
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
         if not exist !sf! (
-            @echo Nothing to do for !GAME_TITLE!
+            echo Nothing to do for !GAME_TITLE!
             goto:eof
         )
 
@@ -269,10 +269,10 @@ REM : functions
 
         call:moveFolder !sf! !target! cr
         if !cr! NEQ 0 (
-            @echo ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!
+            echo ERROR when moving !sf! !target!^, cr=!ERRORLEVEL!
             pause
         ) else (
-            @echo Moving !sf!
+            echo Moving !sf!
         )
 
         :logInfos
@@ -343,20 +343,20 @@ REM : functions
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -413,7 +413,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

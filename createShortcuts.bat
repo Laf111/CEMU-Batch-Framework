@@ -56,7 +56,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         set /A "nbUsers+=1"
     )
     if ["!USERSLIST!"] == [""] (
-        @echo You have to use the setup before this script ^^! launching setup^.bat
+        echo You have to use the setup before this script ^^! launching setup^.bat
         set "setup="!BFW_PATH:"=!\setup.bat""
         wscript /nologo !Start! !setup!
         timeout /t 4 > NUL 2>&1
@@ -101,13 +101,13 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
 
-    @echo Checking for update ^.^.^.
+    echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
     call !ubw!
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
-        @echo BatchFw updated^, please relaunch
+        echo BatchFw updated^, please relaunch
         set "ChangeLog="!BFW_PATH:"=!\Change.log""
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !ChangeLog!
         timeout /t 4 > NUL 2>&1
@@ -115,7 +115,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     )
 
     cls
-    @echo Please select CEMU install folder
+    echo Please select CEMU install folder
 
     :askCemuFolder
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
@@ -130,7 +130,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call !tobeLaunch! !CEMU_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askCemuFolder
     )
@@ -138,7 +138,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : check that cemu.exe exist in
     set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
     if not exist !cemuExe! (
-        @echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
         goto:askCemuFolder
     )
 
@@ -151,7 +151,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if not [!OUTPUT_FOLDER!] == [!BFW_PATH!] goto:inputsAvailables
 
     :askOutputFolder
-    @echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
+    echo Please define where to create shortcuts ^(a Wii-U Games subfolder will be created^)
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
@@ -163,7 +163,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call !tobeLaunch! !OUTPUT_FOLDER!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        @echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
+        echo Path to !OUTPUT_FOLDER! is not DOS compatible^!^, please choose another location
         pause
         goto:askOutputFolder
     )
@@ -172,19 +172,19 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :getArgsValue
     if %nbArgs% GTR 5 (
-        @echo ERROR on arguments passed ^(%nbArgs%^)
-        @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optional^ argument^)
-        @echo given {%*}
+        echo ERROR on arguments passed ^(%nbArgs%^)
+        echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
+        echo ^(^* for optional^ argument^)
+        echo given {%*}
         pause
         exit /b 9
     )
 
     if %nbArgs% LSS 2 (
-        @echo ERROR on arguments passed ^^!
-        @echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
-        @echo ^(^* for optional^ argument^)
-        @echo given {%*}
+        echo ERROR on arguments passed ^^!
+        echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
+        echo ^(^* for optional^ argument^)
+        echo given {%*}
         pause
         exit /b 99
     )
@@ -223,7 +223,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : get and check CEMU_FOLDER
     set CEMU_FOLDER=!args[0]!
     if not exist !CEMU_FOLDER! (
-        @echo ERROR CEMU folder !CEMU_FOLDER! does not exist ^^!
+        echo ERROR CEMU folder !CEMU_FOLDER! does not exist ^^!
         pause
         exit /b 1
     )
@@ -231,7 +231,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : get OUTPUT_FOLDER
     set OUTPUT_FOLDER=!args[1]!
     if not exist !OUTPUT_FOLDER! (
-        @echo ERROR Shortcuts folder !OUTPUT_FOLDER! does not exist ^^!
+        echo ERROR Shortcuts folder !OUTPUT_FOLDER! does not exist ^^!
         pause
         exit /b 2
     )
@@ -246,7 +246,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call !tobeLaunch! !BFW_PATH!
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
-        @echo Please rename !BFW_PATH:"=! to be DOS compatible ^^!^, exiting
+        echo Please rename !BFW_PATH:"=! to be DOS compatible ^^!^, exiting
         pause
         exit /b 3
     )
@@ -261,15 +261,15 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp! -silent
     set /A "cr=!ERRORLEVEL!"
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
 
     if !cr! NEQ 0 (
-        @echo ERROR Graphics packs folder update failed^!
+        echo ERROR Graphics packs folder update failed^!
     )
     cls
-    @echo =========================================================
-    @echo Creating CEMU shortcuts
-    @echo =========================================================
+    echo =========================================================
+    echo Creating CEMU shortcuts
+    echo =========================================================
 
 
     REM : if not exist logFile goto:bfwShortcuts
@@ -303,18 +303,18 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     )
 
     if !QUIET_MODE! EQU 0 (
-        @echo Creating own shortcuts
+        echo Creating own shortcuts
     )
 
     call:fwShortcuts
 
     REM : importing CEMU VERSION controller profiles under !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles
     call:syncControllerProfiles
-    @echo ---------------------------------------------------------
-    @echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
+    echo ---------------------------------------------------------
+    echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     REM : flush logFile of SCREEN_MODE
     call:cleanHostLogFile SCREEN_MODE
 
@@ -331,19 +331,19 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :checkCemuHook
     if exist !dllFile! goto:checkSharedFonts
-    @echo ---------------------------------------------------------
-    @echo CemuHook was not found^. It is required to
-    @echo - play videos
-    @echo - enable FPS^+^+ packs
-    @echo - enable controller motion sensors
+    echo ---------------------------------------------------------
+    echo CemuHook was not found^. It is required to
+    echo - play videos
+    echo - enable FPS^+^+ packs
+    echo - enable controller motion sensors
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        @echo No active connection was found^, unable to open "https://cemuhook.sshnuke.net/#Downloads"
+        echo No active connection was found^, unable to open "https://cemuhook.sshnuke.net/#Downloads"
         goto:openCemuAFirstTime
     )
     if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
-    @echo Opening CemuHook download page^.^.^.
-    @echo Download and extract CemuHook in !CEMU_FOLDER!
+    echo Opening CemuHook download page^.^.^.
+    echo Download and extract CemuHook in !CEMU_FOLDER!
 
     wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
 
@@ -362,17 +362,17 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :openCemuAFirstTime
 
-    @echo ---------------------------------------------------------
-    @echo Opening CEMU^.^.^.
-    if not exist !cs! @echo Set your REGION^, language
-    if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button^, if they are missing
-    @echo Then close CEMU to continue
+    echo ---------------------------------------------------------
+    echo Opening CEMU^.^.^.
+    if not exist !cs! echo Set your REGION^, language
+    if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button^, if they are missing
+    echo Then close CEMU to continue
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
 
     :getCemuVersion
-    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! @echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
+    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
 
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "v1151=2"
@@ -387,6 +387,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     if ["!v1151!"] == [""] echo Error when comparing versions
     if !v1151! EQU 50 echo Error when comparing versions
 
+    REM : is version < 1.15.1
     if !v1151! EQU 2 (
         call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
         if ["!result!"] == [""] echo Error when comparing versions
@@ -404,20 +405,20 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     mkdir !gfxv2! > NUL 2>&1
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
 
-    @echo ---------------------------------------------------------
-    @echo graphic pack V2 are needed for this version^, extracting^.^.^.
+    echo ---------------------------------------------------------
+    echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul   !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
-        @echo ERROR while extracting V2_GFX_Packs, exiting 1
+        echo ERROR while extracting V2_GFX_Packs, exiting 1
         pause
         exit /b 21
     )
     timeout /T 3 > NUL 2>&1
    :autoImportMode
 
-    @echo ---------------------------------------------------------
+    echo ---------------------------------------------------------
     REM : importMode
     set "IMPORT_MODE=ENABLED"
     call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
@@ -456,7 +457,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "noIntel=!GPU_VENDOR:Intel=!"
     if ["!gpuType!"] == ["OTHER"] if not ["!noIntel!"] == ["!GPU_VENDOR!"] (
 
-        @echo ---------------------------------------------------------
+        echo ---------------------------------------------------------
         REM : CEMU < 1.15.1
         if !v1151! LEQ 1 (
             call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y,n): " "n,y" ANSWER
@@ -486,22 +487,22 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
-        @echo =========================================================
-        @echo ERROR Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
-        @echo List of game^'s folder^(s^)^:
-        @echo ---------------------------------------------------------
+        echo =========================================================
+        echo ERROR Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^)^:
+        echo ---------------------------------------------------------
         type !tmpFile! | find "?"
         del /F !tmpFile!
-        @echo ---------------------------------------------------------
-        @echo Fix-it by removing characters here replaced in the folder^'s name by^?
-        @echo Exiting until you rename or move those folders
-        @echo =========================================================
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name by^?
+        echo Exiting until you rename or move those folders
+        echo =========================================================
         pause
     )
     if !QUIET_MODE! EQU 0 cls
-    @echo =========================================================
-    @echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^:
-    if !QUIET_MODE! EQU 0 @echo =========================================================
+    echo =========================================================
+    echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^:
+    if !QUIET_MODE! EQU 0 echo =========================================================
 
     set /A NB_GAMES_TREATED=0
 
@@ -520,15 +521,15 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
             set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
             call !tobeLaunch! !GAME_FOLDER_PATH!
             set /A "cr=!ERRORLEVEL!"
-            if !cr! GTR 1 @echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
+            if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
             call:gameShortcut
 
         ) else (
 
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
+            echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
             for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
 
             REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
@@ -547,41 +548,41 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
     if !QUIET_MODE! EQU 1 goto:log
-    @echo =========================================================
+    echo =========================================================
 
     if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result && set /A "NB_GAMES_TREATED=!result!"
 
-    @echo Treated !NB_GAMES_TREATED! games
+    echo Treated !NB_GAMES_TREATED! games
 
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you want to change global CEMU^'s settings you^'ve just
-    @echo entered here^:
-    @echo ---------------------------------------------------------
-    @echo ^> simply delete the shortcuts and recreate them using
-    @echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
-    @echo to register a SINGLE version of CEMU
-    @echo ---------------------------------------------------------
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo If you want to change global CEMU^'s settings you^'ve just
+    echo entered here^:
+    echo ---------------------------------------------------------
+    echo ^> simply delete the shortcuts and recreate them using
+    echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
+    echo to register a SINGLE version of CEMU
+    echo ---------------------------------------------------------
     pause
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo If you encounter any issues or have made a mistake when
-    @echo collecting settings for a game^:
-    @echo ---------------------------------------------------------
-    @echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
-    @echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
-    @echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
-    @echo ---------------------------------------------------------
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo If you encounter any issues or have made a mistake when
+    echo collecting settings for a game^:
+    echo ---------------------------------------------------------
+    echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
+    echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
+    echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
+    echo ---------------------------------------------------------
     pause
-    @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @echo This windows will close automatically in 15s
-    @echo     ^(n^)^: don^'t close^, i want to read history log first
-    @echo     ^(q^)^: close it now and quit
-    @echo ---------------------------------------------------------
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo This windows will close automatically in 15s
+    echo     ^(n^)^: don^'t close^, i want to read history log first
+    echo     ^(q^)^: close it now and quit
+    echo ---------------------------------------------------------
     call:getUserInput "Enter your choice? : " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM Waiting before exiting
@@ -597,8 +598,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         set "msg="Create shortcuts for !CEMU_FOLDER_NAME! with import mode !IMPORT_MODE! in=!OUTPUT_FOLDER:"=!\Wii-U Games""
         call:log2HostFile !msg!
     )
-    @echo =========================================================
-    if !QUIET_MODE! EQU 0 @echo Waiting the end of all child processes before ending^.^.^.
+    echo =========================================================
+    if !QUIET_MODE! EQU 0 echo Waiting the end of all child processes before ending^.^.^.
 
     call:waitProcessesEnd
 
@@ -620,7 +621,7 @@ REM : functions
         wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set /A "disp=1"
-                @echo Still extracting V2 GFX packs^, please wait ^.^.^.
+                echo Still extracting V2 GFX packs^, please wait ^.^.^.
             )
             goto:waitingLoopProcesses
         )
@@ -641,8 +642,8 @@ REM : functions
         REM : if need call import script and wait
         if !needImport! EQU 0 goto:eof
 
-        @echo Hum^.^.^. some DLC and UPDATE DATA folders were found
-        @echo Preparing those games for emulation^.^.^.
+        echo Hum^.^.^. some DLC and UPDATE DATA folders were found
+        echo Preparing those games for emulation^.^.^.
         timeout /T 5 > NUL 2>&1
 
         REM : calling createShortcuts.bat
@@ -650,7 +651,7 @@ REM : functions
         call !tobeLaunch! !GAMES_FOLDER!
         set /A "cr=!ERRORLEVEL!"
 
-        @echo ^> Games ready for emulation
+        echo ^> Games ready for emulation
         timeout /T 5 > NUL 2>&1
         cls
 
@@ -756,7 +757,7 @@ REM : functions
         if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
         ) else (
-            @echo ERROR^: in !TMP_VBS_FILE!
+            echo ERROR^: in !TMP_VBS_FILE!
             pause
             del /F !TMP_VBS_FILE! > NUL 2>&1
         )
@@ -834,7 +835,7 @@ REM : functions
             set "TARGET_PATH=!program!"
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\!name:.exe=.ico!""
             if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !name:.exe=!
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to !name:.exe=!
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
             )
         )
@@ -852,7 +853,7 @@ REM : functions
         set "LINK_DESCRIPTION="FTP to Wii-U using WinSCP""
 
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to WinSCP
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to WinSCP
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !WD_FOLDER!
         )
 
@@ -862,7 +863,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\scanWiiU.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\wii-u.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to scanWiiU^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to scanWiiU^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -875,7 +876,7 @@ REM : functions
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\scanResults.ico""
 
             if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to Wii-I scans results
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Wii-I scans results
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
         )
@@ -886,7 +887,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getWiiuOnlineFiles.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\online.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to getWiiuOnlineFiles^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to getWiiuOnlineFiles^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -896,7 +897,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\setWiiuAccountToUsers.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\WiiU-user.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to setWiiuAccountToUsers^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to setWiiuAccountToUsers^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -906,7 +907,7 @@ REM : functions
         REM set "TARGET_PATH="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
         REM set "ICO_PATH="!BFW_PATH:"=!\resources\icons\ftp.ico""
         REM if not exist !LINK_PATH! (
-                REM if !QUIET_MODE! EQU 0 @echo Creating a shortcut to dumpGamesFromWiiu^.bat
+                REM if !QUIET_MODE! EQU 0 echo Creating a shortcut to dumpGamesFromWiiu^.bat
             REM call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         REM )
 
@@ -916,7 +917,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\createWiiuSDcard.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\sdcard.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to createWiiuSDcard^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to createWiiuSDcard^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -926,7 +927,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\exportSavesToWiiu.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exportSave.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to exportSavesToWiiu^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to exportSavesToWiiu^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -936,7 +937,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importWiiuSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importSave.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importWiiuSaves^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to importWiiuSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -955,7 +956,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\convertIconsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\convertIconsForAllGames.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to convertIconsForAllGames^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to convertIconsForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -965,7 +966,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\copyMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\copyMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to copyMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to copyMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -975,7 +976,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\moveMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\moveMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to moveMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to moveMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -985,7 +986,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreMlc01DataForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreMlc01DataForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreMlc01DataForAllGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to restoreMlc01DataForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -995,7 +996,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreUserSavesOfAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreUserSavesOfAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreUserSavesOfAllGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to restoreUserSavesOfAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1005,7 +1006,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\backupAllInGameSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\backupAllInGameSaves.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to backupAllInGameSaves^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to backupAllInGameSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1015,7 +1016,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllInGameSavesBackup.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllInGameSavesBackup.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllInGameSavesBackup^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteAllInGameSavesBackup^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1025,7 +1026,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importSaves.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importSaves.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importSaves^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to importSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1035,7 +1036,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getTitleDataFromLibrary.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getTitleDataFromLibrary.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to getTitleDataFromLibrary^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to getTitleDataFromLibrary^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1045,7 +1046,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importTransferableCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importTransferableCache.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importTransferableCache^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to importTransferableCache^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1055,7 +1056,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteMyGpuCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteMyGpuCache.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteMyGpuCache^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteMyGpuCache^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1065,7 +1066,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getMyShaderCachesSize.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\getMyShaderCachesSize.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to getMyShaderCachesSize^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to getMyShaderCachesSize^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1075,7 +1076,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreTransShadersForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreTransShadersForAllGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreTransShadersForAllGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to restoreTransShadersForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1085,7 +1086,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\createGameGraphicPacks.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createGameGraphicPacks.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to createGameGraphicPacks^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to createGameGraphicPacks^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1095,7 +1096,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\forceGraphicPackUpdate.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to forceGraphicPackUpdate^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to forceGraphicPackUpdate^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1105,7 +1106,7 @@ REM : functions
         set "TARGET_PATH="!GAMES_FOLDER:"=!\_BatchFw_Games_Compatibility_Reports\!USERDOMAIN!""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to !USERDOMAIN! compatibility reports folder
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to !USERDOMAIN! compatibility reports folder
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_PATH!
         )
 
@@ -1115,7 +1116,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\BatchFw_readme.txt""
         set "ICO_PATH="NONE""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to BatchFW_readme^.txt
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to BatchFW_readme^.txt
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_PATH!
         )
 
@@ -1125,7 +1126,7 @@ REM : functions
         set "TARGET_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts\fixBrokenShortcuts.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\fixBrokenShortcuts.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to fixBrokenShortcuts.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to fixBrokenShortcuts.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! "!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts"
         )
 
@@ -1135,7 +1136,7 @@ REM : functions
         set "TARGET_PATH="!THIS_SCRIPT!""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createShortcuts.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to this script
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to this script
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -1145,7 +1146,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importGames.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importGames^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to importGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -1155,7 +1156,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreBfwDefaultSettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreBfwDefaultSettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to restoreBfwDefaultSettings^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to restoreBfwDefaultSettings^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -1165,7 +1166,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\killBatchFw.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\kill.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to killBatchFw^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to killBatchFw^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -1175,7 +1176,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\createExecutables.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\createExecutables.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to createExecutables^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to createExecutables^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !OUTPUT_FOLDER!
         )
 
@@ -1185,7 +1186,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\updateGraphicPacksFolder.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to updateGraphicPacksFolder^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to updateGraphicPacksFolder^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1195,7 +1196,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\importModsForAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\importModsForAllGames.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to importModsForAllGames^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to importModsForAllGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1210,7 +1211,7 @@ REM : functions
             set "TARGET_PATH="!BFW_PATH:"=!\tools\displayGamesStats.bat""
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\displayGamesStats.ico""
             if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 @echo Creating a shortcut to displayGamesStats^.bat for !ARGS:"=!
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to displayGamesStats^.bat for !ARGS:"=!
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
         )
@@ -1223,7 +1224,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\setup.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\setup.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to setup^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to setup^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
 
@@ -1235,7 +1236,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\uninstall.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\uninstall.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to uninstall^.bat
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to uninstall^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
 
@@ -1247,7 +1248,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllMySettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllMySettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllMySettings^.bat for all CEMU^'s versions
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteAllMySettings^.bat for all CEMU^'s versions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1259,7 +1260,7 @@ REM : functions
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllMySettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllMySettings.ico""
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to deleteAllMySettings^.bat for !CEMU_FOLDER_NAME!^'s versions
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteAllMySettings^.bat for !CEMU_FOLDER_NAME!^'s versions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1299,7 +1300,7 @@ REM : functions
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to OpenGL caches saves
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to OpenGL caches saves
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -1313,7 +1314,7 @@ REM : functions
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 
         if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 @echo Creating a shortcut to access to Vulkan caches saves
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Vulkan caches saves
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
     goto:eof
@@ -1372,21 +1373,21 @@ REM : functions
 
             REM : else using cemu.exe icon
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\noIconFound.ico""
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            @echo No icons found for !GAME_TITLE!
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo No icons found for !GAME_TITLE!
 
             if [!defaultBrowser!] == ["NOT_FOUND"] (
-                @echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
-                @echo ^(no need to rename it^) then use the shortcut
-                @echo Wii-U Games^\_BatchFw^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
+                echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
+                echo ^(no need to rename it^) then use the shortcut
+                echo Wii-U Games^\_BatchFw^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
                 goto:icoSet
             )
-            @echo.
-            @echo. Opening up a google search^.^.^.
+            echo.
+            echo. Opening up a google search^.^.^.
             REM : open a google search
             wscript /nologo !StartWait! !defaultBrowser! "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
-            @echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
-            @echo ^(no need to rename it^)
+            echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
+            echo ^(no need to rename it^)
             pause
 
             REM : create icon for this game
@@ -1412,8 +1413,8 @@ REM : functions
 
             REM : if shortcut exist and import mode enabled : if shortcut exist skip this game
             if exist !SHORCTUT_PATH! (
-                if !QUIET_MODE! EQU 0 @echo ---------------------------------------------------------
-                if !QUIET_MODE! EQU 0 @echo !GAME_TITLE! ^: shortcut for !user:"=! already exists^, skipped
+                if !QUIET_MODE! EQU 0 echo ---------------------------------------------------------
+                if !QUIET_MODE! EQU 0 echo !GAME_TITLE! ^: shortcut for !user:"=! already exists^, skipped
             ) else (
                 call:userGameShortcut !user!
             )
@@ -1470,14 +1471,14 @@ REM : functions
         if !QUIET_MODE! EQU 0 if !gameDisplayed! EQU 0 (
 
             REM : asking for associating the current game with this CEMU VERSION
-            @echo =========================================================
-            @echo - !GAME_TITLE!
-            @echo ---------------------------------------------------------
-            @echo.
-            @echo Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
-            @echo   ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
-            @echo   ^(y^)^: default value after 15s timeout
-            @echo.
+            echo =========================================================
+            echo - !GAME_TITLE!
+            echo ---------------------------------------------------------
+            echo.
+            echo Create a shortcut for !GAME_TITLE! using !CEMU_FOLDER!^?
+            echo   ^(n^)^: skip^, not associating this game with !CEMU_FOLDER_NAME!
+            echo   ^(y^)^: default value after 15s timeout
+            echo.
 
             call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["n"] (
@@ -1547,7 +1548,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
-        if !QUIET_MODE! EQU 0 @echo - Shortcut for !user:"=! created ^!
+        if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
         set /A NB_GAMES_TREATED+=1
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1645,8 +1646,8 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         REM : versioning separator (init to .)
         set "sep=."
-        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
@@ -1790,20 +1791,20 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         REM : if implicit expansion failed (when calling this script)
         if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
             exit /b 13
         )
 
         REM : try to resolve
         if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
+            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
             exit /b 11
         )
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
+            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
 
@@ -1858,7 +1859,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            @echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found ^?^, exiting 1
             pause
             exit /b 9
         )

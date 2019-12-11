@@ -24,7 +24,7 @@ rem    color 4F
 
     set /A "nbIs=0"
     for /F "tokens=* delims=~" %%i in ('type !logFile! ^| find /I "TO_BE_LAUNCHED" 2^>NUL') do (
-        @echo line read ^: %%i
+        echo line read ^: %%i
         call:closeSoftware "%%i"
     )
 
@@ -43,7 +43,7 @@ REM : functions
 
         for /F "tokens=3 delims=~@" %%j in (!line!) do set "whatTodo=%%j"
 
-        @echo Close = !whatTodo!
+        echo Close = !whatTodo!
         if ["!whatTodo!"] == ["N"] goto:eof
 
         for /F "tokens=2 delims=~@" %%j in (!line!) do set "command="%%j""
@@ -56,8 +56,8 @@ REM : functions
         for /F "tokens=1 delims=~'" %%j in (!command!) do set "program="%%j""
         for /F "tokens=3 delims=~'" %%j in (!command!) do set "firstArg="%%j""
 
-        @echo program = !program!
-        @echo firstArg = !firstArg!
+        echo program = !program!
+        echo firstArg = !firstArg!
 
         if not [!program!] == ["NONE"]  if not exist !program! (
                 call:cleanHostLogFile !program!
@@ -69,7 +69,7 @@ REM : functions
             if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
             if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
-            @echo nbIs=!nbIs!
+            echo nbIs=!nbIs!
 
             REM : basename of GAME FOLDER PATH (used to name shorcut)
             for /F "delims=~" %%i in (!program!) do set "exe=%%~nxi"
