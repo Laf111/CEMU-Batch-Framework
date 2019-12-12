@@ -92,7 +92,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - GPU Cache backup/restore per game (AMD, NVIDIA / OpenGL, Vulkan);
 
-- Automatic GPU Cache cleanup when updating display drivers (CEMU leaves the old OpenGL cache);
+- Automatic GLCache cleanup when updating display drivers (CEMU leaves the old one);
 
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
