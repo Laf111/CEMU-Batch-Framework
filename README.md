@@ -27,12 +27,12 @@ Last GFX packs checked (presets completion) : **V563**
 
 - **create FPS packs : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).**
 
-- **For Wii-U owners:** 
-    - **install online files,** 
-    - **sync friend list,** 
-    - **sync saves between CEMU with the Wii-U (for all versions even < 1.15.19),**
-    - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb)**
-
+- **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
+    - **get/sync online files (account, friends'list),** 
+    - **sync saves between CEMU with the Wii-U (export CEMU->Wii-U using SaveMii),**
+    - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
+    - **ping the wii-U to avoid online simultaneous access** 
+    
 
 
 ## How it works:
