@@ -67,7 +67,7 @@ The mlc01 path is in the game folder so:
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
 
-- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for one or more aspect ratios; 
+- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for 4/3, 16/9, 16/10, 21/9, 32/9 and 48/9 aspect ratios; 
 
 - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC);
 
@@ -90,9 +90,9 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 ### Other features:
 
-- GLCache backup/restore per game (AMD, NVIDIA);
+- GPU Cache backup/restore per game (AMD, NVIDIA / OpenGL, Vulkan);
 
-- Automatic GLCache cleanup when updating display drivers;
+- Automatic GPU Cache cleanup when updating display drivers (CEMU leaves the old OpenGL cache);
 
 - Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
@@ -181,7 +181,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
 
     - CEMU version earlier than 1.15.1 does not protect the GLCache in shaderCache/driver/nvidia
     
-    - GLCache is saved per game and so for versions >= 1.15.1 it avoids to handle only one big cache that could lead in extra RAM/VRAM         consumption and generate stutters even with a full transferable shader cache
+    - GLCache is saved per game and so for versions >= 1.15.1 it avoids to handle only one big cache that could lead in extra RAM/VRAM consumption and generate stutters even with a full transferable shader cache
 
 
 - Playing with my games on a USB drive will not cripple performances? 
