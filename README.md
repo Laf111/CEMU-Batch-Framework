@@ -23,7 +23,7 @@ Last GFX packs checked (presets completion) : **V563**
 
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
 
-- **Complete/create GFX packs for ALL games (even if they are still not officially supported).**
+- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support 4/3, 16/9, 16/10, 21/9, 32/9, 48/9 aspect ratios**
 
 - **create FPS packs for ALL games (to run the games at 105, 110 or 120% for games using a FPS engine model. V-sync need to be disabled).**
 
