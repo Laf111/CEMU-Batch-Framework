@@ -164,6 +164,9 @@ REM : ------------------------------------------------------------------
     @echo Use !versionRead! to display stats
     @echo ^(do not launch games with it^)
     @echo.
+    @echo Don^'t forget that versions of CEMU ^< 1^.15^.18 do not track
+    @echo playtime when launching a game via command line ^(bug#206^)
+    @echo.
     @echo =========================================================
 
     timeout /T 3 > NUL 2>&1
