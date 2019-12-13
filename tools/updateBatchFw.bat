@@ -95,16 +95,21 @@ REM : main
     )
 
     REM : current version is a RC (Release Candidate) ?
-    echo !BFW_VERSION! | find /V "RC" > NUL 2>&1 && goto:isAvailableVersionIsRC
+    echo !BFW_VERSION! | find "RC" > NUL 2>&1 && (
 
-    REM : BFW_VERSION is a RC
-    REM : if available version is also a RC one, goto:diff
-    echo !bfwVR! | find "RC" > NUL 2>&1 && goto:compare
-    REM : else (available version is not a RC => update)
-    goto:newVersion
-
-    :isAvailableVersionIsRC
+        REM : BFW_VERSION is a RC
+        REM : if available version is also a RC one, goto:diff
+        echo !bfwVR! | find "RC" > NUL 2>&1 && goto:compare
+        REM : else (available version is not a RC => update)
+        goto:newVersion
+    )
+    
     REM : here BFW_VERSION is not a RC
+    REM : bug to avoid V1500
+    echo !bfwVR! | find "V1500" > NUL 2>&1 && (
+        echo No new BatchFw update^(s^) available^, last version is still V15
+        exit /b 15
+    )
 
     echo !bfwVR! | find "RC" > NUL 2>&1 && (
         echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
