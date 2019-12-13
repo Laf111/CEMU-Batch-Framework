@@ -65,6 +65,7 @@ REM : main
     set "setup="!BFW_PATH:"=!\setup.bat""
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
     set "BFW_VERSION=%BFW_VERSION:"=%"
+    
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -92,13 +93,28 @@ REM : main
         echo Failed to get the last BatchFw version available
         exit /b 12
     )
-    REM : ignore RC versions
+
+    REM : current version is a RC (Release Candidate) ?
+    echo !BFW_VERSION! | find /V "RC" > NUL 2>&1 && goto:isAvailableVersionIsRC
+
+    REM : BFW_VERSION is a RC
+    REM : if available version is also a RC one, goto:diff
+    echo !bfwVR! | find "RC" > NUL 2>&1 && goto:compare
+    REM : else (available version is not a RC => update)
+    goto:newVersion
+
+    :isAvailableVersionIsRC
+    REM : here BFW_VERSION is not a RC
+
     echo !bfwVR! | find "RC" > NUL 2>&1 && (
         echo A release candidate version is available^, check https^:^/^/github^.com^/Laf111^/CEMU-Batch-Framework^/releases
         echo if you want to update^, do it manually^.
         timeout /T 4 > NUL 2>&1
         exit /b 14
     )
+    REM : here BFW_VERSION is not a RC AND bfwVR is not a RC => continue with comparing
+
+    :compare
     call:compareVersions %bfwVR% %BFW_VERSION% result > NUL 2>&1
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions
