@@ -868,11 +868,6 @@ REM : main
 
     if %QUIET_MODE% EQU 1 goto:done
 
-    echo You^'ll need to launch each game one time with the last versions
-    echo of CEMU you used^, to let BatchFw copy the transferable cache into
-    echo the game^'s folder^.^(lets boot the game to the menu^)
-    echo.
-
     call:getUserInput "Would you like to see how BatchFW works? (y,n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:done
 
@@ -1701,8 +1696,7 @@ REM : functions
         set "lastHostLog="NONE""
         set "patHostLog="!BFW_PATH:"=!\logs\Host_*.log""
 
-        REM : getting the last modified one including _j.bin (conventionnal shader cache)
-        for /F "delims=~" %%i in ('dir /B /S /O:D !patHostLog! 2^>NUL') do set "lastHostLog="%%i""
+        for /F "delims=~" %%i in ('dir /B /S /O:D /T:W !patHostLog! 2^>NUL') do set "lastHostLog="%%i""
 
         call:log2HostFile "================================================="
         call:log2HostFile "CEMU BATCH Framework history and settings for !USERDOMAIN!"

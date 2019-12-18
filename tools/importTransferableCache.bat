@@ -61,9 +61,17 @@ REM : main
     echo =========================================================
     echo Import a transferable cache file
     echo =========================================================
+    echo.
 
+    REM : Ask if tc for CEMU > 1.16 => newTc=1
+    set /A "newTc=0"
+
+    choice /C yn /N /M "Is this cache is for versions of CEMU ^> 1^.16 (y, n)? : "
+    if %ERRORLEVEL% EQU 1 set /A "newTc=1"
+    
     REM : browse to the file
     :askInputFile
+    echo.
     echo Please browse to the transferable cache file
 
     for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
@@ -77,7 +85,9 @@ REM : main
     set "SOURCE_FOLDER=!folder:~0,-2!""
 
     :askGameFolder
+    echo.
     echo Please browse to the game^'s folder
+    echo.
 
     for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
@@ -114,17 +124,52 @@ REM : main
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-    REM : search for BatchFw game info file
-    set "infoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
+    REM : compute shaderCacheId
+
     set "sci=NOT_FOUND"
-    if not exist !infoFile! call:getShaderCacheName & goto:checkSizes
+    call:getShaderCacheName
 
-    type !infoFile! | find "ShaderCache Id" > NUL 2>&1
-    if %ERRORLEVEL% NEQ 0 call:getShaderCacheName & goto:checkSizes
+    if !newTc! EQU 0 goto:checkSizes
 
-    for /F "tokens=2 delims=~=" %%i in ('type !infoFile! ^| find /I "ShaderCache Id" 2^>NUL') do set "sci=%%i"
-    set "sci=!sci:"=!"
-    set "sci=!sci: =!"
+    REM : new cache built with titleId
+    set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
+    if not exist !META_FILE! (
+        echo No meta folder found under game folder^, aborting^!
+        goto:metaFix
+    )
+
+    REM : get Title Id from meta.xml
+    :getTitleLine
+    set "titleLine="NONE""
+    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
+    if [!titleLine!] == ["NONE"] (
+        echo No titleId found in the meta^.xml file ^?
+        :metafix
+        echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
+        set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
+        if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
+        echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
+        echo "Then close notepad to continue"
+
+        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
+        REM : create the meta.xml file
+        echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
+        echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
+        echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
+        echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
+        echo ^<^/menu^> >> !META_FILE!
+        echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
+        echo "Then close notepad to continue"
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
+        goto:getTitleLine
+    )
+
+    for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
+
+    if !titleId! == "################" goto:metafix
+
+    set "sci=!titleId!"
 
     :checkSizes
 
@@ -146,7 +191,7 @@ REM : main
     pushd !TARGET_FOLDER!
 
     set "oldCache="NONE""
-    for /F "delims=~" %%i in ('dir /B /O:D *.bin 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!.bin 2^>NUL') do (
         set "oldCache="!TARGET_FOLDER:"=!\%%i""
     )
 

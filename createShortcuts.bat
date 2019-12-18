@@ -949,7 +949,16 @@ REM : functions
         if not exist !LINK_PATH! (
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
+        REM : create a shortcut to syncGamesFolder.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Synchronize saves and caches between games^'folder^.lnk""
+        set "LINK_DESCRIPTION="Synchronize saves and caches between games folder""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\syncGamesFolder.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\syncGamesFolder.ico""
+        if not exist !LINK_PATH! (
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons\Convert all jpg files to centered icons^.lnk""
         set "LINK_DESCRIPTION="Convert all jpg files find in the Cemu subfolder of the game's folder, to centered icon in order to be used by createShortcuts.bat""
@@ -1051,8 +1060,8 @@ REM : functions
         )
 
         REM : create a shortcut to deleteMyGpuCache.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Flush my GPU OpenGL cache^.lnk""
-        set "LINK_DESCRIPTION="Empty my GPU OpenGL cache""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Flush my GPU shaders caches^.lnk""
+        set "LINK_DESCRIPTION="Empty my GPU shaders caches""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteMyGpuCache.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteMyGpuCache.ico""
         if not exist !LINK_PATH! (

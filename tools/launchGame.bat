@@ -22,6 +22,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "initProgressBar="!BFW_TOOLS_PATH:"=!\initProgressBar.bat""
     set "progressBar="!BFW_RESOURCES_PATH:"=!\progressBar.lnk""
+    set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -42,7 +43,6 @@ REM : main
 
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""
@@ -220,6 +220,7 @@ REM : main
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
+    REM : that works also if CEMU_FOLDER does not exist !
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
 
@@ -332,11 +333,33 @@ REM : main
     if [!titleLine!] == ["NONE"] goto:getScreenMode
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
-    REM : link game's packs
+    REM : handle transferable shader cache comptability since 1.16
+    set "sci=NOT_FOUND"
+    call:getShaderCacheName
+    if ["!sci!"] == ["NOT_FOUND"] (
+        echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^! >> !batchFwLog!
+        echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
+        goto:updateGameGraphicPack
+    )
 
-    echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:updateGameGraphicPack
+
+    REM : is CEMU >= 1.16 ?
+    set /A "v116=2
+
+    if !v11515! EQU 2 goto:updateGameGraphicPack
+    call:compareVersions !versionRead! "1.16.0" v116 > NUL 2>&1
+    if ["!v116!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    if !v116! EQU 2 goto:updateGameGraphicPack
+
+    set "sci=!titleId!"
+
 
     :updateGameGraphicPack
+
+    REM : link game's packs
+    echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 34 36 "pre processing" "checking game graphic packs availability"
 
     REM : update Game's Graphic Packs
@@ -357,24 +380,19 @@ REM : main
         set "gameExe="!OUTPUT_FOLDER:"=!\Wii-U Games\!currentUser!\!GAME_TITLE! [!CEMU_FOLDER_NAME!!argLeg!] !currentUser!.exe""
 
         REM : shortcut to game's profile
-        set "profileShortcuts="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
+        set "versionShortcuts="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!""
 
         cscript /nologo !MessageBox! "CEMU folder !CEMU_FOLDER:"=! does not exist anymore^, you might have move or delete this version^. Removing shortcuts"
 
         REM : delete shortcuts
         if exist !gameShortcut! del /F !gameShortcut! >NUL
         if exist !gameExe! del /F !gameExe! >NUL
-        rmdir /Q /S !profileShortcuts! > NUL 2>&1
-
-        REM : Delete the shortcut
-        set "delSettings="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\%CEMU_FOLDER_NAME%\Delete my %CEMU_FOLDER_NAME%'s settings""
-
-        del /F !delSettings! 2>NUL
+        rmdir /Q /S !versionShortcuts! > NUL 2>&1
 
         REM : Delete the shortcut
         set "logShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\Logs\!CEMU_FOLDER_NAME!.lnk""
 
-        del /F !logShortcut! 2>NUL
+        if exist !logShortcut! del /F !logShortcut! 2>NUL
         timeout /t 8 > NUL 2>&1
         exit 20
     )
@@ -418,8 +436,9 @@ REM : main
 
     set "cacheFile=NONE"
     pushd !gtscf!
+
     REM : getting the last modified one including _j.bin (conventionnal shader cache)
-    for /F "delims=~" %%i in ('dir /B /O:D *.bin 2^>NUL') do set "cacheFile=%%i"
+    for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL') do set "cacheFile=%%i"
     pushd !BFW_TOOLS_PATH!
 
     REM : if not file found
@@ -466,7 +485,7 @@ REM : main
 
     REM : first launch the transferable cache copy in background before
     echo Copying transferable cache to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
-    REM : copy all *.bin file (2 files if separable and conventionnal)
+    REM : copy all !sci!.bin file (2 files if separable and conventionnal)
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.bfw_old /XF *emu* /XF *.rar
 
     REM : launching third party software if defined
@@ -659,7 +678,7 @@ REM : main
     set "idGpuFolder="NOT_FOUND""
     pushd !gpuCacheSavesFolder!
     set "pat=!GPU_VENDOR!*"
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B !pat! 2^>NUL') do set "idGpuFolder="%%x""
+    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !pat! 2^>NUL') do set "idGpuFolder="%%x""
     pushd !BFW_TOOLS_PATH!
 
     REM : if no backup found for your GPU VENDOR goto:lockCemu
@@ -709,19 +728,19 @@ REM : main
     if not exist %gpuCacheBackupFolder% goto:lockCemu
 
     REM : openGpuCacheID
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B !gpuCacheBackupFolder!') do set "oldGpuCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !gpuCacheBackupFolder!') do set "oldGpuCacheId=%%x"
     if not ["%oldGpuCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
 
     REM : search for shader files
     pushd !gpuCacheBackupFolder!
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:lockCemu
 
     pushd !gpuCacheBackupFolder!
     REM GPU_CACHE_PATH already created before (if missing)
-    for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
@@ -981,7 +1000,7 @@ REM : main
     REM : backup of GpuCache, get the last modified folder under GpuCache
     pushd !GPU_CACHE_PATH!
     set "newGpuCacheId=NOT_FOUND"
-    for /F "delims=~" %%x in ('dir /A:D /O:D /B * 2^>NUL') do set "newGpuCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do set "newGpuCacheId=%%x"
     pushd !BFW_TOOLS_PATH!
 
     if not ["%newGpuCacheId%"] == ["NOT_FOUND"] goto:whatToDo
@@ -991,7 +1010,7 @@ REM : main
     pushd !GPU_CACHE!
 
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=~" %%f in ('dir /O:D /B *.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!*.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
 
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:warning
@@ -1001,7 +1020,7 @@ REM : main
     if not exist !targetFolder! mkdir !targetFolder! > NUL 2>&1
 
     pushd !GPU_CACHE!
-    for /F "delims=~" %%f in ('dir /O:D /B %shaderCacheFileName%.* 2^>NUL') do (
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
     )
@@ -1257,6 +1276,17 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :getShaderCacheName
+
+        pushd !getShaderCacheFolder!
+        set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
+
+        for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"
+
+        pushd !GAMES_FOLDER!
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :setProgressBar
         set /A "p1=%~1"
         set /A "p2=%~2"
@@ -1507,7 +1537,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             set "OTHER_SAVE="NONE""
 
             pushd !igsvf!
-            for /F "delims=~" %%i in ('dir /B /O:D !GAME_TITLE!_*.rar  2^>NUL') do (
+            for /F "delims=~" %%i in ('dir /B /O:D /T:W !GAME_TITLE!_*.rar  2^>NUL') do (
                 set "OTHER_SAVE="%%i""
             )
             pushd !BFW_TOOLS_PATH!
@@ -1538,7 +1568,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         pushd !oldSavePath!
 
         REM : delete old saves path in MLC01_FOLDER_PATH
-        for /F "delims=~" %%i in ('dir /b /o:d /a:d * 2^>NUL') do set "PREVIOUS_SHADER_CACHE_ID=%%i"
+        for /F "delims=~" %%i in ('dir /b /O:D /T:W /a:d * 2^>NUL') do set "PREVIOUS_SHADER_CACHE_ID=%%i"
 
         if not ["!PREVIOUS_SHADER_CACHE_ID!"] == ["NONE"] (
             set "folder="!oldSavePath:"=!\!PREVIOUS_SHADER_CACHE_ID!""
@@ -1857,11 +1887,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : initialize to user settings
         set "sSetBin="!candidateFolder:"=!\!currentUser!_settings.bin""
-        if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
+        if not exist !sSetBin! for /F "delims=~" %%i in ('dir /O:D /T:W /B *settings.bin 2^> NUL') do set "sSetBin="!candidateFolder:"=!\%%i""
 
         REM : initialize to user settings
         set "sSetXml="!candidateFolder:"=!\!currentUser!_settings.xml""
-        if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
+        if not exist !sSetXml! for /F "delims=~" %%i in ('dir /O:D /T:W /B *settings.xml 2^> NUL') do set "sSetXml="!candidateFolder:"=!\%%i""
 
         pushd !BFW_TOOLS_PATH!
 
@@ -1903,20 +1933,20 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         pushd !SETTINGS_FOLDER!
 
-        for /F "delims=~" %%i in ('dir /O:D /B *settings.bin 2^> NUL') do (
+        for /F "delims=~" %%i in ('dir /O:D /T:W /B *settings.bin 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!currentUser!_settings.bin" > NUL 2>&1
             REM : remove old saved settings
             if [!f!] == ["settings.bin"] del /F !f! > NUL 2>&1
         )
-        for /F "delims=~" %%i in ('dir /O:D /B *settings.xml 2^> NUL') do (
+        for /F "delims=~" %%i in ('dir /O:D /T:W /B *settings.xml 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!currentUser!_settings.xml" > NUL 2>&1
             REM : remove old saved settings
             if [!f!] == ["settings.xml"] del /F !f! > NUL 2>&1
         )
         set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
-        for /F "delims=~" %%i in ('dir /O:D /B *cemuhook.ini 2^> NUL') do (
+        for /F "delims=~" %%i in ('dir /O:D /T:W /B *cemuhook.ini 2^> NUL') do (
             set "f="%%i""
             copy /Y !f! "!currentUser!_cemuhook.ini" > NUL 2>&1
             REM : remove old saved settings

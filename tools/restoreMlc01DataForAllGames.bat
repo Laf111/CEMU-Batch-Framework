@@ -214,9 +214,6 @@ REM : main
     echo #########################################################
     if !QUIET_MODE! EQU 1 goto:exiting
     echo ---------------------------------------------------------
-    echo Delete and recreate shortcut for the treated games
-    echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
-    echo ---------------------------------------------------------
     echo This windows will close automatically in 12s
     echo     ^(n^) ^: don^'t close^, i want to read history log first
     echo     ^(q^) ^: close it now and quit

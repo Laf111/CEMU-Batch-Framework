@@ -276,65 +276,10 @@ REM : functions
 
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
-        if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
 
-        REM : compute shaderCache id to seek for the transferable cache
-        set "sci=NOT_FOUND"
-        call:getShaderCacheName
-        if ["!sci!"] == ["NOT_FOUND"] (
-            echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
-            goto:treatMlc01Data
-        )
-
-        REM : import transferable cache (check size)
-        set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
-        if not exist !gtscf! mkdir !gtscf! > NUL 2>&1
-
-        set "srcScf="!ctscf:"=!\!sci!.bin""
-        set "tgtScf="!gtscf:"=!\!sci!.bin""
-
-        if not exist !srcScf! goto:treatMlc01Data
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1 & goto:treatMlc01Data
-
-        set /A "srcSize=0"
-        for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
-        set /A "tgtSize=0"
-        for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
-
-        REM : compare their size : move only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1
-
-        :treatMlc01Data
-        REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
+         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        echo =========================================================
-        echo - !GAME_TITLE!
-        echo ---------------------------------------------------------
-
-        REM : asking for associating the current game with this CEMU VERSION
-
-        echo If you play !GAME_TITLE! with !CEMU_FOLDER_NAME:"=! ^:
-        echo.
-        echo Moving game^'s data from !MLC01_FOLDER_PATH! ^?
-        echo   ^(n^) ^: no^, skip
-        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
-        echo.
-
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
-        if [!ANSWER!] == ["n"] (
-            REM : skip this game
-            echo Skip this GAME
-            goto:eof
-        )
-
-        REM : mlc01 subfolder already present
-        set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
-        if exist !mlc01Folder! (
-            choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
-            if !ERRORLEVEL! EQU 2 goto:eof
-        )
-        echo ---------------------------------------------------------
         set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
         if not exist !META_FILE! (
             echo No meta folder found under game folder^, aborting^!
@@ -373,6 +318,81 @@ REM : functions
         if !titleId! == "################" goto:metafix
 
         set "endTitleId=%titleId:~8,8%"
+
+        if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
+
+        REM : compute shaderCache id to seek for the transferable cache
+        set "sci=NOT_FOUND"
+        call:getShaderCacheName
+        if ["!sci!"] == ["NOT_FOUND"] (
+            echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
+            goto:handleNewTC
+        )
+
+        REM : import transferable cache (check size)
+        set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
+        if not exist !gtscf! mkdir !gtscf! > NUL 2>&1
+
+        set "srcScf="!ctscf:"=!\!sci!.bin""
+        set "tgtScf="!gtscf:"=!\!sci!.bin""
+
+        if not exist !srcScf! goto:handleNewTC
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1 & goto:handleNewTC
+
+        set /A "srcSize=0"
+        for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
+        set /A "tgtSize=0"
+        for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
+
+        REM : compare their size : move only if greater
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1
+
+        :handleNewTC
+        REM : for version > 1.16 sci=titleId
+        set "sci=!titleId!"
+        set "srcScf="!ctscf:"=!\!sci!.bin""
+        if not exist !srcScf! goto:treatMlc01Data
+
+        set "tgtScf="!gtscf:"=!\!sci!.bin""
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1 & goto:treatMlc01Data
+
+        set /A "srcSize=0"
+        for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
+        set /A "tgtSize=0"
+        for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
+
+        REM : compare their size : copy only if greater
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1
+
+        :treatMlc01Data
+
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
+
+        REM : asking for associating the current game with this CEMU VERSION
+
+        echo If you play !GAME_TITLE! with !CEMU_FOLDER_NAME:"=! ^:
+        echo.
+        echo Moving game^'s data from !MLC01_FOLDER_PATH! ^?
+        echo   ^(n^) ^: no^, skip
+        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
+        echo.
+
+        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
+        if [!ANSWER!] == ["n"] (
+            REM : skip this game
+            echo Skip this GAME
+            goto:eof
+        )
+
+        REM : mlc01 subfolder already present
+        set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
+        if exist !mlc01Folder! (
+            choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
+        echo ---------------------------------------------------------
 
         set "pat="!MLC01_FOLDER_PATH:"=!\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (

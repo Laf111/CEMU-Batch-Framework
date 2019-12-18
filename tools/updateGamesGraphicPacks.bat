@@ -258,7 +258,7 @@ REM : main
     :checkPackLinks
 
     REM : check that at least one GFX pack was listed
-    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:setMlcLinks
 
     REM : stop execution something wrong happens
     REM : warn user
@@ -269,7 +269,38 @@ REM : main
 
     exit 80
 
-    :endMain
+    :setMlcLinks
+
+    REM : (re)create links for new update/DLC folders tree
+    set "endTitleId=%titleId:~8,8%"
+
+    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%endTitleId%""
+    set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000E\%endTitleId%""
+
+    if not exist !oldUpdateFolder! mkdir !oldUpdateFolder! > NUL 2>&1
+
+    if exist !newUpdateFolder! (
+        REM : delete the link
+        rmdir /Q !newUpdateFolder! > NUL 2>&1
+    ) else (
+        mkdir !newUpdateFolder! > NUL 2>&1
+    )
+    REM : create the link
+    mklink /J /D !newUpdateFolder! !oldUpdateFolder!
+
+    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\mlc01\usr\title\00050000\%endTitleId%\aoc
+    set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\mlc01\usr\title\0005000C\%endTitleId%
+
+    if not exist !oldDlcFolder! mkdir !oldDlcFolder! > NUL 2>&1
+
+    if exist !newDlcFolder! (
+        REM : delete the link
+        rmdir /Q !newDlcFolder! > NUL 2>&1
+    ) else (
+        mkdir !newDlcFolder! > NUL 2>&1
+    )
+    REM : create the link
+    mklink /J /D !newDlcFolder! !oldDlcFolder!    
 
     exit 0
 
