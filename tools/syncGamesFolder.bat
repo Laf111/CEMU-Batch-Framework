@@ -198,7 +198,11 @@ REM : functions
 
     :searchGamesToSync
 
+        REM : log to games library log file
+        set "msg="Sync:!DATE!@!USERDOMAIN! !GAMES_FOLDER:"=!=!TARGET_GAMES_FOLDER:"=!""
+        call:log2GamesLibraryFile !msg!
 
+        cls
         REM : loop on game's code folders found
         for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\mlc01" 2^>NUL') do (
 
@@ -376,21 +380,24 @@ REM : functions
         REM : if target file does not exist, copy
         if not exist !targetRarFile! echo ^> Copying new saves of !currentUser! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Copying new saves of !currentUser! for !TARGET_GAME_TITLE! & copy /Y !sourceRarFile! !targetRarFile! > NUL 2>&1 & goto:eof
 
-
-        for %%l in (!sourceRarFile!) do set dateSrc=%%~tl
-        for %%l in (!targetRarFile!) do set dateTarget=%%~tl
-
+        for %%a in (!sourceRarFile!) do set dateRead=%%~ta
+        set "srcDate=%dateRead:~6,4%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
+        for %%a in (!targetRarFile!) do set dateRead=%%~ta
+        set "tgtDate=%dateRead:~6,4%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
+        
         REM : if files have the sames dates, exit
-        if ["!dateSrc!"] == ["!dateTarget!"] goto:eof
-
+        if ["!srcDate!"] == ["!tgtDate!"] (
+            echo ^= saves file are identicals >> !myLog!
+            echo ^= saves file are identicals
+            goto:eof
+        )
         echo --------------------------------------------------------- >> !myLog!
         echo ---------------------------------------------------------
 
-        for /f %%l in ('dir /b /O:D /T:W !sourceRarFile! !targetRarFile!') do set "newest="%%l""
-        if ["!newest!"] == ["!targetRarFile!"] (
+        if !srcDate! GTR !tgtDate! (
 
             REM : backupRarFile in target folder
-            set "backupRarFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!TARGET_GAME_TITLE!_!currentUser!_!DATE!.rar""
+            set "backupRarFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\SyncBackup_!DATE!_!TARGET_GAME_TITLE!_!currentUser!.rar""
             copy /Y !targetRarFile! !backupRarFile! > NUL 2>&1
 
             echo ^> Backup !currentUser! old save to !backupRarFile! >> !myLog!
@@ -398,9 +405,13 @@ REM : functions
             echo ^> Exporting newest saves of !currentUser! for !TARGET_GAME_TITLE! >> !myLog!
             echo ^> Exporting newest saves of !currentUser! for !TARGET_GAME_TITLE!
 
+            copy /Y !sourceRarFile! !targetRarFile! > NUL 2>&1
+
         ) else (
+            REM : identical date handle above
+
             REM : backupRarFile in source folder
-            set "backupRarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_!DATE!.rar""
+            set "backupRarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\SyncBackup_!DATE!_!GAME_TITLE!_!currentUser!.rar""
             copy /Y !sourceRarFile! !backupRarFile! > NUL 2>&1
 
             echo ^< Backup !currentUser! old save to !backupRarFile! >> !myLog!
@@ -408,9 +419,8 @@ REM : functions
             echo ^< Importing newest saves of !currentUser! for !GAME_TITLE! >> !myLog!
             echo ^< Importing newest saves of !currentUser! for !GAME_TITLE!
 
+            copy /Y !targetRarFile! !sourceRarFile! > NUL 2>&1
         )
-
-        copy /Y !rarFile! !targetRarFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -425,7 +435,7 @@ REM : functions
             for /F "delims=~" %%m in (!sourceTscFile!) do set "fileName=%%~nxm"
 
             set "targetTscFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!fileName!""
-             if not exist !targetTscFile! (
+            if not exist !targetTscFile! (
 
                 echo ^> Copying new !fileName! for !TARGET_GAME_TITLE! >> !myLog!
                 echo ^> Copying new !fileName! for !TARGET_GAME_TITLE!
@@ -438,15 +448,45 @@ REM : functions
                 set /A "tgtSize=0"
                 for /F "tokens=*" %%s in (!targetTscFile!)  do set "tgtSize=%%~zs"
 
+                set "sourceFolder="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
+                set "targetFolder="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
+
                 REM : compare their size : copy only if greater
-                if !srcSize! GTR !tgtSize! echo ^> Exporting !fileName! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE! & robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1
-                if !srcSize! LSS !tgtSize! echo ^< Importing !fileName! for!GAME_TITLE! >> !myLog! & echo ^< Importing !fileName! for !GAME_TITLE! & robocopy !gtscf! !ctscf! !sci!.bin /IS /IT > NUL 2>&1
+                if !srcSize! GTR !tgtSize! robocopy !sourceFolder! !targetFolder! !fileName! /IS /IT > NUL 2>&1 & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE!
+                if !srcSize! LSS !tgtSize! robocopy !targetFolder! !sourceFolder! !fileName! /IS /IT > NUL 2>&1 & echo ^< Importing !fileName! for!GAME_TITLE! >> !myLog! & echo ^< Importing !fileName! for !GAME_TITLE!
+
+                if !srcSize! EQU !tgtSize! echo ^= !fileName! size are identicals >> !myLog! & echo ^= !fileName! size are identicals
             )
         )
 
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+        if not exist !logFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
 
