@@ -399,7 +399,7 @@ REM : main
 
     REM : check if an internet connection is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
-    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractlgfxp
 

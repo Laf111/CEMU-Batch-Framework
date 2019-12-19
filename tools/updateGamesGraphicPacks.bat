@@ -141,6 +141,9 @@ REM : main
 
     if [!gpl!] == ["NOT_FOUND"] (
         echo WARNING ^: !pat! not found^, force extra pack creation ^! >> !myLog!
+        REM : create one
+        set "dnd="!BFW_GP_FOLDER:"=!\graphicPacks563.doNotDelete""
+        echo. > !dnd!
         goto:treatOneGame
     )
 
@@ -272,10 +275,11 @@ REM : main
     :setMlcLinks
 
     REM : (re)create links for new update/DLC folders tree
-    set "endTitleId=%titleId:~8,8%"
+    set "endIdUp=%titleId:~8,8%"
+    call:lowerCase !endIdUp! endIdLow
 
-    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%endTitleId%""
-    set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000E\%endTitleId%""
+    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
+    set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
 
     if not exist !oldUpdateFolder! mkdir !oldUpdateFolder! > NUL 2>&1
 
@@ -288,8 +292,8 @@ REM : main
     REM : create the link
     mklink /J /D !newUpdateFolder! !oldUpdateFolder!
 
-    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\mlc01\usr\title\00050000\%endTitleId%\aoc
-    set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\mlc01\usr\title\0005000C\%endTitleId%
+    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
+    set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
 
     if not exist !oldDlcFolder! mkdir !oldDlcFolder! > NUL 2>&1
 
@@ -311,6 +315,45 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+
+    REM : lower case
+    :lowerCase
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+
+        set "str=!str:A=a!"
+        set "str=!str:B=b!"
+        set "str=!str:C=c!"
+        set "str=!str:D=d!"
+        set "str=!str:E=e!"
+        set "str=!str:F=f!"
+        set "str=!str:G=g!"
+        set "str=!str:H=h!"
+        set "str=!str:I=i!"
+        set "str=!str:J=j!"
+        set "str=!str:K=k!"
+        set "str=!str:L=l!"
+        set "str=!str:M=m!"
+        set "str=!str:N=n!"
+        set "str=!str:O=o!"
+        set "str=!str:P=p!"
+        set "str=!str:Q=q!"
+        set "str=!str:R=r!"
+        set "str=!str:S=s!"
+        set "str=!str:T=t!"
+        set "str=!str:U=u!"
+        set "str=!str:W=w!"
+        set "str=!str:X=x!"
+        set "str=!str:Y=y!"
+        set "str=!str:Z=z!"
+
+        set "%2=!str!"
+
+    goto:eof
 
     :importMods
         REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods

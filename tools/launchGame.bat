@@ -357,6 +357,10 @@ REM : main
 
 
     :updateGameGraphicPack
+
+    echo Expected shaderCacheName ^: !sci! >> !batchFwLog!
+    echo Expected shaderCacheName ^: !sci!
+
     REM : link game's packs
     echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 34 36 "pre processing" "checking game graphic packs availability"
@@ -437,7 +441,7 @@ REM : main
     pushd !gtscf!
 
     REM : getting the last modified one including _j.bin (conventionnal shader cache)
-    for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL') do set "cacheFile=%%i"
+    for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL ^| find /V "backup"') do set "cacheFile=%%i"
     pushd !BFW_TOOLS_PATH!
 
     REM : if not file found
@@ -483,7 +487,8 @@ REM : main
     set OLD_SHADER_CACHE_ID=!cacheFile:.bin=!
 
     REM : first launch the transferable cache copy in background before
-    echo Copying transferable cache to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
+    echo Copying transferable cache !OLD_SHADER_CACHE_ID! to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
+
     REM : copy all !sci!.bin file (2 files if separable and conventionnal)
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.bfw_old /XF *emu* /XF *.rar
 
@@ -922,7 +927,7 @@ REM : main
     call:transShaderCache
 
     REM : let file name with SHADER_MODE suffix
-    if not ["%OLD_TRANS_SHADER%"] == ["NONE"] echo OLD_TRANS_SHADER=%OLD_TRANS_SHADER%>> !batchFwLog!
+    if not ["%OLD_SHADER_CACHE_ID%"] == ["NONE"] echo OLD_TRANS_SHADER=%OLD_TRANS_SHADER%>> !batchFwLog!
     echo NEW_TRANS_SHADER=%NEW_TRANS_SHADER%>> !batchFwLog!
 
     REM : Recreate "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
@@ -1009,7 +1014,7 @@ REM : main
     pushd !GPU_CACHE!
 
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!*.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!*.bin 2^>NUL ^| find /V "backup"') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
 
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:warning
@@ -1280,7 +1285,7 @@ REM : functions
         pushd !getShaderCacheFolder!
 
         for /F %%l in ('getShaderCacheName.exe !RPX_FILE_PATH!') do set "sci=%%l"
-    
+
         pushd !GAMES_FOLDER!
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2104,11 +2109,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : temporary vbs file for creating a windows shortcut
         set "TMP_VBS_FILE="!TEMP!\CEMU_!DATE!.vbs""
 
-        set "ARGS=!gpf:"=!"
-
         REM : create a shortcut to game's profile
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
         if not exist !gpsf! mkdir !gpsf! > NUL 2>&1
+
+        set "ARGS=!gpsf:"=!"
 
         set "LINK_DESCRIPTION="Edit !GAME_TITLE!'s profile for !CEMU_FOLDER_NAME!""
 
@@ -2295,7 +2300,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : check if an internet connexion is active
         set "ACTIVE_ADAPTER=NOT_FOUND"
         set "defaultBrowser="NOT_FOUND""
-        for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+        for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
             for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
@@ -2313,13 +2318,16 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
     :transShaderCache
 
-        REM : get NEW_TRANS_SHADER id from log.txt
-        set "strTmp=NONE"
-        for /F "tokens=1-4 delims=:~" %%i in ('type !cemuLog! ^| find /I "shaderCache" 2^>NUL') do (
-            set "strTmp=%%l"
-            goto:firstOcShaderCache
+        if not ["!versionRead!"] == ["NOT_FOUND"] if !v116! EQU 2 (
+            REM : get NEW_TRANS_SHADER id from log.txt
+            set "strTmp=NONE"
+            for /F "tokens=1-4 delims=:~" %%i in ('type !cemuLog! ^| find /I "shaderCache" 2^>NUL') do (
+                set "strTmp=%%l"
+                goto:firstOcShaderCache
+            )
+        ) else (
+            set strTmp=!titleId!
         )
-
 
         :firstOcShaderCache
 
@@ -2386,7 +2394,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "gntscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!NEW_TRANS_SHADER!""
 
         REM : if the two file have the same name goto:savingShaderCache
-        if ["!NEW_TRANS_SHADER!"] == ["!OLD_TRANS_SHADER!"] goto:savingShaderCache
+        echo !OLD_TRANS_SHADER! | find /I !NEW_TRANS_SHADER! > NUL 2>&1 && goto:savingShaderCache
 
         REM : switching CONVENTIONNAL <-> SEPARABLE
         set "checkToConv=!OLD_SHADER_CACHE_ID!_j"
@@ -2437,7 +2445,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         echo - >> !tscl!
         echo ^(close notepad to continue^) >> !tscl!
-        echo ^(close notepad to continue^)>> !batchFwLog!
+        echo ^(close notepad to continue^)
 
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tscl!
 
@@ -2475,7 +2483,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         echo - >> !tscl!
         echo ^(close notepad to continue^) >> !tscl!
-        echo ^(close notepad to continue^)>> !batchFwLog!
+        echo ^(close notepad to continue^)
 
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tscl!
 
