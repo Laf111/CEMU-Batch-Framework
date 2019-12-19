@@ -381,12 +381,13 @@ REM : functions
         if not exist !targetRarFile! echo ^> Copying new saves of !currentUser! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Copying new saves of !currentUser! for !TARGET_GAME_TITLE! & copy /Y !sourceRarFile! !targetRarFile! > NUL 2>&1 & goto:eof
 
         for %%a in (!sourceRarFile!) do set dateRead=%%~ta
-        set "srcDate=%dateRead:~6,4%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
+        set /A "srcDate=%dateRead:~8,2%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
+
         for %%a in (!targetRarFile!) do set dateRead=%%~ta
-        set "tgtDate=%dateRead:~6,4%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
-        
+        set /A "tgtDate=%dateRead:~8,2%%dateRead:~3,2%%dateRead:~0,2%%dateRead:~11,2%%dateRead:~14,2%"
+
         REM : if files have the sames dates, exit
-        if ["!srcDate!"] == ["!tgtDate!"] (
+        if !srcDate! EQU !tgtDate! (
             echo ^= saves file are identicals >> !myLog!
             echo ^= saves file are identicals
             goto:eof
