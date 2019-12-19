@@ -1,3 +1,13 @@
+19/12/2019 V15-1 :
+- add : script to synchronize GAMES_FOLDER (copy in both sides the newest saves 
+        for all users and newer transferable cache) 
+- add : shortcuts to the script to sync GAMES_FOLDER
+- add : new transferable shader cache handling (CEMU >= 1.16 : shaderCache Name = titleId)
+- add : retro compatibility for update and DLC installed in new locations (0005000c/e) 
+- fix : games library log wasn't flush existing message when asked
+- fix : game profile's shortcut creation failure
+- fix : others minors fixes
+
 12/12/2019 V15 :
 - add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
         import transferable caches (compute shaderCache name : thanks Exzap !)
