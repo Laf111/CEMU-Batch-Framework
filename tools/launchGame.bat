@@ -357,7 +357,6 @@ REM : main
 
 
     :updateGameGraphicPack
-
     REM : link game's packs
     echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 34 36 "pre processing" "checking game graphic packs availability"
@@ -1279,10 +1278,9 @@ REM : functions
     :getShaderCacheName
 
         pushd !getShaderCacheFolder!
-        set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
 
-        for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"
-
+        for /F %%l in ('getShaderCacheName.exe !RPX_FILE_PATH!') do set "sci=%%l"
+    
         pushd !GAMES_FOLDER!
     goto:eof
     REM : ------------------------------------------------------------------
