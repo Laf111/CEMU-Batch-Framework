@@ -170,6 +170,8 @@ REM : main
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
 
+    set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+
     if exist !fnrLogUggp! del /F !fnrLogUggp!
 
     REM : launching the search
@@ -186,21 +188,34 @@ REM : main
         call:log2GamesLibraryFile !msg!
     )
 
+    REM : before waitingLoop :
+    REM : (re)create links for new update/DLC folders tree (in case of drive letter changing)
+    set "endIdUp=%titleId:~8,8%"
+    call:lowerCase !endIdUp! endIdLow
+
+    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
+    set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
+    call:linkMlcFolder !oldDlcFolder! !newDlcFolder! dlc
+
+    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
+    set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
+    call:linkMlcFolder !oldUpdateFolder! !newUpdateFolder! update
+
     REM : monitor LaunchGame.bat until cemu is launched
     set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
 
     REM : wait the create*.bat end before continue
     echo Waiting all child processes end >> !myLog!
     echo Waiting all child processes end
-
+    
     :waitLoop
     wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
     type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
 
-    :linkPacks
-
+    REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
+    
     REM : BatchFW folders
     set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
 
@@ -261,7 +276,7 @@ REM : main
     :checkPackLinks
 
     REM : check that at least one GFX pack was listed
-    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:setMlcLinks
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
 
     REM : stop execution something wrong happens
     REM : warn user
@@ -272,20 +287,10 @@ REM : main
 
     exit 80
 
-    :setMlcLinks
+    :endMain
 
-    REM : (re)create links for new update/DLC folders tree (in case of drive letter changing)
-    set "endIdUp=%titleId:~8,8%"
-    call:lowerCase !endIdUp! endIdLow
-
-    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
-    set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
-    call:linkMlcFolder !oldUpdateFolder! !newUpdateFolder!
-    
-    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
-    set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
-    call:linkMlcFolder !oldDlcFolder! !newDlcFolder!
-
+    echo --------------------------------------------------------- >> !myLog!
+    echo done >> !myLog!
     exit 0
 
     goto:eof
@@ -297,11 +302,16 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :linkMlcFolder
-    
+
         set "oldFolder=%1"
         set "newFolder=%2"
+        set "mlcDataType=%~3"
 
-        REM : clean links in both
+        REM : create if needed
+        if not exist !oldFolder! mkdir !oldFolder! > NUL 2>&1
+        if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
+
+        REM : clean ONLY links in both
         for /F "delims=~" %%a in ('dir /A:L /B !oldFolder! 2^>NUL') do (
             set "link="!oldFolder:"=!\%%a""
             rmdir /Q !link! > NUL 2>&1
@@ -310,36 +320,48 @@ REM : functions
             set "link="!newFolder:"=!\%%a""
             rmdir /Q !link! > NUL 2>&1
         )
-        
+
         set "oldMetaXml="!oldFolder:"=!\meta\meta.xml""
         set "newMetaXml="!newFolder:"=!\meta\meta.xml""
-        
-        REM : where is installed ?     
+
+        REM : where is installed ?
         REM : nowhere -> goto:eof
-        if not exist !oldMetaXml! if not exist !oldMetaXml! goto:eof
-        
+        if not exist !oldMetaXml! if not exist !newMetaXml! goto:eof
+        if not exist !newMetaXml! if not exist !oldMetaXml! goto:eof
+
         REM : initialize with the case installed in 00050000\!endIdUp!, no installation in 0005000X\!endIdLow!
-        set "source=!newFolder!"
+        set "link=!newFolder!"
         set "target=!oldFolder!"
-        
-        REM : installed in 0005000X\!endIdLow!, no installation in 00050000\!endIdUp!
-        if exist !newMetaXml! if not exist !oldMetaXml! (
-            REM : create if needed
-            if not exist !oldFolder! mkdir !oldFolder! > NUL 2>&1
-            
-            set "source=!oldFolder!"
+
+        REM : if installed in 0005000X\!endIdLow!, no installation in 00050000\!endIdUp!
+        if exist !newMetaXml! (
+            set "link=!oldFolder!"
             set "target=!newFolder!"
         )
-        REM : create if needed
-        if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
-        
-        REM : create the link
-        mklink /J /D !source! !target! >> !myLog!    
+
+        call:cleanGamesLibraryFile "!GAME_TITLE! mlc !mlcDataType! install path"
+
+        set "msgFull=mlc !mlcDataType! install path=!target:"=!"
+        echo !msgFull! >> !myLog!
+        set "msgLog="!GAME_TITLE! !msgFull!""
+        call:log2GamesLibraryFile !msgLog!
+
+        for /F "delims=~" %%a in ('dir /B !target! ^| find /I /V "aoc"') do (
+
+            REM : basename of GAME FOLDER PATH (used to name shorcut)
+            for /F "delims=~" %%b in ("%%a") do set "name=%%~nxb"
+
+            set "l="!link:"=!\!name!""
+            set "t="!target:"=!\!name!""
+
+            REM : create the link
+            mklink /J /D !l! !t! >> !myLog!
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     REM : lower case
     :lowerCase
 
@@ -495,8 +517,7 @@ REM : functions
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
         REM : update game's graphic packs
-        set "ggp="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
-        if not exist !ggp! mkdir !ggp! > NUL 2>&1
+        if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
 
         set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
         REM : get game's data for wii-u database file
@@ -527,7 +548,7 @@ REM : functions
             REM : launching the search
             if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do (
                 if ["!lastInstalledVersion!"] == ["!newVersion!"] goto:eof
-                call:updateGPFolder !ggp!
+                call:updateGPFolder
                 pushd !GAMES_FOLDER!
                 goto:eof
             )
@@ -540,8 +561,6 @@ REM : functions
 
 
     :updateGPFolder
-
-        set "GAME_GP_FOLDER="%~1""
 
         REM : check if graphic pack is present for this game (if the game is not supported
         REM : in Slashiee repo, it was deleted last graphic pack's update) => re-create game's graphic packs
@@ -726,20 +745,41 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+
+    :cleanGamesLibraryFile
+
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !glogFile! > NUL 2>&1
+            move /Y !logFileTmp! !glogFile! > NUL 2>&1
+        )
+
+        type !glogFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
     REM : function to log info for current host
     :log2GamesLibraryFile
         REM : arg1 = msg
         set "msg=%~1"
 
         set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-        if not exist !logFile! (
+        if not exist !glogFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
         REM : check if the message is not already entierely present
-        for /F %%i in ('type !logFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
 
         :logMsg2GamesLibraryFile
         echo !msg! >> !glogFile!

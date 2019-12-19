@@ -494,14 +494,14 @@ REM : functions
         set "msg=%~1"
 
         set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-        if not exist !logFile! (
+        if not exist !glogFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2GamesLibraryFile
         )
 
         REM : check if the message is not already entierely present
-        for /F %%i in ('type !logFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
         :logMsg2GamesLibraryFile
         echo !msg! >> !glogFile!
         REM : sorting the log

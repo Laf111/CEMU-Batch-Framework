@@ -1716,8 +1716,8 @@ REM pause
             goto:eof
         )
 
-        echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
-        echo Adding !w!x!h!!desc:"=! preset
+        echo Adding !w!x!h!!desc! preset >> !cgpLogFile!
+        echo Adding !w!x!h!!desc! preset
 
         REM : replacing %wToReplace%xresX2 in rules.txt
         set "logFileLastVersion="!fnrLogFolder:"=!\!gpFolderName:"=!-LastVersion_!h!x!w!.log""
@@ -1740,13 +1740,13 @@ REM pause
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!w![ ]*\n\$height[ ]*=[ ]*!h![ ]*" --logFile !fnrLogAddResoLastVersion!
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoLastVersion! ^| find /I /V "^!" ^| find "File:"') do (
-            echo Preset !w!x!h!!desc:"=! already exists >> !cgpLogFile!
-            echo Preset !w!x!h!!desc:"=! already exists
+            echo Preset !w!x!h!!desc! already exists >> !cgpLogFile!
+            echo Preset !w!x!h!!desc! already exists
             goto:eof
         )
 
-        echo Adding !w!x!h!!desc:"=! preset >> !cgpLogFile!
-        echo Adding !w!x!h!!desc:"=! preset
+        echo Adding !w!x!h!!desc! preset >> !cgpLogFile!
+        echo Adding !w!x!h!!desc! preset
 
         REM : Adding !h!x!w! in rules.txt
         set "logFileLastVersion="!fnrLogFolder:"=!\!gpFolderName:"=!-LastVersion_!h!x!w!.log""
