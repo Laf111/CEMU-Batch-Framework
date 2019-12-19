@@ -274,37 +274,17 @@ REM : main
 
     :setMlcLinks
 
-    REM : (re)create links for new update/DLC folders tree
+    REM : (re)create links for new update/DLC folders tree (in case of drive letter changing)
     set "endIdUp=%titleId:~8,8%"
     call:lowerCase !endIdUp! endIdLow
 
     set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
     set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
-
-    if not exist !oldUpdateFolder! mkdir !oldUpdateFolder! > NUL 2>&1
-
-    if exist !newUpdateFolder! (
-        REM : delete the link
-        rmdir /Q !newUpdateFolder! > NUL 2>&1
-    ) else (
-        mkdir !newUpdateFolder! > NUL 2>&1
-    )
-    REM : create the link
-    mklink /J /D !newUpdateFolder! !oldUpdateFolder!
-
+    call:linkMlcFolder !oldUpdateFolder! !newUpdateFolder!
+    
     set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
     set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
-
-    if not exist !oldDlcFolder! mkdir !oldDlcFolder! > NUL 2>&1
-
-    if exist !newDlcFolder! (
-        REM : delete the link
-        rmdir /Q !newDlcFolder! > NUL 2>&1
-    ) else (
-        mkdir !newDlcFolder! > NUL 2>&1
-    )
-    REM : create the link
-    mklink /J /D !newDlcFolder! !oldDlcFolder!    
+    call:linkMlcFolder !oldDlcFolder! !newDlcFolder!
 
     exit 0
 
@@ -316,7 +296,50 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :linkMlcFolder
+    
+        set "oldFolder=%1"
+        set "newFolder=%2"
 
+        REM : clean links in both
+        for /F "delims=~" %%a in ('dir /A:L /B !oldFolder! 2^>NUL') do (
+            set "link="!oldFolder:"=!\%%a""
+            rmdir /Q !link! > NUL 2>&1
+        )
+        for /F "delims=~" %%a in ('dir /A:L /B !newFolder! 2^>NUL') do (
+            set "link="!newFolder:"=!\%%a""
+            rmdir /Q !link! > NUL 2>&1
+        )
+        
+        set "oldMetaXml="!oldFolder:"=!\meta\meta.xml""
+        set "newMetaXml="!newFolder:"=!\meta\meta.xml""
+        
+        REM : where is installed ?     
+        REM : nowhere -> goto:eof
+        if not exist !oldMetaXml! if not exist !oldMetaXml! goto:eof
+        
+        REM : initialize with the case installed in 00050000\!endIdUp!, no installation in 0005000X\!endIdLow!
+        set "source=!newFolder!"
+        set "target=!oldFolder!"
+        
+        REM : installed in 0005000X\!endIdLow!, no installation in 00050000\!endIdUp!
+        if exist !newMetaXml! if not exist !oldMetaXml! (
+            REM : create if needed
+            if not exist !oldFolder! mkdir !oldFolder! > NUL 2>&1
+            
+            set "source=!oldFolder!"
+            set "target=!newFolder!"
+        )
+        REM : create if needed
+        if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
+        
+        REM : create the link
+        mklink /J /D !source! !target! >> !myLog!    
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
+    
     REM : lower case
     :lowerCase
 
