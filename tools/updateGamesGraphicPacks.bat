@@ -189,17 +189,20 @@ REM : main
     )
 
     REM : before waitingLoop :
+
+    REM : if needed create the new folder tree for update and DLC
+    REM : if version < 1.1? create links for old folder tree
+    
     REM : (re)create links for new update/DLC folders tree (in case of drive letter changing)
     set "endIdUp=%titleId:~8,8%"
     call:lowerCase !endIdUp! endIdLow
 
     set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
     set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
-    call:linkMlcFolder !oldDlcFolder! !newDlcFolder! dlc
-
     set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
     set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
-    call:linkMlcFolder !oldUpdateFolder! !newUpdateFolder! update
+
+    call:linkMlcFolder
 
     REM : monitor LaunchGame.bat until cemu is launched
     set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
@@ -300,55 +303,19 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+    :linkFolder
 
-    :linkMlcFolder
-
-        set "oldFolder=%1"
-        set "newFolder=%2"
-        set "mlcDataType=%~3"
-
-        REM : create if needed
-        if not exist !oldFolder! mkdir !oldFolder! > NUL 2>&1
-        if not exist !newFolder! mkdir !newFolder! > NUL 2>&1
-
-        REM : clean ONLY links in both
-        for /F "delims=~" %%a in ('dir /A:L /B !oldFolder! 2^>NUL') do (
-            set "link="!oldFolder:"=!\%%a""
-            rmdir /Q !link! > NUL 2>&1
-        )
-        for /F "delims=~" %%a in ('dir /A:L /B !newFolder! 2^>NUL') do (
-            set "link="!newFolder:"=!\%%a""
-            rmdir /Q !link! > NUL 2>&1
+        if exist !link! (
+            for /F "delims=~" %%a in ('dir /A:L /B !link! 2^>NUL') do (
+                set "l="!link:"=!\%%a""
+                rmdir /Q !l! > NUL 2>&1
+            )
+        ) else (
+            mkdir !link! > NUL 2>&1
         )
 
-        set "oldMetaXml="!oldFolder:"=!\meta\meta.xml""
-        set "newMetaXml="!newFolder:"=!\meta\meta.xml""
+        for /F "delims=~" %%a in ('dir /B !target! 2^>NUL') do (
 
-        REM : where is installed ?
-        REM : nowhere -> goto:eof
-        if not exist !oldMetaXml! if not exist !newMetaXml! goto:eof
-        if not exist !newMetaXml! if not exist !oldMetaXml! goto:eof
-
-        REM : initialize with the case installed in 00050000\!endIdUp!, no installation in 0005000X\!endIdLow!
-        set "link=!newFolder!"
-        set "target=!oldFolder!"
-
-        REM : if installed in 0005000X\!endIdLow!, no installation in 00050000\!endIdUp!
-        if exist !newMetaXml! (
-            set "link=!oldFolder!"
-            set "target=!newFolder!"
-        )
-
-        call:cleanGamesLibraryFile "!GAME_TITLE! mlc !mlcDataType! install path"
-
-        set "msgFull=mlc !mlcDataType! install path=!target:"=!"
-        echo !msgFull! >> !myLog!
-        set "msgLog="!GAME_TITLE! !msgFull!""
-        call:log2GamesLibraryFile !msgLog!
-
-        for /F "delims=~" %%a in ('dir /B !target! ^| find /I /V "aoc"') do (
-
-            REM : basename of GAME FOLDER PATH (used to name shorcut)
             for /F "delims=~" %%b in ("%%a") do set "name=%%~nxb"
 
             set "l="!link:"=!\!name!""
@@ -357,6 +324,56 @@ REM : functions
             REM : create the link
             mklink /J /D !l! !t! >> !myLog!
         )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :linkMlcFolder
+
+        set "oldUpdateMetaXml="!oldUpdateFolder:"=!\meta\meta.xml""
+        set "newUpdateMetaXml="!newUpdateFolder:"=!\meta\meta.xml""
+        set "newDlcMetaXml="!newDlcFolder:"=!\meta\meta.xml""
+
+        REM : if newfolder not exist and old folder not exist : exit
+        if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! goto:eof
+        if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
+
+        REM : check if newFolder exist
+        if not exist !newUpdateMetaXml! (
+
+            REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
+            cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations"
+            set "oldDlcMetaXml="!oldDlcFolder:"=!\meta\meta.xml""
+
+            if exist !oldDlcMetaXml! (
+                set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c""
+                mkdir !folder! > NUL 2>&1
+                move !oldDlcFolder! !folder! > NUL 2>&1
+                set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
+                move !folder! !newDlcFolder! > NUL 2>&1
+                rmdir /Q !oldDlcFolder!
+            )
+
+            REM : new folder does not exist and the old one yes
+            REM : move update and DLC in new folder tree, delete old tree
+            set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e""
+            mkdir !folder! > NUL 2>&1
+            move /Y !oldUpdateFolder! !folder! > NUL 2>&1
+        )
+
+        if not exist !newDlcMetaXml! goto:linkUpdate
+
+        set "link=!oldDlcFolder!"
+        set "target=!newDlcFolder!"
+
+        call:linkFolder
+
+        :linkUpdate
+        set "link=!oldUpdateFolder!"
+        set "target=!newUpdateFolder!"
+
+        call:linkFolder
 
     goto:eof
     REM : ------------------------------------------------------------------

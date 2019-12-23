@@ -1555,9 +1555,13 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         REM : get BatchFw version
         set "bfwVersion=NONE"
         set "setup="!BFW_PATH:"=!\setup.bat""
-        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
-        set "bfwVersion=%bfwVersion:"=%"
+        for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "bfwVersion=" 2^>NUL') do (
+            set "bfwVersion=%%i"
+            set "bfwVersion=!bfwVersion:"=!"
+            goto:setBat2ExeArgs
+        )
 
+        :setBat2ExeArgs
         REM : arguments to Bat_To_Exe_Converter
         set "ARGS=/bat !BATCH_FILE! /exe !EXE_FILE! /icon !ICO_PATH! /x64 /overwrite /productName BatchFW /productVersion %bfwVersion%"
         set "bec="!BFW_RESOURCES_PATH:"=!\Bat_To_Exe_Converter.exe""

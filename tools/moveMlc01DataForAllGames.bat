@@ -258,6 +258,45 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : lower case
+    :lowerCase
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+
+        set "str=!str:A=a!"
+        set "str=!str:B=b!"
+        set "str=!str:C=c!"
+        set "str=!str:D=d!"
+        set "str=!str:E=e!"
+        set "str=!str:F=f!"
+        set "str=!str:G=g!"
+        set "str=!str:H=h!"
+        set "str=!str:I=i!"
+        set "str=!str:J=j!"
+        set "str=!str:K=k!"
+        set "str=!str:L=l!"
+        set "str=!str:M=m!"
+        set "str=!str:N=n!"
+        set "str=!str:O=o!"
+        set "str=!str:P=p!"
+        set "str=!str:Q=q!"
+        set "str=!str:R=r!"
+        set "str=!str:S=s!"
+        set "str=!str:T=t!"
+        set "str=!str:U=u!"
+        set "str=!str:W=w!"
+        set "str=!str:X=x!"
+        set "str=!str:Y=y!"
+        set "str=!str:Z=z!"
+
+        set "%2=!str!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :mvGameData
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
@@ -349,7 +388,8 @@ REM : functions
 
         :handleNewTC
         REM : for version > 1.16 sci=titleId
-        set "sci=!titleId!"
+        set "endIdUp=!titleId!
+        call:lowerCase !endIdUp! sci
         set "srcScf="!ctscf:"=!\!sci!.bin""
         if not exist !srcScf! goto:treatMlc01Data
 

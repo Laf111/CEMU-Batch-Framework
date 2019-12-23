@@ -81,9 +81,12 @@ REM : main
     echo ========================================================= >> !batchFwLog!
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
-
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "bfwVersion=%%i"
-    set "bfwVersion=%bfwVersion:"=%"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "bfwVersion=" 2^>NUL') do (
+        set "bfwVersion=%%i"
+        set "bfwVersion=!bfwVersion:"=!"
+        goto:displayVersion
+    )
+    :displayVersion
     echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     echo ========================================================= >> !batchFwLog!
 
@@ -333,6 +336,8 @@ REM : main
     if [!titleLine!] == ["NONE"] goto:getScreenMode
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
+    set "endTitleId=%titleId:~8,8%"
+
     REM : handle transferable shader cache comptability since 1.16
     set "sci=NOT_FOUND"
     call:getShaderCacheName
@@ -353,8 +358,8 @@ REM : main
     if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !v116! EQU 2 goto:updateGameGraphicPack
 
-    set "sci=!titleId!"
-
+    set "endIdUp=!titleId!
+    call:lowerCase !endIdUp! sci  
 
     :updateGameGraphicPack
 
@@ -794,6 +799,15 @@ REM : main
     REM : waiting all pre requisities are ready
     call:waitProcessesEnd
 
+    REM : if v >= 1.16 delete old update/dlc tree links and folder
+    if !v116! LEQ 1 (
+        set "linksFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endTitleId!""
+        for /F "delims=~" %%a in ('dir /A:L /B !linksFolder! 2^>NUL') do (
+            rmdir /Q /S !linksFolder! > NUL 2>&1
+            goto:ifWizardWasLaunched
+        )
+    )
+    :ifWizardWasLaunched
     REM : if wizard was launched, packs links is already created
     if !wizardLaunched! EQU 1 goto:launchCemu
 
@@ -1519,8 +1533,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
 
-        set "endTitleId=%titleId:~8,8%"
-
         REM : remove saves but not before BatchFw first run
         if exist !gameInfoFile! for /F %%i in ('type !gameInfoFile! ^| find "Last launch with"') do (
 
@@ -2113,7 +2125,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "gpsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles""
         if not exist !gpsf! mkdir !gpsf! > NUL 2>&1
 
-        set "ARGS=!gpsf:"=!"
+        if [!PROFILE_FILE!] == ["NOT_FOUND"] goto:eof
+        set "ARGS=!PROFILE_FILE:"=!"
 
         set "LINK_DESCRIPTION="Edit !GAME_TITLE!'s profile for !CEMU_FOLDER_NAME!""
 
@@ -2316,6 +2329,47 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
     REM : ------------------------------------------------------------------
 
+
+    REM : lower case
+    :lowerCase
+
+        set "str=%~1"
+
+        REM : format strings
+        set "str=!str: =!"
+
+        set "str=!str:A=a!"
+        set "str=!str:B=b!"
+        set "str=!str:C=c!"
+        set "str=!str:D=d!"
+        set "str=!str:E=e!"
+        set "str=!str:F=f!"
+        set "str=!str:G=g!"
+        set "str=!str:H=h!"
+        set "str=!str:I=i!"
+        set "str=!str:J=j!"
+        set "str=!str:K=k!"
+        set "str=!str:L=l!"
+        set "str=!str:M=m!"
+        set "str=!str:N=n!"
+        set "str=!str:O=o!"
+        set "str=!str:P=p!"
+        set "str=!str:Q=q!"
+        set "str=!str:R=r!"
+        set "str=!str:S=s!"
+        set "str=!str:T=t!"
+        set "str=!str:U=u!"
+        set "str=!str:W=w!"
+        set "str=!str:X=x!"
+        set "str=!str:Y=y!"
+        set "str=!str:Z=z!"
+
+        set "%2=!str!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    
     :transShaderCache
 
         if not ["!versionRead!"] == ["NOT_FOUND"] if !v116! EQU 2 (
@@ -2326,7 +2380,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 goto:firstOcShaderCache
             )
         ) else (
-            set strTmp=!titleId!
+            set "endIdUp=!titleId!
+            call:lowerCase !endIdUp! strTmp
         )
 
         :firstOcShaderCache

@@ -57,15 +57,20 @@ REM : main
 
     if %nbArgs% EQU 1 (
         set "BFW_VERSION=!args[0]!"
-        goto:begin
+        set "BFW_VERSION=!BFW_VERSION:"=!"
+        set "BFW_VERSION=!BFW_VERSION: =!"
+    goto:begin
     )
 
     REM : get the current version from setup
     set "BFW_VERSION=NONE"
     set "setup="!BFW_PATH:"=!\setup.bat""
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION" 2^>NUL') do set "BFW_VERSION=%%i"
-    set "BFW_VERSION=%BFW_VERSION:"=%"
-    
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
+        set "BFW_VERSION=%%i"
+        set "BFW_VERSION=!BFW_VERSION:"=!"
+        goto:begin
+    )
+
     :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -120,6 +125,7 @@ REM : main
     REM : here BFW_VERSION is not a RC AND bfwVR is not a RC => continue with comparing
 
     :compare
+
     call:compareVersions %bfwVR% %BFW_VERSION% result > NUL 2>&1
     if ["!result!"] == [""] echo Error when comparing versions
     if !result! EQU 50 echo Error when comparing versions

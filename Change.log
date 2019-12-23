@@ -1,18 +1,24 @@
+23/12/2019 V15-2 :
+- fix : mlc and update handling
+- fix : auto-updater
+- fix : shortcut to game profile
+- fix : titleId case issues
+
 19/12/2019 V15-1 :
 - add : script to synchronize GAMES_FOLDER (copy in both sides the newest saves 
         for all users and newer transferable cache) 
 - add : shortcuts to the script to sync GAMES_FOLDER
 - add : new transferable shader cache handling (CEMU >= 1.16 : shaderCache Name = titleId)
 - add : retro compatibility for update and DLC installed in new locations (0005000c/e) 
-- fix : games library log wasn't flush existing message when asked
+- fix : existing messages weren't flushed in games library's log file
 - fix : game profile's shortcut creation failure
 - fix : others minors fixes
 
 12/12/2019 V15 :
 - add : in copy/moveMlc01DataForAllGames.bat : if mlc01 folder is within a CEMU's folder
         import transferable caches (compute shaderCache name : thanks Exzap !)
-        That means that there's no need to launch the game with CEMU to get 
-        the transferable cache when importings mlc01 data any more (install step) 
+        That means that there's no need to launch the game a first time with CEMU to get 
+        the transferable cache when importing mlc01 data any more (install step) 
 - add : an optional progressbar launching mode to monitor BatchFw Pre and Post processing
         if BatchFw is installed on a removable device => always use progress bar
 - add : Vulkan shader cache backup implementation + add a shortcut to access to caches backup
