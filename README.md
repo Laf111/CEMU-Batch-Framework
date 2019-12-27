@@ -18,7 +18,7 @@ Last GFX packs checked (presets completion) : **V569**
     - **save settings PER user (including GFX and mods packs) and per host,**
     - **game stats per user (using all version of CEMU that supports it) for all hosts used** 
 
-- **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install;**
+- **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install);**
 
 - **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one;**
 
