@@ -40,6 +40,8 @@ REM : main
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!

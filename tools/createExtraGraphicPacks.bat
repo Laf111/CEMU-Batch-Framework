@@ -461,10 +461,10 @@ REM : functions
         call:dosToUnix
 
         REM : Get the version of the GFX pack
-        set "vGfxPacks=NOT_FOUND"
-        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "vGfxPacks=%%i"
-        set "vGfxPacks=%vGfxPacks: =%"
-        if ["!vGfxPacks!"] == ["NOT_FOUND"] (
+        set "vGfxPack=NOT_FOUND"
+        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "vGfxPack=%%i"
+        set "vGfxPack=%vGfxPack: =%"
+        if ["!vGfxPack!"] == ["NOT_FOUND"] (
             echo ERROR : version was not found in !rulesFile! >> !cgpLogFile!
             echo ERROR : version was not found in !rulesFile!
             goto:eof
@@ -534,8 +534,8 @@ REM : functions
 
         echo --------------------------------------------------------- >> !cgpLogFile!
         echo ---------------------------------------------------------
-        echo ^> !gpFolderName:"=!^'s !vGfxPacks! extra presets created successfully >> !cgpLogFile!
-        echo ^> !gpFolderName:"=!^'s !vGfxPacks! extra presets created successfully
+        echo ^> !gpFolderName:"=!^'s !vGfxPack! extra presets created successfully >> !cgpLogFile!
+        echo ^> !gpFolderName:"=!^'s !vGfxPack! extra presets created successfully
 
         del /F !extraDirectives! > NUL 2>&1
         del /F !extraDirectives169! > NUL 2>&1
@@ -1754,11 +1754,11 @@ REM pause
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPacks![ ]*" --replace "version = !vGfxPacks!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileLastVersion!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%\n!edu!" --logFile !logFileLastVersion!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPacks![ ]*" --replace "version = !vGfxPacks!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileLastVersion!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !w!x!h!!desc:"=!\n$width = !w!\n$height = !h!\n$gameWidth = %nativeWidth%\n$gameHeight = %nativeHeight%" --logFile !logFileLastVersion!
 
     goto:eof
     REM : ------------------------------------------------------------------

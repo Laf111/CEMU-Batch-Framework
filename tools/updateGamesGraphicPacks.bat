@@ -165,8 +165,8 @@ REM : main
     set "newVersion=!newVersion: =!"
 
     :treatOneGame
-    echo lastInstalledVersion ^: !lastInstalledVersion!
-    echo newVersion  ^: !newVersion!
+    echo lastInstalledVersion ^: !lastInstalledVersion! >> !myLog!
+    echo newVersion  ^: !newVersion! >> !myLog!
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
 
@@ -234,19 +234,16 @@ REM : main
     REM : Re launching the search (to get the freshly created packs)
 
     REM : search in the needed folder
-    if ["!gfxType!"] == ["!LastVersion!"] (
+    if not ["!gfxType!"] == ["2"] (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     ) else (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     )
     
-    REM : import GFX packs
+    REM : import 16/9 GFX packs
     call:importGraphicPacks
 
-    if ["!gfxType!"] == ["!LastVersion!"] (
-        call:importMods
-        goto:checkPackLinks
-    )
+    if not ["!gfxType!"] == ["2"] call:importMods
 
     REM : search in all Host_*.log
     set "pat="!BFW_PATH:"=!\logs\Host_*.log""
@@ -492,7 +489,7 @@ REM : functions
     :checkGpFolders
 
         for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! ^| find "^!" 2^>NUL') do (
-            echo Treat GFX pack folder to be DOS compliant
+            echo Treat GFX pack folder to be DOS compliant >> !myLog!
             wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
             goto:eof
         )
@@ -564,6 +561,7 @@ REM : functions
 
             REM : launching the search
             if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do (
+                echo rules^.txt = !rulesFile! >> !myLog!
                 if ["!lastInstalledVersion!"] == ["!newVersion!"] goto:eof
                 call:updateGPFolder
                 pushd !GAMES_FOLDER!
@@ -604,9 +602,16 @@ REM : functions
                 set "gameName=!gameName:_%resX2%p=!"
             )
 
-            for /F "delims=~" %%a in ('type !rulesFile! ^| find "version = !LastVersion!"') do (
+            set "str=!LastVersion!"
+            for /F "delims=~= tokens=2" %%j in ('type !rulesFile! ^| find /I "version" ^| find /I "="') do set "str=%%j"
+            set "str=!str: =!"
+            set /A "vGfxPack=!str!"
+
+            if !vGfxPack! GTR 2 (
                 REM : graphic pack
                 set "LastVersionfound=1"
+                
+                echo Found a V!LastVersion! graphic pack >> !myLog!
                 REM : if a gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpLastVersionRes=!rulesFile:\rules.txt=!"
@@ -625,16 +630,17 @@ REM : functions
         REM : no Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
 
+        echo gameName=!gameName! >> !myLog!
         echo titleId=!titleId! >> !myLog!
         echo gpfound=!gpfound! >> !myLog!
-        echo found=!LastVersionfound! >> !myLog!
+        echo LastVersionfound=!LastVersionfound! >> !myLog!
         echo createLegacyPacks=%createLegacyPacks% >> !myLog!
 
         if %gpfound% EQU 1 if %LastVersionfound% EQU 1 goto:createExtraGP
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        echo Create BatchFW graphic packs for this game ^.^.^.
+        echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
@@ -647,14 +653,14 @@ REM : functions
 
         REM : check if a version were used for this game
         if ["!lastInstalledVersion!"] == ["NOT_FOUND"] goto:createExtraGP
-        echo Extra graphic packs for this game was built using !lastInstalledVersion!^, !newVersion! is the last downloaded
+        echo Extra graphic packs for this game was built using !lastInstalledVersion!^, !newVersion! is the last downloaded >> !myLog!
 
         :createExtraGP
 
         if [!completeGP!] == ["NONE"] goto:eof
 
-        if ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^.
-        if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^.
+        if ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^. >> !myLog!
+        if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
