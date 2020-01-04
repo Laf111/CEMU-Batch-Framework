@@ -1651,17 +1651,16 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : search in logFile, getting only the last occurence
         set "pat="%OLD_CEMU_VERSION% install folder path""
-        set "lastPath=NONE"
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath=%%i"
+        set "lastPath="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath="%%i""
 
-        if ["!lastPath!"] == ["NONE"] goto:bypassComparison
+        if [!lastPath!] == ["NONE"] goto:bypassComparison
 
-        set "OLD_PROFILE_FILE="!lastPath!\gameProfiles\%titleId%.ini""
+        set "OLD_PROFILE_FILE="!lastPath:"=!\gameProfiles\%titleId%.ini""
+        set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
         if not exist !OLD_PROFILE_FILE! goto:bypassComparison
         REM : if PROFILE_FILE does not exist use
         if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:bypassComparison
-
-        set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
 
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""

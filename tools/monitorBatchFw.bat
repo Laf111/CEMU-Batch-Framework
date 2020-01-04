@@ -65,11 +65,11 @@ REM : functions
 
     :askToKill
 
-        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+        type !logFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
 
             REM : warn user with a retry/cancel msgBox
             cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 30sec more. If you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk"
-            set /A "duration-=30"
+            set /A "duration-=60"
             goto:eof
         )
 

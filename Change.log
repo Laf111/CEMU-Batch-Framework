@@ -1,3 +1,7 @@
+04/01/2020 V15-3 :
+- fix : gameprofile import failure (auto import settings enabled)
+- add : update embeded GFX packs to V587
+
 23/12/2019 V15-2 :
 - fix : mlc and update handling
 - fix : auto-updater

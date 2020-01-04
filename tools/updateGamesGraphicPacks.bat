@@ -610,8 +610,8 @@ REM : functions
             if !vGfxPack! GTR 2 (
                 REM : graphic pack
                 set "LastVersionfound=1"
-                
-                echo Found a V!LastVersion! graphic pack >> !myLog!
+
+                echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
                 REM : if a gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
                 echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpLastVersionRes=!rulesFile:\rules.txt=!"
