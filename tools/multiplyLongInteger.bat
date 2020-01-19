@@ -10,7 +10,7 @@ echo !_FIRST! | find "." > NUL 2>&1 && (
     echo ERROR^:^(!_FIRST!^)notAnInteger
     exit 1
 )
-    
+
 echo !_SECOND! | find "." > NUL 2>&1 && (
     echo ERROR^:^(!_SECOND!^)notAnInteger
     exit 2
@@ -38,7 +38,7 @@ GOTO :END
     :: _VAR3 = VARIABLE WITH TRUE/FALSE RETURNED
     SET _NUM1=!%1!
     SET _NUM2=!%2!
-    
+
     SET _RESULT=%3
     FOR /L %%A IN (1,1,2) DO (
         FOR /L %%B IN (0,1,9) DO (
@@ -58,13 +58,13 @@ GOTO :END
             SET _PLUS=
             IF !_TMP! GTR 9 SET _CO=!_TMP:~0,1!& SET _TMP=!_TMP:~-1!& SET _PLUS=+
             SET _NUM3_%%B=!_NUM3_%%B!!_SPC!!_TMP!
-            SET _SPC= 
+            SET _SPC=
             SET _TMP=
             )
         IF DEFINED _CO SET _NUM3_%%B=!_NUM3_%%B! !_CO!& SET _CO=& SET _PLUS=
         SET _NUM3_%%B=!_ZERO!!_NUM3_%%B!
         SET _ZERO=0!_SPC1!!_ZERO!
-        SET _SPC1= 
+        SET _SPC1=
         FOR %%A IN (!_NUM3_%%B!) DO (
           SET /A _CNT+=1
           FOR %%C IN (!_CNT!) DO SET _NUM4_%%C=!_NUM4_%%C!%%A+

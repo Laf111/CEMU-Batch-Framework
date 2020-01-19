@@ -7,7 +7,7 @@ REM : main
 
     color 4F
     set "THIS_SCRIPT=%~0"
-    
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -178,14 +178,14 @@ REM : main
         
     REM : get title;endTitleId;source;dataFound from scan results
     :getList
-    
+
     set "wiiuScanFolder="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!""
     set "gamesList="!wiiuScanFolder:"=!\gamesList.csv""
 
     set "remoteSaves="!wiiuScanFolder:"=!\SRCSaves.log""
     set "remoteUpdates="!wiiuScanFolder:"=!\SRCUpdates.log""
     set "remoteDlc="!wiiuScanFolder:"=!\SRCDlc.log""
-    
+
     set /A "nbGames=0"
     
     cls
@@ -228,11 +228,11 @@ REM : main
     )
     set /A "nbGamesSelected-=1"
     set "START_DATE="
-    
+
     set "rootTarget=!GAMES_FOLDER!"
     set /A "nbPass=1"
     call:loopOnGames
-    
+
     cls
     echo Verifying files to fix unexpected transfert errors^.^.^.
     echo.
@@ -243,21 +243,21 @@ REM : main
     set "DATE=%ldt%"
     
     echo =========================================================
-    echo All transferts ended^, done 
-    echo - start ^: !START_DATE! 
+    echo All transferts ended^, done
+    echo - start ^: !START_DATE!
     echo - end   ^: !DATE!
     echo ---------------------------------------------------------
-    
-    
+
+
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     set "pat="!BFW_GP_FOLDER:"=!\*_Resolution""
-    
+
     if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
     for /F "delims=~" %%p in ('dir /B /S !pat!') do echo "%%p\rules.txt" >> !rulesFiles!
-        
+
     set /A "nbGameWithGfxPack=0"
     call:checkGfxPacksAvailability
-    
+
     if !nbGameWithGfxPack! LSS !nbGamesSelected! (
 
         echo No GFX pack were found for at least one game^.
@@ -286,11 +286,11 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :checkGfxPacksAvailability
-        
+
         for /F "delims=~" %%p in ('type !rulesFiles!') do (
-            
+
             for /L %%i in (0,1,!nbGamesSelected!) do (
-            
+
                 set "titleId=!selectedEndTitlesId[%%i]!"
                 echo %%p | find /I "!titleId!" > NUL 2>&1 && (
 
@@ -303,14 +303,14 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :loopOnGames
-    
+
         REM : loop on the games selected
         for /L %%i in (0,1,!nbGamesSelected!) do (
 
             set "GAME_TITLE=!selectedTitles[%%i]!"
             set "endTitleIdFolder=!selectedEndTitlesId[%%i]!"
 
-            REM : define local folders            
+            REM : define local folders
             set "targetFolder="!rootTarget:"=!\!GAME_TITLE!""
             set "codeFolder="!targetFolder:"=!\code""
             set "contentFolder="!targetFolder:"=!\content""
@@ -368,7 +368,7 @@ REM : functions
 
         REM : get saves only the first pass
         if !nbPass! GTR 1 goto:importGame
-        
+
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -388,7 +388,7 @@ REM : functions
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
 
         if !nbPass! GTR 1 goto:waitingLoop
-        
+
         echo Waiting end of all current transferts^.^.^.
         echo.
         :waitingLoop
@@ -414,17 +414,17 @@ REM : functions
             REM : YES : import dlc in mlc01/usr/title/00050000/!endTitleIdFolder!/aoc (minimized + no wait)
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/!endTitleIdFolder!" "!name! (DLC)"
         )
-                
+
         REM : get saves only the first pass
         if !nbPass! GTR 1 goto:eof
-        
+
         echo Waiting end of all current transferts^.^.^.
         echo.
         :waitingLoop2
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
         wmic process get Commandline | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop2
-        
+
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "!endTitleIdFolder!" > NUL 2>&1 && (
@@ -432,11 +432,11 @@ REM : functions
             REM : TODO ask for importing saves ?  for all user ? (batch mode)
             REM : yes => minimized silent
             REM : no => maximized verbose
-            
+
             REM : Import Wii-U saves
             wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src!
         )
-                
+
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"

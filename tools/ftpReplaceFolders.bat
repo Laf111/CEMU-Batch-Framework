@@ -32,7 +32,7 @@ REM : main
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
 
-        
+
     set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders.log""
 
     REM : set current char codeset

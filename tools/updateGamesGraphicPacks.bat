@@ -575,7 +575,7 @@ REM : functions
         )
 
         pushd !GAMES_FOLDER!
-        
+
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""

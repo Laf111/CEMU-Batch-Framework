@@ -22,7 +22,7 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "multiply="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
-    
+
     REM : set current char codeset
     call:setCharSet
 
@@ -48,9 +48,9 @@ REM : main
     set "nativeWidth=!args[0]:"=!"
     REM : nativeHeight
     set "nativeHeight=!args[1]:"=!"
-    
+
     set /A "resX2=!nativeHeight!*2"
-    
+
     REM : gpResX2gp
     set "gpResX2gp=!args[2]!"
     REM : gp
@@ -67,14 +67,14 @@ REM : main
 
     set "ratio=!args[7]!"
     set "ratio=!ratio:"=!"
-    
+
     REM : compute the width value to replace in function of the template resx2gp used
-    REM : init for 16/9 (3840 or 2560) 
+    REM : init for 16/9 (3840 or 2560)
     set /A "wToReplace=!nativeWidth!*2"
-    
+
     echo "!desc!" | find "(16/9)" > NUL 2>&1 && goto:beginTreatments
-    
-    REM : for others ratios (including windowed ones) 
+
+    REM : for others ratios (including windowed ones)
 
     set "intRatio=!ratio:.=!"
     for /F %%r in ('!multiply! !wToReplace! !intRatio!') do set "result=%%r"
@@ -83,26 +83,26 @@ REM : main
     REM : force even integer
     set /A "isEven=!wToReplace!%%2"
     if !isEven! NEQ 0 set /A "wToReplace=!wToReplace!+1"
-            
+
     REM : patch factor has only 3 decimals
     call:formatPatchValue !ratio! ratioValue
-    
+
     REM : 21/9 in GFX V2 is faulty 2.37037... instead of 2.333333333... => wToReplace=5120
     echo !gpResX2gp! | find /I "p219" > NUL 2>&1 && do (
         if !nativeHeight! EQU 720 set /A "wToReplace=3440"
         if !nativeHeight! EQU 1080 set /A "wToReplace=5120"
         set "patchValue=2.370"
         set "descValue= (16:3)"
-    ) 
-    
+    )
+
     echo !gpResX2gp! | find /I "p489" > NUL 2>&1 && do (
         if !nativeHeight! EQU 720 set set /A "wToReplace=7680"
         if !nativeHeight! EQU 1080 set set /A "wToReplace=11520"
         set "patchValue=5.333"
         set "patchValue=2.370"
         set "descValue= (21:9)"
-    )   
-    
+    )
+
 
     :beginTreatments
     REM : create graphic pack folder
@@ -129,7 +129,7 @@ REM : main
     if not ["!descValue!"] == [""] (
         echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "!descValue!" --replace "!desc!" > !fnrLogFile!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "!descValue!" --replace "!desc!" --logFile !fnrLogFile!
-        
+
         echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!" > !fnrLogFile!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!!desc!" --logFile !fnrLogFile!
     ) else (
@@ -155,7 +155,7 @@ REM : main
     REM compute half target resolution
     set /A "halfHeight=!height!/2"
     set /A "halfWidth=!width!/2"
-    
+
     REM : replacing half res height in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
@@ -197,21 +197,21 @@ REM : main
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" --logFile !fnrLogFile!
 
     set "patchFile="!gp:"=!\patches.txt""
-    
+
     if not exist !patchFile! goto:eof
     REM : replace scale factor in patchFile
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask patches.txt --find !patchValue! --replace !ratioValue! --logFile !fnrLogFile!
-    
+
     exit /b 0
     goto:eof
-    
+
     REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :formatPatchValue 
-    
+    :formatPatchValue
+
         set "r=%~1"
         set "del=%r:~-3%"
         set "%2=!r:%del%=!"
@@ -219,8 +219,8 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :removeDecimals 
-    
+    :removeDecimals
+
         set "r=%~1"
         set "del=%r:~-6%"
         set "%2=!r:%del%=!"
@@ -257,11 +257,11 @@ REM : functions
         if %nlB% GTR %nlA% set /A "max=%nlB%"
         set /A "decimals=9-%max%"
 
-        set /A "one=1"        
+        set /A "one=1"
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         REM : a / b
-        set /A div=fpA*one/fpB  
+        set /A div=fpA*one/fpB
 
         set "intPart="!div:~0,-%decimals%!""
         if [!intPart!] == [""] set "intPart=0"
@@ -280,7 +280,7 @@ REM : functions
         set "%4=!result!"
 
     goto:eof
-    REM : ------------------------------------------------------------------    
+    REM : ------------------------------------------------------------------
 
 
     REM : function to get and set char set code for current host

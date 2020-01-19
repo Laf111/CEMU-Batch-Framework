@@ -144,7 +144,7 @@ REM : main
 
     :inputsAvailables
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
-    
+
     set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
 
     set "titleId=%titleId:"=%"
@@ -218,11 +218,11 @@ REM : main
     set /A "dh=180"
     REM : first height of range
     set /A "h=5760"
-    REM : windowing scale factor 
+    REM : windowing scale factor
     set "wsf=1.07638888888889"
-    
+
     for /F %%r in ('!multiply! !nativeHeight! 1777777') do set "result=%%r"
-    call:removeDecimals !result! nativeWidth        
+    call:removeDecimals !result! nativeWidth
 
     REM : force even integer
     set /A "isEven=!nativeWidth!%%2"
@@ -245,8 +245,8 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :removeDecimals 
-    
+    :removeDecimals
+
         set "r=%~1"
         set "del=%r:~-6%"
         set "%2=!r:%del%=!"
@@ -282,11 +282,11 @@ REM : functions
         if %nlB% GTR %nlA% set /A "max=%nlB%"
         set /A "decimals=9-%max%"
 
-        set /A "one=1"        
+        set /A "one=1"
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         REM : a / b
-        set /A div=fpA*one/fpB  
+        set /A div=fpA*one/fpB
 
         set "intPart="!div:~0,-%decimals%!""
         if [!intPart!] == [""] set "intPart=0"
@@ -305,8 +305,8 @@ REM : functions
         set "%4=!result!"
 
     goto:eof
-    REM : ------------------------------------------------------------------    
-    
+    REM : ------------------------------------------------------------------
+
     :waitChildrenProcessesEnd
 
         REM : waiting all children processes ending
@@ -349,7 +349,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
         echo version = 3 >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!        
+        echo. >> !bfwRulesFile!
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -381,13 +381,13 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         set /A "r=!nativeHeight!%%!resRatio!"
         REM : check if result is an integer
         if !r! NEQ 0 set /A "resRatio+=1" & goto:beginLoopRes
-        
+
         REM : compute targetHeight
         set /A "targetHeight=!nativeHeight!/!resRatio!"
-        
+
         REM : compute targetWidth
         set /A "targetWidth=!nativeWidth!/!resRatio!"
-     
+
         REM : force even integer
         set /A "isEven=!targetWidth!%%2"
         if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
@@ -515,18 +515,18 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
-    
+
+
     REM : function to add an extra 16/9 preset in graphic pack of the game
     :addGfxPacks
         set "suffixGp=%~1"
-        
+
         echo Creating !wc!x!hc!!desc! GFX packs >> !cgpLogFile!
         echo Creating !wc!x!hc!!desc! GFX packs
-  
+
         REM : V2 packs
         if exist !gfxPacksV2Folder! wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeWidth! !nativeHeight! !wc! !hc! "!GAME_TITLE!" "!desc!" "!titleIdList!"
-    
+
         REM : V3 and up
         set "descUpdated=!desc!"
         if !hc! EQU !nativeHeight! if !wc! EQU !nativeWidth! (
@@ -537,51 +537,51 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+
     :addResolution
 
         set "hc=!hi!"
         set "wc=!wi!"
 
         if ["!suffix!"] == [""] (
-        
+
             REM : fullscreen resolutions
-            
-            REM : force even integer
-            set /A "isEven=!wc!%%2"
-            if !isEven! NEQ 0 set /A "wc=!wc!+1" 
-        
-            call:addGfxPacks 
-            
-        ) else (
-        
-            REM : windowed resolutions
-            set "intRatio=!winRatio:.=!"
-            for /F %%r in ('!multiply! !hc! !intRatio!') do set "result=%%r"
-            
-            call:removeDecimals !result! wc
-            
+
             REM : force even integer
             set /A "isEven=!wc!%%2"
             if !isEven! NEQ 0 set /A "wc=!wc!+1"
-            
+
+            call:addGfxPacks
+
+        ) else (
+
+            REM : windowed resolutions
+            set "intRatio=!winRatio:.=!"
+            for /F %%r in ('!multiply! !hc! !intRatio!') do set "result=%%r"
+
+            call:removeDecimals !result! wc
+
+            REM : force even integer
+            set /A "isEven=!wc!%%2"
+            if !isEven! NEQ 0 set /A "wc=!wc!+1"
+
             call:addGfxPacks windowed
         )
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
-    :setPresets 
-    
+
+
+    :setPresets
+
         set "suffix=%~1"
 
         if ["!suffix!"] == [""] (
             set "desc= (!wr!/!hr!)"
             goto:treatEd
-        ) 
+        )
         set "desc= (!wr!/!hr! %suffix%)"
-            
+
         if !winRatio! EQU 0 (
             REM : compute new aspect ratio value
             call:divIntegers !wr! !hr! 8 fsRatio
@@ -598,22 +598,22 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         :treatEd
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
-        
+
         set /A "previous=6000
         for /L %%i in (%end%,-1,%start%) do (
-        
+
             set /A "wi=!wr!*%%i"
             set /A "hi=!hr!*%%i"
             set /A "offset=!previous!-!hi!"
             if !offset! GEQ 180 (
-                call:addResolution  
+                call:addResolution
                 set /A "previous=!hi!"
             )
         )
-    
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
 
     :createGfxPacks
         REM : desc, ex 16-9
@@ -628,12 +628,12 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         call:setPresets
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
-        
+
         REM : windowed GFX packs
         call:setPresets windowed
 
     goto:eof
-    REM : ------------------------------------------------------------------        
+    REM : ------------------------------------------------------------------
 
     :getAllTitleIds
 

@@ -235,7 +235,7 @@ REM : main
 
     :checkProfile
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
-    
+
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
 

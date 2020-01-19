@@ -392,7 +392,7 @@ REM : functions
         echo Import saves for !GAME_TITLE! ^(%endTitleId%^)
         echo Source location ^: ^/storage_!src!
         echo =========================================================
-        
+
         REM : (re) compute GAME_FOLDER_PATH (in function of the presence of args or not)
         set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
 
@@ -404,9 +404,9 @@ REM : functions
         REM : temporary folder where recreated the Wii-U save
         set "TMP_DLSAVE_PATH="!GAMES_FOLDER:"=!\_BatchFw_WiiU\ImportSave""
         if not exist !TMP_DLSAVE_PATH! mkdir !TMP_DLSAVE_PATH! > NUL 2>&1
-            
+
         set "gslog="!TMP_DLSAVE_PATH:"=!\ImportSaveFromWii-U_!GAME_TITLE!.log""
-        
+
         set "localFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\!endTitleId!""
 
         REM : launching transfert
@@ -506,7 +506,7 @@ REM : functions
 
                 REM : add the meta folder content
                 !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
-                
+
                 echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
             )
         )

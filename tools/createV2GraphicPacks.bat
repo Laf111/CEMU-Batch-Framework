@@ -45,13 +45,13 @@ REM : main
     )
     REM : get and check BFW_GP_FOLDER
     set /A "nativeWidth=!args[0]!"
-    set /A "nativeHeight=!args[1]!"    
+    set /A "nativeHeight=!args[1]!"
     set /A "overwriteWidth=!args[2]!"
     set /A "overwriteHeight=!args[3]!"
     set "gameName=!args[4]!"
     set "desc=!args[5]!"
     set "titleIdList=!args[6]!"
-    
+
     set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
     if not exist !bfwgpv2! exit 10
 
@@ -60,9 +60,9 @@ REM : main
     set "sd=!sd:)=!"
     set "sd=!sd: =!"
     set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!!sd!""
-    
+
     echo Creating !gp!
-    
+
     if exist !gp! (
         echo ^^! !gp! already exists, skipped ^^!
         exit 1
@@ -79,7 +79,7 @@ REM : main
         set "name="!gameName! !overwriteWidth!x!overwriteHeight! !desc! ^(native resolution^) created by BatchFw"
     )
     echo name = !name! >> !rulesFile!
-    
+
     echo version = 2 >> !rulesFile!
     echo. >> !rulesFile!
 
@@ -96,26 +96,26 @@ REM : main
 
     REM : compute targetHeight
     set /A "targetHeight=!nativeHeight!/!resRatio!"
-    
+
     REM : compute targetWidth
     set /A "targetWidth=!nativeWidth!/!resRatio!"
- 
+
     REM : force even integer
     set /A "isEven=!targetWidth!%%2"
     if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
-    
+
     REM : compute half targetHeight
     set /A "halfOverwriteHeight=!overwriteHeight!/!resRatio!"
-    
+
     REM : compute half targetWidth
     set /A "halfOverwriteWidth=!overwriteWidth!/!resRatio!"
- 
+
     REM : force even integer
     set /A "isEven=!halfOverwriteWidth!%%2"
     if !isEven! NEQ 0 set /A "targetWidth=!halfOverwriteWidth!+1"
-    
+
     echo Creating Res/!resRatio! filter for !targetWidth!x!targetHeight! !desc!
-    
+
     REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
     call:writeFilters >> !rulesFile!
 
@@ -130,7 +130,7 @@ REM : main
     copy /Y !rulesFile! !utf8! > NUL 2>&1
     type !utf8! > !rulesFile!
     del /F !utf8! > NUL 2>&1
-    
+
     exit 0
     goto:eof
 
@@ -138,7 +138,7 @@ REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
-    
+
     :writeFilters
 
         echo # 1/!resRatio! Res

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-3"
+    set "BFW_VERSION=V15-4"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -354,43 +354,42 @@ REM : main
     echo ---------------------------------------------------------
 
     :askRatioAgain
-    choice /C 1234567c /N /M "Enter your choice: "
-
-    if !ERRORLEVEL! EQU 2 (
+    call:getUserInput "Enter your choice ?: " "1,2,3,4,5,6,7,c" ANSWER
+    if !ANSWER! EQU 2 (
         set "msg="DESIRED_ASPECT_RATIO=169""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 3 (
+    if !ANSWER! EQU 3 (
         set "msg="DESIRED_ASPECT_RATIO=1610""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 4 (
+    if !ANSWER! EQU 4 (
         set "msg="DESIRED_ASPECT_RATIO=219""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 5 (
+    if !ANSWER! EQU 5 (
         set "msg="DESIRED_ASPECT_RATIO=329""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 6 (
+    if !ANSWER! EQU 6 (
         set "msg="DESIRED_ASPECT_RATIO=43""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 7 (
+    if !ANSWER! EQU 7 (
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 8 goto:askScreenMode
+    if !ANSWER! EQU 8 goto:askScreenMode
 
-    if !ERRORLEVEL! EQU 1 (
+    if !ANSWER! EQU 1 (
         :getcustomAr
         set /P  "width=Please enter width  : "
         set /P "height=Please enter height : "
         echo.
-        
+
         choice /C ny /N /M "Please confirm !width!/!height! as aspect ratio ? (y,n): "
         if !ERRORLEVEL! EQU 1 goto:getcustomAr
-        
+
         set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
         call:log2HostFile !msg!
     )
@@ -477,15 +476,17 @@ REM : main
     set "usersList=EMPTY"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do set "usersList=!usersList! [%%i]"
 
-    if not ["%usersList%"] == ["EMPTY"] goto:handleUsers
+    if not ["!usersList!"] == ["EMPTY"] goto:handleUsers
     choice /C ny /N /M "Do you want to add more than one user? (y,n):"
     if !ERRORLEVEL! EQU 1 (
+
         set "msg="USER_REGISTERED=!USERNAME!""
         call:log2HostFile !msg!
         goto:getSoftware
     )
     :handleUsers
-    if ["%usersList%"] == ["EMPTY"] goto:getUsers
+
+    if ["!usersList!"] == ["EMPTY"] goto:getUsers
 
     set "usersList=!usersList:EMPTY=!"
     echo Users already registered in BatchFW: !usersList!
@@ -501,19 +502,20 @@ REM : main
 
     if !alreadyAsked! EQU 1 goto:batchFwUsers
     REM : Have a Wii-U ?
-    echo You can use your Wii-U accounts to create BatchFw^'users 
+    echo You can use your Wii-U accounts to create BatchFw^'users
     echo list and get the files needed to play online^.
     echo For that^, you need to had dumped your NAND^.
     echo.
-    
+
     if not exist !BFW_WIIU_FOLDER! if %QUIET_MODE% EQU 0 (
-    
+
     choice /C yn /N /M "Do you need to format a SDCard with homebrew on? (y,n):"
     if !ERRORLEVEL! EQU 1 wscript /nologo !StartWait! !createWiiuSDcard!
-    echo.    
-    
+    echo.
+    )
     choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
-    echo.    
+    echo.
+    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
@@ -524,9 +526,8 @@ REM : main
     echo    ^* first run Mocha CFW HomeBrewLauncher
     echo    ^* then ftp-everywhere for MOCHA
     echo.
-    echo - get the IP adress displayed on Wii-U gamepad    
+    echo - get the IP adress displayed on Wii-U gamepad
     echo.
-    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
     REM : get online files and accounts
     pushd !BFW_TOOLS_PATH!

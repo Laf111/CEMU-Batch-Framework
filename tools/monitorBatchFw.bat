@@ -58,7 +58,7 @@ REM : main
         if !duration! GTR !timeOut! call:askToKill
         goto:waitingLoopProcesses
     )
-    del /F !logFileTmp! > NUL 2>&1 & 
+    del /F !logFileTmp! > NUL 2>&1 &
 exit 0
 
 REM : ------------------------------------------------------------------
