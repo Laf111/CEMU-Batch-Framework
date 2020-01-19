@@ -41,6 +41,7 @@ REM : main
 
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
+    set "createWiiuSDcard="!BFW_PATH:"=!\createWiiuSDcard.bat""
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
@@ -342,43 +343,58 @@ REM : main
     echo ---------------------------------------------------------
     echo Choose your display ratio ^(for extra graphic packs^) ^:
     echo.
-    echo     ^(1^)^: 16/9
-    echo     ^(2^)^: 16/10
-    echo     ^(3^)^: 21/9
-    echo     ^(4^)^: 32/9
-    echo     ^(5^)^: 4/3
-    echo     ^(6^)^: 16/3 ^(48/9^)
+    echo     ^(1^)^: user define one
+    echo     ^(2^)^: 16/9
+    echo     ^(3^)^: 16/10
+    echo     ^(4^)^: 21/9
+    echo     ^(5^)^: 32/9
+    echo     ^(6^)^: 4/3
+    echo     ^(7^)^: 16/3 ^(48/9^)
     echo     ^(c^)^: cancel
     echo ---------------------------------------------------------
 
     :askRatioAgain
-    choice /C 123456c /N /M "Enter your choice: "
-    if !ERRORLEVEL! EQU 1 (
+    choice /C 1234567c /N /M "Enter your choice: "
+
+    if !ERRORLEVEL! EQU 2 (
         set "msg="DESIRED_ASPECT_RATIO=169""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 2 (
+    if !ERRORLEVEL! EQU 3 (
         set "msg="DESIRED_ASPECT_RATIO=1610""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 3 (
+    if !ERRORLEVEL! EQU 4 (
         set "msg="DESIRED_ASPECT_RATIO=219""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 4 (
+    if !ERRORLEVEL! EQU 5 (
         set "msg="DESIRED_ASPECT_RATIO=329""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 5 (
+    if !ERRORLEVEL! EQU 6 (
         set "msg="DESIRED_ASPECT_RATIO=43""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 6 (
+    if !ERRORLEVEL! EQU 7 (
         set "msg="DESIRED_ASPECT_RATIO=489""
         call:log2HostFile !msg!
     )
-    if !ERRORLEVEL! EQU 7 goto:askScreenMode
+    if !ERRORLEVEL! EQU 8 goto:askScreenMode
 
+    if !ERRORLEVEL! EQU 1 (
+        :getcustomAr
+        set /P  "width=Please enter width  : "
+        set /P "height=Please enter height : "
+        echo.
+        
+        choice /C ny /N /M "Please confirm !width!/!height! as aspect ratio ? (y,n): "
+        if !ERRORLEVEL! EQU 1 goto:getcustomAr
+        
+        set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
+        call:log2HostFile !msg!
+    )
+    
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
@@ -479,18 +495,37 @@ REM : main
     REM : flush logFile of USER_REGISTERED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do call:cleanHostLogFile USER_REGISTERED
 
-    REM : Get BatchFw's users registered with the current windows profile
+    REM : Get BatchFw's users registered
     set /A "alreadyAsked=0"
     :getUsers
 
     if !alreadyAsked! EQU 1 goto:batchFwUsers
     REM : Have a Wii-U ?
-    echo You can use your Wii-U to create BatchFw^'users list
-    echo For that^, you need to had dumped your NAND in order
-    echo to provide files to play online and have launched
-    echo ftpiiU server on your Wii-U^.
+    echo You can use your Wii-U accounts to create BatchFw^'users 
+    echo list and get the files needed to play online^.
+    echo For that^, you need to had dumped your NAND^.
     echo.
+    
+    if not exist !BFW_WIIU_FOLDER! if %QUIET_MODE% EQU 0 (
+    
+    choice /C yn /N /M "Do you need to format a SDCard with homebrew on? (y,n):"
+    if !ERRORLEVEL! EQU 1 wscript /nologo !StartWait! !createWiiuSDcard!
+    echo.    
+    
     choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
+    echo.    
+
+    echo On your Wii-U^, you need to ^:
+    echo - disable the sleeping^/shutdown features
+    echo - if you^'re using a permanent hack ^(CBHC^)^:
+    echo    ^* launch HomeBrewLauncher
+    echo    ^* then ftp-everywhere for CBHC
+    echo - if you^'re not^:
+    echo    ^* first run Mocha CFW HomeBrewLauncher
+    echo    ^* then ftp-everywhere for MOCHA
+    echo.
+    echo - get the IP adress displayed on Wii-U gamepad    
+    echo.
     if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
     REM : get online files and accounts
@@ -728,15 +763,13 @@ REM : main
 
     :getOuptutsType
     if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
-        if not exist !BFW_WIIU_FOLDER! (
-            echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
-            echo Please extract BatchFw in your loadiines games^' folder
-            REM : show doc
-            set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
-            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
-            pause
-            echo Exiting 10
-        )
+        echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
+        echo Please extract BatchFw in your loadiines games^' folder
+        REM : show doc
+        set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+        pause
+        echo Exiting 10
     )
 
     set "outputType=LNK"
@@ -754,15 +787,13 @@ REM : main
         echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     ) else (
-        if exist !BFW_WIIU_FOLDER! if !NB_GAMES_VALID! EQU 0 (
+        if !NB_GAMES_VALID! EQU 0 (
             echo 3^: Cancel^, for dumping my games now
             call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         ) else (
             call:getUserInput "Enter your choice ?: " "1,2" ANSWER
         )
-        if not exist !BFW_WIIU_FOLDER! (
-            call:getUserInput "Enter your choice ?: " "1,2" ANSWER
-        )
+        call:getUserInput "Enter your choice ?: " "1,2" ANSWER
     )
     if [!ANSWER!] == ["3"] exit 70
     if [!ANSWER!] == ["1"] (

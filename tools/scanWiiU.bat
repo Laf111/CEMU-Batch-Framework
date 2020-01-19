@@ -154,24 +154,6 @@ REM : main
     set "remoteUpdates="!wiiuScanFolder:"=!\SRCUpdates.log""
     set "remoteDlc="!wiiuScanFolder:"=!\SRCDlc.log""
 
-    REM : get the list of titleId of your installed games
-    REM create a log file containing all your games titleId
-    set "localTid="!wiiuScanFolder:"=!\localTitleIds.log""
-    if exist !localTid! del /F !localTid!
-
-    pushd !GAMES_FOLDER!
-    REM : searching for meta file
-    for /F "delims=~" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
-
-        REM : meta.xml
-        set "META_FILE="%%i""
-
-        REM : get Title Id from meta.xml
-        set "titleLine="NONE""
-        for /F "tokens=1-2 delims=>" %%j in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%k""
-        for /F "delims=<" %%l in (!titleLine!) do echo %%l >> !localTid!
-    )
-
     REM : if needed, dump account.dat for all users
     REM : online files folders
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""

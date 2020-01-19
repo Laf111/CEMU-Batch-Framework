@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color 4F
+    color F0
 
     set "THIS_SCRIPT=%~0"
 
@@ -173,6 +173,7 @@ REM : main
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
     if exist !fnrLogUggp! del /F !fnrLogUggp!
+    echo titleId^: %titleId% >> !myLog!
 
     REM : launching the search
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
@@ -245,6 +246,7 @@ REM : main
 
     if not ["!gfxType!"] == ["2"] call:importMods
 
+    REM : TODO limit to only the current host
     REM : search in all Host_*.log
     set "pat="!BFW_PATH:"=!\logs\Host_*.log""
     for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
@@ -267,10 +269,12 @@ REM : main
 
     REM : import user defined ratios graphic packs
     for %%a in (!ARLIST!) do (
-        if ["%%a"] == ["1610"] call:importOtherGraphicPacks 1610
-        if ["%%a"] == ["219"]  call:importOtherGraphicPacks 219
-        if ["%%a"] == ["43"]   call:importOtherGraphicPacks 43
-        if ["%%a"] == ["489"]  call:importOtherGraphicPacks 489
+        if ["%%a"] == ["1610"] call:importOtherGraphicPacks "16-10"
+        if ["%%a"] == ["219"]  call:importOtherGraphicPacks "21-9"
+        if ["%%a"] == ["43"]   call:importOtherGraphicPacks "4-3"
+        if ["%%a"] == ["489"]  call:importOtherGraphicPacks "48-9"
+        REM : treating user defined aspect ratio W-H
+        echo "%%a" | find "-" > NUL 2>&1 && call:importOtherGraphicPacks "%%a"
     )
 
     :checkPackLinks
@@ -472,6 +476,7 @@ REM : functions
     :importOtherGraphicPacks
 
         set "filter=%~1"
+        set "filter=!filter:-=!"
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
 
@@ -570,6 +575,19 @@ REM : functions
         )
 
         pushd !GAMES_FOLDER!
+        
+        echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
+        REM : Create game's graphic pack
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId%
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId%
+
+        REM : create FPS cap graphic packs
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -663,8 +681,8 @@ REM : functions
         if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup!
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup!
 
         :createCapGP

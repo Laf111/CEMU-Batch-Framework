@@ -21,6 +21,8 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
+    set "multiply="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
+    
     REM : set current char codeset
     call:setCharSet
 
@@ -34,24 +36,21 @@ REM : main
         goto:continue
     :end
 
-    if %nbArgs% GTR 7 (
+    if %nbArgs% NEQ 8 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" nativeWidth nativeHeight gp width height halfw halfh description
+        echo SYNTAXE ^: "!THIS_SCRIPT!" nativeWidth nativeHeight gpResX2gp gp width height description ratio
         echo given {%*}
         exit /b 99
     )
 
-    if %nbArgs% LSS 6 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!"  nativeWidth nativeHeight gp width height halfw halfh description
-        echo given {%*}
-        exit /b 99
-    )
 
     REM : nativeWidth
     set "nativeWidth=!args[0]:"=!"
     REM : nativeHeight
     set "nativeHeight=!args[1]:"=!"
+    
+    set /A "resX2=!nativeHeight!*2"
+    
     REM : gpResX2gp
     set "gpResX2gp=!args[2]!"
     REM : gp
@@ -62,17 +61,50 @@ REM : main
     set "height=!args[5]:"=!"
 
     REM : description
-    set "description="
-    if %nbArgs% EQU 7 set "description=!args[6]:"=!"
+    set /A "windowed=0"
+    set "desc=!args[6]!"
+    set "desc=!desc:"=!"
 
-    set /A "resX2=%nativeHeight%*2"
+    set "ratio=!args[7]!"
+    set "ratio=!ratio:"=!"
+    
+    REM : compute the width value to replace in function of the template resx2gp used
+    REM : init for 16/9 (3840 or 2560) 
+    set /A "wToReplace=!nativeWidth!*2"
+    
+    echo "!desc!" | find "(16/9)" > NUL 2>&1 && goto:beginTreatments
+    
+    REM : for others ratios (including windowed ones) 
 
-    REM : analyse gpResX2gp folder name
-    set /A "wToReplace=%nativeWidth%*2"
-    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p43"') do set /A "wToReplace=3440"
-    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p219"') do set /A "wToReplace=3440"
-    for /F "delims=~" %%j in ('echo !gpResX2gp! ^| find /I "p489"') do set /A "wToReplace=7680"
+    set "intRatio=!ratio:.=!"
+    for /F %%r in ('!multiply! !wToReplace! !intRatio!') do set "result=%%r"
+    call:removeDecimals !result! wToReplace
 
+    REM : force even integer
+    set /A "isEven=!wToReplace!%%2"
+    if !isEven! NEQ 0 set /A "wToReplace=!wToReplace!+1"
+            
+    REM : patch factor has only 3 decimals
+    call:formatPatchValue !ratio! ratioValue
+    
+    REM : 21/9 in GFX V2 is faulty 2.37037... instead of 2.333333333... => wToReplace=5120
+    echo !gpResX2gp! | find /I "p219" > NUL 2>&1 && do (
+        if !nativeHeight! EQU 720 set /A "wToReplace=3440"
+        if !nativeHeight! EQU 1080 set /A "wToReplace=5120"
+        set "patchValue=2.370"
+        set "descValue= (16:3)"
+    ) 
+    
+    echo !gpResX2gp! | find /I "p489" > NUL 2>&1 && do (
+        if !nativeHeight! EQU 720 set set /A "wToReplace=7680"
+        if !nativeHeight! EQU 1080 set set /A "wToReplace=11520"
+        set "patchValue=5.333"
+        set "patchValue=2.370"
+        set "descValue= (21:9)"
+    )   
+    
+
+    :beginTreatments
     REM : create graphic pack folder
     if not exist !gp! mkdir !gp! > NUL 2>&1
 
@@ -89,14 +121,21 @@ REM : main
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     set "fnrLogFile="!fnrLogFolder:"=!\%wToReplace%xResX2gp.log""
-    echo "GFX %wToReplace%x%resX2% !description!" > !fnrLogFile!
+    echo "GFX %wToReplace%x%resX2% !desc!" > !fnrLogFile!
     echo "%*" >> !fnrLogFile!
 
     REM : replacing %wToReplace%xResX2gp in rules.txt
-    set " > NUL="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height! !description!" --logFile !fnrLogFile!
-
+    set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp.log""
+    if not ["!descValue!"] == [""] (
+        echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "!descValue!" --replace "!desc!" > !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "!descValue!" --replace "!desc!" --logFile !fnrLogFile!
+        
+        echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!" > !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!!desc!" --logFile !fnrLogFile!
+    ) else (
+        echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!!desc!" > !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "%wToReplace%x%resX2%" --replace "!width!x!height!!desc!" --logFile !fnrLogFile!
+    )
     REM : replacing overwriteHeight = ResX2gp in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!height!.log""
     echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = %resX2%" --replace "overwriteHeight = !height!" > !fnrLogFile!
@@ -114,23 +153,23 @@ REM : main
 
 
     REM compute half target resolution
-    call:divfloat2int "!height!.0" "2.0" 1 halfHeight
-    call:divfloat2int "!width!.0" "2.0" 1 halfWidth
-
+    set /A "halfHeight=!height!/2"
+    set /A "halfWidth=!width!/2"
+    
     REM : replacing half res height in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = 720" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res height in rules.txt  (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfHeight!asWidth.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 720" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeHeight!" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeHeight!" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res width in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-!halfWidth!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = 1280" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeWidth!" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeWidth!" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
 
     REM : treating extra files (*_*.txt) if needed
     set "pat="!gp:"=!\*_*s.txt""
@@ -139,8 +178,8 @@ REM : main
 
     :treatExtraFiles
     REM compute scale factor
-    call:divfloat !height! !nativeHeight! 4 yScale
-    call:divfloat !width! !nativeWidth! 4 xScale
+    call:divIntegers !height! !nativeHeight! 8 yScale
+    call:divIntegers !width! !nativeWidth! 8 xScale
 
     REM : replacing float resXScale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_%wToReplace%xResX2gp-xScale.log""
@@ -157,12 +196,37 @@ REM : main
     echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" > !fnrLogFile!
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" --logFile !fnrLogFile!
 
+    set "patchFile="!gp:"=!\patches.txt""
+    
+    if not exist !patchFile! goto:eof
+    REM : replace scale factor in patchFile
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask patches.txt --find !patchValue! --replace !ratioValue! --logFile !fnrLogFile!
+    
     exit /b 0
-
+    goto:eof
+    
     REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :formatPatchValue 
+    
+        set "r=%~1"
+        set "del=%r:~-3%"
+        set "%2=!r:%del%=!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :removeDecimals 
+    
+        set "r=%~1"
+        set "del=%r:~-6%"
+        set "%2=!r:%del%=!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :strLen
         set /A "len=0"
@@ -174,65 +238,15 @@ REM : functions
 
 
     REM : function for dividing integers
-    :divfloat2int
+    :divIntegers
 
         REM : get a
-        set "numA=%~1"
+        set /A "fpA=%~1"
         REM : get b
-        set "numB=%~2"
-        REM : get nbDecimals
-        set /A "decimals=%~3"
+        set /A "fpB=%~2"
+        REM : get number of decimals asked
+        set /A "nbDec=%~3"
 
-        set /A "one=1"
-        set /A "decimalsP1=decimals+1"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numA% does not have %decimals% decimals
-            pause
-            exit /b 1
-        )
-
-        if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numB% does not have %decimals% decimals
-            pause
-            exit /b 2
-        )
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : a / b
-        set /A div=fpA*one/fpB
-
-        set /A "result=!div:~0,-%decimals%!"
-
-        REM : output
-        set "%4=%result%"
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function for dividing integers
-    :divfloat
-
-        REM : get a
-        set "numA=%~1"
-        REM : get b
-        set "numB=%~2"
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : get nbDecimals
-        set /A "decimals=%~3"
-
-        set /A "one=1"
-        if %decimals% EQU 1 (
-            set /A "one=10"
-            goto:treatment
-        )
         call:strLen fpA strLenA
         call:strLen fpB strLenB
 
@@ -242,27 +256,32 @@ REM : functions
         set /A "max=%nlA%"
         if %nlB% GTR %nlA% set /A "max=%nlB%"
         set /A "decimals=9-%max%"
+
+        set /A "one=1"        
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
-        :treatment
         REM : a / b
-        set /A div=fpA*one/fpB
+        set /A div=fpA*one/fpB  
 
         set "intPart="!div:~0,-%decimals%!""
-        if [%intPart%] == [""] set "intPart=0"
+        if [!intPart!] == [""] set "intPart=0"
         set "intPart=%intPart:"=%"
 
-        set "decPart=!div:~-%decimals%!"
+        if %nbDec% LSS %decimals% (
+            set "decPart=!div:~-%nbDec%!"
+        ) else (
+            set "decPart=!div:~-%decimals%!"
+        )
+        set "result=!intPart!.!decPart!"
+        if %nbDec% EQU 0 set /A "result=!intPart!"
 
-        set "result=%intPart%.%decPart%"
-
-        if %decimals% EQU 0 set /A "result=%intPart%"
 
         REM : output
-        set "%4=%result%"
+        set "%4=!result!"
 
     goto:eof
-    REM : ------------------------------------------------------------------
+    REM : ------------------------------------------------------------------    
+
 
     REM : function to get and set char set code for current host
     :setCharSet

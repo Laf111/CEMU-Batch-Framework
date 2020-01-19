@@ -1,15 +1,40 @@
 @echo off
 setlocal EnableExtensions
+title Import Wii-U saves
 REM : ------------------------------------------------------------------
 REM : When called with args, this script treat ONLY ONE game at the time
 REM : When called without, it use the last Wii-U scan and treat only ALL
 REM : games that exist in local AND remote locations
 
-    setlocal EnableDelayedExpansion
+REM : main
 
+    setlocal EnableDelayedExpansion
     color 4F
 
     set "THIS_SCRIPT=%~0"
+
+    REM : directory of this script
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+
+    for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
+    set "BFW_PATH=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+
+    set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
+
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
+
+    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+
+    REM : set current char codeset
+    call:setCharSet
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -31,28 +56,6 @@ REM : games that exist in local AND remote locations
         if %nbArgs% NEQ 0 exit /b 1
     )
 
-    REM : directory of this script
-    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
-
-    for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
-    set "BFW_PATH=!parentFolder:~0,-2!""
-    for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-    for %%a in (!BFW_PATH!) do set "drive=%%~da"
-    set "GAMES_FOLDER=!parentFolder!"
-    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
-
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
-
-    set "ftpReplaceFolders="!BFW_TOOLS_PATH:"=!\ftpReplaceFolders.bat""
-
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
-
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-
-    REM : set current char codeset
-    call:setCharSet
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -123,7 +126,7 @@ REM : games that exist in local AND remote locations
     )
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
-    !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
+    !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=8 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         echo Pause this script until you fix it ^(CTRL-C to abort^)
@@ -185,8 +188,6 @@ REM : games that exist in local AND remote locations
     :getList
     REM : get title;endTitleId;source;dataFound from scan results
     set "gamesList="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!\gamesList.csv""
-    REM create a log file containing all your games titleId
-    set "localTid="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!\localTitleIds.log""
 
     set /A "nbGames=0"
 
@@ -259,7 +260,7 @@ REM : games that exist in local AND remote locations
         if %nbArgs% EQU 0 exit 9
         if %nbArgs% NEQ 0 exit /b 9
     )
-    REM WII-U IO ADRESS (wll be check in ftpReplaceFolders.bat
+    REM WII-U IO ADRESS (wll be check in syncFolder.bat
     set "wiiuIp=!args[0]!"
 
     REM : get GAME_TITLE
@@ -282,8 +283,8 @@ REM : games that exist in local AND remote locations
     set "selectedTitles[0]=!GAME_TITLE!"
     set "selectedEndTitlesId[0]=!endTitleId!"
     set "selectedtitlesSrc[0]=!src!"
-
-    set /A "nbGamesSelected=1"
+    REM : array start from 0
+    set /A "nbGamesSelected=0"
 
     :treatments
     cls
@@ -391,7 +392,7 @@ REM : functions
         echo Import saves for !GAME_TITLE! ^(%endTitleId%^)
         echo Source location ^: ^/storage_!src!
         echo =========================================================
-
+        
         REM : (re) compute GAME_FOLDER_PATH (in function of the presence of args or not)
         set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
 
@@ -401,12 +402,15 @@ REM : functions
         set "DATE=%ldt%"
 
         REM : temporary folder where recreated the Wii-U save
-        set "TMP_DLSAVE_PATH="!GAMES_FOLDER:"=!\_BatchFw_WiiU\ImportSave_!DATE!""
-
+        set "TMP_DLSAVE_PATH="!GAMES_FOLDER:"=!\_BatchFw_WiiU\ImportSave""
+        if not exist !TMP_DLSAVE_PATH! mkdir !TMP_DLSAVE_PATH! > NUL 2>&1
+            
+        set "gslog="!TMP_DLSAVE_PATH:"=!\ImportSaveFromWii-U_!GAME_TITLE!.log""
+        
         set "localFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\!endTitleId!""
 
         REM : launching transfert
-        call !ftpReplaceFolders! !wiiuIp! local !localFolder! "/storage_!src!/usr/save/00050000/!endTitleId!" "!GAME_TITLE! (saves)"
+        call !syncFolder! !wiiuIp! local !localFolder! "/storage_!src!/usr/save/00050000/!endTitleId!" "!GAME_TITLE! (saves)"
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             echo ERROR when downloading existing saves ^!
@@ -417,7 +421,6 @@ REM : functions
         set "localFolderUser="!localFolder:"=!\user""
         if not exist !localFolderUser! (
             echo WARNING ^: no saves found for !GAME_TITLE!
-            rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
             goto:eof
         )        
         REM : creates saves for each users
@@ -426,7 +429,6 @@ REM : functions
         echo ---------------------------------------------------------
 
         pushd !GAMES_FOLDER!
-        rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -469,44 +471,44 @@ REM : functions
                 echo WARNING ^: no Wii-U saves found for !currentUser!
                 goto:eof
             )
+            choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
+            if !ERRORLEVEL! EQU 1 (
 
-            if %nbArgs% EQU 0 (
-                choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
-                if !ERRORLEVEL! EQU 2 goto:eof
-            )
-            set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-            if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
+                set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
+                if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
 
-            REM : for the current user :
-            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+                REM : for the current user :
+                set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
 
-            REM : backup the CEMU save
-            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
-            if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
+                REM : backup the CEMU save
+                set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
+                if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
 
-            REM : delete the user's save
-            if exist !rarFile! del /F !rarFile! > NUL 2>&1
+                REM : delete the user's save
+                if exist !rarFile! del /F !rarFile! > NUL 2>&1
 
-            cd !folder!
-            REM : add the user's folder content, rename folder to 80000001 in the archive file
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+                cd !folder!
+                REM : add the user's folder content, rename folder to 80000001 in the archive file
+                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul  !rarFile! * > NUL 2>&1
 
-            cd ..
-            REM : common folder
-            if exist common (
-                cd common
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul  !rarFile! * > NUL 2>&1
                 cd ..
+                REM : common folder
+                if exist common (
+                    cd common
+                    !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+                    cd ..
+                )
+                REM : cd to meta
+                cd !localFolderMeta!
+
+                REM : overwrite !saveInfo!
+                echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
+
+                REM : add the meta folder content
+                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+                
+                echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
             )
-            REM : cd to meta
-            cd !localFolderMeta!
-
-            REM : overwrite !saveInfo!
-            echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
-
-            REM : add the meta folder content
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
-
         )
     goto:eof
     REM : ------------------------------------------------------------------

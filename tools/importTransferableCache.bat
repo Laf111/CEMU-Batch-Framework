@@ -176,10 +176,7 @@ REM : main
 
     if ["!sci!"] == ["NOT_FOUND"] (
         echo Error when computing shader cache name^.
-        echo.
-        echo Please^, launch the game at least one time
-        echo ^(to let CEMU compute it^)
-        echo and relaunch this script^.
+        pause
         exit 50
     )
     

@@ -55,9 +55,10 @@ REM : main
         type !logFileTmp! | find /I "cemu.exe" > NUL 2>&1 && set /A "duration=-1"
 
         if !duration! GEQ 0 set /A "duration+=1"
-        if !duration! GTR !timeOut! del /F !logFileTmp! > NUL 2>&1 & call:askToKill
+        if !duration! GTR !timeOut! call:askToKill
         goto:waitingLoopProcesses
     )
+    del /F !logFileTmp! > NUL 2>&1 & 
 exit 0
 
 REM : ------------------------------------------------------------------
@@ -68,7 +69,7 @@ REM : functions
         type !logFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
 
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 30sec more. If you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk"
+            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 60sec more. If you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk"
             set /A "duration-=60"
             goto:eof
         )

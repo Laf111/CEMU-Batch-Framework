@@ -33,7 +33,7 @@ REM : main
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
 
         
-    set "logFile="!BFW_PATH:"=!\logs\ftpSyncFolders.log""
+    set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders.log""
 
     REM : set current char codeset
     call:setCharSet
@@ -90,7 +90,7 @@ REM : main
 
         echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp!
         echo !SITENAME!
-        set "logFile="!BFW_PATH:"=!\logs\ftpSyncFolders_!SITENAME!.log""
+        set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders_!SITENAME!.log""
     ) else (
         echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp! ^:
     )
@@ -103,7 +103,7 @@ REM : main
     echo ^> Sync !SYNC_TYPE! !LOCAL_FOLDER! !REMOTE_FOLDER!
 
     REM : run ftp transferts :
-    !winScp! /log=!logFile! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "exit"
+    !winScp! /log=!myLog! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "option batch off" "exit"
     set "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 echo ERROR detected when transferring ^!
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

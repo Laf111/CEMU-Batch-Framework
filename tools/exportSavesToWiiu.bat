@@ -1,33 +1,7 @@
-@echo off
-setlocal EnableExtensions
-REM : ------------------------------------------------------------------
-REM : Main
-
     setlocal EnableDelayedExpansion
-
     color 4F
 
     set "THIS_SCRIPT=%~0"
-
-    REM : checking arguments
-    set /A "nbArgs=0"
-    :continue
-        if "%~1"=="" goto:end
-        set "args[%nbArgs%]="%~1""
-        set /A "nbArgs +=1"
-        shift
-        goto:continue
-    :end
-
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        if %nbArgs% EQU 0 exit 1
-        if %nbArgs% NEQ 0 exit /b 1
-    )
 
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
@@ -52,6 +26,26 @@ REM : Main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
+
+    REM : checking THIS_SCRIPT path
+    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! NEQ 0 (
+        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
+        pause
+        if %nbArgs% EQU 0 exit 1
+        if %nbArgs% NEQ 0 exit /b 1
+    )
 
     set "endTitleId=NONE"
     if %nbArgs% NEQ 0 goto:getArgsValue
@@ -179,8 +173,6 @@ REM : Main
     :getList
     REM : get title;endTitleId;source;dataFound from scan results
     set "gamesList="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!\gamesList.csv""
-    REM create a log file containing all your games titleId
-    set "localTid="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!\localTitleIds.log""
 
     set /A "nbGames=0"
 
@@ -286,8 +278,7 @@ REM : Main
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     set "TMP_DLSAVE_PATH="!BFW_WIIU_FOLDER:"=!\SaveMii""
-    if exist !TMP_DLSAVE_PATH! rmdir /Q /S !TMP_DLSAVE_PATH! > NUL 2>&1
-    mkdir !TMP_DLSAVE_PATH! > NUL 2>&1
+    if not exist !TMP_DLSAVE_PATH! mkdir !TMP_DLSAVE_PATH! > NUL 2>&1
 
     REM : check if sdcard is plugged
     set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
@@ -329,7 +320,7 @@ REM : Main
     echo Now you can stop FTPiiU server and launch SaveMii to
     echo import your save^(s^) for your game^(s^)
     echo.
-    set "gslog="!BFW_PATH:"=!\logs\ExportSaveMii_GAME_TITLE.log""
+    set "gslog="!TMP_DLSAVE_PATH:"=!\ExportSaveMii_GAME_TITLE.log""
     echo SaveMii slots to use for each games saved in files !gslog!
     
     if %nbArgs% EQU 0 pause
@@ -547,9 +538,8 @@ REM : functions
         set "userMlc01Folder="!TMP_DLSAVE_PATH:"=!\mlc01""
         rmdir /Q /S !userMlc01Folder! > NUL 2>&1
 
-        REM : log the slot used in a file under !TMP_DLSAVE_PATH!
-        set "gslog="!BFW_PATH:"=!\logs\ExportSaveMii_!GAME_TITLE!.log""
-        echo !DATE! ^: CEMU saves for !GAME_TITLE! were copied on your SD card for saveMii on the !cemuSlot!th slot >> !gslog!
+        REM : log the slot used in a file
+        echo !DATE! ^: !currentUser! CEMU saves for !GAME_TITLE! were copied on your SD card for saveMii on the !cemuSlot!th slot >> !gslog!
         
     goto:eof
     REM : ------------------------------------------------------------------

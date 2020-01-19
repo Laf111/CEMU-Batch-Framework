@@ -32,7 +32,8 @@ REM : main
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+        
+    set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders.log""
 
     REM : set current char codeset
     call:setCharSet
@@ -89,6 +90,7 @@ REM : main
 
         echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp!
         echo !SITENAME!
+        set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders_!SITENAME!.log""
     ) else (
         echo FTP transfert !USERDOMAIN! ^<-^> !wiiuIp! ^:
     )
@@ -105,14 +107,14 @@ REM : main
         echo ^> Replacing !LOCAL_FOLDER! content with !REMOTE_FOLDER! one
     ) else (
         REM : if remote mode, delete remote folder
-        set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
-        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "rm "!REMOTE_FOLDER!"" "exit"  > !ftplogFile! 2>&1
-        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir "!REMOTE_FOLDER!"" "exit"  > !ftplogFile! 2>&1
+        set "ftpmyLog="!BFW_PATH:"=!\logs\ftpCheck.log""
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "rm "!REMOTE_FOLDER!"" "exit"  > !ftpmyLog! 2>&1
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir "!REMOTE_FOLDER!"" "exit"  > !ftpmyLog! 2>&1
         echo ^> Replacing !REMOTE_FOLDER! content with !LOCAL_FOLDER! one
     )
 
     REM : run ftp transferts ^:
-    !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "exit"
+    !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "synchronize !SYNC_TYPE! "!LOCAL_FOLDER!" "!REMOTE_FOLDER!"" "option batch off" "exit"
     set "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 echo ERROR detected when transferring ^!
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

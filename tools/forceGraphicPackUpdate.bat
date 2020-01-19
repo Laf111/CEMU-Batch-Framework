@@ -114,7 +114,7 @@ REM : main
         set "GLFile="!BFW_LOGS:"=!\gamesLibrary.log""
 
         REM : flush GamesLibrary log
-        call:cleanGameLibFile "graphic packs version=graphicPacks"
+        if exist !GLFile! call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
 
     if !QUIET_MODE! EQU 0 (

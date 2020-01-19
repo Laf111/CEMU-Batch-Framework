@@ -6,8 +6,8 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-
     set "THIS_SCRIPT=%~0"
+    
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -23,12 +23,15 @@ REM : main
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
     set "BFW_PATH=!parentFolder:~0,-2!""
     for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
-
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+    
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
     set "importWiiuSaves="!BFW_TOOLS_PATH:"=!\importWiiuSaves.bat""
 
@@ -39,6 +42,7 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "rulesFiles="!BFW_PATH:"=!\logs\rulesFiles.log""
 
     REM : set current char codeset
     call:setCharSet
@@ -65,6 +69,9 @@ REM : main
     echo.
     echo WARNING ^: it is impossible to get the space left on your Wii-U
     echo storage device^. Be sure that there^'s sufficient space ^!
+    echo.
+    echo BE AWARE ^: transfert errors on update and DLC files can occur
+    echo on symlinks not handled by FTPiiU server^. Just ignore them^.
     echo.
     pause
     echo.
@@ -168,17 +175,17 @@ REM : main
 
     rmdir /Q /S !BFW_WIIUSCAN_FOLDER!
     goto:scanMyWii
-
+        
     REM : get title;endTitleId;source;dataFound from scan results
     :getList
+    
     set "wiiuScanFolder="!BFW_WIIUSCAN_FOLDER:"=!\!LAST_SCAN:"=!""
     set "gamesList="!wiiuScanFolder:"=!\gamesList.csv""
-    set "localTid="!wiiuScanFolder:"=!\localTitleIds.log""
 
     set "remoteSaves="!wiiuScanFolder:"=!\SRCSaves.log""
     set "remoteUpdates="!wiiuScanFolder:"=!\SRCUpdates.log""
     set "remoteDlc="!wiiuScanFolder:"=!\SRCDlc.log""
-
+    
     set /A "nbGames=0"
     
     cls
@@ -191,18 +198,12 @@ REM : main
         set "second=%%j"
         set "endTitleId=!second:'=!"
 
-        REM : check if the game is not also installed on your PC
-        set /A "gameAlreadyInstalled=0"
-        for /F "delims=~" %%n in ('type !localTid! ^| find "!endTitleId!"') do set /A "gameAlreadyInstalled=1"
+        set "titles[!nbGames!]=%%i"
+        set "endTitlesId[!nbGames!]=!endTitleId!"
+        set "titlesSrc[!nbGames!]=%%k"
+        echo !nbGames!	: %%i
 
-        if !gameAlreadyInstalled! EQU 0 (
-            set "titles[!nbGames!]=%%i"
-            set "endTitlesId[!nbGames!]=!endTitleId!"
-            set "titlesSrc[!nbGames!]=%%k"
-            echo !nbGames!	: %%i
-
-            set /A "nbGames+=1"
-        )
+        set /A "nbGames+=1"
     )
     echo =========================================================
 
@@ -226,75 +227,53 @@ REM : main
         exit 11
     )
     set /A "nbGamesSelected-=1"
-
-    echo ---------------------------------------------------------
-    set /A "dumpOnSD=0"
+    set "START_DATE="
+    
     set "rootTarget=!GAMES_FOLDER!"
-
-    choice /C sn /N /M "Dump game throught network (n) or on the SD card plugged on the wii-U (s)? : "
-    if !ERRORLEVEL! EQU 1 (
-        echo WARNING ^: BatchFw does not check available space on SD card
-        echo            Make sure that you have enought space left on your SD card
-        echo.
-        choice /C yc /N /M "Continue (y) or cancel (c)? : "
-        if !ERRORLEVEL! EQU 2 echo cancel by user & pause & exit 12
-
-        echo.
-        echo When done copy the CONTENT of each game^'s folder from the SD card
-        echo to the one created in your games library
-        echo.
-
-        set /A "dumpOnSD=1"
-        set "rootTarget="/sd/dumps""
-    )
-
-
-    REM : loop on the games selected
-    for /L %%i in (0,1,!nbGamesSelected!) do (
-
-        set "GAME_TITLE=!selectedTitles[%%i]!"
-        set "endTitleId=!selectedEndTitlesId[%%i]!"
-
-        REM : define local folders
-        if !dumpOnSD! EQU 0 (
-            set "targetFolder="!rootTarget:"=!\!GAME_TITLE!""
-            set "codeFolder="!targetFolder:"=!\code""
-            set "contentFolder="!targetFolder:"=!\content""
-            set "metaFolder="!targetFolder:"=!\meta""
-            set "updateFolder="!targetFolder:"=!\mlc01\usr\title\0050000\%endTitleId%""
-            set "dlcFolder="!targetFolder:"=!\mlc01\usr\title\0050000\%endTitleId%\aoc""
-        ) else (
-            REM : on sd card (linux path)
-            set "targetFolder="!rootTarget:"=!/!GAME_TITLE: =_!""
-            set "codeFolder="!targetFolder:"=!/code""
-            set "contentFolder="!targetFolder:"=!/content""
-            set "metaFolder="!targetFolder:"=!/meta""
-            set "updateFolder="!targetFolder:"=!/mlc01/usr/title/0050000/%endTitleId%""
-            set "dlcFolder="!targetFolder:"=!/mlc01/usr/title/0050000/%endTitleId%/aoc""
-        )
-
-        call:createRequieredFolders > NUL 2>&1
-
-        REM : dump the game by FTP
-        call:getGame !selectedtitlesSrc[%%i]!
-    )
-
+    set /A "nbPass=1"
+    call:loopOnGames
+    
+    cls
+    echo Verifying files to fix unexpected transfert errors^.^.^.
+    echo.
+    call:loopOnGames
+    
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
     
     echo =========================================================
-    echo All transferts ended^, done at !DATE!
+    echo All transferts ended^, done 
+    echo - start ^: !START_DATE! 
+    echo - end   ^: !DATE!
     echo ---------------------------------------------------------
-    echo.
-    echo Forcing a GFX pack update to add GFX packs for new games^.^.^.
-    echo.
+    
+    
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    set "pat="!BFW_GP_FOLDER:"=!\*_Resolution""
+    
+    if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
+    for /F "delims=~" %%p in ('dir /B /S !pat!') do echo "%%p\rules.txt" >> !rulesFiles!
+        
+    set /A "nbGameWithGfxPack=0"
+    call:checkGfxPacksAvailability
+    
+    if !nbGameWithGfxPack! LSS !nbGamesSelected! (
 
-    REM : forcing a GFX pack update to add GFX packs for new games
-    set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
-    call !gfxUpdate! -silent
+        echo No GFX pack were found for at least one game^.
+        echo.
+        choice /C yn /N /M "Do you want to force a GFX packs update ? (y,n):"
+        if !ERRORLEVEL! EQU 1 (
+        
+            REM : forcing a GFX pack update to add GFX packs for new games
+            set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
+            call !gfxUpdate! -silent
+        )
+    ) else (
+        echo GFX packs found for all games^, no need to update GFX packs
+    )
     echo =========================================================
-    echo !GAME_TITLE! dumped successfully
+    echo games dumped successfully
     pause
     
     exit 0
@@ -305,6 +284,47 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :checkGfxPacksAvailability
+        
+        for /F "delims=~" %%p in ('type !rulesFiles!') do (
+            
+            for /L %%i in (0,1,!nbGamesSelected!) do (
+            
+                set "titleId=!selectedEndTitlesId[%%i]!"
+                echo %%p | find /I "!titleId!" > NUL 2>&1 && (
+
+                    set /A "nbGameWithGfxPack=nbGameWithGfxPack+1"
+                    if !nbGameWithGfxPack! EQU !nbGamesSelected! goto:eof
+                )
+            )
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :loopOnGames
+    
+        REM : loop on the games selected
+        for /L %%i in (0,1,!nbGamesSelected!) do (
+
+            set "GAME_TITLE=!selectedTitles[%%i]!"
+            set "endTitleIdFolder=!selectedEndTitlesId[%%i]!"
+
+            REM : define local folders            
+            set "targetFolder="!rootTarget:"=!\!GAME_TITLE!""
+            set "codeFolder="!targetFolder:"=!\code""
+            set "contentFolder="!targetFolder:"=!\content""
+            set "metaFolder="!targetFolder:"=!\meta""
+            set "updateFolder="!targetFolder:"=!\mlc01\usr\title\00050000\!endTitleIdFolder!""
+            set "dlcFolder="!targetFolder:"=!\mlc01\usr\title\00050000\!endTitleIdFolder!\aoc""
+
+            call:createRequieredFolders > NUL 2>&1
+            REM : dump the game by FTP
+            call:getGame !selectedtitlesSrc[%%i]!
+        )
+        set /A "nbPass=nbPass+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : remove DOS forbiden character from a string
     :secureStringPathForDos
@@ -346,104 +366,100 @@ REM : functions
         REM : source (mlc or usb)
         set "src=%~1"
 
-        REM : get current date
-        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-        set "DATE=%ldt%"
-
-        echo ---------------------------------------------------------
-        echo !name! ^: starting at !DATE!
-        echo - dumping game
-
-        REM : Import the game (minimized + no wait)
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/code" "!name! (code)"
-
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/content" "!name! (content)"
-
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/%endTitleId%/meta" "!name! (meta)"
-
-        REM : search if this game has an update
-        set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
-        type !srcRemoteUpdate! | find "%endTitleId%" > NUL 2>&1 && (
-
-            echo - dumping update
-
-            REM : YES : import update in mlc01/usr/title (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000E/%endTitleId%" "!name! (update)"
-        )
-        REM : search if this game has a DLC
-        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
-        type !srcRemoteDlc! | find "%endTitleId%" > NUL 2>&1 && (
-
-            echo - dumping DLC
-
-            REM : YES : import dlc in mlc01/usr/title/0050000/%endTitleId%/aoc (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/%endTitleId%" "!name! (DLC)"
-        )
-
-        REM : search if this game has saves
-        set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
-        type !srcRemoteSaves! | find "%endTitleId%" > NUL 2>&1 && (
-            echo - dumping saves by ftp on !USERDOMAIN!
-            
-            REM : Import Wii-U saves
-            wscript /nologo !StartMinimized! !importWiiuSaves! !wiiuIp! !GAME_TITLE! %endTitleId% %src%
-        )
-
-        :waitingLoop
-        REM : wait all transfert end
-        timeout /T 1 > NUL 2>&1
-        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 & goto:waitingLoop
+        REM : get saves only the first pass
+        if !nbPass! GTR 1 goto:importGame
         
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         set "DATE=%ldt%"
+        if ["!START_DATE!"] == [""] set "START_DATE=%ldt%"
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo !GAME_TITLE! ^: starting at !DATE!
+        echo ---------------------------------------------------------
+        echo - dumping !GAME_TITLE! to !targetFolder!
 
-        echo end of transferts at !DATE!
+        :importGame
+        REM : Import the game (minimized + no wait)
+        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/code" "!name! (code)"
 
+        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/content" "!name! (content)"
+
+        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
+
+        if !nbPass! GTR 1 goto:waitingLoop
+        
+        echo Waiting end of all current transferts^.^.^.
+        echo.
+        :waitingLoop
+        REM : wait all transfert end
+        timeout /T 1 > NUL 2>&1
+        wmic process get Commandline | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop
+        
+        REM : search if this game has an update
+        set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
+        type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+
+            if !nbPass! EQU 1 echo - dumping update
+
+            REM : YES : import update in mlc01/usr/title (minimized + no wait)
+            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000E/!endTitleIdFolder!" "!name! (update)"
+        )
+        REM : search if this game has a DLC
+        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
+        type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+
+            if !nbPass! EQU 1 echo - dumping DLC
+
+            REM : YES : import dlc in mlc01/usr/title/00050000/!endTitleIdFolder!/aoc (minimized + no wait)
+            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/!endTitleIdFolder!" "!name! (DLC)"
+        )
+                
+        REM : get saves only the first pass
+        if !nbPass! GTR 1 goto:eof
+        
+        echo Waiting end of all current transferts^.^.^.
+        echo.
+        :waitingLoop2
+        REM : wait all transfert end
+        timeout /T 1 > NUL 2>&1
+        wmic process get Commandline | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop2
+        
+        REM : search if this game has saves
+        set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
+        type !srcRemoteSaves! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+            echo - dumping saves
+            REM : TODO ask for importing saves ?  for all user ? (batch mode)
+            REM : yes => minimized silent
+            REM : no => maximized verbose
+            
+            REM : Import Wii-U saves
+            wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src!
+        )
+                
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "DATE=%ldt%"
+
+        echo !GAME_TITLE! ^: ending at !DATE!
     goto:eof
 
     REM : ------------------------------------------------------------------
     :createRequieredFolders
 
-        REM : in all case (using SD card or not)
+        REM : in all case
         set "gameFolder="!GAMES_FOLDER:"=!\!GAME_TITLE!""
         if not exist !gameFolder! mkdir !gameFolder! > NUL 2>&1
         set "cemuSaveFolder="!gameFolder:"=!\Cemu\inGameSaves""
         if not exist !cemuSaveFolder! mkdir !cemuSaveFolder! > NUL 2>&1
 
-        if !dumpOnSD! EQU 0 (
-            if not exist !codeFolder! mkdir !codeFolder! > NUL 2>&1
-            if not exist !contentFolder! mkdir !contentFolder! > NUL 2>&1
-            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
-            REM : updateFolder is created with dlc one
-            if not exist !dlcFolder! mkdir !dlcFolder! > NUL 2>&1
-            goto:eof
-        )
-
-        REM : create remote folders on SD card
-        call:createRemoteFolder !rootTarget! > NUL 2>&1
-        call:createRemoteFolder !targetFolder! > NUL 2>&1
-        call:createRemoteFolder !codeFolder! > NUL 2>&1
-        call:createRemoteFolder !metaFolder! > NUL 2>&1
-        call:createRemoteFolder !dlcFolder! > NUL 2>&1
-
+        if not exist !codeFolder! mkdir !codeFolder! > NUL 2>&1
+        if not exist !contentFolder! mkdir !contentFolder! > NUL 2>&1
+        if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
+        REM : updateFolder is created with dlc one
+        if not exist !dlcFolder! mkdir !dlcFolder! > NUL 2>&1
     goto:eof
-    
-    REM : ------------------------------------------------------------------
-    :createRemoteFolder
-
-        set "remoteFolder=%~1"
-        set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
-
-        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls !remoteFolder!" "exit" > !ftplogFile! 2>&1
-        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir !remoteFolder!" "exit"  > !ftplogFile! 2>&1
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
 
     :checkPathForDos

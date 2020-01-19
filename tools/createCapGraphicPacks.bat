@@ -423,11 +423,11 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
 
         echo version = 3 >> !bfwRulesFile!
-        echo # >> !bfwRulesFile!
+        echo. >> !bfwRulesFile!
         echo [Preset] >> !bfwRulesFile!
         echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
         echo $FPS = !newNativeFps! >> !bfwRulesFile!
-        echo # >> !bfwRulesFile!
+        echo. >> !bfwRulesFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -443,7 +443,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
             echo [Preset] >> !bfwRulesFile!
             echo name = !desc! >> !bfwRulesFile!
             echo $FPS = !fps! >> !bfwRulesFile!
-            echo # >> !bfwRulesFile!
+            echo. >> !bfwRulesFile!
             goto:eof
         )
 
@@ -502,7 +502,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
         echo name = "%description:"=%" >> !rulesFileV2!
         echo version = 2 >> !rulesFileV2!
-        echo # >> !rulesFileV2!
+        echo. >> !rulesFileV2!
 
         echo # Cap FPS to %displayedValue% Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV2!
         echo [Control] >> !rulesFileV2!

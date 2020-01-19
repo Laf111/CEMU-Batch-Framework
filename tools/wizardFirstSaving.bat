@@ -234,7 +234,8 @@ REM : main
     if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
 
     :checkProfile
-
+    set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
+    
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
 
@@ -244,7 +245,7 @@ REM : main
 
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-    set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
+
 
     set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
 

@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color 4F
+    color F0
 
     set "THIS_SCRIPT=%~0"
 
@@ -37,248 +37,121 @@ REM : main
     REM : check if exist external Graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
-    if %nbArgs% GTR 6 (
+    if %nbArgs% NEQ 7 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" nativeWidth nativeHeight overwriteWidth overwriteHeight gameName desc titleIdList
         echo given {%*}
         exit /b 99
     )
-    if %nbArgs% LSS 5 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" overwriteWidth overwriteHeight description gameName ratio*
-        echo given {%*}
-        exit /b 98
-    )
     REM : get and check BFW_GP_FOLDER
-    set "nativeHeight=!args[0]!"
-    set "overwriteWidth=!args[1]!"
-    set "overwriteHeight=!args[2]!"
-    set "description=!args[3]!"
+    set /A "nativeWidth=!args[0]!"
+    set /A "nativeHeight=!args[1]!"    
+    set /A "overwriteWidth=!args[2]!"
+    set /A "overwriteHeight=!args[3]!"
     set "gameName=!args[4]!"
-    if %nbArgs% EQU 6 set "ratio=!args[5]!"
-
+    set "desc=!args[5]!"
+    set "titleIdList=!args[6]!"
+    
     set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
     if not exist !bfwgpv2! exit 10
 
-    set "gp="!bfwgpv2:"=!\_BatchFW %description%""
+    set "sd=!desc:(=p!"
+    set "sd=!sd:/=!"
+    set "sd=!sd:)=!"
+    set "sd=!sd: =!"
+    set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!!sd!""
+    
+    echo Creating !gp!
+    
     if exist !gp! (
-        echo ^^! _BatchFW %description% already exists, skipped ^^!
+        echo ^^! !gp! already exists, skipped ^^!
         exit 1
     )
     if not exist !gp! mkdir !gp! > NUL 2>&1
 
-    set "rulesFileV2="!gp:"=!\rules.txt""
+    set "rulesFile="!gp:"=!\rules.txt""
 
-    echo [Definition] > !rulesFileV2!
-    echo titleIds = !titleIdList! >> !rulesFileV2!
+    echo [Definition] > !rulesFile!
+    echo titleIds = !titleIdList! >> !rulesFile!
 
-    echo name = "BatchFW %overwriteWidth%x%overwriteHeight% %ratio%" >> !rulesFileV2!
-    echo version = 2 >> !rulesFileV2!
-    echo # >> !rulesFileV2!
+    set "name="!gameName! !overwriteWidth!x!overwriteHeight! !desc! created by BatchFw""
+    if !overwriteWidth! EQU !nativeWidth! if !overwriteHeight! EQU !nativeHeight! (
+        set "name="!gameName! !overwriteWidth!x!overwriteHeight! !desc! ^(native resolution^) created by BatchFw"
+    )
+    echo name = !name! >> !rulesFile!
+    
+    echo version = 2 >> !rulesFile!
+    echo. >> !rulesFile!
 
 
     REM : res ratios instructions ------------------------------------------------------
-    set /A "resRatioV2=1"
+    set /A "resRatio=1"
 
-    :beginLoopResV2
+    REM : loop on multiples of !nativeHeight!
+    :beginLoopRes
 
-    set /A "resultV2=0"
-    call:divfloat %nativeHeight% !resRatioV2! 1 resultV2
+    set /A "r=!nativeHeight!%%!resRatio!"
+    REM : check if result is an integer
+    if !r! NEQ 0 set /A "resRatio+=1" & goto:beginLoopRes
 
-    REM : check if targetHeight is an integer
-    for /F "tokens=1-2 delims=." %%a in ("!resultV2!") do if not ["%%b"] == ["0"] set /A "resRatioV2+=1" && goto:beginLoopResV2
-    set "targetHeightV2=!resultV2:.0=!"
+    REM : compute targetHeight
+    set /A "targetHeight=!nativeHeight!/!resRatio!"
+    
+    REM : compute targetWidth
+    set /A "targetWidth=!nativeWidth!/!resRatio!"
+ 
+    REM : force even integer
+    set /A "isEven=!targetWidth!%%2"
+    if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
+    
+    REM : compute half targetHeight
+    set /A "halfOverwriteHeight=!overwriteHeight!/!resRatio!"
+    
+    REM : compute half targetWidth
+    set /A "halfOverwriteWidth=!overwriteWidth!/!resRatio!"
+ 
+    REM : force even integer
+    set /A "isEven=!halfOverwriteWidth!%%2"
+    if !isEven! NEQ 0 set /A "targetWidth=!halfOverwriteWidth!+1"
+    
+    echo Creating Res/!resRatio! filter for !targetWidth!x!targetHeight! !desc!
+    
+    REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
+    call:writeFilters >> !rulesFile!
 
+    if !targetHeight! LEQ 8 goto:formatrUtf8
+    if !resRatio! GEQ 12 goto:formatrUtf8
+    set /A "resRatio+=1"
+    goto:beginLoopRes
 
-    REM compute targetWidth (16/9 = 1.7777777)
-    call:mulfloat "!targetHeightV2!.000" "1.777" 3 targetWidthV2
-
-
-    call:divfloat2int "%overwriteWidth%.0" "!resRatioV2!.0" 1 widthV2
-    call:divfloat2int "%overwriteHeight%.0" "!resRatioV2!.0" 1 heightV2
-
-
-    REM 1^/%resRatioV2% res : %targetWidth%x%targetHeight%
-    call:writeV2Filters >> !rulesFileV2!
-
-
-    if !heightV2! LEQ 8 goto:formatrV2Utf8
-    if !resRatioV2! GEQ 9 goto:formatrV2Utf8
-    set /A "resRatioV2+=1"
-    goto:beginLoopResV2
-
-    :formatrV2Utf8
+    :formatrUtf8
     REM : force UTF8 format
-    set "utf8v2="!gp:"=!\rules.bfw_tmp""
-    copy /Y !rulesFileV2! !utf8v2! > NUL 2>&1
-    type !utf8v2! > !rulesFileV2!
-    del /F !utf8v2! > NUL 2>&1
-
+    set "utf8="!gp:"=!\rules.bfw_tmp""
+    copy /Y !rulesFile! !utf8! > NUL 2>&1
+    type !utf8! > !rulesFile!
+    del /F !utf8! > NUL 2>&1
+    
     exit 0
     goto:eof
 
-    REM : ------------------------------------------------------------------
+REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+    
+    :writeFilters
 
-    :writeV2Filters
-
-        echo # 1/!resRatioV2! Res
+        echo # 1/!resRatio! Res
         echo [TextureRedefine]
-        echo width = !targetWidthV2!
-        echo height = !targetHeightV2!
+        echo width = !targetWidth!
+        echo height = !targetHeight!
         echo tileModesExcluded = 0x001 # For Video Playback
         echo formatsExcluded = 0x431
-        echo overwriteWidth = !widthV2!
-        echo overwriteHeight = !heightV2!
+        echo overwriteWidth = !halfOverwriteWidth!
+        echo overwriteHeight = !halfOverwriteHeight!
         echo #
         echo #
 
-    goto:eof
-
-    REM : function for multiplying integers
-    :mulfloat
-
-        REM : get a
-        set "numA=%~1"
-        REM : get b
-        set "numB=%~2"
-        REM : get nbDecimals
-        set /A "decimals=%~3"
-
-        set /A "one=1"
-        set /A "decimalsP1=decimals+1"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numA% does not have %decimals% decimals
-            pause
-            exit /b 1
-        )
-
-        if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numB% does not have %decimals% decimals
-            pause
-            exit /b 2
-        )
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : a * b
-        if %fpB% GEQ %fpA% set /A "mul=fpA*fpB/one"
-        if %fpA% GEQ %fpB% set /A "mul=fpB*fpA/one"
-
-        set /A "result=!mul:~0,-%decimals%!"
-        REM : floor
-        set /A "result=%result%+1"
-
-        REM : output
-        set "%4=%result%"
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :strLen
-        set /A "len=0"
-        :strLen_Loop
-           if not ["!%1:~%len%!"] == [""] set /A len+=1 & goto:strLen_Loop
-            set %2=%len%
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function for dividing integers
-    :divfloat
-
-        REM : get a
-        set "numA=%~1"
-        REM : get b
-        set "numB=%~2"
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : get nbDecimals
-        set /A "decimals=%~3"
-        set /A "scale=%decimals%"
-
-        set /A "one=1"
-        if %decimals% EQU 1 (
-            set /A "one=10"
-            goto:treatment
-        )
-        call:strLen fpA strLenA
-        call:strLen fpB strLenB
-
-        set /A "nlA=!strLenA!"
-        set /A "nlB=!strLenB!"
-
-        set /A "max=%nlA%"
-        if %nlB% GTR %nlA% set /A "max=%nlB%"
-        set /A "decimals=9-%max%"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        :treatment
-        REM : a / b
-        set /A div=fpA*one/fpB
-
-        set "intPart="!div:~0,-%decimals%!""
-        if [%intPart%] == [""] set "intPart=0"
-        set "intPart=%intPart:"=%"
-
-        set "decPart=!div:~-%decimals%!"
-
-        set "result=%intPart%.%decPart%"
-
-        if %scale% EQU 0 set /A "result=%intPart%"
-
-        REM : output
-        set "%4=%result%"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    REM : function for dividing integers returning an int
-    :divfloat2int
-
-        REM : get a
-        set "numA=%~1"
-        REM : get b
-        set "numB=%~2"
-        REM : get nbDecimals
-        set /A "decimals=%~3"
-
-        set /A "one=1"
-        set /A "decimalsP1=decimals+1"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numA% does not have %decimals% decimals
-            pause
-            exit /b 1
-        )
-
-        if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numB% does not have %decimals% decimals
-            pause
-            exit /b 2
-        )
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : a / b
-        set /A div=fpA*one/fpB
-
-        set /A "result=!div:~0,-%decimals%!"
-
-        REM : output
-        set "%4=%result%"
-
-        exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
 

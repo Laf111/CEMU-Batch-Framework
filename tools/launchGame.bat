@@ -408,10 +408,8 @@ REM : main
     REM : get and check ICO_FILE_PATH
     set "ICO_PATH=!args[3]!"
     if not exist !ICO_PATH! (
-        echo ERROR ^: game's icon file path !ICO_PATH! does not exist ^! >> !batchFwLog!
+        echo WARNING ^: game's icon file path !ICO_PATH! does not exist ^! >> !batchFwLog!
         timeout /t 8 > NUL 2>&1
-        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
-        exit 4
     )
 
     REM : get and check MLC01_FOLDER_PATH
@@ -725,7 +723,7 @@ REM : main
         echo current display drivers version ^: [%GPU_DRIVERS_VERSION%] >> !batchFwLog!
 
         REM : log to host log file
-        set "msg="Detected %GPU_VENDOR% drivers version upgrade from %gpuDriversVersionRead% to =%GPU_DRIVERS_VERSION%""
+        set "msg="Detected %GPU_VENDOR% drivers version upgrade from %gpuDriversVersionRead% to %GPU_DRIVERS_VERSION%""
         call:log2HostFile !msg!
         set "driversUpdateFlag=1"
     )
