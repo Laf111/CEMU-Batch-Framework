@@ -354,46 +354,57 @@ REM : main
     echo ---------------------------------------------------------
 
     :askRatioAgain
-    call:getUserInput "Enter your choice ?: " "1,2,3,4,5,6,7,c" ANSWER
-    if !ANSWER! EQU 2 (
-        set "msg="DESIRED_ASPECT_RATIO=169""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 3 (
-        set "msg="DESIRED_ASPECT_RATIO=1610""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 4 (
-        set "msg="DESIRED_ASPECT_RATIO=219""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 5 (
-        set "msg="DESIRED_ASPECT_RATIO=329""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 6 (
-        set "msg="DESIRED_ASPECT_RATIO=43""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 7 (
-        set "msg="DESIRED_ASPECT_RATIO=489""
-        call:log2HostFile !msg!
-    )
-    if !ANSWER! EQU 8 goto:askScreenMode
+    set /P  "ANSWER=Enter your choice: "
+    if not ["!ANSWER!"] == ["c"] (
 
-    if !ANSWER! EQU 1 (
-        :getcustomAr
-        set /P  "width=Please enter width  : "
-        set /P "height=Please enter height : "
-        echo.
+        if ["!ANSWER!"] == ["2"] (
+            set "msg="DESIRED_ASPECT_RATIO=169""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        if ["!ANSWER!"] == ["3"] (
+            set "msg="DESIRED_ASPECT_RATIO=1610""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        if ["!ANSWER!"] == ["4"] (
+            set "msg="DESIRED_ASPECT_RATIO=219""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        if ["!ANSWER!"] == ["5"] (
+            set "msg="DESIRED_ASPECT_RATIO=329""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        if ["!ANSWER!"] == ["6"] (
+            set "msg="DESIRED_ASPECT_RATIO=43""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        if ["!ANSWER!"] == ["7"] (
+            set "msg="DESIRED_ASPECT_RATIO=489""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        
+        if ["!ANSWER!"] == ["1"] (
+            :getcustomAr
+            set /P  "width=Please enter width  : "
+            set /P "height=Please enter height : "
+            echo.
 
-        choice /C ny /N /M "Please confirm !width!/!height! as aspect ratio ? (y,n): "
-        if !ERRORLEVEL! EQU 1 goto:getcustomAr
+            choice /C ny /N /M "Please confirm !width!/!height! as aspect ratio ? (y,n): "
+            if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
-        set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
-        call:log2HostFile !msg!
+            set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
+            call:log2HostFile !msg!
+            goto:askScreenMode
+        )
+        goto:askRatioAgain
+    ) else (
+        goto:askScreenMode
     )
-    
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
