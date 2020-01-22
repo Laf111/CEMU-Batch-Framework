@@ -338,6 +338,13 @@ REM : main
     REM : check the file size
     for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
 
+    REM : clean BFW_LOGS
+    pushd !BFW_LOGS!
+    for /F "delims=~" %%i in ('dir /B /S /A:D') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:L') do rmdir /Q /S "%%i" > NUL 2>&1
+    REM : cd to GAMES_FOLDER
+    pushd !GAMES_FOLDER!
+    
     REM : create a link to GAME_FOLDER_PATH in log folder
     set "TMP_GAME_FOLDER_PATH="!BFW_LOGS:"=!\!GAME_TITLE!""
 

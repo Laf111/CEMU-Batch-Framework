@@ -214,10 +214,7 @@ REM : main
     cls
     :begin
 
-    REM : height step
-    set /A "dh=180"
-    REM : first height of range
-    set /A "h=5760"
+
     REM : windowing scale factor
     set "wsf=1.07638888888889"
 
@@ -234,10 +231,12 @@ REM : main
     REM : waiting all children processes ending
     call:waitChildrenProcessesEnd
 
+    set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
+    if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
+
     if %nbArgs% EQU 0 endlocal && pause
     exit /b 0
 
-    exit /b 0
     goto:eof
 
     REM : ------------------------------------------------------------------
@@ -311,7 +310,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "fnr.exe" | find /I "_BatchFW_Graphic_Packs" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find "cmd.exe" | find  /I "createV2GraphicPacks" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
@@ -689,28 +688,17 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM : create 16/9 fullscreen graphic packs
         call:createGfxPacks "16-9"
 
-        REM : waiting all children processes ending
-        call:waitChildrenProcessesEnd
-
         for %%a in (!ARLIST!) do (
+            REM : waiting all children processes ending
+            call:waitChildrenProcessesEnd
             if ["%%a"] == ["1610"] call:createGfxPacks "16-10"
-            REM : waiting all children processes ending
-            call:waitChildrenProcessesEnd
             if ["%%a"] == ["219"]  call:createGfxPacks "21-9"
-            REM : waiting all children processes ending
-            call:waitChildrenProcessesEnd
             if ["%%a"] == ["329"]  call:createGfxPacks "32-9"
-            REM : waiting all children processes ending
-            call:waitChildrenProcessesEnd
             if ["%%a"] == ["43"]   call:createGfxPacks "4-3"
-            REM : waiting all children processes ending
-            call:waitChildrenProcessesEnd
             if ["%%a"] == ["489"]  call:createGfxPacks "48-9"
-            REM : waiting all children processes ending
-            call:waitChildrenProcessesEnd
             REM : treating user defined aspect ratio W-H
             echo "%%a" | find "-" > NUL 2>&1 && call:createGfxPacks "%%a"
-            call:waitChildrenProcessesEnd
+            if not ["%%a"] == ["169"] call:waitChildrenProcessesEnd
         )
 
         call:finalizeResGraphicPack

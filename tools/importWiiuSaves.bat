@@ -249,12 +249,13 @@ REM : main
         call:updateTitle %%i
     )
 
+    set "userSavesToImport=select"
     goto:treatments
 
     :getArgsValue
-    if %nbArgs% NEQ 4 (
+    if %nbArgs% NEQ 5 (
         echo ERROR on arguments passed ^(%nbArgs%^)
-        echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE endTitleId src
+        echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE endTitleId src userSavesToImport
         echo given {%*}
         pause
         if %nbArgs% EQU 0 exit 9
@@ -279,6 +280,13 @@ REM : main
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
     )
+    REM : user to import saves during dump.
+    REM : values
+    REM : - none => skip import
+    REM : - select => choose manually (value initialized when there is no args given)
+    REM : - all => import all existing saves for all users
+    REM : - !user! => import all existing saves for !user!
+    set "userSavesToImport=!args[4]!"
 
     set "selectedTitles[0]=!GAME_TITLE!"
     set "selectedEndTitlesId[0]=!endTitleId!"
@@ -433,6 +441,54 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :importSavesForCurrentUser
+
+        echo !userSavesToImport! | find /V "all" > NUL 2>&1 && (
+
+            echo !userSavesToImport! | find /V "select" > NUL 2>&1 && (
+
+            choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
+            if !ERRORLEVEL! EQU 2 goto:eof
+            )
+
+            set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
+            if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
+
+            REM : for the current user :
+            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+
+            REM : backup the CEMU save
+            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
+            if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
+
+            REM : delete the user's save
+            if exist !rarFile! del /F !rarFile! > NUL 2>&1
+
+            cd !folder!
+            REM : add the user's folder content, rename folder to 80000001 in the archive file
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+
+            cd ..
+            REM : common folder
+            if exist common (
+                cd common
+                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+                cd ..
+            )
+            REM : cd to meta
+            cd !localFolderMeta!
+
+            REM : overwrite !saveInfo!
+            echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
+
+            REM : add the meta folder content
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+
+            echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :createUsersSaves
 
@@ -471,44 +527,8 @@ REM : functions
                 echo WARNING ^: no Wii-U saves found for !currentUser!
                 goto:eof
             )
-            choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
-            if !ERRORLEVEL! EQU 1 (
-
-                set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-                if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
-
-                REM : for the current user :
-                set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
-
-                REM : backup the CEMU save
-                set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
-                if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
-
-                REM : delete the user's save
-                if exist !rarFile! del /F !rarFile! > NUL 2>&1
-
-                cd !folder!
-                REM : add the user's folder content, rename folder to 80000001 in the archive file
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul  !rarFile! * > NUL 2>&1
-
-                cd ..
-                REM : common folder
-                if exist common (
-                    cd common
-                    !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul  !rarFile! * > NUL 2>&1
-                    cd ..
-                )
-                REM : cd to meta
-                cd !localFolderMeta!
-
-                REM : overwrite !saveInfo!
-                echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
-
-                REM : add the meta folder content
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
-
-                echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
-            )
+            REM : check if saves need to be imported
+            echo !userSavesToImport! | find /V "none" > NUL 2>&1 && call:importSavesForCurrentUser
         )
     goto:eof
     REM : ------------------------------------------------------------------

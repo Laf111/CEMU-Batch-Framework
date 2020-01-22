@@ -54,9 +54,6 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    REM : flag to create leagcy packs
-    set "createLegacyPacks=true"
-
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -71,6 +68,7 @@ REM : main
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
+    echo Starting Date ^: !DATE!
 
     echo ========================================================= > !myLog!
 
@@ -168,15 +166,21 @@ REM : main
     echo lastInstalledVersion ^: !lastInstalledVersion! >> !myLog!
     echo newVersion  ^: !newVersion! >> !myLog!
 
-    set "codeFullPath="!GAME_FOLDER_PATH:"=!"\code""
+    set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
     if exist !fnrLogUggp! del /F !fnrLogUggp!
     echo titleId^: %titleId% >> !myLog!
 
-    REM : launching the search
+    if ["!lastInstalledVersion!"] == ["!newVersion!"] (
+        echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
+        exit 10
+
+    )
+    REM : launching the search in all gfx pack folder (V2 and up)
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -246,22 +250,15 @@ REM : main
 
     if not ["!gfxType!"] == ["2"] call:importMods
 
-    REM : TODO limit to only the current host
-    REM : search in all Host_*.log
-    set "pat="!BFW_PATH:"=!\logs\Host_*.log""
-    for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
-        set "currentLogFile="%%i""
-
-        REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-
-        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
-            REM : add to the list if not already present
-            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
-            if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
-        )
-        REM : get the SCREEN_MODE
-        for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
+    REM : get DESIRED_ASPECT_RATIO and SCREEN_MODE
+    for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+        REM : add to the list if not already present
+        if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+        if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
     )
+    REM : get the SCREEN_MODE
+    for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
+
     if ["!ARLIST!"] == [""] goto:checkPackLinks
 
     echo ARLIST=!ARLIST! >> !myLog!
@@ -292,9 +289,15 @@ REM : main
     exit 80
 
     :endMain
+    REM : get current date
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "DATE=%ldt%"
+    echo Ending Date ^: !DATE!
 
     echo --------------------------------------------------------- >> !myLog!
     echo done >> !myLog!
+
     exit 0
 
     goto:eof
@@ -558,36 +561,8 @@ REM : functions
            set "nativeFps=%%k"
         )
 
-        REM : check if a gp exist for this game (for the last version of GFX pack)
-        for /F "delims=~" %%i in ('dir /b /a:d !BFW_GP_FOLDER! ^| find /V "_Performance_" ^| find /I /V "_Resolution_" ^| find /I "_Resolution" 2^>NUL') do (
-
-            set "gpFolder="!BFW_GP_FOLDER:"=!\%%i""
-            set "rulesFile="!gpFolder:"=!\rules.txt""
-
-            REM : launching the search
-            if exist !rulesFile! for /F "tokens=2 delims=~=" %%i in ('type !rulesFile! ^| find /I "%titleId:~3%" 2^>NUL') do (
-                echo rules^.txt = !rulesFile! >> !myLog!
-                if ["!lastInstalledVersion!"] == ["!newVersion!"] goto:eof
-                call:updateGPFolder
-                pushd !GAMES_FOLDER!
-                goto:eof
-            )
-        )
-
+        call:updateGPFolder
         pushd !GAMES_FOLDER!
-
-        echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
-        REM : Create game's graphic pack
-        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId%
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId%
-
-        REM : create FPS cap graphic packs
-        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -603,45 +578,47 @@ REM : functions
         set "gpfound=0"
         set "LastVersionfound=0"
         set "gameName=NONE"
-        set "gpLastVersionRes="NONE""
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:"') do (
+        REM : check if a gfx pack with version > 2 exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
             set "gpfound=1"
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo !rulesFile! | find "_%resX2%p" | find /I /V "_BatchFW " > NUL 2>&1 && (
-                REM : V2 graphic pack
-                set "gameName=%%i"
-                set "gameName=!gameName:rules=!"
-                set "gameName=!gameName:\_graphicPacksV2=!"
-                set "gameName=!gameName:\=!"
-                set "gameName=!gameName:_%resX2%p=!"
-            )
+            REM : graphic pack
+            set "LastVersionfound=1"
 
-            set "str=!LastVersion!"
-            for /F "delims=~= tokens=2" %%j in ('type !rulesFile! ^| find /I "version" ^| find /I "="') do set "str=%%j"
-            set "str=!str: =!"
-            set /A "vGfxPack=!str!"
+            echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
 
-            if !vGfxPack! GTR 2 (
-                REM : graphic pack
-                set "LastVersionfound=1"
-
-                echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
-                REM : if a gp of BatchFW was found goto:eof (no need to be completed ni createExtra)
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && type !rulesFile! | find /I "BatchFW" > NUL 2>&1 && goto:eof
-                echo !rulesFile! | find /I /V "_Resolution_" | find /V "_Performance_" | find /I "_Resolution" > NUL 2>&1 && set "gpLastVersionRes=!rulesFile:\rules.txt=!"
-            )
-        )
-
-        REM : if a graphic pack was found get the game's name from it
-        if not [!gpLastVersionRes!] == ["NONE"] (
+            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            REM : get the game's name from it
             for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
             set "gameName=!str:_Resolution=!"
+
+            goto:handleGfxPacks
         )
 
+        REM : No new gfx pack found but is a V2 gfx pack exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| findstr /r "%resX2%p\\rules.txt"') do (
+
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            REM : V2 graphic pack
+            set "str=%%i"
+            set "str=!str:rules=!"
+            set "str=!str:\_graphicPacksV2=!"
+            set "str=!str:\=!"
+            set "gameName=!str:_%resX2%p=!"
+
+            goto:handleGfxPacks
+        )
+
+        REM : No GFX pack was found
+
+
+        :handleGfxPacks
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
 
@@ -652,16 +629,15 @@ REM : functions
         echo titleId=!titleId! >> !myLog!
         echo gpfound=!gpfound! >> !myLog!
         echo LastVersionfound=!LastVersionfound! >> !myLog!
-        echo createLegacyPacks=%createLegacyPacks% >> !myLog!
 
-        if %gpfound% EQU 1 if %LastVersionfound% EQU 1 goto:createExtraGP
+        if !gpfound! EQU 1 if %LastVersionfound% EQU 1 goto:createExtraGP
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !>> !myLog!
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId%
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId%
 
@@ -681,9 +657,9 @@ REM : functions
         if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !createLegacyPacks! !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
 
         :createCapGP
 
@@ -775,7 +751,6 @@ REM : functions
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
-            pause
             exit /b 9
         )
         REM : set char code set, output to host log file

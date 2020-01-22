@@ -91,7 +91,9 @@ REM : main
     echo ========================================================= >> !batchFwLog!
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
+    if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder!
+    del /F "!BFW_PATH:"=!\logs\fnr_*"
+    mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : set current char codeset
     call:setCharSet
@@ -790,7 +792,7 @@ REM : main
     if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
         call:setProgressBar 82 90 "pre processing" "waiting all child processes end"
     ) else (
-        call:setProgressBar 82 96 "pre processing" "waiting all child processes end"
+        call:setProgressBar 82 94 "pre processing" "waiting all child processes end"
         goto:launchCemu
     )
 
@@ -1404,11 +1406,20 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             if !disp! EQU 0 type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
                 echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
                 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
-                set /A "disp=1"
+                set /A "disp=disp+1"
+            )
+            if !disp! GTR 200 (
+                if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
+                    call:setProgressBar 94 96 "pre processing" "waiting for GFX packs processing end"
+                )
             )
             goto:waitingLoopProcesses
         )
 
+        if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
+            call:setProgressBar 94 96 "pre processing" "waiting all child processes end"
+        )
+        
         REM : remove trace
         del /F !logFileTmp! > NUL 2>&1
 
@@ -2313,8 +2324,8 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-            for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
-            if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+            for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
+            if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
         )
         if [!defaultBrowser!] == ["NOT_FOUND"] goto:eof
 

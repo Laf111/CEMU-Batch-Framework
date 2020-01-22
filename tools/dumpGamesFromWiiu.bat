@@ -226,6 +226,17 @@ REM : main
         pause
         exit 11
     )
+
+    REM : get BatchFw users list
+    set "USERSARRAY="
+    set /A "nbUsers=0"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        set "USERSARRAY[!nbUsers!]=%%i"
+        set /A "nbUsers+=1"
+    )
+    REM : ask for saves import mode
+    call:getUser userSavesToImport
+
     set /A "nbGamesSelected-=1"
     set "START_DATE="
 
@@ -284,6 +295,45 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :getUser
+        REM : init to none
+        set "%1=none"
+
+        :askSavesMode
+        echo.
+        echo You can choose a user for which all saves found will be imported^.
+        echo Or you can choose to select which user saves to import for each game^.
+        echo.
+        echo Note that it will interrupt each game^'s download^, to ask your selection ^!
+        echo.
+        echo So if you plan to download more than one game^, you'd better choose
+        echo to download all saves found for all users OR no saves at all^.
+        echo You still can use the importWiiuSaves script to do it afterward.
+        echo.
+
+        choice /C yn /N /M "Do you want to import Wii-U saves during the process (y, n)? : "
+        if !ERRORLEVEL! EQU 2 goto:eof
+
+        choice /C yn /N /M "For all users (y, n)? : "
+        if !ERRORLEVEL! EQU 1 set "%1=all" & goto:eof
+
+        choice /C yn /N /M "Do you want to choose a user now  (y, n = select users during process)? : "
+        if !ERRORLEVEL! EQU 2 set "%1=select" & goto:eof
+
+        for /L %%i in (0,1,!nbUsers!) do echo %%i ^: !USERSARRAY[%%i]!
+
+        echo.
+        :askUser
+        set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
+
+        echo %num% | finstr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+
+        if %num% LSS 0 goto:askUser
+        if %num% GTR %nbUsers% goto:askUser
+
+        set "%1=!USERSARRAY[%num%]!"
+    goto:eof
 
     :checkGfxPacksAvailability
 
@@ -349,14 +399,16 @@ REM : functions
         echo Dump ^:
         echo.
         for %%l in (!listGamesSelected!) do (
-            if %%l GEQ !nbGames! exit /b 1
-            echo - !titles[%%l]!
-            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
-            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
-            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+            echo %%l | finstr /R "^[0-9]*.$" > NUL 2>&1 && (
+                if %%l GEQ !nbGames! exit /b 1
+                echo - !titles[%%l]!
+                set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
+                set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
+                set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
 
-            set /A "nbGamesSelected+=1"
+                set /A "nbGamesSelected+=1"
             )
+        )
         exit /b 0
 
     goto:eof
@@ -429,12 +481,9 @@ REM : functions
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "!endTitleIdFolder!" > NUL 2>&1 && (
             echo - dumping saves
-            REM : TODO ask for importing saves ?  for all user ? (batch mode)
-            REM : yes => minimized silent
-            REM : no => maximized verbose
 
             REM : Import Wii-U saves
-            wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src!
+            wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
         )
 
         REM : get current date

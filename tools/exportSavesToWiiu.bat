@@ -166,8 +166,8 @@
 
         REM : get Title Id from meta.xml
         set "titleLine="NONE""
-        for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-        for /F "delims=<" %%i in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%i >> !localTid!
+        for /F "tokens=1-2 delims=>" %%j in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%k""
+        for /F "delims=<" %%j in (!titleLine!) do set /A "NB_GAMES+=1" && echo %%j >> !localTid!
     )
 
     :getList
@@ -392,6 +392,7 @@ REM : functions
         set "list="%~1""
 
         for %%l in (!list!) do (
+            echo %%l | finstr /RV "^[0-9]*.$" > NUL 2>&1 && exit /b 1
             if %%l GEQ %nbGames% exit /b 2
         )
         exit /b 0

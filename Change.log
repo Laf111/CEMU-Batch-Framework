@@ -1,3 +1,15 @@
+22/01/2020 V15-4 :
+- add : handle custom user aspect ratio for GFX packs completion/creation
+- add : script to complete GFX packs for all games installed
+- add : WII-U / add createSdCard call in setup.bat 
+- add : fix ineffective regExp filters using findStr
+- add : WII-U / when dumping game, you can choose all/select/none or a user for which
+        all saves found will be imported.
+        none,all or a given user : do not interrupt the download process
+        select : choose for each games, which users you want to import saves for.
+- fix : unexpected titleId.ini folder created in _BatchFw_Install\tools
+- fix : replace cmdOw version with v1.4.8 (not detected as false positive by some antivirus)
+
 04/01/2020 V15-3 :
 - fix : gameprofile import failure (auto import settings enabled)
 - add : update embeded GFX packs to V587

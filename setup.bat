@@ -58,7 +58,8 @@ REM : main
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "browseFile="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFileDialog.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : initialize log file for current host (if needed)
     call:initLogForHost
@@ -174,7 +175,7 @@ REM : main
     echo ---------------------------------------------------------
 
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_LOGS:"=!\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         echo =========================================================
@@ -189,6 +190,11 @@ REM : main
         echo =========================================================
         pause
     )
+    REM : clean BFW_LOGS
+    pushd !BFW_LOGS!
+    for /F "delims=~" %%i in ('dir /B /S /A:D 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:L 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
@@ -315,7 +321,7 @@ REM : main
     set /A "changeArList=0"
 
     REM : search in all Host_*.log
-    set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+    set "pat="!BFW_LOGS:"=!\Host_*.log""
     for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
         set "currentLogFile="%%i""
 
@@ -387,7 +393,7 @@ REM : main
             call:log2HostFile !msg!
             goto:askScreenMode
         )
-        
+
         if ["!ANSWER!"] == ["1"] (
             :getcustomAr
             set /P  "width=Please enter width  : "
@@ -817,7 +823,7 @@ REM : main
         if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
         robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
 
-        set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
+        set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
         !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
         del /F !fnrLog! > NUL 2>&1
 
@@ -928,6 +934,17 @@ REM : main
         call:buildDoc
         echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     )
+
+    echo BatchFw share a common GFX packs folder with all versions
+    echo of CEMU ^(installed in your game library as _BatchFw_Graphic_Packs^)
+    echo do not use the update feature in CEMU but the provided scripts^.
+    echo.
+    echo Same remark concerning the auto update feature of CEMU UI^:
+    echo The point of BatchFw is to install the both versions ^(previous and
+    echo current^) before removing the previous one if the last one runs all
+    echo your games without any issue.
+    pause
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
     echo entered here^:
     echo ---------------------------------------------------------
@@ -1100,8 +1117,8 @@ REM : functions
         if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:getCemuVersion
 
         set "defaultBrowser="NOT_FOUND""
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
+        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
         if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
 
         echo Opening CemuHook download page^.^.^.
@@ -1714,12 +1731,14 @@ REM : functions
         echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
 
         if not exist !logFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
+            set "logFolder="!BFW_LOGS:"=!""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
         REM : check if the message is not already entierely present
         for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
+        for /F %%i in ('type !logFile! ^| find /I "!msg:-=!"') do goto:eof
+
        :logMsg2HostFile
         echo !msg!>> !logFile!
 
@@ -1732,12 +1751,12 @@ REM : functions
         REM : create install log file for current host (if needed)
 
         if exist !logFile! goto:eof
-        set "logFolder="!BFW_PATH:"=!\logs""
+        set "logFolder="!BFW_LOGS:"=!""
         if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
 
         REM : get last modified Host log (configuration)
         set "lastHostLog="NONE""
-        set "patHostLog="!BFW_PATH:"=!\logs\Host_*.log""
+        set "patHostLog="!BFW_LOGS:"=!\Host_*.log""
 
         for /F "delims=~" %%i in ('dir /B /S /O:D /T:W !patHostLog! 2^>NUL') do set "lastHostLog="%%i""
 

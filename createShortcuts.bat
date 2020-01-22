@@ -28,6 +28,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
@@ -298,8 +299,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri ".exe""$"') do set "defaultBrowser=%%a"
+        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
+        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
     )
 
     if !QUIET_MODE! EQU 0 (
@@ -504,10 +505,19 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^:
     if !QUIET_MODE! EQU 0 echo =========================================================
 
+    if !QUIET_MODE! EQU 0 (
+        REM : clean BFW_LOGS
+        pushd !BFW_LOGS!
+        for /F "delims=~" %%i in ('dir /B /S /A:D 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+        for /F "delims=~" %%i in ('dir /B /S /A:L 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    )
+    REM : cd to GAMES_FOLDER
+    pushd !GAMES_FOLDER!
+
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| findStr /R "\\code$" ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| find /I /V "\mlc01" 2^>NUL') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -560,6 +570,17 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     echo Treated !NB_GAMES_TREATED! games
 
+
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo BatchFw share a common GFX packs folder with all versions
+    echo of CEMU ^(installed in your game library as _BatchFw_Graphic_Packs^)
+    echo do not use the update feature in CEMU but the provided scripts^.
+    echo.
+    echo Same remark concerning the auto update feature of CEMU UI^:
+    echo The point of BatchFw is to install the both versions ^(previous and
+    echo current^) before removing the previous one if the last one runs all
+    echo your games without any issue.
+    pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
     echo entered here^:
@@ -1106,6 +1127,16 @@ REM : functions
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\forceGraphicPackUpdate.ico""
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to forceGraphicPackUpdate^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        REM : create a shortcut to buildExtraGraphicPacks.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Complete GFX packs for all my games^.lnk""
+        set "LINK_DESCRIPTION="Complete GFX packs for games installed""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\buildExtraGraphicPacks.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to buildExtraGraphicPacks^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 

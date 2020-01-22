@@ -52,9 +52,6 @@ REM : main
     REM : game's name
     set "gameName=NONE"
 
-    REM : flag to create leagcy packs
-    set "createLegacyPacks=true"
-
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -68,7 +65,11 @@ REM : main
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
+    set "startingDate=%ldt%"
+    REM : starting DATE
+
+    echo starting date = %startingDate% >> !cgpLogFile!
+    echo starting date = %startingDate%
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -98,9 +99,6 @@ REM : main
         pause
         goto:askGpFolder
     )
-    REM : ask for legacy packs creation
-    choice /C yn /N /M "Do you want to create legacy graphic packs ? (y, n) : "
-    if !ERRORLEVEL!=2 set "createLegacyPacks=false"
 
     :getTitleId
     set "checkLenght="
@@ -133,16 +131,16 @@ REM : main
     echo. > !cgpLogFile!
     if %nbArgs% GTR 4 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID RULES_FILE NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID RULES_FILE NAME^*
         echo given {%*}
 
         exit /b 99
     )
     if %nbArgs% LSS 3 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID CREATE_LEGACY NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID RULES_FILE NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID RULES_FILE NAME^*
         echo given {%*}
 
         exit /b 99
@@ -159,7 +157,7 @@ REM : main
     REM : get titleId
     set "titleId=!args[1]!"
 
-    set "createLegacyPacks=!args[2]!"
+    set "rulesFile=!args[2]!"
 
     if %nbArgs% EQU 4 (
         set "str=!args[3]!"
@@ -170,13 +168,16 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
-    set "titleId=%titleId:"=%"
-    set "createLegacyPacks=%createLegacyPacks:"=%"
+    REM : BatchFw V2 gfx pack folder
+    set "BFW_GPV2_FOLDER="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
+
+    set "titleId=!titleId:"=!"
 
 
     REM : check if game is recognized
-    call:checkValidity %titleId%
+    call:checkValidity !titleId!
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
@@ -222,7 +223,7 @@ REM : main
     REM : force even integer
     set /A "isEven=!nativeWidth!%%2"
     if !isEven! NEQ 0 set /A "nativeWidth=!nativeWidth!+1"
-
+ 
     if not ["%gameName%"] == ["NONE"] set "GAME_TITLE=%gameName%"
 
     echo ========================================================= >> !cgpLogFile!
@@ -273,100 +274,164 @@ REM : main
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
-    set "fnrLogCegp="!BFW_PATH:"=!\logs\fnr_createExtraGraphicPacks.log""
-    if exist !fnrLogCegp! del /F !fnrLogCegp!
-
-    REM : flag for graphic packs existence
-    set "newGpExist=0"
-    set "v2Name="NOT_FOUND""
-    REM : launching the search
-    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3%
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogCegp!
-
-    REM : instanciating nativeHeightx2 graphic packs for creating V2 graphic packs
+    REM : double of the native height of the game
     set /A "resX2=!nativeHeight!*2"
 
-    REM : height step
-    set /A "dh=180"
-    REM : first height of range
-    set /A "h=5760"
     REM : windowing scale factor
     set "wsf=1.07638888888889"
 
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogCegp! ^| find "File:" ^| find /I /V "^!" ^| find /I /V "_Gamepad" ^| find /I /V "_BatchFW" ^| find /I /V "_Performance_" ^| find /V "_Resolution_" ^| sort /R 2^>NUL') do (
+    REM : flag for graphic packs existence
+    set /A "newGpExist=0"
 
-        set "rules="!BFW_GP_FOLDER:"=!%%i.%%j""
+    REM : updateGameGraphicPacks.bat send rulesFile for GFX packs version > 2 if found
+    REM : v2 only if no V2 found
+    REM : If no gfx pack were found updateGameGraphicPacks.bat call createGameGraphicPacks.bat instead
+    REM : of this script
 
-        set "gpName=%%i"
-        set "gpName=!gpName:rules=!"
-        set "gpName=!gpName:\=!"
+    set "rulesFolder=!rulesFile:\rules.txt=!"
 
-        if ["%createLegacyPacks%"] == ["true"] if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find "_graphicPacksV2" > NUL 2>&1 && (
-            set "gpName=!gpName:_graphicPacksV2=_graphicPacksV2\!"
+    REM : basename of GAME FOLDER PATH (used to name shorcut)
+    for /F "delims=~" %%i in (!rulesFolder!) do set "gpNameFolder=%%~nxi"
 
-            echo !gpName! | find "_%resX2%p" | find /I /V "_%resX2%p219" | find /I /V "_%resX2%p1610" | find /I /V "_%resX2%p169" | find /I /V "_%resX2%p43" | find /I /V "_%resX2%p489" > NUL 2>&1 && set "v2Name=!gpName:_%resX2%p=!" && call:createExtraV2Gp "!gpName!"
+    REM : Windows formating (LF -> CRLF)
+    call:dosToUnix
+
+    REM : Get the version of the GFX pack
+    set "vGfxPackStr=NOT_FOUND"
+    for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "vGfxPackStr=%%i"
+    set "vGfxPackStr=%vGfxPackStr: =%"
+    if ["!vGfxPackStr!"] == ["NOT_FOUND"] (
+        echo ERROR : version was not found in !rulesFile! >> !cgpLogFile!
+        echo ERROR : version was not found in !rulesFile!
+        goto:eof
+    )
+    set /A "vGfxPack=!vGfxPackStr!"
+
+    set "gpNativeHeight=NOT_FOUND"
+    
+    REM : is NO new gfx pack was found => rulesFile contain _graphicPackV2
+    if !vGfxPack! EQU 2 (
+
+        REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
+        type !rulesFile! | find /I "height = !resX2!" > NUL 2>&1 && (
+            set "gpNativeHeight=!nativeHeight!"
         )
 
-        REM : creating graphic packs
-        if not ["!gpName!"] == ["NOT_FOUND"] echo !gpName! | find /I /V "_graphicPacksV2" > NUL 2>&1 && (type !rules! | find "$height" > NUL 2>&1 && set "newGpExist=1" && call:completeGfxPacks "!gpName!")
+        echo !rulesFile! | find /IV "!resX2!p" > NUL 2>&1 && (
+            echo WARNING : graphic pack folder name does not match 2 x native Height >> !cgpLogFile!
+            echo WARNING : graphic pack folder name does not match 2 x native Height
+        )
 
+        goto:treatGfxPacks
     )
-    if %newGpExist% EQU 1 goto:ending
 
-    REM : create res graphic pack (game support in slahiee repository but not present in gfx pack)
+    REM : a new GFX pack was found
+    set /A "newGpExist=1"
 
-    REM : search a V2 2xres graphic pack if found v2Name
+    REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
+    set "gpNativeHeight=NOT_FOUND"
+    for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
+    
+    :treatGfxPacks
+    if !newGpExist! EQU 0 goto:createNew
 
-    if [!v2Name!] == ["NOT_FOUND"] set "gpPrefix="!GAME_TITLE!"" && goto:createNew
+    if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
+        echo WARNING : native height was not found in !rulesFile! >> !cgpLogFile!
+        echo WARNING : native height was not found in !rulesFile!
+    )
 
-    set "gpResX2="!BFW_GP_FOLDER:"=!\!v2Name!_%resX2%p""
-    set "gpPrefix=!v2Name:_graphicPacksV2\=!"
+    echo Native height set to !gpNativeHeight! in rules.txt >> !cgpLogFile!
+    echo Native height set to !gpNativeHeight! in rules.txt
+    echo. >> !cgpLogFile!
+    echo.
+    if not ["!gpNativeHeight!"] == ["NOT_FOUND"] if !gpNativeHeight! NEQ !nativeHeight! (
+        echo WARNING : native height in rules.txt does not match >> !cgpLogFile!
+        echo WARNING : native height in rules.txt does not match
+    )
+
+    call:completeGfxPacks !gpNameFolder!
+
+    if !newGpExist! EQU 1 goto:ending
 
     :createNew
+    REM : create res graphic pack (game support in slahiee repository but not present in gfx pack)
+    set "newGpNameFolder=!gpNameFolder:_graphicPacksV2\=!"
+    set "newGpName=!gpNameFolder:_%resX2%p=!"
+    set "newGpV3="!BFW_GP_FOLDER:"=!\!newGpName:"=!_Resolution""
+    if not exist !newGpV3! mkdir !newGpV3! > NUL 2>&1
 
-    set "newGp="!BFW_GP_FOLDER:"=!\!gpPrefix!_Resolution""
-    if not exist !newGp! mkdir !newGp! > NUL 2>&1
-    set "bfwRulesFile="!newGp:"=!\rules.txt""
+    set "bfwRulesFile="!newGpV3:"=!\rules.txt""
+
+    echo Creating V3 pack for !newGpName! ^: !bfwRulesFile!
 
     call:initResGraphicPack
-    call:completeGfxPacks "!gpPrefix!"
+    call:completeGfxPacks !newGpNameFolder!
     call:finalizeResGraphicPack
 
-    if not exist !gpResX2! goto:ending
+    set "gpResX2=!rulesFolder!"
+    REM : for resX2p no patches.txt file, init to NOT_FOUND
+    set "patchValue=NOT_FOUND"
+
+    REM : search for ResX2p489
+    set "gpResX2p="!gpResX2:"=!489""
+    if exist !gpResX2p! set "patchValue=5.333"
+
+    if not exist !gpResX2p! (
+        REM : try ResX2p219
+        set "gpResX2p="!gpResX2:"=!219""
+        set "patchValue=2.370"
+    )
+
+    if exist !gpResX2p! (
+        set "gpResX2=!gpResX2p!"
+    )
 
     REM : copy files near the rules.txt files
-    robocopy !gpResX2! !newGp! /S /XF rules.txt
+    robocopy !gpResX2! !newGpV3! /S /XF rules.txt
 
     REM : replacing float Scale = 2.0
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_newGp-resXScale.log""
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"  >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"  >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resXScale = 2.0" --replace "resXScale = ($width/$gameWidth)" --logFile !fnrLogFile!
 
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_newGp-resYScale.log""
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resYScale = 2.0" --replace "resYScale = ($height/$gameHeight)" --logFile !fnrLogFile
 
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_newGp-resScale.log""
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" >> !cgpLogFile!
-    echo !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)"
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGp! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" >> !cgpLogFile!
+    echo !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)"
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !newGpV3! --fileMask *_*s.txt --find "resScale = 2.0" --replace "resScale = ($height/$gameHeight)" --logFile !fnrLogFile!
 
 
+    set "patchFile="!newGpV3:"=!\patches.txt""
+
+    if not exist !patchFile! goto:ending
+
+    REM : replace scale factor in patchFile
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGpV3! --fileMask patches.txt --find !patchValue! --replace "$width/$height" --logFile !fnrLogFile!
+    
     :ending
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
-    set "DATE=%ldt%"
-    echo ending date = %date% >> !cgpLogFile!
-    echo ending date = %date%
+    set "endingDate=%ldt%"
+    REM : starting DATE
+
+    echo starting date = %startingDate% >> !cgpLogFile!
+    echo starting date = %startingDate%
+    echo ending date = %endingDate% >> !cgpLogFile!
+    echo ending date = %endingDate%
+
 
     echo =========================================================  >> !cgpLogFile!
     echo =========================================================
 
     call:waitChildrenProcessesEnd
+    set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
+    if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal && pause
 
@@ -425,95 +490,36 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
-    REM : function to create extra V2 graphic packs for a game
-    :createExtraV2Gp
-
-        set "gpFolderName="%~1""
-        set "gpResX2="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
-        set "rulesFile="!gpResX2:"=!\rules.txt""
-        set "gpFolderName=!gpFolderName:_%resX2%p=!"
-
-        REM : create missing full screen 16/9 resolutions graphic packs
-        call:createMissingRes "16-9"
-
-        REM : create missing resolution graphic packs
-        for %%a in (!ARLIST!) do (
-            if ["%%a"] == ["1610"] call:createMissingRes "16-10"
-            if ["%%a"] == ["219"]  call:createMissingRes "21-9"
-            if ["%%a"] == ["329"]  call:createMissingRes "32-9"
-            if ["%%a"] == ["43"]   call:createMissingRes "4-3"
-            if ["%%a"] == ["489"]  call:createMissingRes "48-9"
-            REM : treating user defined aspect ratio W-H
-            echo "%%a" | find "-" > NUL 2>&1 && call:createMissingRes "%%a"
-
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
     REM : function to create extra graphic packs for a game
     :completeGfxPacks
 
         set "gpFolderName="%~1""
-        set "newGp="!BFW_GP_FOLDER:"=!\!gpFolderName:"=!""
         set "gpResX2="
         set /A "showEdFlag=0"
 
-        echo !newGp! | find /V "_Resolution" > NUL 2>&1 && goto:eof
+        if !vGfxPack! NEQ 2 (
+            set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
+            if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
+            set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
 
-        set "rulesFile="!newGp:"=!\rules.txt""
+            REM : here the rules.txt is stock (extraDirectives are 16/9 ones)
+            call:getExtraDirectives > !extraDirectives!
+            copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
 
-        REM : Windows formating (LF -> CRLF)
-        call:dosToUnix
-
-        REM : Get the version of the GFX pack
-        set "vGfxPack=NOT_FOUND"
-        for /F "delims=~= tokens=2" %%i in ('type !rulesFile! ^| find /I "Version"') do set "vGfxPack=%%i"
-        set "vGfxPack=%vGfxPack: =%"
-        if ["!vGfxPack!"] == ["NOT_FOUND"] (
-            echo ERROR : version was not found in !rulesFile! >> !cgpLogFile!
-            echo ERROR : version was not found in !rulesFile!
-            goto:eof
+            REM : replacing directives in extraDirectives.log
+            set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
+            if exist !logFileED! del /F !logFileED! > NUL 2>&1
         )
-
-        REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
-        set "gpNativeHeight=NOT_FOUND"
-        for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
-
-        if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
-            echo WARNING : Native Height was not found in !rulesFile! >> !cgpLogFile!
-            echo WARNING : Native Height was not found in !rulesFile!
-        )
-
-        echo Native height set to !gpNativeHeight! in rules.txt >> !cgpLogFile!
-        echo Native height set to !gpNativeHeight! in rules.txt
-        echo. >> !cgpLogFile!
-        echo.
-        if not ["!gpNativeHeight!"] == ["NOT_FOUND"] if !gpNativeHeight! NEQ !nativeHeight! (
-            echo WARNING : Native Height in rules.txt does not match >> !cgpLogFile!
-            echo WARNING : Native Height in rules.txt does not match
-        )
-
-        set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
-        if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
-        set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
-
-        REM : here the rules.txt is stock (extraDirectives are 16/9 ones)
-        call:getExtraDirectives > !extraDirectives!
-        copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
-
-        REM : replacing directives in extraDirectives.log
-        set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
-        if exist !logFileED! del /F !logFileED! > NUL 2>&1
-
         REM : complete 16/9 (if here => COMPLETE_GP=YES)
         call:createMissingRes "16-9"
 
         REM : reset extra directives file
-        if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
+            call:waitChildrenProcessesEnd
+
             if ["%%a"] == ["1610"] call:createMissingRes "16-10"
             if ["%%a"] == ["219"]  call:createMissingRes "21-9"
             if ["%%a"] == ["329"]  call:createMissingRes "32-9"
@@ -523,11 +529,11 @@ REM : functions
             echo "%%a" | find "-" > NUL 2>&1 && call:createMissingRes "%%a"
 
             REM : reset extra directives file
-            if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
 
-        del /F !extraDirectives! > NUL 2>&1
-        del /F !extraDirectives169! > NUL 2>&1
+        if !vGfxPack! NEQ 2 del /F !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 del /F !extraDirectives169! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -537,7 +543,7 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -575,7 +581,7 @@ REM : functions
 
         echo name = Resolution >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
-        echo description = Created by BatchFW. Changes the resolution of the game >> !bfwRulesFile!
+        echo description = V2 pack ported to V3 by BatchFW^. Changes the resolution of the game >> !bfwRulesFile!
         echo version = !lastVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
@@ -596,7 +602,7 @@ REM : functions
         set "descToWrite=%~3"
 
         echo [Preset] >> !bfwRulesFile!
-        echo name = %overwriteWidth%x%overwriteHeight% %descToWrite% >> !bfwRulesFile!
+        echo name = %overwriteWidth%x%overwriteHeight% !descToWrite! >> !bfwRulesFile!
         echo $width = %overwriteWidth% >> !bfwRulesFile!
         echo $height = %overwriteHeight% >> !bfwRulesFile!
         echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
@@ -638,6 +644,10 @@ REM : functions
         goto:beginLoopRes
 
         :formatUtf8
+
+        REM : Windows formating (LF -> CRLF)
+        call:dosToUnix
+
         REM : add commonly used 16/9 res filters
         echo # add commonly used 16^/9 res filters >> !bfwRulesFile!
         echo #  >> !bfwRulesFile!
@@ -752,7 +762,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "fnr.exe" | find /I "_BatchFW_Graphic_Packs" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find "cmd.exe" | find  /I "instanciateResX2gp" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
@@ -829,8 +839,8 @@ REM : functions
         echo ^> windowed winRatio=!winRatio!
 
         REM : GFX pack V3 or higher
-        if ["!gpResX2!"] == [""] set "edu=!ed!"
-        if ["!gpResX2!"] == [""] if not ["!ed!"] == [""] (
+        if !vGfxPack! NEQ 2 set "edu=!ed!"
+        if !vGfxPack! NEQ 2 if not ["!ed!"] == [""] (
 
             set /A "r=5760/!hr!"
             set /A "mh=!r!*!hr!"
@@ -881,8 +891,9 @@ REM : functions
         set /A "StockRatio=0"
         set /A "winRatio=0"
 
-        REM : if gpResX2 exist => V2 packs call
-        if not ["!gpResX2!"] == [""] set "comment= V2"
+
+        REM : if V2 packs call
+        if !vGfxPack! EQU 2 set "comment= V2"
 
         echo Create !desc:-=/! missing!comment! resolution packs >> !cgpLogFile!
         echo Create !desc:-=/! missing!comment! resolution packs
@@ -890,7 +901,7 @@ REM : functions
         REM : compute Width and Height using desc
         for /F "delims=- tokens=1-2" %%a in ("!desc!") do set "wr=%%a" & set "hr=%%b"
 
-        if not ["!gpResX2!"] == [""] goto:setFsPresets
+        if !vGfxPack! EQU 2 goto:setFsPresets
         if not exist !extraDirectives! goto:setFsPresets
         set "ed="
         for /F "delims=~" %%j in ('type !extraDirectives!') do set "ed=!ed!%%j\n"
@@ -913,7 +924,7 @@ REM : functions
         REM : complete full screen GFX presets (and packs for GFX packs V2)
 
         REM : reset extra directives file (V3 and up)
-        if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         call:setPresets
 
@@ -924,7 +935,7 @@ REM : functions
         echo Create !desc:-=/! windowed missing!comment! resolution packs
 
         REM : reset extra directives file (V3 and up)
-        if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         call:setPresets windowed
 
@@ -956,9 +967,11 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileNewGp!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !wc!\n\$height = !hc!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+        if not ["!edu!"] == [""] (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !wc!\n\$height = !hc!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -966,10 +979,11 @@ REM pause
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*\n\$gameHeight[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*\n\$gameHeight[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
 
-        if not ["!edu!"] == [""] wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-
+        if not ["!edu!"] == [""] (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -977,56 +991,45 @@ REM pause
     REM : function to add an extra 16/9 preset in graphic pack of the game
     :addPresets169
 
-        REM : if gpResX2 exist => V2 packs call
-        if not ["!gpResX2!"] == [""] (
+        REM : if BFW_GPV2_FOLDER exist
+        if exist !BFW_GPV2_FOLDER! (
 
-            set "gpName=!gpResX2:_%resX2%p=!"
-            set "newGp="!gpName:"=!_!hc!p!""
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
+            set "newGp="!gpPath:"=!_!hc!p""
+            set "gpResX2="!gpPath:"=!_%resX2%p""
+
+            REM : if V2 gfx version was detected in rules.txt
+            if !vGfxPack! EQU 2 (
+                set "gpPath=!rulesFolder:_%resX2%p=!"
+                set "newGp="!gpPath:"=!_!hc!p!""
+                set "gpResX2=!rulesFolder!"
+            )
 
             if not exist !newGp! (
 
-                REM : search for resX2p!wr!!hr!
-                set "gpResX2p="!gpResX2:"=!!wr!!hr!""
-
-                REM : else try to use 489 one
-                if not exist !gpResX2p! (
-                    set "gpResX2p="!gpName:"=!489""
-                )
-                if exist !gpResX2p! (
-                    set "gpResX2=!gpResX2p!"
-                )
                 wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" "1.777777" > NUL 2>&1
 
-                echo Creating !wc!x!hc!!desc! V2 GFX pack >> !cgpLogFile!
-                echo Creating !wc!x!hc!!desc! V2 GFX pack
+                echo V2 ^: Creating !wc!x!hc!!desc! >> !cgpLogFile!
+                echo V2 ^: Creating !wc!x!hc!!desc!
             ) else (
-                echo V2 GFX pack !wc!x!hc!!desc! already exists >> !cgpLogFile!
-                echo V2 GFX pack !wc!x!hc!!desc! already exists
+                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
+                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists
+                
             )
-            goto:eof
         )
-        REM : V3 or up GP does not exist => continue to fill it
-        if %newGpExist% EQU 0 (
+
+        REM : V3 or up GP does not exist => continue to fill it and EXIT
+        if !newGpExist! EQU 0 (
             call:fillResGraphicPack !wc! !hc! "!desc!"
             goto:eof
         )
-        REM : V3 or up GP exists
 
+        REM : V3 or up GP exists
         type !rulesFile! | find "name = !wc!x!hc!" > NUL 2>&1 && (
-            echo Preset !wc!x!hc!!desc! already exists >> !cgpLogFile!
-            echo Preset !wc!x!hc!!desc! already exists
+            echo Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
+            echo Ignoring !wc!x!hc!!desc! already exists
             goto:eof
         )
-
-        REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
-REM        set "fnrLogAddResoNewGp169="!fnrLogFolder:"=!\addResoNewGp169_!wc!x!hc!.log""
-REM        if exist !fnrLogAddResoNewGp169! del /F !fnrLogAddResoNewGp169! > NUL 2>&1
-REM        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!wc![ ]*\n\$height[ ]*=[ ]*!hc![ ]*" --logFile !fnrLogAddResoNewGp169!
-REM        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoNewGp169! ^| find /I /V "^!" ^| find "File:"') do (
-REM            echo -- Preset !wc!x!hc! already exists >> !cgpLogFile!
-REM            echo -- Preset !wc!x!hc! already exists
-REM            goto:eof
-REM        )
 
         echo Adding !wc!x!hc!!desc! preset >> !cgpLogFile!
         echo Adding !wc!x!hc!!desc! preset
@@ -1047,57 +1050,57 @@ REM        )
         set "ratio=%~1"
         set "suffixGp=%~2"
 
-        REM : if gpResX2 exist => V2 packs call
-        if not ["!gpResX2!"] == [""] (
+        REM : if BFW_GPV2_FOLDER exist
+        if exist !BFW_GPV2_FOLDER! (
 
-            set "gpName=!gpResX2:_%resX2%p=!"
             echo !desc! | find /I "windowed" > NUL 2>&1 && set "suffixGp=windowed"
-            set "newGp="!gpName:"=!_!hc!p!wr!!hr!!suffixGp!""
+
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
+            set "newGp="!gpPath:"=!_!hc!p!wr!!hr!!suffixGp!""
+            set "gpResX2="!gpPath:"=!_%resX2%p""
+
+
+            REM : if V2 gfx version was detected in rules.txt
+            if !vGfxPack! EQU 2 (
+                set "gpPath=!rulesFolder:_%resX2%p=!"
+                set "newGp="!gpPath:"=!_!hc!p!wr!!hr!!suffixGp!""
+                set "gpResX2=!rulesFolder!"
+            )
 
             if not exist !newGp! (
 
-                REM : search for resX2p!hr!
-                set "gpResX2p="!gpResX2:"=!!wr!!hr!
+                REM : search for ResX2p489
+                set "gpResX2p="!gpResX2:"=!489""
 
-                REM : else try to use 489 one
                 if not exist !gpResX2p! (
-                    set "template="!gpResX2:"=!489""
-                    if exist !template! set "gpResX2p=!template!"
+                    REM : try ResX2p219
+                    set "gpResX2p="!gpResX2:"=!219""
                 )
 
-                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2p! !newGp! !wc! !hc! "!desc!" "!ratio!" > NUL 2>&1
-                echo Creating !wc!x!hc!!desc! V2 GFX pack >> !cgpLogFile!
-                echo Creating !wc!x!hc!!desc! V2 GFX pack
+                if exist !gpResX2p! (
+                    set "gpResX2=!gpResX2p!"
+                )
+                
+                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" "!ratio!" > NUL 2>&1
+                echo V2 ^: Creating !wc!x!hc!!desc!  >> !cgpLogFile!
+                echo V2 ^: Creating !wc!x!hc!!desc!
             ) else (
-                echo V2 GFX pack !wc!x!hc!!desc! already exists >> !cgpLogFile!
-                echo V2 GFX pack !wc!x!hc!!desc! already exists
+                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
+                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists
             )
-            goto:eof
         )
 
         REM : V3 or up GP does not exist => continue to fill it
-        if %newGpExist% EQU 0 (
+        if !newGpExist! EQU 0 (
             call:fillResGraphicPack !wc! !hc! "!desc!"
             goto:eof
         )
         REM : V3 or up GP exists
-
         type !rulesFile! | find "name = !wc!x!hc!" > NUL 2>&1 && (
-            echo Preset !wc!x!hc!!desc! already exists >> !cgpLogFile!
-            echo Preset !wc!x!hc!!desc! already exists
+            echo Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
+            echo Ignoring !wc!x!hc!!desc! already exists
             goto:eof
         )
-        REM : search for "$width = !w!\n$height = !h!" in rulesFile: if found exit
-
-REM        set "fnrLogAddResoNewGp="!fnrLogFolder:"=!\addResoNewGp_!wc!x!hc!.log""
-REM        if exist !fnrLogAddResoNewGp! del /F !fnrLogAddResoNewGp! > NUL 2>&1
-REM        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width[ ]*=[ ]*!wc![ ]*\n\$height[ ]*=[ ]*!hc![ ]*" --logFile !fnrLogAddResoNewGp!
-REM
-REM        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogAddResoNewGp! ^| find /I /V "^!" ^| find "File:"') do (
-REM            echo ------ Preset !wc!x!hc!!desc! already exists >> !cgpLogFile!
-REM            echo ------ Preset !wc!x!hc!!desc! already exists
-REM            goto:eof
-REM        )
 
         echo Adding !wc!x!hc!!desc! preset >> !cgpLogFile!
         echo Adding !wc!x!hc!!desc! preset
@@ -1108,65 +1111,14 @@ REM        )
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------
-
-REM    :longToFloat
-REM        set "long=%~1"
-REM        set /A "intPartLength=%~2"
-REM        set /A "decPartLength=%~3"
-REM
-REM        set "%4=!long:~0,%intPartLength%!.!long:~1,%decPartLength%!"
-REM    goto:eof
-REM    REM : ------------------------------------------------------------------
-REM
-REM    REM : mulIntegerByFloat integer float result
-REM    :mulIntegerByFloat
-REM
-REM        set "longA=%~1"
-REM        set "float=%~2"
-REM
-REM        REM : check longA is an integer
-REM        echo %longA% | find "." > NUL 2>&1 && (
-REM            echo ERROR ^: %longA% is not an integer
-REM            if %QUIET_MODE% EQU 0 pause
-REM            exit /b 1
-REM        )
-REM        echo %float% | find "." > NUL 2>&1 && (
-REM
-REM            for /F "tokens=2 delims=." %%a in ("%float%") do set "decPart=%%a"
-REM            call:strLen decPart decPartLength
-REM
-REM            set "longB=%float:.=%"
-REM            for /F %%r in ('!multiply! %longA% !longB!') do set "fr=%%r"
-REM            call:strLen fr longLength
-REM            set /A "intPartLength=!longLength!-!decPartLength!
-REM
-REM            call:longToFloat !fr! !intPartLength! !decPartLength! result
-REM
-REM            for /F "tokens=1 delims=." %%a in ("!result!") do set "intOut=%%a"
-REM            REM : force even number
-REM            set /A "r=!intOut!%%2"
-REM            if !r! NEQ 0 (
-REM                set /A "result=!intOut!+1"
-REM                set "%3=!result!"
-REM            ) else (
-REM                set "%3=!intOut!"
-REM            )
-REM            goto:eof
-REM        )
-REM        echo ERROR ^: !float! is not a float
-REM        if %QUIET_MODE% EQU 0 pause
-REM        exit /b 2
-REM
-REM    goto:eof
-REM    REM : ------------------------------------------------------------------
 
 
     :strLen

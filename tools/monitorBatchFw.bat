@@ -29,7 +29,7 @@ REM : main
     set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
 
     REM : timeout value in seconds
-    set /A "timeOut=100"
+    set /A "timeOut=180"
 
     REM : duration value in seconds
     set /A "duration=0"

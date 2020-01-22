@@ -17,27 +17,55 @@ REM : main
 
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
+    REM : set current char codeset
+    call:setCharSetOnly
+    
     pushd !BFW_GP_FOLDER!
-    for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution ^| find /V "_Performance"') do (
+    for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
         call:treatGp "%%i"
     )
     pause
     goto:eof
+REM : ------------------------------------------------------------------
+
+REM : ------------------------------------------------------------------
+REM : functions
+
+
+    REM : function to get and set char set code for current host
+    :setCharSetOnly
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            echo Host char codeSet not found ^?^, exiting 1
+            pause
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
 
     :treatGp
 
         for /F "delims=~" %%i in (%1) do set "name=%%~nxi"
         for /F "tokens=1 delims=_" %%j in ("!name!") do set "title=%%j"
+        set "rulesFile="%~1\rules.txt""
 
-        for /F "tokens=2 delims=~=," %%k in ('type "%~1\rules.txt" ^| find "titleIds"') do set "tid=%%k"
+        for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "tid=%%k"
         echo #########################################################
         echo !title!
         echo #########################################################
 
-        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
+        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
         echo.
-        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
+        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
 
         echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
         echo.

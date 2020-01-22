@@ -7,7 +7,7 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
-REM : ------------------------------------------------------------------
+    REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
     set "BFW_NEXT_VERSION=V15-4"
 
@@ -64,11 +64,11 @@ REM : ------------------------------------------------------------------
     )
 
     REM : remove trailing space
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --excludeFileMask "finalizeVersion" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --excludeFileMask "*multiplyLongInteger*" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
     
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fix"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger"') do (
 
         set "filePath="%%f""
 
