@@ -7,7 +7,7 @@ Versions of CEMU supported : **1.11.0 to 1.16.1**
 Not supported : earlier than 1.10.0 included (if you want to use one of these versions, create an installation per game and per user)
 
 
-Last GFX packs checked (presets completion) : **V630**
+Last GFX packs checked (presets completion) : **V640**
 
 
 ## Main purpose:
@@ -26,7 +26,7 @@ Last GFX packs checked (presets completion) : **V630**
 
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
 
-- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support 4/3, 16/9, 16/10, 21/9, 32/9 and 48/9 aspect ratios**
+- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support 4/3, 16/9, 16/10, 21/9, 32/9, 48/9 and custom user aspect ratios**
 
 - **create FPS packs : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).**
 
