@@ -34,7 +34,7 @@ Last GFX packs checked (presets completion) : **V640**
     - **get/sync online files (account, friends'list),** 
     - **sync saves between CEMU with the Wii-U (export CEMU->Wii-U using SaveMii),**
     - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
-    - **dump your games safely (ignoring errors caused by symlinks and usinf a 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
+    - **dump your games safely (ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
     - **ping the wii-U to avoid online simultaneous access** 
     
 
