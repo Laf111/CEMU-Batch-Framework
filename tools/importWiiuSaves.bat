@@ -147,7 +147,7 @@ REM : main
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^> NUL') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         set "scanNow="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
@@ -174,7 +174,7 @@ REM : main
 
     pushd !GAMES_FOLDER!
     REM : searching for meta file
-    for /F "delims=~" %%i in ('dir /B /S meta.xml ^|  find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^|  find /I /V "\mlc01"') do (
 
         REM : meta.xml
         set "META_FILE="%%i""
@@ -337,7 +337,7 @@ REM : functions
         set "num=%~1"
 
         REM : searching for meta file
-        for /F "delims=~" %%i in ('dir /B /S meta.xml ^| find /I /V "\mlc01"') do (
+        for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^| find /I /V "\mlc01"') do (
 
             REM : meta.xml
             set "META_FILE="%%i""
@@ -506,7 +506,7 @@ REM : functions
 
             set "pat="!USERS_ACCOUNTS_FOLDER:"=!\%%i*.dat""
             set "folder=NONE"
-            for /F "delims=~" %%j in ('dir /B !pat!') do (
+            for /F "delims=~" %%j in ('dir /B !pat! 2^> NUL') do (
                 set "filename="%%j""
                 set "noext=!filename:.dat=!"
                 set "folder=!noext:%%i=!"
@@ -566,7 +566,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
@@ -579,7 +579,7 @@ REM : functions
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

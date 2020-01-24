@@ -71,7 +71,8 @@ REM : main
     echo storage device^. Be sure that there^'s sufficient space ^!
     echo.
     echo BE AWARE ^: transfert errors on update and DLC files can occur
-    echo on symlinks not handled by FTPiiU server^. Just ignore them^.
+    echo on symlinks not handled by FTPiiU server^.
+    echo These files are not used by CEMU^. Just ignore them^.
     echo.
     pause
     echo.
@@ -159,7 +160,7 @@ REM : main
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER!') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^> NUL') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         echo ERROR^: last scan results were not found
@@ -264,7 +265,7 @@ REM : main
     set "pat="!BFW_GP_FOLDER:"=!\*_Resolution""
 
     if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
-    for /F "delims=~" %%p in ('dir /B /S !pat!') do echo "%%p\rules.txt" >> !rulesFiles!
+    for /F "delims=~" %%p in ('dir /B /S !pat! 2^> NUL') do echo "%%p\rules.txt" >> !rulesFiles!
 
     set /A "nbGameWithGfxPack=0"
     call:checkGfxPacksAvailability
@@ -446,7 +447,7 @@ REM : functions
         :waitingLoop
         REM : wait all transfert end
         timeout /T 1 > NUL 2>&1
-        wmic process get Commandline | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop
+        wmic process get Commandline 2>NUL | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop
         
         REM : search if this game has an update
         set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
@@ -543,7 +544,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
@@ -556,7 +557,7 @@ REM : functions
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

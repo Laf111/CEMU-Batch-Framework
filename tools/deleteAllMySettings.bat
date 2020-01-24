@@ -142,7 +142,7 @@ REM : main
 
     set /A NB_SETTINGS_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -260,7 +260,7 @@ REM : functions
 
         REM : check if at least one setting for this game was saved (no matter the host is)
         set "rootDir="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-        dir /b !rootDir! | findStr /R "." > NUL 2>&1
+        dir /b !rootDir! 2>NUL | findStr /R "." > NUL 2>&1
         if !ERRORLEVEL! EQU 1 goto:eof
 
         if ["!USERDOMAIN!"] == ["*"] goto:removeAllHost
@@ -414,7 +414,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

@@ -48,8 +48,8 @@ REM : main
             )
         if !nbIs! NEQ 99 (
             REM : count number of running instances
-            if [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
-            if not [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline 2^>NUL ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if not [!firstArg!] == ["NONE"] for /F "delims=~=" %%n in ('wmic process get Commandline 2^>NUL ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
             set cmd=!command:"=!
 

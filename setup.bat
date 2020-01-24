@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-4"
+    set "BFW_VERSION=V15-5"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -42,6 +42,7 @@ REM : main
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "createWiiuSDcard="!BFW_PATH:"=!\createWiiuSDcard.bat""
+    set "dumpGames="!BFW_PATH:"=!\dumpGamesFromWiiu.bat""
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
@@ -68,7 +69,7 @@ REM : main
     call:setCharSet
 
     REM : check if file system is NTFS
-    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value ^| find /I /V "NTFS"') do (
+    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
 
         echo This volume is not an NTFS one^^!
         echo BatchFw use Symlinks and need to be installed on a NTFS volume
@@ -201,7 +202,7 @@ REM : main
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code ^| find /I /V "\mlc01" 2^> NUL') do (
+    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -530,7 +531,7 @@ REM : main
     if !ERRORLEVEL! EQU 1 wscript /nologo !StartWait! !createWiiuSDcard!
     echo.
     )
-    choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n):"
+    choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n -> enter users manually):"
     echo.
     if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
@@ -693,7 +694,7 @@ REM : main
 
     set "icoFile=!name:.exe=.ico!"
     set "icoPath="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
-    if not exist !icoPath! call !quick_Any2Ico! "-res=!program:"=!" "-icon=!icoPath:"=!" -formats=256
+    if not exist !icoPath! call !quick_Any2Ico! "-res=!program:"=!" "-icon=!icoPath:"=!" -formats=512
 
     choice /C yn /N /M "Add another third party software? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askSpath
@@ -805,15 +806,22 @@ REM : main
         echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     ) else (
-        if !NB_GAMES_VALID! EQU 0 (
-            echo 3^: Cancel^, for dumping my games now
+        if !NB_GAMES_VALID! EQU 0 if exist !BFW_WIIU_FOLDER! (
+            echo 3^: Cancel^, for dumping my games now ^?
             call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
         ) else (
             call:getUserInput "Enter your choice ?: " "1,2" ANSWER
         )
-        call:getUserInput "Enter your choice ?: " "1,2" ANSWER
     )
-    if [!ANSWER!] == ["3"] exit 70
+    if [!ANSWER!] == ["3"] (
+        if !NB_GAMES_VALID! EQU 0 if exist !BFW_WIIU_FOLDER! (
+            REM : launch dumping games script
+            wscript /nologo !Start! !dumpGames!
+            exit 15
+        )
+        exit 70
+    )
+
     if [!ANSWER!] == ["1"] (
 
         REM : instanciate a fixBrokenShortcut.bat
@@ -841,7 +849,7 @@ REM : main
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -943,6 +951,7 @@ REM : main
     echo The point of BatchFw is to install the both versions ^(previous and
     echo current^) before removing the previous one if the last one runs all
     echo your games without any issue.
+    echo ---------------------------------------------------------
     pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
@@ -1005,7 +1014,7 @@ REM : functions
     REM : function to set or ask for using progressbar
     :setProgressBar
         REM : enable progress bar if installed on a removable device
-        for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value ^| find "="') do (
+        for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value 2^>NUL ^| find "="') do (
             set "caption=%%i"
             set "usbDrive=!caption:~0,-1!"
             if ["!usbDrive!"] == ["!drive!"] (
@@ -1409,7 +1418,7 @@ REM : functions
         set "cemuFolder="!GAME_FOLDER_PATH:"=!\Cemu""
         REM : search for inGameSaves, shaderCache and GAME_TITLE.txt under game folder
 
-        for /F "delims=~" %%k in ('dir /B /A:D !GAME_FOLDER_PATH!') do (
+        for /F "delims=~" %%k in ('dir /B /A:D !GAME_FOLDER_PATH! 2^> NUL') do (
             set "folder="!GAME_FOLDER_PATH:"=!\%%k""
 
             if ["%%k"] == ["inGameSaves"] (
@@ -1707,7 +1716,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

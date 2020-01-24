@@ -68,7 +68,7 @@ REM : main
     set "tobeRemoved=!wiiuGF:"=!\"
 
     REM : Loop on every shorcuts found recursively
-    for /F "delims=~" %%i in ('dir /S /B "*.lnk"') do call:fixShortcut "%%i"
+    for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^> NUL') do call:fixShortcut "%%i"
 
     REM : fix progress bar shortcut
     set "progressBar="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\progressBar.lnk""

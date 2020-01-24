@@ -63,7 +63,7 @@ REM : main
     set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
     :waitInitPb
-    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
+    wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
     type !logFileTmp! | find /I "initProgessBar.bat" | find /I /V "find"  > NUL 2>&1 && goto:waitInitPb
 
     REM : remove trace
@@ -234,7 +234,7 @@ REM : main
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
 
-    for /F "delims=~=" %%f in ('wmic process get Commandline ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GEQ 2 (
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running (nbI=%nbI%). If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
@@ -500,9 +500,12 @@ REM : main
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
+
     if !useThirdPartySoft! EQU 1 (
         if !usePbFlag! EQU 1 call:setProgressBar 68 70 "pre processing" "launching third party software"
 
+        echo Start 3rd party software >> !batchFwLog!
+        
         REM : launching user's software
         set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !launchThirdPartySoftware!
@@ -544,7 +547,7 @@ REM : main
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=NO_NVIDIA"
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -558,7 +561,7 @@ REM : main
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
 
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value 2^>NUL ^| find "="') do (
         set "string=%%i"
     )
 
@@ -669,7 +672,7 @@ REM : main
     exit 15
 
     :openGpuCache
-    if !usePbFlag! EQU 1 call:setProgressBar 80 82 "pre processing" "installing OpenGL cache"
+    if !usePbFlag! EQU 1 call:setProgressBar 80 82 "pre processing" "installing GPU cache"
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
     set "gpuCacheBackupFolder="NOT_FOUND""
@@ -737,7 +740,7 @@ REM : main
     if not exist %gpuCacheBackupFolder% goto:lockCemu
 
     REM : openGpuCacheID
-    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !gpuCacheBackupFolder!') do set "oldGpuCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !gpuCacheBackupFolder! 2^> NUL') do set "oldGpuCacheId=%%x"
     if not ["%oldGpuCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
 
     REM : search for shader files
@@ -1010,9 +1013,9 @@ REM : main
     :searchCacheFolder
 
     if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 (
-        call:setProgressBar 38 60 "post processing" "backup openGL cache"
+        call:setProgressBar 38 60 "post processing" "backup GPU cache"
     ) else (
-        call:setProgressBar 55 60 "post processing" "backup openGL cache"
+        call:setProgressBar 55 60 "post processing" "backup GPU cache"
     )
     
     REM : backup of GpuCache, get the last modified folder under GpuCache
@@ -1110,7 +1113,7 @@ REM : main
     if [!GpuCache!] == ["NOT_FOUND"] goto:analyseCemuLog
     if exist !GpuCache! call:moveFolder !GpuCache! !gpuCacheSaved! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in openGL cache folder" 4113
+        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in GPU cache folder" 4113
         if !ERROLRLEVEL! EQU 1 goto:moveBack
         cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GPU Cache is backup sucessfully^, if it persists close your session and retry"
     )
@@ -1213,6 +1216,7 @@ REM : main
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" | find /I "@Y"> NUL 2>&1 && (
 
+        echo Stop 3rd party software >> !batchFwLog!
         set "stopThirdPartySoftware="!BFW_TOOLS_PATH:"=!\stopThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !stopThirdPartySoftware!
     )
@@ -1378,7 +1382,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         :waitingLoopProcesses
         timeout /T 1 > NUL 2>&1
 
-        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+        wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
         type !logFileTmp! | find /I "robocopy" > NUL 2>&1 && (
             echo waitProcessesEnd : robocopy still running >> !batchFwLog!
@@ -1402,17 +1406,14 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
-            echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
+            if !disp! EQU 0 echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
             if !disp! EQU 0 type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
                 echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
-                cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
+                if !usePbFlag! EQU 1 call:setProgressBar 90 94 "pre processing" "GFX packs completion, please wait"
+                if !usePbFlag! EQU 0 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
                 set /A "disp=disp+1"
             )
-            if !disp! GTR 200 (
-                if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
-                    call:setProgressBar 94 96 "pre processing" "waiting for GFX packs processing end"
-                )
-            )
+
             goto:waitingLoopProcesses
         )
 
@@ -2816,7 +2817,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
@@ -2830,7 +2831,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -27,7 +27,6 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "cgpLogFile="!BFW_PATH:"=!\logs\createExtraGraphicPacks.log""
 
@@ -217,7 +216,8 @@ REM : main
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =%"
 
-    for /F %%r in ('!multiply! !nativeHeight! 1777777') do set "result=%%r"
+    pushd !BFW_TOOLS_PATH!
+    for /F %%r in ('multiplyLongInteger.bat !nativeHeight! 1777777') do set "result=%%r"
     call:removeDecimals !result! nativeWidth
 
     REM : force even integer
@@ -416,7 +416,7 @@ REM : main
     :ending
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "endingDate=%ldt%"
     REM : starting DATE
 
@@ -429,7 +429,7 @@ REM : main
     echo =========================================================  >> !cgpLogFile!
     echo =========================================================
 
-    call:waitChildrenProcessesEnd
+    if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
     set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
     if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
 
@@ -518,7 +518,7 @@ REM : functions
 
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
-            call:waitChildrenProcessesEnd
+            if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
 
             if ["%%a"] == ["1610"] call:createMissingRes "16-10"
             if ["%%a"] == ["219"]  call:createMissingRes "21-9"
@@ -762,7 +762,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        wmic process get Commandline | find "cmd.exe" | find  /I "instanciateResX2gp" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "instanciateResX2gp" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
@@ -800,7 +800,7 @@ REM : functions
 
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
-            for /F %%r in ('!multiply! !hc! !intRatio!') do set "result=%%r"
+            for /F %%r in ('multiplyLongInteger.bat !hc! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! wc
 
@@ -832,7 +832,7 @@ REM : functions
             set "f1=!fsRatio:.=!
             set "f2=!wsf:.=!
 
-            for /F %%r in ('!multiply! !f1! !f2!') do set "result=%%r"
+            for /F %%r in ('multiplyLongInteger.bat !f1! !f2!') do set "result=%%r"
 
             set "winRatio=!result:~0,1!.!result:~1,6!"
         )
@@ -848,7 +848,7 @@ REM : functions
 
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
-            for /F %%r in ('!multiply! !mh! !intRatio!') do set "result=%%r"
+            for /F %%r in ('multiplyLongInteger.bat !mh! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! mw
 
@@ -868,18 +868,23 @@ REM : functions
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
 
+        REM : to run multiplyLongInteger.bat
+        pushd !BFW_TOOLS_PATH!
+        
         set /A "previous=6000
         for /L %%i in (%end%,-1,%start%) do (
 
             set /A "wi=!wr!*%%i"
             set /A "hi=!hr!*%%i"
             set /A "offset=!previous!-!hi!"
-            if !offset! GEQ 180 (
+            if !hi! NEQ 0 if !offset! GEQ 180 (
                 call:addResolution
                 set /A "previous=!hi!"
             )
         )
-
+        REM : return to BFW_GP_FOLDER, needed  ?
+        pushd !BFW_GP_FOLDER!
+    
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1208,7 +1213,7 @@ REM pause
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

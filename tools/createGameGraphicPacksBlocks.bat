@@ -61,8 +61,7 @@ REM : main
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "startingDate=%ldt%"
-    REM : starting DATE
+    set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -229,22 +228,11 @@ REM : main
     call:createResGP
 
     REM : waiting all children processes ending
-    if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
+    call:waitChildrenProcessesEnd
 
     set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
     if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
 
-    REM : ending DATE
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "endingDate=%ldt%"
-    REM : starting DATE
-
-    echo starting date = %startingDate% >> !cgpLogFile!
-    echo starting date = %startingDate%
-    echo ending date = %endingDate% >> !cgpLogFile!
-    echo ending date = %endingDate%
-    
     if %nbArgs% EQU 0 endlocal && pause
     exit /b 0
 
@@ -321,7 +309,7 @@ REM : functions
 
         REM : waiting all children processes ending
         :waitingLoop
-        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "createV2GraphicPacks" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline | find "cmd.exe" | find  /I "createV2GraphicPacks" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
             timeout /T 1 > NUL 2>&1
             goto:waitingLoop
         )
@@ -631,6 +619,9 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         set /A "StockRatio=0"
         set /A "winRatio=0"
 
+        set /A "nbAR+=1"
+        set "bfwRulesFile="!newGp:"=!\rules_!nbAr!.txt""
+
         REM : compute Width and Height using desc
         for /F "delims=- tokens=1-2" %%a in ("!desc!") do set "wr=%%a" & set "hr=%%b"
 
@@ -692,16 +683,18 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
             goto:eof
         )
         if not exist !newGp! mkdir !newGp! > NUL 2>&1
-        set "bfwRulesFile="!newGp:"=!\rules.txt""
+        set "bfwRulesFile="!newGp:"=!\rules_1.txt""
 
         call:initResGraphicPack !nativeHeight! !nativeWidth! !GAME_TITLE!
+        set /A "nbAR=1"
 
         REM : create 16/9 fullscreen graphic packs
         call:createGfxPacks "16-9"
 
         for %%a in (!ARLIST!) do (
             REM : waiting all children processes ending
-            if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
+            call:waitChildrenProcessesEnd
+
             if ["%%a"] == ["1610"] call:createGfxPacks "16-10"
             if ["%%a"] == ["219"]  call:createGfxPacks "21-9"
             if ["%%a"] == ["329"]  call:createGfxPacks "32-9"
@@ -709,6 +702,16 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
             if ["%%a"] == ["489"]  call:createGfxPacks "48-9"
             REM : treating user defined aspect ratio W-H
             echo "%%a" | find "-" > NUL 2>&1 && call:createGfxPacks "%%a"
+            if not ["%%a"] == ["169"] call:waitChildrenProcessesEnd
+        )
+
+        set "bfwRulesFile="!newGp:"=!\rules.txt""
+        if !nbAR! GTR 1 (
+            for /L %%i in (1,1,!nbAR!) do (
+                set "tmpRulesFile="!newGp:"=!\rules_%%i.txt""
+                type !tmpRulesFile! >> !bfwRulesFile!
+                del /F !tmpRulesFile! > NUL 2>&1
+            )
         )
 
         call:finalizeResGraphicPack

@@ -21,8 +21,6 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
-    set "multiply="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
-
     REM : set current char codeset
     call:setCharSet
 
@@ -70,9 +68,10 @@ REM : main
 
 
     REM : for others ratios (including windowed ones)
+    pushd !BFW_TOOLS_PATH!
 
     set "intRatio=!ratio:.=!"
-    for /F %%r in ('!multiply! !hToReplace! !intRatio!') do set "result=%%r"
+    for /F %%r in ('multiplyLongInteger.bat !hToReplace! !intRatio!') do set "result=%%r"
 
     call:removeDecimals !result! wToReplace
 
@@ -306,7 +305,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

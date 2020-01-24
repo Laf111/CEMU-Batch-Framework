@@ -39,7 +39,7 @@ REM : main
 
     :waitingLoopProcesses
     timeout /T 1 > NUL 2>&1
-    wmic process get Commandline | find ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    wmic process get Commandline 2>NUL | find ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
     type !logFileTmp! | find  /I "LaunchGame" > NUL 2>&1 && (
 
         REM : set BatchFw processes to priority to high

@@ -268,6 +268,7 @@ REM : main
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
     set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
     set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+    set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
     set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
@@ -340,8 +341,8 @@ REM : main
 
     REM : clean BFW_LOGS
     pushd !BFW_LOGS!
-    for /F "delims=~" %%i in ('dir /B /S /A:D') do rmdir /Q /S "%%i" > NUL 2>&1
-    for /F "delims=~" %%i in ('dir /B /S /A:L') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:D 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:L 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
     
@@ -360,8 +361,18 @@ REM : main
     !xmlS! ed -d "//GameCache/Entry" !csTmp0! > !csTmp1!
     
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp1! > !csTmp!
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp1! > !csTmp2!
 
+    REM : patch settings.xml fullscreen mode
+    set "screenMode=fullscreen"
+    REM : get the SCREEN_MODE
+    for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
+    if not ["!screenMode!"] == ["fullscreen"] (
+        !xmlS! ed -u "//fullscreen" -v "false" !csTmp2! > !csTmp!
+    ) else (
+        set "csTmp=!csTmp2!"
+    )
+    
     REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
     set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
 
@@ -524,7 +535,7 @@ REM : main
 
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
+    wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
     type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
@@ -1472,7 +1483,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

@@ -267,7 +267,7 @@ REM : main
     REM : wait all transfert end
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && (
+    wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "winScp.com" | find /I /V "find" > NUL 2>&1 && (
         goto:waitingLoop
     )
 
@@ -348,7 +348,7 @@ REM : functions
 
         REM : loop on all 800000XX folders found
         pushd !WIIU_ACCOUNTS_FOLDER!
-        for /F "delims=~" %%d in ('dir /B /A:D 800000*') do (
+        for /F "delims=~" %%d in ('dir /B /A:D 800000* 2^> NUL') do (
 
             set "af="!WIIU_ACCOUNTS_FOLDER:"=!\%%d\account.dat""
 
@@ -453,7 +453,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
@@ -466,7 +466,7 @@ REM : functions
 
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value ^| find "="') do set "L0CALE_CODE=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

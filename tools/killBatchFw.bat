@@ -55,7 +55,7 @@ REM : main
     )
 
     REM : a second time to kill processes that might have been missed
-    for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%!GAMES_FOLDER_NAME!%%^'^" get ProcessID^,commandline') do (
+    for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%!GAMES_FOLDER_NAME!%%^'^" get ProcessID^,commandline 2^>NUL') do (
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"

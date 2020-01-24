@@ -211,7 +211,7 @@ REM : main
 
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "GPU_VENDOR=!string: =!"
@@ -226,7 +226,7 @@ REM : main
         set "GPU_DRIVERS_VERSION=%%i"
     )
 
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value 2^>NUL ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory /value 2^>NUL ^| find "="') do (
         set "RAM=%%i"
     )
     set "RAM=%RAM: =%"

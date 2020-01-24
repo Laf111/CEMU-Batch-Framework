@@ -66,8 +66,8 @@ REM : functions
         )
         if !nbIs! NEQ 99 (
             REM : count number of running instances
-            if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
-            if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline 2^>NUL ^| find /I !program! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
+            if not [!firstArg!] == ["NONE"] for /F "delims==" %%n in ('wmic process get Commandline 2^>NUL ^| find /I !program! ^| find /I !firstArg! ^| find /I /V "find" /C') do set /A "nbIs=%%n"
 
             echo nbIs=!nbIs!
 
@@ -76,8 +76,8 @@ REM : functions
             for /F "delims=~" %%i in (!firstArg!) do set "argPiece=%%~nxi"
 
             REM : stop the program if it is not already running
-            if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate && exit 0
-            if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate && exit 0
+            if !nbIs! NEQ 0 if [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!'" call terminate 2>NUL && exit 0
+            if !nbIs! NEQ 0 if not [!firstArg!] == ["NONE"] wmic process where "Name like '!exe!' and CommandLine like '%%!argPiece!%%'" call terminate  2>NUL && exit 0
 
         )
 

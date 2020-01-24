@@ -21,7 +21,7 @@ REM : main
     call:setCharSetOnly
     
     pushd !BFW_GP_FOLDER!
-    for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
+    for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution 2^> NUL ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
         call:treatGp "%%i"
     )
     pause
@@ -37,7 +37,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

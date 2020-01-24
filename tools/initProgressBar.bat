@@ -20,9 +20,10 @@ REM : main
 
     REM : create the shortcut in !BFW_RESOURCES_PATH!
     call:fixShortcut
-
+    
     REM : get screen resolution
-    for /f "tokens=2,10-11" %%a in ('!cmdOw! /p') do (
+    pushd !BFW_RESOURCES_PATH!
+    for /f "tokens=2,10-11" %%a in ('cmdOw.exe /p') do (
       if "%%a"=="0" set "WIDTH=%%b" & set "HEIGHT=%%c"
     )
     REM : flush logFile of SCREEN_MODE

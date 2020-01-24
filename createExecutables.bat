@@ -430,7 +430,7 @@ REM : main
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
         set "string=%%i"
         echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
@@ -518,7 +518,7 @@ REM : main
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code ^| find /I /V "\mlc01" 2^>NUL') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -569,8 +569,6 @@ REM : main
     if !QUIET_MODE! EQU 1 goto:log
     echo =========================================================
 
-    if !NB_GAMES_TREATED! NEQ 0 call:divfloat2int "!NB_GAMES_TREATED!.0" "!nbUsers!.0" 1 result && set /A "NB_GAMES_TREATED=!result!"
-
     echo Treated !NB_GAMES_TREATED! games
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -582,6 +580,7 @@ REM : main
     echo The point of BatchFw is to install the both versions ^(previous and
     echo current^) before removing the previous one if the last one runs all
     echo your games without any issue.
+    echo ---------------------------------------------------------
     pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
@@ -641,7 +640,7 @@ REM : functions
 
         set /A "disp=0"
         :waitingLoopProcesses
-        wmic process get Commandline | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set /A "disp=1"
                 echo Still extracting V2 GFX packs^, please wait ^.^.^.
@@ -870,7 +869,7 @@ REM : functions
 
         set "icoFile=!name:.exe=.ico!"
         set "ICO_PATH="!BFW_RESOURCES_PATH:"=!\icons\!icoFile!""
-        if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=256
+        if not exist !ICO_PATH! call !quick_Any2Ico! "-res=!TARGET_PATH:"=!" "-icon=!ICO_PATH:"=!" -formats=512
 
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\WinSCP^.lnk""
         set "LINK_DESCRIPTION="FTP to Wii-U using WinSCP""
@@ -981,7 +980,7 @@ REM : functions
         if not exist !LINK_PATH! (
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         REM : create a shortcut to convertIconsForAllGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's icons\Convert all jpg files to centered icons^.lnk""
         set "LINK_DESCRIPTION="Convert all jpg files find in the Cemu subfolder of the game's folder, to centered icon in order to be used by createExecutables.bat""
@@ -1460,52 +1459,11 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo !GAME_TITLE! ^: executable for !user:"=! already exists^, skipped
             ) else (
                 call:userGameExe !user!
+                set /A NB_GAMES_TREATED+=1
             )
         )
     goto:eof
     REM : ------------------------------------------------------------------
-
-    REM : function for dividing integers returning an int
-    :divfloat2int
-
-        REM : get a
-        set "numA=%~1"
-        REM : get b
-        set "numB=%~2"
-        REM : get nbDecimals
-        set /A "decimals=%~3"
-
-        set /A "one=1"
-        set /A "decimalsP1=decimals+1"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR the number %numA% does not have %decimals% decimals
-            pause
-            exit /b 1
-        )
-
-        if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR the number %numB% does not have %decimals% decimals
-            pause
-            exit /b 2
-        )
-
-        set "fpA=%numA:.=%"
-        set "fpB=%numB:.=%"
-
-        REM : a / b
-        set /A div=fpA*one/fpB
-
-        set /A "result=!div:~0,-%decimals%!"
-
-        REM : output
-        set "%4=%result%"
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
 
     :userGameExe
         set "user="%~1""
@@ -1598,7 +1556,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         pushd !GAMES_FOLDER!
         if !QUIET_MODE! EQU 0 echo - Executable for !user:"=! created ^!
-        set /A NB_GAMES_TREATED+=1
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1905,7 +1863,7 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1

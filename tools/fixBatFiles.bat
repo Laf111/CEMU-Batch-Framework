@@ -9,10 +9,10 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V15-4"
+    set "BFW_NEXT_VERSION=V15-5"
 
     set "THIS_SCRIPT=%~0"
-    
+
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -25,7 +25,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    
+
     REM : get the last version
     for /F "delims=~= tokens=2" %%i in ('type setup.bat ^| find "BFW_VERSION=V"') do set "value=%%i"
     set "BFW_OLD_VERSION=!value:"=!"
@@ -54,6 +54,8 @@ REM : ------------------------------------------------------------------
     timeout /T 3 > NUL 2>&1
 
     :patchSetup
+    echo ^> Check BFW_VERSION in files^.^.^.
+
     set "sf="!BFW_PATH:"=!\setup.bat""
     attrib -R !sf! > NUL 2>&1
     REM : ------------------------------------------------------------------
@@ -63,11 +65,13 @@ REM : ------------------------------------------------------------------
         !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
     )
 
+    echo ^> Remove trailing space^.^.^.
     REM : remove trailing space
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --excludeFileMask "*multiplyLongInteger*" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
-    
+
+    echo ^> Convert all files to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
-    REM : Convert all files to ANSI and set readonly
+    REM : Convert all files to ANSI and set them readonly
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger"') do (
 
         set "filePath="%%f""
@@ -80,6 +84,16 @@ REM : ------------------------------------------------------------------
         move /Y !tmpFile! !filePath! > NUL 2>&1
         attrib +R !filePath! > NUL 2>&1
     )
+
+    REM : check multiplyLongInteger
+    pushd !BFW_TOOLS_PATH!
+    for /F %%r in ('multiplyLongInteger.bat 720 2') do set "result=%%r"
+    if not ["!result!"] == ["1440"] (
+        echo ERROR^: multiplyLongInteger^.bat format was changed ^! 720x2=!result!
+        pause
+        exit /b 10
+    )
+    echo ^> Convert multiplyLongInteger ^: OK^, 720x2=!result!
 
     pause
     exit /b 0
@@ -95,7 +109,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
