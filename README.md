@@ -90,10 +90,10 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
         - if an update is installed;
         - if a DLC is installed;
     - Dump a list of games :
-            - define the list of games to dump (accordingly to the last snapshot taken)
-            - decide if you want to import saves for all/a user/select for each game
-            - dump sumultanously code, content, meta folder (game, update, DLC if found)
-            - prepare the games to be emulated (install update, DLC and saves in the mlc01 folder of the game)
+        - define the list of games to dump (accordingly to the last snapshot taken)
+        - decide if you want to import saves for all/a user/select for each game
+        - dump sumultanously code, content, meta folder (game, update, DLC if found)
+        - prepare the games to be emulated (install update, DLC and saves in the mlc01 folder of the game)
     - Import saves from the Wii-U (for all users);
     - Export saves to the Wii-U using SaveMii (create SaveMii's slots directly on the SD card by FTP)
     
