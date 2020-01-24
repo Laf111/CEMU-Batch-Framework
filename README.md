@@ -34,7 +34,7 @@ Last GFX packs checked (presets completion) : **V640**
     - **get/sync online files (account, friends'list),** 
     - **sync saves between CEMU with the Wii-U (export CEMU->Wii-U using SaveMii),**
     - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
-    - **dump your games safely (ignore errors caused by symlinks, 2 passes of sync command),**
+    - **dump your games safely (ignoring errors caused by symlinks and usinf a 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
     - **ping the wii-U to avoid online simultaneous access** 
     
 
@@ -182,7 +182,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
     
 - Dumping games via network isn't it quite slow?
 
-    - Yes sure (Wii-U builtin network adapter stuck : ~ 400Mb/h) but aoverall time has to be compared to a NANDUMPER's dump on SDCard + WFS Tools time to extract the game (and by FTP all is done automatically, game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one)     
+    - Yes sure (Wii-U builtin network adapter stuck : ~ 400Mb/h, means one night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + WFS Tools time to extract the game. And here, all is done automatically : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
     
 - Why backup/restore GLCache? 
 
