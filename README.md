@@ -176,27 +176,27 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
 
 ## FAQ: 
 
-- Do i need a Wii-U? 
+- **Do i need a Wii-U?**
 
     - No you don't. You can define users but obviously you'll cannot play online
     
-- Dumping games via network isn't it quite slow?
+- **Dumping games via network isn't it quite slow?**
 
     - Yes sure (Wii-U builtin network adapter stuck : ~ 400Mb/h, means one night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + WFS Tools time to extract the game. And here, all is done automatically : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
     
-- Why backup/restore GLCache? 
+- **Why backup/restore GLCache?**
 
     - CEMU version earlier than 1.15.1 does not protect the GLCache in shaderCache/driver/nvidia
     
     - GLCache is saved per game and so for versions >= 1.15.1 it avoids to handle only one big cache that could lead in extra RAM/VRAM consumption and generate stutters even with a full transferable shader cache
 
 
-- Playing with my games on a USB drive will not cripple performances? 
+- **Playing with my games on a USB drive will not cripple performances?**
 
     - When you have a full cache (transferable) for each games : NO. CEMU load all in RAM and so it will only lower opening/closing times.
     
     
-- CEMU is already portable, what about install CEMU on a USB drive directlty? 
+- **CEMU is already portable, what about install CEMU on a USB drive directlty?**
 
     - First, it might heavily drop performances especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time)
     
@@ -208,7 +208,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
         - you'll have to update your settings if the driver letter of your USB device is changed
         - BatchFw fix broken shortcuts (Wii-U Games\\fix broken shortcuts.lnk can be also use if you move your games'folder)
         
-- How BatchFw will mess around with CEMU accounts (> 1.15.19) ? 
+- **How BatchFw will mess around with CEMU accounts (> 1.15.19) ?**
 
     - Same as it does with earlier version. In fact, it ignores them so continue to use BatchFw user as usual (do not use the CEMU's feature) and so all users will be able to play on versions earlier than 1.15.19. 
     
