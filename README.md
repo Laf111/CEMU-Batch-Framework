@@ -182,7 +182,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
     
 - **Dumping games via network isn't it quite slow?**
 
-    - Yes sure (Wii-U builtin network adapter stuck : ~ 400Mb/h, means one night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + WFS Tools time to extract the game. And here, all is done automatically : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
+    - Yes sure (Wii-U builtin network adapter suck : ~ 400Mb/h, a long night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + manual extraction with WFS Tools' time. Here all is done automatically by scripts : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
     
 - **Why backup/restore GLCache?**
 
