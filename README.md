@@ -193,7 +193,7 @@ V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/
 
 - **Playing with my games on a USB drive will not cripple performances?**
 
-    - When you have a full cache (transferable) for each games : NO. CEMU load all in RAM and so it will only lower opening/closing times.
+    - When you have a full cache (transferable) for each games : NO. CEMU load all in RAM and so it will only slightly upper  opening/closing times.
     
     
 - **CEMU is already portable, what about install CEMU on a USB drive directlty?**
