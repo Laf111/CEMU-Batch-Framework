@@ -800,6 +800,8 @@ REM : functions
 
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
+            REM : to run multiplyLongInteger.bat
+            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !hc! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! wc
@@ -831,7 +833,8 @@ REM : functions
 
             set "f1=!fsRatio:.=!
             set "f2=!wsf:.=!
-
+            REM : to run multiplyLongInteger.bat
+            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !f1! !f2!') do set "result=%%r"
 
             set "winRatio=!result:~0,1!.!result:~1,6!"
@@ -848,6 +851,8 @@ REM : functions
 
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
+            REM : to run multiplyLongInteger.bat
+            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !mh! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! mw
@@ -868,9 +873,6 @@ REM : functions
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
 
-        REM : to run multiplyLongInteger.bat
-        pushd !BFW_TOOLS_PATH!
-        
         set /A "previous=6000
         for /L %%i in (%end%,-1,%start%) do (
 
@@ -884,7 +886,7 @@ REM : functions
         )
         REM : return to BFW_GP_FOLDER, needed  ?
         pushd !BFW_GP_FOLDER!
-    
+
     goto:eof
     REM : ------------------------------------------------------------------
 

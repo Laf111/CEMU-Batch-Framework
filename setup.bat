@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-5"
+    set "BFW_VERSION=V15-6"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -42,7 +42,7 @@ REM : main
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "createWiiuSDcard="!BFW_PATH:"=!\createWiiuSDcard.bat""
-    set "dumpGames="!BFW_PATH:"=!\dumpGamesFromWiiu.bat""
+    set "dumpGames="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
@@ -251,7 +251,17 @@ REM : main
 
     echo =========================================================
     echo ^> %NB_GAMES_VALID% valid games found
+    if %NB_GAMES_VALID% EQU 0 (
 
+        call:getUserInput "No games were found, do you want to dump games from your Wii-U? (y,n)" "y,n" ANSWER
+        if [!ANSWER!] == ["n"] (
+            echo So exiting^.^.^.
+            echo _BatchFW_Install folder must be located in your loadiines ^(^*^.rpx^) games folder
+            timeout /T 8 > NUL 2>&1
+            exit 55
+        )
+        goto:installWithDump
+    )
     if %QUIET_MODE% EQU 0 (
 
         echo ---------------------------------------------------------
@@ -318,7 +328,7 @@ REM : main
 
     :askRatios
     REM : get the users list
-    set "ratiosList=EMPTY"
+    set "ARLIST=EMPTY"
     set /A "changeArList=0"
 
     REM : search in all Host_*.log
@@ -334,10 +344,10 @@ REM : main
         )
     )
 
-    if ["!ratiosList!"] == ["EMPTY"] goto:getRatios
+    if ["!ARLIST!"] == ["EMPTY"] goto:getRatios
 
-    set "ratiosList=!ratiosList:EMPTY=!"
-    echo Aspect ratios already defined in BatchFW: !ratiosList!
+    set "ARLIST=!ARLIST:EMPTY=!"
+    echo Aspect ratios already defined in BatchFW: !ARLIST!
     choice /C ny /N /M "Change this list? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askScreenMode
 
@@ -350,7 +360,7 @@ REM : main
     echo ---------------------------------------------------------
     echo Choose your display ratio ^(for extra graphic packs^) ^:
     echo.
-    echo     ^(1^)^: user define one
+    echo     ^(1^)^: user define
     echo     ^(2^)^: 16/9
     echo     ^(3^)^: 16/10
     echo     ^(4^)^: 21/9
@@ -535,6 +545,7 @@ REM : main
     echo.
     if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
 
+    :installWithDump
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - if you^'re using a permanent hack ^(CBHC^)^:
@@ -560,9 +571,16 @@ REM : main
     )
 
     echo.
-    choice /C yn /N /M "Do you want to import some saves from your WII-U now? (y,n):"
-    if !ERRORLEVEL! EQU 2 goto:getSoftware
 
+    if %NB_GAMES_VALID% EQU 0 (
+        echo Launching dumping games^.^.^.
+        REM : launch dumping games script
+        wscript /nologo !Start! !dumpGames!
+        exit 15
+    ) else (
+        choice /C yn /N /M "Do you want to import some saves from your WII-U now? (y,n):"
+        if !ERRORLEVEL! EQU 2 goto:getSoftware
+    )
     echo.
     echo BatchFw need to take a snapshot of your Wii-U to
     echo will list games^, saves^, updates and DLC
@@ -806,20 +824,7 @@ REM : main
         echo.
         call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
     ) else (
-        if !NB_GAMES_VALID! EQU 0 if exist !BFW_WIIU_FOLDER! (
-            echo 3^: Cancel^, for dumping my games now ^?
-            call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
-        ) else (
-            call:getUserInput "Enter your choice ?: " "1,2" ANSWER
-        )
-    )
-    if [!ANSWER!] == ["3"] (
-        if !NB_GAMES_VALID! EQU 0 if exist !BFW_WIIU_FOLDER! (
-            REM : launch dumping games script
-            wscript /nologo !Start! !dumpGames!
-            exit 15
-        )
-        exit 70
+        call:getUserInput "Enter your choice ?: " "1,2" ANSWER
     )
 
     if [!ANSWER!] == ["1"] (
@@ -1418,7 +1423,7 @@ REM : functions
         set "cemuFolder="!GAME_FOLDER_PATH:"=!\Cemu""
         REM : search for inGameSaves, shaderCache and GAME_TITLE.txt under game folder
 
-        for /F "delims=~" %%k in ('dir /B /A:D !GAME_FOLDER_PATH! 2^> NUL') do (
+        for /F "delims=~" %%k in ('dir /B /A:D !GAME_FOLDER_PATH! 2^>NUL') do (
             set "folder="!GAME_FOLDER_PATH:"=!\%%k""
 
             if ["%%k"] == ["inGameSaves"] (

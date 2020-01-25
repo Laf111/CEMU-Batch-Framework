@@ -160,7 +160,7 @@ REM : main
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^> NUL') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^>NUL') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         echo ERROR^: last scan results were not found
@@ -265,7 +265,7 @@ REM : main
     set "pat="!BFW_GP_FOLDER:"=!\*_Resolution""
 
     if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
-    for /F "delims=~" %%p in ('dir /B /S !pat! 2^> NUL') do echo "%%p\rules.txt" >> !rulesFiles!
+    for /F "delims=~" %%p in ('dir /B /S !pat! 2^>NUL') do echo "%%p\rules.txt" >> !rulesFiles!
 
     set /A "nbGameWithGfxPack=0"
     call:checkGfxPacksAvailability

@@ -226,7 +226,7 @@ REM : main
         set "GPU_DRIVERS_VERSION=%%i"
     )
 
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory /value 2^>NUL ^| find "="') do (
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value 2^>NUL ^| find "="') do (
         set "RAM=%%i"
     )
     set "RAM=%RAM: =%"

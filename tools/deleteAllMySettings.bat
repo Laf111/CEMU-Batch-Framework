@@ -290,8 +290,8 @@ REM : functions
         )
         cd ..
         rmdir /S /Q !rootDir! > NUL 2>&1
-        if %ERRORLEVEL% EQU 0 echo !rootDir! deleted ^^!
-        if %ERRORLEVEL% NEQ 0 echo ERROR^: when deleting !rootDir! ^^!
+        if !ERRORLEVEL! EQU 0 echo !rootDir! deleted ^^!
+        if !ERRORLEVEL! NEQ 0 echo ERROR^: when deleting !rootDir! ^^!
 
         set /A NB_SETTINGS_TREATED+=1
         goto:eof
@@ -310,8 +310,8 @@ REM : functions
             call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["y"] (
                  rmdir /S /Q %%j > NUL 2>&1
-                if %ERRORLEVEL% EQU 0 echo %%j deleted ^^!
-                if %ERRORLEVEL% NEQ 0 echo ERROR^: when deleting %%j ^^!
+                if !ERRORLEVEL! EQU 0 echo %%j deleted ^^!
+                if !ERRORLEVEL! NEQ 0 echo ERROR^: when deleting %%j ^^!
                 set /A NB_SETTINGS_TREATED+=1
             )
         )
@@ -332,8 +332,8 @@ REM : functions
             call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
             if [!ANSWER!] == ["y"] (
                  rmdir /S /Q %%j > NUL 2>&1
-                if %ERRORLEVEL% EQU 0 echo %%j deleted ^^!
-                if %ERRORLEVEL% NEQ 0 echo ERROR^: when deleting %%j ^^!
+                if !ERRORLEVEL! EQU 0 echo %%j deleted ^^!
+                if !ERRORLEVEL! NEQ 0 echo ERROR^: when deleting %%j ^^!
                 set /A NB_SETTINGS_TREATED+=1
             )
         )

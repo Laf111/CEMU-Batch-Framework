@@ -1,3 +1,7 @@
+26/01/2020 V15-6 :
+fix : dumpGame call location in setup.bat
+fix : windowed GFX packs broken
+
 24/01/2020 V15-5 :
 fix : unexpected "file not found" message due to a missing redirection of stderr
 fix : force fullscreen choice in settings.xml (fullscreen node introduced in version 1.15.18)
@@ -7,7 +11,7 @@ fix : setup.bat ask outputs type 2 times
 fix : size of converted icons from jpg are now 512x512
 fix : remove unused icons built with box art image (save 40Mb on BatchFw)      
 fix : multiplyLongInteger error if a custom character (not ISO 850) is in games' path
-      (implicit expension not delayed in for loop)
+      (implicit expansion not delayed in for loop)
 add : if GFX completion is running and progress bar is used : in launchGame.bat use the
       progress bar to display the message
 add : a 0 limit on height in create*GraphicPacks when computing "exotic" custom aspect ratio

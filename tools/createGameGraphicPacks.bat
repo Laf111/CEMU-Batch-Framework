@@ -244,7 +244,7 @@ REM : main
     echo starting date = %startingDate%
     echo ending date = %endingDate% >> !cgpLogFile!
     echo ending date = %endingDate%
-    
+
     if %nbArgs% EQU 0 endlocal && pause
     exit /b 0
 

@@ -132,7 +132,7 @@
     )
 
     set "LAST_SCAN="NOT_FOUND""
-    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^> NUL') do set "LAST_SCAN="%%i""
+    for /F "delims=~" %%i in ('dir /B /A:D /O:N !BFW_WIIUSCAN_FOLDER! 2^>NUL') do set "LAST_SCAN="%%i""
 
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         set "scanNow="!BFW_TOOLS_PATH:"=!\scanWiiU.bat""
@@ -430,7 +430,7 @@ REM : functions
 
             set "pat="!USERS_ACCOUNTS_FOLDER:"=!\%%i*.dat""
             set "folder=NONE"
-            for /F "delims=~" %%j in ('dir /B !pat! 2^> NUL') do (
+            for /F "delims=~" %%j in ('dir /B !pat! 2^>NUL') do (
                 set "filename="%%j""
                 set "noext=!filename:.dat=!"
                 set "folder=!noext:%%i=!"

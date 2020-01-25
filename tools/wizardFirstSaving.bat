@@ -278,7 +278,7 @@ REM : main
     set "LastVersion=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
     set "LastVersion=!LastVersion:"=!"
-    
+
     set "gfxType=!LastVersion!"
 
     REM : suppose that version > 1.14 => > v1.12
@@ -341,8 +341,8 @@ REM : main
 
     REM : clean BFW_LOGS
     pushd !BFW_LOGS!
-    for /F "delims=~" %%i in ('dir /B /S /A:D 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
-    for /F "delims=~" %%i in ('dir /B /S /A:L 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:D 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:L 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
     
@@ -372,7 +372,7 @@ REM : main
     ) else (
         set "csTmp=!csTmp2!"
     )
-    
+
     REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
     set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
 

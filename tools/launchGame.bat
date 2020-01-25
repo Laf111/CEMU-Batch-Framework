@@ -500,12 +500,11 @@ REM : main
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
-
     if !useThirdPartySoft! EQU 1 (
+        echo Launching third party software >> !batchFwLog!
+
         if !usePbFlag! EQU 1 call:setProgressBar 68 70 "pre processing" "launching third party software"
 
-        echo Start 3rd party software >> !batchFwLog!
-        
         REM : launching user's software
         set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !launchThirdPartySoftware!
@@ -740,7 +739,7 @@ REM : main
     if not exist %gpuCacheBackupFolder% goto:lockCemu
 
     REM : openGpuCacheID
-    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !gpuCacheBackupFolder! 2^> NUL') do set "oldGpuCacheId=%%x"
+    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !gpuCacheBackupFolder! 2^>NUL') do set "oldGpuCacheId=%%x"
     if not ["%oldGpuCacheId%"] == ["NOT_FOUND"] goto:subfolderFound
 
     REM : search for shader files
@@ -1215,8 +1214,8 @@ REM : main
 
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" | find /I "@Y"> NUL 2>&1 && (
+        echo Stoping third party software >> !batchFwLog!
 
-        echo Stop 3rd party software >> !batchFwLog!
         set "stopThirdPartySoftware="!BFW_TOOLS_PATH:"=!\stopThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !stopThirdPartySoftware!
     )
@@ -1413,7 +1412,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 if !usePbFlag! EQU 0 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
                 set /A "disp=disp+1"
             )
-
             goto:waitingLoopProcesses
         )
 

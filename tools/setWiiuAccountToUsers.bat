@@ -78,7 +78,7 @@ REM : main
 
     REM : loop on all 800000XX folders found
     pushd !WIIU_ACCOUNTS_FOLDER!
-    for /F "delims=~" %%d in ('dir /B /A:D 800000* 2^> NUL') do (
+    for /F "delims=~" %%d in ('dir /B /A:D 800000* 2^>NUL') do (
 
         set "af="!WIIU_ACCOUNTS_FOLDER:"=!\%%d\account.dat""
 

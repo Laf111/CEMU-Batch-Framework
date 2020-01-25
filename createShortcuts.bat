@@ -1547,6 +1547,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
         if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
+        set /A NB_GAMES_TREATED+=1
     goto:eof
     REM : ------------------------------------------------------------------
 
