@@ -127,6 +127,8 @@ REM pause
     REM : get gp name
     for /F "delims=~" %%i in (!gp!) do set "gpName=%%~nxi"
 
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr\%gpName%""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
@@ -218,7 +220,6 @@ REM pause
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask patches.txt --find !patchValue! --replace !ratioValue! --logFile !fnrLogFile!
 
     :endMain
-    rmdir /S /Q !fnrLogFolder! > NUL 2>&1
     exit /b 0
     goto:eof
 

@@ -197,14 +197,15 @@ REM : main
 
     REM : if needed create the new folder tree for update and DLC
     REM : if version < 1.1? create links for old folder tree
-    
+
     REM : (re)create links for new update/DLC folders tree (in case of drive letter changing)
     set "endIdUp=%titleId:~8,8%"
     call:lowerCase !endIdUp! endIdLow
 
-    set "oldDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!\aoc""
+    set "ffTitleFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000""
+    set "oldDlcFolder="!ffTitleFolder:"=!\!endIdUp!\aoc""
     set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
-    set "oldUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\!endIdUp!""
+    set "oldUpdateFolder="!ffTitleFolder:"=!\!endIdUp!""
     set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
 
     call:linkMlcFolder
@@ -215,7 +216,7 @@ REM : main
     REM : wait the create*.bat end before continue
     echo Waiting all child processes end >> !myLog!
     echo Waiting all child processes end
-    
+
     :waitLoop
     wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
     type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && goto:waitLoop
@@ -223,7 +224,7 @@ REM : main
     del /F !logFileTmp! > NUL 2>&1
 
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
-    
+
     REM : BatchFW folders
     set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
 
@@ -244,7 +245,7 @@ REM : main
     ) else (
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     )
-    
+
     REM : import 16/9 GFX packs
     call:importGraphicPacks
 
@@ -339,11 +340,11 @@ REM : functions
         set "newUpdateMetaXml="!newUpdateFolder:"=!\meta\meta.xml""
         set "newDlcMetaXml="!newDlcFolder:"=!\meta\meta.xml""
 
-        REM : if newfolder not exist and old folder not exist : exit
+        REM : if newUpdatefolder not exist and old folder not exist : exit
         if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! goto:eof
         if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
 
-        REM : check if newFolder exist
+        REM : check if newUpdateFolder exist
         if not exist !newUpdateMetaXml! (
 
             REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
@@ -352,9 +353,10 @@ REM : functions
 
             if exist !oldDlcMetaXml! (
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c""
-                mkdir !folder! > NUL 2>&1
+                if not exist !folder! mkdir !folder! > NUL 2>&1
                 move !oldDlcFolder! !folder! > NUL 2>&1
-                set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
+
+                set "folder="!ffTitleFolder:"=!\aoc""
                 move !folder! !newDlcFolder! > NUL 2>&1
                 rmdir /Q !oldDlcFolder!
             )
@@ -364,20 +366,26 @@ REM : functions
             set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e""
             mkdir !folder! > NUL 2>&1
             move /Y !oldUpdateFolder! !folder! > NUL 2>&1
+
+            REM : it breaks compatibility with versions earlier than 1.11.6
+            rmdir /S /Q !ffTitleFolder! > NUL 2>&1
         )
 
-        if not exist !newDlcMetaXml! goto:linkUpdate
+        REM : do not recreate the old folder
+        REM : it breaks compatibility with versions earlier than 1.11.6
+REM        if not exist !newDlcMetaXml! goto:linkUpdate
+REM
+REM        set "link=!oldDlcFolder!"
+REM        set "target=!newDlcFolder!"
+REM
+REM        call:linkFolder
+REM
+REM        :linkUpdate
+REM        set "link=!oldUpdateFolder!"
+REM        set "target=!newUpdateFolder!"
+REM
+REM        call:linkFolder
 
-        set "link=!oldDlcFolder!"
-        set "target=!newDlcFolder!"
-
-        call:linkFolder
-
-        :linkUpdate
-        set "link=!oldUpdateFolder!"
-        set "target=!newUpdateFolder!"
-
-        call:linkFolder
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -36,11 +36,13 @@ REM : main
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     set "instanciateResX2gp="!BFW_TOOLS_PATH:"=!\instanciateResX2gp.bat""
-    set "multiply="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
@@ -252,8 +254,9 @@ REM : main
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
 
+            set "currentAr=%%j"
             REM : add to the list if not already present
-            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "!currentAr:-=!" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
             if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
         )
         REM : get the SCREEN_MODE
@@ -269,16 +272,13 @@ REM : main
         exit /b 2
     )
 
-    pushd !BFW_GP_FOLDER!
-
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
-
     REM : double of the native height of the game
     set /A "resX2=!nativeHeight!*2"
 
     REM : windowing scale factor
-    set "wsf=1.07638888888889"
+    set "wsf=1.0744047619047619047619047619048"
+    REM : 1366/768 windowed factor
+    REM set "wsf=1.103953147877013" 1508/768
 
     REM : flag for graphic packs existence
     set /A "newGpExist=0"
@@ -431,7 +431,6 @@ REM : main
 
     if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
     set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
-    if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal && pause
 
@@ -801,7 +800,6 @@ REM : functions
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
             REM : to run multiplyLongInteger.bat
-            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !hc! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! wc
@@ -834,11 +832,11 @@ REM : functions
             set "f1=!fsRatio:.=!
             set "f2=!wsf:.=!
             REM : to run multiplyLongInteger.bat
-            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !f1! !f2!') do set "result=%%r"
 
             set "winRatio=!result:~0,1!.!result:~1,6!"
         )
+        echo ^> windowed winRatio=!winRatio! >> !cgpLogFile!
         echo ^> windowed winRatio=!winRatio!
 
         REM : GFX pack V3 or higher
@@ -852,7 +850,6 @@ REM : functions
             REM : windowed resolutions
             set "intRatio=!winRatio:.=!"
             REM : to run multiplyLongInteger.bat
-            pushd !BFW_TOOLS_PATH!
             for /F %%r in ('multiplyLongInteger.bat !mh! !intRatio!') do set "result=%%r"
 
             call:removeDecimals !result! mw
@@ -873,20 +870,23 @@ REM : functions
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
 
+        set /A "step=1"
+        set /A "range=(end-start)"
+        set /A "step=range/30"
+        if !step! LSS 1 set /A "step=1"
+
         set /A "previous=6000
-        for /L %%i in (%end%,-1,%start%) do (
+        for /L %%i in (%end%,-!step!,%start%) do (
 
             set /A "wi=!wr!*%%i"
             set /A "hi=!hr!*%%i"
+
             set /A "offset=!previous!-!hi!"
             if !hi! NEQ 0 if !offset! GEQ 180 (
                 call:addResolution
                 set /A "previous=!hi!"
             )
         )
-        REM : return to BFW_GP_FOLDER, needed  ?
-        pushd !BFW_GP_FOLDER!
-
     goto:eof
     REM : ------------------------------------------------------------------
 

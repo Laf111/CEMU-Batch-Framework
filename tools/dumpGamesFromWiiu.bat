@@ -73,6 +73,9 @@ REM : main
     echo BE AWARE ^: transfert errors on update and DLC files can occur
     echo on symlinks not handled by FTPiiU server^.
     echo These files are not used by CEMU^. Just ignore them^.
+REM : TODO uncomment when inject game feature will ne enabled
+REM    echo Do not delete them if you want to inject the file to your Wii-U
+REM    echo using BatchFw.
     echo.
     pause
     echo.

@@ -32,6 +32,9 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! BatchFw* /MIN > NUL 2>&1
+
+
+
     
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
@@ -48,6 +51,7 @@ REM : main
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "fnrLogFolder="!BFW_LOGS:"=!\fnr""
 
     REM : set current char codeset
     call:setCharSet
@@ -115,6 +119,21 @@ REM : main
     echo - PROFILE_FILE    ^: !PROFILE_FILE!
     echo - SETTINGS_FOLDER ^: !SETTINGS_FOLDER!
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    REM : kill progress bar
+    type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && (
+        set "logFileTmp="!TMP:"=!\BatchFw_process_wizard.list""
+
+        :killingLoop
+        REM : use () after do (wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C taskkill /F /pid %%i > NUL 2>&1 & goto:killingLoop does nothing)
+        !cmdOw! /T | find /I "BatchFw pre processing" | sort /R > !logFileTmp!
+        for /F "tokens=3" %%i in ('type !logFileTmp!') do (
+            taskkill /F /pid %%i > NUL 2>&1
+            goto:killingLoop
+        )
+        del /F !logFileTmp! > NUL 2>&1
+
+    )
 
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
@@ -338,13 +357,6 @@ REM : main
 
     REM : check the file size
     for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
-
-    REM : clean BFW_LOGS
-    pushd !BFW_LOGS!
-    for /F "delims=~" %%i in ('dir /B /S /A:D 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
-    for /F "delims=~" %%i in ('dir /B /S /A:L 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
-    REM : cd to GAMES_FOLDER
-    pushd !GAMES_FOLDER!
     
     REM : create a link to GAME_FOLDER_PATH in log folder
     set "TMP_GAME_FOLDER_PATH="!BFW_LOGS:"=!\!GAME_TITLE!""
@@ -539,8 +551,8 @@ REM : main
 
     type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
-            cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
         )
         set /A "disp=disp+1"
         goto:waitingLoop

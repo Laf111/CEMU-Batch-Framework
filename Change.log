@@ -1,3 +1,13 @@
+27/01/2020 V15-7 :
+fix : migrate games'update and DLC path to new ones (break compatibility with versions
+      earlier than 1.11.6) ti avoid 1.17 DLC check on the old location (copy/moveMlc01 scripts
+      are not impacted)
+fix : update scale factor for 16/10 windowed ratio
+fix : System.IO.DirectoryNotFoundException that can be raised because of fnr subfolder deletion
+      by other scripts when building GFX packs
+fix : do not display the progress bar when collecting settings for a game
+opt : slightly optimize GFX completion process
+
 26/01/2020 V15-6 :
 fix : dumpGame call location in setup.bat
 fix : windowed GFX packs broken

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-6"
+    set "BFW_VERSION=V15-7"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -576,6 +576,8 @@ REM : main
         echo Launching dumping games^.^.^.
         REM : launch dumping games script
         wscript /nologo !Start! !dumpGames!
+        echo When finished^, relaunch setup^.bat
+        timeout /T 6 > NUL 2>&1
         exit 15
     ) else (
         choice /C yn /N /M "Do you want to import some saves from your WII-U now? (y,n):"

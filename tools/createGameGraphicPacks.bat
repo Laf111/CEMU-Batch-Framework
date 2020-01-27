@@ -39,6 +39,7 @@ REM : main
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
+
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
@@ -216,7 +217,7 @@ REM : main
 
 
     REM : windowing scale factor
-    set "wsf=1.07638888888889"
+    set "wsf=1.0744047619047619047619047619048"
     pushd !BFW_TOOLS_PATH!
     for /F %%r in ('multiplyLongInteger.bat !nativeHeight! 1777777') do set "result=%%r"
     call:removeDecimals !result! nativeWidth
@@ -230,9 +231,6 @@ REM : main
 
     REM : waiting all children processes ending
     if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
-
-    set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
-    if exist !fnrFolder! rmdir /Q /S !fnrFolder! > NUL 2>&1
 
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -609,8 +607,13 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
 
+        set /A "step=1"
+        set /A "range=(end-start)"
+        set /A "step=range/30"
+        if !step! LSS 1 set /A "step=1"
+
         set /A "previous=6000
-        for /L %%i in (%end%,-1,%start%) do (
+        for /L %%i in (%end%,-!step!,%start%) do (
 
             set /A "wi=!wr!*%%i"
             set /A "hi=!hr!*%%i"
@@ -676,8 +679,9 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
             REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
 
             for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
+                set "currentAr=%%j"
                 REM : add to the list if not already present
-                if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+                if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "!currentAr:-=!" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
                 if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
             )
             REM : get the SCREEN_MODE

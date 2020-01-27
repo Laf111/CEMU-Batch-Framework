@@ -26,6 +26,18 @@ REM : main
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+
+
+    REM : clean BFW_LOGS
+    pushd !BFW_LOGS!
+    for /F "delims=~" %%i in ('dir /B /S /A:D 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    for /F "delims=~" %%i in ('dir /B /S /A:L 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
+    REM : cd to GAMES_FOLDER
+    pushd !GAMES_FOLDER!
+
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    mkdir !fnrLogFolder! > NUL 2>&1
+
     set /A "usePbFlag=0"
     type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && (
         REM : init progressBar
@@ -89,11 +101,6 @@ REM : main
     :displayVersion
     echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     echo ========================================================= >> !batchFwLog!
-
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder!
-    del /F "!BFW_PATH:"=!\logs\fnr_*"
-    mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : set current char codeset
     call:setCharSet
@@ -1274,7 +1281,7 @@ REM : main
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
-    if !usePbFlag! EQU 1 call:setProgressBar 96 100 "post processing" "waiting the end of all child processes"
+    if !usePbFlag! EQU 1 call:setProgressBar 96 100 "post processing" "waiting child processes end before exiting"
 
     REM :restoreBackups
     if exist !cs! call:restoreFile !cs!
