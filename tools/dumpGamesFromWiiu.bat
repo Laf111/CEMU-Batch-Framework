@@ -35,6 +35,7 @@ REM : main
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
     set "importWiiuSaves="!BFW_TOOLS_PATH:"=!\importWiiuSaves.bat""
 
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
     set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
