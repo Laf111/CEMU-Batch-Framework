@@ -2,7 +2,7 @@
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, powershell, vbs scripts and 3rd party tools.
 
-Versions of CEMU supported : **1.11.6 to 1.17.0**
+Versions of CEMU supported : **1.11.1 to 1.17.0**
 
 (if you want to use earlier versions, create an installation per game and per user)
 
@@ -26,7 +26,7 @@ Last GFX packs checked (presets completion) : **V640**
 
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
 
-- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support 4/3, 16/9, 16/10, 21/9, 32/9, 48/9 and custom user aspect ratios**
+- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones**
 
 - **create FPS packs : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).**
 
