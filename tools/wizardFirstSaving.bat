@@ -549,7 +549,7 @@ REM : main
     timeout /T 1 > NUL 2>&1
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
-    type !logFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+    type !logFileTmp! | find /I "GraphicPacks.bat" | find /I "create" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
@@ -1120,6 +1120,12 @@ REM : functions
         if not ["!value!"] == ["NOT_FOUND"] (
             if ["!value!"] == ["0"] echo Graphics API [OpenGL]
             if ["!value!"] == ["1"] echo Graphics API [Vulkan]
+        )
+
+        call:getValueInXml "//Graphic/fullscreen/text()" !cs! value
+        if not ["!value!"] == ["NOT_FOUND"] (
+            if ["!value!"] == ["true"] echo Fullscreen Mode [ON]
+            if ["!value!"] == ["false"] echo Fullscreen Mode [OFF]
         )
 
         call:getValueInXml "//Graphic/fullscreen_menubar/text()" !cs! value

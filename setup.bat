@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-7"
+    set "BFW_VERSION=V15-8"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -67,6 +67,17 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : get screen resolution
+    pushd !BFW_RESOURCES_PATH!
+    for /f "tokens=2,10-11" %%a in ('cmdOw.exe /p') do (
+      if "%%a"=="0" set "scrWidth=%%b" & set "scrHeight=%%c"
+    )
+    REM : flush logFile of SCREEN_MODE
+    call:cleanHostLogFile RESOLUTION
+
+    set "msg="RESOLUTION=!scrWidth!x!scrHeight!""
+    call:log2HostFile !msg!
 
     REM : check if file system is NTFS
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
@@ -327,6 +338,15 @@ REM : main
     goto:askScreenMode
 
     :askRatios
+    REM : compute current aspect ratio
+    call:reduceFraction !scrWidth! !scrHeight! sWr sHr
+
+    set "msg="DESIRED_ASPECT_RATIO=!sWr!-!sHr!""
+
+    type !logFile! | find /V !msg! > NUL 2>&1 && (
+        call:log2HostFile !msg!
+    )
+
     REM : get the users list
     set "ARLIST=EMPTY"
     set /A "changeArList=0"
@@ -344,66 +364,33 @@ REM : main
         )
     )
 
-    if ["!ARLIST!"] == ["EMPTY"] goto:getRatios
-
     set "ARLIST=!ARLIST:EMPTY=!"
     echo Aspect ratios already defined in BatchFW: !ARLIST!
-    choice /C ny /N /M "Change this list? (y,n): "
+    choice /C ny /N /M "Change this list? (y = add an aspect ratio or define a custom one, n): "
     if !ERRORLEVEL! EQU 1 goto:askScreenMode
 
-    REM : flush logFile of DESIRED_ASPECT_RATIO
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "DESIRED_ASPECT_RATIO" 2^>NUL') do call:cleanHostLogFile DESIRED_ASPECT_RATIO
-
     :getRatios
-    set /A "changeArList=1"
 
     echo ---------------------------------------------------------
     echo Choose your display ratio ^(for extra graphic packs^) ^:
     echo.
-    echo     ^(1^)^: user define
-    echo     ^(2^)^: 16/9
-    echo     ^(3^)^: 16/10
-    echo     ^(4^)^: 21/9
-    echo     ^(5^)^: 32/9
-    echo     ^(6^)^: 4/3
-    echo     ^(7^)^: 16/3 ^(48/9^)
+
+    echo     ^(1^)^: custom one ^(define it^)
+    echo     ^(2^)^: 4^/3
+    echo     ^(3^)^: 21^/9
+    echo     ^(4^)^: 21^/9 UltraWide 2^.37^:1 ^(2560x1080 = 64^/27^)
+    echo     ^(5^)^: 21^/9 UltraWide 2^.4^:1 ^(1920x900 = 32^/15^)
+    echo     ^(6^)^: 21^/9 UltraWide 2^.13^:1 ^(1920x800 = 12^/5^)
+    echo     ^(7^)^: TV Flat 1^.85^:1 ^(1998x1080 = 37^/20^)
+    echo     ^(8^)^: TV Scope 2^.39^:1 ^(2048x858 = 1024^/429^)
+    echo     ^(9^)^: TV Full Container (DCI) 1^.89^:1 ^(2048x1080 = 256^/135^)
+
     echo     ^(c^)^: cancel
     echo ---------------------------------------------------------
 
     :askRatioAgain
     set /P  "ANSWER=Enter your choice: "
     if not ["!ANSWER!"] == ["c"] (
-
-        if ["!ANSWER!"] == ["2"] (
-            set "msg="DESIRED_ASPECT_RATIO=169""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
-        if ["!ANSWER!"] == ["3"] (
-            set "msg="DESIRED_ASPECT_RATIO=1610""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
-        if ["!ANSWER!"] == ["4"] (
-            set "msg="DESIRED_ASPECT_RATIO=219""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
-        if ["!ANSWER!"] == ["5"] (
-            set "msg="DESIRED_ASPECT_RATIO=329""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
-        if ["!ANSWER!"] == ["6"] (
-            set "msg="DESIRED_ASPECT_RATIO=43""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
-        if ["!ANSWER!"] == ["7"] (
-            set "msg="DESIRED_ASPECT_RATIO=489""
-            call:log2HostFile !msg!
-            goto:askScreenMode
-        )
 
         if ["!ANSWER!"] == ["1"] (
             :getcustomAr
@@ -415,13 +402,81 @@ REM : main
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
             set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
-            call:log2HostFile !msg!
-            goto:askScreenMode
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["2"] (
+            set "msg="DESIRED_ASPECT_RATIO=43""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["3"] (
+            set "msg="DESIRED_ASPECT_RATIO=219""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["4"] (
+            set "msg="DESIRED_ASPECT_RATIO=64-27""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["5"] (
+            set "msg="DESIRED_ASPECT_RATIO=32-15""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["6"] (
+            set "msg="DESIRED_ASPECT_RATIO=12-15""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["7"] (
+            set "msg="DESIRED_ASPECT_RATIO=37-20""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["8"] (
+            set "msg="DESIRED_ASPECT_RATIO=1024-429""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["9"] (
+            set "msg="DESIRED_ASPECT_RATIO=256-135""
+            type !logFile! | find /V !msg! > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
         )
         goto:askRatioAgain
     ) else (
         goto:askScreenMode
     )
+    :anotherRatio
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
@@ -455,7 +510,9 @@ REM : main
     set /A "cr=!ERRORLEVEL!"
     REM : if user cancelled the update
     if !cr! EQU 2 if not exist !BFW_GP_FOLDER! goto:beginExtraction
-    if !changeArList! EQU 1 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if !cr! NEQ 1 (
+
+    REM : here ["!ACTIVE_ADAPTER!"] != ["NOT_FOUND"]
+    if !changeArList! EQU 1 (
         REM : force a graphic pack update
         echo Forcing a GFX pack update to take new ratios into account^.^.^.
         echo.
@@ -468,6 +525,7 @@ REM : main
     if !cr! EQU 0 goto:getUserMode
 
     :extractlgfxp
+    if !changeArList! EQU 1 goto:beginExtraction
     if %QUIET_MODE% EQU 1 goto:getUserMode
 
     :beginExtraction
@@ -828,7 +886,11 @@ REM : main
     ) else (
         call:getUserInput "Enter your choice ?: " "1,2" ANSWER
     )
-
+    if [!ANSWER!] == ["3"] (
+        echo Exiting^.^.^.
+        timeout /T 3 > NUL 2>&1
+        exit 25
+    )
     if [!ANSWER!] == ["1"] (
 
         REM : instanciate a fixBrokenShortcut.bat
@@ -1018,6 +1080,31 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :reduceFraction
+
+        set /A "w=%~1"
+        set /A "h=%~2"
+
+        for /L %%l in (19,-1,2) do (
+
+            set /A "multiplier=%%l"
+            set /A "r=!w!%%!multiplier!"
+
+            if !r! EQU 0 (
+                set /A "r=!h!%%!multiplier!"
+                if !r! EQU 0 (
+                    set /A "w=w/!multiplier!"
+                    set /A "h=h/!multiplier!"
+                )
+            )
+        )
+
+        set /A "%3=!w!"
+        set /A "%4=!h!"
+    goto:eof
+
+REM : ------------------------------------------------------------------
+
     REM : function to set or ask for using progressbar
     :setProgressBar
         REM : enable progress bar if installed on a removable device
@@ -1038,6 +1125,7 @@ REM : functions
             call:log2HostFile !msg!
         )
     goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : check if (DLC) or (UPDATE DATA) folders exist
     :checkGamesToBePrepared

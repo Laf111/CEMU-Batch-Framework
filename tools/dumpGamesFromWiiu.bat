@@ -287,6 +287,15 @@ REM    echo using BatchFw.
     ) else (
         echo GFX packs found for all games^, no need to update GFX packs
     )
+
+    if !nbGamesSelected! NEQ 0 (
+        echo New Games were added to your library^, launching setup^.bat^.^.^.
+        set "setup="!BFW_PATH:"=!\setup.bat""
+
+        wscript /nologo !Start! !setup!
+        timeout /T 3 > NUL 2>&1
+        exit 15
+    )
     echo =========================================================
     echo games dumped successfully
     pause

@@ -72,10 +72,10 @@ REM : main
 
     echo ========================================================= > !myLog!
 
-    if %nbArgs% NEQ 4 (
+    if %nbArgs% NEQ 5 (
         echo ERROR ^: on arguments passed ^!  >> !myLog!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile >> !myLog!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId lockFile
+        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId buildOldUpdatePaths lockFile >> !myLog!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" gfxType GAME_FOLDER_PATH titleId buildOldUpdatePaths lockFile
         echo given {%*} >> !myLog!
         echo given {%*}
 
@@ -116,7 +116,10 @@ REM : main
     set "titleId=!args[2]!"
     set "titleId=%titleId:"=%"
 
-    set "lockFile=!args[3]!"
+    set "buildOldUpdatePaths=!args[3]!"
+    set /A "buildOldUpdatePaths=%buildOldUpdatePaths:"=%"
+
+    set "lockFile=!args[4]!"
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
@@ -175,7 +178,7 @@ REM : main
 
     if ["!lastInstalledVersion!"] == ["!newVersion!"] (
         echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
-        exit 10
+        goto:createLinks
 
     )
     REM : launching the search in all gfx pack folder (V2 and up)
@@ -193,6 +196,7 @@ REM : main
         call:log2GamesLibraryFile !msg!
     )
 
+    :createLinks
     REM : before waitingLoop :
 
     REM : if needed create the new folder tree for update and DLC
@@ -203,6 +207,7 @@ REM : main
     call:lowerCase !endIdUp! endIdLow
 
     set "ffTitleFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000""
+    if not exist !ffTitleFolder! mkdir !ffTitleFolder! > NUL 2>&1
     set "oldDlcFolder="!ffTitleFolder:"=!\!endIdUp!\aoc""
     set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
     set "oldUpdateFolder="!ffTitleFolder:"=!\!endIdUp!""
@@ -240,16 +245,22 @@ REM : main
     REM : Re launching the search (to get the freshly created packs)
 
     REM : search in the needed folder
-    if not ["!gfxType!"] == ["2"] (
+    if not ["!gfxType!"] == ["V2"] (
+        echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER! >> !myLog!
+        echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER!
+
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     ) else (
+        echo V2 packs^, search in  ^: !BFW_LEGACY_GP_FOLDER! >> !myLog!
+        echo V2 packs^, search in  ^: !BFW_LEGACY_GP_FOLDER!
+
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
     )
 
     REM : import 16/9 GFX packs
     call:importGraphicPacks
 
-    if not ["!gfxType!"] == ["2"] call:importMods
+    if not ["!gfxType!"] == ["V2"] call:importMods
 
     REM : get DESIRED_ASPECT_RATIO and SCREEN_MODE
     for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
@@ -366,25 +377,26 @@ REM : functions
             set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e""
             mkdir !folder! > NUL 2>&1
             move /Y !oldUpdateFolder! !folder! > NUL 2>&1
-
-            REM : it breaks compatibility with versions earlier than 1.11.6
-            rmdir /S /Q !ffTitleFolder! > NUL 2>&1
         )
 
-        REM : do not recreate the old folder
-        REM : it breaks compatibility with versions earlier than 1.11.6
-REM        if not exist !newDlcMetaXml! goto:linkUpdate
-REM
-REM        set "link=!oldDlcFolder!"
-REM        set "target=!newDlcFolder!"
-REM
-REM        call:linkFolder
-REM
-REM        :linkUpdate
-REM        set "link=!oldUpdateFolder!"
-REM        set "target=!newUpdateFolder!"
-REM
-REM        call:linkFolder
+        if !buildOldUpdatePaths! EQU 0 (
+            REM : v> 1.15.11 and especially v1.16 and up => delete the folder to avoid popup move message
+            rmdir /Q /S !ffTitleFolder! > NUL 2>&1
+            goto:eof
+        )
+
+        if not exist !newDlcMetaXml! goto:linkUpdate
+
+        set "link=!oldDlcFolder!"
+        set "target=!newDlcFolder!"
+
+        call:linkFolder
+
+        :linkUpdate
+        set "link=!oldUpdateFolder!"
+        set "target=!newUpdateFolder!"
+
+        call:linkFolder
 
 
     goto:eof

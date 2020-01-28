@@ -73,7 +73,7 @@ REM : main
     set "intRatio=!ratio:.=!"
     for /F %%r in ('multiplyLongInteger.bat !hToReplace! !intRatio!') do set "result=%%r"
 
-    call:removeDecimals !result! wToReplace
+    call:removeFromRight !result! wToReplace
 
     REM : force even integer
     set /A "isEven=!wToReplace!%%2"
@@ -237,12 +237,36 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :removeDecimals
+    :truncateStrFromRight
+        set "str=%~1"
+        set /A "nbc=%~2"
+        set "%3=!str:~-%nbc%!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :removeFromRight
 
         set "r=%~1"
-        set "del=%r:~-6%"
-        set "%2=!r:%del%=!"
+        set /A "nbd=%~2"
+        REM : init for an integer => remove from right
+        set "%3=!r:~0,-%nbd%!"
 
+        REM : for a float only treat the decimal part
+        echo !r! | find "." > NUL 2>&1 && (
+
+            set "decPart="
+            for /F "delims=~. tokens=1-2" %%e in ("%r%") do set "intPart=%%e" & set "decPart=%%f"
+
+            REM : init with !nbd! GTR !tnbd!
+            set "%3=!intPart!.!decPart!"
+
+            call:strLen decPart tnbd
+            if !nbd! LEQ !tnbd! (
+                call:truncateStrFromRight !decPart! !nbd! decPartFormated
+                set "%3=!intPart!.!decPartFormated!"
+            )
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -250,7 +274,7 @@ REM : functions
         set /A "len=0"
         :strLen_Loop
            if not ["!%1:~%len%!"] == [""] set /A len+=1 & goto:strLen_Loop
-            set %2=%len%
+            set /A "%2=%len%"
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -262,17 +286,15 @@ REM : functions
         set /A "fpA=%~1"
         REM : get b
         set /A "fpB=%~2"
-        REM : get number of decimals asked
-        set /A "nbDec=%~3"
 
-        call:strLen fpA strLenA
-        call:strLen fpB strLenB
+        REM : fix number of decimals to 7 (int 32 bits limitation)
+        set /A "nbDec=7"
 
-        set /A "nlA=!strLenA!"
-        set /A "nlB=!strLenB!"
+        call:strLen fpA nlA
+        call:strLen fpB nlB
 
-        set /A "max=%nlA%"
-        if %nlB% GTR %nlA% set /A "max=%nlB%"
+        set /A "max=!nlA!"
+        if !nlB! GTR !nlA! set /A "max=!nlB!"
         set /A "decimals=9-%max%"
 
         set /A "one=1"
@@ -287,19 +309,22 @@ REM : functions
 
         if %nbDec% LSS %decimals% (
             set "decPart=!div:~-%nbDec%!"
-        ) else (
-            set "decPart=!div:~-%decimals%!"
+            goto:setResult
         )
+        REM : %nbDec% GEQ %decimals%
+        set "decPart=!div:~-%decimals%!"
+        set /A "nbMis=nbDec-decimals"
+        for /L %%l in (1,1,!nbMis!) do set "decPart=!decPart!0"
+
+        :setResult
         set "result=!intPart!.!decPart!"
         if %nbDec% EQU 0 set /A "result=!intPart!"
 
-
         REM : output
-        set "%4=!result!"
+        set "%3=!result!"
 
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     REM : function to get and set char set code for current host
     :setCharSet

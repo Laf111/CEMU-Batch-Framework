@@ -125,6 +125,8 @@ REM : main
 
     REM : flag importing settings
     set /A "settingsImported=0"
+    REM : flag for creating old update and DLC paths
+    set /A "buildOldUpdatePaths=1"
 
     REM : cd to BFW_TOOLS_PATH
     pushd !BFW_TOOLS_PATH!
@@ -272,6 +274,11 @@ REM : main
     set "ml="!BFW_TOOLS_PATH:"=!\monitorBatchFw.bat""
     wscript /nologo !StartHidden! !ml!
 
+
+    REM : check if an internet connexion is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
     if !usePbFlag! EQU 1 call:setProgressBar 22 34 "pre processing" "searching for a new GFX packs release"
     
     REM : check a graphic pack update
@@ -311,6 +318,9 @@ REM : main
     ) else (
         REM : version > 1.15.15 => version > 1.14
         set "v114=1"
+
+        REM : do build old update/dlc paths in mlc
+        set /A "buildOldUpdatePaths=0"
         goto:getTitleId
     )
     if exist !gfxv2! goto:getTitleId
@@ -331,6 +341,15 @@ REM : main
         echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 21
+    )
+    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] type !logFile! | find /I "COMPLETE_GP" > NUL && (
+        REM : force a graphic pack update
+        echo Forcing a GFX pack update to take new ratios into account^.^.^.
+        echo.
+
+        REM : forcing a GFX pack update to add GFX packs for new games
+        set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
+        call !gfxUpdate! -silent
     )
 
     :getTitleId
@@ -381,8 +400,8 @@ REM : main
 
     REM : update Game's Graphic Packs
     set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-    wscript /nologo !StartHidden! !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !lockFile!
-    echo !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !lockFile! >> !batchFwLog!
+    wscript /nologo !StartHidden! !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile!
+    echo !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile! >> !batchFwLog!
 
     :getScreenMode
 
@@ -964,9 +983,9 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "native FPS" 2^>NUL') do set "FPS=%%i"
 
     if !usePbFlag! EQU 1 if %cr_cemu% EQU 0 (
-        call:setProgressBar 30 38 "post processing" "fil in compatibility reports"
+        call:setProgressBar 30 38 "post processing" "fill in compatibility reports"
     ) else (
-        call:setProgressBar 10 38 "post processing" "fil in compatibility reports"
+        call:setProgressBar 10 38 "post processing" "fill in compatibility reports"
     )
 
     REM : report compatibility for CEMU_FOLDER_NAME and GAME on USERDOMAIN
@@ -2324,10 +2343,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             goto:eof
         )
 
-        REM : check if an internet connexion is active
-        set "ACTIVE_ADAPTER=NOT_FOUND"
         set "defaultBrowser="NOT_FOUND""
-        for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
             for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
