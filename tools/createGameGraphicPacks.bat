@@ -668,7 +668,8 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         call:setPresets
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
-
+        if not ["!desc!"] == ["16-10"] goto:eof
+        
         REM : windowed GFX packs
         call:setPresets windowed
 

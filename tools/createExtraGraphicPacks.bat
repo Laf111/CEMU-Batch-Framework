@@ -960,6 +960,7 @@ REM : functions
         call:setPresets
 
         if ["!screenMode!"] == ["fullscreen"] goto:eof
+        if not ["!desc!"] == ["16-10"] goto:eof
 
         REM : complete windowed GFX presets (and packs for GFX packs V2)
         echo Create !desc:-=/! windowed missing!comment! resolution packs >> !cgpLogFile!

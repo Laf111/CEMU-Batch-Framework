@@ -69,7 +69,7 @@ REM : functions
         type !logFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
 
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 60sec more. If you want to kill all processes, use .\BatchFw\Kill BatchFw Processes.lnk"
+            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 60sec more. If you want to kill all processes anyway, use .\BatchFw\Kill BatchFw Processes.lnk"
             set /A "duration-=60"
             goto:eof
         )

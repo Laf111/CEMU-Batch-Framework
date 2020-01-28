@@ -1,3 +1,15 @@
+28/01/2020 V15-8 :
+add : call to setup.bat at the end of dumping game if game was added
+add : get //Graphic/fullscreen value from settings/xml in wizardFirstSaving.bat
+add : force GFX packs update after extraction if V2 GFX packs are needed
+add : ratio aspect computation from the current resolution
+add : TV aspect ratio support (HDTV, DCI, UltraWide)
+fix : regression setup.bat exit (choice 3) was not taken into account
+fix : regression V2 packs not listed in CEMU < 1.14 (links were not created)
+fix : update paths/detection compatibility broken for CEMU < 1.15.11 
+      (>1.16 move files and break the comptability on update location, DLC is OK since 1.11.6)
+      rebuild the old paths (using links) for versions < 1.15.11 
+
 27/01/2020 V15-7 :
 fix : migrate games'update and DLC path to new ones (break compatibility with versions
       earlier than 1.11.6) ti avoid 1.17 DLC check on the old location (copy/moveMlc01 scripts

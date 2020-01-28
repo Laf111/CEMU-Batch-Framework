@@ -32,9 +32,6 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! BatchFw* /MIN > NUL 2>&1
-
-
-
     
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
@@ -1122,13 +1119,13 @@ REM : functions
             if ["!value!"] == ["1"] echo Graphics API [Vulkan]
         )
 
-        call:getValueInXml "//Graphic/fullscreen/text()" !cs! value
+        call:getValueInXml "//fullscreen/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
             if ["!value!"] == ["true"] echo Fullscreen Mode [ON]
             if ["!value!"] == ["false"] echo Fullscreen Mode [OFF]
         )
 
-        call:getValueInXml "//Graphic/fullscreen_menubar/text()" !cs! value
+        call:getValueInXml "//fullscreen_menubar/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] (
             if ["!value!"] == ["true"] echo Fullscreen Menubar [ON]
             if ["!value!"] == ["false"] echo Fullscreen Menubar [OFF]
