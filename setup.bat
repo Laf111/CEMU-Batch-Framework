@@ -394,11 +394,17 @@ REM : main
 
         if ["!ANSWER!"] == ["1"] (
             :getcustomAr
-            set /P  "width=Please enter width  : "
-            set /P "height=Please enter height : "
             echo.
-
-            choice /C ny /N /M "Please confirm !width!/!height! as aspect ratio ? (y,n): "
+            echo You can enter a directly a target resolution if you don^'t know
+            echo the reduced ratio^.
+            echo.
+            set /P  "widthRead=Please enter width  : "
+            set /P "heightRead=Please enter height : "
+            echo.
+            REM : compute current aspect ratio
+            call:reduceFraction !widthRead! !heightRead! width height
+    
+            choice /C ny /N /M "Define !width!/!height! as aspect ratio ? (y,n): "
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
             set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
@@ -409,7 +415,7 @@ REM : main
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["2"] (
-            set "msg="DESIRED_ASPECT_RATIO=43""
+            set "msg="DESIRED_ASPECT_RATIO=4-3""
             type !logFile! | find /V !msg! > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
@@ -417,7 +423,7 @@ REM : main
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["3"] (
-            set "msg="DESIRED_ASPECT_RATIO=219""
+            set "msg="DESIRED_ASPECT_RATIO=21-9""
             type !logFile! | find /V !msg! > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
@@ -685,7 +691,7 @@ REM : main
     if !ERRORLEVEL! EQU 1  goto:getUsers
 
     :getSoftware
-    cls
+
     echo ---------------------------------------------------------
 
     REM : get the software list
@@ -782,7 +788,7 @@ REM : main
     if %nbArgs% EQU 0 if !QUIET_MODE! EQU 0 (
         echo ---------------------------------------------------------
         choice /C ny /N /M "Do you use an/some external mlc01 folder(s) you wish to import? (y,n): "
-        if !ERRORLEVEL! EQU 1 goto:getOuptutsFolder
+        if !ERRORLEVEL! EQU 1 goto:getOuptutsType
 
         set "tmpFile="!BFW_PATH:"=!\doc\mlc01data.txt""
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
@@ -817,6 +823,48 @@ REM : main
 
     )
 
+    :getOuptutsType
+    if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
+        echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
+        echo Please extract BatchFw in your loadiines games^' folder
+        REM : show doc
+        set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
+        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+        pause
+        echo Exiting 10
+    )
+
+    set "outputType=LNK"
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo What kind of outputs do you want to launch your games^?
+    echo.
+    echo 1^: Windows shortcuts
+    echo 2^: Executables files ^(to define Steam shorcuts^)
+    echo.
+    REM : display only if shortcuts have already been created
+    set /A "alreadyInstalled=0"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set /A "alreadyInstalled=1"
+    if %alreadyInstalled% EQU 1 (
+        echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
+        echo.
+        call:getUserInput "Enter your choice ?: " "1,2,3" OUTPUTS_TYPE
+    ) else (
+        call:getUserInput "Enter your choice ?: " "1,2" OUTPUTS_TYPE
+    )
+    if [!OUTPUTS_TYPE!] == ["3"] (
+        echo Exiting^.^.^.
+        timeout /T 3 > NUL 2>&1
+        exit 25
+    )
+    if [!OUTPUTS_TYPE!] == ["1"] goto:getOuptutsFolder
+
+    set "outputType=EXE"
+    set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
+    if %QUIET_MODE% EQU 0 (
+        set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
+         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+    )
+
     :getOuptutsFolder
     cls
     REM : skip if one arg is given
@@ -824,7 +872,7 @@ REM : main
         echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
         timeout /T 3 > NUL 2>&1
-        goto:getOuptutsType
+        goto:registerCemuInstalls
     )
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -858,44 +906,12 @@ REM : main
     echo ^> Ouptuts will be created in !OUTPUT_FOLDER:"=!\Wii-U Games
     timeout /T 3 > NUL 2>&1
 
-    :getOuptutsType
-    if %QUIET_MODE% EQU 0 if !NB_GAMES_VALID! EQU 0 (
-        echo No loadiines games^(^*^.rpx^) founds under !GAMES_FOLDER!^!
-        echo Please extract BatchFw in your loadiines games^' folder
-        REM : show doc
-        set "tmpFile="!BFW_PATH:"=!\doc\updateInstallUse.txt""
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
-        pause
-        echo Exiting 10
-    )
+    :registerCemuInstalls
 
-    set "outputType=LNK"
-    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    echo What kind of outputs do you want to launch your games^?
-    echo.
-    echo 1^: Windows shortcuts
-    echo 2^: Executables files ^(to define Steam shorcuts^)
-    echo.
-    REM : display only if shortcuts have already been created
-    set /A "alreadyInstalled=0"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set /A "alreadyInstalled=1"
-    if %alreadyInstalled% EQU 1 (
-        echo 3^: Cancel^, i just wanted to set BatchFw^'s settings
-        echo.
-        call:getUserInput "Enter your choice ?: " "1,2,3" ANSWER
-    ) else (
-        call:getUserInput "Enter your choice ?: " "1,2" ANSWER
-    )
-    if [!ANSWER!] == ["3"] (
-        echo Exiting^.^.^.
-        timeout /T 3 > NUL 2>&1
-        exit 25
-    )
-    if [!ANSWER!] == ["1"] (
-
+    if [!OUTPUTS_TYPE!] == ["1"] (
         REM : instanciate a fixBrokenShortcut.bat
         set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
-        if exist !fbsf! goto:registerCemuInstalls
+        if exist !fbsf! goto:getGpuVendor
 
         if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
         robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
@@ -903,18 +919,8 @@ REM : main
         set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
         !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
         del /F !fnrLog! > NUL 2>&1
-
-        goto:registerCemuInstalls
     )
-    set "outputType=EXE"
-    set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
-    if %QUIET_MODE% EQU 0 (
-        set "tmpFile="!BFW_PATH:"=!\doc\executables.txt""
-         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
-    )
-
-    :registerCemuInstalls
-
+    :getGpuVendor
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
@@ -1098,7 +1104,10 @@ REM : functions
                 )
             )
         )
+        REM : avoid 8/5 for 16/10
+        if !w! EQU 8 if !h! EQU 5 set /A "w=16" & set /A "h=10"
 
+        :endComputation
         set /A "%3=!w!"
         set /A "%4=!h!"
     goto:eof
@@ -1841,7 +1850,6 @@ REM : ------------------------------------------------------------------
         )
         REM : check if the message is not already entierely present
         for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-        for /F %%i in ('type !logFile! ^| find /I "!msg:-=!"') do goto:eof
 
        :logMsg2HostFile
         echo !msg!>> !logFile!

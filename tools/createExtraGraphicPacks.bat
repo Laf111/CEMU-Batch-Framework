@@ -218,9 +218,8 @@ REM : main
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =%"
 
-    pushd !BFW_TOOLS_PATH!
-    for /F %%r in ('multiplyLongInteger.bat !nativeHeight! 1777777') do set "result=%%r"
-    call:removeFromRight !result! 6 nativeWidth
+    if !nativeHeight! EQU 720 set /A "nativeWidth=1280"
+    if !nativeHeight! EQU 1080 set /A "nativeWidth=1920"
 
     REM : force even integer
     set /A "isEven=!nativeWidth!%%2"
@@ -254,9 +253,9 @@ REM : main
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
 
-            set "currentAr=%%j"
             REM : add to the list if not already present
-            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "!currentAr:-=!" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+
             if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
         )
         REM : get the SCREEN_MODE
@@ -274,11 +273,6 @@ REM : main
 
     REM : double of the native height of the game
     set /A "resX2=!nativeHeight!*2"
-
-    REM : windowing scale factor
-    set "wsf=1.0744047619047619047619047619048"
-    REM : 1366/768 windowed factor
-    REM set "wsf=1.103953147877013" 1508/768
 
     REM : flag for graphic packs existence
     set /A "newGpExist=0"
@@ -414,6 +408,11 @@ REM : main
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGpV3! --fileMask patches.txt --find !patchValue! --replace "$width/$height" --logFile !fnrLogFile!
     
     :ending
+
+    echo =========================================================  >> !cgpLogFile!
+    echo =========================================================
+
+    if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -425,13 +424,7 @@ REM : main
     echo ending date = %endingDate% >> !cgpLogFile!
     echo ending date = %endingDate%
 
-
-    echo =========================================================  >> !cgpLogFile!
-    echo =========================================================
-
-    if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
-    set "fnrFolder="!BFW_PATH:"=!\logs\fnr""
-
+    
     if %nbArgs% EQU 0 endlocal && pause
 
     exit /b 0
@@ -509,24 +502,20 @@ REM : functions
             set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
             if exist !logFileED! del /F !logFileED! > NUL 2>&1
         )
-        REM : complete 16/9 (if here => COMPLETE_GP=YES)
-        call:createMissingRes "16-9"
 
         REM : reset extra directives file
         if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         REM : create missing resolution graphic packs
         for %%a in (!ARLIST!) do (
-            if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
 
-            if ["%%a"] == ["1610"] call:createMissingRes "16-10"
-            if ["%%a"] == ["219"]  call:createMissingRes "21-9"
-            if ["%%a"] == ["329"]  call:createMissingRes "32-9"
-            if ["%%a"] == ["43"]   call:createMissingRes "4-3"
-            if ["%%a"] == ["489"]  call:createMissingRes "48-9"
-            REM : treating user defined aspect ratio W-H
-            echo "%%a" | find "-" > NUL 2>&1 && call:createMissingRes "%%a"
-
+            call:createMissingRes "%%a"
+            if not ["!screenMode!"] == ["fullscreen"] (
+                REM : add windowed ratio for 16-10
+                if ["%%a"] == ["16-10"] call:createMissingRes "361-210"
+                REM : add windowed ratio for 683-384
+                if ["%%a"] == ["683-384"] call:createMissingRes "377-192"
+            )
             REM : reset extra directives file
             if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
@@ -769,128 +758,26 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :truncateStrFromRight
-        set "str=%~1"
-        set /A "nbc=%~2"
-        set "%3=!str:~-%nbc%!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :removeFromRight
-
-        set "r=%~1"
-        set /A "nbd=%~2"
-        REM : init for an integer => remove from right
-        set "%3=!r:~0,-%nbd%!"
-
-        REM : for a float only treat the decimal part
-        echo !r! | find "." > NUL 2>&1 && (
-
-            set "decPart="
-            for /F "delims=~. tokens=1-2" %%e in ("%r%") do set "intPart=%%e" & set "decPart=%%f"
-
-            REM : init with !nbd! GTR !tnbd!
-            set "%3=!intPart!.!decPart!"
-
-            call:strLen decPart tnbd
-            if !nbd! LEQ !tnbd! (
-                call:truncateStrFromRight !decPart! !nbd! decPartFormated
-                set "%3=!intPart!.!decPartFormated!"
-            )
-        )
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :addResolution
 
         set "hc=!hi!"
         set "wc=!wi!"
 
-        if ["!suffix!"] == [""] (
+        REM : fullscreen resolutions
+        if !hi! EQU !nativeHeight! if !wi! EQU !nativeWidth! goto:eof
+        if !hr! EQU 9 if !wr! EQU 16 call:addPresets169 & goto:eof
 
-            REM : fullscreen resolutions
-            if !hi! EQU !nativeHeight! if !wi! EQU !nativeWidth! goto:eof
-            if !hr! EQU 9 if !wr! EQU 16 call:addPresets169 & goto:eof
-
-            REM : force even integer
-            set /A "isEven=!wc!%%2"
-            if !isEven! NEQ 0 set /A "wc=!wc!+1"
-
-            call:addCustomPresets !fsRatio!
-
-        ) else (
-
-            REM : windowed resolutions
-            set "intRatio=!winRatio:.=!"
-            REM : to run multiplyLongInteger.bat
-            for /F %%r in ('multiplyLongInteger.bat !hc! !intRatio!') do set "result=%%r"
-
-            call:removeFromRight !result! 6 wc
-
-            REM : force even integer
-            set /A "isEven=!wc!%%2"
-            if !isEven! NEQ 0 set /A "wc=!wc!+1"
-
-            call:addCustomPresets !winRatio! windowed
-        )
+        call:addCustomPresets
 
     goto:eof
     REM : ------------------------------------------------------------------
 
 
     :setPresets
+    
+        set "desc= (!wr!/!hr!)"
 
-        set "suffix=%~1"
-
-        if ["!suffix!"] == [""] (
-            set "desc= (!wr!/!hr!)"
-            goto:treatEd
-        )
-        set "desc= (!wr!/!hr! %suffix%)"
-
-        if !winRatio! EQU 0 (
-            REM : compute new aspect ratio value
-            call:divIntegers !wr! !hr! 8 fsRatio
-
-            set "f1=!fsRatio:.=!
-            set "f2=!wsf:.=!
-            REM : to run multiplyLongInteger.bat
-            for /F %%r in ('multiplyLongInteger.bat !f1! !f2!') do set "result=%%r"
-
-            set "winRatio=!result:~0,1!.!result:~1,6!"
-        )
-        echo ^> windowed winRatio=!winRatio! >> !cgpLogFile!
-        echo ^> windowed winRatio=!winRatio!
-
-        REM : GFX pack V3 or higher
-        if !vGfxPack! NEQ 2 set "edu=!ed!"
-        if !vGfxPack! NEQ 2 if not ["!ed!"] == [""] (
-
-            set /A "r=5760/!hr!"
-            set /A "mh=!r!*!hr!"
-            set /A "mw=!r!*!wr!"
-
-            REM : windowed resolutions
-            set "intRatio=!winRatio:.=!"
-            REM : to run multiplyLongInteger.bat
-            for /F %%r in ('multiplyLongInteger.bat !mh! !intRatio!') do set "result=%%r"
-
-            call:removeFromRight !result! 6 mw
-
-            REM : force even integer
-            set /A "isEven=!mw!%%2"
-            if !isEven! NEQ 0 set /A "mw=!mw!+1"
-
-            type !extraDirectives! | find "aspectRatio" > NUL 2>&1 && call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (!mw!.0/!mh!.0)"
-
-            REM Handle : ratio > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
-            type !extraDirectives! | find "UIAspectY" > NUL 2>&1 && call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (!mw!.0/!mh!.0)/(!nativeWidth!.0/!nativeHeight!.0)"
-
-            type !extraDirectives! | find "GameAspect" > NUL 2>&1 && call:updateExtraDirectives "GameAspect[ ]*=[ ]*\(!nativeWidtht![ ]*\/[ ]*!nativeHeight![ ]*\)" "GameAspect = (!mw!.0/!mh!.0)"
-        )
-
-        :treatEd
         set /A "end=5760/!hr!"
         set /A "start=360/!hr!"
 
@@ -919,15 +806,16 @@ REM : functions
 
         REM : desc, ex 16-9
         set "desc=%~1"
-        set /A "StockRatio=0"
-        set /A "winRatio=0"
-
 
         REM : if V2 packs call
         if !vGfxPack! EQU 2 set "comment= V2"
 
+        echo ---------------------------------------------------------  >> !cgpLogFile!
+        echo ---------------------------------------------------------
         echo Create !desc:-=/! missing!comment! resolution packs >> !cgpLogFile!
         echo Create !desc:-=/! missing!comment! resolution packs
+        echo ---------------------------------------------------------  >> !cgpLogFile!
+        echo ---------------------------------------------------------
 
         REM : compute Width and Height using desc
         for /F "delims=- tokens=1-2" %%a in ("!desc!") do set "wr=%%a" & set "hr=%%b"
@@ -958,18 +846,6 @@ REM : functions
         if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         call:setPresets
-
-        if ["!screenMode!"] == ["fullscreen"] goto:eof
-        if not ["!desc!"] == ["16-10"] goto:eof
-
-        REM : complete windowed GFX presets (and packs for GFX packs V2)
-        echo Create !desc:-=/! windowed missing!comment! resolution packs >> !cgpLogFile!
-        echo Create !desc:-=/! windowed missing!comment! resolution packs
-
-        REM : reset extra directives file (V3 and up)
-        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
-
-        call:setPresets windowed
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1038,14 +914,13 @@ REM pause
             )
 
             if not exist !newGp! (
+                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" > NUL 2>&1
 
-                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" "1.777777" > NUL 2>&1
-
-                echo V2 ^: Creating !wc!x!hc!!desc! >> !cgpLogFile!
-                echo V2 ^: Creating !wc!x!hc!!desc!
+                echo + !wc!x!hc!!desc! V2 pack >> !cgpLogFile!
+                echo + !wc!x!hc!!desc! V2 pack 
             ) else (
-                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
-                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists
+                echo - !wc!x!hc!!desc! V2 pack already exists >> !cgpLogFile!
+                echo - !wc!x!hc!!desc! V2 pack already exists
                 
             )
         )
@@ -1058,13 +933,12 @@ REM pause
 
         REM : V3 or up GP exists
         type !rulesFile! | find "name = !wc!x!hc!" > NUL 2>&1 && (
-            echo Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
-            echo Ignoring !wc!x!hc!!desc! already exists
+            echo - !wc!x!hc!!desc! preset already exists >> !cgpLogFile!
+            echo - !wc!x!hc!!desc! preset already exists
             goto:eof
         )
-
-        echo Adding !wc!x!hc!!desc! preset >> !cgpLogFile!
-        echo Adding !wc!x!hc!!desc! preset
+        echo + !wc!x!hc!!desc! preset >> !cgpLogFile!
+        echo + !wc!x!hc!!desc! preset
 
         REM : replacing %wToReplace%xresX2 in rules.txt
         set "logFileNewGp="!fnrLogFolder:"=!\!gpFolderName:"=!-NewGp_!hc!x!wc!.log""
@@ -1076,26 +950,86 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :setParams
+
+        echo !desc! | find /I " (361/210)" > NUL 2>&1 && (
+            set "description= (16/10) windowed"
+            set "wp=16"
+            set "hp=10"
+            set "suffixGp=Win"
+        )
+        echo !desc! | find /I " (377/192)" > NUL 2>&1 && (
+            set "description= (16/9 laptop) windowed"
+            set "wp=16"
+            set "hp=9_laptop"
+            set "suffixGp=Win"
+        )
+        echo !desc! | find /I " (683/384)" > NUL 2>&1 && (
+            set "description= (16/9 laptop)"
+            set "wp=16"
+            set "hp=9_laptop"
+        )
+
+        echo !desc! | find /I " (64/27)" > NUL 2>&1 && (
+            set "description= (21/9 ultrawide r=2.37)"
+            set "wp=21"
+            set "hp=9_uw237"
+        )
+
+        echo !desc! | find /I " (32/15)" > NUL 2>&1 && (
+            set "description= (21/9 ultrawide r=2.4)"
+            set "wp=21"
+            set "hp=9_uw24"
+        )
+
+        echo !desc! | find /I " (12/15)" > NUL 2>&1 && (
+            set "description= (21/9 ultrawide r=2.13)"
+            set "wp=21"
+            set "hp=9_uw213"
+        )
+
+        echo !desc! | find /I " (37/20)" > NUL 2>&1 && (
+            set "description= (TV Flat r=1.85)"
+            set "wp=Tv"
+            set "hp=Flat_r185"
+        )
+
+        echo !desc! | find /I " (1024/429)" > NUL 2>&1 && (
+            set "description= (TV Scope r=2.39)"
+            set "wp=Tv"
+            set "hp=Scope_r239"
+        )
+
+        echo !desc! | find /I " (256/135)" > NUL 2>&1 && (
+            set "description= (TV DCI r=1.89)"
+            set "wp=Tv"
+            set "hp=Dci_r189"
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
     REM : function to add an extra preset in graphic pack of the game
     :addCustomPresets
 
-        set "ratio=%~1"
-        set "suffixGp=%~2"
+        set "wp=!wr!"
+        set "hp=!hr!"
+        set "description=!desc!"
+        set "suffixGp="
+
+        call:setParams
 
         REM : if BFW_GPV2_FOLDER exist
         if exist !BFW_GPV2_FOLDER! (
 
-            echo !desc! | find /I "windowed" > NUL 2>&1 && set "suffixGp=windowed"
-
             set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
-            set "newGp="!gpPath:"=!_!hc!p!wr!!hr!!suffixGp!""
+            set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
             set "gpResX2="!gpPath:"=!_%resX2%p""
-
 
             REM : if V2 gfx version was detected in rules.txt
             if !vGfxPack! EQU 2 (
                 set "gpPath=!rulesFolder:_%resX2%p=!"
-                set "newGp="!gpPath:"=!_!hc!p!wr!!hr!!suffixGp!""
+                set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
                 set "gpResX2=!rulesFolder!"
             )
 
@@ -1112,30 +1046,30 @@ REM pause
                 if exist !gpResX2p! (
                     set "gpResX2=!gpResX2p!"
                 )
-                
-                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" "!ratio!" > NUL 2>&1
-                echo V2 ^: Creating !wc!x!hc!!desc!  >> !cgpLogFile!
-                echo V2 ^: Creating !wc!x!hc!!desc!
+
+                wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!description!" > NUL 2>&1
+                echo + !wc!x!hc!!description! V2 pack >> !cgpLogFile!
+                echo + !wc!x!hc!!description! V2 pack
             ) else (
-                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
-                echo V2 ^: Ignoring !wc!x!hc!!desc! already exists
+                echo - !wc!x!hc!!description! V2 pack already exists >> !cgpLogFile!
+                echo - !wc!x!hc!!description! V2 pack already exists
             )
         )
 
         REM : V3 or up GP does not exist => continue to fill it
         if !newGpExist! EQU 0 (
-            call:fillResGraphicPack !wc! !hc! "!desc!"
+            call:fillResGraphicPack !wc! !hc! "!description!"
             goto:eof
         )
         REM : V3 or up GP exists
         type !rulesFile! | find "name = !wc!x!hc!" > NUL 2>&1 && (
-            echo Ignoring !wc!x!hc!!desc! already exists >> !cgpLogFile!
-            echo Ignoring !wc!x!hc!!desc! already exists
+            echo - !wc!x!hc!!description! preset already exists >> !cgpLogFile!
+            echo - !wc!x!hc!!description! preset already exists
             goto:eof
         )
 
-        echo Adding !wc!x!hc!!desc! preset >> !cgpLogFile!
-        echo Adding !wc!x!hc!!desc! preset
+        echo + !wc!x!hc!!description! preset >> !cgpLogFile!
+        echo + !wc!x!hc!!description! preset
 
         REM : Adding !h!x!w! in rules.txt
         set "logFileNewGp="!fnrLogFolder:"=!\!gpFolderName:"=!-NewGp_!hc!x!wc!.log""
@@ -1143,62 +1077,11 @@ REM pause
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!description:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    :strLen
-        set /A "len=0"
-        :strLen_Loop
-           if not ["!%1:~%len%!"] == [""] set /A len+=1 & goto:strLen_Loop
-            set /A "%2=%len%"
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function for dividing integers
-    :divIntegers
-
-        REM : get a
-        set /A "fpA=%~1"
-        REM : get b
-        set /A "fpB=%~2"
-        REM : get number of decimals asked
-        set /A "nbDec=%~3"
-
-        call:strLen fpA nlA
-        call:strLen fpB nlB
-
-        set /A "max=!nlA!"
-        if !nlB! GTR !nlA! set /A "max=!nlB!"
-        set /A "decimals=9-%max%"
-
-        set /A "one=1"
-        for /L %%i in (1,1,%decimals%) do set "one=!one!0"
-
-        REM : a / b
-        set /A div=fpA*one/fpB
-
-        set "intPart="!div:~0,-%decimals%!""
-        if [!intPart!] == [""] set "intPart=0"
-        set "intPart=%intPart:"=%"
-
-        if %nbDec% LSS %decimals% (
-            set "decPart=!div:~-%nbDec%!"
-        ) else (
-            set "decPart=!div:~-%decimals%!"
-        )
-        set "result=!intPart!.!decPart!"
-        if %nbDec% EQU 0 set /A "result=!intPart!"
-
-
-        REM : output
-        set "%4=!result!"
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!description:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------

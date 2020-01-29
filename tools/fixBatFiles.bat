@@ -67,12 +67,12 @@ REM : ------------------------------------------------------------------
 
     echo ^> Remove trailing space^.^.^.
     REM : remove trailing space
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --excludeFileMask "*multiplyLongInteger*" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
 
     echo ^> Convert all files to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile"') do (
 
         set "filePath="%%f""
 
@@ -84,16 +84,6 @@ REM : ------------------------------------------------------------------
         move /Y !tmpFile! !filePath! > NUL 2>&1
         attrib +R !filePath! > NUL 2>&1
     )
-
-    REM : check multiplyLongInteger
-    pushd !BFW_TOOLS_PATH!
-    for /F %%r in ('multiplyLongInteger.bat 720 2') do set "result=%%r"
-    if not ["!result!"] == ["1440"] (
-        echo ERROR^: multiplyLongInteger^.bat format was changed ^! 720x2=!result!
-        pause
-        exit /b 10
-    )
-    echo ^> Convert multiplyLongInteger ^: OK^, 720x2=!result!
 
     pause
     exit /b 0

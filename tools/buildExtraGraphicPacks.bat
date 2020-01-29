@@ -150,9 +150,9 @@ REM : functions
         REM : No GFX pack was found : createCapGraphicPacks.bat
         echo No GFX pack found ^: create them
         echo.
-        echo "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !title!
+        echo "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId%
         echo.
-        call "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !title!
+        call "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId%
         goto:creatCap
 
 

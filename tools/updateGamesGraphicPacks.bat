@@ -277,14 +277,7 @@ REM : main
     echo ARLIST=!ARLIST!
 
     REM : import user defined ratios graphic packs
-    for %%a in (!ARLIST!) do (
-        if ["%%a"] == ["1610"] call:importOtherGraphicPacks "16-10"
-        if ["%%a"] == ["219"]  call:importOtherGraphicPacks "21-9"
-        if ["%%a"] == ["43"]   call:importOtherGraphicPacks "4-3"
-        if ["%%a"] == ["489"]  call:importOtherGraphicPacks "48-9"
-        REM : treating user defined aspect ratio W-H
-        echo "%%a" | find "-" > NUL 2>&1 && call:importOtherGraphicPacks "%%a"
-    )
+    for %%a in (!ARLIST!) do call:importOtherGraphicPacks "%%a"
 
     :checkPackLinks
 

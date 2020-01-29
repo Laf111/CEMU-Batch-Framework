@@ -55,11 +55,25 @@ REM : main
     set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
     if not exist !bfwgpv2! exit 10
 
-    set "sd=!desc:(=p!"
-    set "sd=!sd:/=!"
-    set "sd=!sd:)=!"
-    set "sd=!sd: =!"
-    set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!!sd!""
+    echo !desc! | find /I " (16/10) windowed" > NUL 2>&1 && set "sd=1610pWin"
+
+    echo !desc! | find /I " (16/9 laptop) windowed" > NUL 2>&1 && set "sd=169_laptopWin"
+
+    echo !desc! | find /I " (16/9 laptop)" > NUL 2>&1 && set "sd=169_laptop"
+
+    echo !desc! | find /I " (21/9 ultrawide r=2.37)" > NUL 2>&1 && set "sd=219_uw237"
+
+    echo !desc! | find /I " (21/9 ultrawide r=2.4)" > NUL 2>&1 && set "sd=219_uw24"
+
+    echo !desc! | find /I " (21/9 ultrawide r=2.13)" > NUL 2>&1 && set "sd=219_uw213"
+
+    echo !desc! | find /I " (TV Flat r=1.85)" > NUL 2>&1 && set "sd=TvFlat_r185"
+
+    echo !desc! | find /I " (TV Scope r=2.39)" > NUL 2>&1 && set "sd=TvScope_r239"
+
+    echo !desc! | find /I " (TV DCI r=1.89)" > NUL 2>&1 && set "sd=TvDci_r189"
+
+    set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!p!sd!""
 
     echo Creating !gp!
 
