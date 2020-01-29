@@ -7,7 +7,7 @@ Versions of CEMU supported : **1.11.1 to 1.17.0**
 (if you want to use earlier versions, create an installation per game and per user)
 
 
-Last GFX packs checked (presets completion) : **V640**
+Last GFX packs checked (presets completion) : **V641**
 
 
 ## Main purpose:
