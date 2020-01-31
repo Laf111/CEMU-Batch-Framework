@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-8"
+    set "BFW_VERSION=V15-9"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -261,8 +261,8 @@ REM : main
     )
 
     echo =========================================================
-    echo ^> %NB_GAMES_VALID% valid games found
-    if %NB_GAMES_VALID% EQU 0 (
+    echo ^> !NB_GAMES_VALID! valid games found
+    if !NB_GAMES_VALID! EQU 0 (
 
         call:getUserInput "No games were found, do you want to dump games from your Wii-U? (y,n)" "y,n" ANSWER
         if [!ANSWER!] == ["n"] (
@@ -271,7 +271,7 @@ REM : main
             timeout /T 8 > NUL 2>&1
             exit 55
         )
-        goto:installWithDump
+        goto:useWiiU
     )
     if %QUIET_MODE% EQU 0 (
 
@@ -593,23 +593,26 @@ REM : main
     :getUsers
 
     if !alreadyAsked! EQU 1 goto:batchFwUsers
-    REM : Have a Wii-U ?
+
+    :useWiiU
+    echo.
     echo You can use your Wii-U accounts to create BatchFw^'users
     echo list and get the files needed to play online^.
     echo For that^, you need to had dumped your NAND^.
     echo.
 
-    if not exist !BFW_WIIU_FOLDER! if %QUIET_MODE% EQU 0 (
+    if not exist !BFW_WIIU_FOLDER! (
 
-    choice /C yn /N /M "Do you need to format a SDCard with homebrew on? (y,n):"
-    if !ERRORLEVEL! EQU 1 wscript /nologo !StartWait! !createWiiuSDcard!
-    echo.
+        choice /C yn /N /M "Do you need to format a SDCard with homebrew apps on? (y,n):"
+        if !ERRORLEVEL! EQU 1 wscript /nologo !StartWait! !createWiiuSDcard!
+        echo.
     )
-    choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n -> enter users manually):"
-    echo.
-    if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
+    if !NB_GAMES_VALID! NEQ 0 (
+        choice /C yn /N /M "Continue and create users' list from your Wii-U? (y,n -> enter users manually):"
+        echo.
+        if !ERRORLEVEL! EQU 2 set /A "alreadyAsked=1" && goto:batchFwUsers
+    )
 
-    :installWithDump
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - if you^'re using a permanent hack ^(CBHC^)^:
@@ -636,7 +639,7 @@ REM : main
 
     echo.
 
-    if %NB_GAMES_VALID% EQU 0 (
+    if !NB_GAMES_VALID! EQU 0 (
         echo Launching dumping games^.^.^.
         REM : launch dumping games script
         wscript /nologo !Start! !dumpGames!

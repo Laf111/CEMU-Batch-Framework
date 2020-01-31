@@ -37,20 +37,10 @@
         goto:continue
     :end
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        if %nbArgs% EQU 0 exit 1
-        if %nbArgs% NEQ 0 exit /b 1
-    )
-
     set "endTitleId=NONE"
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Export CEMU saves to WiiU for SaveMii
+    title Export CEMU saves to SaveMii slots on your SD Card
 
     echo On your Wii-U^, you need to ^:
     echo - have your SDCard plugged in your Wii-U
@@ -235,12 +225,13 @@
         call:updateTitle %%i
     )
 
+    set "userSavesToExport="select""
     goto:treatments
 
     :getArgsValue
-    if %nbArgs% NEQ 4 (
+    if %nbArgs% NEQ 5 (
         echo ERROR on arguments passed ^(%nbArgs%^)
-        echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE ENDTITLEID SRC
+        echo SYNTAX^: "!THIS_SCRIPT!" WIIU_IP_ADRESS GAME_TITLE ENDTITLEID SRC userSavesToExport
         echo given {%*}
         pause
         if %nbArgs% EQU 0 exit 9
@@ -265,6 +256,12 @@
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
     )
+    REM : user to export saves during a game's injection.
+    REM : values
+    REM : - select => choose manually (value initialized when there is no args given)
+    REM : - all => import all existing saves for all users
+    REM : - !user! => import all existing saves for !user!
+    set "userSavesToExport=!args[4]!"
 
     set "selectedTitles[0]=!GAME_TITLE!"
     set "selectedEndTitlesId[0]=!ENDTITLEID!"
@@ -277,11 +274,11 @@
 
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
-    set "TMP_DLSAVE_PATH="!BFW_WIIU_FOLDER:"=!\SaveMii""
-    if not exist !TMP_DLSAVE_PATH! mkdir !TMP_DLSAVE_PATH! > NUL 2>&1
+    set "TMP_ULSAVE_PATH="!BFW_WIIU_FOLDER:"=!\SaveMii""
+    if not exist !TMP_ULSAVE_PATH! mkdir !TMP_ULSAVE_PATH! > NUL 2>&1
 
     REM : check if sdcard is plugged
-    set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
+    set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         echo ^/sd^/wiiu^/backups^ not found^, make sure that your SDCard is
@@ -313,14 +310,14 @@
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,2%"
     set "DATE=%ldt%"
 
-    pushd !TMP_DLSAVE_PATH!
+    pushd !TMP_ULSAVE_PATH!
 
     for /L %%n in (0,1,!nbGamesSelected!) do call:exportSaves %%n
     echo =========================================================
     echo Now you can stop FTPiiU server and launch SaveMii to
     echo import your save^(s^) for your game^(s^)
     echo.
-    set "gslog="!TMP_DLSAVE_PATH:"=!\ExportSaveMii_GAME_TITLE.log""
+    set "gslog="!TMP_ULSAVE_PATH:"=!\ExportSaveMii_GAME_TITLE.log""
     echo SaveMii slots to use for each games saved in files !gslog!
     
     if %nbArgs% EQU 0 pause
@@ -392,7 +389,7 @@ REM : functions
         set "list="%~1""
 
         for %%l in (!list!) do (
-            echo %%l | finstr /RV "^[0-9]*.$" > NUL 2>&1 && exit /b 1
+            echo %%l | findStr /RV "^[0-9]*.$" > NUL 2>&1 && exit /b 1
             if %%l GEQ %nbGames% exit /b 2
         )
         exit /b 0
@@ -402,8 +399,6 @@ REM : functions
 
     :exportSaves
 
-        set "currentUser=!user:"=!"
-
         set /A "num=%~1"
 
         REM : set GAME_TITLE (used for naming user's rar file)
@@ -412,7 +407,7 @@ REM : functions
         set "src=!selectedtitlesSrc[%num%]!"
 
         set /A "cemuSlot=0"
-        set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
+        set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
         call:getNextSaveMiiSlotNumber
         
         echo =========================================================
@@ -426,9 +421,10 @@ REM : functions
         set /A "nbUsersTreated=0"
         REM : get BatchFw users list
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-            set "user=%%i"
+            set "user="%%i""
+            set "currentUser=!user:"=!"
 
-            set "pat="!USERS_ACCOUNTS_FOLDER:"=!\%%i*.dat""
+            set "pat="!USERS_ACCOUNTS_FOLDER:"=!\!currentUser!*.dat""
             set "folder=NONE"
             for /F "delims=~" %%j in ('dir /B !pat! 2^>NUL') do (
                 set "filename="%%j""
@@ -437,14 +433,10 @@ REM : functions
                 set "folder=!folder:"=!"
             )
             if ["!folder!"] == ["NONE"] (
-                echo WARNING^: no account associated with %%i
-                echo You should use Wii-U Games^\Wii-U^\Get online files^.lnk
-                echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
-                echo before this script ^^!
+                echo WARNING^: no account associated with user %%i
             ) else (
-                REM : treatment for the user
-                echo Treating !currentUser! ^(!folder!^)
-                call:treatUser
+                REM : export saves (if asked)
+                if not [!userSavesToExport!] == ["none]" call:exportSavesForCurrentAccount
             )
         )
 
@@ -468,7 +460,7 @@ REM : functions
     :treatCommonFolder
 
         REM : common folder
-        set "commonFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\common""
+        set "commonFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\common""
         if not exist !commonFolder! goto:eof
 
         echo Transfert CEMU common saves for !GAME_TITLE! to
@@ -484,24 +476,15 @@ REM : functions
             exit /b 61
         )
         REM : delete user's save folder
-        set "userMlc01Folder="!TMP_DLSAVE_PATH:"=!\mlc01""
+        set "userMlc01Folder="!TMP_ULSAVE_PATH:"=!\mlc01""
         rmdir /Q /S !userMlc01Folder! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :treatUser
+    :exportSavesForCurrentAccount
 
-
-        REM : check if a save axist on the wii-U for this user
-
-        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/save/00050000/!endTitleId!/user/!folder!" "exit" > !ftplogFile! 2>&1
-        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-            echo No Wii-U saves were found for !currentUser!
-            goto:eof
-        )
-
-        REM : for the current user : extract rar file in TMP_DLSAVE_PATH
+        REM : for the current user : extract rar file in TMP_ULSAVE_PATH
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
         if not exist !rarFile! (
@@ -509,17 +492,24 @@ REM : functions
             goto:eof
         )
 
-        if %nbArgs% EQU 0 (
-            choice /C yn /N /M "Upload !currentUser! saves on Wii-U's SD card (y, n)? : "
-            if !ERRORLEVEL! EQU 2 goto:eof
-        )
+        if not [!userSavesToExport!] == ["all"] (
 
+            if [!userSavesToExport!] == ["select"] (
+                choice /C yn /N /M "Upload !currentUser! saves on Wii-U's SD card (y, n)? : "
+                if !ERRORLEVEL! EQU 2 goto:eof
+            ) else (
+                REM : here userSavesToExport define a user name
+                if not [!userSavesToExport!] == ["!currentUser!"] goto:eof
+            )
+
+        REM : treatment for the user
+        echo Treating !currentUser! ^(!folder!^)
         
         REM extract the CEMU saves for current user
-        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !TMP_DLSAVE_PATH! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !TMP_ULSAVE_PATH! > NUL 2>&1
 
         REM : CEMU 80000001 folder for the current user
-        set "cemuUserSaveFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\80000001""
+        set "cemuUserSaveFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\80000001""
 
         echo Transfert CEMU saves for !GAME_TITLE! and !currentUser! to
         echo ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!^/!folder!
@@ -536,7 +526,7 @@ REM : functions
         )
 
         REM : delete user's save folder
-        set "userMlc01Folder="!TMP_DLSAVE_PATH:"=!\mlc01""
+        set "userMlc01Folder="!TMP_ULSAVE_PATH:"=!\mlc01""
         rmdir /Q /S !userMlc01Folder! > NUL 2>&1
 
         REM : log the slot used in a file
@@ -546,7 +536,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :getNextSaveMiiSlotNumber
-        set "ftplogFile="!TMP_DLSAVE_PATH:"=!\ftpCheck.log""
+        set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
 
         !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu/backups/00050000%endTitleId%" "exit" > !ftplogFile! 2>&1
         type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
@@ -568,33 +558,7 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    :checkPathForDos
 
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSet

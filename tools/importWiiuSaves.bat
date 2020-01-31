@@ -46,16 +46,6 @@ REM : main
         goto:continue
     :end
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        if %nbArgs% EQU 0 exit 1
-        if %nbArgs% NEQ 0 exit /b 1
-    )
-
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -249,7 +239,7 @@ REM : main
         call:updateTitle %%i
     )
 
-    set "userSavesToImport=select"
+    set "userSavesToImport="select""
     goto:treatments
 
     :getArgsValue
@@ -280,9 +270,8 @@ REM : main
         if %nbArgs% EQU 0 exit 3
         if %nbArgs% NEQ 0 exit /b 3
     )
-    REM : user to import saves during dump.
+    REM : user to import saves during a game's dump.
     REM : values
-    REM : - none => skip import
     REM : - select => choose manually (value initialized when there is no args given)
     REM : - all => import all existing saves for all users
     REM : - !user! => import all existing saves for !user!
@@ -443,13 +432,18 @@ REM : functions
 
     :importSavesForCurrentUser
 
-        echo !userSavesToImport! | find /V "all" > NUL 2>&1 && (
+        if not [!userSavesToImport!] == ["all"] (
 
-            echo !userSavesToImport! | find /V "select" > NUL 2>&1 && (
-
-            choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
-            if !ERRORLEVEL! EQU 2 goto:eof
+            if [!userSavesToImport!] == ["select"] (
+                choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
+                if !ERRORLEVEL! EQU 2 goto:eof
+            ) else (
+                REM : here userSavesToImport define a user name
+                if not [!userSavesToImport!] == ["!currentUser!"] goto:eof
             )
+
+            REM : treatment for the user
+            echo Importing !folder! save ^(!currentUser!^)
 
             set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
             if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
@@ -527,39 +521,12 @@ REM : functions
                 echo WARNING ^: no Wii-U saves found for !currentUser!
                 goto:eof
             )
-            REM : check if saves need to be imported
-            echo !userSavesToImport! | find /V "none" > NUL 2>&1 && call:importSavesForCurrentUser
+            REM : import saves (if asked)
+            if not [!userSavesToImport!] == ["none"] call:importSavesForCurrentUser
         )
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSet

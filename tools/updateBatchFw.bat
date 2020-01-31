@@ -247,6 +247,38 @@ REM : functions
             )
         )
 
+        REM : V15-8 clean DESIRED_ASPECT_RATIO in all host log
+        REM : search in all Host_*.log
+        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+
+        for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
+            set "currentLogFile="%%i""
+
+            call:cleanArFromHostLogFile !currentLogFile!
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :cleanArFromHostLogFile
+        REM : pattern to ignore in log file
+        set "log="%~1""
+
+        set "logFileTmp="!log:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !log! > NUL 2>&1
+            move /Y !logFileTmp! !log! > NUL 2>&1
+        )
+        if exist !logFileTmp! (
+            del /F !log! > NUL 2>&1
+            move /Y !logFileTmp! !log! > NUL 2>&1
+        )
+
+        type !log! | find /I /V "DESIRED_ASPECT_RATIO" > !logFileTmp!
+
+        del /F /S !log! > NUL 2>&1
+        move /Y !logFileTmp! !log! > NUL 2>&1
+
     goto:eof
     REM : ------------------------------------------------------------------
 

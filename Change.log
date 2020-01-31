@@ -1,12 +1,29 @@
+31/01/2020 V15-9 :
+- fix : update process needs to flush DESIRED_ASPECT_RATIO in all host log files
+        otherwise GFX completion might failed (you can fix it on V15-8 by using 
+        "Wii-U Games\BatchFw\Reset BatchFw.lnk"
+- fix : WII-U / dumpGames exit after selecting games'numbers
+- fix : WII-U / unexpected check on wiiU IP adress (DOS syntax)
+- fix : WII-U / useless warning raised by scanWiiU.bat
+- add : WII-U / ask for a SDcard creation when dumping games from the setup.bat (if no games
+        were found in setup.bat)
+- add : WII-U / dump games script check if an active network connection exists before 
+        propose you to update GFX packs folder (if needed)
+- add : import games script check if a GFX pack are available for each game imported
+        if at least one game has no GFX pack, propose to update the GFX packs folder
+- add : import games script call setup.bat if no args are given
+- fix : import games script creates new update and DLC paths
+- fix : WII-U / dump games script uses new update and DLC paths
+
 29/01/2020 V15-8 :
-add : in setup.bat ask fot outputs type before asking where create outputs
-add : call to setup.bat at the end of dumping game if game was added
-add : get //fullscreen value from settings/xml in wizardFirstSaving.bat
+add : in setup.bat enter outputs type before asking where create outputs
+add : WII-U / call to setup.bat at the end of dumping game if a game was added
+add : get //fullscreen value from settings.xml in wizardFirstSaving.bat
 add : force GFX packs update after V2 pack extraction if you let batchFw complete packs 
-add : ratio aspect computed from the current resolution with computing the minimum 
+add : get ratio aspect from the current resolution with computing the minimum 
       rational number associated (no need to add the current ratio anymore)
 add : TV aspect ratio support (HDTV, DCI, UltraWide)
-opt : lower GFX completion time
+opt : lower GFX pack completion time
 fix : limit windowed presets and packs to 16/10 and 1366x768
 fix : regression setup.bat exit (choice 3) was not taken into account
 fix : regression V2 packs not listed in CEMU < 1.14 (links were not created)
@@ -42,7 +59,7 @@ add : if GFX completion is running and progress bar is used : in launchGame.bat 
       progress bar to display the message
 add : a 0 limit on height in create*GraphicPacks when computing "exotic" custom aspect ratio
       such as 1366x768 -> 863/384
-add : call to dumGamesFromWiiu.bat in setup.bat when no games were found
+add : WII-U / call to dumGamesFromWiiu.bat in setup.bat when no games were found
 opt : lower graphic completion time by 5sec if no V2 GFX packs are used 
 
 22/01/2020 V15-4 :

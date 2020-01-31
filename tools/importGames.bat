@@ -28,15 +28,19 @@ REM : main
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+    REM : BFW_GP_FOLDER
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -74,8 +78,8 @@ REM : main
         echo In this case BatchFw has already built the mlc01 folder
         echo structure^, just move their content to the right place^:
         echo.
-        echo - update in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]
-        echo - dlc    in mlc01^/usr^/title^/titleId[0^:7]/titleId[8^:15]/aoc
+        echo - update in mlc01^/usr^/title^/0005000e/titleId[8^:15]
+        echo - dlc    in mlc01^/usr^/title^/0005000c/titleId[8^:15]
         echo.
         echo =========================================================
 
@@ -155,7 +159,12 @@ REM : main
         goto:eof
     )
 
-    set /A NB_GAMES_TREATED=0
+    REM : check if an internet connection is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    
+    set /A "NB_GAMES_TREATED=0"
+    set /A "gfxPackFoundForAllGames=1"
 
     REM using the sort /V, first come the game, then update and DLC (if availables)
 
@@ -216,6 +225,31 @@ REM : main
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
+
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:launchSetup
+
+    if !gfxPackFoundForAllGames! EQU 0 (
+
+        echo No GFX pack were found for at least one game^.
+        echo.
+        choice /C yn /N /M "Do you want to update GFX packs folder ? (y,n):"
+        if !ERRORLEVEL! EQU 1 (
+            set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
+            call !ugp!
+        )
+
+    )
+
+    :launchSetup
+    if !NB_GAMES_TREATED! NEQ 0 if %nbArgs% EQU 0 (
+        echo New Games were added to your library^, launching setup^.bat^.^.^.
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        timeout /T 3 > NUL 2>&1
+        wscript /nologo !Start! !setup!
+
+        exit 15
+    )
+
     if %nbArgs% EQU 1 goto:exiting
 
     echo =========================================================
@@ -244,6 +278,19 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :checkGfxPacksAvailability
+        set "fnrLogIg="!BFW_PATH:"=!\logs\fnr_import!GAME_TITLE!.log""
+        if exist !fnrLogIg! del /F !fnrLogIg! > NUL 2>&1
+
+
+        REM : launching the search in all gfx pack folder (V2 and up)
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogIg!
+
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogIg! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do set /A "gfxPackFoundForAllGames=0"
+        del /F !fnrLogIg! > NUL 2>&1
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :prepareGame
 
@@ -316,6 +363,8 @@ REM : functions
             echo Creating saves folder
             mkdir !saveFolder! > NUL 2>&1
         )
+        REM : check if a GFX pack exist (V2 or up)
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:checkGfxPacksAvailability
 
         set /A NB_GAMES_TREATED+=1
         echo.
@@ -347,7 +396,7 @@ REM : functions
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%""
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000E\%endTitleId%""
 
         if not exist !target! (
             echo Creating update^'s folder
@@ -393,7 +442,7 @@ REM : functions
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\00050000\%endTitleId%\%endTitleId%_aoc""
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000C\%endTitleId%""
         set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
 
         move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1

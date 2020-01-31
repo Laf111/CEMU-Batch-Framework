@@ -8,15 +8,6 @@ REM : main
     color 4F
     set "THIS_SCRIPT=%~0"
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        exit 1
-    )
-
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -34,6 +25,7 @@ REM : main
     
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
     set "importWiiuSaves="!BFW_TOOLS_PATH:"=!\importWiiuSaves.bat""
+    set "checkZeroSizedFiles="!BFW_TOOLS_PATH:"=!\checkZeroSizedFiles.bat""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
@@ -74,12 +66,9 @@ REM : main
     echo BE AWARE ^: transfert errors on update and DLC files can occur
     echo on symlinks not handled by FTPiiU server^.
     echo These files are not used by CEMU^. Just ignore them^.
-REM : TODO uncomment when inject game feature will ne enabled
-REM    echo Do not delete them if you want to inject the file to your Wii-U
-REM    echo using BatchFw.
-    echo.
     pause
-    echo.
+    
+    cls
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - if you^'re using a permanent hack ^(CBHC^)^:
@@ -240,12 +229,11 @@ REM    echo using BatchFw.
         set /A "nbUsers+=1"
     )
     REM : ask for saves import mode
-    call:getUser userSavesToImport
+    call:getSavesUserMode userSavesToImport
 
     set /A "nbGamesSelected-=1"
     set "START_DATE="
 
-    set "rootTarget=!GAMES_FOLDER!"
     set /A "nbPass=1"
     call:loopOnGames
 
@@ -253,7 +241,7 @@ REM    echo using BatchFw.
     echo Verifying files to fix unexpected transfert errors^.^.^.
     echo.
     call:loopOnGames
-    
+
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
@@ -271,6 +259,12 @@ REM    echo using BatchFw.
     if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
     for /F "delims=~" %%p in ('dir /B /S !pat! 2^>NUL') do echo "%%p\rules.txt" >> !rulesFiles!
 
+    REM : check if an internet connection is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:launchSetup
+    
     set /A "nbGameWithGfxPack=0"
     call:checkGfxPacksAvailability
 
@@ -278,23 +272,23 @@ REM    echo using BatchFw.
 
         echo No GFX pack were found for at least one game^.
         echo.
-        choice /C yn /N /M "Do you want to force a GFX packs update ? (y,n):"
+        choice /C yn /N /M "Do you want to update GFX packs folder ? (y,n):"
         if !ERRORLEVEL! EQU 1 (
-        
-            REM : forcing a GFX pack update to add GFX packs for new games
-            set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
-            call !gfxUpdate! -silent
+            set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
+            call !ugp!        
         )
+
     ) else (
         echo GFX packs found for all games^, no need to update GFX packs
     )
 
+    :launchSetup
     if !nbGamesSelected! NEQ 0 (
         echo New Games were added to your library^, launching setup^.bat^.^.^.
         set "setup="!BFW_PATH:"=!\setup.bat""
-
-        wscript /nologo !Start! !setup!
         timeout /T 3 > NUL 2>&1
+        wscript /nologo !Start! !setup!
+
         exit 15
     )
     echo =========================================================
@@ -310,7 +304,7 @@ REM    echo using BatchFw.
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :getUser
+    :getSavesUserMode
         REM : init to none
         set "%1=none"
 
@@ -341,13 +335,14 @@ REM : functions
         :askUser
         set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
 
-        echo %num% | finstr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+        echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
 
         if %num% LSS 0 goto:askUser
         if %num% GTR %nbUsers% goto:askUser
 
         set "%1=!USERSARRAY[%num%]!"
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :checkGfxPacksAvailability
 
@@ -375,12 +370,12 @@ REM : functions
             set "endTitleIdFolder=!selectedEndTitlesId[%%i]!"
 
             REM : define local folders
-            set "targetFolder="!rootTarget:"=!\!GAME_TITLE!""
+            set "targetFolder="!GAMES_FOLDER:"=!\!GAME_TITLE!""
             set "codeFolder="!targetFolder:"=!\code""
             set "contentFolder="!targetFolder:"=!\content""
             set "metaFolder="!targetFolder:"=!\meta""
-            set "updateFolder="!targetFolder:"=!\mlc01\usr\title\00050000\!endTitleIdFolder!""
-            set "dlcFolder="!targetFolder:"=!\mlc01\usr\title\00050000\!endTitleIdFolder!\aoc""
+            set "updateFolder="!targetFolder:"=!\mlc01\usr\title\0005000e\!endTitleIdFolder!""
+            set "dlcFolder="!targetFolder:"=!\mlc01\usr\title\0005000c\!endTitleIdFolder!""
 
             call:createRequieredFolders > NUL 2>&1
             REM : dump the game by FTP
@@ -413,7 +408,7 @@ REM : functions
         echo Dump ^:
         echo.
         for %%l in (!listGamesSelected!) do (
-            echo %%l | finstr /R "^[0-9]*.$" > NUL 2>&1 && (
+            echo %%l | findStr /R "^[0-9]*.$" > NUL 2>&1 && (
                 if %%l GEQ !nbGames! exit /b 1
                 echo - !titles[%%l]!
                 set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
@@ -469,7 +464,7 @@ REM : functions
             if !nbPass! EQU 1 echo - dumping update
 
             REM : YES : import update in mlc01/usr/title (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000E/!endTitleIdFolder!" "!name! (update)"
+            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
         )
         REM : search if this game has a DLC
         set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
@@ -477,13 +472,13 @@ REM : functions
 
             if !nbPass! EQU 1 echo - dumping DLC
 
-            REM : YES : import dlc in mlc01/usr/title/00050000/!endTitleIdFolder!/aoc (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000C/!endTitleIdFolder!" "!name! (DLC)"
+            REM : YES : import dlc in mlc01/usr/title/0005000C/!endTitleIdFolder! (minimized + no wait)
+            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
         )
 
         REM : get saves only the first pass
-        if !nbPass! GTR 1 goto:eof
-
+        if !nbPass! GTR 1 goto:checkDump
+            
         echo Waiting end of all current transferts^.^.^.
         echo.
         :waitingLoop2
@@ -494,10 +489,12 @@ REM : functions
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "!endTitleIdFolder!" > NUL 2>&1 && (
-            echo - dumping saves
+            if not ["!userSavesToImport!"] == ["none"] (
+                echo - dumping saves
 
-            REM : Import Wii-U saves
-            wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
+                REM : Import Wii-U saves
+                wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
+            )
         )
 
         REM : get current date
@@ -506,6 +503,26 @@ REM : functions
         set "DATE=%ldt%"
 
         echo !GAME_TITLE! ^: ending at !DATE!
+
+        :checkDump
+        echo - verifying dump validity
+        REM : check the game (list zero sized file and check if they exist under game's folder)
+        set "zeroSizedFilesReport="!targetFolder:"=!\Cemu\zeroSizedFilesFromDump.txt""
+        wscript /nologo !StartHiddenWait! !checkZeroSizedFiles! !targetFolder! "00050000!endTitleIdFolder!" > !zeroSizedFilesReport!
+        attrib -R !zeroSizedFilesReport! > NUL 2>&1
+
+        echo.
+        type !zeroSizedFilesReport! | find "Dump is invalid" > NUL 2>&1 && (
+            echo !GAME_TITLE! dump failed ^!
+            echo It seems there were transferts errors^, try to relaunch
+            echo.
+            echo consult !zeroSizedFilesReport!
+            echo.
+            goto:eof
+        )
+        echo !GAME_TITLE! dump seems valid
+        echo.
+        
     goto:eof
 
     REM : ------------------------------------------------------------------
@@ -523,34 +540,6 @@ REM : functions
         REM : updateFolder is created with dlc one
         if not exist !dlcFolder! mkdir !dlcFolder! > NUL 2>&1
     goto:eof
-
-
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSet

@@ -1507,10 +1507,10 @@ REM : functions
             call:createFolder !sysFolder!
             set "saveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\00050000\%titleId:00050000=%""
             call:createFolder !saveFolder!
-            set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%titleId:00050000=%\aoc""
+            set "dlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\%titleId:00050000=%""
             call:createFolder !dlcFolder!
-REM            set "dlcFolder2="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000\%titleId:00050000=%\aoc_%titleId%""
-REM            if not exist !dlcFolder2! mklink /J /D !dlcFolder2! !dlcFolder! > NUL 2>&1
+            set "updateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\%titleId:00050000=%""
+            call:createFolder !updateFolder!
 
             REM : first game's registration : create mods folder
             set "subfolder="!GAME_FOLDER_PATH:"=!\Cemu\mods""

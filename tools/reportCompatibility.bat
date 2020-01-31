@@ -144,7 +144,7 @@ REM : main
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
     set "META_FILE_MLC01="!MLC01_FOLDER_PATH:"=!\usr\title\%beginTitleId%\%endTitleId%\meta\meta.xml""
     if exist !META_FILE_MLC01! set META_FILE=!META_FILE_MLC01!
-    set "META_FILE_MLC01="!MLC01_FOLDER_PATH:"=!\usr\title\0005000E\%endTitleId%\meta\meta.xml""
+    set "META_FILE_MLC01="!MLC01_FOLDER_PATH:"=!\usr\title\0005000e\%endTitleId%\meta\meta.xml""
     if exist !META_FILE_MLC01! set META_FILE=!META_FILE_MLC01!
 
     REM : get Title Id from meta.xml
@@ -158,7 +158,7 @@ REM : main
     set "DLC=no"
     set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\%beginTitleId%\%endTitleId%\aoc\meta\meta.xml""
     if exist !META_FILE_DLC! set "DLC=yes"
-    set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\0005000C\%endTitleId%\aoc\meta\meta.xml""
+    set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\0005000c\%endTitleId%\aoc\meta\meta.xml""
     if exist !META_FILE_DLC! set "DLC=yes"
 
     REM : update GAME_VERSION,DLC,ShaderCahe in gameInfoFile

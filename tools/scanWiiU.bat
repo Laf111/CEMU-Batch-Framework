@@ -17,17 +17,6 @@ REM : main
         goto:continue
     :end
 
-    set "THIS_SCRIPT=%~0"
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        if %nbArgs% EQU 0 exit 1
-        if %nbArgs% EQU 0 exit /b 1
-    )
-
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -187,32 +176,20 @@ REM : main
         REM : get saves list
         set "outputFile=!remoteSaves:SRC=%%i!"
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/save/00050000" "exit" > !outputFile!
-        if !ERRORLEVEL! NEQ 0 (
-            echo WARNING when getting saves list on storage_!src!
-        )
 
         REM : get games list
         set "outputFile=!remoteTids:SRC=%%i!"
         set "gamesListSrc=!outputFile!"
 
         !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/00050000"  "exit" > !outputFile!
-        if !ERRORLEVEL! NEQ 0 (
-            echo WARNING when getting games list on storage_!src!
-        )
 
         REM : get updates list
         set "outputFile=!remoteUpdates:SRC=%%i!"
-        !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000E"  "exit" > !outputFile!
-        if !ERRORLEVEL! NEQ 0 (
-            echo WARNING when getting updates list on storage_!src!
-        )
+        !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000e"  "exit" > !outputFile!
 
         REM : get DLC list
         set "outputFile=!remoteDlc:SRC=%%i!"
-        !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000C"  "exit" > !outputFile!
-        if !ERRORLEVEL! NEQ 0 (
-            echo WARNING when getting DLC list on storage_!src!
-        )
+        !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_!src!/usr/title/0005000c"  "exit" > !outputFile!
 
         REM : parsing the %src%GamesList.txt and get the titleIds
         for /F "tokens=9" %%j in ('type !gamesListSrc! ^| find "Drwxr"') do (
@@ -305,32 +282,6 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSet

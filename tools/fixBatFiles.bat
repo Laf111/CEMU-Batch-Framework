@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V15-8"
+    set "BFW_NEXT_VERSION=V15-9"
 
     set "THIS_SCRIPT=%~0"
 

@@ -8,14 +8,6 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        pause
-        exit 1
-    )
 
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
@@ -138,39 +130,12 @@ REM : functions
         :askUser
         set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
 
-        echo %num% | finstr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+        echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
 
         if %num% LSS 0 goto:askUser
         if %num% GTR %nbUsers% goto:askUser
 
         set "%1=!USERSARRAY[%num%]!"
-    goto:eof
-
-
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
 
