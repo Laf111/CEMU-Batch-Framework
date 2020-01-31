@@ -32,6 +32,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
@@ -92,13 +93,17 @@ REM : main
     REM : convert all bat files to AINSI, remove trailling spaces
     set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFiles.bat""
     !fixBatFile!
+
     echo =========================================================
     echo Done
     echo #########################################################
 
 
-    echo This windows will close automatically in 10s
-    timeout /T 10 > NUL 2>&1
+    echo Launching setup.bat in 6s
+    timeout /T 6 > NUL 2>&1
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    wscript /nologo !StartMaximized! !setup!
+
     endlocal
     exit /b 0
 
