@@ -63,9 +63,8 @@ REM : main
 
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
 
-    echo ^> Deleting all logs under !BFW_LOGS! ^.^.^.
-    pushd !BFW_LOGS!
-    del /F /S *.log > NUL 2>&1
+    echo ^> Deleting !BFW_LOGS! ^.^.^.
+    rmdir /Q /S !BFW_LOGS!
 
     pushd !GAMES_FOLDER!
 
