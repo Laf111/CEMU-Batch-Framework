@@ -91,16 +91,16 @@ REM : main
     )
 
     REM : convert all bat files to AINSI, remove trailling spaces
-    set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFile.bat""
-    !StartHidden! !fixBatFile!
+    set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFiles.bat""
+    !fixBatFile!
     echo =========================================================
     echo Done
     echo #########################################################
 
 
-    echo This windows will close automatically in 2s
-    timeout /T 2 > NUL 2>&1
-    if %nbArgs% EQU 0 endlocal
+    echo This windows will close automatically in 10s
+    timeout /T 10 > NUL 2>&1
+    endlocal
     exit /b 0
 
     goto:eof
