@@ -33,6 +33,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""
+    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
@@ -92,7 +93,7 @@ REM : main
 
     REM : convert all bat files to AINSI, remove trailling spaces
     set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFiles.bat""
-    !fixBatFile!
+    wscript /nologo !StartMaximizedWait! !fixBatFile!
 
     echo =========================================================
     echo Done
