@@ -35,6 +35,8 @@ Last GFX packs checked (presets completion) : **V641**
     - **sync saves between CEMU with the Wii-U (export CEMU->Wii-U using SaveMii),**
     - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
     - **dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
+    - **inject games on the Wii-U (games previously dumped only and without update and DLC. You'll need to update and get the DLC with your Wii-U**
+    - **enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update)** 
     - **ping the wii-U to avoid online simultaneous access** 
     
 
@@ -71,7 +73,7 @@ The mlc01 path is in the game folder so:
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
 
-- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for 4/3, 16/9, 16/10, 21/9, 32/9 and 48/9 aspect ratios; 
+- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for your aspect ratios used. BatchFw compute your aspect ratio with the current resolution on each hosts. Common TV aspect ratios are proposed and you can define your own aspect ratio (by giving a resolution if you don't know the fractional number corresponding); 
 
 - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC);
 
@@ -94,6 +96,11 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
         - decide if you want to import saves for all/a user/select for each game
         - dump sumultanously code, content, meta folder (game, update, DLC if found)
         - prepare the games to be emulated (install update, DLC and saves in the mlc01 folder of the game)
+    - Inject a list of games : 
+        - only games that have been dumped previously (./code/title.* must exist)
+        - total size needed on the Wii-U, is computed
+        - you'll have to update the game on the Wii-U
+    - Enable/Disable Wii-U firmware update (by removing/creating the folder /storage_mlc/sys/update)
     - Import saves from the Wii-U (for all users);
     - Export saves to the Wii-U using SaveMii (create SaveMii's slots directly on the SD card by FTP)
     
@@ -123,6 +130,8 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 - Automatic graphic packs update (check availability);
 
 - Automatic update (check availability);
+
+- check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution)
 
 
 ## Install: 
