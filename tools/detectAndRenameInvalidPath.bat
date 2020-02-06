@@ -133,9 +133,6 @@ REM : main
         set "str=!str:&=!"
         set "str=!str:\!=!"
         set "str=!str:%%=!"
-        set "str=!str:?=!"
-        set "str=!str:\"=!"
-        set "str=!str:^=!"
         set "newFolderName=!str:"=!"
         set "newName="!basename!!newFolderName:"=!""
 

@@ -66,7 +66,7 @@ REM : main
     REM : Ask if tc for CEMU > 1.16 => newTc=1
     set /A "newTc=0"
 
-    choice /C yn /N /M "Is this cache is for versions of CEMU ^> 1^.16 (y, n)? : "
+    choice /C yn /N /M "Is this cache is for versions of CEMU > 1.16 (y, n)? : "
     if %ERRORLEVEL% EQU 1 set /A "newTc=1"
     
     REM : browse to the file
@@ -110,7 +110,8 @@ REM : main
     set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
     REM : cd to codeFolder
     pushd !codeFolder!
-    for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+    set "RPX_FILE="project.rpx""
+	if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
         set "RPX_FILE="%%i""
     )
     REM : cd to GAMES_FOLDER
@@ -179,7 +180,7 @@ REM : main
         pause
         exit 50
     )
-    
+
     REM : check the files sizes
     for /F "tokens=*" %%a in (!TRANSF_CACHE!)  do set "newSize=%%~za"
 
@@ -192,7 +193,6 @@ REM : main
     for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!.bin 2^>NUL') do (
         set "oldCache="!TARGET_FOLDER:"=!\%%i""
     )
-
     pushd !GAMES_FOLDER!
 
     REM : if no cache is found
@@ -286,8 +286,10 @@ REM : functions
 
         pushd !getShaderCacheFolder!
         set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
+        echo Computing RPX hash of !rpx_path!
 
         for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"
+        echo Shader Cache named computed=!sci!
 
         pushd !GAMES_FOLDER!
     goto:eof

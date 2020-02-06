@@ -331,7 +331,7 @@ REM : main
     echo --------------------------------------------------------- >> !batchFwLog!
     echo graphic pack V2 are needed for this version^, extracting^.^.^. >> !batchFwLog!
 
-    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, close this popup to continue^."
+    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, please wait^.^.^."
 
     if !usePbFlag! EQU 1 call:setProgressBar 34 34 "pre processing" "installing V2 GFX packs"
 
@@ -368,13 +368,15 @@ REM : main
 
     REM : handle transferable shader cache comptability since 1.16
     set "sci=NOT_FOUND"
+    REM : old shader cache id (rpx hash)
+    set "osci=NOT_FOUND"
     call:getShaderCacheName
     if ["!sci!"] == ["NOT_FOUND"] (
         echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^! >> !batchFwLog!
         echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
         goto:updateGameGraphicPack
     )
-
+    set "osci=!sci!"
     if ["!versionRead!"] == ["NOT_FOUND"] goto:updateGameGraphicPack
 
     REM : is CEMU >= 1.16 ?
@@ -386,6 +388,7 @@ REM : main
     if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !v116! EQU 2 goto:updateGameGraphicPack
 
+    REM : if
     set "endIdUp=!titleId!
     call:lowerCase !endIdUp! sci  
 
@@ -473,6 +476,17 @@ REM : main
 
     REM : getting the last modified one including _j.bin (conventionnal shader cache)
     for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL ^| find /V "backup"') do set "cacheFile=%%i"
+
+    REM : if new cache sci=titleId is not found AND if exist an old one => use it
+    if ["!cacheFile!"] == ["NONE"] (
+        set "oldCache=!osci!.bin"
+        if exist !oldCache!  (
+            set "cacheFile=!sci!.bin"
+            copy /Y !oldCache! !cacheFile! > NUL 2>&1
+            echo Importing old transferable cache !oldCache! as new cache !cacheFile! >> !batchFwLog!
+            cscript /nologo !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! (after 1.16 included)"
+        )
+    )
     pushd !BFW_TOOLS_PATH!
 
     REM : if not file found
@@ -585,6 +599,7 @@ REM : main
     echo gpuType ^: !GPU_VENDOR!
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value 2^>NUL ^| find "="') do (
         set "string=%%i"
@@ -1425,7 +1440,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
+        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" |find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
             echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
@@ -1500,21 +1515,56 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : remove DOS forbiden character from a string
-    :secureStringPathForDos
+    REM : check if a string contain *
+    :checkStr
 
-        set "str=%~1"
-        set "str=!str:&=!"
-        set "str=!str:?=!"
-        set "str=!str:(=!"
-        set "str=!str:)=!"
-        set "str=!str:%%=!"
-        set "str=!str:^=!"
-        set "str=!str:"=!"
-        set "%2=!str!"
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+        set "%2=OK"
 
     goto:eof
     REM : ------------------------------------------------------------------
+
+    REM : remove DOS forbiden character from a string
+    :secureStringPathForDos
+
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+
+        REM : str is expected protected with double quotes
+        set "string=%~1"
+
+        call:checkStr "!string!" status
+        if ["!status!"] == ["KO"] (
+            echo string is not valid
+            pause
+        )
+
+        set "string=!string:&=!"
+        set "string=!string:?=!"
+        set "string=!string:\!=!"
+        set "string=!string:%%=!"
+        set "string=!string:^=!"
+        set "string=!string:\=!"
+        set "string=!string:/=!"
+        set "string=!string:>=!"
+        set "string=!string:<=!"
+        set "string=!string::=!"
+        set "string=!string:|=!""
+
+        set "%2="!string!""
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
 
     :getModifiedFile

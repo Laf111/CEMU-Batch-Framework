@@ -267,7 +267,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%j in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%j in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%j""
         )
         REM : cd to GAMES_FOLDER
@@ -323,6 +324,7 @@ REM : functions
         REM : basename of TARGET_GAME_FOLDER_PATH (to get TARGET_GAME_TITLE)
         for /F "delims=~" %%l in (!TARGET_GAME_FOLDER_PATH!) do set "TARGET_GAME_TITLE=%%~nxl"
 
+        cls
         echo ========================================================= >> !myLog!
         echo =========================================================
 
@@ -340,17 +342,26 @@ REM : functions
             echo Skip this GAME
             goto:eof
         )
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH! >> !myLog!
+        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH!
+        echo ========================================================= >> !myLog!
+        echo =========================================================
 
         :loopOnUsers
-        echo - Sync !TARGET_GAME_TITLE! saves and transferable caches >> !myLog!
-        echo.
+
         REM : For all users : sync saves
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
-
+            echo.
             call:syncSaveForUser !user!
         )
-
+        echo.
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+        echo Sync transferable caches
+        echo.
         REM : sync transferable shader cache
         call:syncTsc
 
@@ -376,7 +387,9 @@ REM : functions
             echo Skip user !currentUser!
             goto:eof
         )
-
+        echo --------------------------------------------------------- >> !myLog!
+        echo ---------------------------------------------------------
+        
         REM : targetRarFile
         set "targetRarFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!TARGET_GAME_TITLE!_!currentUser!.rar""
 
@@ -395,8 +408,6 @@ REM : functions
             echo ^= saves file are identicals
             goto:eof
         )
-        echo --------------------------------------------------------- >> !myLog!
-        echo ---------------------------------------------------------
 
         if !srcDate! GTR !tgtDate! (
 

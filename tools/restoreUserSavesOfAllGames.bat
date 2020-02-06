@@ -283,7 +283,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER

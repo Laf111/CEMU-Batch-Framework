@@ -25,10 +25,10 @@ REM : main
     
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
     set "importWiiuSaves="!BFW_TOOLS_PATH:"=!\importWiiuSaves.bat""
-    set "checkZeroSizedFiles="!BFW_TOOLS_PATH:"=!\checkZeroSizedFiles.bat""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
+    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
     set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
@@ -39,6 +39,10 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : clean ftp logs
+    set "pat="!BFW_PATH:"=!\logs\ftp*.log""
+    del /F /S !pat! > NUL 2>&1
 
     REM : online files folders
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
@@ -206,7 +210,6 @@ REM : main
     set /A "nbGamesSelected=0"
 
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
-    call:secureStringPathForDos !listGamesSelected! listGamesSelected
     call:checkListOfGames !listGamesSelected!
     if !ERRORLEVEL! NEQ 0 goto:getList
     echo ---------------------------------------------------------
@@ -215,6 +218,7 @@ REM : main
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
+    echo =========================================================
     if !nbGamesSelected! EQU 0 (
         echo WARNING^: no games selected ^?
         pause
@@ -230,7 +234,7 @@ REM : main
     )
     REM : ask for saves import mode
     call:getSavesUserMode userSavesToImport
-
+    cls
     set /A "nbGamesSelected-=1"
     set "START_DATE="
 
@@ -238,22 +242,25 @@ REM : main
     call:loopOnGames
 
     cls
-    echo Verifying files to fix unexpected transfert errors^.^.^.
+    echo Fix unexpected transfert errors with a 2nd pass^.^.^.
     echo.
     call:loopOnGames
 
+    call:waitEndOfTransfers
+    
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
     
     echo =========================================================
+    echo Now you can stop FTPiiU server on you wii-U
     echo All transferts ended^, done
     echo - start ^: !START_DATE!
     echo - end   ^: !DATE!
     echo ---------------------------------------------------------
 
-
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    if not exist !BFW_GP_FOLDER! goto:launchSetup
     set "pat="!BFW_GP_FOLDER:"=!\*_Resolution""
 
     if exist !rulesFiles! del /F !rulesFiles! > NUL 2>&1
@@ -287,8 +294,17 @@ REM : main
         echo New Games were added to your library^, launching setup^.bat^.^.^.
         set "setup="!BFW_PATH:"=!\setup.bat""
         timeout /T 3 > NUL 2>&1
-        wscript /nologo !Start! !setup!
 
+        REM : last loaction used for batchFw outputs
+
+        REM : get the last location from logFile
+        set "OUTPUT_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
+        if not ["!OUTPUT_FOLDER!"] == ["NONE"] (
+            wscript /nologo !Start! !setup! !OUTPUT_FOLDER!
+        ) else (
+            wscript /nologo !Start! !setup!
+        )
         exit 15
     )
     echo =========================================================
@@ -303,6 +319,16 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :waitEndOfTransfers
+
+        :waitingLoop
+        REM : wait all transfert end
+        timeout /T 1 > NUL 2>&1
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "ftpSyncFolders.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && goto:waitingLoop
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :getSavesUserMode
         REM : init to none
@@ -329,16 +355,17 @@ REM : functions
         choice /C yn /N /M "Do you want to choose a user now  (y, n = select users during process)? : "
         if !ERRORLEVEL! EQU 2 set "%1=select" & goto:eof
 
-        for /L %%i in (0,1,!nbUsers!) do echo %%i ^: !USERSARRAY[%%i]!
+        set /A "nbUserm1=nbUsers-1"
+        for /L %%i in (0,1,!nbUserm1!) do echo %%i ^: !USERSARRAY[%%i]!
 
         echo.
         :askUser
-        set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
+        set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
 
         echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
 
         if %num% LSS 0 goto:askUser
-        if %num% GTR %nbUsers% goto:askUser
+        if %num% GEQ %nbUsers% goto:askUser
 
         set "%1=!USERSARRAY[%num%]!"
     goto:eof
@@ -385,22 +412,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : remove DOS forbiden character from a string
-    :secureStringPathForDos
-
-        set "str=%~1"
-        set "str=!str:&=!"
-        set "str=!str:?=!"
-        set "str=!str:(=!"
-        set "str=!str:)=!"
-        set "str=!str:%%=!"
-        set "str=!str:^=!"
-        set "str=!str:"=!"
-        set "%2=!str!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     REM : check list of games and create selection
     :checkListOfGames
 
@@ -435,10 +446,11 @@ REM : functions
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         set "DATE=%ldt%"
         if ["!START_DATE!"] == [""] set "START_DATE=%ldt%"
-        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo !GAME_TITLE! ^: starting at !DATE!
         echo ---------------------------------------------------------
         echo - dumping !GAME_TITLE! to !targetFolder!
+        set "msg="!GAME_TITLE!: start downloading at !DATE! to=!targetFolder:"=!""
+        call:log2GamesDownloadFile !msg!
 
         :importGame
         REM : Import the game (minimized + no wait)
@@ -448,15 +460,8 @@ REM : functions
 
         wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
 
-        if !nbPass! GTR 1 goto:waitingLoop
+        call:waitEndOfTransfers
 
-        echo Waiting end of all current transferts^.^.^.
-        echo.
-        :waitingLoop
-        REM : wait all transfert end
-        timeout /T 1 > NUL 2>&1
-        wmic process get Commandline 2>NUL | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop
-        
         REM : search if this game has an update
         set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
         type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
@@ -477,14 +482,9 @@ REM : functions
         )
 
         REM : get saves only the first pass
-        if !nbPass! GTR 1 goto:checkDump
+        if !nbPass! GTR 1 goto:eof
             
-        echo Waiting end of all current transferts^.^.^.
-        echo.
-        :waitingLoop2
-        REM : wait all transfert end
-        timeout /T 1 > NUL 2>&1
-        wmic process get Commandline | find /I "WinSCP.exe" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && timeout /T 2 > NUL 2>&1 && goto:waitingLoop2
+        call:waitEndOfTransfers
 
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
@@ -493,7 +493,11 @@ REM : functions
                 echo - dumping saves
 
                 REM : Import Wii-U saves
-                wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
+                if not ["!userSavesToImport!"] == ["select"] (
+                    wscript /nologo !StartMinimizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
+                ) else (
+                    wscript /nologo !StartMaximizedWait! !importWiiuSaves! "!wiiuIp!" "!GAME_TITLE!" !endTitleIdFolder! !src! !userSavesToImport!
+                )
             )
         )
 
@@ -502,26 +506,11 @@ REM : functions
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         set "DATE=%ldt%"
 
+        echo ---------------------------------------------------------
         echo !GAME_TITLE! ^: ending at !DATE!
-
-        :checkDump
-        echo - verifying dump validity
-        REM : check the game (list zero sized file and check if they exist under game's folder)
-        set "zeroSizedFilesReport="!targetFolder:"=!\Cemu\zeroSizedFilesFromDump.txt""
-        wscript /nologo !StartHiddenWait! !checkZeroSizedFiles! !targetFolder! "00050000!endTitleIdFolder!" > !zeroSizedFilesReport!
-        attrib -R !zeroSizedFilesReport! > NUL 2>&1
-
-        echo.
-        type !zeroSizedFilesReport! | find "Dump is invalid" > NUL 2>&1 && (
-            echo !GAME_TITLE! dump failed ^!
-            echo It seems there were transferts errors^, try to relaunch
-            echo.
-            echo consult !zeroSizedFilesReport!
-            echo.
-            goto:eof
-        )
-        echo !GAME_TITLE! dump seems valid
-        echo.
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        set "msg="!GAME_TITLE!: downloaded at !DATE!""
+        call:log2GamesDownloadFile !msg!
         
     goto:eof
 
@@ -560,6 +549,18 @@ REM : functions
         REM : get locale for current HOST
         set "L0CALE_CODE=NOT_FOUND"
         for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : function to log
+    :log2GamesDownloadFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        set "glogFile="!BFW_WIIU_FOLDER:"=!\gameDownloadHistory.log""
+
+        echo !msg! >> !glogFile!
 
     goto:eof
     REM : ------------------------------------------------------------------

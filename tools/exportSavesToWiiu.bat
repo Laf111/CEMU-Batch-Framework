@@ -1,3 +1,8 @@
+@echo off
+setlocal EnableExtensions
+REM : ------------------------------------------------------------------
+REM : main
+
     setlocal EnableDelayedExpansion
     color 4F
 
@@ -17,7 +22,7 @@
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
-    set "ftpReplaceFolders="!BFW_TOOLS_PATH:"=!\ftpReplaceFolders.bat""
+    set "ftpSyncFolders="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
@@ -237,7 +242,7 @@
         if %nbArgs% EQU 0 exit 9
         if %nbArgs% NEQ 0 exit /b 9
     )
-    REM WII-U IO ADRESS (wll be check in ftpReplaceFolders.bat
+    REM WII-U IO ADRESS (wll be check in ftpSyncFolders.bat
     set "wiiuIp=!args[0]!"
 
     REM : get GAME_TITLE
@@ -317,7 +322,7 @@
     echo Now you can stop FTPiiU server and launch SaveMii to
     echo import your save^(s^) for your game^(s^)
     echo.
-    set "gslog="!TMP_ULSAVE_PATH:"=!\ExportSaveMii_GAME_TITLE.log""
+    set "gslog="!TMP_ULSAVE_PATH:"=!\ExportSaveMiiSlotsUsed.log""
     echo SaveMii slots to use for each games saved in files !gslog!
     
     if %nbArgs% EQU 0 pause
@@ -468,7 +473,7 @@ REM : functions
         echo ---------------------------------------------------------
         
         REM : launching transfert
-        call !ftpReplaceFolders! !wiiuIp! remote !commonFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/common" "Export !GAME_TITLE! common saves to Wii-U"
+        call !ftpSyncFolders! !wiiuIp! remote !commonFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/common" "Export !GAME_TITLE! common saves to Wii-U"
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             echo ERROR when exporting common saves ^!
@@ -516,7 +521,7 @@ REM : functions
         echo ---------------------------------------------------------
 
         REM : launching transfert
-        call !ftpReplaceFolders! !wiiuIp! remote !cemuUserSaveFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/!folder!" "Export !GAME_TITLE! saves for !currentUser! to Wii-U"
+        call !ftpSyncFolders! !wiiuIp! remote !cemuUserSaveFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/!folder!" "Export !GAME_TITLE! saves for !currentUser! to Wii-U"
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             echo ERROR when exporting existing saves for !currentUser! ^!

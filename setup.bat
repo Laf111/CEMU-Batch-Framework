@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V15-9"
+    set "BFW_VERSION=V16"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -62,14 +62,72 @@ REM : main
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
+    if exist !logFile! goto:setChcp
+
+    REM ----------------------------------------------------------------------------------------------
+    REM First run checks
+    REM ----------------------------------------------------------------------------------------------
+
+    REM : check if file system is NTFS (BatchFw use Symlinks and need to be installed on a NTFS volume)
+    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
+
+        echo This volume is not an NTFS one^!
+        echo BatchFw use Symlinks and need to be installed on a NTFS volume
+        pause
+        exit 2
+    )
+
+    REM : check rights to create links
+    pushd !BFW_PATH!
+    mklink /J doc2 doc > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 (
+        echo This user is not allowed to create links^!
+        echo BatchFw use Symlinks^, please contact !USERDOMAIN! administrator
+        pause
+        exit 21
+    )
+    rmdir /Q doc2 > NUL 2>&1
+    pushd !GAMES_FOLDER!
+
+    REM : check rights to launch vbs scripts
+    for /F "usebackq tokens=3" %%a in (`reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled 2^>nul`) do (
+        set /A "value=%%a"
+        if !value! EQU 0 (
+            echo Launching VBS scripts is not allowed^!
+            echo BatchFw use VBS scripts^, please contact !USERDOMAIN! administrator
+            pause
+            exit 22
+        )
+    )
+
+    REM : check powershell policy to launch unsigned powershell scripts
+    for /F %%a in ('powershell Get-ExecutionPolicy') do (
+        set "policy=%%a"
+        if ["!policy!"] EQU ["Restricted"] (
+            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
+            echo BatchFw use powershell scripts^, please contact !USERDOMAIN! administrator
+            pause
+            exit 23
+        )
+        if ["!policy!"] EQU ["AllSigned"] (
+            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
+            echo BatchFw use powershell scripts^, please contact !USERDOMAIN! administrator
+            pause
+            exit 24
+        )
+    )
+    REM ----------------------------------------------------------------------------------------------
+
     REM : initialize log file for current host (if needed)
     call:initLogForHost
 
+    :setChcp
     REM : set current char codeset
     call:setCharSet
 
     REM : get screen resolution
     pushd !BFW_RESOURCES_PATH!
+
     for /f "tokens=2,10-11" %%a in ('cmdOw.exe /p') do (
       if "%%a"=="0" set "scrWidth=%%b" & set "scrHeight=%%c"
     )
@@ -78,15 +136,6 @@ REM : main
 
     set "msg="RESOLUTION=!scrWidth!x!scrHeight!""
     call:log2HostFile !msg!
-
-    REM : check if file system is NTFS
-    for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
-
-        echo This volume is not an NTFS one^^!
-        echo BatchFw use Symlinks and need to be installed on a NTFS volume
-        pause
-        exit 2
-    )
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -341,7 +390,7 @@ REM : main
     REM : compute current aspect ratio
     call:reduceFraction !scrWidth! !scrHeight! sWr sHr
 
-    set "msg="DESIRED_ASPECT_RATIO=!sWr!-!sHr!""
+    set "msg="DESIRED_ASPECT_RATIO=!sWr!-!sHr!=!sWr!/!sHr!""
 
     type !logFile! | find /V !msg! > NUL 2>&1 && (
         call:log2HostFile !msg!
@@ -407,72 +456,76 @@ REM : main
             choice /C ny /N /M "Define !width!/!height! as aspect ratio ? (y,n): "
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
-            set "msg="DESIRED_ASPECT_RATIO=!width!-!height!""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set /P "desc=Please enter a description for this setting : "
+            call:secureStringPathForDos !desc! desc
+            set "desc=!desc:"=!"
+
+            set "msg="DESIRED_ASPECT_RATIO=!width!-!height!=!desc!""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=!width!-!height!" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["2"] (
-            set "msg="DESIRED_ASPECT_RATIO=4-3""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=4-3=4/3""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=4-3" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["3"] (
-            set "msg="DESIRED_ASPECT_RATIO=21-9""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=21-9=21/9""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=21-9" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["4"] (
-            set "msg="DESIRED_ASPECT_RATIO=64-27""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=64-27=21/9 UltraWide 2.37:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=64-27" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["5"] (
-            set "msg="DESIRED_ASPECT_RATIO=32-15""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=32-15=21/9 UltraWide 2.4:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=32-15" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["6"] (
-            set "msg="DESIRED_ASPECT_RATIO=12-15""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=12-15=21/9 UltraWide 2.13:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=12-15" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["7"] (
-            set "msg="DESIRED_ASPECT_RATIO=37-20""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=37-20=TV Flat 1.85:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=37-20" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["8"] (
-            set "msg="DESIRED_ASPECT_RATIO=1024-429""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=1024-429=TV Scope 2.39:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=1024-429" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["9"] (
-            set "msg="DESIRED_ASPECT_RATIO=256-135""
-            type !logFile! | find /V !msg! > NUL 2>&1 && (
+            set "msg="DESIRED_ASPECT_RATIO=256-135=TV DCI 1.89:1""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=256-135" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
             )
@@ -498,8 +551,9 @@ REM : main
     call:log2HostFile !msg!
 
     :externalGP
-    REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
+    if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     REM : check if an internet connection is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
@@ -518,7 +572,8 @@ REM : main
     if !cr! EQU 2 if not exist !BFW_GP_FOLDER! goto:beginExtraction
 
     REM : here ["!ACTIVE_ADAPTER!"] != ["NOT_FOUND"]
-    if !changeArList! EQU 1 (
+    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+    if exist !glogFile! if !changeArList! EQU 1 (
         REM : force a graphic pack update
         echo Forcing a GFX pack update to take new ratios into account^.^.^.
         echo.
@@ -941,6 +996,7 @@ REM : main
 
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     cls
 
@@ -1406,18 +1462,52 @@ REM : ------------------------------------------------------------------
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : check if a string contain *
+    :checkStr
+
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+        set "%2=OK"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : remove DOS forbiden character from a string
     :secureStringPathForDos
 
-        set "str=%~1"
-        set "str=!str:&=!"
-        set "str=!str:?=!"
-        set "str=!str:(=!"
-        set "str=!str:)=!"
-        set "str=!str:%%=!"
-        set "str=!str:^=!"
-        set "str=!str:"=!"
-        set "%2=!str!"
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+
+        REM : str is expected protected with double quotes
+        set "string=%~1"
+
+        call:checkStr "!string!" status
+        if ["!status!"] == ["KO"] (
+            echo string is not valid
+            pause
+        )
+
+        set "string=!string:&=!"
+        set "string=!string:?=!"
+        set "string=!string:\!=!"
+        set "string=!string:%%=!"
+        set "string=!string:^=!"
+        set "string=!string:\=!"
+        set "string=!string:/=!"
+        set "string=!string:>=!"
+        set "string=!string:<=!"
+        set "string=!string::=!"
+        set "string=!string:|=!"
+
+        set "%2="!string!""
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1506,7 +1596,8 @@ REM : ------------------------------------------------------------------
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER

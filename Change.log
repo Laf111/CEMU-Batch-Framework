@@ -1,7 +1,37 @@
+06/02/2020 V16 :
+- add : now it is possible to add a descripton when defining a user aspect ratio 
+        (visibles when browsing GFX packs in CEMU and used to name V2 graphic packs)
+- add : the choice to copy or move data in importGames.bat
+- add : output folder as arg when calling setup.bat from dumpingGames.bat (to avoid 
+        asking you the outputs location you already defined on this host)
+- add : if no new cache is found for a game, rename and use the old one (warn user
+        with a popup message) to avoid the CEMU (> 1.16) popup import.
+- add : checks on the first run of setup.bat on a given host
+       -> try to create a link (used in BatchFw for GFX packs)
+       -> check if powershell scripts execution is allowed (policy <> Restricted or AllSigned)
+       -> check if the vbs scripts execution is allowed
+- add : WII-U / scripts to enable/disable WII-U firmware update and shortcuts
+- add : WII-U / a script to inject games'dumps (games you removed from the wii-U) and
+        previsouly dumped with BatchFw.
+        Due to FTPiiU server limitation it is impossible to recreate symlinks on the 
+        WiiU file system remotely => only game is injected (not the update nor the DLC).
+        You'll have to update the game and get the DLC from your Wii-U
+        Only FULL games dumps are candidates : files title.fst and title.tmd must exist under the 
+        code folder of the game.
+- add : WII-U / add shortcut for inject dump script in "Wii-u Games\Wii-U"
+- add : WII-U / and start/end dumping dates in "_BatchFw_WiiU\gameDownloadHistory.log" and
+        for injecting games in "_BatchFw_WiiU\gameUploadHistory.log"
+- fix : WII-U / WinScp compare files (sync feature) by size and not by date anymore 
+- fix : GFX pack availability check failure in importGames.bat
+- fix : setup.bat force GFX update on aspect ratios list changed only if 
+        _BatchFw_Install\logs\gamesLibrary.log doesn't exist
+
+        
 31/01/2020 V15-9 :
 - fix : update process needs to flush DESIRED_ASPECT_RATIO in all host log files
         otherwise GFX completion might failed (you can fix it on V15-8 by using 
-        "Wii-U Games\BatchFw\Reset BatchFw.lnk"
+        "Wii-U Games\BatchFw\Reset BatchFw.lnk")
+- fix : Reset BatchFw call to fixBatFiles.bat
 - fix : WII-U / dumpGames exit after selecting games'numbers
 - fix : WII-U / unexpected check on wiiU IP adress (DOS syntax)
 - fix : WII-U / useless warning raised by scanWiiU.bat
@@ -14,6 +44,7 @@
 - add : import games script call setup.bat if no args are given
 - fix : import games script creates new update and DLC paths
 - fix : WII-U / dump games script uses new update and DLC paths
+
 
 29/01/2020 V15-8 :
 add : in setup.bat enter outputs type before asking where create outputs

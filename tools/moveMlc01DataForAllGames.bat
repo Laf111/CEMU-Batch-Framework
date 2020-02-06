@@ -307,7 +307,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER
@@ -358,6 +359,8 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
+
+        REM : import cache if CEMU's folder
         if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
 
         REM : compute shaderCache id to seek for the transferable cache

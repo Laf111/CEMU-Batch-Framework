@@ -19,7 +19,14 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     REM : set current char codeset
     call:setCharSet
@@ -55,23 +62,35 @@ REM : main
     set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
     if not exist !bfwgpv2! exit 10
 
+    REM : init
+    set "sd=!desc!"
+    set "sd=!sd: =!"
+    set "sd=!sd:(=!"
+    set "sd=!sd:)=!"
+    set "sd=!sd:/=-!"
+
+    REM : override
+    echo !desc! | find /I " (16/9)" > NUL 2>&1 && set "sd=169p"
+
+   echo !desc! | find /I " (16/10)" > NUL 2>&1 && set "sd=1610p"
+
     echo !desc! | find /I " (16/10) windowed" > NUL 2>&1 && set "sd=1610pWin"
 
     echo !desc! | find /I " (16/9 laptop) windowed" > NUL 2>&1 && set "sd=169_laptopWin"
 
     echo !desc! | find /I " (16/9 laptop)" > NUL 2>&1 && set "sd=169_laptop"
 
-    echo !desc! | find /I " (21/9 ultrawide r=2.37)" > NUL 2>&1 && set "sd=219_uw237"
+    echo !desc! | find /I " (21/9 UltraWide 2.37:1)" > NUL 2>&1 && set "sd=219_uw237"
 
-    echo !desc! | find /I " (21/9 ultrawide r=2.4)" > NUL 2>&1 && set "sd=219_uw24"
+    echo !desc! | find /I " (21/9 UltraWide 2.4:1)" > NUL 2>&1 && set "sd=219_uw24"
 
-    echo !desc! | find /I " (21/9 ultrawide r=2.13)" > NUL 2>&1 && set "sd=219_uw213"
+    echo !desc! | find /I " (21/9 UltraWide 2.13:1)" > NUL 2>&1 && set "sd=219_uw213"
 
-    echo !desc! | find /I " (TV Flat r=1.85)" > NUL 2>&1 && set "sd=TvFlat_r185"
+    echo !desc! | find /I " (TV Flat 1.85:1)" > NUL 2>&1 && set "sd=TvFlat_r185"
 
-    echo !desc! | find /I " (TV Scope r=2.39)" > NUL 2>&1 && set "sd=TvScope_r239"
+    echo !desc! | find /I " (TV Scope 2.39:1)" > NUL 2>&1 && set "sd=TvScope_r239"
 
-    echo !desc! | find /I " (TV DCI r=1.89)" > NUL 2>&1 && set "sd=TvDci_r189"
+    echo !desc! | find /I " (TV DCI 1.89:1)" > NUL 2>&1 && set "sd=TvDci_r189"
 
     set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!p!sd!""
 
@@ -84,6 +103,7 @@ REM : main
     if not exist !gp! mkdir !gp! > NUL 2>&1
 
     set "rulesFile="!gp:"=!\rules.txt""
+    set "rulesFolder=!rulesFile:\rules.txt=!"
 
     echo [Definition] > !rulesFile!
     echo titleIds = !titleIdList! >> !rulesFile!
@@ -133,17 +153,20 @@ REM : main
     REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
     call:writeFilters >> !rulesFile!
 
-    if !targetHeight! LEQ 8 goto:formatrUtf8
-    if !resRatio! GEQ 12 goto:formatrUtf8
+    if !targetHeight! LEQ 8 goto:formatUtf8
+    if !resRatio! GEQ 12 goto:formatUtf8
     set /A "resRatio+=1"
     goto:beginLoopRes
 
-    :formatrUtf8
+    :formatUtf8
     REM : force UTF8 format
     set "utf8="!gp:"=!\rules.bfw_tmp""
     copy /Y !rulesFile! !utf8! > NUL 2>&1
     type !utf8! > !rulesFile!
     del /F !utf8! > NUL 2>&1
+
+    REM : Linux formating (CRLF -> LF)
+    call:dosToUnix
 
     exit 0
     goto:eof
@@ -152,6 +175,16 @@ REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :dosToUnix
+    REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+
+        REM : replace all \n by \n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :writeFilters
 

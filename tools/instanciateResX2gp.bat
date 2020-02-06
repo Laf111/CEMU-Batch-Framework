@@ -22,6 +22,8 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
+    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+
     REM : set current char codeset
     call:setCharSet
 
@@ -29,7 +31,7 @@ REM : main
     set /A "nbArgs=0"
     :continue
         if "%~1"=="" goto:end
-        set "args[%nbArgs%]="%~1""
+        set "args[%nbArgs%]=%~1"
         set /A "nbArgs +=1"
         shift
         goto:continue
@@ -51,23 +53,21 @@ REM : main
     set /A "hResX2GpUsed=!nativeHeight!*2"
 
     REM : gpResX2gp
-    set "gpResX2gp=!args[2]!"
+    set "gpResX2gp="!args[2]!""
 
     if not exist !gpResX2gp! (
         echo ERROR ^: !gpResX2gp! does not exist
         exit /b 3
     )
     REM : gp
-    set "gp=!args[3]!"
+    set "gp="!args[3]!""
     REM : width
-    set /A "width=!args[4]:"=!"
+    set /A "width=!args[4]!"
     REM : height
-    set /A "height=!args[5]:"=!"
+    set /A "height=!args[5]!"
 
     REM : description
     set "desc=!args[6]!"
-    set "desc=!desc:"=!"
-
 
     pushd !BFW_TOOLS_PATH!
 
@@ -119,7 +119,17 @@ echo tmplRatioValue=!tmplRatioValue!
     robocopy !gpResX2gp! !gp! /S > NUL 2>&1
 
     REM : rules.txt
-    set "rulesFilegp="!gp:"=!\rules.txt""
+    set "rulesFile="!gp:"=!\rules.txt""
+    set "rulesFolder=!gp!"
+
+    REM : force UTF8 format
+    set "utf8="!gp:"=!\rules.bfw_tmp""
+    copy /Y !rulesFile! !utf8! > NUL 2>&1
+    type !utf8! > !rulesFile!
+    del /F !utf8! > NUL 2>&1
+
+    REM : Linux formating (CRLF -> LF)
+    call:dosToUnix
 
     REM : get gp name
     for /F "delims=~" %%i in (!gp!) do set "gpName=%%~nxi"
@@ -225,6 +235,7 @@ echo ratioValue=!ratioValue!
     wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask patches.txt --find !tmplRatioValue! --replace !ratioValue! --logFile !fnrLogFile!
 
     :endMain
+        
     exit /b 0
     goto:eof
 
@@ -232,6 +243,16 @@ echo ratioValue=!ratioValue!
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :dosToUnix
+    REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+
+        REM : replace all \n by \n
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :truncateStrFromRight
         set "str=%~1"

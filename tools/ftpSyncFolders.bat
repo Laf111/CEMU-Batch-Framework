@@ -23,6 +23,9 @@ REM : main
     set "WinScpFolder="!BFW_RESOURCES_PATH:"=!\winSCP""
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
 
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "DATE=%ldt%"
         
     set "myLog="!BFW_PATH:"=!\logs\ftpSyncFolders.log""
 
@@ -88,8 +91,23 @@ REM : main
     echo ----------------------------------------------------------
 
     REM : create localFolder if needed
-    if not exist !LOCAL_FOLDER! mkdir !LOCAL_FOLDER! > NUL 2>&1
+    set /A "nbRetry=0"
 
+    :createFolders
+    if ["!SYNC_TYPE!"] == ["local"] (
+        if not exist !LOCAL_FOLDER! mkdir !LOCAL_FOLDER! > NUL 2>&1
+    ) else (
+        set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheckBeforeSync_!DATE!.log""
+
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir "!REMOTE_FOLDER!"" "option batch off" "exit" > !ftplogFile!
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls "!REMOTE_FOLDER!"" "option batch off" "exit" > !ftplogFile!
+        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
+            echo ERROR ^: unable to create !REMOTE_FOLDER!
+            pause
+            exit /b 50
+        )
+    )
+    del /F !ftplogFile! > NUL 2>&1
     echo.
     echo ^> Sync !SYNC_TYPE! !LOCAL_FOLDER! !REMOTE_FOLDER!
 

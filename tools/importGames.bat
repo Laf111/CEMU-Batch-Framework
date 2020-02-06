@@ -28,10 +28,15 @@ REM : main
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     REM : BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
-    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
@@ -63,8 +68,10 @@ REM : main
         goto:continue
    :end
 
+    REM : flag to move DATA instead of copy them (default = move)
+    set /A "moveFlag=1"
+
     if %nbArgs% EQU 0 (
-        title Import Games with updates and DLC
 
         echo =========================================================
         echo Import new games in your library and prepare them for
@@ -129,6 +136,10 @@ REM : main
         pause
         goto:askInputFolder
     )
+    title Move Games with updates and DLC and prepare them to emulation
+    echo.
+    choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
+    if !ERRORLEVEL! EQU 1 title Copy Games with updates and DLC and prepare them to emulation & set /A "moveFlag=0"
 
     :inputsAvailable
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"
@@ -229,7 +240,7 @@ REM : main
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:launchSetup
 
     if !gfxPackFoundForAllGames! EQU 0 (
-
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo No GFX pack were found for at least one game^.
         echo.
         choice /C yn /N /M "Do you want to update GFX packs folder ? (y,n):"
@@ -241,12 +252,22 @@ REM : main
     )
 
     :launchSetup
+    cls
     if !NB_GAMES_TREATED! NEQ 0 if %nbArgs% EQU 0 (
         echo New Games were added to your library^, launching setup^.bat^.^.^.
         set "setup="!BFW_PATH:"=!\setup.bat""
         timeout /T 3 > NUL 2>&1
-        wscript /nologo !Start! !setup!
 
+        REM : last loaction used for batchFw outputs
+
+        REM : get the last location from logFile
+        set "OUTPUT_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
+        if not ["!OUTPUT_FOLDER!"] == ["NONE"] (
+            wscript /nologo !Start! !setup! !OUTPUT_FOLDER!
+        ) else (
+            wscript /nologo !Start! !setup!
+        )
         exit 15
     )
 
@@ -287,7 +308,9 @@ REM : functions
         REM : launching the search in all gfx pack folder (V2 and up)
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogIg!
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogIg! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do set /A "gfxPackFoundForAllGames=0"
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogIg! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do del /F !fnrLogIg! > NUL 2>&1 & goto:eof
+
+        set /A "gfxPackFoundForAllGames=0"
         del /F !fnrLogIg! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
@@ -299,7 +322,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER
@@ -338,18 +362,27 @@ REM : functions
 
         REM : moving game's folder
 
-        set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
-
-        move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-
-        :moveGame
-        call:moveFolder !source! !target! cr
-        if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
-            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
-            if !ERROLRLEVEL! EQU 1 goto:moveGame
+        :treatGame
+        if !moveFlag! EQU 1 (
+            echo Moving game^'s files^.^.^.
+            set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
+            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+            call:moveFolder !source! !target! cr
+            if !cr! NEQ 0 (
+                cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatGame
+            )
+        ) else (
+            echo Copying game^'s files^.^.^.
+            robocopy !source! !target! /S > NUL 2>&1
+            set /A "cr=!ERRORLEVEL!"
+            if !cr! GTR 7 (
+                cscript /nologo !MessageBox! "ERROR While copying game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatGame
+            )
         )
-
         REM : creating mlc01 folder structure
         set "sysFolder="!target:"=!\mlc01\sys\title\0005001b\10056000\content""
 
@@ -364,10 +397,9 @@ REM : functions
             mkdir !saveFolder! > NUL 2>&1
         )
         REM : check if a GFX pack exist (V2 or up)
-        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:checkGfxPacksAvailability
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if exist !BFW_GP_FOLDER! call:checkGfxPacksAvailability
 
         set /A NB_GAMES_TREATED+=1
-        echo.
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -396,24 +428,33 @@ REM : functions
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000E\%endTitleId%""
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000e\%endTitleId%""
 
         if not exist !target! (
-            echo Creating update^'s folder
             mkdir !target! > NUL 2>&1
         )
-        set "source="!INPUT_FOLDER:"=!\%endTitleId%""
+        echo Installing update^.^.^.
 
-        move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+        :treatUpdate
+        if !moveFlag! EQU 1 (
+            set "source="!INPUT_FOLDER:"=!\%endTitleId%""
+            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+            call:moveFolder !source! !target! cr
+            if !cr! NEQ 0 (
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update cr=!cr!, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatUpdate
+            )
+        ) else (
+            robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
+            set /A "cr=!ERRORLEVEL!"
+            if !cr! GTR 7 (
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatUpdate
+            )
 
-        :moveUpdate
-        call:moveFolder !source! !target! cr
-        if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update ^, close all explorer^.exe that might interfer ^!" 4113
-            if !ERROLRLEVEL! EQU 1 goto:moveUpdate
-            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
         )
-        echo update installed
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -442,22 +483,33 @@ REM : functions
         )
 
         REM : moving to game's folder
-        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000C\%endTitleId%""
-        set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
-
-        move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-
-        :moveDlc
-        call:moveFolder !source! !target! cr
-        if !cr! NEQ 0 (
-            cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC ^, close all explorer^.exe that might interfer ^!" 4113
-            if !ERROLRLEVEL! EQU 1 goto:moveDlc
-            if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC !"
-
+        set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!\mlc01\usr\title\0005000c\%endTitleId%""
+        if not exist !target! (
+            mkdir !target! > NUL 2>&1
         )
 
-        move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
-        echo DLC installed
+        echo Installing DLC^.^.^.
+        :treatDlc
+        if !moveFlag! EQU 1 (
+            set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
+            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+            call:moveFolder !source! !target! cr
+            if !cr! NEQ 0 (
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC cr=!cr!, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatDlc
+            )
+            move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
+
+        ) else (
+            robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
+            set /A "cr=!ERRORLEVEL!"
+            if !cr! GTR 7 (
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
+                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files !"
+                if !ERROLRLEVEL! EQU 1 goto:treatDlc
+            )
+        )
 
     goto:eof
 

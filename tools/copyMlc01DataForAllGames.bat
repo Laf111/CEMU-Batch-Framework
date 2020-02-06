@@ -157,6 +157,24 @@ REM : main
     set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
     call !importSave! !MLC01_FOLDER_PATH!
 
+    REM : check if exist game's folder(s) containing non supported characters
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    dir /B /A:D > !tmpFile! 2>&1
+    for /F %%i in ('type !tmpFile! ^| find "?"') do (
+        cls
+        echo =========================================================
+        echo ERROR ^: Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
+        echo List of game^'s folder^(s^) ^:
+        echo ---------------------------------------------------------
+        type !tmpFile! | find "?"
+        del /F !tmpFile!
+        echo ---------------------------------------------------------
+        echo Fix-it by removing characters here replaced in the folder^'s name
+        echo Exiting until you rename or move those folders
+        echo =========================================================
+        pause
+        goto:eof
+    )
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
@@ -295,7 +313,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER

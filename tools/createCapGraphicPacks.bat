@@ -466,7 +466,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         echo [Control] >> !bfwRulesFile!
         echo vsyncFrequency = $FPS >> !bfwRulesFile!
 
-        REM : Windows formating (LF -> CRLF)
+        REM : Linux formating (CRLF -> LF)
         call:dosToUnix
 
         REM : force UTF8 format

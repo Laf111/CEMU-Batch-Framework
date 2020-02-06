@@ -49,7 +49,7 @@ REM : main
         type !logFileTmp! | find /I "wizardFirstSaving.bat" > NUL 2>&1 && goto:waitingLoopProcesses
 
         REM : if rar is running, don't count
-        type !logFileTmp! | find /I "rar.exe" | find /I "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:waitingLoopProcesses
+        type !logFileTmp! | find /I "rar.exe" | find /I /V "winRar" |find /I "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:waitingLoopProcesses
 
         REM : monitor Cemu launch
         type !logFileTmp! | find /I "cemu.exe" > NUL 2>&1 && set /A "duration=-1"

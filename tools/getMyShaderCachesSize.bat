@@ -210,18 +210,32 @@ REM : functions
             goto:eof
         )
 
-        set "inMo=0"
+        set /A "im=0"
         if not ["!sizeRead!"] == ["0"] (
-            set "inMo=!sizeRead:~,-6!"
-            if ["!inMo!"] == [""] (
+
+            set /A "ik=!sizeRead!/1024"
+            set /A "dk=!sizeRead!%%1024"
+
+            if !ik! EQU 0 (
+                set "%2=0"
+                goto:eof
+            )
+
+            set /A "ik+=1"
+
+            set /A "im=!ik!/1024"
+            set /A "dm=!ik!%%1024"
+            if !im! EQU 0 (
                 set "%2=0"
             ) else (
-                set "%2=!inMO!"
+                set /A "im+=1"
+                set "%2=!im!"
             )
         )
-        if ["!sizeRead!"] == [""] set "%2=0"
+        if ["!sizeRead!"] == [""] set "%2=0.0"
 
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :cleanHostLogFile
         REM : patern to ignore in log file

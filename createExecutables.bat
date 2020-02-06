@@ -444,6 +444,7 @@ REM : main
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     set "IGNORE_PRECOMP=DISABLED"
     REM : GPU is NVIDIA => ignoring precompiled shaders cache
@@ -640,7 +641,7 @@ REM : functions
 
         set /A "disp=0"
         :waitingLoopProcesses
-        wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "find" > NUL 2>&1 && (
+        wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic" | find /I "rar.exe" | find /I /V "winRar" |find /I /V "find" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 set /A "disp=1"
                 echo Still extracting V2 GFX packs^, please wait ^.^.^.
@@ -680,20 +681,57 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : check if a string contain *
+    :checkStr
+
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+        set "%2=OK"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : remove DOS forbiden character from a string
     :secureStringPathForDos
 
-        set "str=%~1"
-        set "str=!str:&=!"
-        set "str=!str:?=!"
-        set "str=!str:(=!"
-        set "str=!str:)=!"
-        set "str=!str:%%=!"
-        set "str=!str:^=!"
-        set "str=!str:"=!"
-        set "%2=!str!"
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed
+
+            set "%2=KO"
+            goto:eof
+        )
+
+        REM : str is expected protected with double quotes
+        set "string=%~1"
+
+        call:checkStr "!string!" status
+        if ["!status!"] == ["KO"] (
+            echo string is not valid
+            pause
+        )
+
+        set "string=!string:&=!"
+        set "string=!string:?=!"
+        set "string=!string:(=!"
+        set "string=!string:)=!"
+        set "string=!string:%%=!"
+        set "string=!string:^=!"
+        set "string=!string:\=!"
+        set "string=!string:/=!"
+        set "string=!string:>=!"
+        set "string=!string:<=!"
+        set "string=!string::=!"
+        set "string=!string:|=!"
+
+        set "%2="!string!""
 
     goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :cleanHostLogFile
         REM : pattern to ignore in log file
@@ -927,9 +965,19 @@ REM : functions
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Dump games from my Wii-U^.lnk""
         set "LINK_DESCRIPTION="Dump games installed on your Wii-U""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\ftp.ico""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\download.ico""
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to dumpGamesFromWiiu^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        REM : create a shortcut to injectDumpsToWiiu.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Inject dumps to my Wii-U^.lnk""
+        set "LINK_DESCRIPTION="Inject games previously dumped by BatchFw to my Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\injectDumpsToWiiu.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\upload.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to injectDumpsToWiiu^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
@@ -962,6 +1010,28 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo Creating a shortcut to importWiiuSaves^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
+
+        set "ARGS=ON"
+        REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
+        set "LINK_DESCRIPTION="Enable firmware update on the Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\ftpSetWiiuFirmwareUpdateMode.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\WiiUfwuOn.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to enabling firmware update on the Wii-U
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+        )
+        set "ARGS=OFF"
+        REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Disable firmware update on the Wii-U^.lnk""
+        set "LINK_DESCRIPTION="Disable firmware update on the Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\ftpSetWiiuFirmwareUpdateMode.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\WiiUfwuOff.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to disabling firmware update on the Wii-U
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+        )
+        set "ARGS="NONE""
 
         REM : create a shortcut to progressBar.bat (if needed)
         set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar^.lnk""
@@ -1369,7 +1439,8 @@ REM : functions
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
-        for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+        set "RPX_FILE="project.rpx""
+	    if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER
