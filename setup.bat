@@ -103,12 +103,6 @@ REM : main
     REM : check powershell policy to launch unsigned powershell scripts
     for /F %%a in ('powershell Get-ExecutionPolicy') do (
         set "policy=%%a"
-        if ["!policy!"] EQU ["Restricted"] (
-            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
-            echo BatchFw use powershell scripts^, please contact !USERDOMAIN! administrator
-            pause
-            exit 23
-        )
         if ["!policy!"] EQU ["AllSigned"] (
             echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
             echo BatchFw use powershell scripts^, please contact !USERDOMAIN! administrator
