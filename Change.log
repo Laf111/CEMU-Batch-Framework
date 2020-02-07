@@ -1,3 +1,7 @@
+07/02/2020 V16-1 :
+- fix : allow Restricted as powershell poilcy when checking pre-requisites
+
+
 06/02/2020 V16 :
 - add : now it is possible to add a descripton when defining a user aspect ratio 
         (visibles when browsing GFX packs in CEMU and used to name V2 graphic packs)
