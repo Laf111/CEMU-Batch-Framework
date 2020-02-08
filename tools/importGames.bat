@@ -263,8 +263,9 @@ REM : main
         REM : get the last location from logFile
         set "OUTPUT_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
-        if not ["!OUTPUT_FOLDER!"] == ["NONE"] (
-            wscript /nologo !Start! !setup! !OUTPUT_FOLDER!
+        if not [!OUTPUT_FOLDER!] == ["NONE"] (
+            set "pf=!OUTPUT_FOLDER:\Wii-U Games=!"
+            wscript /nologo !Start! !setup! !pf!
         ) else (
             wscript /nologo !Start! !setup!
         )
@@ -361,11 +362,11 @@ REM : functions
         set "endTitleId=%titleId:~8,8%"
 
         REM : moving game's folder
+        set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
 
         :treatGame
         if !moveFlag! EQU 1 (
             echo Moving game^'s files^.^.^.
-            set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
             move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
@@ -375,6 +376,7 @@ REM : functions
             )
         ) else (
             echo Copying game^'s files^.^.^.
+
             robocopy !source! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (

@@ -129,7 +129,6 @@ REM : main
 
     set "sci=NOT_FOUND"
     call:getShaderCacheName
-
     if !newTc! EQU 0 goto:checkSizes
 
     REM : new cache built with titleId
@@ -186,6 +185,7 @@ REM : main
 
     REM : search for existing cache
     set "TARGET_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\ShaderCache\transferable""
+    if not exist !TARGET_FOLDER! mkdir !TARGET_FOLDER! > NUL 2>&1
 
     pushd !TARGET_FOLDER!
 
@@ -212,10 +212,9 @@ REM : main
     )
 
     :copyCache
-    set "newName="!SOURCE_FOLDER:"=!\!sci!.bin""
+    set "newPath="!TARGET_FOLDER:"=!\!sci!.bin""
 
-    move /Y !TRANSF_CACHE! !newName! > NUL 2>&1
-    robocopy !SOURCE_FOLDER! !TARGET_FOLDER! !sci!.bin > NUL 2>&1
+    copy /Y !TRANSF_CACHE! !newPath! > NUL 2>&1
 
     echo !TRANSF_CACHE! successfully copied to
     echo !TARGET_FOLDER! as !sci!.bin
@@ -285,7 +284,7 @@ REM : functions
     :getShaderCacheName
 
         pushd !getShaderCacheFolder!
-        set "rpx_path=!codeFolder!\!RPX_FILE:"=!"
+        set "rpx_path="!codeFolder:"=!\!RPX_FILE:"=!""
         echo Computing RPX hash of !rpx_path!
 
         for /F %%l in ('getShaderCacheName.exe !rpx_path!') do set "sci=%%l"

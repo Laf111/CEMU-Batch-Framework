@@ -301,7 +301,8 @@ REM : main
         set "OUTPUT_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
         if not [!OUTPUT_FOLDER!] == ["NONE"] (
-            wscript /nologo !Start! !setup! !OUTPUT_FOLDER!
+            set "pf=!OUTPUT_FOLDER:\Wii-U Games=!"
+            wscript /nologo !Start! !setup! !pf!
         ) else (
             wscript /nologo !Start! !setup!
         )
