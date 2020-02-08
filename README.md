@@ -188,6 +188,7 @@ V13-6 (online files installation for all users) : https://1drv.ms/v/s!Apr2zdKB1g
 
 V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/cc606b/batchfw_v14_sync_saves_with_wiiu_for_all_wiiu/
 
+V16 dump games : https://1drv.ms/u/s!Apr2zdKB1g7fgkGen12h8ACrTP3K?e=sVDub6
 
 ## FAQ: 
 
