@@ -174,7 +174,7 @@ REM : main
 
     for /F "delims=~" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
         set "folder="!emulatorSaveFolder:"=!\%%i""
-        !rarExe! a -ed -ap"mlc01\emulatorSave" -ep1 -r -inul   !rarFileEmuSave! !folder! > NUL 2>&1
+        !rarExe! u -ed -ap"mlc01\emulatorSave" -ep1 -r -inul   !rarFileEmuSave! !folder! > NUL 2>&1
     )
 
     :done
@@ -206,7 +206,7 @@ REM : functions
         set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\%~1\%endTitleId%""
 
         if exist !sf! (
-            !rarExe! a -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul  !rarFile! !sf! > NUL 2>&1
+            !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul  !rarFile! !sf! > NUL 2>&1
             set "%1=!ERRORLEVEL!"
         )
 
