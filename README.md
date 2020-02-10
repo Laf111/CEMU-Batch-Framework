@@ -137,8 +137,7 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 ## Install: 
 
 - Extract in your games folder;
-- Wii-U Owner only : if you haven't a SDCard ready, launch  _BatchFW_Install\\tools\\createWiiuSDcard.bat before setup.bat
-- launch _BatchFW_Install\\setup.bat;
+- Launch _BatchFW_Install\\setup.bat;
 - move or copy your mlc01 data when asked;
     - if you use external mlc01 folders per user, import all of them
     - if you use a CEMU installs per user, register all installs with importing mlc01 data   
