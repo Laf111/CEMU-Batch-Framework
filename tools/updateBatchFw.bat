@@ -182,8 +182,7 @@ REM : main
 
     REM : treatments to be done after updating to this release
     call:cleanBeforeUpdate
-
-
+    
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -224,8 +223,10 @@ REM : functions
 
         REM : move each USERDOMAIN folder contain ..
         for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
+           
             move /Y "%%x\*" . > NUL 2>&1
-            del /F /S "%%x" > NUL 2>&1
+
+            rmdir /Q /S "%%x" > NUL 2>&1
         )
 
         REM : delete old GFX packs archive
@@ -242,7 +243,7 @@ REM : functions
                 robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
 
                 set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
-                !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+                !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!
                 del /F !fnrLog! > NUL 2>&1
             )
         )
