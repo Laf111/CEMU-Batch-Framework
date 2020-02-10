@@ -808,7 +808,10 @@ REM : functions
         echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
         echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
         if not [!ICO_PATH!] == ["NONE"] echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
-        if not [!ARGS!] == ["NONE"] echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
+        if not [!ARGS!] == ["NONE"] (
+            set "secureArgs=!ARGS:|=^|!"
+            echo oLink^.Arguments = "!secureArgs!" >> !TMP_VBS_FILE!
+        )
         if not [!WD_PATH!] == ["NONE"] echo oLink^.WorkingDirectory = !WD_PATH! >> !TMP_VBS_FILE!
         echo oLink^.Save >> !TMP_VBS_FILE!
 
@@ -1375,6 +1378,19 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        set "ARGS=/C for /F ""delims=~"" %%i in ('dir /B /A:D ""!OUTPUT_FOLDER:"=!\Wii-U Games"" ^| find /V ""CEMU"" ^| find /V ""BatchFw"" ^| find /V ""Wii-U"" ^| find /V ""3rdParty""') do for /F ""delims=~"" %%j in ('dir /B ""!OUTPUT_FOLDER:"=!\Wii-U Games\%%i"" ^| find /I ""!CEMU_FOLDER_NAME!""') do del /F ""!OUTPUT_FOLDER:"=!\Wii-U Games\%%i\%%j"""
+
+        REM : create a shortcut to delete games shortcuts for !CEMU_FOLDER_NAME!
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!'s games shortcuts^.lnk""
+        set "LINK_DESCRIPTION="Delete all my games shortcuts created for !CEMU_FOLDER_NAME!""
+        set "TARGET_PATH=c:\Windows\System32\cmd.exe"
+
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteGamesShortcuts.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to delete !CEMU_FOLDER_NAME!^'s shortcuts
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! "c:\Windows\System32"
+        )
+        
         set "ARGS="NONE""
 
         REM : search your current GLCache
