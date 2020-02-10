@@ -15,7 +15,7 @@ Last GFX packs checked (presets completion) : **V641**
 - **Handle more than one user/save (also with versions of CEMU < 1.15.19);**
 
 - **Make your loadiine games library portable :**
-    - **save settings PER user (including GFX and mods packs) and per host,**
+    - **save settings PER user (including GFX and mods packs) and PER host,**
     - **game stats per user (using all version of CEMU that supports it) for all hosts used** 
 
 - **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig). No need to use the CEMU auto update feature (or you might check new release before updating your main install);**
