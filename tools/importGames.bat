@@ -9,7 +9,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    title Import Games with updates and DLC
+
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
@@ -136,11 +136,13 @@ REM : main
         pause
         goto:askInputFolder
     )
-    title Move Games with updates and DLC and prepare them to emulation
+    title Move Games with updates and DLC and prepare them to emulation from !INPUT_FOLDER:"=!
     echo.
     choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
-    if !ERRORLEVEL! EQU 1 title Copy Games with updates and DLC and prepare them to emulation & set /A "moveFlag=0"
-
+    if !ERRORLEVEL! EQU 1 (
+        title Copy Games with updates and DLC and prepare them to emulation from !INPUT_FOLDER:"=!
+        set /A "moveFlag=0"
+    )
     :inputsAvailable
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"
 

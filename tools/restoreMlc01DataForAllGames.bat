@@ -5,7 +5,6 @@ REM : main
 
 
     setlocal EnableDelayedExpansion
-
     color 4F
 
     set "THIS_SCRIPT=%~0"
@@ -55,14 +54,15 @@ REM : main
         goto:continue
     :end
 
+    REM : flag to move DATA instead of copy them (default = move)
+    set /A "moveFlag=1"
+    
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-
-    title Move mlc01 data of all games to a target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -93,6 +93,13 @@ REM : main
         goto:askMlc01Folder
     )
 
+    title Move back mlc01 data to !MLC01_FOLDER_PATH:"=!
+    echo.
+    choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
+    if !ERRORLEVEL! EQU 1 (
+        title Copy back mlc01 data to !MLC01_FOLDER_PATH:"=! 
+        set /A "moveFlag=0"
+    )
     cls
     goto:inputsAvailables
 
@@ -179,7 +186,7 @@ REM : main
 
             if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
-            call:mvGameData
+            call:restoreGameData
 
         ) else (
 
@@ -234,7 +241,7 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :mvGameData
+    :restoreGameData
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
         if /I [!GAME_FOLDER_PATH!] == ["!GAMES_FOLDER:"=!\mlc01"] goto:eof
@@ -264,8 +271,11 @@ REM : functions
         echo =========================================================
         echo - !GAME_TITLE!
         echo ---------------------------------------------------------
-
-        echo Moving game^'s data to !MLC01_FOLDER_PATH! ^?
+        if !moveFlag! EQU 1 (
+            echo echo Moving game^'s data to !MLC01_FOLDER_PATH! ^?
+        ) else (
+            echo Copying game^'s data to !MLC01_FOLDER_PATH! ^?
+        )
         echo   ^(n^) ^: no^, skip
         echo   ^(y^) ^: yes ^(default value after 15s timeout^)
         echo.
@@ -318,7 +328,11 @@ REM : functions
 
         set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
-            call:moveTitle "%%i"
+            if !moveFlag! EQU 1 (
+                call:moveTitle "%%i"
+            ) else (
+                call:copyTitle "%%i"
+            )
         )
 
         :logInfos
@@ -327,6 +341,26 @@ REM : functions
         call:log2GamesLibraryFile !msg!
 
         set /A NB_GAMES_TREATED+=1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :copyTitle
+
+        set "tf="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
+        if not exist !tf! (
+            goto:eof
+        )
+
+        set "target="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
+        robocopy !tf! !target! /S > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 7 (
+            echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
+            pause
+        )
+        if !cr! GTR 0 echo - Copying !tf!
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -344,12 +378,12 @@ REM : functions
             echo ERROR when moving !tf! !target!^, cr=!ERRORLEVEL!
             pause
         ) else (
-            echo Moving !tf!
+            echo - Moving !tf!
         )
 
     goto:eof
     REM : ------------------------------------------------------------------
-
+    
     REM : function to optimize a folder move (move if same drive letter much type faster)
     :moveFolder
 

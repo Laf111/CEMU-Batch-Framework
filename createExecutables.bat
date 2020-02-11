@@ -1095,8 +1095,8 @@ REM : functions
         )
 
         REM : create a shortcut to restoreUserSavesOfAllGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Restore user saves for selected games^.lnk""
-        set "LINK_DESCRIPTION="Restore user saves for selected games in a mlc01 target folder""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Restore user's saves for selected games^.lnk""
+        set "LINK_DESCRIPTION="Restore user^'s saves for selected games in a mlc01 target folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\restoreUserSavesOfAllGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\restoreUserSavesOfAllGames.ico""
         if not exist !LINK_PATH! (

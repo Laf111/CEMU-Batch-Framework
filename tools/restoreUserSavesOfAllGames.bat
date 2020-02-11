@@ -64,7 +64,7 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    title Restore all saves to a mlc01 target folder
+    title Restore all user^'s saves to a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -159,7 +159,11 @@ REM : main
     set "user=NONE"
     set /A "index=!cr!-1"
     set "user=!users[%index%]!"
-
+    echo. 
+    echo user slected=!user:"=!
+    echo. 
+    timeout /T 2 > NUL
+    cls
     :displayHeader
     set "currentUser=!user:"=!"
     title Restore all saves for !currentUser! to a mlc01 target folder
@@ -292,19 +296,19 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
         REM : if rarFile not exists, skip this game
         if not exist !rarFile! goto:eof
 
-        REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-
         echo =========================================================
         echo - Restore !currentUser! save of !GAME_TITLE!
         echo ---------------------------------------------------------
         if !QUIET_MODE! EQU 1 goto:extract
-        echo Moving !currentUser! saves to !MLC01_FOLDER_PATH! ^?
+        echo Extract !currentUser! saves to !MLC01_FOLDER_PATH! ^?
         echo   ^(n^) ^: no^, skip
         echo   ^(y^) ^: yes ^(default value after 15s timeout^)
         echo.

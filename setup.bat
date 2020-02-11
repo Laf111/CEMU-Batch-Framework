@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-1"
+    set "BFW_VERSION=V16-2"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -420,13 +420,14 @@ REM : main
 
     echo     ^(1^)^: custom one ^(define it^)
     echo     ^(2^)^: 4^/3
-    echo     ^(3^)^: 21^/9
-    echo     ^(4^)^: 21^/9 UltraWide 2^.37^:1 ^(2560x1080 = 64^/27^)
-    echo     ^(5^)^: 21^/9 UltraWide 2^.4^:1 ^(1920x900 = 32^/15^)
-    echo     ^(6^)^: 21^/9 UltraWide 2^.13^:1 ^(1920x800 = 12^/5^)
-    echo     ^(7^)^: TV Flat 1^.85^:1 ^(1998x1080 = 37^/20^)
-    echo     ^(8^)^: TV Scope 2^.39^:1 ^(2048x858 = 1024^/429^)
-    echo     ^(9^)^: TV Full Container (DCI) 1^.89^:1 ^(2048x1080 = 256^/135^)
+    echo     ^(3^)^: 16^/9 ^(missing resolutions^) standard HDTV
+    echo     ^(4^)^: 21^/9
+    echo     ^(5^)^: 21^/9 UltraWide 2^.37^:1 ^(2560x1080 = 64^/27^)
+    echo     ^(6^)^: 21^/9 UltraWide 2^.4^:1 ^(1920x900 = 32^/15^)
+    echo     ^(7^)^: 21^/9 UltraWide 2^.13^:1 ^(1920x800 = 12^/5^)
+    echo     ^(8^)^: TV Flat 1^.85^:1 ^(1998x1080 = 37^/20^)
+    echo     ^(9^)^: TV Scope 2^.39^:1 ^(2048x858 = 1024^/429^)
+    echo     ^(10^)^: TV Full Container (DCI) 1^.89^:1 ^(2048x1080 = 256^/135^)
 
     echo     ^(c^)^: cancel
     echo ---------------------------------------------------------
@@ -470,7 +471,7 @@ REM : main
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["3"] (
-            set "msg="DESIRED_ASPECT_RATIO=21-9=21/9""
+            set "msg="DESIRED_ASPECT_RATIO=16-9=16/9""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=21-9" > NUL 2>&1 && (
                 set /A "changeArList=1"
                 call:log2HostFile !msg!
@@ -478,6 +479,14 @@ REM : main
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["4"] (
+            set "msg="DESIRED_ASPECT_RATIO=21-9=21/9""
+            type !logFile! | find /V "DESIRED_ASPECT_RATIO=21-9" > NUL 2>&1 && (
+                set /A "changeArList=1"
+                call:log2HostFile !msg!
+            )
+            goto:anotherRatio
+        )
+        if ["!ANSWER!"] == ["5"] (
             set "msg="DESIRED_ASPECT_RATIO=64-27=21/9 UltraWide 2.37:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=64-27" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -485,7 +494,7 @@ REM : main
             )
             goto:anotherRatio
         )
-        if ["!ANSWER!"] == ["5"] (
+        if ["!ANSWER!"] == ["6"] (
             set "msg="DESIRED_ASPECT_RATIO=32-15=21/9 UltraWide 2.4:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=32-15" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -493,7 +502,7 @@ REM : main
             )
             goto:anotherRatio
         )
-        if ["!ANSWER!"] == ["6"] (
+        if ["!ANSWER!"] == ["7"] (
             set "msg="DESIRED_ASPECT_RATIO=12-15=21/9 UltraWide 2.13:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=12-15" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -501,7 +510,7 @@ REM : main
             )
             goto:anotherRatio
         )
-        if ["!ANSWER!"] == ["7"] (
+        if ["!ANSWER!"] == ["8"] (
             set "msg="DESIRED_ASPECT_RATIO=37-20=TV Flat 1.85:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=37-20" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -509,7 +518,7 @@ REM : main
             )
             goto:anotherRatio
         )
-        if ["!ANSWER!"] == ["8"] (
+        if ["!ANSWER!"] == ["9"] (
             set "msg="DESIRED_ASPECT_RATIO=1024-429=TV Scope 2.39:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=1024-429" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -517,7 +526,7 @@ REM : main
             )
             goto:anotherRatio
         )
-        if ["!ANSWER!"] == ["9"] (
+        if ["!ANSWER!"] == ["10"] (
             set "msg="DESIRED_ASPECT_RATIO=256-135=TV DCI 1.89:1""
             type !logFile! | find /V "DESIRED_ASPECT_RATIO=256-135" > NUL 2>&1 && (
                 set /A "changeArList=1"
@@ -568,13 +577,9 @@ REM : main
     REM : here ["!ACTIVE_ADAPTER!"] != ["NOT_FOUND"]
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
     if exist !glogFile! if !changeArList! EQU 1 (
-        REM : force a graphic pack update
-        echo Forcing a GFX pack update to take new ratios into account^.^.^.
-        echo.
-
-        REM : forcing a GFX pack update to add GFX packs for new games
-        set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
-        call !gfxUpdate! -silent
+        REM : clean all entries in glogFile to force bathFw to complete
+        REM : GFX packs on next launch
+        call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
 
     if !cr! EQU 0 goto:getUserMode
@@ -1762,6 +1767,20 @@ REM : ------------------------------------------------------------------
         set /A "%2=%len%"
     goto:eof
 
+    :cleanGameLibFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
+
+        type !glogFile! | find /I /V "!pat!" > !logFileTmp! 2>&1
+
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
+    
     REM : COMPARE VERSION : function to format string version without alphabetic charcaters
     :formatStrVersion
 

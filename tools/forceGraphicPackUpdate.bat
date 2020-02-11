@@ -78,7 +78,7 @@ REM : main
     echo Note that :
     echo     - V2 graphic packs will be untouched
     echo     - If you^'ve chosen to let BatchFw complete your GFX
-    echo       It will rebuild all the first time you launch a game
+    echo     - It will rebuild all the first time you launch a game
     echo =========================================================
 
     echo Launching in 30s

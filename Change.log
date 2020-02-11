@@ -1,5 +1,23 @@
+11/02/2020 V16-2 :
+- fix : when adding a new aspect ratio, instead of forcing a GFX pack update flush the 
+        gamesLibrary.log (to force batchFw will complete the GFX packs on next launch)
+- fix : auto-update issue (did not end). Fixed but you'll get an excpeted error 
+        "'RLEVEL" when update (due the dynamic patch of the updater source
+        file). Just close the windows.
+- fix : saves not found for the current user in restoreUserSavesOfAllGames.bat
+- fix : importGames.bat always copy even if move was chosen
+- opt : lower compression time by using the update mode
+- add : 16/9 standard HDTV as proposed aspect ratios in setup.bat
+- add : possibility to copy data (move by default) in restoreMlc01DataForAllGames.bat 
+        when called with no args
+- add : a shortcut to delete all game's shortcuts created for this version in each 
+        CEMU's version subfolder under "Wii-U Games\CEMU" 
+- add : WII-U / add DLC injection in injectDumpsToWiiu.bat (only update seems to use
+        symlinks on Wii-U file system)
+
+
 07/02/2020 V16-1 :
-- fix : allow Restricted as powershell poilcy when checking pre-requisites
+- fix : allow Restricted as powershell policy when checking pre-requisites
 
 
 06/02/2020 V16 :
