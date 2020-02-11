@@ -65,11 +65,6 @@ REM : main
     :end
 
     REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
-    echo Starting Date ^: !DATE!
-
     echo ========================================================= > !myLog!
 
     if %nbArgs% NEQ 5 (
@@ -84,7 +79,9 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-
+    REM : BatchFW folders
+    set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+    
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
@@ -94,7 +91,7 @@ REM : main
         exit /b 1
     )
     REM : check if GFX pack folder was treated to be DOS compliant
-    call:checkGpFolders
+REM    call:checkGpFolders
 
     REM : GFX version to set
     set "setup="!BFW_PATH:"=!\setup.bat""
@@ -230,9 +227,6 @@ REM : main
 
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
 
-    REM : BatchFW folders
-    set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
-
     REM : clean links in game's graphic pack folder
     for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
@@ -294,11 +288,6 @@ REM : main
     exit 80
 
     :endMain
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
-    echo Ending Date ^: !DATE!
 
     echo --------------------------------------------------------- >> !myLog!
     echo done >> !myLog!
@@ -391,7 +380,6 @@ REM : functions
 
         call:linkFolder
 
-
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -447,7 +435,7 @@ REM : functions
 
             REM : if link exist , delete it
             if exist !linkPath! rmdir /Q !linkPath! > NUL 2>&1
-            mklink /J /D !linkPath! !mod!
+            mklink /J /D !linkPath! !mod! >> !mylog!
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -475,15 +463,13 @@ REM : functions
         set "str=!str:~2!"
 
         set "gp="!str:\rules=!"
-
         REM : if more than one folder level exist (LastVersion packs, get only the first level
         call:getFirstFolder rgp
-
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
         if ["!gfxType!"] == ["V2"] set "targetPath="!BFW_GP_FOLDER:"=!\_graphicPacksV2\!gp:"=!""
 
-        if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
+        if not exist !linkPath! mklink /J /D !linkPath! !targetPath! >> !myLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -494,29 +480,36 @@ REM : functions
         set "filter=%~1"
         set "filter=!filter:-=!"
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-
+        if ["!gfxType!"] == ["V2"] (    
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        ) else (
+            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
 
     :importGraphicPacks
 
+    if ["!gfxType!"] == ["V2"] (    
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+    ) else (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+    )
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :checkGpFolders
-
-        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! 2^>NUL ^| find "^!"') do (
-            echo Treat GFX pack folder to be DOS compliant >> !myLog!
-            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
-            goto:eof
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
+REM    :checkGpFolders
+REM
+REM        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! 2^>NUL ^| find "^!"') do (
+REM            echo Treat GFX pack folder to be DOS compliant >> !myLog!
+REM            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+REM            goto:eof
+REM        )
+REM
+REM    goto:eof
+REM    REM : ------------------------------------------------------------------
 
     :cleanGameLogFile
         REM : pattern to ignore in log file
@@ -612,8 +605,9 @@ REM : functions
 
             goto:handleGfxPacks
         )
-
         REM : No new gfx pack found but is a V2 gfx pack exists ?
+        if not exist !BFW_LEGACY_GP_FOLDER! goto:handleGfxPacks
+
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| findstr /r "%resX2%p\\rules.txt"') do (
 
             REM : rules.txt
@@ -630,8 +624,6 @@ REM : functions
         )
 
         REM : No GFX pack was found
-
-
         :handleGfxPacks
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
