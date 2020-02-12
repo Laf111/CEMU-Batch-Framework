@@ -16,7 +16,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -74,7 +74,7 @@ REM : main
 
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askMlc01Folder
     )
     REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
@@ -134,6 +134,17 @@ REM : main
     )
     echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
     echo  - source mlc01 folder^: !MLC01_FOLDER_PATH!
+    echo.
+    echo Computing the size needed^.^.^.
+    echo.
+    REM : compute the size needed
+    call:getFolderSizeInMb !MLC01_FOLDER_PATH! sizeNeeded
+    choice /C yn /N /M "!sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
+    if !ERRORLEVEL! EQU 2 (
+        REM : Cancelling
+        echo Cancelled by user^, exiting in 2s
+        exit /b 49
+    )
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
     echo Launching in 30s
@@ -418,8 +429,6 @@ REM : functions
         echo - !GAME_TITLE!
         echo ---------------------------------------------------------
 
-        REM : asking for associating the current game with this CEMU VERSION
-
         echo If you play !GAME_TITLE! with !CEMU_FOLDER_NAME:"=!^:
         echo.
         echo Copy game^'s data from !MLC01_FOLDER_PATH!^?
@@ -467,6 +476,75 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        REM : prevent path to be stripped if contain '
+        set "folder=!folder:'=`'!"
+        set "folder=!folder:[=`[!"
+        set "folder=!folder:]=`]!"
+        set "folder=!folder:)=`)!"
+        set "folder=!folder:(=`(!"
+
+        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+
+        set "line=NONE"
+        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
+        REM : powershell call always return %ERRORLEVEL%=0
+
+        if ["!line!"] == ["NONE"] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set "sizeRead=%line: =%"
+
+        if ["!sizeRead!"] == [" ="] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set /A "im=0"
+        if not ["!sizeRead!"] == ["0"] (
+
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
+                goto:eof
+            )
+        )
+        set "%2=0.0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
     :copyTitle
 
         set "tf="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""

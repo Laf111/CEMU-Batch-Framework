@@ -159,9 +159,9 @@ REM : main
     set "user=NONE"
     set /A "index=!cr!-1"
     set "user=!users[%index%]!"
-    echo. 
+    echo.
     echo user slected=!user:"=!
-    echo. 
+    echo.
     timeout /T 2 > NUL
     cls
     :displayHeader
@@ -298,7 +298,7 @@ REM : functions
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-        
+
         set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
 
         REM : if rarFile not exists, skip this game

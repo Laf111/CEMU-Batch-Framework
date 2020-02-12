@@ -78,8 +78,8 @@ REM : main
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!"
 
     set "size=0"
-    if exist !GLCacheSavesFolder! call:getFolderSize !GLCacheSavesFolder! size
-    echo Global OpenGL Cache size ^(Mo^) ^: %size%
+    if exist !GLCacheSavesFolder! call:getFolderSizeInMb !GLCacheSavesFolder! size
+    echo Global OpenGL Cache size ^(Mb^) ^: %size%
     echo ---------------------------------------------------------
 
     for /F "delims=~" %%x in ('dir /b /o:n /a:d !GLCacheSavesFolder! 2^>NUL') do (
@@ -93,8 +93,8 @@ REM : main
     set "vkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
 
     set "size=0"
-    if exist !vkCacheSavesFolder! call:getFolderSize !vkCacheSavesFolder! size
-    echo Global Vulkan Cache size ^(Mo^) ^: %size%
+    if exist !vkCacheSavesFolder! call:getFolderSizeInMb !vkCacheSavesFolder! size
+    echo Global Vulkan Cache size ^(Mb^) ^: %size%
     echo ---------------------------------------------------------
 
     for /F "delims=~" %%x in ('dir /b /o:n /a:d !vkCacheSavesFolder! 2^>NUL') do (
@@ -138,7 +138,7 @@ REM : functions
 
             set "folder="!gpuVersion:"=!\%%y""
             set "sizeG=0"
-            call:getFolderSize !folder! sizeG
+            call:getFolderSizeInMb !folder! sizeG
             echo - %%y shader cache size ^: !sizeG!
         )
         cd ..
@@ -160,29 +160,50 @@ REM : functions
             goto:eof
         )
 
-        echo Size of !CEMU_FOLDER_NAME:"=! subfolders ^(Mo^) ^:
+        echo Size of !CEMU_FOLDER_NAME:"=! subfolders ^(Mb^) ^:
         echo ---------------------------------------------------------
 
         set "precompiled="!CEMU_FOLDER:"=!\ShaderCache\precompiled""
         set "sizeP=0"
-        if exist !precompiled! call:getFolderSize !precompiled! sizeP
+        if exist !precompiled! call:getFolderSizeInMb !precompiled! sizeP
         echo - precompiled     ^: !sizeP!
 
         set "transferable="!CEMU_FOLDER:"=!\ShaderCache\transferable""
         set "sizeT=0"
-        if exist !transferable! call:getFolderSize !transferable! sizeT
+        if exist !transferable! call:getFolderSizeInMb !transferable! sizeT
         echo - transferable    ^: !sizeT!
 
         set "glcache="!CEMU_FOLDER:"=!\ShaderCache\driver""
         set "sizeT=0"
-        if exist !glcache! call:getFolderSize !glcache! sizeT
+        if exist !glcache! call:getFolderSizeInMb !glcache! sizeT
         echo - GLCache    ^: !sizeT!
         echo =========================================================
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :getFolderSize
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
 
         set "folder="%~1""
         REM : prevent path to be stripped if contain '
@@ -203,7 +224,7 @@ REM : functions
             goto:eof
         )
 
-        set "sizeRead=!line: =!"
+        set "sizeRead=%line: =%"
 
         if ["!sizeRead!"] == [" ="] (
             set "%2=0"
@@ -213,30 +234,23 @@ REM : functions
         set /A "im=0"
         if not ["!sizeRead!"] == ["0"] (
 
-            set /A "ik=!sizeRead!/1024"
-            set /A "dk=!sizeRead!%%1024"
-
-            if !ik! EQU 0 (
-                set "%2=0"
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
                 goto:eof
             )
-
-            set /A "ik+=1"
-
-            set /A "im=!ik!/1024"
-            set /A "dm=!ik!%%1024"
-            if !im! EQU 0 (
-                set "%2=0"
-            ) else (
-                set /A "im+=1"
-                set "%2=!im!"
-            )
         )
-        if ["!sizeRead!"] == [""] set "%2=0.0"
+        set "%2=0.0"
 
     goto:eof
     REM : ------------------------------------------------------------------
-
     :cleanHostLogFile
         REM : patern to ignore in log file
         set "pat=%~1"

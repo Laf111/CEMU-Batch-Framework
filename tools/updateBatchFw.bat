@@ -108,7 +108,7 @@ REM : main
         REM : else (available version is not a RC => update)
         goto:newVersion
     )
-    
+
     REM : here BFW_VERSION is not a RC
     REM : bug to avoid V1500
     echo !bfwVR! | find "V1500" > NUL 2>&1 && (
@@ -182,7 +182,7 @@ REM : main
 
     REM : treatments to be done after updating to this release
     call:cleanBeforeUpdate
-    
+
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -223,7 +223,7 @@ REM : functions
 
         REM : move each USERDOMAIN folder contain ..
         for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
-           
+
             move /Y "%%x\*" . > NUL 2>&1
 
             rmdir /Q /S "%%x" > NUL 2>&1
@@ -451,7 +451,7 @@ REM : functions
         set "%2=!str!"
 
     goto:eof
-    
+
    :cleanHostLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"

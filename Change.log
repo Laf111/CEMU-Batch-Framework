@@ -7,6 +7,15 @@
 - fix : saves not found for the current user in restoreUserSavesOfAllGames.bat
 - fix : importGames.bat always copy even if move was chosen
 - opt : lower compression time by using the update mode
+- opt : lower significatively pre processing time :
+        - extract saves earlier
+        - lower updateGameGraphicPacks.bat execution time
+- add : folder size computation in 
+        - copyMlc01DataForAllGames.bat
+        - dumpGamesFromWiiu.bat
+        - importGames.bat
+        - moveMlc01DataForAllGames.bat
+        - restoreMlc01DataForAllGames.bat
 - add : 16/9 standard HDTV as proposed aspect ratios in setup.bat
 - add : possibility to copy data (move by default) in restoreMlc01DataForAllGames.bat 
         when called with no args

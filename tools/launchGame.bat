@@ -365,7 +365,7 @@ REM : main
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
     set "endTitleId=%titleId:~8,8%"
-    
+
     REM : link game's packs
     echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 12 16 "pre processing" "checking game graphic packs availability"

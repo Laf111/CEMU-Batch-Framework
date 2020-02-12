@@ -65,6 +65,11 @@ REM : main
     :end
 
     REM : get current date
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "DATE=%ldt%"
+    echo Starting Date ^: !DATE!
+
     echo ========================================================= > !myLog!
 
     if %nbArgs% NEQ 5 (
@@ -81,7 +86,7 @@ REM : main
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     REM : BatchFW folders
     set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
-    
+
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     if not exist !BFW_GP_FOLDER! (
@@ -239,6 +244,8 @@ REM    call:checkGpFolders
     REM : Re launching the search (to get the freshly created packs)
 
     REM : search in the needed folder
+    REM : TODO try compare with a loop on _resolution folders only + type | find !titleId:~3! ?
+    REM : double : first try to find !GAME_TITLE: =!_Resolution (V3 and up) and !GAME_TITLE: =!_ (V2)
     if not ["!gfxType!"] == ["V2"] (
         echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER! >> !myLog!
         echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER!
@@ -252,9 +259,10 @@ REM    call:checkGpFolders
     )
 
     REM : import 16/9 GFX packs
-    call:importGraphicPacks
+    call:linkGraphicPacks
 
-    if not ["!gfxType!"] == ["V2"] call:importMods
+    REM : GFX pack V3 and up : import mods and other ratios already treated in importGraphicPacks
+    if not ["!gfxType!"] == ["V2"] call:linkMods & goto:checkPackLinks
 
     REM : get DESIRED_ASPECT_RATIO and SCREEN_MODE
     for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
@@ -271,7 +279,7 @@ REM    call:checkGpFolders
     echo ARLIST=!ARLIST!
 
     REM : import user defined ratios graphic packs
-    for %%a in (!ARLIST!) do call:importOtherGraphicPacks "%%a"
+    for %%a in (!ARLIST!) do call:linkOtherV2GraphicPacks "%%a"
 
     :checkPackLinks
 
@@ -288,6 +296,11 @@ REM    call:checkGpFolders
     exit 80
 
     :endMain
+    REM : get current date
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "DATE=%ldt%"
+    echo Ending Date ^: !DATE!
 
     echo --------------------------------------------------------- >> !myLog!
     echo done >> !myLog!
@@ -422,7 +435,7 @@ REM : functions
 
     goto:eof
 
-    :importMods
+    :linkMods
         REM : search user's mods under %GAME_FOLDER_PATH%\Cemu\mods
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\mods""
         if not exist !pat! mkdir !pat! > NUL 2>&1
@@ -469,29 +482,28 @@ REM : functions
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
         if ["!gfxType!"] == ["V2"] set "targetPath="!BFW_GP_FOLDER:"=!\_graphicPacksV2\!gp:"=!""
 
+        REM : links are already deleted earlier (more efficient than doing it here)
+        REM : if not exist !linkPath! => because of GFX pack subfolder (FPS++ ect...)
         if not exist !linkPath! mklink /J /D !linkPath! !targetPath! >> !myLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
 
-    :importOtherGraphicPacks
+    :linkOtherV2GraphicPacks
 
         set "filter=%~1"
         set "filter=!filter:-=!"
 
-        if ["!gfxType!"] == ["V2"] (    
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        ) else (
-            for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-        )
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+
     goto:eof
     REM : ------------------------------------------------------------------
 
 
-    :importGraphicPacks
+    :linkGraphicPacks
 
-    if ["!gfxType!"] == ["V2"] (    
+    if ["!gfxType!"] == ["V2"] (
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
     ) else (
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"

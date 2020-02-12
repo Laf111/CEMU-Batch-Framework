@@ -15,7 +15,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -56,7 +56,7 @@ REM : main
 
     REM : flag to move DATA instead of copy them (default = move)
     set /A "moveFlag=1"
-    
+
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -72,7 +72,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askMlc01Folder
     )
 
@@ -97,7 +97,7 @@ REM : main
     echo.
     choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
     if !ERRORLEVEL! EQU 1 (
-        title Copy back mlc01 data to !MLC01_FOLDER_PATH:"=! 
+        title Copy back mlc01 data to !MLC01_FOLDER_PATH:"=!
         set /A "moveFlag=0"
     )
     cls
@@ -135,6 +135,26 @@ REM : main
     echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
     echo  - target mlc01 folder ^: !MLC01_FOLDER_PATH!
     echo =========================================================
+    echo.
+    echo Computing max size needed^.^.^.
+    echo.
+    REM : compute the size needed
+    set /A "totalSizeNeeded=0"
+
+    for /F "delims=~" %%i in ('dir /B /A:D !GAMES_FOLDER! ^| find /V "_BatchFw" 2^>NUL') do (
+        set "folder="!GAMES_FOLDER:"=!\%%i\mlc01\usr\title""
+        if exist !folder! (
+            call:getFolderSizeInMb !folder! size
+            set /A "totalSizeNeeded+=size"
+        )
+    )
+    choice /C yn /N /M "A maximum of !totalSizeNeeded! Mb are needed, continue (y, n)? : "
+    if !ERRORLEVEL! EQU 2 (
+        REM : Cancelling
+        echo Cancelled by user^, exiting in 2s
+        exit /b 49
+    )
+
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
     echo Launching in 30s
@@ -240,6 +260,77 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        REM : prevent path to be stripped if contain '
+        set "folder=!folder:'=`'!"
+        set "folder=!folder:[=`[!"
+        set "folder=!folder:]=`]!"
+        set "folder=!folder:)=`)!"
+        set "folder=!folder:(=`(!"
+
+        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+
+        set "line=NONE"
+        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
+        REM : powershell call always return %ERRORLEVEL%=0
+
+        if ["!line!"] == ["NONE"] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set "sizeRead=%line: =%"
+
+        if ["!sizeRead!"] == [" ="] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set /A "im=0"
+        if not ["!sizeRead!"] == ["0"] (
+
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
+                goto:eof
+            )
+        )
+        set "%2=0.0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :restoreGameData
 
@@ -383,7 +474,7 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     REM : function to optimize a folder move (move if same drive letter much type faster)
     :moveFolder
 

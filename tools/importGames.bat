@@ -16,7 +16,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -57,6 +57,8 @@ REM : main
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
+    REM : with no arguments to this script, activating user inputs
+    set /A "QUIET_MODE=0"
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -109,11 +111,13 @@ REM : main
         echo SYNTAXE^: "!THIS_SCRIPT!" INPUT_FOLDER
         echo given {%*}
         pause
-        exit 9
+        exit /b 9
     )
 
     REM : get and check INPUT_FOLDER
     set "INPUT_FOLDER=!args[0]!"
+    REM : with arguments to this script, deactivating user inputs
+    set /A "QUIET_MODE=1"
 
     goto:inputsAvailable
 
@@ -123,7 +127,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a source folder"') do set "folder=%%b" && set "INPUT_FOLDER=!folder:?= !"
     if [!INPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askInputFolder
     )
 
@@ -146,6 +150,21 @@ REM : main
     :inputsAvailable
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"
 
+    if !QUIET_MODE! EQU 0 (
+        echo.
+        echo Computing the size needed^.^.^.
+        echo.
+        REM : compute the size needed
+        call:getFolderSizeInMb !INPUT_FOLDER! sizeNeeded
+
+        echo Only if you copy data or move data from another partition^:
+        choice /C yn /N /M "!sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
+        if !ERRORLEVEL! EQU 2 (
+            REM : Cancelling
+            echo Cancelled by user^, exiting in 2s
+            exit /b 49
+        )
+    )
     pushd !INPUT_FOLDER!
 
     REM : rename folders that contains forbiden characters : & ! .
@@ -271,7 +290,7 @@ REM : main
         ) else (
             wscript /nologo !Start! !setup!
         )
-        exit 15
+        exit /b 15
     )
 
     if %nbArgs% EQU 1 goto:exiting
@@ -302,6 +321,76 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        REM : prevent path to be stripped if contain '
+        set "folder=!folder:'=`'!"
+        set "folder=!folder:[=`[!"
+        set "folder=!folder:]=`]!"
+        set "folder=!folder:)=`)!"
+        set "folder=!folder:(=`(!"
+
+        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+
+        set "line=NONE"
+        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
+        REM : powershell call always return %ERRORLEVEL%=0
+
+        if ["!line!"] == ["NONE"] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set "sizeRead=%line: =%"
+
+        if ["!sizeRead!"] == [" ="] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set /A "im=0"
+        if not ["!sizeRead!"] == ["0"] (
+
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
+                goto:eof
+            )
+        )
+        set "%2=0.0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :checkGfxPacksAvailability
         set "fnrLogIg="!BFW_PATH:"=!\logs\fnr_import!GAME_TITLE!.log""

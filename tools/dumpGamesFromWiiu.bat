@@ -37,6 +37,8 @@ REM : main
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "rulesFiles="!BFW_PATH:"=!\logs\rulesFiles.log""
 
+    set /A "totalMoCopied=0"
+
     REM : set current char codeset
     call:setCharSet
 
@@ -309,7 +311,9 @@ REM : main
         exit 15
     )
     echo =========================================================
-    echo games dumped successfully
+    echo games dumped successfully ^(!totalMoCopied! Mb^)
+    echo.
+
     pause
     
     exit 0
@@ -482,11 +486,18 @@ REM : functions
             wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
         )
 
-        REM : get saves only the first pass
-        if !nbPass! GTR 1 goto:eof
-            
         call:waitEndOfTransfers
 
+        REM : get saves only the first pass
+        if !nbPass! GTR 1 (
+
+            REM : compute the game size (waitEndOfTransfers already call for game files)
+            set /A "dumpSize=0"
+            call:getFolderSizeInMb !targetFolder! dumpSize
+            set /A "totalMoCopied+=!dumpSize!"
+            goto:eof
+        )
+        
         REM : search if this game has saves
         set "srcRemoteSaves=!remoteSaves:SRC=%src%!"
         type !srcRemoteSaves! | find "!endTitleIdFolder!" > NUL 2>&1 && (
@@ -514,7 +525,79 @@ REM : functions
         call:log2GamesDownloadFile !msg!
         
     goto:eof
+    REM : ------------------------------------------------------------------
 
+
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        REM : prevent path to be stripped if contain '
+        set "folder=!folder:'=`'!"
+        set "folder=!folder:[=`[!"
+        set "folder=!folder:]=`]!"
+        set "folder=!folder:)=`)!"
+        set "folder=!folder:(=`(!"
+
+        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+
+        set "line=NONE"
+        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
+        REM : powershell call always return %ERRORLEVEL%=0
+
+        if ["!line!"] == ["NONE"] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set "sizeRead=%line: =%"
+
+        if ["!sizeRead!"] == [" ="] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set /A "im=0"
+        if not ["!sizeRead!"] == ["0"] (
+
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
+                goto:eof
+            )
+        )
+        set "%2=0.0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : ------------------------------------------------------------------
     :createRequieredFolders
 

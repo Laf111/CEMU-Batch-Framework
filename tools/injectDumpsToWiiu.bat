@@ -263,7 +263,7 @@ REM : main
     )
 
     echo.
-    echo !totalMoNeeded! Mo are needed on the Wii-U ^!
+    echo !totalMoNeeded! Mb are needed on the Wii-U ^!
     echo.
     choice /C yn /N /M "Do you want to continue (y, n)? : "
     if !ERRORLEVEL! EQU 2 (
@@ -518,7 +518,7 @@ REM
 REM            REM : YES : import update in mlc01/usr/title (minimized + no wait)
 REM            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
 REM        )
-        
+
         REM : search if this game has a DLC
         set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
         type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
@@ -564,34 +564,55 @@ REM        )
 
         REM : compte the size using powershell (symlinks are taken into account)
         set "folder="!gamefolder:"=!\Code""
-        call:getFolderSize !folder! sgCode
+        call:getFolderSizeInMb !folder! sgCode
         set /A "totalMoNeeded+=!sgCode!"
 
         set "folder="!gamefolder:"=!\Meta""
-        call:getFolderSize !folder! sgMeta
+        call:getFolderSizeInMb !folder! sgMeta
         set /A "totalMoNeeded+=!sgMeta!"
 
         set "folder="!gamefolder:"=!\Content""
-        call:getFolderSize !folder! sgContent
+        call:getFolderSizeInMb !folder! sgContent
         set /A "totalMoNeeded+=!sgContent!"
 
 REM        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000e""
 REM        if not exist !folder! goto:dlc
-REM        
-REM        call:getFolderSize !folder! sgUpdate
+REM
+REM        call:getFolderSizeInMb !folder! sgUpdate
 REM        set /A "totalMoNeeded+=!sgUpdate!"
-        
+
         :dlc
         set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
         if not exist !folder! goto:eof
-        
-        call:getFolderSize !folder! sgDlc
+
+        call:getFolderSizeInMb !folder! sgDlc
         set /A "totalMoNeeded+=!sgDlc!"
         
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :getFolderSize
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
 
         set "folder="%~1""
         REM : prevent path to be stripped if contain '
@@ -612,7 +633,7 @@ REM        set /A "totalMoNeeded+=!sgUpdate!"
             goto:eof
         )
 
-        set "sizeRead=!line: =!"
+        set "sizeRead=%line: =%"
 
         if ["!sizeRead!"] == [" ="] (
             set "%2=0"
@@ -622,30 +643,23 @@ REM        set /A "totalMoNeeded+=!sgUpdate!"
         set /A "im=0"
         if not ["!sizeRead!"] == ["0"] (
 
-            set /A "ik=!sizeRead!/1024"
-            set /A "dk=!sizeRead!%%1024"
-
-            if !ik! EQU 0 (
-                set "%2=0"
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
                 goto:eof
             )
-
-            set /A "ik+=1"
-
-            set /A "im=!ik!/1024"
-            set /A "dm=!ik!%%1024"
-            if !im! EQU 0 (
-                set "%2=0"
-            ) else (
-                set /A "im+=1"
-                set "%2=!im!"
-            )
         )
-        if ["!sizeRead!"] == [""] set "%2=0.0"
+        set "%2=0.0"
 
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     REM : function to get and set char set code for current host
     :setCharSet

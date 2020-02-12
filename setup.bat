@@ -1779,8 +1779,8 @@ REM : ------------------------------------------------------------------
 
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     REM : COMPARE VERSION : function to format string version without alphabetic charcaters
     :formatStrVersion
 

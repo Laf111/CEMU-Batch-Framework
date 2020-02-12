@@ -811,10 +811,10 @@ REM : functions
         )
         if not [!WD_PATH!] == ["NONE"] echo oLink^.WorkingDirectory = !WD_PATH! >> !TMP_VBS_FILE!
         echo oLink^.Save >> !TMP_VBS_FILE!
-        
+
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
-        
+
         if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
         ) else (
@@ -1374,7 +1374,7 @@ REM : functions
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteAllMySettings^.bat for !CEMU_FOLDER_NAME!^'s versions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         set "ARGS=/C for /F ""delims=~"" %%i in ('dir /B /A:D ""!OUTPUT_FOLDER:"=!\Wii-U Games"" ^| find /V ""CEMU"" ^| find /V ""BatchFw"" ^| find /V ""Wii-U"" ^| find /V ""3rdParty""') do for /F ""delims=~"" %%j in ('dir /B ""!OUTPUT_FOLDER:"=!\Wii-U Games\%%i"" ^| find /I ""!CEMU_FOLDER_NAME!""') do del /F ""!OUTPUT_FOLDER:"=!\Wii-U Games\%%i\%%j"""
 
         REM : create a shortcut to delete games shortcuts for !CEMU_FOLDER_NAME!
@@ -1387,7 +1387,7 @@ REM : functions
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to delete !CEMU_FOLDER_NAME!^'s shortcuts
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! "c:\Windows\System32"
         )
-        
+
         set "ARGS="NONE""
 
         REM : search your current GLCache

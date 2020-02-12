@@ -1390,7 +1390,7 @@ REM : functions
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to delete !CEMU_FOLDER_NAME!^'s shortcuts
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! "c:\Windows\System32"
         )
-        
+
         set "ARGS="NONE""
 
         REM : search your current GLCache
