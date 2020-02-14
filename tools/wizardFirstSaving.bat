@@ -31,7 +31,9 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
-    !cmdOw! BatchFw* /MIN > NUL 2>&1
+    !cmdOw! @ /MAX > NUL 2>&1
+
+    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
     
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
@@ -519,6 +521,8 @@ REM : main
     set "ACTIVE_ADAPTER=NOT_FOUND"
 
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    REM : account file for current user
+    set "accountFile="NONE""
 
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
 
@@ -642,6 +646,7 @@ REM : main
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
     :launchCemu
+    !cmdOw! @ /NOT > NUL 2>&1
 
     REM : launching CEMU
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
@@ -680,7 +685,33 @@ REM : main
     )
 
     REM : if exist game's stats (last settings file)
-    if exist !lst! call:setGameStats > NUL 2>&1
+    if exist !lst! call:setGameStats > NUL 2>&1 & goto:saveOptions
+
+    REM : If no last settings.xml is found AND wiiuStatsFile exist under _BatchFw_WiiU\ImportSave\mlc01\usr\save\00050000\!endTitleId!
+    REM : import the Wii-U game stats
+    set "wiiuStatsFile="!BFW_WIIU_FOLDER:"!\ImportSave\mlc01\mlc01\usr\save\00050000\!endTitleId!.stats""
+    if not exist !wiiuStatsFile! goto:saveOptions
+    REM : if a account file was not found
+    if [!accountFile!] == ["NONE"] goto:saveOptions
+
+    call:getAccount !accountFile! !currentUser! currentAccount
+
+    if ["!currentAccount!"] == ["NONE"] goto:saveOptions
+
+    REM : update last_played in !cs! if accId found in wiiuStatsFile
+    set "wiiuTs1970=NONE"
+    for /F "delims=~= tokens=2" %%j in ('type !wiiuStatsFile! ^| find /I "=" ^| find /I "!currentAccount!" 2^>NUL') do set "wiiuTs1970=%%j"
+    if ["!wiiuTs1970!"] == ["NONE"] goto:saveOptions
+
+    REM :update last_played in !cs!
+    set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+
+    !xmlS! ed -u "//GameCache/Entry[path='!RPX_FILE_PATH:"=!']/last_played" -v "!wiiuTs1970!" !cs! > !csTmp!
+
+    if exist !csTmp! (
+        del /F !cs! > NUL 2>&1
+        move /Y !csTmp! !cs! > NUL 2>&1
+    )
 
     :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
@@ -724,24 +755,30 @@ REM : main
     echo - From now^, if you modify your settings during the game they will be saved when closing CEMU^.
     echo ---------------------------------------------------------
     echo If you encounter any issues or have made a mistake when
-    echo collecting settings for a game^:
-    echo ^> delete the settings saved for !CEMU_FOLDER_NAME! using
-    echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
-    echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
-    echo ^> or delete !SETTINGS_FOLDER:"=! manually
-    echo ---------------------------------------------------------
-    pause
+    echo collecting settings for a game^: delete the settings saved for !CEMU_FOLDER_NAME! using
+    echo the shortcut Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     echo =========================================================
-    echo - Continue with launching the game in a 2s seconds
-    timeout /T 2 > NUL 2>&1
-    echo ---------------------------------------------------------
+    pause
 
-    exit 0
-
+    goto:eof
     REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :getAccount
+        REM : account file
+        set "acf="%~1""
+        set "user=%~2"
+         set "%3=NONE"
+
+        REM : basename of GAME FOLDER PATH (used to name shorcut)
+        for /F "delims=~=" %%i in (!acf!) do set "fileName=%%~nxi"
+        set "fileName=!fileName:.dat=!"
+        set "%3=!fileName:%user%=!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :patchGraphicSection
         REM : arg1 : file
@@ -845,7 +882,7 @@ REM : functions
         REM : else verifiy cemu hook install
         set dllFile="!CEMU_FOLDER:"=!\keystone.dll""
 
-        REM : if not exit exit
+        REM : if not exist exit
         if not exist !dllFile! goto:patchGp
 
         REM : force ignorePrecompiledShaderCache = true in cemuHook.ini
@@ -958,29 +995,26 @@ REM : functions
 
     :setOnlineFiles
 
-        set "BFW_ONLINE="!GAMES_FOLDER:"=!\_BatchFw_WiiU\onlineFiles""
+        set "BFW_ONLINE="!BFW_WIIU_FOLDER:"=!\onlineFiles""
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
         If not exist !BFW_ONLINE! goto:eof
-
-        set "currentUser=!currentUser!"
-        REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
-
+        REM : get the account.dat file for the current user and the accId
         set "pat="!BFW_ONLINE_ACC:"=!\!currentUser!*.dat""
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
-            set "af="!BFW_ONLINE_ACC:"=!\%%i""
+            set "accountFile="!BFW_ONLINE_ACC:"=!\%%i""
 
-            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
+            for /F "delims=~= tokens=2" %%j in ('type !accountFile! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
         )
 
         if ["!accId!"] == ["NONE"] (
             echo WARNING^: AccountId not found for !currentUser!^, cancel online files installation ^!
-            pause
+            goto:eof
         )
         echo ---------------------------------------------------------
-        echo AccountId found for !currentUser!
+        echo AccountId found for !currentUser! ^: !accid!
 
         REM : check if the Wii-U is not power on
         set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
@@ -998,11 +1032,13 @@ REM : functions
 
         :installAccount
 
-        REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
+        REM : copy !accountFile! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
         set "cemuUserFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""
+
         if not exist !cemuUserFolder! mkdir !cemuUserFolder! > NUL 2>&1
         set "target="!cemuUserFolder:"=!\account.dat""
-        copy /Y !af! !target! > NUL 2>&1
+
+        copy /Y !accountFile! !target! > NUL 2>&1
 
         REM : patch settings.xml
         REM if not nul
@@ -1025,7 +1061,7 @@ REM : functions
         )
 
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""

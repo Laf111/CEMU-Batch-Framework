@@ -57,7 +57,7 @@ REM : main
         echo or Wii-U Games^\Wii-U^\Scan my Wii-U^.lnk
         echo before this script
         pause
-        exit 99
+        exit /b 99
     )
 
     cls
@@ -134,7 +134,7 @@ REM : main
     if !state! EQU 0 (
         echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
-        exit 2
+        exit /b 2
     )
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
@@ -164,7 +164,7 @@ REM : main
     if [!LAST_SCAN!] == ["NOT_FOUND"] (
         echo ERROR^: last scan results were not found
         pause
-        exit 90
+        exit /b 90
     )
     cls
     if !noOldScan! EQU 1 goto:getList
@@ -216,7 +216,7 @@ REM : main
     if !ERRORLEVEL! NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -224,7 +224,7 @@ REM : main
     if !nbGamesSelected! EQU 0 (
         echo WARNING^: no games selected ^?
         pause
-        exit 11
+        exit /b 11
     )
 
     REM : get BatchFw users list

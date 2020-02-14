@@ -46,6 +46,8 @@ REM : main
         goto:continue
     :end
 
+    REM : J2000 unix timestamp (/ J1970)
+    set /A "j2000=946684800"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -321,6 +323,139 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :hex2Dec
+        set "hex=%~1"
+
+        set /A "%2=0x%hex%"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : get a node value in a xml file
+    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
+    :getValueInXml
+
+        set "xPath="%~1""
+        set "xmlFile="%~2""
+
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+            set "%3=%%x"
+
+            goto:eof
+        )
+
+        set "%3=NOT_FOUND"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getTs1970
+
+        set "arg=%~2"
+
+        set "ts="
+        if not ["!arg!"] == [""] set "ts=%arg%"
+
+        REM : if ts is not given : compute timestamp of the current date
+        if ["%ts%"] == [""] for /F "delims=~= tokens=2" %%t in ('wmic os get localdatetime /value') do set "ts=%%t"
+
+        set /A "yy=10000%ts:~0,4% %% 10000, mm=100%ts:~4,2% %% 100, dd=100%ts:~6,2% %% 100"
+        set /A "dd=dd-2472663+1461*(yy+4800+(mm-14)/12)/4+367*(mm-2-(mm-14)/12*12)/12-3*((yy+4900+(mm-14)/12)/100)/4"
+        set /A "ss=(((1%ts:~8,2%*60)+1%ts:~10,2%)*60)+1%ts:~12,2%-366100-%ts:~21,1%((1%ts:~22,3%*60)-60000)"
+
+        set /A "%1+=dd*86400"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : number to hexa with 16 digits
+    :num2hex
+
+        set /a "num = %~1"
+        set "hex="
+        set "hex.10=a"
+        set "hex.11=b"
+        set "hex.12=c"
+        set "hex.13=d"
+        set "hex.14=e"
+        set "hex.15=f"
+
+        :loop
+        set /a "hextmp = num %% 16"
+        if %hextmp% gtr 9 set hextmp=!hex.%hextmp%!
+        set /a "num /= 16"
+        set "hex=%hextmp%%hex%"
+        if %num% gtr 0 goto loop
+
+        :loop2
+        call:strLength !hex! len
+        if !len! LSS 16 set "hex=0!hex!" & goto:loop2
+
+        set "%2=!hex!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :updateLastSettings
+
+        REM : get the last_played from Wii-U
+        call:getValueInXml "//account[@persistentId='!folder!']/timestamp/text()" !saveInfo! wtsj2kHex
+        if ["!wtsj2kHex!"] == ["NOT_FOUND"] goto:eof
+
+        REM : compute Wii-U last_played in J1970
+
+        REM : wtsj2kHex -> wtsj2k
+        call:hex2Dec !wtsj2kHex! wtsj2k
+        REM : wtsj1970=wtsj2k-J2000
+        set /A "wtsj1970=wtsj2k+j2000"
+
+        REM : save the time played relative to 1970 for the account in a wiiuStatsFile
+        echo !folder! 1970 timestamp=!wtsj1970! >> !wiiuStatsFile!
+
+        REM : check if exist a last settings exist for !currentUser!
+        set "lus="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
+        if not exist !lus! goto:eof
+
+        REM : get the last modified settings for the current user
+        for /F "delims=~" %%i in ('type !lus!') do set "ls=%%i"
+        set "lst="!GAME_FOLDER_PATH:"=!\Cemu\settings\!ls:"=!""
+        REM : if not exist !lst! do not create it : exit
+        REM : import have to be handled in launchGame.bat / wizardFirstLaunch.bat or updateGameStats.bat
+        if not exist !lst! goto:eof
+
+        REM : get last_played with RPX path from CEMU settings
+        call:getValueInXml "//GameCache/Entry[path='!RPX_FILE:"=!']/last_played/text()" !lst! ctsj1970
+        if ["!ctsj1970!"] == ["NOT_FOUND"] goto:eof
+
+        REM :if ctsj1970 > wtsj1970 nothing to do
+        REM :if ctsj1970 < wtsj1970
+        if !ctsj1970! LSS !wtsj1970! (
+            REM : update last settings.xml saved for !currentUser!
+
+            REM : CEMU time_played=wtsj1970-ctsj1970
+            set /A "tp=wtsj1970-ctsj1970"
+            set "ltmp=!lst!0"
+            xml ed -u "//GameCache/Entry[path='!RPX_FILE:"=!']/time_played" -v "!tp!" !lst! > !ltmp!
+            xml ed -u "//GameCache/Entry[path='!RPX_FILE:"=!']/last_played" -v "!wtsj1970!" !ltmp! > !lst!
+            if !ERRORLEVEL! EQU 0 del /F !lst! > NUL 2>&1 & move /Y !ltmp! !lst!
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :updateTitle
 
         set "num=%~1"
@@ -345,6 +480,7 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
+
     REM : check list of games and create selection
     :checkListOfGames
 
@@ -405,7 +541,12 @@ REM : functions
         set "gslog="!TMP_DLSAVE_PATH:"=!\ImportSaveFromWii-U_!GAME_TITLE!.log""
 
         set "localFolder="!TMP_DLSAVE_PATH:"=!\mlc01\usr\save\00050000\!endTitleId!""
-
+        set "localFolderMeta="!localFolder:"=!\meta""
+        set "saveinfo="!localFolderMeta:"=!\saveinfo.xml""
+        REM : save the time played relative to 1970 in a wiiuStatsFile
+        set "wiiuStatsFile="!TMP_DLSAVE_PATH:"!\mlc01\usr\save\00050000\!endTitleId!.stats""
+        if exist !wiiuStatsFile! del /F /S !wiiuStatsFile!
+        
         REM : launching transfert
         call !syncFolder! !wiiuIp! local !localFolder! "/storage_!src!/usr/save/00050000/!endTitleId!" "!GAME_TITLE! (saves)"
         set "cr=!ERRORLEVEL!"
@@ -460,13 +601,13 @@ REM : functions
 
             cd !folder!
             REM : add the user's folder content, rename folder to 80000001 in the archive file
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
 
             cd ..
             REM : common folder
             if exist common (
                 cd common
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
                 cd ..
             )
             REM : cd to meta
@@ -476,7 +617,7 @@ REM : functions
             echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
             REM : add the meta folder content
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul  !rarFile! * > NUL 2>&1
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
 
             echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
         )
@@ -487,11 +628,7 @@ REM : functions
     :createUsersSaves
 
         set "accountEntries="""
-
-        set "localFolderMeta="!localFolder:"=!\meta""
-
-        REM : replace the saveinfo.xml
-        set "saveInfo="!localFolderMeta:"=!\saveinfo.xml""
+        set /A "nbUsersTreated=0"
 
         REM : get BatchFw users list
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
@@ -523,7 +660,19 @@ REM : functions
             )
             REM : import saves (if asked)
             if not [!userSavesToImport!] == ["none"] call:importSavesForCurrentUser
+
+            REM : cd to BFW_RESOURCES_PATH to use xml.exe
+            pushd !BFW_RESOURCES_PATH!
+
+            REM : update user last settings using saveinfo file
+            call:updateLastSettings
+
+            pushd !GAMES_FOLDER!
+
+            set /A "nbUsersTreated+=1"            
         )
+
+
     goto:eof
     REM : ------------------------------------------------------------------
 

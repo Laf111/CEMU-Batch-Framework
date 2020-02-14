@@ -327,7 +327,7 @@ REM : functions
         pushd !CEMU_FOLDER!
         set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
 
-        !rarExe! x -o+ -inul  !rarFile! > NUL 2>&1
+        !rarExe! x -o+ -inul -w!TMP! !rarFile! > NUL 2>&1
         pushd !GAMES_FOLDER!
 
 

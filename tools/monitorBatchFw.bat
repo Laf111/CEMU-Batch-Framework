@@ -24,6 +24,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
+
+    set "batchFwLog="!BFW_LOGS_PATH:"=!\logs\BatchFwLog.txt""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
@@ -33,6 +35,7 @@ REM : main
 
     REM : duration value in seconds
     set /A "duration=0"
+    set /A "wizardLaunched=0"
 
     REM : monitor LaunchGame.bat until cemu is launched
     set "logFileTmp="!TMP:"=!\BatchFw_monitor_process.list""
@@ -45,8 +48,8 @@ REM : main
         REM : set BatchFw processes to priority to high
         wmic process where "CommandLine like '%%!GAMES_FOLDER_NAME!%%'" call setpriority 128 > NUL 2>&1
 
-        REM : if wizard is running, don't count
-        type !logFileTmp! | find /I "wizardFirstSaving.bat" > NUL 2>&1 && goto:waitingLoopProcesses
+        REM : if wizard is running, double timmeout
+        if !wizardLaunched! EQU 0 type !batchFwLog! | find /I "wizardFirstSaving.bat" > NUL 2>&1 && set /A "wizardLaunched=0" & set /A "timeOut=360" & goto:waitingLoopProcesses
 
         REM : if rar is running, don't count
         type !logFileTmp! | find /I "rar.exe" | find /I /V "winRar" |find /I "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:waitingLoopProcesses

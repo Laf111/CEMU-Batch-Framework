@@ -67,7 +67,10 @@ REM : main
     REM ----------------------------------------------------------------------------------------------
     REM First run checks
     REM ----------------------------------------------------------------------------------------------
-
+    echo =========================================================
+    echo BatchFw pre-requisites check^.^.^.
+    echo =========================================================
+    
     REM : check if file system is NTFS (BatchFw use Symlinks and need to be installed on a NTFS volume)
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
 
@@ -76,18 +79,20 @@ REM : main
         pause
         exit 2
     )
+    echo File system NTFS ^: OK
 
     REM : check rights to create links
-    pushd !BFW_PATH!
-    mklink /J doc2 doc > NUL 2>&1
+    pushd !GAMES_FOLDER!
+    mklink /J ./linkCheck !TMP!  > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
         echo This user is not allowed to create links^!
         echo BatchFw use Symlinks^, please contact !USERDOMAIN! administrator
         pause
         exit 21
     )
-    rmdir /Q doc2 > NUL 2>&1
-    pushd !GAMES_FOLDER!
+    echo Rights to create symlinks ^: OK
+
+    rmdir /Q ./linkCheck > NUL 2>&1
 
     REM : check rights to launch vbs scripts
     for /F "usebackq tokens=3" %%a in (`reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled 2^>nul`) do (
@@ -99,6 +104,7 @@ REM : main
             exit 22
         )
     )
+    echo Rights to launch vbs scripts ^: OK
 
     REM : check powershell policy to launch unsigned powershell scripts
     for /F %%a in ('powershell Get-ExecutionPolicy') do (
@@ -110,6 +116,11 @@ REM : main
             exit 24
         )
     )
+    echo Compatible PowerShell policy ^: OK
+    echo ---------------------------------------------------------
+    timeout /T 4 > NUL 2>&1
+    cls
+
     REM ----------------------------------------------------------------------------------------------
 
     REM : initialize log file for current host (if needed)
@@ -599,7 +610,7 @@ REM : main
     REM : extract embeded packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\GFX_Packs.rar""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting GFX_Packs^.rar^, exiting 1
@@ -1357,7 +1368,7 @@ REM : ------------------------------------------------------------------
         echo ---------------------------------------------------------
         echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !rarFile! !gfxv2! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo ERROR while extracting V2_GFX_Packs, exiting 1

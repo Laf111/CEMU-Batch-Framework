@@ -43,9 +43,13 @@ REM : main
     :end
 
     set "endTitleId=NONE"
+
+    REM : J2000 unix timestamp (/ J1970)
+    set /A "j2000=946684800"
+
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Export CEMU saves to SaveMii slots on your SD Card
+    title Export CEMU saves to your Wii-U
 
     echo On your Wii-U^, you need to ^:
     echo - have your SDCard plugged in your Wii-U
@@ -196,26 +200,19 @@ REM : main
     set /A "nbGamesSelected=0"
 
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
-    call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 (
-        echo Invalid numbers or forbiden characters found^, please retry
-        pause
-        goto:getList
-    )
-
     call:checkListOfGames !listGamesSelected!
-
     if !ERRORLEVEL! NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
+    echo =========================================================
     if !nbGamesSelected! EQU 0 (
         echo WARNING^: no games selected ^?
         pause
-        exit 11
+        exit /b 11
     )
     set /A "nbGamesSelected-=1"
 
@@ -229,7 +226,6 @@ REM : main
         set "endTitleId=!selectedEndTitlesId[%%i]!"
         call:updateTitle %%i
     )
-
     set "userSavesToExport="select""
     goto:treatments
 
@@ -279,24 +275,9 @@ REM : main
 
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
-    set "TMP_ULSAVE_PATH="!BFW_WIIU_FOLDER:"=!\SaveMii""
+    set "TMP_ULSAVE_PATH="!BFW_WIIU_FOLDER:"=!\ExportSave""
     if not exist !TMP_ULSAVE_PATH! mkdir !TMP_ULSAVE_PATH! > NUL 2>&1
 
-    REM : check if sdcard is plugged
-    set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
-    !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu" "exit" > !ftplogFile! 2>&1
-    type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-        echo ^/sd^/wiiu^/backups^ not found^, make sure that your SDCard is
-        echo plugged in your Wii-U
-        echo ---------------------------------------------------------
-        choice /C yn /N /M "Retry (y, n)? : "
-        if !ERRORLEVEL! EQU 2 (
-            echo Canceled by user^, exiting
-            if %nbArgs% EQU 0 pause && exit 98
-            exit /b 98
-        )
-        goto:treatments
-    )
     set "BFW_ONLINE_FOLDER="!BFW_WIIU_FOLDER:"=!\OnlineFiles""
     set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
     if not exist !USERS_ACCOUNTS_FOLDER! (
@@ -319,11 +300,8 @@ REM : main
 
     for /L %%n in (0,1,!nbGamesSelected!) do call:exportSaves %%n
     echo =========================================================
-    echo Now you can stop FTPiiU server and launch SaveMii to
-    echo import your save^(s^) for your game^(s^)
+    echo Now you can stop FTPiiU server
     echo.
-    set "gslog="!TMP_ULSAVE_PATH:"=!\ExportSaveMiiSlotsUsed.log""
-    echo SaveMii slots to use for each games saved in files !gslog!
     
     if %nbArgs% EQU 0 pause
     if !ERRORLEVEL! NEQ 0 timeout /T 3 > NUL 2>&1
@@ -411,17 +389,31 @@ REM : functions
         set "endTitleId=!selectedEndTitlesId[%num%]!"
         set "src=!selectedtitlesSrc[%num%]!"
 
-        set /A "cemuSlot=0"
-        set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
-        call:getNextSaveMiiSlotNumber
+        REM : get bigger rpx file present under game folder
+        set "RPX_FILE="NONE""
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        set "RPX_FILE="project.rpx""
+		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
+        )
+
+        REM : create remotes folders
+        call:createRemoteFolders
+        set "cemuSaveFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%""
+        set "metaFolder="!cemuSaveFolder:"=!\meta""
+        set "saveinfo="!metaFolder:"=!\saveinfo.xml""
         
         echo =========================================================
-        echo Export CEMU saves of !GAME_TITLE! for saveMii
-        echo Target location ^: ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!
+        echo Export CEMU saves of !GAME_TITLE! to the Wii-U
         echo =========================================================
 
         REM : (re) compute GAME_FOLDER_PATH (in function of the presence of args or not)
         set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+
+        REM : download meta folder from the wii-U
+        wscript /nologo !StartHiddenWait! !ftpSyncFolders! !wiiuIp! local !metaFolder! "/storage_!src!/usr/save/00050000/!endTitleIdFolder!/meta" "save meta folder"
 
         set /A "nbUsersTreated=0"
         REM : get BatchFw users list
@@ -444,45 +436,163 @@ REM : functions
                 if not [!userSavesToExport!] == ["none]" call:exportSavesForCurrentAccount
             )
         )
-
         pushd !GAMES_FOLDER!
 
-        if !nbUsersTreated! NEQ 0 (
-            call:treatCommonFolder
+        echo Transfert !currentUser!^'s saves for !GAME_TITLE!^.^.^.
+        echo ---------------------------------------------------------
 
-            echo.
-            echo CEMU saves for !GAME_TITLE! were sucessfully injected to
-            echo ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!
-            echo Ready to be injected with saveMii using the !cemuSlot!th slot
-            echo.
-        ) else (
-            REM : delete the reserved slot
-            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "rmdir /sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!" "exit"  > !ftplogFile! 2>&1
+        REM : launching transfert
+        call !ftpSyncFolders! !wiiuIp! remote !cemuSaveFolder! "/storage_!src!/usr/save/00050000/!endTitleId!" "Export !GAME_TITLE! saves for !currentUser! to Wii-U"
+        set "cr=!ERRORLEVEL!"
+        if !cr! NEQ 0 (
+            echo ERROR when exporting existing saves for !currentUser! ^!
+            del /F /S !cemuUserSaveFolder! > NUL 2>&1
+            if %nbArgs% EQU 0 pause && exit 51
+            exit /b 51
         )
+
+        REM : log the slot used in a file
+        echo !DATE! ^: !currentUser! CEMU saves for !GAME_TITLE! were copied on your Wii-U
+
+        REM : delete user's save folder just extracted
+        set "userMlc01Folder="!TMP_ULSAVE_PATH:"=!\mlc01""
+        rmdir /Q /S !userMlc01Folder! > NUL 2>&1
+
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :treatCommonFolder
+    REM : get a node value in a xml file
+    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
+    :getValueInXml
 
-        REM : common folder
-        set "commonFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\common""
-        if not exist !commonFolder! goto:eof
+        set "xPath="%~1""
+        set "xmlFile="%~2""
 
-        echo Transfert CEMU common saves for !GAME_TITLE! to
-        echo ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!^/common
-        echo ---------------------------------------------------------
-        
-        REM : launching transfert
-        call !ftpSyncFolders! !wiiuIp! remote !commonFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/common" "Export !GAME_TITLE! common saves to Wii-U"
-        set "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 (
-            echo ERROR when exporting common saves ^!
-            if %nbArgs% EQU 0 pause && exit 61
-            exit /b 61
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+            set "%3=%%x"
+
+            goto:eof
         )
-        REM : delete user's save folder
-        set "userMlc01Folder="!TMP_ULSAVE_PATH:"=!\mlc01""
-        rmdir /Q /S !userMlc01Folder! > NUL 2>&1
+
+        set "%3=NOT_FOUND"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getTs1970
+
+        set "arg=%~2"
+
+        set "ts="
+        if not ["!arg!"] == [""] set "ts=%arg%"
+
+        REM : if ts is not given : compute timestamp of the current date
+        if ["%ts%"] == [""] for /F "delims=~= tokens=2" %%t in ('wmic os get localdatetime /value') do set "ts=%%t"
+
+        set /A "yy=10000%ts:~0,4% %% 10000, mm=100%ts:~4,2% %% 100, dd=100%ts:~6,2% %% 100"
+        set /A "dd=dd-2472663+1461*(yy+4800+(mm-14)/12)/4+367*(mm-2-(mm-14)/12*12)/12-3*((yy+4900+(mm-14)/12)/100)/4"
+        set /A "ss=(((1%ts:~8,2%*60)+1%ts:~10,2%)*60)+1%ts:~12,2%-366100-%ts:~21,1%((1%ts:~22,3%*60)-60000)"
+
+        set /A "%1+=dd*86400"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : number to hexa with 16 digits
+    :num2hex
+
+        set /a "num = %~1"
+        set "hex="
+        set "hex.10=a"
+        set "hex.11=b"
+        set "hex.12=c"
+        set "hex.13=d"
+        set "hex.14=e"
+        set "hex.15=f"
+
+        :loop
+        set /a "hextmp = num %% 16"
+        if %hextmp% gtr 9 set hextmp=!hex.%hextmp%!
+        set /a "num /= 16"
+        set "hex=%hextmp%%hex%"
+        if %num% gtr 0 goto loop
+
+        :loop2
+        call:strLength !hex! len
+        if !len! LSS 16 set "hex=0!hex!" & goto:loop2
+
+        set "%2=!hex!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :updateSaveInfoFile
+
+        REM : init the value with now (J2000)
+echo ok
+        call:getTs1970 now
+echo now=!now!
+        set /A "nowJ2K=!now!-j2000"
+        call:num2hex !nowJ2K! hexValue
+echo nowJ2K=!nowJ2K!
+echo hexValue=!hexValue!
+pause
+
+        REM : check if exist a last settings exist for !currentUser!
+        set "lus="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
+        if not exist !lus! goto:patch
+
+        REM : get the last modified settings for the current user
+        for /F "delims=~" %%i in ('type !lus!') do set "ls=%%i"
+        set "lst="!GAME_FOLDER_PATH:"=!\Cemu\settings\!ls:"=!""
+        if not exist !lst! goto:patch
+
+        REM : get last_played with RPX path
+        call:getValueInXml "//GameCache/Entry[path='!RPX_FILE:"=!']/last_played/text()" !lst! last_played
+        if ["!last_played!"] == ["NOT_FOUND"] goto:patch
+
+        REM : compute last_played in J2000
+        set /A "ctsj2k=!last_played!-j2000"
+        REM : compute hex value
+        call:num2hex !ctsj2k! hexValue
+echo ctsj2k=!ctsj2k!
+pause
+
+        :patch
+echo patch SaveInfo
+echo hexValue=!hexValue!
+pause
+        REM : if exist saveInfo.xml check if !folder! exist in saveinfo.xml
+        if exist !saveInfo! (
+            REM : if the account is not present in saveInfo.xml
+            type !saveInfo! | find /V !folder! > NUL 2>&1 && (
+                REM : add it
+                set "stmp=!saveInfo!tmp"
+                xml ed -s "//info" -t elem -n "account persistentId=""!folder!""" !saveInfo! > !stmp!
+                xml ed -s "//info/account[@persistentId='!folder!']" -t elem -n "timestamp" -v "!hexValue!" !stmp! > !saveInfo!
+                goto:eof
+            )
+            REM : else update it
+            set "stmp=!saveInfo!tmp"
+            xml ed -u "//info/account[@persistentId='!folder!']" -v "!hexValue!" !saveInfo! > !stmp!
+            if !ERRORLEVEL! EQU 0 del /F !saveInfo! > NUL 2>&1 & move /Y !stmp! !saveInfo!
+            goto:eof
+        )
+        REM : if saveinfo.xml does not exist
+        echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"!folder!^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -500,66 +610,42 @@ REM : functions
         if not [!userSavesToExport!] == ["all"] (
 
             if [!userSavesToExport!] == ["select"] (
-                choice /C yn /N /M "Upload !currentUser! saves on Wii-U's SD card (y, n)? : "
+                choice /C yn /N /M "Upload !currentUser! saves on Wii-U (y, n)? : "
                 if !ERRORLEVEL! EQU 2 goto:eof
             ) else (
                 REM : here userSavesToExport define a user name
                 if not [!userSavesToExport!] == ["!currentUser!"] goto:eof
             )
 
+        )
         REM : treatment for the user
         echo Treating !currentUser! ^(!folder!^)
         
         REM extract the CEMU saves for current user
-        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !TMP_ULSAVE_PATH! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !TMP_ULSAVE_PATH! > NUL 2>&1
+
 
         REM : CEMU 80000001 folder for the current user
-        set "cemuUserSaveFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%\user\80000001""
+        set "cemuUserSaveFolder="!cemuSaveFolder:"=!\user\80000001""
+        set "wiiuUserSaveFolder="!cemuSaveFolder:"=!\user\!folder:"=!""
+        if exist !wiiuUserSaveFolder! rmdir /Q /S !wiiuUserSaveFolder! > NUL 2>&1
+        move /Y !cemuUserSaveFolder! !wiiuUserSaveFolder! > NUL 2>&1
 
-        echo Transfert CEMU saves for !GAME_TITLE! and !currentUser! to
-        echo ^/sd^/wiiu^/backups^/00050000%endTitleId%^/!cemuSlot!^/!folder!
-        echo ---------------------------------------------------------
+        REM : cd to BFW_RESOURCES_PATH to use xml.exe
+        pushd !BFW_RESOURCES_PATH!
 
-        REM : launching transfert
-        call !ftpSyncFolders! !wiiuIp! remote !cemuUserSaveFolder! "/sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!/!folder!" "Export !GAME_TITLE! saves for !currentUser! to Wii-U"
-        set "cr=!ERRORLEVEL!"
-        if !cr! NEQ 0 (
-            echo ERROR when exporting existing saves for !currentUser! ^!
-            del /F /S !cemuUserSaveFolder! > NUL 2>&1
-            if %nbArgs% EQU 0 pause && exit 51
-            exit /b 51
-        )
+        REM : update saveinfo file using user last settings
+        call:updateSaveInfoFile
 
-        REM : delete user's save folder
-        set "userMlc01Folder="!TMP_ULSAVE_PATH:"=!\mlc01""
-        rmdir /Q /S !userMlc01Folder! > NUL 2>&1
+        pushd !GAMES_FOLDER!
 
-        REM : log the slot used in a file
-        echo !DATE! ^: !currentUser! CEMU saves for !GAME_TITLE! were copied on your SD card for saveMii on the !cemuSlot!th slot >> !gslog!
-        
+        set /A "nbUsersTreated+=1"
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :getNextSaveMiiSlotNumber
+    :createRemoteFolders
         set "ftplogFile="!TMP_ULSAVE_PATH:"=!\ftpCheck.log""
-
-        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu/backups/00050000%endTitleId%" "exit" > !ftplogFile! 2>&1
-        type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%" "exit"  > !ftplogFile! 2>&1
-            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%/0" "exit"  > !ftplogFile! 2>&1
-            goto:eof
-        )
-
-        for /L %%i in (0,1,255) do (
-
-            REM : check if a save exist on the wii-U for this user
-            !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /sd/wiiu/backups/00050000%endTitleId%/%%i" "exit" > !ftplogFile! 2>&1
-            type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
-                set /A "cemuSlot=%%i"
-                !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /sd/wiiu/backups/00050000%endTitleId%/!cemuSlot!" "exit"  > !ftplogFile! 2>&1
-                goto:eof
-            )
-        )
+        !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "mkdir /storage_!src!/usr/save/00050000/!endTitleId!" "exit"  > !ftplogFile! 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

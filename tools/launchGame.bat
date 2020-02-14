@@ -335,7 +335,7 @@ REM : main
 
     if !usePbFlag! EQU 1 call:setProgressBar 12 12 "pre processing" "installing V2 GFX packs"
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul  !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
@@ -452,7 +452,7 @@ REM : main
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
     echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
 
-    if !usePbFlag! EQU 1 call:setProgressBar 16 40 "pre processing" "install !currentUser!^'s saves"
+    if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
     REM : importing game's saves for !user!
     set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
@@ -502,12 +502,13 @@ REM : main
     )
 
     :LoadingSaves
+
     for %%a in (!MLC01_FOLDER_PATH!) do set "parentFolder="%%~dpa""
     set "EXTRACT_PATH=!parentFolder:~0,-2!""
 
     pushd !BFW_TOOLS_PATH!
     echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !rarFile! !EXTRACT_PATH!
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !EXTRACT_PATH!
 
     :savesLoaded
 
@@ -551,19 +552,19 @@ REM : main
         goto:getSettings
     )
 
-    if !usePbFlag! EQU 1 call:setProgressBar 40 70 "pre processing" "backup and provide transferable cache"
+    if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "backup and provide transferable cache"
 
     REM : backup transferable cache in case of CEMU corrupt it
     set "transF="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!cacheFile:"=!""
-    set "backup="!transF:"=!-backupLaunchN.rar""
+    set "backup="!transF:"=!-backupLaunchN""
 
     REM : add a supplementary level of backup because the launch following the crash that have corrupt file
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
-    set "lastValid="!transF:"=!-backupLaunchN-1.rar""
-    if exist !backup! copy /Y !backup! !lastValid! > NUL 2>&1
+    set "lastValid="!transF:"=!-backupLaunchN-1""
+    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !backup! !lastValid!
 
-    wscript /nologo !StartHidden! !rarExe! a -ep1 -inul !backup! !transF!
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !transF! !backup!
 
     REM : get backup files sizes
     if exist !backup! (
@@ -591,7 +592,7 @@ REM : main
     echo Copying transferable cache !OLD_SHADER_CACHE_ID! to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
 
     REM : copy all !sci!.bin file (2 files if separable and conventionnal)
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! /S /XF *.log /XF *.bfw_old /XF *emu* /XF *.rar
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /IS /IT > NUL 2>&1
 
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
@@ -599,14 +600,16 @@ REM : main
     if !useThirdPartySoft! EQU 1 (
         echo Launching third party software >> !batchFwLog!
 
-        if !usePbFlag! EQU 1 call:setProgressBar 70 72 "pre processing" "launching third party software"
+        if !usePbFlag! EQU 1 call:setProgressBar 50 52 "pre processing" "launching third party software"
 
         REM : launching user's software
         set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
         wscript /nologo !StartHidden! !launchThirdPartySoftware!
 
+        if !usePbFlag! EQU 1 call:setProgressBar 52 54 "pre processing" "getting CEMU options saved for !currentUser!"
+        
     ) else (
-        if !usePbFlag! EQU 1 call:setProgressBar 70 72 "pre processing" "getting CEMU options saved for !currentUser!"
+        if !usePbFlag! EQU 1 call:setProgressBar 50 54 "pre processing" "getting CEMU options saved for !currentUser!"
     )
 
     :getSettings
@@ -624,7 +627,7 @@ REM : main
 
     REM : load Cemu's options
     call:loadCemuOptions
-
+echo OK5
     REM : handling GPU shader cache backup
     REM : ----------------------------
 
@@ -768,7 +771,7 @@ REM : main
     exit 15
 
     :openGpuCache
-    if !usePbFlag! EQU 1 call:setProgressBar 84 86 "pre processing" "installing GPU cache"
+    if !usePbFlag! EQU 1 call:setProgressBar 82 84 "pre processing" "installing GPU cache"
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
     set "gpuCacheBackupFolder="NOT_FOUND""
@@ -889,9 +892,9 @@ REM : main
     echo --------------------------------------------------------- >> !batchFwLog!
 
     if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
-        call:setProgressBar 86 90 "pre processing" "waiting all child processes end"
+        call:setProgressBar 84 90 "pre processing" "waiting all child processes end"
     ) else (
-        call:setProgressBar 86 94 "pre processing" "waiting all child processes end"
+        call:setProgressBar 84 94 "pre processing" "waiting all child processes end"
         goto:launchCemu
     )
 
@@ -986,7 +989,7 @@ REM : main
     REM : remove lock file
     del /F /S !lockFile! > NUL 2>&1
 
-    if !usePbFlag! EQU 1 call:setProgressBar 0 10 "post processing" "analysing Cemu return code"
+    if !usePbFlag! EQU 1 call:setProgressBar 0 6 "post processing" "analysing Cemu return code"
 
     REM : analyse CEMU's return code
     :analyseCemuStatus
@@ -1020,7 +1023,7 @@ REM : main
 
     if %cr_cemu% NEQ 0 goto:getTransCacheBack
 
-    if !usePbFlag! EQU 1 call:setProgressBar 10 30 "post processing" "Compress save for !currentUser!"
+    if !usePbFlag! EQU 1 call:setProgressBar 6 10 "post processing" "Compress save for !currentUser!"
 
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
@@ -1031,6 +1034,12 @@ REM : main
     REM : get SHADER_MODE
     set "SHADER_MODE=SEPARABLE"
     for /F "delims=~" %%i in ('type !cemuLog! ^| find /I "UseSeparableShaders: false"') do set "SHADER_MODE=CONVENTIONAL"
+
+    if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 (
+        call:setProgressBar 6 48 "post processing" "Save transferable shader cache"
+    ) else (
+        call:setProgressBar 10 48 "post processing" "Save transferable shader cache"
+    )
 
     echo SHADER_MODE=%SHADER_MODE%>> !batchFwLog!
     set "NEW_SHADER_CACHE_ID=UNKNOWN"
@@ -1051,11 +1060,7 @@ REM : main
     set "FPS=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !gameInfoFile! ^| find /I "native FPS" 2^>NUL') do set "FPS=%%i"
 
-    if !usePbFlag! EQU 1 if %cr_cemu% EQU 0 (
-        call:setProgressBar 30 38 "post processing" "fill in compatibility reports"
-    ) else (
-        call:setProgressBar 10 38 "post processing" "fill in compatibility reports"
-    )
+    if !usePbFlag! EQU 1 call:setProgressBar 48 52 "post processing" "fill in compatibility reports"
 
     REM : report compatibility for CEMU_FOLDER_NAME and GAME on USERDOMAIN
     set "rc="!BFW_TOOLS_PATH:"=!\reportCompatibility.bat""
@@ -1065,7 +1070,7 @@ REM : main
 
     echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
 
-    if !usePbFlag! EQU 1 call:setProgressBar 38 55 "post processing" "backup and remove !currentUser! save"
+    if !usePbFlag! EQU 1 call:setProgressBar 52 75 "post processing" "backup and remove !currentUser! save"
     
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
@@ -1106,10 +1111,7 @@ REM : main
 
     :searchCacheFolder
 
-    if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 (
-        call:setProgressBar 38 60 "post processing" "backup GPU cache"
-    ) else (
-        call:setProgressBar 55 60 "post processing" "backup GPU cache"
+    if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 call:setProgressBar 75 80 "post processing" "backup GPU cache"
     )
     
     REM : backup of GpuCache, get the last modified folder under GpuCache
@@ -1217,7 +1219,7 @@ REM : main
     call:createLogShorcut
 
     if %cr_cemu% NEQ 0 goto:analyseCemuTitleId
-    if !usePbFlag! EQU 1 call:setProgressBar 60 75 "post processing" "analyse and move back transferable cache"
+    if !usePbFlag! EQU 1 call:setProgressBar 80 92 "post processing" "analyse and move back transferable cache"
 
     REM : analyse CEMU's log
     if not exist !cemuLog! goto:titleIdChecked
@@ -1237,7 +1239,7 @@ REM : main
         goto:firstOcTitle
     )
     :firstOcTitle
-    if !usePbFlag! EQU 1 call:setProgressBar 85 92 "post processing" "analysing Cemu titleId"
+    if !usePbFlag! EQU 1 call:setProgressBar 92 96 "post processing" "analysing Cemu titleId"
 
     if not [!cemuTitleLine!] == ["NONE"] goto:cemuTitleIdExist
 
@@ -1329,7 +1331,7 @@ REM : main
         echo GAME_CONFIGURATION after launching !CEMU_FOLDER_NAME! ^: >> !tscl!
         if exist !gameInfoFile! type !gameInfoFile! >> !tscl!
     )
-    if !usePbFlag! EQU 1 call:setProgressBar 92 96 "post processing" "saving settings for !currentUser!"
+    if !usePbFlag! EQU 1 call:setProgressBar 96 98 "post processing" "saving settings for !currentUser!"
 
     call:saveCemuOptions
 
@@ -1369,8 +1371,11 @@ REM : main
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
-    if !usePbFlag! EQU 1 call:setProgressBar 96 100 "post processing" "waiting child processes end before exiting"
-
+    if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 (
+        call:setProgressBar 96 100 "post processing" "waiting child processes end before exiting"
+    ) else (
+        call:setProgressBar 98 100 "post processing" "waiting child processes end before exiting"
+    )
     REM :restoreBackups
     if exist !cs! call:restoreFile !cs!
     if exist !csb! call:restoreFile !csb!
@@ -1476,24 +1481,9 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         :waitingLoopProcesses
         wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
-        type !logFileTmp! | find /I "robocopy" > NUL 2>&1 && (
-            echo waitProcessesEnd : robocopy still running >> !batchFwLog!
-            goto:waitingLoopProcesses
-        )
-        type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && (
-            echo waitProcessesEnd : fnr^.exe still running >> !batchFwLog!
-            goto:waitingLoopProcesses
-        )
-        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGameStats.bat" > NUL 2>&1 && (
-            echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
-            goto:waitingLoopProcesses
-        )
+
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
-            goto:waitingLoopProcesses
-        )
-        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" |find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
-            echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
@@ -1507,7 +1497,18 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             )
             goto:waitingLoopProcesses
         )
-
+        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGameStats.bat" > NUL 2>&1 && (
+            echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
+        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" |find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
+            echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
+        type !logFileTmp! | find /I "copy" | find /I "!CEMU_FOLDER_NAME!" > NUL 2>&1 && (
+            echo waitProcessesEnd : a copy is still running >> !batchFwLog!
+            goto:waitingLoopProcesses
+        )
         if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
             call:setProgressBar 94 96 "pre processing" "waiting all child processes end"
         )
@@ -1667,17 +1668,17 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "pat="!CEMU_FOLDER:"=!\*graphicPacks*""
         for /F "delims=~" %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
 
-        if exist !graphicPacksBackup! rmdir /Q !graphicPacks! && move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
+        if exist !graphicPacksBackup! rmdir /Q !graphicPacks!  > NUL 2>&1 & move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
 
         REM : remove saves but not before BatchFw first run
-        if exist !gameInfoFile! for /F %%i in ('type !gameInfoFile! ^| find "Last launch with"') do (
+        if exist !gameInfoFile! for /F %%i in ('type !gameInfoFile! ^| find "Last launch with" 2^>NUL') do (
 
             REM : delete current saves in mlc01
             set "saveFolder="!MLC01_FOLDER_PATH:"=!\usr\save""
             for /F "delims=~" %%i in ('dir /b /o:n /a:d !saveFolder! 2^>NUL') do call:removeSaves "%%i"
         )
 
-        if !usePbFlag! EQU 1 call:setProgressBar 72 78 "pre processing" "installing settings for !currentUser!"
+        if !usePbFlag! EQU 1 call:setProgressBar 54 60 "pre processing" "installing settings for !currentUser!"
 
         if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
 
@@ -1716,10 +1717,17 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
             set "wfs="!BFW_TOOLS_PATH:"=!\wizardFirstSaving.bat""
             echo !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH! !IGNORE_PRECOMP!>> !batchFwLog!
-            wscript /nologo !StartMaximizedWait! !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH! !IGNORE_PRECOMP!
+
+            !cmdOw! BatchFw* /MIN > NUL 2>&1
+            cls
+            call !wfs! !CEMU_FOLDER! "!GAME_TITLE!" !PROFILE_FILE! !SETTINGS_FOLDER! !user! !RPX_FILE_PATH! !IGNORE_PRECOMP!
+            !cmdOw! @ /MIN > NUL 2>&1
+            !cmdOw! @ /HID > NUL 2>&1
+            if !usePbFlag! EQU 1 call:setProgressBar 60 70 "pre processing" "installing settings for !currentUser!"
 
             goto:beforeLoad
         )
+        if !usePbFlag! EQU 1 call:setProgressBar 60 70 "pre processing" "installing settings for !currentUser!"
 
         REM : get path to CEMU installs folder
         for %%a in (!CEMU_FOLDER!) do set "parentFolder="%%~dpa""
@@ -1815,7 +1823,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         set "rpxFilePath=!RPX_FILE_PATH!"
 
-        if !usePbFlag! EQU 1 call:setProgressBar 78 82 "pre processing" "updating games stats"
+        if !usePbFlag! EQU 1 call:setProgressBar 70 78 "pre processing" "updating games stats"
         
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
@@ -1874,13 +1882,13 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
         echo !toBeLaunch! !lst! !cs! !gid! >> !batchFwLog!
 
-        wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
+        wscript /nologo !StartHidden! !toBeLaunch! !lst! !cs! !gid!
 
         :cemuHookSettings
         pushd !BFW_TOOLS_PATH!
         
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
-        if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! call:setProgressBar 82 84 "pre processing" "installing online files"
+        if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! call:setProgressBar 78 8? "pre processing" "installing online files"
 
         pushd !BFW_TOOLS_PATH!
         set "chIniUser="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
@@ -1944,6 +1952,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : set validity to true
         set /A "%1=1"
     goto:eof
+    REM : ------------------------------------------------------------------
 
 
     :getSettingsFolder
@@ -1953,8 +1962,9 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if exist !csb! (
             for /F "tokens=*" %%a in (!csb!)  do set "csbSize=%%~za"
         )
-
+   
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!""
+        if not exist !sf! goto:eof
         pushd !sf!
         for /F "delims=~" %%j in ('dir /B /A:D /O:-N * 2^> NUL') do (
             call:checkSettingsFolder "%%j" result
@@ -1967,8 +1977,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 echo Failed to import settings from %%j>> !batchFwLog!
             )
         )
+
         pushd !BFW_TOOLS_PATH!
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :checkSettingsFolder
         set "folderName=%~1"
@@ -2016,6 +2028,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "%2=1"
 
     goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to set settings for a given user
     :setSettingsForUser
@@ -2127,7 +2140,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul  !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""

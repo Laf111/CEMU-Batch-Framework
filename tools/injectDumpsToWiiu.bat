@@ -305,11 +305,6 @@ REM : main
     echo =========================================================
     echo Now you can stop FTPiiU server on you wii-U
     echo All transferts ended^, done
-    if not ["!userSavesToExport!"] == ["none"] (
-        echo Check !gslog!
-        echo to know which SaveMii slots were filled^ for wich games^.
-        echo Launch SaveMii to import your save^(s^) for your game^(s^)^.
-    )
     echo.
     echo - start ^: !START_DATE!
     echo - end   ^: !DATE!
@@ -366,9 +361,6 @@ REM : functions
         echo to export all saves found for all users OR no saves at all^.
         echo You still can use the exportWiiuSaves script to do it afterward^.
         echo.
-
-        set "TMP_ULSAVE_PATH="!BFW_WIIU_FOLDER:"=!\SaveMii""
-        set "gslog="!TMP_ULSAVE_PATH:"=!\ExportSaveMiiSlotsUsed.log""
 
         choice /C yn /N /M "Do you want to export Wii-U saves during the process (y, n)? : "
         if !ERRORLEVEL! EQU 2 goto:eof
