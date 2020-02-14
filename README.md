@@ -32,7 +32,7 @@ Last GFX packs checked (presets completion) : **V641**
 
 - **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
     - **get/sync online files (account, friends'list),** 
-    - **sync saves between CEMU with the Wii-U (export CEMU->Wii-U using SaveMii),**
+    - **sync saves between CEMU with the Wii-U, sync also game stats between CEMU and the Wii-U,**
     - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
     - **dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
     - **inject games on the Wii-U (games previously dumped only and without update and DLC. You'll need to update and get the DLC with your Wii-U)**
