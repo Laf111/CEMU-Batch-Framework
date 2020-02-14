@@ -101,8 +101,9 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
         - total size needed on the Wii-U, is computed
         - you'll have to update the game on the Wii-U
     - Enable/Disable Wii-U firmware update (by removing/creating the folder /storage_mlc/sys/update)
-    - Import saves from the Wii-U (for all users);
-    - Export saves to the Wii-U using SaveMii (create SaveMii's slots directly on the SD card by FTP)
+    - Import saves from the Wii-U (for all selected users);
+    - Export saves to the Wii-U (for all selected users)
+    - Sync game stats between CEMU and your Wii-U
     
     
 ### Other features:
