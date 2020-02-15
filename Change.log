@@ -1,4 +1,4 @@
-11/02/2020 V16-2 :
+15/02/2020 V16-2 :
 - fix : when adding a new aspect ratio, instead of forcing a GFX pack update flush the 
         gamesLibrary.log (to force batchFw will complete the GFX packs on next launch)
 - fix : auto-update issue (did not end). Fixed but you'll get an excpeted error 
@@ -10,6 +10,7 @@
 - opt : lower significatively pre processing time :
         - extract saves earlier
         - lower updateGameGraphicPacks.bat execution time
+- add : robustness on launching game : call wizardFirstRun.bat in the same instance
 - add : folder size computation in 
         - copyMlc01DataForAllGames.bat
         - dumpGamesFromWiiu.bat
@@ -23,8 +24,12 @@
         CEMU's version subfolder under "Wii-U Games\CEMU" 
 - add : WII-U / add DLC injection in injectDumpsToWiiu.bat (only update seems to use
         symlinks on Wii-U file system)
+- add : WII-U / do not use SaveMii anymore : BatchFw now fully handle saves (import/export)
+- add : WII-U / now game stats are handled and updated both ways (CEMU <-> Wii-U) during import/export
+        It does not work before because i didn't realize that Wii-U timestamp in saveinfo.xml is an hexa
+        number. Converted to decimal, it gives a J2000 timestamp and Cemu uses a 1970 timestamp (like Linux)
 
-
+        
 07/02/2020 V16-1 :
 - fix : allow Restricted as powershell policy when checking pre-requisites
 

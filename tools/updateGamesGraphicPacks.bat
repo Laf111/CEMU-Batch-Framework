@@ -354,17 +354,17 @@ REM : functions
         if not exist !newUpdateMetaXml! (
 
             REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
-            cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations"
+            cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations if needed (old versions)"
             set "oldDlcMetaXml="!oldDlcFolder:"=!\meta\meta.xml""
 
             if exist !oldDlcMetaXml! (
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c""
                 if not exist !folder! mkdir !folder! > NUL 2>&1
-                move !oldDlcFolder! !folder! > NUL 2>&1
+                if !ERRORLEVEL! EQU 0 move !oldDlcFolder! !folder! > NUL 2>&1
 
-                set "folder="!ffTitleFolder:"=!\aoc""
+                set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
                 move !folder! !newDlcFolder! > NUL 2>&1
-                rmdir /Q !oldDlcFolder!
+                if !ERRORLEVEL! EQU 0 rmdir /Q !oldDlcFolder!
             )
 
             REM : new folder does not exist and the old one yes
