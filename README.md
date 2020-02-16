@@ -214,10 +214,10 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
     
 - **CEMU is already portable, what about install CEMU on a USB drive directlty?**
 
-    - First, it might heavily drop performances especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time)
+    - First, it might heavy performance drops especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time)
     
     - If you install a single version of CEMU : 
-        - you'll have to change most of the settings on every hosts (and need to backup them manually)
+        - you'll have to change most of the settings on every host (and need to backup them manually)
         - you'll have to recompile all shader caches each time on each host
         
     - If you install a version for each host (and use a specific mlc01 folder location) : 
@@ -239,4 +239,4 @@ Using the main branch could lead in regressions and troubles as bacth scripting 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
 
 
-If you have any trouble, send me a private message on CEMU's reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
+If you have any trouble, send me a private message on CEMU's piracy reddit, CEMU's Discord or GBATemp (to Laf111) and i'll gladly help you.
