@@ -212,23 +212,23 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
     
 - **CEMU is already portable, what about install CEMU on a USB drive directlty?**
 
-    - First, it might heavy performance drops especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time) but also
+    First, you'll encounter heavy performance drops especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time) but also
     
     - If you install a single version of CEMU, you're not sure to manage to run all games without issues on every host (intel GPU) but also : 
         - even if you can set relatives paths to avoid the USB drive letter change issue, you'll have to change most of the settings on every host (and need to backup them manually). Specially games profiles (recompiler mode) that are tweaked for a specific host (game's profile value will override the general UI settings) 
-        - you'll have to recompile all shader caches each time on each host
+        - you'll have to recompile the entire shader cache each time for each game, on each host.
         
     - If you install a version for each host (and use a custom mlc01 folder location) : 
         - you'll have to update your settings if the driver letter of your USB device is changed : even if relative paths syntax is supported when creating symlinks full paths are used : that's why BatchFw re-creates its symlinks on the fly)
         
-    - BatchFw fix broken shortcuts (Wii-U Games\\fix broken shortcuts.lnk can be also use if you move your games'folder)
-    - CEMU installs on host are only few Mb sized
-    - **You won't need to rebuild the shader cache everytime** (shader cache will be valid until the next drivers update for most of CEMU's versions you'll install)
-    - BatchFw proposed to wipe all you traces on the host (Wii-U Games\\Wipe install traces on %USERDOMAIN%.lnk) 
+    BatchFw fix broken shortcuts (Wii-U Games\\fix broken shortcuts.lnk can be also use if you move your games'folder)
+    CEMU installs on host are only few Mb sized
+    **You won't need to rebuild the shader cache everytime** (shader cache will be valid until the next drivers update and for most of CEMU's versions you'll install)
+    BatchFw proposed to wipe all you traces on the host (Wii-U Games\\Wipe install traces on %USERDOMAIN%.lnk) 
         
 - **How BatchFw will mess around with CEMU accounts (> 1.15.19) ?**
 
-    - Same as it does with earlier version. In fact, it ignores them and always use the default account for all user. So all users are be able to use their saves on versions earlier than 1.15.19. 
+    - Same as it does with earlier version. All users use the 8000001 and so are be able to use their saves on versions earlier than 1.15.19. When imptoring Exporting games, you can choose source/target accounts to use
     
 
 ## Recommendations: 
