@@ -44,10 +44,13 @@ REM : main
     set "previousPath=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
         set "previousPath="%%i""
-        echo ^> remove !previousPath!
-        rmdir /S /Q !previousPath! > NUL 2>&1
+        if exist !previousPath! (
+            echo ^> remove !previousPath!
+            rmdir /S /Q !previousPath! > NUL 2>&1
+            REM : flush logFile
+            call:cleanHostLogFile !previousPath!
+        )
     )
-
 
     echo ---------------------------------------------------------
     echo Removing shortcuts created^.^.^.
@@ -56,18 +59,15 @@ REM : main
     REM : get the last location from logFile
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do (
         set "WIIU_GAMES_FOLDER="%%i""
-        if exist !WIIU_GAMES_FOLDER!] (
+        if exist !WIIU_GAMES_FOLDER! (
 
             rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
             echo ^> !WIIU_GAMES_FOLDER! deleted ^!
+
+            REM : flush logFile
+            call:cleanHostLogFile !WIIU_GAMES_FOLDER!
         )
     )
-
-    echo ---------------------------------------------------------
-    echo BatchFw saves all your GPU Caches in %APPDATA%
-    echo.
-    choice /C yn /N /M "Do you want to also remove your GPU caches ? (y, n)"
-    if !ERRORLEVEL! EQU 2 goto:ending
 
     REM : search your current GLCache
     REM : check last path saved in log file
@@ -77,27 +77,14 @@ REM : main
     set "OPENGL_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "OPENGL_CACHE=%%i"
 
-    if not [!OPENGL_CACHE!] == ["NOT_FOUND"] if exist !OPENGL_CACHE! goto:glCacheFound
+    if [!OPENGL_CACHE!] == ["NOT_FOUND"] goto:ending
 
-    REM : else search it
-    pushd "%LOCALAPPDATA%"
-    set "cache="NOT_FOUND""
-    for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if [!cache!] == ["NOT_FOUND"] pushd "%APPDATA%" && for /F "delims=~" %%x in ('dir /b /o:n /a:d /s GLCache 2^>NUL') do set "cache="%%x""
-    if not [!cache!] == ["NOT_FOUND"] set "OPENGL_CACHE=!cache!"
-    pushd !BFW_TOOLS_PATH!
+    echo ---------------------------------------------------------
+    echo BatchFw saves all your GPU Caches in %APPDATA%
+    echo.
+    choice /C yn /N /M "Do you want to also remove your GPU caches ? (y, n)"
+    if !ERRORLEVEL! EQU 2 goto:ending
 
-    if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
-        echo Unable to find your GPU GLCache folder ^? cancelling
-        goto:ending
-    )
-
-    REM : save path to log file
-    set "msg="OPENGL_CACHE=!OPENGL_CACHE:"=!""
-    call:log2HostFile !msg!
-
-    REM : openGL cache location
-    :glCacheFound
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
     if not exist !GLCacheSavesFolder! goto:cleanBfwVkCache
@@ -108,11 +95,14 @@ REM : main
     :cleanBfwVkCache
     set "VkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
 
-    if not exist !VkCacheSavesFolder! goto:ending
-    rmdir /Q /S !VkCacheSavesFolder! > NUL 2>&1
-    echo.
-    echo ^> Vulkan caches were removed ^!
-
+    if exist !VkCacheSavesFolder! (
+        rmdir /Q /S !VkCacheSavesFolder! > NUL 2>&1
+        echo.
+        echo ^> Vulkan caches were removed ^!
+    )
+    REM : flush logFile
+    call:cleanHostLogFile !OPENGL_CACHE!
+    
     :ending
     echo =========================================================
     echo done
@@ -128,6 +118,23 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :cleanHostLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !logFile! > NUL 2>&1
+            move /Y !logFileTmp! !logFile! > NUL 2>&1
+        )
+
+        type !logFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSet

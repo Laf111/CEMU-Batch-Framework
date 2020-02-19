@@ -83,7 +83,9 @@ REM : main
 
     REM : check rights to create links
     pushd !GAMES_FOLDER!
-    mklink /J ./linkCheck !TMP!  > NUL 2>&1
+    mklink /J linkCheck !TMP!
+    echo cr=!ERRORLEVEL!
+    pause
     if !ERRORLEVEL! NEQ 0 (
         echo This user is not allowed to create links^!
         echo BatchFw use Symlinks^, please contact !USERDOMAIN! administrator

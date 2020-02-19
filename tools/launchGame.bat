@@ -1168,11 +1168,6 @@ echo OK5
         set "msg="!DATE!-your display drivers have change !CEMU_FOLDER_NAME! GLCache Id from %oldGpuCacheId% to %newGpuCacheId%=%folderName%""
         call:log2HostFile !msg!
 
-    ) else (
-
-        REM : log to host log file : detected OGLCacheId
-        set "msg="Detected GLCache Id for !CEMU_FOLDER_NAME! launching !GAME_TITLE!=%newGpuCacheId%""
-        call:log2HostFile !msg!
     )
 
     REM : if a display drivers update was detected
