@@ -32,10 +32,10 @@ Last GFX packs checked (presets completion) : **V641**
 
 - **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
     - **get/sync online files (account, friends'list),** 
-    - **sync saves between CEMU with the Wii-U, sync also game stats between CEMU and the Wii-U,**
+    - **sync saves between CEMU with the Wii-U**
+    - **sync game stats between CEMU and the Wii-U,**
     - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
     - **dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
-    - **inject games on the Wii-U (games previously dumped only and without update and DLC. You'll need to update and get the DLC with your Wii-U)**
     - **enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update)** 
     - **ping the wii-U to avoid online simultaneous access** 
     
@@ -98,14 +98,10 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
         - decide if you want to import saves for all/a user/select for each game
         - dump sumultanously code, content, meta folder (game, update, DLC if found)
         - prepare the games to be emulated (install update, DLC and saves in the mlc01 folder of the game)
-    - Inject a list of games : 
-        - only games that have been dumped previously (./code/title.* must exist)
-        - total size needed on the Wii-U, is computed
-        - you'll have to update the game on the Wii-U
     - Enable/Disable Wii-U firmware update (by removing/creating the folder /storage_mlc/sys/update)
     - Import saves from the Wii-U (for all selected users including games stats from Wii-U);
-    - Export saves to the Wii-U (for all selected users including CEMU games stats)
-    - Sync game stats between CEMU and your Wii-U
+    - Export saves to the Wii-U (for all selected users including CEMU games stats -> Wii-U)
+   
     
     
 ### Other features:
