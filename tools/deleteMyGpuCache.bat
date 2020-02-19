@@ -66,7 +66,7 @@ REM : main
 
     REM : openGL cache location
     :glCacheFound
-    choice /C y /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! (y/n : yes by default in 4s) ?:"
+    choice /C yn /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! (y/n : yes by default in 4s) ?:"
     if %ERRORLEVEL% EQU 2 (
         choice /C y /T 2 /D y /N /M "> Cancelled by user"
         goto:cemuInstalls
@@ -79,7 +79,7 @@ REM : main
     :cemuInstalls
 
 
-    choice /C y /T 4 /D y /N /M "Clear all shader caches of ALL your CEMU installs (y/n : yes by default in 4s) ?:"
+    choice /C yn /T 4 /D y /N /M "Clear all shader caches of ALL your CEMU installs (y/n : yes by default in 4s) ?:"
     if %ERRORLEVEL% EQU 2 (
         choice /C y /T 2 /D y /N /M "> Cancelled by user"
         goto:log

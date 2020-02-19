@@ -35,8 +35,9 @@ REM : main
     echo =========================================================
     echo Wipe all traces on !USERDOMAIN!
     echo =========================================================
-    echo.
     pause
+    echo ---------------------------------------------------------
+    echo Removing Cemu installs^.^.^.
     REM : delete all cemu installs on !USERDOMAIN!
 
     REM : search in logFile, getting only the last occurence
@@ -48,7 +49,7 @@ REM : main
     )
 
 
-    echo.
+    echo ---------------------------------------------------------
     echo Removing shortcuts created^.^.^.
     echo.
 
@@ -62,11 +63,11 @@ REM : main
         )
     )
 
-    echo.
+    echo ---------------------------------------------------------
     echo BatchFw saves all your GPU Caches in %APPDATA%
     echo.
-    call:getUserInput "Do you want to remove your GPU caches ? (y, n)" "y,n" ANSWER
-    if [!ANSWER!] == ["n"] goto:ending
+    choice /C yn /N /M "Do you want to also remove your GPU caches ? (y, n)"
+    if !ERRORLEVEL! EQU 2 goto:ending
 
     REM : search your current GLCache
     REM : check last path saved in log file
@@ -97,16 +98,20 @@ REM : main
 
     REM : openGL cache location
     :glCacheFound
-    choice /C y /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! (y/n : yes by default in 4s) ?:"
-    if %ERRORLEVEL% EQU 2 (
-        choice /C y /T 2 /D y /N /M "> Cancelled by user"
-        goto:ending
-    )
-    rmdir /Q /S !OPENGL_CACHE! > NUL 2>&1
-    mkdir !OPENGL_CACHE! > NUL 2>&1
+    set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
-    echo ^> !OPENGL_CACHE:"=! was cleared ^!
+    if not exist !GLCacheSavesFolder! goto:cleanBfwVkCache
+    rmdir /Q /S !GLCacheSavesFolder! > NUL 2>&1
     echo.
+    echo ^> OpenGL caches were removed ^!
+
+    :cleanBfwVkCache
+    set "VkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
+
+    if not exist !VkCacheSavesFolder! goto:ending
+    rmdir /Q /S !VkCacheSavesFolder! > NUL 2>&1
+    echo.
+    echo ^> Vulkan caches were removed ^!
 
     :ending
     echo =========================================================
