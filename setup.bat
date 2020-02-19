@@ -83,7 +83,10 @@ REM : main
 
     REM : check rights to create links
     pushd !GAMES_FOLDER!
-    mklink /J linkCheck !TMP! > NUL 2>&1
+    set "linkCheck="!BFW_PATH:"=!\linkCheck""
+    if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
+
+    mklink /J !linkCheck! !TMP! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
         echo This user is not allowed to create links^!
         echo BatchFw use Symlinks^, please contact !USERDOMAIN! administrator
@@ -92,7 +95,7 @@ REM : main
     )
     echo Rights to create symlinks ^: OK
 
-    rmdir /Q linkCheck > NUL 2>&1
+    if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
     REM : check rights to launch vbs scripts
     for /F "usebackq tokens=3" %%a in (`reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled 2^>nul`) do (
