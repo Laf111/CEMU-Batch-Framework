@@ -1,3 +1,13 @@
+18/02/2020 V16-3 :
+- fix : remove debug lines in exportSavesToWiiu.bat
+- fix : FTP configuration not found in ftpSetWiiuFirmwareUpdateMode.bat
+- fix : WII-U / remove injection feature since it not works on all games
+        I need to investigate why
+- add : CEMU accounts support in import/export saves
+- add : script and shortcut do wipe all traces on this host 
+- add : vulkan caches backup deletion in uninstall.bat
+
+
 15/02/2020 V16-2 :
 - fix : when adding a new aspect ratio, instead of forcing a GFX pack update flush the 
         gamesLibrary.log (to force batchFw will complete the GFX packs on next launch)

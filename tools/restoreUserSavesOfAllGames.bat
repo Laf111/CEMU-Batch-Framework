@@ -3,7 +3,6 @@ setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
 
-
     setlocal EnableDelayedExpansion
 
     color 4F
@@ -16,7 +15,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -29,12 +28,16 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    REM : RAR.exe path
+    set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
@@ -42,12 +45,19 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
+    set "USERSLIST="
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do set "USERSLIST=%%i !USERSLIST!"
+    if ["!USERSLIST!"] == [""] (
+        echo No BatchFw^'s users registered ^^!
+        echo Delete _BatchFw_Install folder and reinstall
+        pause
+        exit /b 9
+    )
+
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    REM : initialize the number of users
-    set /A "nbUsers=0"
-
+    cls
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -88,21 +98,19 @@ REM : main
         goto:askMlc01Folder
     )
 
-    REM : check if a usr/save exist
-    set usrFolder="!MLC01_FOLDER_PATH:"=!\usr"
-    if not exist !usrFolder! (
-        echo !usrFolder! not found ^?
+    REM : check if a usr/title exist
+    set usrSave="!MLC01_FOLDER_PATH:"=!\usr\save"
+    if not exist !usrSave! (
+        echo !usrSave! not found ^?
         goto:askMlc01Folder
     )
 
-    cls
     goto:inputsAvailables
 
     :getArgsValue
-    if %nbArgs% GTR 2 (
+    if %nbArgs% NEQ 1 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH user^*
-        echo ^(^* for optionnal^ argument^)
+        echo SYNTAXE ^: "!THIS_SCRIPT!" MLC01_FOLDER_PATH
         echo given {%*}
         pause
         exit /b 99
@@ -115,62 +123,51 @@ REM : main
         exit /b 1
     )
 
-    if %nbArgs% EQU 2 (
-        set "user=!args[1]!"
-        set /A "nbUsers=1"
-    )
-
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
-
+(
     :inputsAvailables
-
+    cls
     REM : basename of MLC01_FOLDER_PATH
     for /F "delims=~" %%i in (!MLC01_FOLDER_PATH!) do set "basename=%%~nxi"
-    set CEMU_FOLDER=!MLC01_FOLDER_PATH:\%basename%=!
-
-    REM : if called with a user as 2nd argument
-    if !nbUsers! EQU 1 goto:displayHeader
-
-    REM : ask for a registered user if more than one user exist
-
+    set "CEMU_FOLDER=!MLC01_FOLDER_PATH:\%basename%=!"
+    set "tmpExtractFolder="!CEMU_FOLDER:"=!\bfwTmpRarSavesExtract""
     REM : check if more than user is defined
-    for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
-
-    if !nbUsers! LEQ 1 (
-        set "user="%USERNAME%""
-        goto:displayHeader
-    )
-
-    echo For which user do you want to use it ?
-    echo.
-
     set /A "nbUsers=0"
-    set "cargs="
+
+    set /A "ua=0"
+
+    REM : get userArray, choice args
+    set /A "nbUsers=0"
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-        set "users[!nbUsers!]="%%a""
-        set /A "nbUsers +=1"
-        set "cargs=!cargs!!nbUsers!"
-        echo !nbUsers! ^. %%a
+
+        set "user=%%a"
+        choice /C 123456789s /N /M "Account 8000000X to associate to !user! (1-9 or s to skip this user) ? : "
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! LSS 10 (
+            set "accounts[!ua!]=8000000!cr!"
+            set /A "ua+=1"
+            set "users[!nbUsers!]=%%a"
+            set /A "nbUsers+=1"
+        )
+    )
+    set /A "nbUsers-=1"
+
+    echo ===============================================================
+    set /A "nbUsersToDisplay=!nbUsers!+1"
+    echo You^'ve chosen to associate ^:
+    echo.
+
+    for /L %%l in (0,1,!nbUsers!) do (
+        set /A "acc=%%l+1"
+        echo !users[%%l]! ^: !accounts[%%l]!
     )
     echo.
-    choice /C !cargs! /N /M "Enter the user id (number above) : "
-    set /A "cr=!ERRORLEVEL!"
-    set "user=NONE"
-    set /A "index=!cr!-1"
-    set "user=!users[%index%]!"
-    echo.
-    echo user slected=!user:"=!
-    echo.
-    timeout /T 2 > NUL
+    if !QUIET_MODE! EQU 0 pause
     cls
-    :displayHeader
-    set "currentUser=!user:"=!"
-    title Restore all saves for !currentUser! to a mlc01 target folder
+
     echo =========================================================
-    echo Restore saves of !user:"! to a mlc01 folder for each game^'s chosen
-    echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
-    echo  - target mlc01 folder ^: !MLC01_FOLDER_PATH!
+    echo Export saves to ^: !MLC01_FOLDER_PATH!
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
@@ -186,6 +183,13 @@ REM : main
     )
     cls
     :scanGamesFolder
+
+    if exist !tmpExtractFolder! (
+        rmdir /Q /S  !tmpExtractFolder! > NUL 2>&1
+    )
+    mkdir !tmpExtractFolder! > NUL 2>&1
+
+    pushd !GAMES_FOLDER!
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -202,7 +206,9 @@ REM : main
         echo Exiting until you rename or move those folders
         echo =========================================================
         if !QUIET_MODE! EQU 0 pause
+        exit /b 20
     )
+
     set /A NB_SAVES_TREATED=0
     REM : loop on game's code folders found
     for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
@@ -222,7 +228,7 @@ REM : main
 
             if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
-            call:extractSave
+            call:extractSaves
 
         ) else (
 
@@ -251,9 +257,13 @@ REM : main
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
+    if exist !tmpExtractFolder! rmdir /Q /S  !tmpExtractFolder! > NUL 2>&1
 
     echo =========================================================
-    echo Treated !NB_SAVES_TREATED! games
+    echo Treated !NB_SAVES_TREATED! saves
+
+    if !QUIET_MODE! EQU 1 goto:exiting
+
     echo #########################################################
     if !QUIET_MODE! EQU 1 goto:exiting
     echo ---------------------------------------------------------
@@ -266,7 +276,10 @@ REM : main
         REM : Waiting before exiting
         pause
     )
+
     :exiting
+    echo =========================================================
+    echo Waiting the end of all child processes before ending ^.^.^.
     if %nbArgs% EQU 0 endlocal
     exit /b 0
 
@@ -274,10 +287,39 @@ REM : main
 
     REM : ------------------------------------------------------------------
 
+
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :extractSave
+    :extractSaveForUser
+
+
+        echo ^> !GAME_TITLE! ^: restore !currentUser! saves [!currentAccount!]
+        REM : extract save (that for CEMU portability used account 80000001)
+
+        !rarExe! x -o+ -inul -w!TMP! !rarFile! > NUL 2>&1
+        REM : now get a folder structure
+        REM : %CEMU_FOLDER%\bfwTmpExtract\mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001
+        set "gf=mlc01\usr\save\%startTitleId%\%endTitleId%"
+        set "srcFolder=%gf%\user\80000001"
+        set "tgtFolder=%gf%\user\!currentAccount!"
+
+        if not exist !tgtFolder! move /Y !srcFolder! !tgtFolder! > NUL 2>&1
+        if exist ..\!tgtFolder! rmdir /Q /S ..\!tgtFolder! > NUL 2>&1
+        set "fgf="!CEMU_FOLDER:"=!\%gf%""
+        if not exist !fgf! (
+            move /Y %gf% ..\mlc01\usr\save\%startTitleId% > NUL 2>&1
+        ) else (
+            rmdir /Q /S ..\!tgtFolder! > NUL 2>&1
+            move /Y !tgtFolder! ..\%gf%\user > NUL 2>&1
+        )
+        set /A NB_SAVES_TREATED+=1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :extractSaves
 
         REM : avoiding a mlc01 folder under !GAME_FOLDER_PATH!
         if /I [!GAME_FOLDER_PATH!] == ["!GAMES_FOLDER:"=!\mlc01"] goto:eof
@@ -296,43 +338,69 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
+        if not exist !META_FILE! (
+            echo No meta folder not found under game folder ^?^, aborting ^^!
+            goto:metaFix
+        )
+
+        REM : get Title Id from meta.xml
+        :getTitleLine
+        set "titleLine="NONE""
+        for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
+        if [!titleLine!] == ["NONE"] (
+            echo No titleId found in the meta^.xml file ^?
+            :metafix
+            echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder ^!
+            set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
+            if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
+            echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
+            echo "Then close notepad to continue"
+            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
+
+            REM : create the meta.xml file
+            echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
+            echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
+            echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
+            echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
+            echo ^<^/menu^> >> !META_FILE!
+            echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
+            echo "Then close notepad to continue"
+
+            wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
+            goto:getTitleLine
+        )
+
+        for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
+
+        if !titleId! == "################" goto:metafix
+
+        set "startTitleId=%titleId:~0,8%"
+        set "endTitleId=%titleId:~8,8%"
+
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
+        set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
-        REM : if rarFile not exists, skip this game
-        if not exist !rarFile! goto:eof
+        REM : cd to temporary folder
 
-        echo =========================================================
-        echo - Restore !currentUser! save of !GAME_TITLE!
-        echo ---------------------------------------------------------
-        if !QUIET_MODE! EQU 1 goto:extract
-        echo Extract !currentUser! saves to !MLC01_FOLDER_PATH! ^?
-        echo   ^(n^) ^: no^, skip
-        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
-        echo.
+        REM : cd %CEMU_FOLDER%\bfwTmpExtract
+        pushd !tmpExtractFolder!
 
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
-        if [!ANSWER!] == ["n"] (
-            REM : skip this game
-            echo Skip this GAME
-            goto:eof
+        REM : Loop on accounts array
+        for /L %%l in (0,1,!nbUsers!) do (
+
+            if not ["!accounts[%%l]!"] == ["SKIPPED"] (
+                set "currentUser=!users[%%l]!"
+                REM : save file
+                set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+                set "currentAccount=!accounts[%%l]!"
+                if exist !rarFile! call:extractSaveForUser
+            )
+
         )
-
-        echo ---------------------------------------------------------
-        REM : extract rarFile
-        :extract
-
-        pushd !CEMU_FOLDER!
-        set "rarExe="!BFW_PATH:"=!\resources\rar.exe""
-
-        !rarExe! x -o+ -inul -w!TMP! !rarFile! > NUL 2>&1
-        pushd !GAMES_FOLDER!
-
-
-        set /A NB_SAVES_TREATED+=1
-
     goto:eof
     REM : ------------------------------------------------------------------
 

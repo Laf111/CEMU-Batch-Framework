@@ -3,7 +3,6 @@ setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
 
-
     setlocal EnableDelayedExpansion
 
     color 4F
@@ -16,7 +15,7 @@ REM : main
     if !cr! NEQ 0 (
         echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
         pause
-        exit 1
+        exit /b 1
     )
 
     REM : directory of this script
@@ -33,6 +32,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
@@ -74,6 +74,7 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
+    title Import all user^'s saves from a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -126,42 +127,118 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+    cls
 
     REM : check if more than user is defined
     set /A "nbUsers=0"
-    for /F %%n in ('type !logFile! ^| find /I "USER_REGISTERED" /C') do set /A "nbUsers=%%n"
+    set "userLeftList="
 
-    if !nbUsers! LEQ 1 (
-        set "user="%USERNAME%""
-        goto:displayHeader
-    )
-
-    echo For which user do you want to use it ?
-    echo.
-
+    REM : get userArray, choice args
     set /A "nbUsers=0"
     set "cargs="
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
         set "users[!nbUsers!]="%%a""
-        set /A "nbUsers +=1"
+        set "userLeftList=!userLeftList! %%a"
         set "cargs=!cargs!!nbUsers!"
-        echo !nbUsers! ^. %%a
+        set /A "nbUsers+=1"
+    )
+    set /A "nbUsers-=1"
+
+    set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\00050000""
+
+    REM : loop on all 800000XX folders found
+    pushd !sf!
+
+    set /A "nbAccount=1"
+    set "accounts="
+    set "currentAccount="!BFW_PATH:"=!\logs\currentAccount.log""
+
+    :loopAccounts
+    dir /B /S /A:D 8000000!nbAccount! > !currentAccount! 2>&1
+    type !currentAccount! | find /I "8000000!nbAccount!" > NUL 2>&1 && (
+        REM :
+        echo ---------------------------------------------------------------
+        choice /C yn /N /M "Account 8000000!nbAccount! detected, import it ? (y/n) :"
+        if !ERRORLEVEL! EQU 2 (
+            echo.
+            echo skipping account 8000000!nbAccount!
+            set /A "ua=!nbAccount!-1"
+            set "accounts[!ua!]=SKIPPED"
+            set /A "nbAccount+=1"
+            goto:loopAccounts
+        )
+
+        if not ["!userLeftList!"] == ["  "] (
+            for /L %%l in (0,1,!nbUsers!) do (
+                echo !userLeftList!  | find !users[%%l]! > NUL 2>&1 && echo %%l ^: !users[%%l]!
+            )
+            echo.
+            echo Which BatchFw^'s user will use it ?
+            echo.
+
+            choice /C !cargs!s /N /M "Enter the user id (number above) : "
+            set /A "cr=!ERRORLEVEL!"
+            set /A "un=cr-1"
+        ) else (
+            echo No more BatchFw^'s user defined left
+            echo Add a new user using the setup^.bat to associate to the account 8000000!nbAccount!
+            echo.
+            echo skipping account 8000000!nbAccount!
+            echo.
+            goto:accountCreated
+        )
+        set /A "nbAcc=!nbAccount!-1"
+        call:setAccount !nbAcc! !un!
+
+        set /A "nbAccount+=1"
+        goto:loopAccounts
+    )
+    :accountCreated
+    echo ===============================================================
+    set /A "nbAccount-=1"
+    echo.
+    echo !nbAccount! accounts found in !sf!
+    echo.
+    set /A "nbAccount-=1"
+    if exist !currentAccount! del /F !currentAccount! > NUL 2>&1
+    if ["!nbAcc!"] == [""] (
+        echo.
+        echo No accounts selected^, exiting
+        pause
+        exit /b 10
+    )
+    echo ===============================================================
+    set /A "nbAccToDisplay=!nbAccount!+1"
+    echo Found !nbAccToDisplay! accounts in this mlc path^.
+    echo You^'ve chosen to associate ^:
+    echo.
+
+    for /L %%l in (0,1,!nbAccount!) do (
+        set /A "acc=%%l+1"
+        echo account 8000000!acc! ^: !accounts[%%l]!
     )
     echo.
-    choice /C !cargs! /N /M "Enter the user id (number above) : "
-    set /A "cr=!ERRORLEVEL!"
-    set "user=NONE"
-    set /A "index=!cr!-1"
-    set "user=!users[%index%]!"
-    set "currentUser=!user:"=!"
+    if !QUIET_MODE! EQU 0 pause
+    cls
 
-    :displayHeader        
-    IF !QUIET_MODE! EQU 0 echo =========================================================
-    echo Import saves for !currentUser! from ^: !MLC01_FOLDER_PATH!
-    IF !QUIET_MODE! EQU 0 echo =========================================================
+    echo =========================================================
+    echo Import saves from ^: !MLC01_FOLDER_PATH!
+    echo =========================================================
+    if !QUIET_MODE! EQU 1 goto:scanGamesFolder
 
+    echo Launching in 30s
+    echo     ^(y^) ^: launch now
+    echo     ^(n^) ^: cancel
+    echo ---------------------------------------------------------
+    call:getUserInput "Enter your choice ? : " "y,n" ANSWER 30
+    if [!ANSWER!] == ["n"] (
+        REM : Cancelling
+        choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
+        goto:eof
+    )
+    cls
     :scanGamesFolder
-
+    pushd !GAMES_FOLDER!
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -177,8 +254,8 @@ REM : main
         echo Fix-it by removing characters here replaced in the folder^'s name by ^?
         echo Exiting until you rename or move those folders
         echo =========================================================
-        pause
-        goto:eof
+        if !QUIET_MODE! EQU 0 pause
+        exit /b 20
     )
 
     set /A NB_SAVES_TREATED=0
@@ -229,12 +306,14 @@ REM : main
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
-
-    if !QUIET_MODE! EQU 1 goto:exiting
     echo =========================================================
     echo Treated !NB_SAVES_TREATED! saves
 
+    if !QUIET_MODE! EQU 1 goto:exiting
+
     echo #########################################################
+    if !QUIET_MODE! EQU 1 goto:exiting
+    echo ---------------------------------------------------------
     echo This windows will close automatically in 12s
     echo     ^(n^) ^: don^'t close^, i want to read history log first
     echo     ^(q^) ^: close it now and quit
@@ -244,10 +323,10 @@ REM : main
         REM : Waiting before exiting
         pause
     )
-    echo =========================================================
-    echo Waiting the end of all child processes before ending ^.^.^.
 
     :exiting
+    echo =========================================================
+    echo Waiting the end of all child processes before ending ^.^.^.
     if %nbArgs% EQU 0 endlocal
     exit /b 0
 
@@ -259,7 +338,20 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : saving function
+    :setAccount
+        set /A "na=%~1"
+        set /A "nu=%~2"
+
+        set "user=!users[%nu%]!"
+        set "toRemove=!user:"=!"
+
+        set "userLeftList=!userLeftList:%toRemove%=!"
+
+        set "accounts[%na%]=!user:"=!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :importSavesForUsers
 
         REM : get bigger rpx file present under game folder
@@ -324,26 +416,51 @@ REM : functions
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
-        echo =========================================================
-        echo !currentUser! save detected for !GAME_TITLE!
-        echo ---------------------------------------------------------
-
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
         if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
-        set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
-
-        if exist !rarFile! (
-            choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
-            if !ERRORLEVEL! EQU 2 echo Cancel^! && goto:eof
-        )
-        echo.
-
+        REM : create a rar file that contains all accounts
         pushd !inGameSavesFolder!
-        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -w!TMP! !rarFile! !saveFolder!
-        pushd !GAMES_FOLDER!
-        set /A NB_SAVES_TREATED+=1
+        set "commonRarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_common.rar""
+        wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -w!TMP! !commonRarFile! !saveFolder!
 
+        REM : delete all accounts in
+        wscript /nologo !StartHiddenWait! !rarExe! d -r -inul -w!TMP! !commonRarFile! "mlc01\usr\save\00050000\101d6000\user\8000000*\*"
+
+        REM : Loop on accounts array
+        for /L %%l in (0,1,!nbAccount!) do (
+
+            set /A "nAcc=%%l+1"
+            set "accountFolder="!MLC01_FOLDER_PATH:"=!\usr\save\%startTitleId%\%endTitleId%\user\8000000!nAcc!""
+
+            if exist !accountFolder! if not ["!accounts[%%l]!"] == ["SKIPPED"] (
+                set "currentUser=!accounts[%%l]!"
+
+                REM : save file
+                set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+                echo =========================================================
+                echo !currentUser! save detected for !GAME_TITLE!
+                echo ---------------------------------------------------------
+                echo.
+                if exist !rarFile! (
+                    choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
+                    if !ERRORLEVEL! EQU 1 (
+                        copy /Y !commonRarFile! !rarFile! > NUL 2>&1
+
+                        REM : add user account (no wait
+                        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
+                        set /A NB_SAVES_TREATED+=1
+                    )
+                ) else (
+                    copy /Y !commonRarFile! !rarFile! > NUL 2>&1
+
+                    REM : add user account (no wait
+                    wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
+                    set /A NB_SAVES_TREATED+=1
+                )
+            )
+        )
+        del /F !commonRarFile! > NUL 2>&1
         set "targetSaveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%startTitleId%\%endTitleId%""
         if not exist !targetSaveFolder! mkdir !targetSaveFolder! > NUL 2>&1
 

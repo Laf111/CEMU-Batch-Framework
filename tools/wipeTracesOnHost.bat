@@ -32,10 +32,41 @@ REM : main
     REM : cd to BFW_TOOLS_PATH
     pushd !BFW_TOOLS_PATH!
 
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
+    echo =========================================================
+    echo Wipe all traces on !USERDOMAIN!
+    echo =========================================================
+    echo.
+    pause
+    REM : delete all cemu installs on !USERDOMAIN!
+
+    REM : search in logFile, getting only the last occurence
+    set "previousPath=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
+        set "previousPath="%%i""
+        echo ^> remove !previousPath!
+        rmdir /S /Q !previousPath! > NUL 2>&1
+    )
+
+
+    echo.
+    echo Removing shortcuts created^.^.^.
+    echo.
+
+    REM : get the last location from logFile
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do (
+        set "WIIU_GAMES_FOLDER="%%i""
+        if exist !WIIU_GAMES_FOLDER!] (
+
+            rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
+            echo ^> !WIIU_GAMES_FOLDER! deleted ^!
+        )
+    )
+
+    echo.
+    echo BatchFw saves all your GPU Caches in %APPDATA%
+    echo.
+    call:getUserInput "Do you want to remove your GPU caches ? (y, n)" "y,n" ANSWER
+    if [!ANSWER!] == ["n"] goto:ending
 
     REM : search your current GLCache
     REM : check last path saved in log file
@@ -57,7 +88,7 @@ REM : main
 
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] (
         echo Unable to find your GPU GLCache folder ^? cancelling
-        goto:eof
+        goto:ending
     )
 
     REM : save path to log file
@@ -69,38 +100,17 @@ REM : main
     choice /C y /T 4 /D y /N /M "Flush !OPENGL_CACHE:"=! (y/n : yes by default in 4s) ?:"
     if %ERRORLEVEL% EQU 2 (
         choice /C y /T 2 /D y /N /M "> Cancelled by user"
-        goto:cemuInstalls
+        goto:ending
     )
     rmdir /Q /S !OPENGL_CACHE! > NUL 2>&1
     mkdir !OPENGL_CACHE! > NUL 2>&1
 
     echo ^> !OPENGL_CACHE:"=! was cleared ^!
+    echo.
 
-    :cemuInstalls
-
-
-    choice /C y /T 4 /D y /N /M "Clear all shader caches of ALL your CEMU installs (y/n : yes by default in 4s) ?:"
-    if %ERRORLEVEL% EQU 2 (
-        choice /C y /T 2 /D y /N /M "> Cancelled by user"
-        goto:log
-    )
-
-    REM : search in logFile, getting only the last occurence
-    set "installPath=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "install folder path" 2^>NUL') do (
-
-        set "installPath="%%i""
-        set "GLCache="!installPath:"=!\shaderCache\driver""
-        if exist !GLCache! echo ^> Clearing !GLCache! && rmdir /S /Q  !GLCache! > NUL 2>&1
-        set "pcCache="!installPath:"=!\shaderCache\precompiled""
-        echo ^> Clearing !pcCache!
-        for /F "delims=~" %%i in ('dir /B /S !pcCache! 2^>NUL') do del /F "%%i" > NUL 2>&1
-    )
-
-    :log
-    set "msg="!DATE! Shader Caches deleted by !USERNAME!""
-    call:log2HostFile !msg!
-
+    :ending
+    echo =========================================================
+    echo done
     timeout /T 3 > NUL 2>&1
 
     endlocal

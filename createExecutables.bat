@@ -974,15 +974,15 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
-        REM : create a shortcut to injectDumpsToWiiu.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Inject dumps to my Wii-U^.lnk""
-        set "LINK_DESCRIPTION="Inject games previously dumped by BatchFw to my Wii-U""
-        set "TARGET_PATH="!BFW_PATH:"=!\tools\injectDumpsToWiiu.bat""
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\upload.ico""
-        if not exist !LINK_PATH! (
-            if !QUIET_MODE! EQU 0 echo Creating a shortcut to injectDumpsToWiiu^.bat
-            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
-        )
+REM        REM : create a shortcut to injectDumpsToWiiu.bat (if needed)
+REM        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Inject dumps to my Wii-U^.lnk""
+REM        set "LINK_DESCRIPTION="Inject games previously dumped by BatchFw to my Wii-U""
+REM        set "TARGET_PATH="!BFW_PATH:"=!\tools\injectDumpsToWiiu.bat""
+REM        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\upload.ico""
+REM        if not exist !LINK_PATH! (
+REM            if !QUIET_MODE! EQU 0 echo Creating a shortcut to injectDumpsToWiiu^.bat
+REM            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+REM        )
 
         REM : create a shortcut to createWiiuSDcard.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Create a SDCard for Wii-U^.lnk""
@@ -1161,6 +1161,16 @@ REM : functions
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteMyGpuCache.ico""
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteMyGpuCache^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
+        REM : create a shortcut to wipeTracesOnHost.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wipe all traces on !USERDOMAIN!^.lnk""
+        set "LINK_DESCRIPTION="Wipe all traces on host !USERDOMAIN!""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\wipeTracesOnHost.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\wipe.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to wipeTracesOnHost^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 

@@ -119,6 +119,12 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that FTP_every_where is launched
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
+        pause
+        goto:checkConnection
+    )
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         echo Pause this script until you fix it ^(CTRL-C to abort^)
@@ -250,15 +256,12 @@ REM : main
 
     pushd !GAMES_FOLDER!
 
-    echo.
-    echo Creating symlinks to be upload (if needed) and
-    echo computing the space left needed on the Wii-U^.^.^.
-    echo.
-
     REM : Loop on the game selected
     for /L %%i in (0,1,!nbGamesSelected!) do (
     REM : get the endTitleId
         set "endTitleId=!selectedEndTitlesId[%%i]!"
+        set "title=!selectedTitles[%%i]!"
+echo prepare !title!
         call:prepareGame %%i
     )
 
@@ -511,15 +514,15 @@ REM            REM : YES : import update in mlc01/usr/title (minimized + no wait
 REM            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
 REM        )
 
-        REM : search if this game has a DLC
-        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
-        type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
-
-            if !nbPass! EQU 1 echo - injecting DLC
-            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
-            REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
-            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
-        )
+REM        REM : search if this game has a DLC
+REM        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
+REM        type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+REM
+REM            if !nbPass! EQU 1 echo - injecting DLC
+REM            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+REM            REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
+REM            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
+REM        )
 
         REM : get saves only the first pass
         if !nbPass! GTR 1 goto:endInject
@@ -553,19 +556,23 @@ REM        )
 
     :addGameSize
         set "gamefolder="%~1""
+        set /A "totalGameSize=0"
 
         REM : compte the size using powershell (symlinks are taken into account)
         set "folder="!gamefolder:"=!\Code""
         call:getFolderSizeInMb !folder! sgCode
         set /A "totalMoNeeded+=!sgCode!"
+        set /A "totalGameSize+=!sgCode!"
 
         set "folder="!gamefolder:"=!\Meta""
         call:getFolderSizeInMb !folder! sgMeta
         set /A "totalMoNeeded+=!sgMeta!"
+        set /A "totalGameSize+=!sgMeta!"
 
         set "folder="!gamefolder:"=!\Content""
         call:getFolderSizeInMb !folder! sgContent
         set /A "totalMoNeeded+=!sgContent!"
+        set /A "totalGameSize+=!sgContent!"
 
 REM        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000e""
 REM        if not exist !folder! goto:dlc
@@ -573,12 +580,15 @@ REM
 REM        call:getFolderSizeInMb !folder! sgUpdate
 REM        set /A "totalMoNeeded+=!sgUpdate!"
 
-        :dlc
-        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
-        if not exist !folder! goto:eof
+REM        :dlc
+REM        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
+REM        if not exist !folder! goto:eof
+REM
+REM        call:getFolderSizeInMb !folder! sgDlc
+REM        set /A "totalMoNeeded+=!sgDlc!"
+REM        set /A "totalGameSize+=!sgDlc!"
 
-        call:getFolderSizeInMb !folder! sgDlc
-        set /A "totalMoNeeded+=!sgDlc!"
+        echo size needed for !title! ^: !totalGameSize! Mb
         
     goto:eof
     REM : ------------------------------------------------------------------

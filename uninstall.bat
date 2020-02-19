@@ -124,15 +124,15 @@ REM : main
     echo ---------------------------------------------------------
     :removeController
     set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
-    if not exist !BatchFW_Controller_Profiles! goto:removeGLCache
+    if not exist !BatchFW_Controller_Profiles! goto:removeGpuCache
     call:getUserInput "Remove _BatchFW_Controller_Profiles folder ? (y, n)" "y,n" ANSWER
-    if [!ANSWER!] == ["n"] goto:removeGLCache
+    if [!ANSWER!] == ["n"] goto:removeGpuCache
     rmdir /Q /S !BatchFW_Controller_Profiles! > NUL 2>&1
     echo ^> _BatchFW_Controller_Profiles deleted ^!
 
     echo ---------------------------------------------------------
-    :removeGLCache
-    call:getUserInput "Remove your OpenGL cache backup ? (y, n)" "y,n" ANSWER
+    :removeGpuCache
+    call:getUserInput "Remove your GPU caches ? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:restoreMlc01
 
     REM : search your current GLCache
@@ -149,10 +149,16 @@ REM : main
     :cleanBfwGlCache
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
-    if not exist !GLCacheSavesFolder! goto:restoreMlc01
+    if not exist !GLCacheSavesFolder! goto:cleanBfwVkCache
     rmdir /Q /S !GLCacheSavesFolder! > NUL 2>&1
+    echo ^> OpenGL caches were removed ^!
 
-    echo ^> OpenGL cache backup was removed ^!
+    :cleanBfwVkCache
+    set "VkCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuVkCache!"
+    if not exist !VkCacheSavesFolder! goto:restoreMlc01
+    rmdir /Q /S !VkCacheSavesFolder! > NUL 2>&1
+
+    echo ^> Vulkan caches were removed ^!
 
     echo ---------------------------------------------------------
     :restoreMlc01
@@ -237,39 +243,9 @@ REM : main
 
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
-    REM : Loop on every user registered
-    for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-        set "user="%%a""
 
-        :askSaveFolder
-        for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
-        if [!MLC01_FOLDER_PATH!] == ["NONE"] (
-            choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-            if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
-            goto:askSaveFolder
-        )
-        REM : check if folder name contains forbiden character for !MLC01_FOLDER_PATH!
-        set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-        call !tobeLaunch! !MLC01_FOLDER_PATH!
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! GTR 1 (
-            echo Path to !MLC01_FOLDER_PATH! is not DOS compatible^!^, please choose another location
-            pause
-            goto:askSaveFolder
-        )
-
-        REM : check if a usr/title exist
-        set usrTitle="!MLC01_FOLDER_PATH:"=!\usr\title"
-        if not exist !usrTitle! (
-            echo !usrTitle! not found ^?
-            goto:askSaveFolder
-        )
-
-        set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
-
-        wscript /nologo !StartWait! !script! !MLC01_FOLDER_PATH! !user!
-
-    )
+    set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
+    wscript /nologo !StartWait! !script! !MLC01_FOLDER_PATH!
 
     set "restoreUserSavesOfAllGames=1"
     echo ^> all saves of all users for all games were restored
@@ -354,7 +330,7 @@ REM : main
     REM : if not called from this folder
     if [!WIIU_GAMES_FOLDER!] == ["NONE"] (
     REM : get the last location from logFile
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
     )
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 

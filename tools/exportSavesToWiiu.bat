@@ -111,6 +111,12 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that FTP_every_where is launched
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
+        pause
+        goto:checkConnection
+    )
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         echo Pause this script until you fix it ^(CTRL-C to abort^)
@@ -542,14 +548,9 @@ REM : functions
     :updateSaveInfoFile
 
         REM : init the value with now (J2000)
-echo ok
         call:getTs1970 now
-echo now=!now!
         set /A "nowJ2K=!now!-j2000"
         call:num2hex !nowJ2K! hexValue
-echo nowJ2K=!nowJ2K!
-echo hexValue=!hexValue!
-pause
 
         REM : check if exist a last settings exist for !currentUser!
         set "lus="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
@@ -568,13 +569,8 @@ pause
         set /A "ctsj2k=!last_played!-j2000"
         REM : compute hex value
         call:num2hex !ctsj2k! hexValue
-echo ctsj2k=!ctsj2k!
-pause
 
         :patch
-echo patch SaveInfo
-echo hexValue=!hexValue!
-pause
         REM : if exist saveInfo.xml check if !folder! exist in saveinfo.xml
         if exist !saveInfo! (
             REM : if the account is not present in saveInfo.xml

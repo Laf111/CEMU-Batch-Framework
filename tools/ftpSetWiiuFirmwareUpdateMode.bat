@@ -6,17 +6,6 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
-
-    REM : checking arguments
-    set /A "nbArgs=0"
-    :continue
-        if "%~1"=="" goto:end
-        set "args[%nbArgs%]="%~1""
-        set /A "nbArgs +=1"
-        shift
-        goto:continue
-    :end
-
     set "THIS_SCRIPT=%~0"
 
     title Set Wii-U Firmware Update Mode
@@ -32,11 +21,22 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
+
+    if %nbArgs% NEQ 0 goto:treatArgs
 
     echo =========================================================
     echo Set the WiiU firmware update feature mode
@@ -49,7 +49,7 @@ REM : main
     REM : 0 : disable update
     REM : 1 : enable update
     set /A "wfum=0"
-    if %nbArgs% NEQ 0 goto:treatArgs
+
 
     echo.
     choice /C yn /N /M "Do you want to enable the firmware update on you Wii-U (y, n)? : "
@@ -108,6 +108,7 @@ REM : main
     set "WinScp="!WinScpFolder:"=!\WinScp.com""
     set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
     set "winScpIni="!WinScpFolder:"=!\WinScp.ini""
+
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
@@ -153,6 +154,12 @@ REM : main
 
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
+    type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that FTP_every_where is launched
+        echo Pause this script until you fix it ^(CTRL-C to abort^)
+        pause
+        goto:checkConnection
+    )
     type !ftplogFile! | find /I "Could not retrieve directory listing" > NUL 2>&1 && (
         echo ERROR ^: unable to list games on NAND^, launch MOCHA CFW before FTP_every_where on the Wii-U
         echo Pause this script until you fix it ^(CTRL-C to abort^)
@@ -160,6 +167,7 @@ REM : main
         goto:checkConnection
     )
     cls
+
     REM : in function of wfum
     if !wfum! EQU 0 (
         echo.
