@@ -73,8 +73,8 @@ REM : main
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
-    if %nbArgs% NEQ 0 goto:getArgsValue
     title Restore all user^'s saves to a mlc01 target folder
+    if %nbArgs% NEQ 0 goto:getArgsValue
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -125,7 +125,7 @@ REM : main
 
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
-(
+
     :inputsAvailables
     cls
     REM : basename of MLC01_FOLDER_PATH
