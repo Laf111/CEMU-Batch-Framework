@@ -231,7 +231,7 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
         
 - **How BatchFw will mess around with CEMU accounts (> 1.15.19) ?**
 
-    - Same as it does with earlier version. All users use the 8000001 and so are be able to use their saves on versions earlier than 1.15.19. When imptoring Exporting games, you can choose source/target accounts to use
+    - Same as it does with earlier version. All users use the 8000001 and so can use their saves on versions earlier than 1.15.19 (which introduced accounts). When imptoring Exporting games, you can choose source/target accounts to use
     
 
 ## Recommendations: 
