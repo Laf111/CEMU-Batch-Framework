@@ -180,13 +180,13 @@
 '0005000010116500';Toki Tori 2;wup-p-waap;00tw;-;v32;eur;yes;'0005000010116500';720;60
 '0005000010116600';Fist Of The Northstar Ken s Rage 2;wup-n-ah9j;00c8;-;v17;jap;yes;'000500001012B800';720;60
 '0005000010116700';Kickbeat Special Edition;wup-n-wkbe;-;-;v0;usa;yes;'0005000010113B00';720;60
-'0005000010117200';Monster Hunter 3 Ultimate;wup-p-ahdp;8;-;v32;eur;yes;'0005000010117200';1080;30
+'0005000010117200';Monster Hunter 3 Ultimate;wup-p-ahdp;8;-;v32;eur;yes;'0005000010117200';720;30
 '0005000010117700';Chasing Aurora;wup-p-wcap;00tj;-;v17;eur;yes;'0005000010117700';720;60
 '0005000010117800';Kungfu Rabbit;wup-p-wkfp;-;-;v0;eur;yes;'0005000010117800';720;60
 '0005000010118000';SIMPLE series for Wii U Vol 1;wup-n-afpj;-;-;v0;jap;yes;'0005000010118000';720;60
 '0005000010118100';Barbie Dreamhouse Party;-;-;-;v0;usa;yes;'0005000010147B00';720;60
 '0005000010118200';Monsterhigh 13 Wishes;-;-;-;v1;usa;yes;'0005000010118200';720;60
-'0005000010118300';Monster Hunter 3 Ultimate;wup-n-ahde;8;-;v32;usa;yes;'0005000010117200';1080;30
+'0005000010118300';Monster Hunter 3 Ultimate;wup-n-ahde;8;-;v32;usa;yes;'0005000010117200';720;30
 '0005000010118400';Funky Barn;wup-p-afbp;00gt;-;v16;eur;notmd;'0005000010113C00';720;60
 '0005000010119200';Pac-man;wup-n-fare;-;-;v0;usa;yes;'0005000010119200';720;60
 '0005000010119300';Pac-man;wup-n-farp;-;-;v0;eur;yes;'0005000010119200';720;60
@@ -330,14 +330,14 @@
 '0005000010132B00';Lego Marvel Superheroes;wup-n-alme;00wr;-;v32;usa;yes;'00050000101BE900';720;30
 '0005000010132C00';Scribblenauts Unmasked A DC Comics Adventure;wup-n-adce;00wr;-;v1;usa;yes;'0005000010132D00';720;60
 '0005000010132D00';Scribblenauts Unmasked A DC Comics Adventure;-;-;-;v0;eur;yes;'0005000010132D00';720;60
-'0005000010132F00';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-p-wlyp;-;-;v16;eur;yes;'0005000010117200';1080;30
+'0005000010132F00';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-p-wlyp;-;-;v16;eur;yes;'0005000010117200';720;30
 '0005000010133000';Mother;wup-n-fbdj;-;-;v0;jap;yes;'0005000010133000';720;60
 '0005000010133100';Earthbound Beginnings;wup-n-fbde;-;-;v0;usa;yes;'0005000010133100';720;60
 '0005000010133200';Earthbound Beginnings;wup-n-fbdp;-;-;v0;eur;yes;'0005000010133100';720;60
 '0005000010133300';Mother 2;wup-n-jbbj;-;-;v0;jap;yes;'0005000010133300';720;60
 '0005000010133400';Earthbound;wup-n-jbbe;-;-;v0;usa;yes;'0005000010133400';720;60
 '0005000010133500';Earthbound;wup-n-jbbp;-;-;v0;eur;yes;'0005000010133400';720;60
-'0005000010133600';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-n-wlye;-;-;v16;usa;yes;'0005000010117200';1080;30
+'0005000010133600';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-n-wlye;-;-;v16;usa;yes;'0005000010117200';720;30
 '0005000010133700';CastleStorm;wup-n-wcse;-;-;v0;usa;yes;'0005000010113A00';720;60
 '0005000010133800';Tank Tank Tank;wup-n-wake;-;-;v0;usa;yes;'000500001010FE00';720;60
 '0005000010133900';Turbo-Super Stunt Squad;wup-n-atbe;00g9;-;v0;usa;yes;'0005000010136700';720;60
@@ -1644,7 +1644,7 @@
 '00050000101D5300';Cutie Pets Pick Berries;wup-n-acke;-;-;v0;usa;yes;'00050000101D5300';720;60
 '00050000101D5500';Joe s Diner;wup-n-ajae;-;-;-;usa;yes;'00050000101D4D00';720;60
 '00050000101D5600';Jones On Fire;wup-n-ajfe;-;-;-;usa;yes;'00050000101D4E00';720;60
-'00050000101D5F00';FreezeME;wup-n-af4e;-;-;16,32;usa;yes;'00050000101D5F00';720;60
+'00050000101D5F00';FreezeME;wup-n-af4e;-;-;16,32;usa;yes;'00050000101D5F00';720;30
 '00050000101D6000';Fast Racing Neo;wup-p-wfsp;00jx;-;v2;eur;yes;'00050000101D6000';720;60
 '00050000101D6100';Gunman Clive HD Collection;wup-p-agwp;00fv;-;v0;eur;yes;'00050000101D0900';720;60
 '00050000101D6200';Test Your Mind;wup-n-athe;-;-;v1;usa;yes;'00050000101D6200';720;60
@@ -1788,7 +1788,7 @@
 '00050000101E7D00';Tap Tap Arcade;wup-n-btae;-;-;-;usa;yes;'00050000101E7C00';720;60
 '00050000101E7E00';Touch Selections;wup-p-btjp;-;-;-;eur;yes;'00050000101E7E00';720;60
 '00050000101E7F00';Touch Selections;wup-n-btje;-;-;-;usa;yes;'00050000101E7E00';720;60
-'00050000101E8000';FreezeME;wup-p-af4p;-;-;-;eur;yes;'00050000101D5F00';720;60
+'00050000101E8000';FreezeME;wup-p-af4p;-;-;-;eur;yes;'00050000101D5F00';720;30
 '00050000101E8300';Discovery;wup-p-adup;-;-;-;eur;yes;'00050000101D9B00';720;60
 '00050000101E8500';Temple Of Yog;wup-p-btyp;-;-;-;eur;yes;'0005000010189A00';720;60
 '00050000101E8800';Color Bombs;wup-p-bw2p;-;-;-;eur;yes;'00050000101ABB00';720;60
@@ -1934,7 +1934,7 @@
 '00050000101FC700';The First Skunk Bundle;wup-n-bfke;-;-;v1;usa;yes;'00050000101FC700';720;60
 '00050000101FCE00';Word Logic By Powgi;wup-n-awqe;-;-;-;usa;yes;'00050000101FCE00';720;60
 '00050000101FD100';Grumpy Reaper;wup-n-agqj;-;-;-;jap;yes;'00050000101D4500';720;60
-'00050000101FD400';FreezeME;wup-n-af4j;-;-;-;jap;yes;'00050000101D5F00';720;60
+'00050000101FD400';FreezeME;wup-n-af4j;-;-;-;jap;yes;'00050000101D5F00';720;30
 '00050000101FD800';Prism Pets;wup-n-br4e;-;-;-;usa;yes;'00050000101FD800';720;60
 '00050000101FDA00';Hurry Up Bird Hunter;wup-p-bhbp;-;-;-;eur;yes;'00050000101FDA00';720;60
 '00050000101FDB00';Toby - The Secret Mine;wup-p-btqp;-;-;-;eur;yes;'00050000101F8800';720;60
