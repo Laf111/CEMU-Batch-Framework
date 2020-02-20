@@ -24,7 +24,7 @@ Last GFX packs checked (presets completion) : **V641**
 
 - **Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;**
 
-- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games;**
+- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games (no need to dig in the mlc01 folder);**
 
 - **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones**
 
