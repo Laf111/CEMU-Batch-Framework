@@ -214,9 +214,9 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
 
     First, you'll encounter heavy performance drops especially if some shaders needs to compile while playing (USB drives don't like read/write access at the same time) but also
     
-    - If you install a single version of CEMU, you're not sure to manage to run all games without issues on every host (intel GPU) but also : 
-        - even if you can set relatives paths to avoid the USB drive letter change issue, you'll have to change most of the settings on every host (and need to backup them manually). Specially games profiles (recompiler mode) that are tweaked for a specific host (game's profile value will override the general UI settings) 
-        - you'll have to recompile the entire shader cache each time for each game, on each host.
+    - If you install a single version of CEMU, you're not sure to manage to run all games without issues on every host but also : 
+        - even if you can set relatives paths to avoid the USB drive letter change issue, you'll have to change some settings on every host (and need to backup them manually). Specially games profiles (recompiler mode) that are tweaked for a specific host (game's profile value will override the general UI settings) 
+        - you'll have to recompile the entire shader cache each time, on each host.
         
     - If you install a version for each host (and use a custom mlc01 folder location) : 
         - you'll have to update your settings if the driver letter of your USB device is changed : even if relative paths syntax is supported when creating symlinks full paths are used : that's why BatchFw re-creates its symlinks on the fly)
