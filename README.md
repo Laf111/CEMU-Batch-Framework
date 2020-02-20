@@ -65,8 +65,6 @@ The mlc01 path is in the game folder so:
 
 - Supports CEMU accounts to import/export games saves;
 
-- This last feature allows you to handle multiple saves per user by defining as many "pseudo users" as differents saves you want (user_slot1, user_slot2... in this case, online user account will follow);
-
 - Save all settings including controller profiles for each players per game;
 
 - Save separate CEMU settings per users (allow users to use differents mods);
