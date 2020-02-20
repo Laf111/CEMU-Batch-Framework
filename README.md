@@ -55,6 +55,8 @@ The mlc01 path is in the game folder so:
 
 - you can backup a whole game by compressing its folder (saves, updates, DLC, controller profiles, settings... are ALL included).
 
+- uninstalling a game consist just in delete its folder.
+
 
 
 ## Main features:
