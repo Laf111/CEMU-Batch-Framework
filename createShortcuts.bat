@@ -1102,6 +1102,16 @@ REM
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to exportAllToCemu.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Export all games data in a CEMU folder^.lnk""
+        set "LINK_DESCRIPTION="Move updates, DLC transferable cache and extract all saves in a CEMU target folder""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\exportAllToCemu.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exportAllToCemu.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to exportAllToCemu^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
         REM : create a shortcut to backupAllInGameSaves.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Backup my games's saves^.lnk""
         set "LINK_DESCRIPTION="Compress all my games^'s saves""

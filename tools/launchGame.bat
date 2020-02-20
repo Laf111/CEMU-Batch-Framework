@@ -27,7 +27,6 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
-
     REM : clean BFW_LOGS
     pushd !BFW_LOGS!
     for /F "delims=~" %%i in ('dir /B /S /A:D 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
@@ -1476,7 +1475,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         :waitingLoopProcesses
         wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
-
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
@@ -1496,11 +1494,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" |find /I !GAMES_FOLDER! | find /V "backupLaunchN" > NUL 2>&1 && (
+        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && (
             echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /I "copy" | find /I "!CEMU_FOLDER_NAME!" > NUL 2>&1 && (
+        type !logFileTmp! | find /I "copy" | find /I "!CEMU_FOLDER_NAME!" | find /I "shaderCache" > NUL 2>&1 && (
             echo waitProcessesEnd : a copy is still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )

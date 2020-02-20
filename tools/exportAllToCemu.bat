@@ -5,7 +5,7 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
-    title Restore BacthFw factory settings
+    title Export all games data to a CEMU folder
 
     set "THIS_SCRIPT=%~0"
 
@@ -30,6 +30,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
@@ -47,7 +48,7 @@ REM : main
     pushd !GAMES_FOLDER!
 
     echo =========================================================
-    echo Reset BatchFw to factory settings ^?
+    echo Export^/Restore all games data to a CEMU folder ^?
     echo =========================================================
 
     echo Launching in 30s
@@ -62,48 +63,53 @@ REM : main
     )
     cls
 
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+    REM : with no arguments to this script, activating user inputs
+    set /A "QUIET_MODE=0"
+    echo Please select CEMU target folder
+    :askCemuFolder
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
+    if [!CEMU_FOLDER!] == ["NONE"] goto:eof
 
-    echo ^> Deleting !BFW_LOGS! ^.^.^.
-    rmdir /Q /S !BFW_LOGS!
-
-    pushd !GAMES_FOLDER!
-
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    if exist !BFW_GP_FOLDER! (
-        rmdir /Q /S !BFW_GP_FOLDER!
-        echo ---------------------------------------------------------
-        echo ^> Delete graphic pack folder !BFW_GP_FOLDER! ^.^.^.
+    REM : check if folder name contains forbiden character for !CEMU_FOLDER!
+    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
+    call !tobeLaunch! !CEMU_FOLDER!
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        echo Path to !CEMU_FOLDER! is not DOS compatible^!^, please choose another location
+        pause
+        goto:askCemuFolder
     )
 
-    if exist !WIIU_GAMES_FOLDER! (
-        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
-        echo ---------------------------------------------------------
-        echo ^> Delete shortcuts created ^.^.^.
+    REM : check that cemu.exe exist in
+    set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe" "
+    if not exist !cemuExe! (
+        echo ERROR^, No Cemu^.exe file found under !CEMU_FOLDER! ^^!
+        goto:askCemuFolder
     )
+    cls
+    REM : Restore updates and DLC
+    set "MLC01_FOLDER_PATH="!CEMU_FOLDER:"=!\mlc01""
+    echo ^> Copy or move updates and DLC to !MLC01_FOLDER_PATH:"=!
 
+    set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
+    wscript /nologo !StartMaximizedWait! !script! !MLC01_FOLDER_PATH!
 
-    set "bfrf="!BFW_PATH:"=!\BatchFw_readme.txt""
-    if exist !bfrf! (
-        echo ---------------------------------------------------------
-        echo ^> Delete BatchFW_readme.txt ^.^.^.
-        del /F !bfrf! > NUL 2>&1
-    )
+    REM : Restore transferable caches
+    echo ^> Move all transferable caches !CEMU_FOLDER:"=!
 
-    REM : convert all bat files to AINSI, remove trailling spaces
-    set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFiles.bat""
-    wscript /nologo !StartMaximizedWait! !fixBatFile!
+    set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
+    wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
+
+    REM : Restore transferable caches
+    echo ^> Extract all saves for all users in !MLC01_FOLDER_PATH:"=!
+
+    set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
+    wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
 
     echo =========================================================
     echo Done
     echo #########################################################
-
-
-    echo Launching setup.bat in 6s
-    timeout /T 6 > NUL 2>&1
-    set "setup="!BFW_PATH:"=!\setup.bat""
-    wscript /nologo !StartMaximized! !setup!
-
+    pause
     endlocal
     exit /b 0
 

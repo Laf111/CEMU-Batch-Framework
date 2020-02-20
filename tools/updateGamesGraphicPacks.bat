@@ -68,9 +68,9 @@ REM : main
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
-    echo Starting Date ^: !DATE!
+    echo Starting Date ^: !DATE! > !myLog!
 
-    echo ========================================================= > !myLog!
+    echo ========================================================= >> !myLog!
 
     if %nbArgs% NEQ 5 (
         echo ERROR ^: on arguments passed ^!  >> !myLog!
@@ -178,14 +178,13 @@ REM    call:checkGpFolders
     if exist !fnrLogUggp! del /F !fnrLogUggp!
     echo titleId^: %titleId% >> !myLog!
 
-    if ["!lastInstalledVersion!"] == ["!newVersion!"] (
-        echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
-        goto:createLinks
-
-    )
     REM : launching the search in all gfx pack folder (V2 and up)
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
 
+    if ["!lastInstalledVersion!"] == ["!newVersion!"] (
+        echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
+        goto:createLinks
+    )
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -238,26 +237,6 @@ REM    call:checkGpFolders
         rmdir /Q !gpLink! > NUL 2>&1
     )
 
-    REM : search game's graphic pack folder
-    set "fnrLogLgp="!BFW_PATH:"=!\logs\fnr_linkGamePacks.log""
-    if exist !fnrLogLgp! del /F !fnrLogLgp!
-    REM : Re launching the search (to get the freshly created packs)
-
-    REM : search in the needed folder
-    REM : TODO try compare with a loop on _resolution folders only + type | find !titleId:~3! ?
-    REM : double : first try to find !GAME_TITLE: =!_Resolution (V3 and up) and !GAME_TITLE: =!_ (V2)
-    if not ["!gfxType!"] == ["V2"] (
-        echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER! >> !myLog!
-        echo V2 or up packs^, search in  ^: !BFW_GP_FOLDER!
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --includeSubDirectories --ExcludeDir _graphicPacksV2 --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
-    ) else (
-        echo V2 packs^, search in  ^: !BFW_LEGACY_GP_FOLDER! >> !myLog!
-        echo V2 packs^, search in  ^: !BFW_LEGACY_GP_FOLDER!
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_LEGACY_GP_FOLDER! --includeSubDirectories --fileMask "rules.txt" --find !titleId:~3! --logFile !fnrLogLgp!
-    )
-
     REM : import 16/9 GFX packs
     call:linkGraphicPacks
 
@@ -300,7 +279,7 @@ REM    call:checkGpFolders
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
-    echo Ending Date ^: !DATE!
+    echo Ending Date ^: !DATE! >> !myLog!
 
     echo --------------------------------------------------------- >> !myLog!
     echo done >> !myLog!
@@ -495,7 +474,7 @@ REM : functions
         set "filter=%~1"
         set "filter=!filter:-=!"
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find "p%filter%" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -504,9 +483,9 @@ REM : functions
     :linkGraphicPacks
 
     if ["!gfxType!"] == ["V2"] (
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
     ) else (
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLgp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
     )
 
     goto:eof

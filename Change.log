@@ -1,3 +1,15 @@
+20/02/2020 V16-4 :
+- fix : native height to 720 for Monster Hunter 3 Ultimate in WiiU-Titles-Library.csv
+- add : a script exportAllToCemu.bat that call 
+        - restoreMlc01DataForAllGames.bat
+        - restoreTransShadersForAllGames.bat
+        - restoreUserSavesOfAllGames.bat
+        in order to move back updates, DLC, transferable cache and extract
+        all saves for all users (choosing theirs accounts) in a CEMU target folder
+        + shortcut to this script in "Wii-U Games\CEMU"
+- add : the choice to dump or import games when no games are found during setup.bat 
+
+
 19/02/2020 V16-3 :
 - fix : link creation test failed in setup.bat.
 - fix : do not save GLCache Id in host's log file anymore.

@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V16-3"
+    set "BFW_NEXT_VERSION=V16-4"
 
     set "THIS_SCRIPT=%~0"
 
@@ -39,7 +39,7 @@ REM : main
         title Produce BatchFw !BFW_NEXT_VERSION! from !BFW_OLD_VERSION!
     )
     echo =========================================================
-REM : ------------------------------------------------------------------
+    REM : ------------------------------------------------------------------
 
     set "changeLog="!BFW_PATH:"=!\Change.log""
     REM : ------------------------------------------------------------------

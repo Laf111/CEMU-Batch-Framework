@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-3"
+    set "BFW_VERSION=V16-4"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -321,14 +321,25 @@ REM : main
     echo ^> !NB_GAMES_VALID! valid games found
     if !NB_GAMES_VALID! EQU 0 (
 
-        call:getUserInput "No games were found, do you want to dump games from your Wii-U? (y,n)" "y,n" ANSWER
-        if [!ANSWER!] == ["n"] (
+        echo No RPX games were found
+        echo.
+
+        call:getUserInput "Dumps games from your Wii-U (1) or import dumps (2), cancel (c) ?" "1,2,c" ANSWER
+        if [!ANSWER!] == ["c"] (
             echo So exiting^.^.^.
             echo _BatchFW_Install folder must be located in your loadiines ^(^*^.rpx^) games folder
             timeout /T 8 > NUL 2>&1
             exit 55
         )
-        goto:useWiiU
+        if [!ANSWER!] == ["1"] goto:useWiiU
+        REM : calling importGames.bat
+        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
+        call !tobeLaunch! !GAMES_FOLDER!
+
+        echo ---------------------------------------------------------
+        echo ^> Games ready for emulation
+        timeout /T 3 > NUL 2>&1
+        cls
     )
     if %QUIET_MODE% EQU 0 (
 

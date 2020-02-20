@@ -330,6 +330,7 @@ REM : main
     REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
     set "gpNativeHeight=NOT_FOUND"
     for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
+    if ["!gpNativeHeight!"] == ["NOT_FOUND"] for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Native" 2^>NUL') do set "gpNativeHeight=%%s"
     
     :treatGfxPacks
     if !newGpExist! EQU 0 goto:createNew

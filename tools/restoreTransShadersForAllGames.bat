@@ -111,7 +111,7 @@ REM : main
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
 
     echo =========================================================
-    echo Restore transferable shader cache to a CEMU install folder for each game^'s chosen
+    echo Restore transferable shader cache to a CEMU install folder for each chosen game
     echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
     echo  - target CEMU folder ^: !CEMU_FOLDER!
     echo =========================================================

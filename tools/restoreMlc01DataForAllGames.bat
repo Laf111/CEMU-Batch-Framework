@@ -131,7 +131,7 @@ REM : main
     for %%a in (!CEMU_FOLDER!) do set CEMU_FOLDER_NAME="%%~nxa"
 
     echo =========================================================
-    echo Restore Game data to a mlc01 folder for each game^'s chosen
+    echo Restore Game data to a mlc01 folder for each chosen game
     echo  - loadiine Wii-U Games under ^: !GAMES_FOLDER!
     echo  - target mlc01 folder ^: !MLC01_FOLDER_PATH!
     echo =========================================================
