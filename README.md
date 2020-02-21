@@ -244,4 +244,4 @@ Using the main branch could lead in regressions and troubles as bacth scripting 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
 
 
-If you have any trouble, send me a private message on CEMU's piracy reddit, CEMU's Discord or GBATemp (to Laf111) and i'll gladly help you.
+If you have any trouble don't seek for help or support on /r/CEMU or on discord, send me a private message on reddit, CEMU's Discord or GBATemp (to Laf111) and i'll gladly help you.
