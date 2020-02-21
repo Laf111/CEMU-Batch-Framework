@@ -248,6 +248,7 @@ REM : functions
         set "fnrLogIm="!BFW_PATH:"=!\logs\fnr_importModsForAllGames.log""
         if exist !fnrLogIm! del /F !fnrLogIm!
 
+        echo Searching mods for !GAME_TITLE!^.^.^.
         REM : launching the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !MODS_FOLDER_PATH! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogIm!
 
@@ -267,14 +268,12 @@ REM : functions
                 set "GAME_MOD_PATH="!GAME_FOLDER_PATH:"=!\Cemu\mods""
                 if not exist !GAME_MOD_PATH! mkdir !GAME_MOD_PATH! > NUL 2>&1
                 set "targetModPath="!GAME_MOD_PATH:"=!\!name!""
-
                 robocopy !srcModPath! !targetModPath! /S > NUL 2>&1
                 echo ---------------------------------------------------------
-                echo Mod !name! for !GAME_TITLE! was successfull imported
-
+                echo ^> !name! for !GAME_TITLE! was successfull imported
             )
         )
-
+        echo =========================================================
     goto:eof
     REM : ------------------------------------------------------------------
 

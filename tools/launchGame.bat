@@ -27,6 +27,9 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
+    REM : set current char codeset
+    call:setCharSet
+
     REM : clean BFW_LOGS
     pushd !BFW_LOGS!
     for /F "delims=~" %%i in ('dir /B /S /A:D 2^>NUL') do rmdir /Q /S "%%i" > NUL 2>&1
@@ -101,20 +104,10 @@ REM : main
     echo CEMU^'s Batch Framework %bfwVersion% >> !batchFwLog!
     echo ========================================================= >> !batchFwLog!
 
-    REM : set current char codeset
-    call:setCharSet
+    call:cleanHostLogFile BFW_VERSION
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr! >> !batchFwLog!
-        timeout /t 8 > NUL 2>&1
-        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
-        exit 1
-    )
-    REM : checking GAMES_FOLDER folder
-    call:checkPathForDos !GAMES_FOLDER!
+    set "msg="BFW_VERSION=%bfwVersion%""
+    call:log2HostFile !msg!
 
     REM : Intel legacy options
     set "argLeg="
@@ -2850,6 +2843,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
+
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "charCodeSet" 2^>NUL') do set "CHARSET=%%i"
+        if not ["%CHARSET%"] == ["NOT_FOUND"] goto:chcp
+
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
@@ -2858,13 +2855,12 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )
-        REM : set char code set, output to host log file
+        call:log2HostFile "charCodeSet=%CHARSET%"
 
+        REM : set char code set, output to host log file
+        :chcp
         chcp %CHARSET% > NUL 2>&1
 
-        REM : get locale for current HOST
-        set "L0CALE_CODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic path Win32_OperatingSystem get Locale /value 2^>NUL ^| find "="') do set "L0CALE_CODE=%%f"
 
     goto:eof
     REM : ------------------------------------------------------------------

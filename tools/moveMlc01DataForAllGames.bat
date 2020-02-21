@@ -511,11 +511,13 @@ REM : functions
             goto:eof
         )
 
-        REM : mlc01 subfolder already present
-        set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
-        if exist !mlc01Folder! (
-            choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
-            if !ERRORLEVEL! EQU 2 goto:eof
+        if !QUIET_MODE! EQU 0 (
+            REM : mlc01 subfolder already present
+            set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
+            if exist !mlc01Folder! (
+                choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
+                if !ERRORLEVEL! EQU 2 goto:eof
+            )
         )
         echo ---------------------------------------------------------
 

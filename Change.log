@@ -1,3 +1,15 @@
+21/02/2020 V16-5 :
+- fix : GFX packs missing when collecting settings (wizardFirstSaving)
+        regression due to recent optimizations 
+- fix : windows title set in restoreUserSavesOfAllGames.bat and 
+        importSaves.bat when called with args 
+- fix : (copy/moveMlc01DataForAllGames.bat) check if mlc01 folder already exist in game's folder
+        only when called without args
+- opt : remove useless checks in pre-processing (launchGame.bat)
+- add : launchGame.bat now writes batchFw version in logs\Host_!USERDOMAIN!.log
+- add : traces in console's output for importModsForAllGames.bat
+
+
 21/02/2020 V16-4 :
 - fix : native height to 720 for Monster Hunter 3 Ultimate in WiiU-Titles-Library.csv
 - fix : launchGame.bat might ends when old transferable shader cache is not found
