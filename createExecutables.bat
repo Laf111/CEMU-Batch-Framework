@@ -1105,8 +1105,8 @@ REM        )
         )
 
         REM : create a shortcut to exportAllToCemu.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Export all games data in a CEMU folder^.lnk""
-        set "LINK_DESCRIPTION="Move updates, DLC transferable cache and extract all saves in a CEMU target folder""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Export all games data to a CEMU folder^.lnk""
+        set "LINK_DESCRIPTION="Move updates, DLC transferable cache and extract all saves to a CEMU target folder""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\exportAllToCemu.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exportAllToCemu.ico""
         if not exist !LINK_PATH! (
