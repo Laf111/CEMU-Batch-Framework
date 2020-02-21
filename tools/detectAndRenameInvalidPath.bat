@@ -146,7 +146,6 @@ REM : main
             goto:eof
         )
 
-        :renameFolder
         pushd !basename!
         move /Y !FOLDER_PATH! !newName!
         if !ERRORLEVEL! NEQ 0 (

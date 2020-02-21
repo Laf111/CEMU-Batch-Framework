@@ -229,7 +229,7 @@ REM : main
         REM : Waiting before exiting
         pause
     )
-    :exiting
+
     if %nbArgs% EQU 0 endlocal
     exit 0
 

@@ -2,8 +2,6 @@
 setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
-
-
     setlocal EnableDelayedExpansion
     color 4F
 
@@ -273,7 +271,6 @@ REM : functions
             echo Moving !sf!
         )
 
-        :logInfos
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! restore transferable shader cache for !GAME_TITLE! in=!CEMU_FOLDER:"=!""
         call:log2GamesLibraryFile !msg!

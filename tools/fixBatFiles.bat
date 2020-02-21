@@ -65,11 +65,11 @@ REM : main
         !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
     )
 
-    echo ^> Remove trailing space^.^.^.
+    echo ^> Remove trailing spaces^.^.^.
     REM : remove trailing space
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
 
-    echo ^> Convert all files to ANSI and set them readonly^.^.^.
+    echo ^> Check bat files^, convert them to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set them readonly
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile"') do (
@@ -117,6 +117,32 @@ REM : functions
     :checkFile
 
         type !filePath! | find /I "goto::" && echo ERROR^: syntax error in !filePath!
+        type !filePath! | find /I "call::" && echo ERROR^: syntax error in !filePath!
         type !filePath! | find "TODO" && echo WARNING^: TODO found in !filePath!
 
+        set /A "wngDetected=0"
+        REM : loop on ':' find in the file
+        for /F "delims=:~ tokens=2" %%p in ('type !filePath! ^| find /I /V "REM" ^| find /I /V "echo" ^| find "   :" ^| find /V "=" ^| findStr /R "[A-Z]*" 2^>NUL') do (
+
+            set "label=%%p"
+            REM : search for "call:!label!" count occurences
+            set /A "nbCall=0"
+            for /F "delims=~" %%c in ('type !filePath! ^| find /I /C "call:!label: =!" 2^>NUL') do set /A "nbCall=%%c"
+
+            REM : search for "goto:!label!" count occurences
+            set /A "nbGoto=0"
+            for /F "delims=~" %%c in ('type !filePath! ^| find /I /C "goto:!label: =!" 2^>NUL') do set /A "nbGoto=%%c"
+
+            if !nbCall! EQU 0 if !nbGoto! EQU 0 (
+                echo.
+                echo WARNING ^: !label! not used in !filePath!
+                set /A "wngDetected=1"
+            )
+            if !nbGoto! EQU 0 if !nbCall! EQU 0 if !wngDetected! EQU 0 (
+                echo.
+                echo WARNING ^: !label! not used in !filePath!
+                set /A "wngDetected=1"
+            )
+        )
+REM        if !wngDetected! EQU 1 pause
     goto:eof

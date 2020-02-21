@@ -495,31 +495,6 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     REM : function to log info for current host
-    :log2GamesLibraryFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-        if not exist !glogFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2GamesLibraryFile
-        )
-
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
-        :logMsg2GamesLibraryFile
-        echo !msg! >> !glogFile!
-        REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
-        type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to log info for current host
     :log2HostFile
         REM : arg1 = msg
         set "msg=%~1"

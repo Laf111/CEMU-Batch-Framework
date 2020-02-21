@@ -426,7 +426,6 @@ REM : functions
             )
         )
 
-        :logInfos
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! restore mlc01 data for !GAME_TITLE! in=!MLC01_FOLDER_PATH:"=!""
         call:log2GamesLibraryFile !msg!

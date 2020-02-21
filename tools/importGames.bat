@@ -444,7 +444,6 @@ REM : functions
         )
 
         REM : get Title Id from meta.xml
-        :getTitleLine
         set "titleLine="NONE""
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
         if [!titleLine!] == ["NONE"] goto:eof

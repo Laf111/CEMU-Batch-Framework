@@ -345,7 +345,6 @@ REM : functions
         REM : init to none
         set "%1=none"
 
-        :askSavesMode
         echo.
         echo You can choose a user for which all saves found will be imported^.
         echo Or you can choose to select which user saves to import for each game^.

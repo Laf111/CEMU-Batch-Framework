@@ -1,5 +1,9 @@
-20/02/2020 V16-4 :
+21/02/2020 V16-4 :
 - fix : native height to 720 for Monster Hunter 3 Ultimate in WiiU-Titles-Library.csv
+- fix : launchGame.bat might ends when old transferable shader cache is not found
+        (regression due to recent optimizations)
+- add : a new check in fixBatFiles.bat to avoid this kind of issue (searching for unused/undefined label)
+- opt : clean the code using the results of the new check on bat files (remove all unused labels and fucntions)
 - add : a script exportAllToCemu.bat that call 
         - restoreMlc01DataForAllGames.bat
         - restoreTransShadersForAllGames.bat

@@ -97,8 +97,6 @@ REM : main
         set "descValue=!wResX2GpUsed!x!hResX2GpUsed! (16:3)"
     )
 
-    :beginTreatments
-
 echo nativeWidth=!nativeWidth!
 echo nativeHeight=!nativeHeight!
 echo gpResX2gp=!gpResX2gp!

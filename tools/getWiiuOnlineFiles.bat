@@ -186,7 +186,6 @@ REM : main
     )
     cls
 
-    :treatments
     set "CCERTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\mlc01\sys\title\0005001b\10054000\content\ccerts""
     if not exist !CCERTS_FOLDER! mkdir !CCERTS_FOLDER! > NUL 2>&1
 

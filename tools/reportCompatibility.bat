@@ -316,23 +316,6 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :getElt
-        set arg=%~1
-        set elt=%arg: =%
-        if not ["%elt%"] == [""] (
-            if ["%LIST%"] == ["EMPTY"] goto:initList
-            if not ["%LIST%"] == ["EMPTY"] goto:addList
-        )
-    goto:oef
-
-    :initList
-        set LIST=%elt%
-    goto:eof
-
-    :addList
-        set LIST=%LIST% %elt%
-    goto:eof
-
     REM : try to get version of CEMU from install folder name
     :getVersion
 

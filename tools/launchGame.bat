@@ -385,16 +385,19 @@ REM : main
         goto:shaderCacheComputed
     )
     set "osci=!sci!"
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:shaderCacheComputed
+
+    echo osci=!osci! sci=!sci! >> !batchFwLog!
+    
+    if ["!versionRead!"] == ["NOT_FOUND"] goto:getScreenMode
 
     REM : is CEMU >= 1.16 ?
     set /A "v116=2
 
-    if !v11515! EQU 2 goto:shaderCacheComputed
+    if !v11515! EQU 2 goto:getScreenMode
     call:compareVersions !versionRead! "1.16.0" v116 > NUL 2>&1
     if ["!v116!"] == [""] echo Error when comparing versions >> !batchFwLog!
     if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
-    if !v116! EQU 2 goto:shaderCacheComputed
+    if !v116! EQU 2 goto:getScreenMode
 
     REM : if
     set "endIdUp=!titleId!
@@ -438,6 +441,7 @@ REM : main
         echo WARNING ^: game's icon file path !ICO_PATH! does not exist ^! >> !batchFwLog!
         timeout /t 8 > NUL 2>&1
     )
+    echo ICO_PATH=!ICO_PATH! >> !batchFwLog!
 
     REM : get and check MLC01_FOLDER_PATH
     set "MLC01_FOLDER_PATH=!args[4]!"
@@ -714,7 +718,6 @@ echo OK5
     REM : CEMU >= 1.15.1
     set "cemuGLcache="!CEMU_FOLDER:"=!\shaderCache\driver\nvidia""
 
-    :createGLcacheFolder
     if ["%gpuType%"]==["NVIDIA"] if exist !cemuGLcache! set "GPU_CACHE_PATH="!cemuGLcache:"=!\GLCache""
 
     REM : Vulkan cache (CEMU >= 1.16)
@@ -991,7 +994,6 @@ echo OK5
     if !usePbFlag! EQU 1 call:setProgressBar 0 6 "post processing" "analysing Cemu return code"
 
     REM : analyse CEMU's return code
-    :analyseCemuStatus
     set "CEMU_STATUS=Loads"
     if %cr_cemu% NEQ 0 (
         echo !CEMU_FOLDER_NAME! failed^, return code ^: %cr_cemu% >> !batchFwLog!
@@ -1073,7 +1075,6 @@ echo OK5
     
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
-    :hangleGpuCache
 
     REM : Vulkan cache (CEMU >= 1.16)
     if ["!graphicApi!"] == ["Vulkan"] goto:searchCacheFolder
@@ -1704,7 +1705,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         :continueLoad
         if [!previousSettingsFolder!] == ["NONE"] (
-            :launchWizard
             set /A "wizardLaunched=1"
             REM : PROFILE_FILE for game that still not exist in CEMU folder = NOT_FOUND (first run on a given host)
 
@@ -2635,7 +2635,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL 2>&1
 
-        :delLog
         REM : delete transShaderCache.log (useless)
         if exist !tscl! del /F /S !tscl! > NUL 2>&1
 
@@ -2814,45 +2813,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "str=!str:z=26!"
 
         set "%2=!str!"
-
-    goto:eof
-    
-    REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
-    :getUserInput
-
-        REM : arg1 = question
-        set "question="%~1""
-        REM : arg2 = valuesList
-        set "valuesList=%~2"
-        REM : arg3 = return of the function (user input value)
-        REM : arg4 = timeOutValue (optional : if given set 1st value as default value after timeOutValue seconds)
-        set "timeOutValue=%~4"
-
-        set choiceValues=%valuesList:,=%
-        set defaultTimeOutValue=%valuesList:~0,1%
-
-        REM : building choice command
-        if ["%timeOutValue%"] == [""] (
-            set choiceCmd=choice /C %choiceValues% /CS /N /M !question!
-        ) else (
-            set choiceCmd=choice /C %choiceValues% /CS /N /T %timeOutValue% /D %defaultTimeOutValue% /M !question!
-        )
-
-        REM : launching and get return code
-        !choiceCmd!
-        set /A "cr=!ERRORLEVEL!"
-
-        set j=1
-        for %%i in ("%valuesList:,=" "%") do (
-
-            if [%cr%] == [!j!] (
-                REM : value found , return function value
-
-                set "%3=%%i"
-                goto:eof
-            )
-            set /A j+=1
-        )
 
     goto:eof
     REM : ------------------------------------------------------------------

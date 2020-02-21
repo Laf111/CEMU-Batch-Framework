@@ -237,8 +237,6 @@ REM : main
         echo ^(in case of false input close this main window to cancel^)
     )
 
-    :validateGamesLibrary
-
     echo ---------------------------------------------------------
     echo Scanning your games library^.^.^.
     echo ---------------------------------------------------------
@@ -375,7 +373,6 @@ REM : main
     :useProgressBar
     if %nbArgs% EQU 0 call:setProgressBar
 
-    :importModForGames
     echo ---------------------------------------------------------
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
@@ -436,8 +433,6 @@ REM : main
     echo Aspect ratios already defined in BatchFW: !ARLIST!
     choice /C ny /N /M "Change this list? (y = add an aspect ratio or define a custom one, n): "
     if !ERRORLEVEL! EQU 1 goto:askScreenMode
-
-    :getRatios
 
     echo ---------------------------------------------------------
     echo Choose your display ratio ^(for extra graphic packs^) ^:
@@ -578,7 +573,6 @@ REM : main
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
 
-    :externalGP
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
     if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
@@ -1190,7 +1184,6 @@ REM : functions
         REM : avoid 8/5 for 16/10
         if !w! EQU 8 if !h! EQU 5 set /A "w=16" & set /A "h=10"
 
-        :endComputation
         set /A "%3=!w!"
         set /A "%4=!h!"
     goto:eof

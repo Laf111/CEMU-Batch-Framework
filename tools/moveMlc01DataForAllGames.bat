@@ -534,7 +534,6 @@ REM : functions
 
         set /A NB_GAMES_TREATED+=1
 
-        :logInfos
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! move mlc01 data from=!MLC01_FOLDER_PATH:"=!""
         call:log2GamesLibraryFile !msg!

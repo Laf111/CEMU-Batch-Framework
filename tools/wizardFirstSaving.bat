@@ -1321,15 +1321,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :importSaves
-        set fileFound=%~1
-
-        choice /C yn /N /M "Do you want to use this one : %fileFound% (y, n)?"
-        if [!ERRORLEVEL!] == [1] set SAVE_FILE=%fileFound%
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     REM : COMPARE VERSIONS : function to count occurences of a separator
     :countSeparators
         set "string=%~1"

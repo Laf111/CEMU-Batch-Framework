@@ -373,19 +373,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : check list of integers
-    :checkListOfIntegers
-        set "list="%~1""
-
-        for %%l in (!list!) do (
-            echo %%l | findStr /RV "^[0-9]*.$" > NUL 2>&1 && exit /b 1
-            if %%l GEQ %nbGames% exit /b 2
-        )
-        exit /b 0
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :exportSaves
 
         set /A "num=%~1"

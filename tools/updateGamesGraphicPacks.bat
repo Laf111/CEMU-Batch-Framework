@@ -698,47 +698,6 @@ REM    REM : ------------------------------------------------------------------
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
-    :getUserInput
-
-        REM : arg1 = question
-        set "question="%~1""
-        REM : arg2 = valuesList
-        set "valuesList=%~2"
-        REM : arg3 = return of the function (user input value)
-        REM : arg4 = timeOutValue (optional : if given set 1st value as default value after timeOutValue seconds)
-        set "timeOutValue=%~4"
-
-        set choiceValues=%valuesList:,=%
-        set defaultTimeOutValue=%valuesList:~0,1%
-
-        REM : building choice command
-        if ["%timeOutValue%"] == [""] (
-            set choiceCmd=choice /C %choiceValues% /CS /N /M !question!
-        ) else (
-            set choiceCmd=choice /C %choiceValues% /CS /N /T %timeOutValue% /D %defaultTimeOutValue% /M !question!
-        )
-
-        REM : launching and get return code
-        !choiceCmd!
-        set /A "cr=!ERRORLEVEL!"
-
-        set j=1
-        for %%i in ("%valuesList:,=" "%") do (
-
-            if [%cr%] == [!j!] (
-                REM : value found , return function value
-
-                set "%3=%%i"
-                goto:eof
-            )
-            set /A j+=1
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
     REM : function to get and set char set code for current host
     :setCharSet
 
@@ -757,27 +716,6 @@ REM    REM : ------------------------------------------------------------------
 
     goto:eof
     REM : ------------------------------------------------------------------
-
-
-    :cleanGamesLibraryFile
-
-        REM : pattern to ignore in log file
-        set "pat=%~1"
-        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-        set "logFileTmp="!glogFile:"=!.bfw_tmp""
-        if exist !logFileTmp! (
-            del /F !glogFile! > NUL 2>&1
-            move /Y !logFileTmp! !glogFile! > NUL 2>&1
-        )
-
-        type !glogFile! | find /I /V "!pat!" > !logFileTmp!
-
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !logFileTmp! !glogFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
 
     REM : function to log info for current host
     :log2GamesLibraryFile

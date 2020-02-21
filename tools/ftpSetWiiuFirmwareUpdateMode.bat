@@ -230,24 +230,4 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to log info for current host
-   :log2HostFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        REM : build a relative path in case of software is installed also in games folders
-        echo msg=!msg! | find %BFW_PATH% > NUL 2>&1 && set "msg=!msg:%BFW_PATH:"=%=%%BFW_PATH:"=%%!"
-
-        if not exist !logFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2HostFile
-        )
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-       :logMsg2HostFile
-        echo !msg!>> !logFile!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
     

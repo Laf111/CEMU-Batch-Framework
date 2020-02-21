@@ -146,7 +146,6 @@ REM : main
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] goto:restoreMlc01
 
     REM : openGL cache location
-    :cleanBfwGlCache
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
     if not exist !GLCacheSavesFolder! goto:cleanBfwVkCache
@@ -357,34 +356,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-    REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput

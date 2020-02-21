@@ -93,7 +93,6 @@ REM : main
     REM : create localFolder if needed
     set /A "nbRetry=0"
 
-    :createFolders
     if ["!SYNC_TYPE!"] == ["local"] (
         if not exist !LOCAL_FOLDER! mkdir !LOCAL_FOLDER! > NUL 2>&1
     ) else (

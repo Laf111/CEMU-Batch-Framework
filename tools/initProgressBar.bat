@@ -55,38 +55,3 @@ REM : functions
         if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
-
-    :cleanHostLogFile
-        REM : pattern to ignore in log file
-        set "pat=%~1"
-        set "logFileTmp="!logFile:"=!.bfw_tmp""
-        if exist !logFileTmp! (
-            del /F !logFile! > NUL 2>&1
-            move /Y !logFileTmp! !logFile! > NUL 2>&1
-        )
-
-        type !logFile! | find /I /V "!pat!" > !logFileTmp!
-
-        del /F /S !logFile! > NUL 2>&1
-        move /Y !logFileTmp! !logFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to log info for current host
-    :log2HostFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        if not exist !logFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2HostFile
-        )
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-        :logMsg2HostFile
-        echo !msg!>> !logFile!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
