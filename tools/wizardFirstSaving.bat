@@ -550,7 +550,7 @@ REM : main
     timeout /T 1 > NUL 2>&1
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
 
-    type !logFileTmp! | find /I "updateGameGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+    type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
         if !disp! EQU 7 (
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
