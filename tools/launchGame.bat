@@ -446,7 +446,7 @@ REM : main
     )
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
-    echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
+REM    echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
@@ -600,7 +600,7 @@ REM : main
 
         REM : launching user's software
         set "launchThirdPartySoftware="!BFW_TOOLS_PATH:"=!\launchThirdPartySoftware.bat""
-        wscript /nologo !StartHidden! !launchThirdPartySoftware!
+        wscript /nologo !StartHidden! !launchThirdPartySoftware! >> !batchFwLog!
 
         if !usePbFlag! EQU 1 call:setProgressBar 52 54 "pre processing" "getting CEMU options saved for !currentUser!"
         
@@ -623,7 +623,7 @@ REM : main
 
     REM : load Cemu's options
     call:loadCemuOptions
-echo OK5
+
     REM : handling GPU shader cache backup
     REM : ----------------------------
 
@@ -1302,7 +1302,7 @@ echo OK5
         echo Stoping third party software >> !batchFwLog!
 
         set "stopThirdPartySoftware="!BFW_TOOLS_PATH:"=!\stopThirdPartySoftware.bat""
-        wscript /nologo !StartHidden! !stopThirdPartySoftware!
+        wscript /nologo !StartHidden! !stopThirdPartySoftware! >> !batchFwLog!
     )
 
     if %cr_cemu% NEQ 0 goto:endMain
@@ -1690,6 +1690,10 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : search for the last modified settings folder
         set "previousSettingsFolder="NONE""
 
+        REM : get path to CEMU installs folder
+        for %%a in (!CEMU_FOLDER!) do set "parentFolder="%%~dpa""
+        set "CEMU_INSTALLS_FOLDER=!parentFolder:~0,-2!""
+
         REM : if no import goto:continueLoad
         if ["!IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
@@ -1715,36 +1719,20 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
         if !usePbFlag! EQU 1 call:setProgressBar 60 70 "pre processing" "installing settings for !currentUser!"
 
-        REM : get path to CEMU installs folder
-        for %%a in (!CEMU_FOLDER!) do set "parentFolder="%%~dpa""
-        set "CEMU_INSTALLS_FOLDER=!parentFolder:~0,-2!""
-        REM : get the version of CEMU for the imported settings
-        for /F "delims=~" %%i in (!previousSettingsFolder!) do set "settingFolder=%%~nxi"
-
-        set "OLD_CEMU_VERSION=!settingFolder!"
-
-        REM : search in logFile, getting only the last occurence
-        set "pat="%OLD_CEMU_VERSION% install folder path""
-        set "lastPath="NONE""
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath="%%i""
-
-        if [!lastPath!] == ["NONE"] goto:bypassComparison
-
-        set "OLD_PROFILE_FILE="!lastPath:"=!\gameProfiles\%titleId%.ini""
         set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
         if not exist !OLD_PROFILE_FILE! goto:bypassComparison
-        REM : if PROFILE_FILE does not exist use
+        REM : if PROFILE_FILE does not exist use OLD_PROFILE_FILE
         if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:bypassComparison
 
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. Use Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles shortcuts to edit game's profile^." 4161
         goto:syncCP
 
         :bypassComparison
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. Use Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles shortcuts to edit game's profile^." 4161
 
         :syncCP
         REM : synchronized controller profiles (import)
@@ -1904,6 +1892,35 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     REM : function to valid a settings.xml for automatic import
     :isValid
 
+        REM : set validity to false
+        set /A "%1=0"
+
+        REM : get the version of CEMU for the imported settings
+        for /F "delims=~" %%i in (!candidateFolder!) do set "settingFolder=%%~nxi"
+
+        set "OLD_CEMU_VERSION=!settingFolder!"
+
+        REM : search in logFile, getting only the last occurence
+        set "pat="%OLD_CEMU_VERSION% install folder path""
+        set "lastPath="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I !pat! 2^>NUL') do set "lastPath="%%i""
+
+        REM : if this version was moved/deleted => exit with false (validity init)
+        if [!lastPath!] == ["NONE"] goto:eof
+        set "OLD_PROFILE_FILE="!lastPath:"=!\gameProfiles\%titleId%.ini""
+
+        REM : no need to check CEMU's version : if the gameProfile do not exist => exit with false (validity init)
+        if not exist !OLD_PROFILE_FILE! goto:eof
+
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:checkSrcCsValidity
+        REM : here : for version > 1.15.15 : it exists a user game profile => no need to launch the wizard, validity = true, exit (auto updater will update the source settings.xml)
+        if !v11515! LEQ 1 (
+            REM : set validity to true
+            set /A "%1=1"
+            goto:eof
+        )
+
+        :checkSrcCsValidity
         set "fileTmp="!BFW_PATH:"=!\logs\settings_target.bfw_tmp""
 
         REM : delete ignored nodes
@@ -1915,9 +1932,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
         set "pat="!BFW_PATH:"=!\logs\settings_target.bfw_tmp*""
-
-        REM : initialize to false = 0
-        set /A "%1=0"
 
         REM : for each nodes in the filtered target xml file
         for /F "delims=~" %%i in ('type !fileTmp! ^| find /V "?" ^| find /V "!"') do (
@@ -2809,34 +2823,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
     goto:eof
     REM : ------------------------------------------------------------------
-
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove specials characters from %1 ^(such as ^&,^(,^),^!^)^, exiting 13>> !batchFwLog!
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 11>> !batchFwLog!
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12>> !batchFwLog!
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
 
     REM : function to get and set char set code for current host
     :setCharSet

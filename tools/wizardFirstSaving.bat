@@ -264,7 +264,6 @@ REM : main
     REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
     set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
 
-
     set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
 
     REM : check if a ddefault profile exist
@@ -492,7 +491,7 @@ REM : main
     REM : if version of CEMU >= 1.15.6 (v1156<=1) : use CEMU to open profile file
     if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:step2
 
-    echo Openning !PROFILE_FILE:"=! ^.^.^.
+    echo opening !PROFILE_FILE:"=! ^.^.^.
     echo Complete it ^(if needed^) then close notepad to continue
     wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !PROFILE_FILE!
     echo ---------------------------------------------------------
@@ -646,7 +645,9 @@ REM : main
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
     :launchCemu
+
     !cmdOw! @ /NOT > NUL 2>&1
+
 
     REM : launching CEMU
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""

@@ -26,8 +26,19 @@ REM : main
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
-    !cmdOw! @ /MAX > NUL 2>&1
+    if %nbArgs% EQU 0 !cmdOw! @ /MAX > NUL 2>&1
+
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
@@ -64,16 +75,6 @@ REM : main
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
-
-    REM : checking arguments
-    set /A "nbArgs=0"
-    :continue
-        if "%~1"=="" goto:end
-        set "args[%nbArgs%]="%~1""
-        set /A "nbArgs +=1"
-        shift
-        goto:continue
-    :end
 
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -318,68 +319,41 @@ REM : main
     call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y, n)? : "
-    if !ERRORLEVEL! EQU 1 goto:checkInstall
+    if !ERRORLEVEL! EQU 1 goto:openCemuAFirstTime
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
 
-    :checkInstall
-
-    REM : check if CemuHook is installed
-    set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
-
-    :checkCemuHook
-    if exist !dllFile! goto:checkSharedFonts
-    echo ---------------------------------------------------------
-    echo CemuHook was not found^. It is required to
-    echo - play videos
-    echo - enable FPS^+^+ packs
-    echo - enable controller motion sensors
-    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        echo No active connection was found^, unable to open "https://cemuhook.sshnuke.net/#Downloads"
-        goto:openCemuAFirstTime
-    )
-    if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
-
-    echo Opening CemuHook download page^.^.^.
-    echo Download and extract CemuHook in !CEMU_FOLDER!
-
-    wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
-
-    timeout /T 2 > NUL 2>&1
-    wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
-
-    choice /C y /N /M "If CemuHook is installed, continue? (y) : "
-    goto:checkCemuHook
-
-    :checkSharedFonts
-
-    REM : check if sharedFonts were downloaded
-    set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
-    set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    if exist !cs! if exist !sharedFonts! goto:getCemuVersion
-
     :openCemuAFirstTime
+    set "cs="!CEMU_FOLDER:"=!\settings.xml""
 
+    if exist !cs! goto:getCemuVersion
     echo ---------------------------------------------------------
-    echo Opening CEMU^.^.^.
-    if not exist !cs! echo Set your REGION^, language
-    if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button^, if they are missing
+    echo opening CEMU^.^.^.
+    echo.
+    echo If a mlc01 folder creation message popup^, answer 'Yes'
+    echo Ignore graphic pack folder download notification^.
+    echo.
+    echo Set your REGION^, language and all common settings for your
+    echo games ^(sound^, overlay^.^.^.^)
+    echo.
     echo Then close CEMU to continue
+    echo.
+    echo ^(if cemuHook and/or sharedFonts are missing^, BatchFw will
+    echo install them for you^)
+    echo.
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
 
     :getCemuVersion
-    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
 
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "v1151=2"
-    set "versionRead=NOT_FOUND"
-    if not exist !clog! goto:openCemuAFirstTime
+     set "versionRead=NOT_FOUND"
+     if not exist !clog! goto:openCemuAFirstTime
 
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-
     if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
 
     call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
@@ -391,15 +365,14 @@ REM : main
         call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 1 goto:autoImportMode
-        if !result! EQU 0 goto:autoImportMode
+        if !result! EQU 1 goto:checkCemuHook
+        if !result! EQU 0 goto:checkCemuHook
     ) else (
-        goto:autoImportMode
+        goto:checkCemuHook
     )
-
     :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
-    if exist !gfxv2! goto:autoImportMode
+    if exist !gfxv2! goto:checkCemuHook
 
     mkdir !gfxv2! > NUL 2>&1
     set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
@@ -408,23 +381,47 @@ REM : main
     echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
-    set /A cr=!ERRORLEVEL!
+    set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        echo ERROR while extracting V2_GFX_Packs, exiting 1
+        echo ERROR while extracting V2_GFX_Packs^, exit 21
         pause
         exit /b 21
     )
+
+    :checkCemuHook
+    REM : check if CemuHook is installed
+    set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
+
+    if exist !dllFile! goto:checkSharedFonts
+
+    echo Installing CemuHook^.^.^.
+    call:installCemuHook
+
+    :checkSharedFonts
+
+    REM : check if sharedFonts were downloaded
+    set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
+    if exist !cs! if exist !sharedFonts! goto:autoImportMode
+    echo Installing sharedFonts^.^.^.
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        echo WARNING ^: while extracting sharedFonts
+        pause
+    )
     timeout /T 3 > NUL 2>&1
-   :autoImportMode
+
+    :autoImportMode
 
     echo ---------------------------------------------------------
     REM : importMode
     set "IMPORT_MODE=ENABLED"
-    call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
-    if [!ANSWER!] == ["y"] set "IMPORT_MODE=DISABLED"
-
-    set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
-    call:log2HostFile !msg!
+REM    call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
+REM    if [!ANSWER!] == ["y"] set "IMPORT_MODE=DISABLED"
+REM
+REM    set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
+REM    call:log2HostFile !msg!
 
 
     REM : get GPU_VENDOR

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-4"
+    set "BFW_VERSION=V17"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -139,7 +139,7 @@ REM : main
     for /f "tokens=2,10-11" %%a in ('cmdOw.exe /p') do (
       if "%%a"=="0" set "scrWidth=%%b" & set "scrHeight=%%c"
     )
-    REM : flush logFile of SCREEN_MODE
+    REM : flush logFile of RESOLUTION
     call:cleanHostLogFile RESOLUTION
 
     set "msg="RESOLUTION=!scrWidth!x!scrHeight!""
@@ -424,7 +424,11 @@ REM : main
         REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
         for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
             REM : add to the list if not already present
-            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && set "ARLIST=%%j !ARLIST!"
+            if not ["!ARLIST!"] == [""] echo !ARLIST! | find /V "%%j" > NUL 2>&1 && (
+                set "ARLIST=%%j !ARLIST!"
+                REM : will force BatchFw to complete GFX packs/presets
+                set /A "changeArList=1"
+            )
             if ["!ARLIST!"] == [""] set "ARLIST=%%j !ARLIST!"
         )
     )
@@ -1021,8 +1025,8 @@ REM : main
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo Please^, define your CEMU^'s installations paths
     echo ---------------------------------------------------------
-    echo ^> No need to have cemuHook installed ^(you^'ll be asked
-    echo    to install it^)
+    echo ^> If needed BatchFw will add the right version of CemuHook
+    echo and install sharedFonts
     echo ^> If you install CEMU^>=1^.15^.1^, you^'d better have it
     echo installed on C^: to avoid a long copy of your GLCache into
     echo CEMU^'s install folder
@@ -1137,7 +1141,7 @@ REM : main
     pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if %nbArgs% EQU 1 exit 0
-    echo Openning !OUTPUT_FOLDER:"=!\Wii-U Games^.^.^.
+    echo opening !OUTPUT_FOLDER:"=!\Wii-U Games^.^.^.
     timeout /T 4 > NUL 2>&1
 
     set "folder="!OUTPUT_FOLDER:"=!\Wii-U Games""
@@ -1262,6 +1266,33 @@ REM : ------------------------------------------------------------------
     goto:eof
     REM : ------------------------------------------------------------------
 
+
+    :installCemuHook
+
+        REM : cemuHook for versions < 1.12.1
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1116_0564.rar""
+
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractCemuHook
+
+        call:compareVersions !versionRead! "1.12.1" result > NUL 2>&1
+        if ["!result!"] == [""] echo Error when comparing with version 1^.12^.1
+        if !result! EQU 50 echo Error when comparing with version 1^.12^.1
+        if !result! EQU 2 goto:extractCemuHook
+
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
+        
+        :extractCemuHook
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            echo WARNING ^: while extracting CemuHook
+            pause
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
     :regCemuInstall
 
         set "cemuNumber=%1"
@@ -1269,8 +1300,8 @@ REM : ------------------------------------------------------------------
 
         for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
 
-        if %nbArgs% EQU 1 goto:createShortcuts
-        if !useMlcFolderFlag! EQU 1 goto:createShortcuts
+        if %nbArgs% EQU 1 goto:openCemuAFirstTime
+        if !useMlcFolderFlag! EQU 1 goto:openCemuAFirstTime
 
         REM : first Cemu install
         if %cemuNumber% EQU 1 (
@@ -1280,7 +1311,7 @@ REM : ------------------------------------------------------------------
         )
 
         choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y,n):"
-        if !ERRORLEVEL! EQU 2 goto:createShortcuts
+        if !ERRORLEVEL! EQU 2 goto:openCemuAFirstTime
 
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
         set /A "cr=!ERRORLEVEL!"
@@ -1290,58 +1321,28 @@ REM : ------------------------------------------------------------------
         if !cr! EQU 1 call:move
         if !cr! EQU 2 call:copy
 
-       :createShortcuts
-
-        REM : check if CemuHook is installed
-        set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
-
-       :checkCemuHook
-        if exist !dllFile! goto:checkSharedFonts
-
-        echo ---------------------------------------------------------
-        echo CemuHook was not found^. It is requiered to
-        echo - play videos
-        echo - enable FPS++ packs
-        echo - to enable controller^'s motions
-        if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:getCemuVersion
-
-        set "defaultBrowser="NOT_FOUND""
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] goto:openCemuAFirstTime
-
-        echo Opening CemuHook download page^.^.^.
-        echo Download and extract CemuHook in !CEMU_FOLDER!
-
-        wscript /nologo !Start! !defaultBrowser! "https://cemuhook.sshnuke.net/#Downloads"
-
-        timeout /T 2 > NUL 2>&1
-        wscript /nologo !Start! "%windir%\explorer.exe" !CEMU_FOLDER!
-
-        choice /C y /N /M "If CemuHook is installed, continue? (y): "
-        goto:checkCemuHook
-
-       :checkSharedFonts
-
-        REM : check if sharedFonts were downloaded
-        set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
-        set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        if exist !cs! if exist !sharedFonts! goto:getCemuVersion
-
        :openCemuAFirstTime
 
+        if exist !cs! goto:getCemuVersion
         echo ---------------------------------------------------------
-        echo Openning CEMU^.^.^.
-        if not exist !cs! echo Set your REGION^, language
-        if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button^, if they are missing
-
+        echo opening CEMU^.^.^.
+        echo.
+        echo If a mlc01 folder creation message popup^, answer 'Yes'
+        echo Ignore graphic pack folder download notification^.
+        echo.
+        echo Set your REGION^, language and all common settings for your
+        echo games ^(sound^, overlay^.^.^.^)
+        echo.
         echo Then close CEMU to continue
+        echo.
+        echo ^(if cemuHook and/or sharedFonts are missing^, BatchFw will
+        echo install them for you^)
+        echo.
 
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
 
        :getCemuVersion
-        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if not exist !sharedFonts! echo Download sharedFonts using Cemuhook button & goto:openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         set /A "v1151=2"
@@ -1360,14 +1361,14 @@ REM : ------------------------------------------------------------------
             call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
             if ["!result!"] == [""] echo Error when comparing versions
             if !result! EQU 50 echo Error when comparing versions
-            if !result! EQU 1 goto:autoImportMode
-            if !result! EQU 0 goto:autoImportMode
+            if !result! EQU 1 goto:checkCemuHook
+            if !result! EQU 0 goto:checkCemuHook
         ) else (
-            goto:autoImportMode
+            goto:checkCemuHook
         )
        :extractV2Packs
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
-        if exist !gfxv2! goto:autoImportMode
+        if exist !gfxv2! goto:checkCemuHook
 
         mkdir !gfxv2! > NUL 2>&1
         set "rarFile="!BFW_RESOURCES_PATH:"=!\V2_GFX_Packs.rar""
@@ -1383,33 +1384,59 @@ REM : ------------------------------------------------------------------
             exit /b 21
         )
 
-       :autoImportMode
-        echo ---------------------------------------------------------
-        if %cemuNumber% EQU 1  (
 
-            echo AUTOMATIC SETTINGS IMPORT is enable by default
-            echo but if it causes issues^, you still can disable it
-            echo.
-            echo For each games^, if no settings exist for a given
-            echo version of CEMU^, BatchFw will try to find suitables
-            echo settings and you won^'t have to re-enter your settings
-            echo.
-            if %QUIET_MODE% EQU 0 pause
-            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
+       :checkCemuHook
+        REM : check if CemuHook is installed
+        set "dllFile="!CEMU_FOLDER:"=!\keystone.dll""
+
+        if exist !dllFile! goto:checkSharedFonts
+
+        echo Installing CemuHook^.^.^.
+        call:installCemuHook
+
+       :checkSharedFonts
+
+        REM : check if sharedFonts were downloaded
+        set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
+        if exist !cs! if exist !sharedFonts! goto:autoImportMode
+        echo Installing sharedFonts^.^.^.
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            echo WARNING ^: while extracting sharedFonts
+            pause
         )
+        timeout /T 3 > NUL 2>&1
+
+       :autoImportMode
+REM        echo ---------------------------------------------------------
+REM        if %cemuNumber% EQU 1  (
+REM
+REM            echo AUTOMATIC SETTINGS IMPORT is enable by default
+REM            echo but if it causes issues^, you still can disable it
+REM            echo.
+REM            echo For each games^, if no settings exist for a given
+REM            echo version of CEMU^, BatchFw will try to find suitables
+REM            echo settings and you won^'t have to re-enter your settings
+REM            echo.
+REM            if %QUIET_MODE% EQU 0 pause
+REM            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
+REM        )
 
         REM : importMode
         set "argOpt="
         set "IMPORT_MODE=ENABLED"
-        call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
-
-        if [!ANSWER!] == ["y"] (
-            set "argOpt=-noImport"
-            set "IMPORT_MODE=DISABLED"
-        )
-
-        set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
-        call:log2HostFile !msg!
+REM        call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
+REM
+REM        if [!ANSWER!] == ["y"] (
+REM            set "argOpt=-noImport"
+REM            set "IMPORT_MODE=DISABLED"
+REM        )
+REM
+REM        set "msg="!CEMU_FOLDER_NAME! installed with automatic import=!IMPORT_MODE:"=!""
+REM        call:log2HostFile !msg!
 
         set "IGNORE_PRECOMP=DISABLED"
         REM : GPU is NVIDIA => ignoring precompiled shaders cache

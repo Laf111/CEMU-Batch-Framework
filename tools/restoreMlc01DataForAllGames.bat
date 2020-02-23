@@ -54,8 +54,8 @@ REM : main
         goto:continue
     :end
 
-    REM : flag to move DATA instead of copy them (default = move)
-    set /A "moveFlag=1"
+    REM : flag to move DATA instead of copy them (default = copy)
+    set /A "moveFlag=0"
 
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -95,10 +95,10 @@ REM : main
 
     title Move back mlc01 data to !MLC01_FOLDER_PATH:"=!
     echo.
-    choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
+    choice /C yn /N /M "Do you want to move instead of copying files (y, n)? : "
     if !ERRORLEVEL! EQU 1 (
-        title Copy back mlc01 data to !MLC01_FOLDER_PATH:"=!
-        set /A "moveFlag=0"
+        title Move back mlc01 data to !MLC01_FOLDER_PATH:"=!
+        set /A "moveFlag=1"
     )
     cls
     goto:inputsAvailables

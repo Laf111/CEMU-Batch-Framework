@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V16-4"
+    set "BFW_NEXT_VERSION=V17"
 
     set "THIS_SCRIPT=%~0"
 
@@ -119,6 +119,7 @@ REM : functions
         type !filePath! | find /I "goto::" && echo ERROR^: syntax error in !filePath!
         type !filePath! | find /I "call::" && echo ERROR^: syntax error in !filePath!
         type !filePath! | find "TODO" && echo WARNING^: TODO found in !filePath!
+        type !filePath! | find "echo OK" && echo WARNING^: unexpected debug traces^? in !filePath!
 
         set /A "wngDetected=0"
         REM : loop on ':' find in the file
