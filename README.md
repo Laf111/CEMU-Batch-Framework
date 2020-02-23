@@ -233,6 +233,13 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
 
     - Same as it does with earlier version. All users use the 8000001 and so can use their saves on versions earlier than 1.15.19 (which introduced accounts). When imptoring Exporting games, you can choose source/target accounts to use
     
+- **Why BatchFw's size is so big?**
+
+    - Because of the third party software it comes with but mostly because of it package files for offline installations :
+        - GFX packs V2 and V3
+        - CemuHook 0.5.7.3 and 0.5.6.4
+        - shared fonts
+    
 
 ## Recommendations: 
 
