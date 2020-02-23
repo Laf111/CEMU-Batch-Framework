@@ -235,7 +235,7 @@ V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2D
     
 - **Why BatchFw's size is so big?**
 
-    - Because of the third party software it comes with but mostly because of it package files for offline installations :
+    - Because of the third party software it comes with but mostly because of it packages files for offline installations :
         - GFX packs V2 and V3
         - CemuHook 0.5.7.3 and 0.5.6.4
         - shared fonts
