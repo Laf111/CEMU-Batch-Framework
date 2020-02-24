@@ -80,7 +80,7 @@ REM : main
     if [!OPENGL_CACHE!] == ["NOT_FOUND"] goto:ending
 
     echo ---------------------------------------------------------
-    echo BatchFw saves all your GPU Caches in %APPDATA%
+    echo BatchFw saves all your GPU Caches in !OPENGL_CACHE:"=!
     echo.
     choice /C yn /N /M "Do you want to also remove your GPU caches ? (y, n)"
     if !ERRORLEVEL! EQU 2 goto:ending

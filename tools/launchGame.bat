@@ -783,7 +783,7 @@ REM    echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
 
     set "idGpuFolder="NOT_FOUND""
     pushd !gpuCacheSavesFolder!
-    set "pat=!GPU_VENDOR!*"
+    set "pat="!GPU_VENDOR!*""
     for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B !pat! 2^>NUL') do set "idGpuFolder="%%x""
     pushd !BFW_TOOLS_PATH!
 
@@ -1728,11 +1728,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. Use Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles shortcuts to edit game's profile^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^' shortcuts^." 4161
         goto:syncCP
 
         :bypassComparison
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. Use Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles shortcuts to edit game's profile^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^' shortcuts^." 4161
 
         :syncCP
         REM : synchronized controller profiles (import)

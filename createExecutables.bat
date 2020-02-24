@@ -654,9 +654,9 @@ REM : functions
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
 
-        set "pat=*(DLC)*"
+        set "pat="*(DLC)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
-        set "pat=*(UPDATE DATA)*"
+        set "pat="*(UPDATE DATA)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
 
         REM : if need call import script and wait

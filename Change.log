@@ -1,16 +1,17 @@
 23/02/2020 V17 :
-- fix : do not maximize create*.bat when call with args
+- fix : import games failure when folder has DOS unsupported character
+- fix : do not maximize create*.bat when called with args
 - fix : version left to 16-4 in source code => ask for update batchFw everytime
-- fix : when a new aspect ratio is added, force BatchFw to complete GFX packs on next run
+- fix : when a new aspect ratio is detected from the resolution, force BatchFw to complete GFX packs on next run
 - add : resources : cemuhook_1116_0564.zip, cemuhook_1159_0573.zip and sharedFonts.zip
 - add : auto install CemuHook and sharedFonts (in function of CEMU's version)
 - add : auto-import is now enabled by default
        if installing a version >= 1.15.15, if a user game profile is found => import (CEMU's auto-update
-         feature will update the settings.xml file)
+            feature will update the settings.xml file)
        else :
-       - if a user's game profile is not found => do not import
-       - all requiered nodes must exist in the candidate settings.xml
-       - and if settings.bin files exist, check their sizes 
+            - if a user's game profile is not found => do not import
+            - all requiered nodes must exist in the candidate settings.xml
+            - and if settings.bin files exist, check their sizes 
        Keep the launchGame.bat arg for compatibility issue (previous shortcuts created)
 - add : copy instead of move by default in restoreMlc01DataForAllGames.bat (when called with args)
 - add : redirect launch/StopThirdPartySoftware outputs to bathFw's log

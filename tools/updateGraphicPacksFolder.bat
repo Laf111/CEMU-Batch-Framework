@@ -188,7 +188,7 @@ REM : main
     wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     REM : delete all previous update log files in BFW_GP_FOLDER
-    set "pat=graphicPacks*.doNotDelete"
+    set "pat="graphicPacks*.doNotDelete""
     for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do del /F "%%a"
 
     set "noDelFile=!BFW_GP_FOLDER:"=!\!zipFile:zip=doNotDelete!"

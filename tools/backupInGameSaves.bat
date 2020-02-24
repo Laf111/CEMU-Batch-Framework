@@ -166,7 +166,7 @@ REM : main
     set "shaderCacheId=!strTmp:"=!"
 
     if [!shaderCacheId!] == ["NONE"] goto:done
-    set pat="!emulatorSaveFolder:"=!\!shaderCacheId!*"
+    set "pat="!emulatorSaveFolder:"=!\!shaderCacheId!*""
     REM : in case of a future playing game with old save format on a version >= 1.11
     REM : to avoid loosing saves (in old format), systematically backup-it in a !GAME_TITLE!_emulatorSave.rar
     REM : under inGameSaves

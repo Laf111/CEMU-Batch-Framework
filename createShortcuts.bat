@@ -404,7 +404,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : check if sharedFonts were downloaded
     set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    if exist !cs! if exist !sharedFonts! goto:autoImportMode
+    if exist !sharedFonts! goto:autoImportMode
     echo Installing sharedFonts^.^.^.
     set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
@@ -677,9 +677,9 @@ REM : functions
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
 
-        set "pat=*(DLC)*"
+        set "pat="*(DLC)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
-        set "pat=*(UPDATE DATA)*"
+        set "pat="*(UPDATE DATA)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
 
         REM : if need call import script and wait

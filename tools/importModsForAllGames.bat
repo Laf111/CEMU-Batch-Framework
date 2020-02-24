@@ -53,7 +53,7 @@ REM : main
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
-    echo Please select your mods source folder
+    echo Please select your ^'ready to use^' ^(BCML output in case of multiple mods combined^) mods source folder
 
     :askModFolder
     for /F %%b in ('cscript /nologo !browseFolder!  "Select a source folder"') do set "folder=%%b" && set "MODS_FOLDER_PATH=!folder:?= !"

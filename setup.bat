@@ -374,6 +374,10 @@ REM : main
     if %nbArgs% EQU 0 call:setProgressBar
 
     echo ---------------------------------------------------------
+    echo You can import ^'ready to use^' mods for your games^.
+    echo Note that if you use more than one mod you^'d better use BCML to create a
+    echo resulting mod ^'ready to use^'^.
+    echo.
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:askGpCompletion
 
@@ -1222,9 +1226,9 @@ REM : ------------------------------------------------------------------
         REM : already pushed to GAMES_FOLDER
         set /A "needImport=0"
 
-        set "pat=*(DLC)*"
+        set "pat="*(DLC)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
-        set "pat=*(UPDATE DATA)*"
+        set "pat="*(UPDATE DATA)*""
         for /F "delims=~" %%i in ('dir /A:d /B !pat! 2^>NUL') do set /A "needImport=1"
 
         REM : if need call import script and wait
@@ -1322,7 +1326,7 @@ REM : ------------------------------------------------------------------
         if !cr! EQU 2 call:copy
 
        :openCemuAFirstTime
-
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
         if exist !cs! goto:getCemuVersion
         echo ---------------------------------------------------------
         echo opening CEMU^.^.^.
@@ -1398,8 +1402,7 @@ REM : ------------------------------------------------------------------
 
         REM : check if sharedFonts were downloaded
         set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
-        set "cs="!CEMU_FOLDER:"=!\settings.xml""
-        if exist !cs! if exist !sharedFonts! goto:autoImportMode
+        if exist !sharedFonts! goto:autoImportMode
         echo Installing sharedFonts^.^.^.
         set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
