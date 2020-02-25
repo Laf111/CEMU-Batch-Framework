@@ -89,23 +89,55 @@ REM : main
     cls
     REM : Restore updates and DLC
     set "MLC01_FOLDER_PATH="!CEMU_FOLDER:"=!\mlc01""
-    echo ^> Copy or move updates and DLC to !MLC01_FOLDER_PATH:"=!
+    echo ^> Copy or move updates and DLC to !MLC01_FOLDER_PATH:"=! ^.^.^.
 
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartMaximizedWait! !script! !MLC01_FOLDER_PATH!
 
     REM : Restore transferable caches
-    echo ^> Move all transferable caches !CEMU_FOLDER:"=!
+    echo ^> Move all transferable caches !CEMU_FOLDER:"=! ^.^.^.
 
     set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
     wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
 
-    REM : Restore transferable caches
-    echo ^> Extract all saves for all users in !MLC01_FOLDER_PATH:"=!
+    REM : Restore all saves of all users
+    echo ^> Extract all saves for all users in !MLC01_FOLDER_PATH:"=! ^.^.^.
 
     set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
     wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
 
+    REM : Export games stats to this folder ? 
+    choice /C yn /N /M "Export games stats to this folder (y, n)? : "
+    if !ERRORLEVEL! EQU 2 goto:ending
+
+    REM : get userArray, choice args
+    set /A "nbUsers=0"
+    set "cargs="
+    for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        echo !nbUsers! ^: %%a
+        set "users[!nbUsers!]="%%a""
+        set /A "nbUsers+=1"
+    )
+    set /A "nbUsers-=1"
+
+    :getUserGamesStats
+    echo.
+    set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
+
+    echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
+
+    if %num% LSS 0 goto:getUserGamesStats
+    if %num% GTR !nbUsers! goto:getUserGamesStats
+
+    set "user=!users[%num%]!"
+
+    REM : Restore game stats
+    echo ^> Restore !user:"=! games^'stats in !CEMU_FOLDER:"=! ^.^.^.
+
+    set "script="!BFW_TOOLS_PATH:"=!\exportUserGamesStatsToCemu.bat""
+    wscript /nologo !StartMaximizedWait! !user! !CEMU_FOLDER!
+
+    :ending
     echo =========================================================
     echo Done
     echo #########################################################

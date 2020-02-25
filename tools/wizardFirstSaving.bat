@@ -632,8 +632,8 @@ REM : main
             REM : compare to 1.15.3b
             call:compareVersions !versionRead! "1.15.3b" v1153b > NUL 2>&1
 
-            if ["!v1153b!"] == [""] echo Error when comparing versions >> !batchFwLog!
-            if !v1153b! EQU 50 echo Error when comparing versions >> !batchFwLog!
+            if ["!v1153b!"] == [""] echo Error when comparing versions
+            if !v1153b! EQU 50 echo Error when comparing versions
             if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             REM : version < 1.14 => version < 1.15.3b
@@ -707,7 +707,8 @@ REM : main
     REM :update last_played in !cs!
     set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
 
-    !xmlS! ed -u "//GameCache/Entry[path='!RPX_FILE_PATH:"=!']/last_played" -v "!wiiuTs1970!" !cs! > !csTmp!
+    set "endPath=!RPX_FILE_PATH:~4,-1!"
+    !xmlS! ed -u "//GameCache/Entry[path='!endPath!']/last_played" -v "!wiiuTs1970!" !cs! > !csTmp!
 
     if exist !csTmp! (
         del /F !cs! > NUL 2>&1
@@ -957,29 +958,16 @@ REM : functions
     :setGameStats
 
         pushd !BFW_RESOURCES_PATH!
-        set "rpxFilePath=!RPX_FILE_PATH!"
 
-        REM : get game Id with RPX path
-        :getRpx
+        REM : get the rpxFilePath used
+        set "rpxFilePath="NONE""
+        for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
+
+        if [!rpxFilePath!] == ["NOT_FOUND"] goto:endFctSgs
+
         call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
-        if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
-
-        set "rpxFilePath_USB="!drive!!rpxFilePath:~3!"
-
-        if [!rpxFilePath!] == [!rpxFilePath_USB!] (
-            REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
-                set "rpxFilePathTmp=!rpxFilePath:"=!"
-                set "rpxFilePath_LOGS="!rpxFilePathTmp:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!""
-                if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:endFctSgs
-                set "rpxFilePath=!rpxFilePath_LOGS!"
-                goto:getRpx
-            )
-            goto:endFctSgs
-        )
-        goto:getRpx
-
-        :updateGameStats
+        if ["!gid!"] == ["NOT_FOUND"] goto:endFctSgs
+        
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
         set "tmpLogFile="!BFW_LOGS:"=!\updateGameStats.log""
@@ -1124,18 +1112,17 @@ REM : functions
 
         set "xPath="%~1""
         set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
 
+        REM : return the first match
         for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
             set "%3=%%x"
 
             goto:eof
         )
 
-        set "%3=NOT_FOUND"
-
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     
     :checkCemuSettings

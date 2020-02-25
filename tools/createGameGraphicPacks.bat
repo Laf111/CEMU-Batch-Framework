@@ -44,9 +44,6 @@ REM : main
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
-    REM : checking GAMES_FOLDER folder
-    call:checkPathForDos !GAMES_FOLDER!
-
     REM : set current char codeset
     call:setCharSet
 

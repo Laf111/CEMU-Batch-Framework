@@ -118,6 +118,7 @@ REM : functions
 
         type !filePath! | find /I "goto::" && echo ERROR^: syntax error in !filePath!
         type !filePath! | find /I "call::" && echo ERROR^: syntax error in !filePath!
+        type !filePath! | find /I ".bat.bat" && echo ERROR^: syntax error in !filePath!
         type !filePath! | find "TODO" && echo WARNING^: TODO found in !filePath!
         type !filePath! | find "echo OK" && echo WARNING^: unexpected debug traces^? in !filePath!
 

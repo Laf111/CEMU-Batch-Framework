@@ -45,9 +45,6 @@ REM : main
     set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
     set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
 
-    REM : checking GAMES_FOLDER folder
-    call:checkPathForDos !GAMES_FOLDER!
-
     REM : set current char codeset
     call:setCharSet
 
@@ -522,17 +519,16 @@ REM    REM : ------------------------------------------------------------------
         REM : not game folder, skip
         if not exist !codeFullPath! goto:eof
 
-        REM : get bigger rpx file present under game folder
-        set "RPX_FILE="NONE""
-        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
-        pushd !codeFolder!
+        pushd !codeFullPath!
         set "RPX_FILE="project.rpx""
-		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+	    REM : get bigger rpx file present under game folder
+        if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
         REM : cd to GAMES_FOLDER
         pushd !GAMES_FOLDER!
+
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 

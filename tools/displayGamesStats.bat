@@ -110,47 +110,9 @@ REM : ------------------------------------------------------------------
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
-        REM : check folder
-        call:checkPathForDos !GAME_FOLDER_PATH! > NUL 2>&1
-        set /A "cr=!ERRORLEVEL!"
-
-        if !cr! EQU 0 (
-            REM : check if folder name contains forbiden character for batch file
-            set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-            call !tobeLaunch! !GAME_FOLDER_PATH!
-            set /A "cr=!ERRORLEVEL!"
-
-            if !cr! GTR 1 @echo Please rename the game^'s folder to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
-            if !cr! EQU 1 goto:scanGamesFolder
-            call:getStats
-
-        ) else (
-
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            for %%a in (!GAME_FOLDER_PATH!) do set "folderName=%%~nxa"
-            @echo !folderName!^: Unsupported characters found^, rename it otherwise it will be ignored by BatchFW ^^!
-            for %%a in (!GAME_FOLDER_PATH!) do set "basename=%%~dpa"
-
-            REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
-            set "str="!folderName!""
-            set "str=!str:&=!"
-            set "str=!str:\!=!"
-            set "str=!str:%%=!"
-            set "str=!str:.=!"
-            set "str=!str:?=!"
-            set "str=!str:\"=!"
-            set "str=!str:^=!"
-            set "newFolderName=!str:"=!"
-            set "newName="!basename!!newFolderName:"=!""
-
-            call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
-
-            if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 @echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
-            @echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        )
+        call:getStats
     )
+
     @echo.
     if !GAMES_PLAYED! EQU 0 (
         @echo.
@@ -235,14 +197,14 @@ REM : ------------------------------------------------------------------
 
         set "xPath="%~1""
         set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
 
+        REM : return the first match
         for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
             set "%3=%%x"
 
             goto:eof
         )
-
-        set "%3=NOT_FOUND"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -272,13 +234,12 @@ REM : ------------------------------------------------------------------
     :getStats
         set "currentUser=!user:"=!"
     
-        REM : get bigger rpx file present under game folder
-        set "RPX_FILE="NONE""
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
         set "RPX_FILE="project.rpx""
-		if not exist !RPX_FILE! for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+	    REM : get bigger rpx file present under game folder
+        if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
 
@@ -511,76 +472,6 @@ REM : ------------------------------------------------------------------
         set "str=!str:z=26!"
 
         set "%2=!str!"
-
-    goto:eof
-
-    REM : ------------------------------------------------------------------
-    REM : function to detect DOS reserved characters in path for variable's expansion: &, %, !
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            @echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            @echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
-    :getUserInput
-
-        REM : arg1 = question
-        set question=%1
-        REM : arg2 = valuesList
-        set valuesList=%~2
-        REM : arg3 = return of the function (user input value)
-        REM : arg4 = timeOutValue (optional: if given set 1st value as default value after timeOutValue seconds)
-        set timeOutValue=%~4
-
-        REM : init return
-        set "%3=?"
-
-        set choiceValues=%valuesList:,=%
-        set defaultTimeOutValue=%valuesList:~0,1%
-
-        REM : building choice command
-        if [%timeOutValue%] == [] (
-            set choiceCmd=choice /C %choiceValues% /CS /N /M !question!
-        ) else (
-            set choiceCmd=choice /C %choiceValues% /CS /N /T %timeOutValue% /D %defaultTimeOutValue% /M !question!
-        )
-
-        REM : launching and get return code
-        !choiceCmd!
-        set /A "cr=!ERRORLEVEL!"
-        set j=1
-        for %%i in ("%valuesList:,=" "%") do (
-
-            if [!cr!] == [!j!] (
-                REM : value found , return function value
-
-                set "%3=%%i"
-                goto:eof
-            )
-            set /A j+=1
-        )
 
     goto:eof
     REM : ------------------------------------------------------------------

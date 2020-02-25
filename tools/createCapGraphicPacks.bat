@@ -39,8 +39,6 @@ REM : main
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "cgpLogFile="!BFW_PATH:"=!\logs\createCapGraphicPacks.log""
 
-    REM : checking GAMES_FOLDER folder
-    call:checkPathForDos !GAMES_FOLDER!
 
     REM : set current char codeset
     call:setCharSet

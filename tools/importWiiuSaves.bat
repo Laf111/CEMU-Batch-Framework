@@ -343,17 +343,18 @@ REM : functions
 
         set "xPath="%~1""
         set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
 
+        REM : return the first match
         for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
             set "%3=%%x"
 
             goto:eof
         )
 
-        set "%3=NOT_FOUND"
-
     goto:eof
     REM : ------------------------------------------------------------------
+
 
     :updateLastSettings
 

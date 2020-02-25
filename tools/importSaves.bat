@@ -133,10 +133,22 @@ REM : main
     set /A "nbUsers=0"
     set "userLeftList="
 
+    REM : check if ml01 path is within a CEMU install
+    for %%a in (!MLC01_FOLDER_PATH!) do set "parentFolder="%%~dpa""
+    set "CEMU_FOLDER=!parentFolder:~0,-2!""
+    set "cs="!CEMU_FOLDER:"=!\Settings.xml""
+    set /A "importGsFlag=0"
+
+    if not exist !cs! goto:getAccountsUsed
+
+    choice /C yn /N /M "Do you want to import games stats from !CEMU_FOLDER:"=! ? (y/n) :"
+    if !ERRORLEVEL! EQU 1 set /A "importGsFlag=1"
+
     REM : get userArray, choice args
     set /A "nbUsers=0"
     set "cargs="
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        if !importGsFlag! EQU 1 echo !nbUsers! ^: %%a
         set "users[!nbUsers!]="%%a""
         set "userLeftList=!userLeftList! %%a"
         set "cargs=!cargs!!nbUsers!"
@@ -144,7 +156,24 @@ REM : main
     )
     set /A "nbUsers-=1"
 
+    if !importGsFlag! EQU 0 goto:getAccountsUsed
+
+    :getUserGamesStats
+
+    set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
+
+    echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
+
+    if %num% LSS 0 goto:getUserGamesStats
+    if %num% GTR !nbUsers! goto:getUserGamesStats
+
+    set "gamesStatUser=!users[%num%]!"
+
+    :getAccountsUsed
+
     set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\00050000""
+
+    if not exist !sf! goto:beginImport
 
     REM : loop on all 800000XX folders found
     pushd !sf!
@@ -167,7 +196,13 @@ REM : main
             set /A "nbAccount+=1"
             goto:loopAccounts
         )
-
+REM        REM : if game stats was asked
+REM        if !importGsFlag! EQU 1 (
+REM            set /A "nbAcc=!nbAccount!-1"
+REM            set "accounts[!nbAcc!]=!gamesStatUser:"=!"
+REM            set /A "nbAccount+=1"
+REM            goto:accountCreated
+REM        )
         if not ["!userLeftList!"] == ["  "] (
             for /L %%l in (0,1,!nbUsers!) do (
                 echo !userLeftList!  | find !users[%%l]! > NUL 2>&1 && echo %%l ^: !users[%%l]!
@@ -219,6 +254,7 @@ REM : main
     )
     echo.
     if !QUIET_MODE! EQU 0 pause
+    :beginImport
     cls
 
     echo =========================================================
@@ -338,6 +374,95 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : get a node value in a xml file
+    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
+    :getValueInXml
+
+        set "xPath="%~1""
+        set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
+
+        REM : return the first match
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+            set "%3=%%x"
+
+            goto:eof
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :updateLastSettings
+
+        pushd !BFW_RESOURCES_PATH!
+
+        REM : get the rpxFilePath used
+        set "rpxFilePath="NONE""
+        for /F "delims=~<> tokens=3" %%p in ('type !cs! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
+
+        if [!rpxFilePath!] == ["NOT_FOUND"] goto:eof
+
+        REM : get game Id with RPX path
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !cs! gid
+
+        if ["!gid!"] == ["NOT_FOUND"] goto:eof
+
+        set "currentUser=!gamesStatUser:"=!"
+        set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+        set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
+
+        if not exist !lls! (
+            echo !GAME_TITLE! ^: no last settings file found for !currentUser!
+            goto:eof
+        )
+        pushd !sf!
+
+        for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
+
+        if not exist !ls! goto:eof
+
+        set "lst="!sf:"=!\!ls:"=!""
+
+        type !lst! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && (
+
+            REM : update !lst! games stats for !GAME_TITLE! using !cs! ones
+            set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
+            wscript /nologo !StartHiddenWait! !toBeLaunch! !cs! !lst! !gid!
+
+            echo.
+            echo !GAME_TITLE! ^: games stats were sucessfully imported for !currentUser!
+
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :importGamesStats
+
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        set "RPX_FILE="project.rpx""
+	    REM : get bigger rpx file present under game folder
+        if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
+        )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
+
+        REM : if no rpx file found, ignore GAME
+        if [!RPX_FILE!] == ["NONE"] goto:eof
+
+        set "RPX_FILE_PATH="!codeFolder:"=!\!RPX_FILE:"=!""
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
+
+        REM : need to treat this game ?
+        type !cs! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && call:updateLastSettings
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :setAccount
         set /A "na=%~1"
         set /A "nu=%~2"
@@ -445,18 +570,25 @@ REM : functions
                 if exist !rarFile! (
                     choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
                     if !ERRORLEVEL! EQU 1 (
+                        REM : prepare the archive with commonRarFile
                         copy /Y !commonRarFile! !rarFile! > NUL 2>&1
 
-                        REM : add user account (no wait
+                        REM : add user account in commonRarFile
                         wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
                         set /A NB_SAVES_TREATED+=1
                     )
                 ) else (
+                    REM : prepare the archive with commonRarFile
                     copy /Y !commonRarFile! !rarFile! > NUL 2>&1
 
-                    REM : add user account (no wait
+                    REM : add user account in commonRarFile
                     wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
                     set /A NB_SAVES_TREATED+=1
+                )
+                if !importGsFlag! EQU 1 if [!gamesStatUser!] == ["!currentUser!"] (
+                    echo Importing games^' stats for !currentUser!
+                    echo.
+                    call:importGamesStats
                 )
             )
         )

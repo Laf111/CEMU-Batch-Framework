@@ -1,18 +1,31 @@
+
+- add : exportUserGamesStatsToCemu.bat that collects playtime stats of a user for all games and update 
+        the ones in a target CEMU's install 
+        (+shortcut in "Wii-U Games\%BatchFwUser%\Export all stats to a CEMU install.lnk")
+- add : exportAllToCemu.bat now call exportUserGamesStatsToCemu.bat
+
+
+- add : new icon for "Wii-U Games\%BatchFwUser%\Display games stats.lnk"
+- add : now ask to import games stats from a CEMU install for the chosen user in importSaves.bat   
+- add : a suffix "BatchFw : " to batchFw's shortcuts names in user folders (to gather them) 
+- opt : remove useless checks in internals scripts (that have not shortcut in BatchFw interface)
+
 23/02/2020 V17 :
-- fix : import games failure when folder has DOS unsupported character
+- fix : import games failure when the folder has DOS unsupported characters in
 - fix : do not maximize create*.bat when called with args
 - fix : version left to 16-4 in source code => ask for update batchFw everytime
-- fix : when a new aspect ratio is detected from the resolution, force BatchFw to complete GFX packs on next run
+- fix : when a new aspect ratio is detected from the resolution, force BatchFw to complete GFX packs 
+        on next run.
 - add : resources : cemuhook_1116_0564.zip, cemuhook_1159_0573.zip and sharedFonts.zip
 - add : auto install CemuHook and sharedFonts (in function of CEMU's version)
 - add : auto-import is now enabled by default
-       if installing a version >= 1.15.15, if a user game profile is found => import (CEMU's auto-update
-            feature will update the settings.xml file)
-       else :
+        if installing a version >= 1.15.15, if a user game profile is found => import (CEMU's auto-
+            update feature will update the settings.xml file)
+        else :
             - if a user's game profile is not found => do not import
             - all requiered nodes must exist in the candidate settings.xml
             - and if settings.bin files exist, check their sizes 
-       Keep the launchGame.bat arg for compatibility issue (previous shortcuts created)
+        Keep the launchGame.bat's arg for compatibility (previous shortcuts created)
 - add : copy instead of move by default in restoreMlc01DataForAllGames.bat (when called with args)
 - add : redirect launch/StopThirdPartySoftware outputs to bathFw's log
 

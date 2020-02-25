@@ -1626,17 +1626,18 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         set "xPath="%~1""
         set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
 
+        REM : return the first match
         for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
             set "%3=%%x"
-
 
             goto:eof
         )
 
-        set "%3=NOT_FOUND"
     goto:eof
     REM : ------------------------------------------------------------------
+
 
     :loadCemuOptions
 
@@ -1823,34 +1824,18 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             goto:getLastModifiedSettings
         )
         set "lst="!sf:"=!\!ls:"=!""
-       
-        REM : get game Id with RPX path
-        :getRpx
-        pushd !BFW_RESOURCES_PATH!
 
         REM : if the file is the same
         if [!xmlUser!] == [!lst!] goto:cemuHookSettings
 
+        REM : get the rpxFilePath used
+        set "rpxFilePath="NONE""
+        for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
+
+        if [!rpxFilePath!] == ["NOT_FOUND"] goto:cemuHookSettings
+
         call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
-        if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
-
-        set "rpxFilePath_USB="!drive!!rpxFilePath:~3!"
-
-        if [!rpxFilePath!] == [!rpxFilePath_USB!] (
-            REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !rpxFilePath! | find "_BatchFW_Install" > NUL 2>&1 && (
-                set "rpxFilePathTmp=!rpxFilePath:"=!"
-                set "rpxFilePath_LOGS="!rpxFilePathTmp:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!""
-                if [!rpxFilePath!] == [!rpxFilePath_LOGS!] goto:cemuHookSettings
-                set "rpxFilePath=!rpxFilePath_LOGS!"
-                goto:getRpx
-            )
-            goto:cemuHookSettings
-        )
-        goto:getRpx
-
-
-        :updateGameStats
+        if ["!gid!"] == ["NOT_FOUND"] goto:cemuHookSettings
 
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
