@@ -1729,11 +1729,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^' shortcuts^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
         goto:syncCP
 
         :bypassComparison
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^' shortcuts^." 4161
+        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
 
         :syncCP
         REM : synchronized controller profiles (import)

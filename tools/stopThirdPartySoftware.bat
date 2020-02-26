@@ -61,7 +61,7 @@ REM : functions
 
         if not [!program!] == ["NONE"]  if not exist !program! (
                 call:cleanHostLogFile !program!
-                cscript /nologo !MessageBox! "WARNING software to launch before CEMU !program! does not exist anymore in ^, deleting this entry^!" 4144
+                cscript /nologo !MessageBox! "WARNING software to launch before CEMU !program! does not exist anymore in host log file^, deleting this entry^!" 4144
                 set /A "nbIs=99"
         )
         if !nbIs! NEQ 99 (

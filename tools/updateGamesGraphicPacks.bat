@@ -182,6 +182,8 @@ REM    call:checkGpFolders
         echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
         goto:createLinks
     )
+    REM : flag to know if GFX pack is found
+    set "gpfound=0"    
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -221,10 +223,16 @@ REM    call:checkGpFolders
     echo Waiting all child processes end
 
     :waitLoop
-    wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
-    type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && goto:waitLoop
+    wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" > NUL 2>&1 && goto:waitLoop
+    type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
+    
+    if !gpfound! EQU 0 (
+        REM : relaunching the search in all gfx pack folder (V2 and up)
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+    )
 
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
 
@@ -234,7 +242,11 @@ REM    call:checkGpFolders
         rmdir /Q !gpLink! > NUL 2>&1
     )
 
-    REM : import 16/9 GFX packs
+    REM :Rebuild links on GFX packs
+    echo Rebuild links on GFX packs >> !myLog!
+    echo Rebuild links on GFX packs
+    
+    REM : import GFX packs
     call:linkGraphicPacks
 
     REM : GFX pack V3 and up : import mods and other ratios already treated in importGraphicPacks
@@ -259,6 +271,10 @@ REM    call:checkGpFolders
 
     :checkPackLinks
 
+    REM :Rebuild links on GFX packs
+    echo Check links on GFX packs >> !myLog!
+    echo Check links on GFX packs
+    
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
 
@@ -569,7 +585,6 @@ REM    REM : ------------------------------------------------------------------
 
         set /A "resX2=%nativeHeight%*2"
 
-        set "gpfound=0"
         set "LastVersionfound=0"
         set "gameName=NONE"
 

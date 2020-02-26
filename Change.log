@@ -1,3 +1,9 @@
+login FTP no pwd asked
+
+- fix : shortcuts creation failed for displayGamesStats & exportUserGamesStatsToCemu
+- fix : GFX packs not found when collecting settings
+
+
 25/02/2020 V16-6 :
 - fix : import games failure when the folder has DOS unsupported characters in
 - fix : do not maximize create*.bat when called with args
@@ -23,7 +29,7 @@
             - and if settings.bin files exist, check their sizes 
         Keep the launchGame.bat's arg for compatibility (previous shortcuts created)
 - add : copy instead of move by default in restoreMlc01DataForAllGames.bat (when called with args)
-- add : redirect launch/StopThirdPartySoftware outputs to bathFw's log
+- add : redirect launch/StopThirdPartySoftware outputs to batchFw's log
 
 
 21/02/2020 V16-5 :
