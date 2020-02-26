@@ -2,8 +2,6 @@
 HOW IT WORKS : 
 =========================================================
 
-Assuming that all users (BatchFw users created with each Windows profile) share the same settings on a given host.
-
 When creating shortcuts for a CEMU's version : 
 
     - if a mlc01 subfolder does not exist in game's folder, batchFw will create one. 

@@ -11,13 +11,10 @@ Only graphic packs needed for your games are installed.
 If a game is not supported in the Slashiee's repository, BatchFW creates a generic one for resolution scaling.
 
 Those graphics packs are very simple compared to Slashiee's ones since they only scale without tweaking shaders. 
-If V2 graphics packs already exist BatchFW will import those 
-graphics packs and upgrade them to the V3 syntax (import the double native resolution graphic pack of V2 and replace 
-    
-    res(X|Y|)Scale = 2.0 by res(X|Y|)Scale = ($width/($gameWidth|gameHeight))
+If V2 graphics packs already exist BatchFW will import those graphics packs and upgrade them to the V3 syntax 
 
 When an official pack comes out BatchFW will replace its packs with the official ones automatically 
-(during the graphics packs folder auto-update process) and define missing presets for your desired 
+(during the graphics packs folder auto-update process) and add missing presets for your desired 
 aspect ratios (16/10 for example);
 
 If on a new game graphics packs are not applied or if you have any issue, the native resolution 

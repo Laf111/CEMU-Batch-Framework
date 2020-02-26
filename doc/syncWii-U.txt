@@ -69,17 +69,8 @@ Browse for a game in your library for which you want export saves to your Wii-U.
 The script will use the last scan results (or your can launch a new scan) to be sure that the game is installed on your Wii-U and your PC 
 then export the saves for all users that have an accountId (so an associated folder 80000XX) and saves for this game. 
 
-The 8000001 folder is replaced by the one used by this user on the wii-U.
-If a common folder is found, it will be also backuped.
-
-The saves are directly saved on the SD card of your Wii-U for a SaveMii use.
-
-saveMii tutorial : https://gbatemp.net/threads/tutorial-importing-wii-u-saves-with-savemii.475349/
-
-
 ---------------------------------------------------------
-NOTES : 
+Dumping games :
+---------------------------------------------------------
+Using the last scan result, BatchFw will download a list of games (game's file + update + DLC + saves for all profiles) 
 
-- saves and games cannot be upload directly on the Wii-U
-- FTP injection of saves does not work for all games and for all Wii-U users
-- SaveMii is still the more reliable solution to backup saves for all users  

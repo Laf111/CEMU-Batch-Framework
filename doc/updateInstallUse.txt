@@ -43,9 +43,6 @@ INSTALL :
     To be fully functional BatchFw needs that you register the last(s) version(s) of CEMU you used to play your games.            
     If you're using more the one version of CEMU (on version per game for example) register all installations and select 
     the games to associated with those versions.
-    
-    Once your shortcuts are created, please launch all your games one time to let BatchFw copy the transferable cache 
-    into each game's folder.
              
     If you're using one version of CEMU per player (and handle differents saves this way) : register this version for one user
     and use the shortcut "Wii-U Games\BatchFW\Tools\Games's saves\Import Saves" to import saves for other users afterward.    
@@ -54,11 +51,7 @@ INSTALL :
 UPDATE : 
 ---------------------------------------------------------
 
-    Delete 
-        - _BatchFW_Graphic_Packs 
-        - _BatchFW_Install folder
-        - also your Wii-U Games folder (containing batchFw's shortcuts)
-    Extract archive contains in your loadiine's games folder and launch setup.bat (same process as install)
+    BatchFW comes with an auto-updater
 
 ---------------------------------------------------------
 USE : 
@@ -117,8 +110,7 @@ USE :
     - bin files size check: if source file's size is striclty lower than target's one => invalid import
     - if bin files check is OK, check if all criticals nodes (settings ones only) in xml target file exist in source file, if not => invalid import
       
-    If you have a single issue, delete the shortcut and recreate it whith disabling the automatic import before report any issue on 
-    CEMU's reddit or discord
+    In addition, on last versions of CEMU, its auto-updater handle the settings.xml file upgrade.
 
     WARNING : Do not delete log files created under ./logs 
     If you need to reset BatchFw to default, use the shortcut "Wii-U Games\BatchFW\Reset BatchFw.lnk"

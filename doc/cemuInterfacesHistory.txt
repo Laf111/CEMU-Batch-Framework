@@ -14,8 +14,11 @@ CEMU HISTORY :
     CEMU 1.14    Shader reworked and introduced V3 graphic packs;
     CEMU 1.15.1  Support for game's mods and protection of the GLCache under shaderCahce/driver/nvidia;
     CEMU 1.15.6  Save controler profile used in the game's profile when using the UI (right click on the game in the list);
+    CEMU 1.15.10 Add auto-updater;
     CEMU 1.15.15 User game's profiles (not overwritted when updating);
     CEMU 1.15.19 Accounts handling (multi users)
+    CEMU 1.16    Vulkan API
+    CEMU 1.17.2  Enhance multi-core recompiler compatibility (more games support it)
                 
 Before 1.11, saves were in mlc01/emulatorSave/ShaderCacheId and updates and DLC were applied by overwriting files.
 After 1.11, they are stored in mlc01/usr/save/titleId[0:7]/titleId[8:15]/* (where titleId is the 16 characters id 
