@@ -154,7 +154,7 @@ REM : main
         exit 99
     )
     REM : flag for nolegacy options
-    set "IMPORT_MODE=ENABLED"
+    set "AUTO_IMPORT_MODE=ENABLED"
     set "IGNORE_PRECOMP=DISABLED"
 
 
@@ -164,7 +164,7 @@ REM : main
     if %nbArgs% EQU 6 goto:getCemuFolder
 
     REM : args 7
-    if [!args[6]!] == ["-noImport"] set "IMPORT_MODE=DISABLED"
+    if [!args[6]!] == ["-noImport"] set "AUTO_IMPORT_MODE=DISABLED"
     if [!args[6]!] == ["-ignorePrecomp"] set "IGNORE_PRECOMP=ENABLED"
     if [!args[6]!] == ["-noLegacy"] set "argLeg=-noLegacy"
     if [!args[6]!] == ["-Legacy"] set "argLeg=-Legacy"
@@ -172,7 +172,7 @@ REM : main
     if %nbArgs% EQU 7 goto:getCemuFolder
 
     REM : args 8
-    if [!args[7]!] == ["-noImport"] set "IMPORT_MODE=DISABLED"
+    if [!args[7]!] == ["-noImport"] set "AUTO_IMPORT_MODE=DISABLED"
     if [!args[7]!] == ["-ignorePrecomp"] set "IGNORE_PRECOMP=ENABLED"
     if [!args[7]!] == ["-noLegacy"] set "argLeg=-noLegacy"
     if [!args[7]!] == ["-Legacy"] set "argLeg=-Legacy"
@@ -180,7 +180,7 @@ REM : main
     if %nbArgs% EQU 8 goto:getCemuFolder
 
     REM : args 9
-    if [!args[8]!] == ["-noImport"] set "IMPORT_MODE=DISABLED"
+    if [!args[8]!] == ["-noImport"] set "AUTO_IMPORT_MODE=DISABLED"
     if [!args[8]!] == ["-ignorePrecomp"] set "IGNORE_PRECOMP=ENABLED"
     if [!args[8]!] == ["-noLegacy"] set "argLeg=-noLegacy"
     if [!args[8]!] == ["-Legacy"] set "argLeg=-Legacy"
@@ -446,7 +446,7 @@ REM : main
     )
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
-REM    echo Automatic settings import ^: !IMPORT_MODE! >> !batchFwLog!
+REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
@@ -1696,7 +1696,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "CEMU_INSTALLS_FOLDER=!parentFolder:~0,-2!""
 
         REM : if no import goto:continueLoad
-        if ["!IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
+        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : search for valid settings
         call:getSettingsFolder
@@ -1721,24 +1721,36 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if !usePbFlag! EQU 1 call:setProgressBar 60 70 "pre processing" "installing settings for !currentUser!"
 
         set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-        if not exist !OLD_PROFILE_FILE! goto:bypassComparison
+        if not exist !OLD_PROFILE_FILE! goto:syncCP
         REM : if PROFILE_FILE does not exist use OLD_PROFILE_FILE
-        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:bypassComparison
+        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:syncCP
 
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
-        goto:syncCP
-
-        :bypassComparison
-        cscript /nologo !MessageBox! "Importing !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^, check that all CEMU^'s settings are still OK ^(set^/modify if needed^)^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
 
         :syncCP
         REM : synchronized controller profiles (import)
         call:syncControllerProfiles
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
+
+        REM : get the AUTO_IMPORT_MODE
+        set "AUTO_IMPORT_MODE=NOT_FOUND"
+        for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "AUTO_IMPORT_MODE" 2^>NUL') do set "AUTO_IMPORT_MODE=%%j"
+        if ["!AUTO_IMPORT_MODE!"] == ["NOT_FOUND"] set "AUTO_IMPORT_MODE=DISABLED"
+
+        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] (
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^?" 4145
+            if !ERRORLEVEL! EQU 2 (
+                set "previousSettingsFolder="NONE""
+                goto:continueLoad
+            )
+            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
+        ) else (
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk" 4161
+        )
+
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
         echo Import settings from !previousSettingsFolder:"=! >> !batchFwLog!

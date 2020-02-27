@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17"
+    set "BFW_VERSION=V16-7"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -407,18 +407,21 @@ REM : main
     goto:askScreenMode
 
     :askRatios
+    set /A "changeArList=0"
+
     REM : compute current aspect ratio
     call:reduceFraction !scrWidth! !scrHeight! sWr sHr
 
     set "msg="DESIRED_ASPECT_RATIO=!sWr!-!sHr!=!sWr!/!sHr!""
 
     type !logFile! | find /V !msg! > NUL 2>&1 && (
+        REM : will force BatchFw to complete GFX packs/presets
+        set /A "changeArList=1"
         call:log2HostFile !msg!
     )
 
     REM : get the users list
     set "ARLIST=EMPTY"
-    set /A "changeArList=0"
 
     REM : search in all Host_*.log
     set "pat="!BFW_LOGS:"=!\Host_*.log""
@@ -573,14 +576,15 @@ REM : main
     :askScreenMode
     echo ---------------------------------------------------------
     REM : flush logFile of SCREEN_MODE
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "SCREEN_MODE" 2^>NUL') do call:cleanHostLogFile SCREEN_MODE
+    call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen? (y,n):"
-    if !ERRORLEVEL! EQU 1 goto:getUserMode
+    if !ERRORLEVEL! EQU 1 goto:updateGfxPacksFolder
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
 
+    :updateGfxPacksFolder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
     if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
@@ -598,17 +602,19 @@ REM : main
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
     call !ugp!
     set /A "cr=!ERRORLEVEL!"
+
     REM : if user cancelled the update
     if !cr! EQU 2 if not exist !BFW_GP_FOLDER! goto:beginExtraction
 
     REM : here ["!ACTIVE_ADAPTER!"] != ["NOT_FOUND"]
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+   
     if exist !glogFile! if !changeArList! EQU 1 (
         REM : clean all entries in glogFile to force bathFw to complete
         REM : GFX packs on next launch
-        call:cleanGameLibFile "graphic packs version=graphicPacks"
-    )
+        call:cleanGameLibFile "version=graphicPacks"
 
+    )
     if !cr! EQU 0 goto:getUserMode
 
     :extractlgfxp
@@ -1414,23 +1420,37 @@ REM : ------------------------------------------------------------------
         timeout /T 3 > NUL 2>&1
 
        :autoImportMode
-REM        echo ---------------------------------------------------------
-REM        if %cemuNumber% EQU 1  (
-REM
-REM            echo AUTOMATIC SETTINGS IMPORT is enable by default
-REM            echo but if it causes issues^, you still can disable it
-REM            echo.
-REM            echo For each games^, if no settings exist for a given
-REM            echo version of CEMU^, BatchFw will try to find suitables
-REM            echo settings and you won^'t have to re-enter your settings
-REM            echo.
-REM            if %QUIET_MODE% EQU 0 pause
-REM            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
-REM        )
+        echo ---------------------------------------------------------
+        if %cemuNumber% EQU 1  (
 
-        REM : importMode
+            echo For each games^, if no settings exist for a given
+            echo version of CEMU^, BatchFw will try to find suitables
+            echo settings and you won^'t have to re-enter your settings^.
+            echo.
+            echo But you can choose to decide each time what to do^.
+            echo If you cancel the import^, batchFw will collect your
+            echo settings for this version as for the first run^.
+            echo So you^'re sure to use the factory settings of this
+            echo version^.
+            echo.
+
+            if %QUIET_MODE% EQU 0 pause
+            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
+        )
+
+        set "msg="AUTO_IMPORT_MODE=ENABLED""
+        REM : clean IMPORT_MODE in host log file
+        call:cleanHostLogFile AUTO_IMPORT_MODE
+
+        call:getUserInput "Do you want to disable the import settings notification? (y,n : default in 10sec): " "n,y" ANSWER 10
+        if [!ANSWER!] == ["y"] set "msg="AUTO_IMPORT_MODE=DISABLED""
+
+        call:log2HostFile !msg!
+
+        REM : importMode (keep for backward compatibility)
         set "argOpt="
         set "IMPORT_MODE=ENABLED"
+
 REM        call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
 REM
 REM        if [!ANSWER!] == ["y"] (

@@ -1043,8 +1043,8 @@ REM        )
         )
 
         REM : create a shortcut to syncGamesFolder.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Synchronize saves and caches between games^'folder^.lnk""
-        set "LINK_DESCRIPTION="Synchronize saves and caches between games folder""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Synchronize with another BatchFw^'s install^.lnk""
+        set "LINK_DESCRIPTION="Synchronize with another BatchFw's install (saves, caches, games stats)""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\syncGamesFolder.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\syncGamesFolder.ico""
         if not exist !LINK_PATH! (

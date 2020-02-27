@@ -126,19 +126,17 @@ REM : main
     :inputsAvailables
     pushd !GAMES_FOLDER!
 
-    title Sync BatchFw saves and transferable cache with another games^' folder
+    title Sync with another BatchFw^'s installation
     echo =========================================================
 
-    echo Sync BatchFw saves and transferable cache between >> !myLog!
-    echo Sync BatchFw saves and transferable cache between
+    echo Sync saves^, transferable cache and games stats between >> !myLog!
+    echo Sync saves^, transferable cache and games stats between
     echo  - ^: !GAMES_FOLDER! >> !myLog!
     echo  - ^: !GAMES_FOLDER!
     echo AND
     echo  - ^: !TARGET_GAMES_FOLDER! >> !myLog!
     echo  - ^: !TARGET_GAMES_FOLDER!
     echo.
-    echo Newer saves and caches will be import^/export from the
-    echo 2 folders for games in common ^(same titleId^)
     echo ========================================================= >> !myLog!
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
@@ -189,6 +187,10 @@ REM : main
         pause
     )
     :exiting
+
+    set "pat="!BFW_LOGS_PATH:"=!\fnr*.log""
+    del /F !pat! > NUL 2>&1
+
     if %nbArgs% EQU 0 endlocal
     exit /b 0
 
@@ -198,6 +200,124 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    REM : get a node value in a xml file
+    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
+    :getValueInXml
+
+        set "xPath="%~1""
+        set "xmlFile="%~2""
+        set "%3=NOT_FOUND"
+
+        REM : return the first match
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+            set "%3=%%x"
+
+            goto:eof
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getTimeStamp
+
+        set "file="%~1""
+        set "title=%~2"
+
+        set "ts=NOT_FOUND"
+
+        pushd !BFW_RESOURCES_PATH!
+
+        REM : get the rpxFilePath used in source file
+        set "rpxFilePath="NONE""
+        for /F "delims=~<> tokens=3" %%p in ('type !sls! ^| find "<path>" ^| find "!title!" 2^>NUL') do set "rpxFilePath="%%p""
+        if [!rpxFilePath!] == ["NOT_FOUND"] set "%3=NOT_FOUND" & goto:eof
+
+        REM : get timestamp with RPX path
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/last_played/text()" !file! ts
+
+        REM : get timestamp value in source
+        set "%3=!ts!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :syncGamesStats
+
+        set "currentUser=%~1"
+
+        REM : source file
+        set "ssf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+        if not exist !ssf! goto:eof
+        set "slls="!ssf:"=!\!currentUser!_lastSettings.txt"
+        if not exist !slls! goto:eof
+
+        pushd !ssf!
+        for /F "delims=~" %%i in ('type !slls!') do set "sls=%%i"
+        if not exist !sls! goto:eof
+
+        REM : user source last settings file
+        set "slst="!ssf:"=!\!sls:"=!""
+        if not exist !slst! goto:eof
+
+        REM : RPX_FILE_PATH check
+        type !slst! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && (
+
+            REM : target file
+            set "tsf="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\settings""
+            if not exist !tsf! goto:eof
+            set "tlls="!tsf:"=!\!currentUser!_lastSettings.txt"
+            if not exist !tlls! goto:eof
+
+            pushd !tsf!
+            for /F "delims=~" %%i in ('type !tlls!') do set "tls=%%i"
+            if not exist !tls! goto:eof
+
+            REM : user source last settings file
+            set "tlst="!tsf:"=!\!tls:"=!""
+            if not exist !tlst! goto:eof
+
+            REM : get source timestamp
+            call:getTimeStamp !slst! !GAME_TITLE! sts
+            if ["!sts!"] == ["NOT_FOUND"] goto:eof
+
+            REM : get target timestamp
+            call:getTimeStamp !tlst! !TARGET_GAME_TITLE! tts
+            if ["!tts!"] == ["NOT_FOUND"] goto:eof
+
+            REM : divide by 10 to avoid int32 limits (2147483647 => 19/01/2038 03:14:07)	
+            set /A "ttsdt=sts/10"
+            set /A "stsdt=tts/10"
+
+            set "srcValue=!sts!"
+            set "tgtValue=!tts!"
+
+            set "folder=!sls!"
+            set "target=!tls!"
+            set "prefix=^> Exporting"
+
+            REM : compare stsdt and ttsdt
+            if !ttsdt! LSS !stsdt! (
+                REM : switch source and target
+                set "source=!target!"
+                set "target=!sls!"
+                set "srcValue=!tgtValue!"
+                set "tgtValue=!sts!"
+                set "prefix=^< Importing"
+            )
+
+            for %%a in (!tlst!) do set "parentFolder="%%~dpa""
+            set "folder=!parentFolder:~0,-2!""
+
+            REM : use fnr.exe to update
+            set "BfwSyncGsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSyncGsLog.log""
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "last_played>!srcValue!" --replace "last_played>!tgtValue!" --logFile !BfwSyncGsLog! > NUL
+
+            echo !prefix! !title! !currentUser!^'s playtime stats to !folder! >> !myLog!
+            echo !prefix! !title! !currentUser!^'s playtime stats to !folder!
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :searchGamesToSync
 
@@ -275,6 +395,8 @@ REM : functions
 
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
+        set "RPX_FILE_PATH="!codeFolder:"=!\!RPX_FILE:"=!""
+
 
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%j in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxj"
@@ -311,67 +433,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    :syncGameForUsers
-
-        REM : here the game exist in the 2 games'folders
-        set "mfn="%~1""
-
-        for %%a in (!mfn!) do set "parentFolder="%%~dpa""
-        set "metaF=!parentFolder:~0,-2!""
-        set "TARGET_GAME_FOLDER_PATH=!metaF:\meta=!"
-
-        REM : basename of TARGET_GAME_FOLDER_PATH (to get TARGET_GAME_TITLE)
-        for /F "delims=~" %%l in (!TARGET_GAME_FOLDER_PATH!) do set "TARGET_GAME_TITLE=%%~nxl"
-
-        cls
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-
-        if !QUIET_MODE! EQU 1 goto:loopOnUsers
-        echo - Sync !TARGET_GAME_TITLE! saves and transferable caches ^?
-        echo   ^(n^) ^: no^, skip
-        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
-        echo.
-        echo --------------------------------------------------------- >> !myLog!
-        echo ---------------------------------------------------------
-
-        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
-        if [!ANSWER!] == ["n"] (
-            REM : skip this game
-            echo Skip this GAME
-            goto:eof
-        )
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH! >> !myLog!
-        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH!
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-
-        :loopOnUsers
-
-        REM : For all users : sync saves
-        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
-            set "user="%%a""
-            echo.
-            call:syncSaveForUser !user!
-        )
-        echo.
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-        echo Sync transferable caches
-        echo.
-        REM : sync transferable shader cache
-        call:syncTsc
-
-
-        REM : sync settings ?
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
     :syncSaveForUser
 
         set "currentUser=%~1"
@@ -389,7 +450,7 @@ REM : functions
         )
         echo --------------------------------------------------------- >> !myLog!
         echo ---------------------------------------------------------
-        
+
         REM : targetRarFile
         set "targetRarFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!TARGET_GAME_TITLE!_!currentUser!.rar""
 
@@ -472,6 +533,75 @@ REM : functions
 
                 if !srcSize! EQU !tgtSize! echo ^= !fileName! size are identicals >> !myLog! & echo ^= !fileName! size are identicals
             )
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------    
+
+    :syncGameForUsers
+
+        REM : here the game exist in the 2 games'folders
+        set "mfn="%~1""
+
+        for %%a in (!mfn!) do set "parentFolder="%%~dpa""
+        set "metaF=!parentFolder:~0,-2!""
+        set "TARGET_GAME_FOLDER_PATH=!metaF:\meta=!"
+
+        REM : basename of TARGET_GAME_FOLDER_PATH (to get TARGET_GAME_TITLE)
+        for /F "delims=~" %%l in (!TARGET_GAME_FOLDER_PATH!) do set "TARGET_GAME_TITLE=%%~nxl"
+
+        cls
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+
+        if !QUIET_MODE! EQU 1 goto:loopOnUsers
+        echo - Sync !TARGET_GAME_TITLE! saves and transferable caches ^?
+        echo   ^(n^) ^: no^, skip
+        echo   ^(y^) ^: yes ^(default value after 15s timeout^)
+        echo.
+        echo --------------------------------------------------------- >> !myLog!
+        echo ---------------------------------------------------------
+
+        call:getUserInput "Enter your choice? : " "y,n" ANSWER 15
+        if [!ANSWER!] == ["n"] (
+            REM : skip this game
+            echo Skip this GAME
+            goto:eof
+        )
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH! >> !myLog!
+        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH!
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+
+        :loopOnUsers
+
+        REM : For all users : sync saves
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+            set "user="%%a""
+            echo.
+            call:syncSaveForUser !user!
+        )
+        echo.
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+        echo Sync transferable caches
+        echo.
+        REM : sync transferable shader cache
+        call:syncTsc
+
+        echo.
+        echo ========================================================= >> !myLog!
+        echo =========================================================
+        echo Sync games stats
+        echo.
+
+        REM : For all users : sync saves
+        for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+            set "user="%%a""
+            echo.
+            call:syncGamesStats !user!
         )
 
     goto:eof

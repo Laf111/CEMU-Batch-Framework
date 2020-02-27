@@ -1,7 +1,10 @@
-login FTP no pwd asked
-
+27/02/2020 V16-7 :
+- add : auto import settings is now a Host parameter
+        (if you disable it, a notification will be displayed and you can choose to import
+        the candidate settings or to collect settings as for a first run)
+- add : sync games stats in syncGamesFolder.bat
 - fix : shortcuts creation failed for displayGamesStats & exportUserGamesStatsToCemu
-- fix : GFX packs not found when collecting settings
+- fix : GFX packs not found when collecting settings (wizardFirstLaunch)
 
 
 25/02/2020 V16-6 :

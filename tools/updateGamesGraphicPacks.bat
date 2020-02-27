@@ -183,7 +183,7 @@ REM    call:checkGpFolders
         goto:createLinks
     )
     REM : flag to know if GFX pack is found
-    set "gpfound=0"    
+    set "gpfound=0"
     call:updateGraphicPacks
 
     REM : log in game library log
@@ -228,7 +228,7 @@ REM    call:checkGpFolders
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
-    
+
     if !gpfound! EQU 0 (
         REM : relaunching the search in all gfx pack folder (V2 and up)
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
@@ -245,7 +245,7 @@ REM    call:checkGpFolders
     REM :Rebuild links on GFX packs
     echo Rebuild links on GFX packs >> !myLog!
     echo Rebuild links on GFX packs
-    
+
     REM : import GFX packs
     call:linkGraphicPacks
 
@@ -274,7 +274,7 @@ REM    call:checkGpFolders
     REM :Rebuild links on GFX packs
     echo Check links on GFX packs >> !myLog!
     echo Check links on GFX packs
-    
+
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
 

@@ -106,7 +106,7 @@ REM : main
     set "script="!BFW_TOOLS_PATH:"=!\restoreUserSavesOfAllGames.bat""
     wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
 
-    REM : Export games stats to this folder ? 
+    REM : Export games stats to this folder ?
     choice /C yn /N /M "Export games stats to this folder (y, n)? : "
     if !ERRORLEVEL! EQU 2 goto:ending
 
