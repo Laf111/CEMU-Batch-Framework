@@ -1472,7 +1472,7 @@ REM
 
         REM : create a shortcut to explore OpenGL Cache saved
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore OpenGL caches saved^.lnk""
-        set "LINK_DESCRIPTION="Explore OpenGL shader caches saved""
+        set "LINK_DESCRIPTION="Explore OpenGL shader caches backup""
         set "TARGET_PATH=!GLCacheSavesFolder!"
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 

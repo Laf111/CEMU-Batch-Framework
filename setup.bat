@@ -1425,7 +1425,8 @@ REM : ------------------------------------------------------------------
 
             echo For each games^, if no settings exist for a given
             echo version of CEMU^, BatchFw will try to find suitables
-            echo settings and you won^'t have to re-enter your settings^.
+            echo settings ^(saved for other version of CEMU on this host^)
+            echo and so you won^'t have to re-define them^.
             echo.
             echo But you can choose to decide each time what to do^.
             echo If you cancel the import^, batchFw will collect your
@@ -1442,8 +1443,8 @@ REM : ------------------------------------------------------------------
         REM : clean IMPORT_MODE in host log file
         call:cleanHostLogFile AUTO_IMPORT_MODE
 
-        call:getUserInput "Do you want to disable the import settings notification? (y,n : default in 10sec): " "n,y" ANSWER 10
-        if [!ANSWER!] == ["y"] set "msg="AUTO_IMPORT_MODE=DISABLED""
+        choice /C yn /CS /N /M "Decide when importing CEMU^'s settings from other versions? (y,n) : ?"
+        if !ERRORLEVEL! EQU 2 set "msg="AUTO_IMPORT_MODE=DISABLED""
 
         call:log2HostFile !msg!
 

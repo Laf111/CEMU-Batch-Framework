@@ -401,7 +401,8 @@ REM : main
 
     REM : check if sharedFonts were downloaded
     set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
-    if exist !cs! if exist !sharedFonts! goto:autoImportMode
+    set "cs="!CEMU_FOLDER:"=!\settings.xml""
+    if exist !sharedFonts! goto:autoImportMode
     echo Installing sharedFonts^.^.^.
     set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
@@ -511,6 +512,7 @@ REM    call:log2HostFile !msg!
         for /F "delims=~" %%i in ('dir /B /S /A:D 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
         for /F "delims=~" %%i in ('dir /B /S /A:L 2^> NUL') do rmdir /Q /S "%%i" > NUL 2>&1
     )
+    REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
     set /A NB_GAMES_TREATED=0
@@ -634,6 +636,31 @@ REM    call:log2HostFile !msg!
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :installCemuHook
+
+        REM : cemuHook for versions < 1.12.1
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1116_0564.rar""
+
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractCemuHook
+
+        call:compareVersions !versionRead! "1.12.1" result > NUL 2>&1
+        if ["!result!"] == [""] echo Error when comparing with version 1^.12^.1
+        if !result! EQU 50 echo Error when comparing with version 1^.12^.1
+        if !result! EQU 2 goto:extractCemuHook
+
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
+
+        :extractCemuHook
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            echo WARNING ^: while extracting CemuHook
+            pause
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :waitProcessesEnd
 
         set /A "disp=0"
@@ -713,8 +740,7 @@ REM : functions
 
         set "string=!string:&=!"
         set "string=!string:?=!"
-        set "string=!string:(=!"
-        set "string=!string:)=!"
+        set "string=!string:\!=!"
         set "string=!string:%%=!"
         set "string=!string:^=!"
         set "string=!string:\=!"
@@ -814,6 +840,7 @@ REM : functions
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
+
         if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
         ) else (
@@ -980,7 +1007,7 @@ REM        if not exist !LINK_PATH! (
 REM            if !QUIET_MODE! EQU 0 echo Creating a shortcut to injectDumpsToWiiu^.bat
 REM            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
 REM        )
-
+REM
         REM : create a shortcut to createWiiuSDcard.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Create a SDCard for Wii-U^.lnk""
         set "LINK_DESCRIPTION="Format and prepare a SDCard for your Wii-U""
@@ -1110,7 +1137,7 @@ REM        )
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to exportAllToCemu^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         REM : create a shortcut to backupAllInGameSaves.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's saves\Backup my games's saves^.lnk""
         set "LINK_DESCRIPTION="Compress all my games^'s saves""
@@ -1357,7 +1384,6 @@ REM        )
             )
 
         )
-
         set "ARGS="!OUTPUT_FOLDER!""
 
         REM : create a shortcut to setup.bat
@@ -1450,7 +1476,7 @@ REM        )
 
         REM : create a shortcut to explore OpenGL Cache saved
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches\Explore OpenGL caches saved^.lnk""
-        set "LINK_DESCRIPTION="Explore OpenGL caches saved""
+        set "LINK_DESCRIPTION="Explore OpenGL shader caches backup""
         set "TARGET_PATH=!GLCacheSavesFolder!"
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exploreOpenGLCacheSaves.ico""
 
