@@ -249,6 +249,7 @@ REM : ------------------------------------------------------------------
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
         set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
+
         if not exist !lls! goto:eof
 
         pushd !sf!
@@ -267,36 +268,22 @@ REM : ------------------------------------------------------------------
             goto:getLastModifiedSettings
         )
         set "lst="!sf:"=!\!ls:"=!""
+
         pushd !BFW_RESOURCES_PATH!
 
         for /F "delims=~" %%k in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxk"
         @echo - !GAME_TITLE!
 
-        REM : get game Id with RPX path
-        set "RPX_FILE_PATH="!codeFolder:"=!\!RPX_FILE:"=!""
-        set "gamePath=!RPX_FILE_PATH!"
+        REM : get the rpxFilePath used
+        set "rpxFilePath="NOT_FOUND""
+        for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
+
+        if [!rpxFilePath!] == ["NOT_FOUND"] goto:eof
 
         REM : get game Id with RPX path
-        :getRpx
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
 
-        call:getValueInXml "//GameCache/Entry[path='!gamePath:"=!']/title_id/text()" !lst! gid
-        if not ["!gid!"] == ["NOT_FOUND"] goto:updateGameStats
-
-        set "gamePath_USB="!drive!!gamePath:~3!"
-
-        if [!gamePath!] == [!gamePath_USB!] (
-            REM : try with _BatchFW_Install\logs\ and left for BatchFw V14 compatibility
-            echo !gamePath! | find /V "_BatchFW_Install" > NUL 2>&1 && (
-                set "gamePath_LOGS=!gamePath:%GAME_TITLE%=_BatchFW_Install\logs\%GAME_TITLE%!"
-                if [!gamePath!] == [!gamePath_LOGS!] goto:eof
-                set "gamePath=!gamePath_LOGS!"
-                goto:getRpx
-            )
-            goto:eof
-        )
-        goto:getRpx
-
-        :updateGameStats
+        if ["!gid!"] == ["NOT_FOUND"] goto:eof
 
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""

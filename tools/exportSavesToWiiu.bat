@@ -5,6 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
     color 4F
+    title Export CEMU saves to your Wii-U
 
     set "THIS_SCRIPT=%~0"
 
@@ -48,8 +49,6 @@ REM : main
     set /A "j2000=946684800"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-
-    title Export CEMU saves to your Wii-U
 
     echo On your Wii-U^, you need to ^:
     echo - have your SDCard plugged in your Wii-U

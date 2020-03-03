@@ -139,7 +139,7 @@ REM : main
     echo.
     REM : compute the size needed
     call:getFolderSizeInMb !MLC01_FOLDER_PATH! sizeNeeded
-    choice /C yn /N /M "!sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
+    choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
     if !ERRORLEVEL! EQU 2 (
         REM : Cancelling
         echo Cancelled by user^, exiting in 2s
@@ -166,7 +166,7 @@ REM : main
 
     REM : call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
     set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
-    call !importSave! !MLC01_FOLDER_PATH!
+    wscript /nologo !StartWait! !importSave! !script! !MLC01_FOLDER_PATH!
 
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
@@ -548,6 +548,10 @@ REM : functions
 
         set "tf="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
         if not exist !tf! goto:eof
+
+        REM : check if a meta folder exist
+        set "metaFolder="!tf:"=!\meta"
+        if not exist !metaFolder! goto:eof
 
         set "target="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
         set "metaFolder="!target:"=!\meta""

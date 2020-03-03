@@ -5,6 +5,7 @@ REM : ------------------------------------------------------------------
 REM : main
     setlocal EnableDelayedExpansion
     color 4F
+    title Export games^' stats to !CEMU_FOLDER:"=!
 
 REM : ------------------------------------------------------------------
 
@@ -32,7 +33,7 @@ REM : ------------------------------------------------------------------
     call:setCharSet
     set /A "QUIET_MODE=0"
 
-    set "user="NONE""
+    set "gamesStatUser="NONE""
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -53,8 +54,18 @@ REM : ------------------------------------------------------------------
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "DATE=%ldt%"
 
-    if %nbArgs% EQU 2 goto:beginTreatments
+    if %nbArgs% EQU 2 (
+        REM : args 1
+        set "gamesStatUser=!args[0]!"
 
+        if %nbArgs% EQU 2 (
+            set "CEMU_FOLDER=!args[1]!"
+        )
+        REM : with arguments to this script, deactivating user inputs
+        set /A "QUIET_MODE=1"
+
+        goto:beginTreatments
+    )
     cls
     echo Please select CEMU install folder
 
@@ -83,14 +94,13 @@ REM : ------------------------------------------------------------------
         goto:askCemuFolder
     )
     if %nbArgs% EQU 1 (
-        set "user=!args[0]!"
+        set "gamesStatUser=!args[0]!"
         goto:beginTreatments
     )
 
     echo.
     REM : get userArray, choice args
     set /A "nbUsers=0"
-    set "cargs="
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
         echo !nbUsers! ^: %%a
         set "users[!nbUsers!]="%%a""
@@ -107,8 +117,8 @@ REM : ------------------------------------------------------------------
     if %num% LSS 0 goto:getUserGamesStats
     if %num% GTR !nbUsers! goto:getUserGamesStats
 
-    set "user=!users[%num%]!"
-    title Export !user"=! games^' stats to !CEMU_FOLDER:"=!
+    set "gamesStatUser=!users[%num%]!"
+    title Export !gamesStatUser"=! games^' stats to !CEMU_FOLDER:"=!
 
     goto:beginTreatments
 
@@ -120,15 +130,6 @@ REM : ------------------------------------------------------------------
         timeout /t 4 > NUL 2>&1
         exit /b 98
     )
-
-    REM : args 1
-    set "user=!args[0]!"
-
-    if %nbArgs% EQU 2 (
-        set "CEMU_FOLDER=!args[1]!"
-    )
-    REM : with arguments to this script, deactivating user inputs
-    set /A "QUIET_MODE=1"
 
     :beginTreatments
     cls
@@ -154,7 +155,8 @@ REM : ------------------------------------------------------------------
     REM : loop on each games
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
-    @echo Loop on games played by !user:"=!^.^.^.
+
+    @echo Loop on games played by !gamesStatUser:"=!^.^.^.
     @echo.
 
     REM : searching for code folder to find in only one rpx file (the bigger one)
@@ -175,6 +177,9 @@ REM : ------------------------------------------------------------------
 
             if !cr! GTR 1 @echo Please rename the game^'s folder to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
+
+            REM : basename of GAME FOLDER PATH (GAME_TITLE)
+            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
             call:exportStats
 
         ) else (
@@ -242,9 +247,8 @@ REM : ------------------------------------------------------------------
         pushd !BFW_RESOURCES_PATH!
 
         REM : get the rpxFilePath used
-        set "rpxFilePath="NONE""
+        set "rpxFilePath="NOT_FOUND""
         for /F "delims=~<> tokens=3" %%p in ('type !cs! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
-
         if [!rpxFilePath!] == ["NOT_FOUND"] goto:eof
 
         REM : get game Id with RPX path
@@ -268,13 +272,10 @@ REM : ------------------------------------------------------------------
 
         set "lst="!sf:"=!\!ls:"=!""
 
-        type !lst! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && (
+        REM : update !cs! games stats for !GAME_TITLE!
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
 
-            REM : update !cs! games stats for !GAME_TITLE!
-            set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
-            wscript /nologo !StartHiddenWait! !toBeLaunch! !lst! !cs! !gid!
-
-        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -289,16 +290,12 @@ REM : ------------------------------------------------------------------
         if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
             set "RPX_FILE="%%i""
         )
-
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
         set "RPX_FILE_PATH="!codeFolder:"=!\!RPX_FILE:"=!""
 
-        REM : need to treat this game ?
-        REM : treat this game only if it exist in !cs!
-
-        type !cs! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && call:updateCs
+        call:updateCs
 
     goto:eof
     REM : ------------------------------------------------------------------

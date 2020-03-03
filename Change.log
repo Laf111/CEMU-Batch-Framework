@@ -1,3 +1,23 @@
+03/03/2020 V16-8 :
+- fix : games treated not counted correctly in CreateShortcuts/Executables.bat
+- fix : windows titles not displayed in restore*ForAllGames.bat
+- fix : ask for auto import mode in setup.bat only one time   
+- add : time_played when sync games stats in syncGamesFolder.bat
+- add : a warning if no active network connection is found when checking pre-requisites
+        on a first run of setup.bat. Do not try to update if this test has failed for this
+        run.
+- add : a check to know if the game exists in the target games folder in
+        - restoreMlc01DataForAllGames.bat
+        - restoreTransShadersForAllGames.bat
+        - restoreUserSavesOfAllGames.bat
+        if it doesn't, ask you to skip the game 
+- add : when installed on a HDD, add shortcuts to enable/disable the progressbar in 
+        'Wii-U Games\BatchFw\enable/disableProgressBar' 
+- add : recompute the current resolution on each run to set progress bar correctly
+- fix : bug in exportUserGamesStatsToCemu.bat
+- fix : replace call by external call for importSaves.bat i copy/moveMlc01Data.bat
+
+
 27/02/2020 V16-7 :
 - add : auto import settings is now a Host parameter
         (if you disable it, a notification will be displayed and you can choose to import

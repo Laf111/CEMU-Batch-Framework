@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-7"
+    set "BFW_VERSION=V16-8"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -62,6 +62,8 @@ REM : main
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
+    set "ACTIVE_ADAPTER=NONE"
+
     if exist !logFile! goto:setChcp
 
     REM ----------------------------------------------------------------------------------------------
@@ -79,7 +81,7 @@ REM : main
         pause
         exit 2
     )
-    echo File system NTFS ^: OK
+    echo File system NTFS              ^: OK
 
     REM : check rights to create links
     pushd !GAMES_FOLDER!
@@ -93,7 +95,7 @@ REM : main
         pause
         exit 21
     )
-    echo Rights to create symlinks ^: OK
+    echo Rights to create symlinks     ^: OK
 
     if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
@@ -107,7 +109,7 @@ REM : main
             exit 22
         )
     )
-    echo Rights to launch vbs scripts ^: OK
+    echo Rights to launch vbs scripts  ^: OK
 
     REM : check powershell policy to launch unsigned powershell scripts
     for /F %%a in ('powershell Get-ExecutionPolicy') do (
@@ -119,7 +121,15 @@ REM : main
             exit 24
         )
     )
-    echo Compatible PowerShell policy ^: OK
+    echo Compatible PowerShell policy  ^: OK
+
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+        echo Active network connection     ^: KO
+    ) else (
+        echo Active network connection     ^: OK
+    )
     echo ---------------------------------------------------------
     timeout /T 4 > NUL 2>&1
     cls
@@ -590,9 +600,10 @@ REM : main
     if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     REM : check if an internet connection is active
-    set "ACTIVE_ADAPTER=NOT_FOUND"
-    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
-
+    if ["!ACTIVE_ADAPTER!"] == ["NONE"] (
+        set "ACTIVE_ADAPTER=NOT_FOUND"
+        for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    )
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:extractlgfxp
 
     echo ---------------------------------------------------------
@@ -1031,6 +1042,32 @@ REM : main
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     cls
+        timeout /T 3 > NUL 2>&1
+
+    echo ---------------------------------------------------------
+    echo For each games^, if no settings exist for a given
+    echo version of CEMU^, BatchFw will try to find suitables
+    echo settings ^(saved for other version of CEMU on this host^)
+    echo and so you won^'t have to re-define them^.
+    echo.
+    echo But you can choose to decide each time what to do^.
+    echo If you cancel the import^, batchFw will collect your
+    echo settings for this version as for the first run^.
+    echo So you^'re sure to use the factory settings of this
+    echo version^.
+    echo.
+
+    if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
+
+    set "msg="AUTO_IMPORT_MODE=ENABLED""
+    REM : clean IMPORT_MODE in host log file
+    call:cleanHostLogFile AUTO_IMPORT_MODE
+
+    choice /C yn /CS /N /M "Decide when importing CEMU's settings from other versions? (y,n) : ?"
+    if !ERRORLEVEL! EQU 2 set "msg="AUTO_IMPORT_MODE=DISABLED""
+
+    call:log2HostFile !msg!
+    cls
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo Please^, define your CEMU^'s installations paths
@@ -1408,7 +1445,7 @@ REM : ------------------------------------------------------------------
 
         REM : check if sharedFonts were downloaded
         set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
-        if exist !sharedFonts! goto:autoImportMode
+        if exist !sharedFonts! goto:setOptArgs
         echo Installing sharedFonts^.^.^.
         set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
@@ -1417,37 +1454,8 @@ REM : ------------------------------------------------------------------
             echo WARNING ^: while extracting sharedFonts
             pause
         )
-        timeout /T 3 > NUL 2>&1
 
-       :autoImportMode
-        echo ---------------------------------------------------------
-        if %cemuNumber% EQU 1  (
-
-            echo For each games^, if no settings exist for a given
-            echo version of CEMU^, BatchFw will try to find suitables
-            echo settings ^(saved for other version of CEMU on this host^)
-            echo and so you won^'t have to re-define them^.
-            echo.
-            echo But you can choose to decide each time what to do^.
-            echo If you cancel the import^, batchFw will collect your
-            echo settings for this version as for the first run^.
-            echo So you^'re sure to use the factory settings of this
-            echo version^.
-            echo.
-
-            if %QUIET_MODE% EQU 0 pause
-            if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
-        )
-
-        set "msg="AUTO_IMPORT_MODE=ENABLED""
-        REM : clean IMPORT_MODE in host log file
-        call:cleanHostLogFile AUTO_IMPORT_MODE
-
-        choice /C yn /CS /N /M "Decide when importing CEMU^'s settings from other versions? (y,n) : ?"
-        if !ERRORLEVEL! EQU 2 set "msg="AUTO_IMPORT_MODE=DISABLED""
-
-        call:log2HostFile !msg!
-
+        :setOptArgs
         REM : importMode (keep for backward compatibility)
         set "argOpt="
         set "IMPORT_MODE=ENABLED"

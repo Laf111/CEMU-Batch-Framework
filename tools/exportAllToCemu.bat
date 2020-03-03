@@ -97,7 +97,7 @@ REM : main
     REM : Restore transferable caches
     echo ^> Move all transferable caches !CEMU_FOLDER:"=! ^.^.^.
 
-    set "script="!BFW_TOOLS_PATH:"=!\restoreMlc01DataForAllGames.bat""
+    set "script="!BFW_TOOLS_PATH:"=!\restoreTransShadersForAllGames.bat""
     wscript /nologo !StartMaximizedWait! !script! !CEMU_FOLDER!
 
     REM : Restore all saves of all users
@@ -135,7 +135,7 @@ REM : main
     echo ^> Restore !user:"=! games^'stats in !CEMU_FOLDER:"=! ^.^.^.
 
     set "script="!BFW_TOOLS_PATH:"=!\exportUserGamesStatsToCemu.bat""
-    wscript /nologo !StartMaximizedWait! !user! !CEMU_FOLDER!
+    wscript /nologo !StartMaximizedWait! !script! !user! !CEMU_FOLDER!
 
     :ending
     echo =========================================================

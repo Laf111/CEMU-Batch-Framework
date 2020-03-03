@@ -6,6 +6,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
     color 4F
+    title Move back mlc01 data
 
     set "THIS_SCRIPT=%~0"
 
@@ -169,6 +170,12 @@ REM : main
     )
     cls
     :scanGamesFolder
+
+    REM : get settings.xml path in case of MLC01_FOLDER_PATH is in a CEMU install folder
+    for %%a in (!MLC01_FOLDER_PATH!) do set "parentFolder="%%~dpa""
+    set "CEMU_FOLDER_PATH=!parentFolder:~0,-2!""
+    set "cs="!CEMU_FOLDER_PATH:"=!\Settings.xml""
+
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -360,6 +367,22 @@ REM : functions
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         echo =========================================================
+        if not exist !cs! goto:treatGame
+        REM : check if the game title is listed
+        type !cs! | find /I "!GAME_TITLE!" > NUL 2>&1 && goto:treatGame
+
+        echo !GAME_TITLE! seems to be not installed in !CEMU_FOLDER_PATH:"=!
+        echo ---------------------------------------------------------
+        echo.
+        choice /C yn /N /M "Skip this game (y, n)? : "
+        echo.
+
+        if !ERRORLEVEL! EQU 1 (
+            echo ^> Skip !GAME_TITLE! data
+            goto:eof
+        )
+
+        :treatGame
         echo - !GAME_TITLE!
         echo ---------------------------------------------------------
         if !moveFlag! EQU 1 (
@@ -438,9 +461,11 @@ REM : functions
     :copyTitle
 
         set "tf="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
-        if not exist !tf! (
-            goto:eof
-        )
+        if not exist !tf! goto:eof
+
+        REM : check if a meta folder exist
+        set "metaFolder="!tf:"=!\meta"
+        if not exist !metaFolder! goto:eof
 
         set "target="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
         robocopy !tf! !target! /S > NUL 2>&1
@@ -458,9 +483,11 @@ REM : functions
     :moveTitle
 
         set "tf="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\%~1\%endTitleId%""
-        if not exist !tf! (
-            goto:eof
-        )
+        if not exist !tf! goto:eof
+
+        REM : check if a meta folder exist
+        set "metaFolder="!tf:"=!\meta"
+        if not exist !metaFolder! goto:eof
 
         set "target="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
         call:moveFolder !tf! !target! cr

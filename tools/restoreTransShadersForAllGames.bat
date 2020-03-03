@@ -5,6 +5,8 @@ REM : main
     setlocal EnableDelayedExpansion
     color 4F
 
+    title Move all transferable caches to a CEMU install target folder
+
     set "THIS_SCRIPT=%~0"
 
     REM : checking THIS_SCRIPT path
@@ -56,8 +58,6 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-
-    title Move all transferable caches to a CEMU install target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -127,6 +127,10 @@ REM : main
     )
     cls
     :scanGamesFolder
+
+    REM : get settings.xml path in case of MLC01_FOLDER_PATH is in a CEMU install folder
+    set "cs="!CEMU_FOLDER:"=!\Settings.xml""
+
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
@@ -234,10 +238,29 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        set "sf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
+        if not exist !sf! goto:eof
+
         REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         echo =========================================================
+        if not exist !cs! goto:treatGame
+        REM : check if the game title is listed
+        type !cs! | find /I "!GAME_TITLE!" > NUL 2>&1 && goto:treatGame
+
+        echo !GAME_TITLE! seems to be not installed in !CEMU_FOLDER:"=!
+        echo ---------------------------------------------------------
+        echo.
+        choice /C yn /N /M "Skip this game (y, n)? : "
+        echo.
+
+        if !ERRORLEVEL! EQU 1 (
+            echo ^> Skip !GAME_TITLE! data
+            goto:eof
+        )
+
+        :treatGame
         echo - !GAME_TITLE!
         echo ---------------------------------------------------------
 
@@ -253,13 +276,6 @@ REM : functions
             goto:eof
         )
         echo ---------------------------------------------------------
-
-
-        set "sf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
-        if not exist !sf! (
-            echo Nothing to do for !GAME_TITLE!
-            goto:eof
-        )
 
         set "target="!CEMU_FOLDER:"=!\ShaderCache\transferable""
 

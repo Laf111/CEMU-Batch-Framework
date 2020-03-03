@@ -6,6 +6,7 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
+    title Restore all user^'s saves to a mlc01 target folder
 
     set "THIS_SCRIPT=%~0"
 
@@ -74,7 +75,6 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    title Restore all user^'s saves to a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -184,6 +184,9 @@ REM : main
     cls
     :scanGamesFolder
 
+    REM : get settings.xml path in case of MLC01_FOLDER_PATH is in a CEMU install folder
+    set "cs="!CEMU_FOLDER:"=!\Settings.xml""
+    
     if exist !tmpExtractFolder! (
         rmdir /Q /S  !tmpExtractFolder! > NUL 2>&1
     )
@@ -280,6 +283,7 @@ REM : main
     :exiting
     echo =========================================================
     echo Waiting the end of all child processes before ending ^.^.^.
+
     if %nbArgs% EQU 0 endlocal
     exit /b 0
 
@@ -338,6 +342,25 @@ REM : functions
         REM : if no rpx file found, ignore GAME
         if [!RPX_FILE!] == ["NONE"] goto:eof
 
+        REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+
+        if not exist !cs! goto:treatGame
+        REM : check if the game title is listed
+        type !cs! | find /I "!GAME_TITLE!" > NUL 2>&1 && goto:treatGame
+
+        echo ---------------------------------------------------------
+        echo !GAME_TITLE! seems to be not installed in !CEMU_FOLDER:"=!
+        echo.
+        choice /C yn /N /M "Skip this game (y, n)? : "
+        echo.
+
+        if !ERRORLEVEL! EQU 1 (
+            echo ^> Skip !GAME_TITLE! data
+            goto:eof
+        )
+
+        :treatGame
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
             echo No meta folder not found under game folder ^?^, aborting ^^!
@@ -378,9 +401,6 @@ REM : functions
 
         set "startTitleId=%titleId:~0,8%"
         set "endTitleId=%titleId:~8,8%"
-
-        REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
-        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
         set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 

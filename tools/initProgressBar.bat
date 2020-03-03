@@ -21,6 +21,18 @@ REM : main
     REM : create the shortcut in !BFW_RESOURCES_PATH!
     call:fixShortcut
 
+    pushd !BFW_RESOURCES_PATH!
+
+    for /f "tokens=2,10-11" %%a in ('cmdOw.exe /p') do (
+        if "%%a"=="0" set "scrWidth=%%b" & set "scrHeight=%%c"
+    )
+
+    REM : flush logFile of RESOLUTION
+    call:cleanHostLogFile RESOLUTION
+
+    set "msg="RESOLUTION=!scrWidth!x!scrHeight!""
+    call:log2HostFile !msg!
+
     exit 0
 goto:eof
 
@@ -29,6 +41,23 @@ REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :cleanHostLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!logFile:"=!.bfw_tmp""
+        if exist !logFileTmp! (
+            del /F !logFile! > NUL 2>&1
+            move /Y !logFileTmp! !logFile! > NUL 2>&1
+        )
+
+        type !logFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !logFile! > NUL 2>&1
+        move /Y !logFileTmp! !logFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to update the shortcuts folder that become obsolete
     :fixShortcut
@@ -55,3 +84,27 @@ REM : functions
         if !ERRORLEVEL! EQU 0 del /F !TMP_VBS_FILE! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
+
+
+    REM : function to log info for current host
+    :log2HostFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        REM : build a relative path in case of software is installed also in games folders
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+
+        if not exist !logFile! (
+            set "logFolder="!BFW_LOGS:"=!""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2HostFile
+        )
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
+
+       :logMsg2HostFile
+        echo !msg!>> !logFile!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    

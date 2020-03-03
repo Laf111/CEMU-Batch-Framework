@@ -229,10 +229,8 @@ REM    call:checkGpFolders
 
     del /F !logFileTmp! > NUL 2>&1
 
-    if !gpfound! EQU 0 (
-        REM : relaunching the search in all gfx pack folder (V2 and up)
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
-    )
+    REM : relaunching the search in all gfx pack folder (V2 and up)
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
 
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
 

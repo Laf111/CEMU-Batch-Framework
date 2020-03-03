@@ -205,6 +205,10 @@ REM : functions
     :compress
         set "sf="!MLC01_FOLDER_PATH:"=!\usr\save\%~1\%endTitleId%""
 
+        REM : check if a user folder exist
+        set "userFolder="!sf:"=!\user"
+        if not exist !userFolder! goto:eof
+
         if exist !sf! (
             !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul !rarFile! !sf! > NUL 2>&1
             set "%1=!ERRORLEVEL!"

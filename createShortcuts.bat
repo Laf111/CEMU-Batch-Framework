@@ -1034,6 +1034,14 @@ REM
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : check if installed on an usb drive
+        set /A "installedOnUsb=0"
+        for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value 2^>NUL ^| find "="') do (
+            set "caption=%%i"
+            set "usbDrive=!caption:~0,-1!"
+            if ["!usbDrive!"] == ["!drive!"] set /A "installedOnUsb=1"
+        )
+        
         set "ARGS=ON"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
@@ -1044,6 +1052,17 @@ REM
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to enabling firmware update on the Wii-U
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
+        if !installedOnUsb! EQU 0 (
+            REM : create a shortcut to displayProgressBar.bat
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Enable BatchFw^'s progress bar^.lnk""
+            set "LINK_DESCRIPTION="Enable BatchFw^'s progress bar""
+            set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\enableProgressBar.ico""
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to enable progress bar
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+            )
+        )
         set "ARGS=OFF"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Disable firmware update on the Wii-U^.lnk""
@@ -1053,6 +1072,17 @@ REM
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to disabling firmware update on the Wii-U
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+        )
+        if !installedOnUsb! EQU 0 (
+            REM : create a shortcut to displayProgressBar.bat
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Disable BatchFw^'s progress bar^.lnk""
+            set "LINK_DESCRIPTION="Disable BatchFw^'s progress bar""
+            set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\disableProgressBar.ico""
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to disable progress bar
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+            )
         )
         set "ARGS="NONE""
 
@@ -1593,8 +1623,8 @@ REM
                 if !QUIET_MODE! EQU 0 echo ---------------------------------------------------------
                 if !QUIET_MODE! EQU 0 echo !GAME_TITLE! ^: shortcut for !user:"=! already exists^, skipped
             ) else (
+                if !gameDisplayed! EQU 1 set /A NB_GAMES_TREATED+=1
                 call:userGameShortcut !user!
-                set /A NB_GAMES_TREATED+=1
             )
         )
     goto:eof
@@ -1685,7 +1715,6 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
         if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
-        set /A NB_GAMES_TREATED+=1
     goto:eof
     REM : ------------------------------------------------------------------
 

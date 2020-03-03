@@ -6,6 +6,7 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
+    title Import all user^'s saves from a mlc01 target folder
 
     set "THIS_SCRIPT=%~0"
 
@@ -74,7 +75,6 @@ REM : main
     set "DATE=%ldt%"
 
     if %nbArgs% NEQ 0 goto:getArgsValue
-    title Import all user^'s saves from a mlc01 target folder
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
@@ -398,7 +398,7 @@ REM : functions
         pushd !BFW_RESOURCES_PATH!
 
         REM : get the rpxFilePath used
-        set "rpxFilePath="NONE""
+        set "rpxFilePath="NOT_FOUND""
         for /F "delims=~<> tokens=3" %%p in ('type !cs! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
 
         if [!rpxFilePath!] == ["NOT_FOUND"] goto:eof
@@ -424,16 +424,13 @@ REM : functions
 
         set "lst="!sf:"=!\!ls:"=!""
 
-        type !lst! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && (
+        REM : update !lst! games stats for !GAME_TITLE! using !cs! ones
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
+        wscript /nologo !StartHiddenWait! !toBeLaunch! !cs! !lst! !gid!
 
-            REM : update !lst! games stats for !GAME_TITLE! using !cs! ones
-            set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""
-            wscript /nologo !StartHiddenWait! !toBeLaunch! !cs! !lst! !gid!
+        echo.
+        echo !GAME_TITLE! ^: games stats were sucessfully imported for !currentUser!
 
-            echo.
-            echo !GAME_TITLE! ^: games stats were sucessfully imported for !currentUser!
-
-        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -458,7 +455,7 @@ REM : functions
         pushd !GAMES_FOLDER!
 
         REM : need to treat this game ?
-        type !cs! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && call:updateLastSettings
+        call:updateLastSettings
 
     goto:eof
     REM : ------------------------------------------------------------------

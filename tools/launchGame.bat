@@ -1746,9 +1746,9 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 set "previousSettingsFolder="NONE""
                 goto:continueLoad
             )
-            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
+            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^'^)^. If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
         ) else (
-            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^'^)^. If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
         )
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
@@ -1840,7 +1840,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if [!xmlUser!] == [!lst!] goto:cemuHookSettings
 
         REM : get the rpxFilePath used
-        set "rpxFilePath="NONE""
+        set "rpxFilePath="NOT_FOUND""
         for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
 
         if [!rpxFilePath!] == ["NOT_FOUND"] goto:cemuHookSettings

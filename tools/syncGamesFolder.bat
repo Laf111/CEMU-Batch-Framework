@@ -188,7 +188,7 @@ REM : main
     )
     :exiting
 
-    set "pat="!BFW_LOGS_PATH:"=!\fnr*.log""
+    set "pat="!BFW_PATH:"=!\logs\fnr*.log""
     del /F !pat! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal
@@ -224,13 +224,13 @@ REM : functions
         set "file="%~1""
         set "title=%~2"
 
-        set "ts=NOT_FOUND"
+        set "%3=NOT_FOUND"
 
         pushd !BFW_RESOURCES_PATH!
 
         REM : get the rpxFilePath used in source file
-        set "rpxFilePath="NONE""
-        for /F "delims=~<> tokens=3" %%p in ('type !sls! ^| find "<path>" ^| find "!title!" 2^>NUL') do set "rpxFilePath="%%p""
+        set "rpxFilePath="NOT_FOUND""
+        for /F "delims=~<> tokens=3" %%p in ('type !file! ^| find "<path>" ^| find "!title!" 2^>NUL') do set "rpxFilePath="%%p""
         if [!rpxFilePath!] == ["NOT_FOUND"] set "%3=NOT_FOUND" & goto:eof
 
         REM : get timestamp with RPX path
@@ -242,6 +242,29 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :getTimePlayed
+
+        set "file="%~1""
+        set "title=%~2"
+
+        set "%3=NOT_FOUND"
+
+        pushd !BFW_RESOURCES_PATH!
+
+        REM : get the rpxFilePath used in source file
+        set "rpxFilePath="NOT_FOUND""
+        for /F "delims=~<> tokens=3" %%p in ('type !file! ^| find "<path>" ^| find "!title!" 2^>NUL') do set "rpxFilePath="%%p""
+        if [!rpxFilePath!] == ["NOT_FOUND"] set "%3=NOT_FOUND" & goto:eof
+
+        REM : get timestamp with RPX path
+        call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/time_played/text()" !file! tp
+
+        REM : get time played value in source
+        set "%3=!tp!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :syncGamesStats
 
         set "currentUser=%~1"
@@ -249,16 +272,16 @@ REM : functions
         REM : source file
         set "ssf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
         if not exist !ssf! goto:eof
-        set "slls="!ssf:"=!\!currentUser!_lastSettings.txt"
+        set "slls="!ssf:"=!\!currentUser!_lastSettings.txt""
         if not exist !slls! goto:eof
 
         pushd !ssf!
-        for /F "delims=~" %%i in ('type !slls!') do set "sls=%%i"
+        for /F "delims=~" %%i in ('type !slls! 2^>NUL') do set "sls=%%i"
         if not exist !sls! goto:eof
-
         REM : user source last settings file
         set "slst="!ssf:"=!\!sls:"=!""
         if not exist !slst! goto:eof
+
 
         REM : RPX_FILE_PATH check
         type !slst! | find /I "!RPX_FILE_PATH:~4,-1!" > NUL 2>&1 && (
@@ -266,11 +289,11 @@ REM : functions
             REM : target file
             set "tsf="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\settings""
             if not exist !tsf! goto:eof
-            set "tlls="!tsf:"=!\!currentUser!_lastSettings.txt"
+            set "tlls="!tsf:"=!\!currentUser!_lastSettings.txt""
             if not exist !tlls! goto:eof
 
             pushd !tsf!
-            for /F "delims=~" %%i in ('type !tlls!') do set "tls=%%i"
+            for /F "delims=~" %%i in ('type !tlls! 2^>NUL') do set "tls=%%i"
             if not exist !tls! goto:eof
 
             REM : user source last settings file
@@ -278,40 +301,54 @@ REM : functions
             if not exist !tlst! goto:eof
 
             REM : get source timestamp
-            call:getTimeStamp !slst! !GAME_TITLE! sts
+            call:getTimeStamp !slst! "!GAME_TITLE!" sts
             if ["!sts!"] == ["NOT_FOUND"] goto:eof
 
             REM : get target timestamp
-            call:getTimeStamp !tlst! !TARGET_GAME_TITLE! tts
+            call:getTimeStamp !tlst! "!TARGET_GAME_TITLE!" tts
             if ["!tts!"] == ["NOT_FOUND"] goto:eof
 
+            REM : get source time played
+            call:getTimePlayed !slst! "!GAME_TITLE!" stp
+            if ["!stp!"] == ["NOT_FOUND"] goto:eof
+
+            REM : get target time played
+            call:getTimePlayed !tlst! "!GAME_TITLE!" ttp
+            if ["!ttp!"] == ["NOT_FOUND"] goto:eof
+            
             REM : divide by 10 to avoid int32 limits (2147483647 => 19/01/2038 03:14:07)	
             set /A "ttsdt=sts/10"
             set /A "stsdt=tts/10"
 
-            set "srcValue=!sts!"
-            set "tgtValue=!tts!"
+            set "srcTsValue=!sts!"
+            set "tgtTsValue=!tts!"
+            set "srcTpValue=!stp!"
+            set "tgtTpValue=!ttp!"
 
             set "folder=!sls!"
             set "target=!tls!"
-            set "prefix=^> Exporting"
+            set "prefix=> Exporting"
 
             REM : compare stsdt and ttsdt
             if !ttsdt! LSS !stsdt! (
                 REM : switch source and target
                 set "source=!target!"
                 set "target=!sls!"
-                set "srcValue=!tgtValue!"
-                set "tgtValue=!sts!"
-                set "prefix=^< Importing"
+                set "srcTsValue=!tgtTsValue!"
+                set "tgtTsValue=!sts!"
+                set "srcTpValue=!tgtTpValue!"
+                set "tgtTpValue=!stp!"
+                set "prefix=< Importing"
             )
 
             for %%a in (!tlst!) do set "parentFolder="%%~dpa""
             set "folder=!parentFolder:~0,-2!""
 
             REM : use fnr.exe to update
-            set "BfwSyncGsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSyncGsLog.log""
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "last_played>!srcValue!" --replace "last_played>!tgtValue!" --logFile !BfwSyncGsLog! > NUL
+            set "BfwSyncGsLog="!BFW_PATH:"=!\logs\fnr_BfwSyncGsLog.log""
+
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "last_played>!srcTsValue!" --replace "last_played>!tgtTsValue!" --logFile !BfwSyncGsLog!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "time_played>!srcTpValue!" --replace "time_played>!tgtTpValue!" --logFile !BfwSyncGsLog!
 
             echo !prefix! !title! !currentUser!^'s playtime stats to !folder! >> !myLog!
             echo !prefix! !title! !currentUser!^'s playtime stats to !folder!
@@ -550,12 +587,11 @@ REM : functions
         REM : basename of TARGET_GAME_FOLDER_PATH (to get TARGET_GAME_TITLE)
         for /F "delims=~" %%l in (!TARGET_GAME_FOLDER_PATH!) do set "TARGET_GAME_TITLE=%%~nxl"
 
-        cls
         echo ========================================================= >> !myLog!
         echo =========================================================
 
         if !QUIET_MODE! EQU 1 goto:loopOnUsers
-        echo - Sync !TARGET_GAME_TITLE! saves and transferable caches ^?
+        echo - Sync !TARGET_GAME_TITLE! ^?
         echo   ^(n^) ^: no^, skip
         echo   ^(y^) ^: yes ^(default value after 15s timeout^)
         echo.
@@ -576,33 +612,36 @@ REM : functions
         echo =========================================================
 
         :loopOnUsers
+        echo Sync games saves^.^.^. >> !myLog!
+        echo Sync games saves^.^.^.
+        echo.
 
         REM : For all users : sync saves
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
-            echo.
             call:syncSaveForUser !user!
         )
-        echo.
+
         echo ========================================================= >> !myLog!
         echo =========================================================
-        echo Sync transferable caches
+        echo Sync transferable caches^.^.^. >> !myLog!
+        echo Sync transferable caches^.^.^.
         echo.
         REM : sync transferable shader cache
         call:syncTsc
 
-        echo.
         echo ========================================================= >> !myLog!
         echo =========================================================
-        echo Sync games stats
+        echo Sync games stats^.^.^. >> !myLog!
+        echo Sync games stats^.^.^.
         echo.
 
         REM : For all users : sync saves
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
-            echo.
             call:syncGamesStats !user!
         )
+        timeout /T 3 > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

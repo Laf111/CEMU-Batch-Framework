@@ -287,6 +287,7 @@ REM : main
     set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
     set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
     set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+    del /F !csTmp!* > NUL 2>&1
 
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
@@ -960,7 +961,7 @@ REM : functions
         pushd !BFW_RESOURCES_PATH!
 
         REM : get the rpxFilePath used
-        set "rpxFilePath="NONE""
+        set "rpxFilePath="NOT_FOUND""
         for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<path>" ^| find "!GAME_TITLE!" 2^>NUL') do set "rpxFilePath="%%p""
 
         if [!rpxFilePath!] == ["NOT_FOUND"] goto:endFctSgs
