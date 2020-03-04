@@ -1,5 +1,7 @@
 04/03/2020 V16-9 :
 - fix : sync game stats failure in syncGamesFolder.bat
+- fix : logs in uninstall.bat
+- fix : existing profile files copied in _BatchFW_Missing_Games_Profiles
 
 03/03/2020 V16-8 :
 - fix : games treated not counted correctly in CreateShortcuts/Executables.bat

@@ -95,7 +95,7 @@ REM : main
     echo ========================================================= >> !batchFwLog!
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "bfwVersion=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
         set "bfwVersion=%%i"
         set "bfwVersion=!bfwVersion:"=!"
         goto:displayVersion
@@ -1678,11 +1678,15 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : its path if already saved under _BatchFW_Missing_Games_Profiles
         set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-        if exist !missingProfile! goto:isSettingsExist
+        if not exist !missingProfile! goto:isSettingsExist
 
-        REM : copy profile file in MISSING_PROFILES_FOLDER
+        REM : copy profile file in CEMU_FOLDER (PROFILE_FILE=NOT_FOUND)
         set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
-        robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
+
+        REM : deafult profile file
+        set "default="%CEMU_FOLDER:"=%\gameProfiles\default\%titleId%.ini""
+
+        if not exist !default! robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
 
         :isSettingsExist
 

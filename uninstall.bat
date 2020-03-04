@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     set "THIS_SCRIPT=%~0"
-    title !THIS_SCRIPT!
+    title Uninstall BatchFw
 
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_PATH=!SCRIPT_FOLDER:\"="!"
@@ -42,12 +42,13 @@ REM : main
     REM : get BatchFw version
     set "bfwVersion=NONE"
     set "setup="!BFW_PATH:"=!\setup.bat""
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "bfwVersion=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
         set "bfwVersion=%%i"
         set "bfwVersion=!bfwVersion:"=!"
         goto:cdGF
     )
     :cdGF
+    title Uninstall BatchFw !bfwVersion!
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -162,7 +163,7 @@ REM : main
     echo ---------------------------------------------------------
     :restoreMlc01
     set "mlc01Restored=0"
-    call:getUserInput "Restore mlc01 data of each games ? (y, n)" "y,n" ANSWER
+    call:getUserInput "Copy back mlc01 data of each games in a mlc01 folder? (y, n)" "y,n" ANSWER
     if [!ANSWER!] == ["n"] goto:restoreTransShaderCache
 
     :askMlc01Folder
@@ -238,7 +239,7 @@ REM : main
 
     :restoreSaves
     set "restoreUserSavesOfAllGames=0"
-    call:getUserInput "Restore all saves for all users to mlc01 folders ? (y, n)" "y,n" ANSWER
+    call:getUserInput "Restore all saves for all users to a mlc01 folder ? (y, n)" "y,n" ANSWER
 
     if [!ANSWER!] == ["n"] goto:removeExtraFolders
 
@@ -287,7 +288,6 @@ REM : main
     :removeFoldersLeft
     echo Do you want to remove all Cemu extra subfolders created^?
     echo That^'s included ^:
-    echo - all controllers profiles
     echo - all CEMU saved settings
     echo - your own graphic packs if created ones in Cemu game^'s subfolder
     echo That^'s excluded ^:
@@ -298,6 +298,7 @@ REM : main
     echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:removeShortcuts
 
+    pushd !GAMES_FOLDER!
     for /F "delims=~" %%x in ('dir /b /a:d /s mods 2^>NUL ^| find "Cemu"') do (
         echo At least one mods subfolder still exist in your games library^.
         echo Moving all mods folders in game^'s folders ^.^.^.
