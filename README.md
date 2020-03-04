@@ -71,6 +71,8 @@ The mlc01 path is in the game folder so:
 
 - Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
 
+- Synchronize saves, transferable cache and game stats between BatchFw installs;
+
 - Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
@@ -176,17 +178,12 @@ Code is well commented and is read only.
 
 ## Tutorials & videos:
 
-V11 (install, mlc01 import, gfx packs creation/completion... uninstall) : https://1drv.ms/v/s!Apr2zdKB1g7fghwWMdKpepl5S48C?e=UbjaQh
+Install, create a portable loadiine library : https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
 
-V12 (multi users without a Wii-U) : https://www.reddit.com/r/cemu/comments/ahkt5d/batchfw_v12_multiusers_mode_save_per_users_each/
+Online files installation for all users : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
-V13 (install/import games update and DLC) : https://www.reddit.com/r/cemu/comments/axw1ag/batchfw_v13_now_fully_silent_launchclose_3rd/
+Dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 
-V13-6 (online files installation for all users) : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
-
-V14 (settings and mods saved per user) : https://www.reddit.com/r/cemu/comments/cc606b/batchfw_v14_sync_saves_with_wiiu_for_all_wiiu/
-
-V16 dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 
 ## FAQ: 
 
