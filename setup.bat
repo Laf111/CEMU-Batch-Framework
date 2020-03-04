@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-8"
+    set "BFW_VERSION=V16-9"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -1047,7 +1047,7 @@ REM : main
     echo ---------------------------------------------------------
     echo For each games^, if no settings exist for a given
     echo version of CEMU^, BatchFw will try to find suitables
-    echo settings ^(saved for other version of CEMU on this host^)
+    echo settings ^(saved for other versions of CEMU on this host^)
     echo and so you won^'t have to re-define them^.
     echo.
     echo But you can choose to decide each time what to do^.

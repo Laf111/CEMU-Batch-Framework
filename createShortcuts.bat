@@ -501,7 +501,7 @@ REM    call:log2HostFile !msg!
     )
     if !QUIET_MODE! EQU 0 cls
     echo =========================================================
-    echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^:
+    echo Creating !CEMU_FOLDER_NAME! shortcuts for your games^.^.^.
     if !QUIET_MODE! EQU 0 echo =========================================================
 
     if !QUIET_MODE! EQU 0 (

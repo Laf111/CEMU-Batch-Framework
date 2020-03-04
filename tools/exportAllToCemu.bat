@@ -30,6 +30,9 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""

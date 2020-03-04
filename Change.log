@@ -1,3 +1,6 @@
+04/03/2020 V16-9 :
+- fix : sync game stats failure in syncGamesFolder.bat
+
 03/03/2020 V16-8 :
 - fix : games treated not counted correctly in CreateShortcuts/Executables.bat
 - fix : windows titles not displayed in restore*ForAllGames.bat
@@ -15,7 +18,7 @@
         'Wii-U Games\BatchFw\enable/disableProgressBar' 
 - add : recompute the current resolution on each run to set progress bar correctly
 - fix : bug in exportUserGamesStatsToCemu.bat
-- fix : replace call by external call for importSaves.bat i copy/moveMlc01Data.bat
+- fix : replace call by external call for importSaves.bat in copy/moveMlc01Data.bat
 
 
 27/02/2020 V16-7 :

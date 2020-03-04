@@ -73,10 +73,10 @@ REM : main
 
     REM : with no arguments to this script, activating user inputs
     set /A "QUIET_MODE=0"
-    echo Please select target games^' folder
+    echo Please select the target games^' folder ^(where BatchFw is installed^)
 
     :askGamesFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a games^' folder"') do set "folder=%%b" && set "TARGET_GAMES_FOLDER=!folder:?= !"
+    for /F %%b in ('cscript /nologo !browseFolder! "Select a games^' folder where BatchFw is installed"') do set "folder=%%b" && set "TARGET_GAMES_FOLDER=!folder:?= !"
     if [!TARGET_GAMES_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
@@ -173,7 +173,6 @@ REM : main
 
     call:searchGamesToSync
 
-    echo =========================================================
     echo #########################################################
     if !QUIET_MODE! EQU 1 goto:exiting
     echo ---------------------------------------------------------
@@ -313,22 +312,26 @@ REM : functions
             if ["!stp!"] == ["NOT_FOUND"] goto:eof
 
             REM : get target time played
-            call:getTimePlayed !tlst! "!GAME_TITLE!" ttp
+            call:getTimePlayed !tlst! "!TARGET_GAME_TITLE!" ttp
             if ["!ttp!"] == ["NOT_FOUND"] goto:eof
-            
-            REM : divide by 10 to avoid int32 limits (2147483647 => 19/01/2038 03:14:07)	
-            set /A "ttsdt=sts/10"
-            set /A "stsdt=tts/10"
 
+
+            REM : initialize local variables
             set "srcTsValue=!sts!"
             set "tgtTsValue=!tts!"
             set "srcTpValue=!stp!"
             set "tgtTpValue=!ttp!"
 
-            set "folder=!sls!"
+            for %%a in (!tlst!) do set "parentFolder="%%~dpa""
+            set "folder=!parentFolder:~0,-2!""
+
+            set "source=!sls!"
             set "target=!tls!"
             set "prefix=> Exporting"
 
+            REM : divide by 10 to avoid int32 limits (2147483647 => 19/01/2038 03:14:07)	
+            set /A "ttsdt=sts/10"
+            set /A "stsdt=tts/10"
             REM : compare stsdt and ttsdt
             if !ttsdt! LSS !stsdt! (
                 REM : switch source and target
@@ -338,20 +341,34 @@ REM : functions
                 set "tgtTsValue=!sts!"
                 set "srcTpValue=!tgtTpValue!"
                 set "tgtTpValue=!stp!"
+
+                for %%a in (!slst!) do set "parentFolder="%%~dpa""
+                set "folder=!parentFolder:~0,-2!""
+                
                 set "prefix=< Importing"
             )
 
-            for %%a in (!tlst!) do set "parentFolder="%%~dpa""
-            set "folder=!parentFolder:~0,-2!""
+            echo Source !currentUser! game stats of !GAME_TITLE! ^: >> !myLog!
+            echo - time played = !srcTpValue! >> !myLog!
+            echo - last played = !srcTsValue! >> !myLog!
+            echo - origin      = !source! >> !myLog!
+            echo.  >> !myLog!
+            echo Target !currentUser! game stats of !GAME_TITLE! ^: >> !myLog!
+            echo - time played = !tgtTpValue! >> !myLog!
+            echo - last played = !tgtTsValue! >> !myLog!
+            echo - origin      = !target! >> !myLog!
+            echo.  >> !myLog!
+            echo Target folder location = !folder! >> !myLog!
+            echo.  >> !myLog!
 
             REM : use fnr.exe to update
             set "BfwSyncGsLog="!BFW_PATH:"=!\logs\fnr_BfwSyncGsLog.log""
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "last_played>!srcTsValue!" --replace "last_played>!tgtTsValue!" --logFile !BfwSyncGsLog!
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "settings.xml" --find "time_played>!srcTpValue!" --replace "time_played>!tgtTpValue!" --logFile !BfwSyncGsLog!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "!currentUser!_settings.xml" --find "last_played>!tgtTsValue!" --replace "last_played>!srcTsValue!" --logFile !BfwSyncGsLog!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !folder! --fileMask "!currentUser!_settings.xml" --find "time_played>!tgtTpValue!" --replace "time_played>!srcTpValue!" --logFile !BfwSyncGsLog!
 
-            echo !prefix! !title! !currentUser!^'s playtime stats to !folder! >> !myLog!
-            echo !prefix! !title! !currentUser!^'s playtime stats to !folder!
+            echo !prefix! !title! !currentUser!^'s playtime stats >> !myLog!
+            echo !prefix! !title! !currentUser!^'s playtime stats
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -485,8 +502,6 @@ REM : functions
             echo Skip user !currentUser!
             goto:eof
         )
-        echo --------------------------------------------------------- >> !myLog!
-        echo ---------------------------------------------------------
 
         REM : targetRarFile
         set "targetRarFile="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!TARGET_GAME_TITLE!_!currentUser!.rar""
@@ -502,8 +517,8 @@ REM : functions
 
         REM : if files have the sames dates, exit
         if !srcDate! EQU !tgtDate! (
-            echo ^= saves file are identicals >> !myLog!
-            echo ^= saves file are identicals
+            echo ^= !currentUser! saves files dates are identicals >> !myLog!
+            echo ^= !currentUser! saves files dates are identicals
             goto:eof
         )
 
@@ -542,6 +557,13 @@ REM : functions
 
         REM : loop on bin file found under !GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\*.bin""
+        dir /B /S !pat! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+            echo ^? No transferable shader cache found >> !myLog!
+            echo ^? No transferable shader cache found
+            goto:eof
+        )
+
         for /F "delims=~" %%l in ('dir /B /S !pat! 2^>NUL') do (
             set "sourceTscFile="%%l""
 
@@ -604,17 +626,10 @@ REM : functions
             echo Skip this GAME
             goto:eof
         )
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH! >> !myLog!
-        echo !GAME_FOLDER_PATH! ^< = ^> !TARGET_GAME_FOLDER_PATH!
-        echo ========================================================= >> !myLog!
-        echo =========================================================
+        echo --------------------------------------------------------- >> !myLog!
+        echo ---------------------------------------------------------
 
         :loopOnUsers
-        echo Sync games saves^.^.^. >> !myLog!
-        echo Sync games saves^.^.^.
-        echo.
 
         REM : For all users : sync saves
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
@@ -622,19 +637,9 @@ REM : functions
             call:syncSaveForUser !user!
         )
 
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-        echo Sync transferable caches^.^.^. >> !myLog!
-        echo Sync transferable caches^.^.^.
-        echo.
         REM : sync transferable shader cache
         call:syncTsc
 
-        echo ========================================================= >> !myLog!
-        echo =========================================================
-        echo Sync games stats^.^.^. >> !myLog!
-        echo Sync games stats^.^.^.
-        echo.
 
         REM : For all users : sync saves
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (

@@ -503,7 +503,7 @@ REM    call:log2HostFile !msg!
     call:createFolder !launchersFolder!
 
     echo =========================================================
-    echo Creating !CEMU_FOLDER_NAME! executables for your games ^:
+    echo Creating !CEMU_FOLDER_NAME! executables for your games^.^.^.
     if !QUIET_MODE! EQU 0 echo =========================================================
 
     if !QUIET_MODE! EQU 0 (
