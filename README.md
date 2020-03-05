@@ -190,9 +190,9 @@ Install, create a portable loadiine library, complete/create and custom GFX pack
 
 - 25:45 : install on another host (HOST2)
 
-- 28:25 : importing BatchFw parameters on new host
+- 28:25 : automatic import of BatchFw parameters on new host
 
-- 38:00 : see that game stats follow
+- 38:00 : see that game stats follow (Host1 ones are completed)
 
 - 39:00 : how to remove all install traces on a host with one click
 
@@ -200,7 +200,7 @@ Install, create a portable loadiine library, complete/create and custom GFX pack
 
 - 40:48    - what if the drive letter change when my USB device is mounted ?
 
-- 41:40    - no need to rebuild the cache !
+- 41:40    - no need to rebuild the cache ! your games are ready to launch
 
 - 41:55    - transferable, saves and games stats have been updated when playing on HOST2 
 
@@ -210,7 +210,7 @@ Install, create a portable loadiine library, complete/create and custom GFX pack
 
 - 47:10 : pre/post treatments time when installed on a basic HDD (5400rpm)
 
-- 47:40 : disable progress bar on local installation
+- 47:40 : disable progress bar on a local installation
 
 - 48:45 : uninstall BatchFw
 
