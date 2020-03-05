@@ -279,6 +279,11 @@ REM : main
     REM : else, create profile file in CEMU_FOLDER
     if not exist !PROFILE_FILE! call:createGameProfile > NUL 2>&1
 
+    REM : if just created, copy it in MISSING_PROFILES_FOLDER (if a default one does not exist)
+    set "defaultProfile="!CEMU_PF:"=!\default\%titleId%.ini""
+    if not exist !missingProfile! if not exist !defaultProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
+
+
     :handleVersions
 
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
@@ -510,9 +515,6 @@ REM : main
     )
 
     type !gameInfoFile!
-
-    REM : if just created, copy it in MISSING_PROFILES_FOLDER
-    if not exist !missingProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
 
     REM : check CEMU options (and controllers settings)
 

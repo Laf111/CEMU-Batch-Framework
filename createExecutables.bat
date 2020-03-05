@@ -1657,8 +1657,9 @@ REM
                 set /A "gameDisplayed=2"
                 goto:eof
             )
-            set /A "gameDisplayed=1"
         )
+        if !gameDisplayed! EQU 0 set /A "gameDisplayed=1"
+
         REM : first user already skipped the game
         if !gameDisplayed! EQU 2 goto:eof
 

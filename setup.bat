@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V16-9"
+    set "BFW_VERSION=V17"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -830,7 +830,11 @@ REM : main
     if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     REM : flush logFile of TO_BE_LAUNCHED
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "TO_BE_LAUNCHED" 2^>NUL') do call:cleanHostLogFile TO_BE_LAUNCHED
+    call:cleanHostLogFile TO_BE_LAUNCHED
+
+    echo ---------------------------------------------------------
+    choice /C ny /N /M "Add a 3rd party software? (y,n): "
+    if !ERRORLEVEL! EQU 1 goto:askExtMlC01Folders
 
     :askS
     echo ---------------------------------------------------------
@@ -935,6 +939,33 @@ REM : main
         echo Exiting 10
     )
 
+    cls
+    timeout /T 3 > NUL 2>&1
+
+    echo ---------------------------------------------------------
+    echo For each games^, if no settings exist for a given
+    echo version of CEMU^, BatchFw will try to find suitables
+    echo settings ^(saved for other versions of CEMU on this host^)
+    echo and so you won^'t have to re-define them^.
+    echo.
+    echo But you can choose to decide each time what to do^.
+    echo If you cancel the import^, batchFw will collect your
+    echo settings for this version as for the first run^.
+    echo So you^'re sure to use the factory settings of this
+    echo version^.
+    echo.
+
+    if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
+
+    set "msg="AUTO_IMPORT_MODE=ENABLED""
+    REM : clean IMPORT_MODE in host log file
+    call:cleanHostLogFile AUTO_IMPORT_MODE
+
+    choice /C yn /CS /N /M "Decide when importing CEMU's settings from other versions? (y,n) : ?"
+    if !ERRORLEVEL! EQU 1 set "msg="AUTO_IMPORT_MODE=DISABLED""
+
+    call:log2HostFile !msg!
+    cls
     set "outputType=LNK"
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo What kind of outputs do you want to launch your games^?
@@ -1041,32 +1072,6 @@ REM : main
     call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
-    cls
-        timeout /T 3 > NUL 2>&1
-
-    echo ---------------------------------------------------------
-    echo For each games^, if no settings exist for a given
-    echo version of CEMU^, BatchFw will try to find suitables
-    echo settings ^(saved for other versions of CEMU on this host^)
-    echo and so you won^'t have to re-define them^.
-    echo.
-    echo But you can choose to decide each time what to do^.
-    echo If you cancel the import^, batchFw will collect your
-    echo settings for this version as for the first run^.
-    echo So you^'re sure to use the factory settings of this
-    echo version^.
-    echo.
-
-    if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
-
-    set "msg="AUTO_IMPORT_MODE=ENABLED""
-    REM : clean IMPORT_MODE in host log file
-    call:cleanHostLogFile AUTO_IMPORT_MODE
-
-    choice /C yn /CS /N /M "Decide when importing CEMU's settings from other versions? (y,n) : ?"
-    if !ERRORLEVEL! EQU 2 set "msg="AUTO_IMPORT_MODE=DISABLED""
-
-    call:log2HostFile !msg!
     cls
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
