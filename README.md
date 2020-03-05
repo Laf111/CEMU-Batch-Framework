@@ -181,22 +181,39 @@ Code is well commented and is read only.
 Install, create a portable loadiine library, complete/create and custom GFX packs, synchronize installs, revert, uninstall : https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
 
 02:00 - install games directly (only put game, DLC and update folder in your games'folder)
+
 07:45 - import saves/transferable cache/update/DLC and games stats from existing CEMU's installation
+
 19:45 - use the same shader cache for CEMU 1.15.18, 1.17.0 and 1.17.1 (slow build only one time on the first run)
+
 25:45 - use GFX packs created by batchFw on a game still not supported in the official repository
+
 25:45 - install on another host (HOST2)
+
 28:25 - importing BatchFw parameters on new host
+
 38:00 - see that game stats follow
+
 39:00 - how to remove all install traces on a host with one click
+
 40:25 - switch back to a host (HOST1) 
+
 40:48    - what if the drive letter change when my USB device is mounted ?
+
 41:40    - no need to rebuild the cache !
+
 41:55    - transferable, saves and games stats have been updated when playing on HOST2 
+
 44:40 - restore all data to "classic" CEMU install (including games stats)
+
 46:00 - synchronize your transferable cache, saves and games stats with other BatchFw's install
+
 47:10 - pre/post treatments time when installed on a basic HDD (5400rpm)
+
 47:40 - disable progress bar on local installation
+
 48:45 - uninstall BatchFw
+
 
 Online files installation for all users : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 
