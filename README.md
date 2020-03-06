@@ -61,23 +61,27 @@ The mlc01 path is in the game folder so:
 
 ## Main features:
 
-- Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
-
-- Supports CEMU accounts to import/export games saves;
-
-- Save all settings including controller profiles for each players per game;
-
-- Save separate CEMU settings per users (allow users to use differents mods);
-
-- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
-
-- Synchronize saves, transferable cache and game stats between BatchFw installs;
-
 - Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
+
+- Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
 
 - Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
 
 - Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for your aspect ratios used. BatchFw compute your aspect ratio with the current resolution on each hosts. Common TV aspect ratios are proposed and you can define your own aspect ratio (by giving a resolution if you don't know the fractional number corresponding); 
+
+- Save separate CEMU settings per users (allow users to use differents mods) and per hosts;
+
+- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
+
+- Synchronize controller profiles between CEMU installs;
+
+- Handle drive letter changing when used on an external drive (rebuild all the links so you can also use this feature if you want to move your games location);
+
+- Supports CEMU accounts to import/export games saves;
+
+- Provide scripts to import/export saves, transferable cache and game stats to a "classic" CEMU install (including CEMU accounts handling);
+
+- Synchronize saves, transferable cache and game stats between BatchFw installs;
 
 - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC);
 
@@ -108,11 +112,11 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
     
 ### Other features:
 
+- Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
+
 - GPU Cache backup/restore per game (AMD, NVIDIA / OpenGL, Vulkan);
 
 - Automatic GLCache cleanup when updating display drivers (CEMU leaves the old one);
-
-- Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
 
 - Push the CEMU process priority to "above nromal" to "high" to minimize FPS drops while in game;
 
@@ -132,7 +136,9 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
 
 - Automatic update (check availability);
 
-- check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution)
+- check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution);
+
+- optional progress bar to follow pre and post treatments
 
 
 ## Install: 
@@ -143,9 +149,9 @@ You'll only have to start/stop the ftpiiu server on your Wii-U and launch the pr
     - if you use external mlc01 folders per user, import all of them
     - if you use a CEMU installs per user, register all installs with importing mlc01 data   
 
-When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to create shortcuts (users already defined on another host are imported automatically, online files as well). 
+When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to create shortcuts (users and trird party software already defined on another host are imported automatically, online files as well). 
 
-Settings are saved by host (and per users). Transferable cache, controller profiles, graphic packs are shared/completed by all hosts.
+Settings are saved by host (and per users). Transferable cache, controller profiles, graphic packs are shared/completed by all users on all hosts.
 
 
 
@@ -198,17 +204,17 @@ Install, create a portable loadiine library, complete/create and custom GFX pack
 
 - 40:25 : switch back to a host (HOST1) 
 
-- 40:48    - what if the drive letter change when my USB device is mounted ?
+- 40:48 : what if the drive letter change when my USB device is mounted ?
 
-- 41:40    - no need to rebuild the cache ! your games are ready to launch
+- 41:40 : no need to rebuild the cache ! your games are ready to launch
 
-- 41:55    - transferable, saves and games stats have been updated when playing on HOST2 
+- 41:55 : transferable, saves and games stats have been updated when playing on HOST2 
 
 - 44:40 : restore all data to "classic" CEMU install (including games stats)
 
 - 46:00 : synchronize your transferable cache, saves and games stats with other BatchFw's install
 
-- 47:10 : pre/post treatments time when installed on a basic HDD (5400rpm)
+- 47:10 : pre/post treatments times when installed on a basic HDD (5400rpm)
 
 - 47:40 : disable progress bar on a local installation
 
