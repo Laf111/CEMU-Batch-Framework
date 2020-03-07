@@ -2,7 +2,7 @@
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-Versions of CEMU supported : **1.11.1 to 1.17.2**
+Versions of CEMU supported : **1.11.1 to 1.17.3**
 
 (if you want to use earlier versions, create an installation per game and per user)
 
@@ -161,7 +161,7 @@ Settings are saved by host (and per users). Transferable cache, controller profi
 
     - "C:\Users\\%USERNAME%\Desktop\Wii-U Games\BatchFW\Create CEMU's shortcuts for selected games.lnk" for a single CEMU version;
 
-    - "C:\Users\\%USERNAME%\Desktop\Wii-U Games\BatchFW\Register CEMU installs.lnk" for more than one version (call setup.bat in silent mode);
+    - "C:\Users\\%USERNAME%\Desktop\Wii-U Games\BatchFW\Set BatchFw settings and register CEMU installs.lnk" for more than one version (call setup.bat in silent mode);
 
 - You want to change the way how Cemu is launched?: delete the shortcuts and re-create them;
 
