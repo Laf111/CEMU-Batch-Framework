@@ -12,7 +12,9 @@ Last GFX packs checked (presets completion) : **V641**
 
 ## Main purpose:
 
-- **Making easier the installation of many versions of CEMU to launch your games (keeping as stable as possible for your games and your rig);**
+- **Making easier the installation of many versions of CEMU to launch your games (with BatchFw CEMU installs size only few MB);**
+
+- **Avoid regression on games (and to be obliged to downgrade CEMU version) by keeping the best version for each games (CEMU as reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);** 
 
 - **Handle more than one user/save (also with versions of CEMU < 1.15.19);**
 
