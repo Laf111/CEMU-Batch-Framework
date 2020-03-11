@@ -14,7 +14,7 @@ Last GFX packs checked (presets completion) : **V641**
 
 - **Making easier the installation of many versions of CEMU to launch your games (with BatchFw CEMU installs size only few MB);**
 
-- **Avoid regression on games (and be obliged to downgrade CEMU version) by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);** 
+- **Avoid regression on games (and downgrade CEMU version) by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);** 
 
 - **Handle more than one user/save (also with versions of CEMU < 1.15.19);**
 
