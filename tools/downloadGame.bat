@@ -194,7 +194,7 @@ REM : main
     )
 
     REM : download the game
-    wscript /nologo !Start! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
+    wscript /nologo !StartWait! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
 
     REM : compute update and DLC titleId
     set "titleId=!titleIds[%index%]!"
@@ -204,14 +204,14 @@ REM : main
     REM : if a update exist, download it
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
-        wscript /nologo !Start! !download! !JNUSFolder! !utid! !decryptMode!
+        wscript /nologo !StartWait! !download! !JNUSFolder! !utid! !decryptMode!
     )
 
     set "dtid=0005000c!endTitleId!"
     REM : if a DLC exist, download it
     type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
-        wscript /nologo !Start! !download! !JNUSFolder! !dtid! !decryptMode!
+        wscript /nologo !StartWait! !download! !JNUSFolder! !dtid! !decryptMode!
     )
 
     REM : wait until all transferts are done
