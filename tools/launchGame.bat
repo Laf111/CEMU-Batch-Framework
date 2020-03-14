@@ -19,6 +19,8 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "initProgressBar="!BFW_TOOLS_PATH:"=!\initProgressBar.bat""
     set "progressBar="!BFW_RESOURCES_PATH:"=!\progressBar.lnk""

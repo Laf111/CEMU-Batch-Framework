@@ -24,6 +24,10 @@ REM : main
     for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution 2^> NUL ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
         call:treatGp "%%i"
     )
+    REM : V5 gfx packs
+    for /F "delims=~" %%i in ('dir /B  /A:D *_Graphics 2^> NUL') do (
+        call:treatGp "%%i"
+    )
     pause
     goto:eof
 REM : ------------------------------------------------------------------
@@ -56,7 +60,7 @@ REM : functions
 
         for /F "delims=~" %%i in (%1) do set "name=%%~nxi"
         for /F "tokens=1 delims=_" %%j in ("!name!") do set "title=%%j"
-        set "rulesFile="%~1\rules.txt""
+        set "rulesFile="!BFW_GP_FOLDER:"=!\%~1\rules.txt""
 
         for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "tid=%%k"
         echo #########################################################

@@ -111,6 +111,7 @@ REM : functions
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogBegp!
 
         set "gameName=NONE"
+        set /A "v5pack=0"
 
         REM : check if a gfx pack with version > 2 exists ?
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
@@ -125,6 +126,23 @@ REM : functions
             REM : get the game's name from it
             for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
             set "gameName=!str:_Resolution=!"
+
+            goto:handleGfxPacks
+        )
+        REM : check if a gfx pack with version >=5 exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Graphics\"') do (
+
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            echo GFX pack found ^: !rulesFile!
+            echo.
+
+            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            REM : get the game's name from it
+            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
+            set "gameName=!str:_Graphics=!"
+            set /A "v5pack=1"
 
             goto:handleGfxPacks
         )

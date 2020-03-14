@@ -9,14 +9,6 @@ REM : main
 
     set "THIS_SCRIPT=%~0"
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-        exit 1
-    )
-
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -748,35 +740,6 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         echo   to fix^, overwrite game^'s file with its last update or if no update
         echo   are available^, re-dump the game ^!
         exit /b 2
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : ------------------------------------------------------------------
-    REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
 

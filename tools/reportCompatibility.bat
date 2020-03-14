@@ -158,7 +158,7 @@ REM : main
     set "DLC=no"
     set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\%beginTitleId%\%endTitleId%\aoc\meta\meta.xml""
     if exist !META_FILE_DLC! set "DLC=yes"
-    set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\0005000c\%endTitleId%\aoc\meta\meta.xml""
+    set "META_FILE_DLC="!MLC01_FOLDER_PATH:"=!\usr\title\0005000c\%endTitleId%\meta\meta.xml""
     if exist !META_FILE_DLC! set "DLC=yes"
 
     REM : update GAME_VERSION,DLC,ShaderCahe in gameInfoFile

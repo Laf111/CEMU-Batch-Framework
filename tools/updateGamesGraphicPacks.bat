@@ -605,6 +605,27 @@ REM    REM : ------------------------------------------------------------------
 
             goto:handleGfxPacks
         )
+
+        REM : check if a gfx pack with version >= 5 exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "Graphics\"') do (
+            set "gpfound=1"
+
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            REM : graphic pack
+            set "LastVersionfound=1"
+
+            echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
+
+            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            REM : get the game's name from it
+            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
+            set "gameName=!str:_Graphics=!"
+
+            goto:handleGfxPacks
+        )
+
         REM : No new gfx pack found but is a V2 gfx pack exists ?
         if not exist !BFW_LEGACY_GP_FOLDER! goto:handleGfxPacks
 

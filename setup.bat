@@ -332,7 +332,7 @@ REM : main
         echo No RPX games were found
         echo.
 
-        call:getUserInput "Dumps games from your Wii-U (1) or import dumps (2), cancel (c) ?" "1,2,c" ANSWER
+        call:getUserInput "Dumps games from your Wii-U (1), import dumps (2), download a game (3) or cancel (c) ?" "1,2,3,c" ANSWER
         if [!ANSWER!] == ["c"] (
             echo So exiting^.^.^.
             echo _BatchFW_Install folder must be located in your loadiines ^(^*^.rpx^) games folder
@@ -340,14 +340,21 @@ REM : main
             exit 55
         )
         if [!ANSWER!] == ["1"] goto:useWiiU
-        REM : calling importGames.bat
-        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
-        call !tobeLaunch! !GAMES_FOLDER!
+        if [!ANSWER!] == ["2"] (
+            REM : calling importGames.bat
+            set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
+            call !tobeLaunch! !GAMES_FOLDER!
+        )
+        if [!ANSWER!] == ["3"] (
+            REM : calling downloadGames.bat
+            set "tobeLaunch="!BFW_TOOLS_PATH:"=!\downloadGame.bat""
+            call !tobeLaunch! !GAMES_FOLDER!
+        )
 
-        echo ---------------------------------------------------------
-        echo ^> Games ready for emulation
         timeout /T 3 > NUL 2>&1
         cls
+
+
     )
     if %QUIET_MODE% EQU 0 (
 

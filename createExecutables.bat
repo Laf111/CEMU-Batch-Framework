@@ -1090,6 +1090,16 @@ REM
         )
         set "ARGS="NONE""
 
+        REM : create a shortcut to downloadGame.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download a Game^.lnk""
+        set "LINK_DESCRIPTION="Download a Wii-U title for CEMU or your Wii-U""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGame.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGame.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to downloadGame^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        
         REM : create a shortcut to progressBar.bat (if needed)
         set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar^.lnk""
         set "LINK_DESCRIPTION="Link to progressBar""

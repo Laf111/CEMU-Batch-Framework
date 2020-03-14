@@ -8,15 +8,6 @@ REM : main
     color F0
     set "THIS_SCRIPT=%~0"
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-
-        exit /b 1
-    )
-
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -356,6 +347,7 @@ REM : main
     set "newGpNameFolder=!gpNameFolder:_graphicPacksV2\=!"
     set "newGpName=!gpNameFolder:_%resX2%p=!"
     set "newGpV3="!BFW_GP_FOLDER:"=!\!newGpName:"=!_Resolution""
+    set "newGpV3="!BFW_GP_FOLDER:"=!\!newGpName:"=!_Graphics""
     if not exist !newGpV3! mkdir !newGpV3! > NUL 2>&1
 
     set "bfwRulesFile="!newGpV3:"=!\rules.txt""
@@ -503,7 +495,7 @@ REM : functions
         set "gpResX2="
         set /A "showEdFlag=0"
 
-        if !vGfxPack! NEQ 2 (
+        if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 (
             set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
             if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
             set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
@@ -518,7 +510,7 @@ REM : functions
         )
 
         REM : reset extra directives file
-        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         REM : create missing resolution graphic packs
         for /L %%a in (0,1,!nbAr!) do (
@@ -531,11 +523,11 @@ REM : functions
                 if ["!aspectRatiosArray[%%a]!"] == ["683-384"] call:createMissingRes "377-192" "16/9 laptop windowed"
             )
             REM : reset extra directives file
-            if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+            if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
         )
 
-        if !vGfxPack! NEQ 2 del /F !extraDirectives! > NUL 2>&1
-        if !vGfxPack! NEQ 2 del /F !extraDirectives169! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 del /F !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 del /F !extraDirectives169! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -858,7 +850,7 @@ REM : functions
         REM : complete full screen GFX presets (and packs for GFX packs V2)
 
         REM : reset extra directives file (V3 and up)
-        if !vGfxPack! NEQ 2 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
+        if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
         call:setPresets
 
@@ -898,6 +890,14 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : add a resolution bloc BEFORE the native one in rules.txt
+    :pushFrontV5
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory = Resolution" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = Resolution\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16:9 Default)\ncategory = Resolution" --logFile !logFileNewGp!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
@@ -910,6 +910,13 @@ REM pause
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : add a resolution bloc AFTER the native one in rules.txt
+    :pushBackV5
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory = Resolution" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16:9 Default)\ncategory = Resolution\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = Resolution\n$width = !wc!\n$height = !hc!" --logFile !logFileNewGp!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to add an extra 16/9 preset in graphic pack of the game
     :addPresets169
@@ -918,6 +925,7 @@ REM pause
         if exist !BFW_GPV2_FOLDER! (
 
             set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Graphics=!""
             set "newGp="!gpPath:"=!_!hc!p""
             set "gpResX2="!gpPath:"=!_%resX2%p""
 
@@ -959,8 +967,15 @@ REM pause
         set "logFileNewGp="!fnrLogFolder:"=!\!gpFolderName:"=!-NewGp_!hc!x!wc!.log""
         if exist !logFileNewGp! del /F !logFileNewGp! > NUL 2>&1
 
-        if !hc! GTR !nativeHeight! call:pushBack
-        if !hc! LSS !nativeHeight! call:pushFront
+        if !hc! GTR !nativeHeight! (
+            if !vGfxPack! NEQ 5 call:pushBack
+            if !vGfxPack! EQU 5 call:pushBackV5
+        )
+
+        if !hc! LSS !nativeHeight! (
+            if !vGfxPack! NEQ 5 call:pushFront
+            if !vGfxPack! EQU 5 call:pushFrontV5
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1071,6 +1086,7 @@ REM pause
         if exist !BFW_GPV2_FOLDER! (
 
             set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Graphics=!""
             set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
             set "gpResX2="!gpPath:"=!_%resX2%p""
 
@@ -1129,43 +1145,16 @@ REM pause
 
         if not ["!edu!"] == [""] (
 
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+            if !vGfxPack! NEQ 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
+        if !vGfxPack! NEQ 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
+
+        if !vGfxPack! EQU 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight!" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------
-
-    REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
 
     REM : function to get and set char set code for current host
     :setCharSet
