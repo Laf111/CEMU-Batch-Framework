@@ -85,7 +85,7 @@ REM : main
 
     for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!pat!" ^| find /I "00050000" ^| find /I /V "Demo" 2^>NUL') do (
         set "titleIds[!nbRes!]=%%a"
-        set "titleKey[!nbRes!]=%%b"
+        set "titleKeys[!nbRes!]=%%b"
         set "titles[!nbRes!]="%%c""
         set "regions[!nbRes!]=%%d"
         set /A "nbRes+=1"
