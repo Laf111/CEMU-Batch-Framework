@@ -1,0 +1,37 @@
+2. Command line (when you want to provide a key or use a titleid that is not in the list)
+Code:
+
+java -jar JNUSTool.jar TITLEID
+
+Replace the TITLEID with the title id you want to download (e.g. 0005000E1011A700). You can also add a version number ("v" prefix). e.g.
+Code:
+
+java -jar JNUSTool.jar 0005000E1011A700 v16
+
+To download the encrypted data, just append the string "-dlEncrypted".
+Code:
+
+java -jar JNUSTool.jar 0005000E1011A700 v16 -dlEncrypted
+
+You can download decrypted files via comandline with the -file argument. The argument after -files is regular expression that will be used.
+
+Example for downloading the app.xml only
+Code:
+
+java -jar JNUSTool.jar 0005000E1011A700  -file /code/app.xml
+
+Example for downloading the code folder only
+Code:
+
+java -jar JNUSTool.jar 0005000E1011A700  -file /code/.*
+
+Example for downloading all .szs files
+Code:
+
+java -jar JNUSTool.jar 0005000E1011A700  -file .*.szs
+
+To decrypted encrypted data, put the files into a created "tmp_TITLEID" folder. For example when you have the title id "0005000012345678" out the files in the folder "tmp_0005000012345678" and do:
+Code:
+
+java -jar JNUSTool.jar 0005000012345678
+
