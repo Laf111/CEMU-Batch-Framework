@@ -253,7 +253,7 @@ REM : main
     ) else (
 
         REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
-        if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName!
+        if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
 
         REM : if exist "GAME_TITLE [XXXXXX]\updates"
         set "folder="!gameFolderName:"=!\updates""
