@@ -24,6 +24,8 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    
 
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
@@ -421,6 +423,7 @@ REM : functions
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found ^?^, exiting 1
+            pause
             exit /b 9
         )
         REM : set char code set, output to host log file
@@ -431,4 +434,25 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2HostFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        REM : build a relative path in case of software is installed also in games folders
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+
+        if not exist !logFile! (
+            set "logFolder="!BFW_LOGS:"=!""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2HostFile
+        )
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
+
+       :logMsg2HostFile
+        echo !msg!>> !logFile!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
