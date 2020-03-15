@@ -30,7 +30,6 @@ REM : main
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
-    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -197,7 +196,7 @@ REM : main
     )
 
     REM : download the game
-    wscript /nologo !Start! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
+    wscript /nologo !StartWait! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
 
     REM : compute update and DLC titleId
     set "titleId=!titleIds[%index%]!"
@@ -217,12 +216,12 @@ REM : main
         wscript /nologo !StartWait! !download! !JNUSFolder! !dtid! !decryptMode!
     )
 
-    REM : wait until all transferts are done
-    :waitingLoop
-    wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
-        timeout /T 1 > NUL 2>&1
-        goto:waitingLoop
-    )
+REM    REM : wait until all transferts are done
+REM    :waitingLoop
+REM    wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+REM        timeout /T 1 > NUL 2>&1
+REM        goto:waitingLoop
+REM    )
     echo ===============================================================
 
     REM : update and DLC target folder names
