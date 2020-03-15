@@ -298,17 +298,17 @@ REM : functions
         echo First we need to find a ^'Wii U common key^' with google
         echo It should be 32 chars long and start with ^'D7^'^.
         echo.
-        timeout /T 4 > NUL 2>&1
+        timeout /T 3 > NUL 2>&1
         
-        wscript /nologo !StartWait! !explorer! "https://www.google.com/search?q=Wii-U+"common+key"+D7"
+        wscript /nologo !StartWait! !explorer! "https://www.google.com/search?q=Wii-U+common+key+D7"
         echo.
         echo Now replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
         echo and save^.
         echo.
-        timeout /T 4 > NUL 2>&1
+        timeout /T 3 > NUL 2>&1
         set "config="!JNUSFolder:"=!\config""
         wscript /nologo !StartWait! !notePad! !config!
-        timeout /T 4 > NUL 2>&1
+        timeout /T 3 > NUL 2>&1
         
         REM ping  -n 1 !wiiutitlekeysSite! > NUL 2>&1
         REM if !ERRORLEVEL! NEQ 0 (
@@ -342,18 +342,36 @@ REM : functions
 
         REM : convert CRLF -> LF (WINDOWS-> UNIX)
         set "uTdLog="!BFW_PATH:"=!\logs\fnr_titleKeys.log""
+        del /F !uTdLog! > NUL 2>&1
 
-        REM : edge
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n0" --replace "\n\n" --logFile !uTdLog!
+        REM : if found '0 \t\r\n' -> firefox
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --logFile !uTdLog!
+        type !uTdLog! | find /I /V "^!" | find "File:" > NUL 2>&1 && (
+
+            REM : firefox
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --replace "0\t" --logFile !uTdLog!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find " \t" --replace "\t" --logFile !uTdLog!
+            goto:delLog
+        )
+        REM : else      
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0\t " --logFile !uTdLog!
+        REM : if found '\t \t' -> Chrome
+        type !uTdLog! | find /I /V "^!" | find "File:" > NUL 2>&1 && (
+
+            REM : Chrome
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
+            goto:delLog    
+        )
+        
+        REM : else
+
+        REM : Edge
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n0" --replace "\n\n0" --logFile !uTdLog!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n" --replace "\t" --logFile !uTdLog!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t \t" --replace "\t" --logFile !uTdLog!
-        REM : firefox
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --replace "0\t" --logFile !uTdLog!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find " \t" --replace "\t" --logFile !uTdLog!
-        REM : chrome
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
 
+        :delLog
         del /F !uTdLog! > NUL 2>&1
     goto:eof
     REM : ------------------------------------------------------------------
