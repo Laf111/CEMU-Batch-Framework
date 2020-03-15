@@ -25,7 +25,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
-    
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""    
 
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
@@ -39,6 +39,10 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "download="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
+    
+    set "notePad="%windir%\System32\notepad.exe""
+    set "explorer="%windir%\explorer.exe""
+        
     REM : output folder
     set "targetFolder=!GAMES_FOLDER!"
 
@@ -75,12 +79,8 @@ REM : main
     set /P  "pat=Enter a key word to search for the game (part of the title, titleId...): "
     echo.
     echo =========================== Matches ===========================
-    REM : get userArray, choice args
+    REM : get userArray
     set /A "nbRes=0"
-    set "titleIds="
-    set "titleKeys="
-    set "titles="
-    set "regions="
 
     for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!pat!" ^| find /I "00050000" ^| find /I /V "Demo" 2^>NUL') do (
         set "titleIds[!nbRes!]=%%a"
@@ -293,17 +293,23 @@ REM : functions
     :createKeysFile
 
         echo No keys file found^, let^'s create it
-
-        REM : get the default internet browser
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-
-        if [!defaultBrowser!] == ["NOT_FOUND"] (
-            echo WARNING^: failed to find an internet browser
-            echo Open the following page by your own !wiiutitlekeysSite!
-            goto:howTo
-        )
-
+        echo.
+        
+        echo First we need to find a ^'Wii U common key^' with google
+        echo It should be 32 chars long and start with ^'D7^'^.
+        echo.
+        timeout /T 4 > NUL 2>&1
+        
+        wscript /nologo !StartWait! !explorer! "https://www.google.com/search?q=Wii-U+"common+key"+D7"
+        echo.
+        echo Now replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
+        echo and save^.
+        echo.
+        timeout /T 4 > NUL 2>&1
+        set "config="!JNUSFolder:"=!\config""
+        wscript /nologo !StartWait! !notePad! !config!
+        timeout /T 4 > NUL 2>&1
+        
         REM ping  -n 1 !wiiutitlekeysSite! > NUL 2>&1
         REM if !ERRORLEVEL! NEQ 0 (
             REM echo ERROR^: !wiiutitlekeysSite! does not respond^.
@@ -313,35 +319,38 @@ REM : functions
             REM exit 58
         REM )
 
-        echo Openning !wiiutitlekeysSite!
+        echo Now^, openning !wiiutitlekeysSite! to create a keys file
         timeout /T 3 > NUL 2>&1
 
-        wscript /nologo !Start! !defaultBrowser! !wiiutitlekeysSite!
+        wscript /nologo !Start! !explorer! !wiiutitlekeysSite!
         :howTo
         echo.
-        echo If the site is down^, get another one with a google search
+        echo If the site is down^, or if you want to update the list
+        echo get another one with a google search^.
         echo Edit !THIS_SCRIPT!
         echo and change wiiutitlekeysSite variable^.
         echo.
         echo.
         echo To create the keys file ^:
         echo.
-
-
-        echo.
         echo  1^. select all in this page ^(CTRL+A^)
         echo  2^. paste all in notepad
         echo  3^. save the file and close notepad
         echo.
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" "!JNUSFolder:"=!\titleKeys.txt"
 
+        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
 
         REM : convert CRLF -> LF (WINDOWS-> UNIX)
         set "uTdLog="!BFW_PATH:"=!\logs\fnr_titleKeys.log""
 
-        REM : replace all \t\t by \t
+        REM : edge
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n0" --replace "\n\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n" --replace "\t" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t \t" --replace "\t" --logFile !uTdLog!
+        REM : firefox
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --replace "0\t" --logFile !uTdLog!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find " \t" --replace "\t" --logFile !uTdLog!
+        REM : chrome
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
 
