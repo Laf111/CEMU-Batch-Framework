@@ -178,8 +178,8 @@ REM : main
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
     if !decryptMode! EQU 0 (
-        echo ^> Downloading WUP packages of !titles[%index%]! [!regions[%index%]!]^.^.^.
-        title Downloading WUP packages of !titles[%index%]! [!regions[%index%]!]
+        echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^.
+        title Downloading WUP of !titles[%index%]! [!regions[%index%]!]
     ) else (
 
         set "finalPath="!GAMES_FOLDER:"=!\!gameFolderName:"=!"
@@ -191,8 +191,8 @@ REM : main
             exit 61
         )
 
-        echo ^> Downloading RPX packages of !titles[%index%]! [!regions[%index%]!]^.^.^.
-        title Downloading RPX packages of !titles[%index%]! [!regions[%index%]!]
+        echo ^> Downloading RPX package of !titles[%index%]! [!regions[%index%]!]^.^.^.
+        title Downloading RPX package of !titles[%index%]! [!regions[%index%]!]
     )
 
     REM : download the game
