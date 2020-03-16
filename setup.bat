@@ -947,32 +947,6 @@ REM : main
     )
 
     cls
-    timeout /T 3 > NUL 2>&1
-
-    echo ---------------------------------------------------------
-    echo For each games^, if no settings exist for a given
-    echo version of CEMU^, BatchFw will try to find suitables
-    echo settings ^(saved for other versions of CEMU on this host^)
-    echo and so you won^'t have to re-define them^.
-    echo.
-    echo But you can choose to decide each time what to do^.
-    echo If you cancel the import^, batchFw will collect your
-    echo settings for this version as for the first run^.
-    echo So you^'re sure to use the factory settings of this
-    echo version^.
-    echo.
-
-    if %QUIET_MODE% EQU 1 timeout /t 2 > NUL 2>&1
-
-    set "msg="AUTO_IMPORT_MODE=ENABLED""
-    REM : clean IMPORT_MODE in host log file
-    call:cleanHostLogFile AUTO_IMPORT_MODE
-
-    choice /C yn /CS /N /M "Decide when importing CEMU's settings from other versions? (y,n) : ?"
-    if !ERRORLEVEL! EQU 1 set "msg="AUTO_IMPORT_MODE=DISABLED""
-
-    call:log2HostFile !msg!
-    cls
     set "outputType=LNK"
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo What kind of outputs do you want to launch your games^?
