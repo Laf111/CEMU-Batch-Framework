@@ -7,9 +7,6 @@ REM : main
 
     color 4F
 
-    REM : wiiu title keys Site
-    set "wiiutitlekeysSite="http://wiiutitlekeys.altervista.org""
-
     set "THIS_SCRIPT=%~0"
 
     title Search and download a game
@@ -25,7 +22,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
-    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""    
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
@@ -39,10 +36,10 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "download="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
-    
+
     set "notePad="%windir%\System32\notepad.exe""
     set "explorer="%windir%\explorer.exe""
-        
+
     REM : output folder
     set "targetFolder=!GAMES_FOLDER!"
 
@@ -61,11 +58,12 @@ REM : main
         pause
         exit 51
     )
-    
+
     REM : set current char codeset
     call:setCharSet
-    
+
     set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
+
     if not exist !titleKeysDataBase! call:createKeysFile
 
     if not exist !titleKeysDataBase! (
@@ -96,6 +94,17 @@ REM : main
     echo c ^: to cancel
     echo ---------------------------------------------------------------
     echo.
+    echo If your search failed^, check the format of
+    echo !titleKeysDataBase!
+    echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
+    echo ^(columns separated with a TAB^)
+    echo.
+    echo If your search failed on a ^"recent game^"^, try to update
+    echo !titleKeysDataBase!
+    echo with a newer database^.
+    echo.
+    echo.
+
     :askChoice
     set /p "answer=Enter your choice : "
 
@@ -216,12 +225,6 @@ REM : main
         wscript /nologo !StartWait! !download! !JNUSFolder! !dtid! !decryptMode!
     )
 
-REM    REM : wait until all transferts are done
-REM    :waitingLoop
-REM    wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
-REM        timeout /T 1 > NUL 2>&1
-REM        goto:waitingLoop
-REM    )
     echo ===============================================================
 
     REM : update and DLC target folder names
@@ -278,6 +281,28 @@ REM    )
         REM : call importGames.bat on current folder
         set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
         call !tobeLaunch! !JNUSFolder!
+
+        echo ---------------------------------------------------------
+        echo ^> Games ready for emulation
+        echo.
+        echo.
+
+        echo New Games were added to your library^, launching setup^.bat^.^.^.
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        timeout /T 3 > NUL 2>&1
+
+        REM : last loaction used for batchFw outputs
+
+        REM : get the last location from logFile
+        set "OUTPUT_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
+        if not [!OUTPUT_FOLDER!] == ["NONE"] (
+            set "pf=!OUTPUT_FOLDER:\Wii-U Games=!"
+            wscript /nologo !Start! !setup! !pf!
+        ) else (
+            wscript /nologo !Start! !setup!
+        )
+        
     )
     rmdir /Q /S !initialGameFolderName! > NUL 2>&1
 
@@ -292,87 +317,37 @@ REM : functions
     REM : create keys file
     :createKeysFile
 
-        echo No keys file found^, let^'s create it
+        echo To use this feature^, you^'ll have to setup JNUSTool
+        echo and get the files requiered by yourself^.
         echo.
-        
-        echo First we need to find a ^'Wii U common key^' with google
-        echo It should be 32 chars long and start with ^'D7^'^.
-        echo.
-        timeout /T 3 > NUL 2>&1
-        
-        wscript /nologo !StartWait! !explorer! "https://www.google.com/search?q=Wii-U+common+key+D7"
-        echo.
-        echo Now replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
-        echo and save^.
-        echo.
-        timeout /T 3 > NUL 2>&1
+
         set "config="!JNUSFolder:"=!\config""
-        wscript /nologo !StartWait! !notePad! !config!
-        timeout /T 3 > NUL 2>&1
-        
-        REM ping  -n 1 !wiiutitlekeysSite! > NUL 2>&1
-        REM if !ERRORLEVEL! NEQ 0 (
-            REM echo ERROR^: !wiiutitlekeysSite! does not respond^.
-            REM echo Edit !THIS_SCRIPT!
-            REM echo and update wiiutitlekeysSite variable
-            REM pause
-            REM exit 58
-        REM )
+        type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
+            echo First you need to find the ^'Wii U common key^' with google
+            echo It should be 32 chars long and start with ^'D7^'^.
+            echo.
 
-        echo Now^, openning !wiiutitlekeysSite! to create a keys file
-        timeout /T 3 > NUL 2>&1
-
-        wscript /nologo !Start! !explorer! !wiiutitlekeysSite!
-        :howTo
-        echo.
-        echo If the site is down^, or if you want to update the list
-        echo get another one with a google search^.
-        echo Edit !THIS_SCRIPT!
-        echo and change wiiutitlekeysSite variable^.
-        echo.
-        echo.
-        echo To create the keys file ^:
-        echo.
-        echo  1^. select all in this page ^(CTRL+A^)
-        echo  2^. paste all in notepad
-        echo  3^. save the file and close notepad
-        echo.
-
-        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
-
-        REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!BFW_PATH:"=!\logs\fnr_titleKeys.log""
-        del /F !uTdLog! > NUL 2>&1
-
-        REM : if found '0 \t\r\n' -> firefox
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --logFile !uTdLog!
-        type !uTdLog! | find /I /V "^!" | find "File:" > NUL 2>&1 && (
-
-            REM : firefox
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0 \t\r\n" --replace "0\t" --logFile !uTdLog!
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find " \t" --replace "\t" --logFile !uTdLog!
-            goto:delLog
+            echo Then replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
+            echo and save^.
+            echo.
+            timeout /T 3 > NUL 2>&1
+            wscript /nologo !StartWait! !notePad! !config!
         )
-        REM : else      
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "0\t " --logFile !uTdLog!
-        REM : if found '\t \t' -> Chrome
-        type !uTdLog! | find /I /V "^!" | find "File:" > NUL 2>&1 && (
 
-            REM : Chrome
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t\t" --replace "\t" --logFile !uTdLog!
-            goto:delLog    
-        )
-        
-        REM : else
-
-        REM : Edge
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n0" --replace "\n\n0" --logFile !uTdLog!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\r\n" --replace "\t" --logFile !uTdLog!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !JNUSFolder! --fileMask "titleKeys.txt" --useEscapeChars --find "\t \t" --replace "\t" --logFile !uTdLog!
-
-        :delLog
-        del /F !uTdLog! > NUL 2>&1
+        echo You need to create the title keys file^.
+        echo.
+        echo Google to find the last Wii U Title KEY Database
+        echo copy all the lines and paste them in notepad++
+        echo.
+        echo Edit the text file and modify it to use the following format
+        echo.
+        echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
+        echo ^(use TAB as separator^)
+        echo.
+        echo.
+        echo Relaunch this script when done^.
+        pause
+        exit 80
     goto:eof
     REM : ------------------------------------------------------------------
 
