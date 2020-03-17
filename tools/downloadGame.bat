@@ -96,8 +96,12 @@ REM : main
     echo.
     echo If your search failed^, check the format of
     echo !titleKeysDataBase!
+    echo.
+    echo The text file must use the following format ^:
+    echo.
     echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
-    echo ^(columns separated with a TAB^)
+    echo ^(use TAB as separator^)
+    echo.
     echo.
     echo If your search failed on a ^"recent game^"^, try to update
     echo !titleKeysDataBase!
@@ -336,16 +340,15 @@ REM : functions
 
         echo You need to create the title keys file^.
         echo.
-        echo Google to find the last Wii U Title KEY Database
-        echo copy all the lines and paste them in notepad++
+        echo Use Chrome browser to have less hand work to do^.
+        echo Google to find ^'Open Source WiiU Title Key^'
+        echo Select and paste all in notepad        
         echo.
-        echo Edit the text file and modify it to use the following format
-        echo.
-        echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
-        echo ^(use TAB as separator^)
+        timeout /T 4 > NUL 2>&1
+        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
         echo.
         echo.
-        echo Relaunch this script when done^.
+        echo Save and relaunch this script when done^.
         pause
         exit 80
     goto:eof
