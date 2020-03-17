@@ -1,7 +1,6 @@
 17/03/2020 V17-1 :
 - fix : DLC detection failure in reportCompatibility.bat
 - add : GFX pack V5 support for completion (DO not use them, they are not ready)
-- add : JNUSTool in resources
 - fix : do not ask for auto import settings anymore (ask each time)
 
 05/03/2020 V17 :
@@ -799,9 +798,9 @@ opt : lower graphic completion time by 5sec if no V2 GFX packs are used
 
 
 2018/08/16 V9 :
-    - can now ouput executables that can be “shortcuted” by STEAM and so you can use all BatchFW features with launching from STEAM
+    - can now ouput executables that can be Â“shortcutedÂ” by STEAM and so you can use all BatchFW features with launching from STEAM
     - automatic graphic pack update
-    - auto-import settings from last version reset by default with comparing the two game’s profiles lines side by side (if needed)
+    - auto-import settings from last version reset by default with comparing the two gameÂ’s profiles lines side by side (if needed)
     - fix openGL Cache backup for AMD users (looking for a folder and nor for files in the GLCache folder)
 
 2018/07/03 V8-6 :
@@ -930,7 +929,7 @@ opt : lower graphic completion time by 5sec if no V2 GFX packs are used
     
     
 2018/04/04 V5 : Install Icons automatically, open dialog boxes
-    - now only the following characters are forbiden in paths : (,),&,%,£,! and ^
+    - now only the following characters are forbiden in paths : (,),&,%,Â£,! and ^
     - improved specials characters support by : 
         getting and setting the char code set of the host
         delay expansion in all code and closing variables visibility
