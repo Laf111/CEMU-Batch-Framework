@@ -1,7 +1,8 @@
-13/03/2020 V17-1 :
+17/03/2020 V17-1 :
 - fix : DLC detection failure in reportCompatibility.bat
 - add : GFX pack V5 support for completion (DO not use them, they are not ready)
-- add : JNUSTool and automation of its use
+- add : JNUSTool in resources
+- fix : do not ask for auto import settings anymore (ask each time)
 
 05/03/2020 V17 :
 - fix : sync game stats failure in syncGamesFolder.bat

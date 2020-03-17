@@ -317,7 +317,7 @@ REM : functions
     REM : create keys file
     :createKeysFile
 
-        echo To use this feature^, you^'ll have to setup JNUSTool
+        echo To use this feature^, obviously you^'ll have to setup JNUSTool
         echo and get the files requiered by yourself^.
         echo.
 

@@ -22,8 +22,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
-    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log"" 
-    
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     call:setCharSet
@@ -143,5 +143,4 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-
 

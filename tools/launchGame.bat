@@ -156,7 +156,7 @@ REM : main
         exit 99
     )
     REM : flag for nolegacy options
-    set "AUTO_IMPORT_MODE=ENABLED"
+    set "AUTO_IMPORT_MODE=DISABLED"
     set "IGNORE_PRECOMP=DISABLED"
 
 
@@ -1702,7 +1702,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "CEMU_INSTALLS_FOLDER=!parentFolder:~0,-2!""
 
         REM : if no import goto:continueLoad
-        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
+REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : search for valid settings
         call:getSettingsFolder
@@ -1740,11 +1740,6 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : synchronized controller profiles (import)
         call:syncControllerProfiles
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
-
-        REM : get the AUTO_IMPORT_MODE
-        set "AUTO_IMPORT_MODE=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "AUTO_IMPORT_MODE" 2^>NUL') do set "AUTO_IMPORT_MODE=%%j"
-        if ["!AUTO_IMPORT_MODE!"] == ["NOT_FOUND"] set "AUTO_IMPORT_MODE=DISABLED"
 
         if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] (
             cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^?" 4145
