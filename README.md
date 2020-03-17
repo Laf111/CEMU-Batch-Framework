@@ -292,3 +292,5 @@ But if you clone the repository anyway, take care that some files might be encod
 
 
 If you have any trouble don't seek for help or support on CEMU's subreddits or discords, send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
+
+If you want to reward me for my work and help me to maintain BatchFw, pleas donate at https://paypal.me/pools/c/8ns9ioEgG7
