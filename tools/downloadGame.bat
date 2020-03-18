@@ -31,7 +31,7 @@ REM : main
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
@@ -135,9 +135,6 @@ REM : main
     echo !titles[%index%]! [!regions[%index%]!] ^(!titleIds[%index%]!^)
     echo ===============================================================
     echo.
-    echo Pay attention to the space remaining on the target device because
-    echo there^'s no way to check it until all transferts end^!
-    echo.
     echo You can download a WUP package for the game to be installed on
     echo your Wii-U using WUP Installer GX2^. You^'ll have to browse to the
     echo target location in this case ^(for example^: %%SD_CARD%%\install^)
@@ -164,6 +161,14 @@ REM : main
     set "JNUSFolder=!targetFolder!"
 
     :begin
+
+    REM : compute update and DLC titleId
+    set "titleId=!titleIds[%index%]!"
+    set "endTitleId=%titleId:~8,8%"
+
+    set "utid=0005000e!endTitleId!"
+    set "dtid=0005000c!endTitleId!"
+
     cls
     echo ===============================================================
     echo Temporary folder ^: !JNUSFolder!
@@ -174,13 +179,47 @@ REM : main
     REM : download meta/meta.xml to get the title name
     pushd !JNUSFolder!
 
-    java -jar JNUSTool.jar !titleIds[%index%]! !titleKeys[%index%]! -file /code/app.xml > NUL 2>&1
+    set "str="Total Size of Content Files""
+    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
 
+    set /A "totalSize=0"
+    call:getSize !titleId! !str! "Game  "
+
+    type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && call:getSize !utid! !str! Update
+
+    type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && call:getSize !dtid! !str! "DLC   "
+
+    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+
+    REM : get size left on !targetDrive! in Gb
+    for /F "tokens=1" %%i in ('wmic logicaldisk get Name^,FreeSpace ^| find "!targetDrive!" 2^>NUL') do set "leftBytes=%%i"
+    set /A "leftKb=%leftBytes:~0,-3%"
+
+    set /A "intSizeLeft=!leftKb!/1024"
+    echo.
+    if !intSizeLeft! GTR !totalSize! (
+        echo !totalSize! Mb needed on !targetDrive! ^(!intSizeLeft! Mb left^)^.
+    ) else (
+        echo ERROR ^: not enought space left on !targetDrive!
+        echo Needed !totalSize! Mb ^/ available !intSizeLeft!
+        pause
+        exit 78
+    )
+    echo.
+    set /P "answer=Continue (y/n)? : "
+    if not ["!answer!"] == ["y"] (
+        echo Cancelled by user^.
+        timeout /T 2 > NUL 2>&1
+        exit 95
+    )
+    echo ---------------------------------------------------------------
+    
     REM : get the last modified folder in
     set "initialGameFolderName="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do set "initialGameFolderName="%%x""
     if [!initialGameFolderName!] == ["NOT_FOUND"] (
         echo ERROR^: failed to download meta^.xlm
+        echo Check security policy
         pause
         exit 60
     )
@@ -209,24 +248,22 @@ REM : main
     )
 
     REM : download the game
-    wscript /nologo !StartWait! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
+    wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
 
-    REM : compute update and DLC titleId
-    set "titleId=!titleIds[%index%]!"
-    set "endTitleId=%titleId:~8,8%"
+    call:monitorTransfert
 
-    set "utid=0005000e!endTitleId!"
     REM : if a update exist, download it
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
-        wscript /nologo !StartWait! !download! !JNUSFolder! !utid! !decryptMode!
+        wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
+        call:monitorTransfert
     )
 
-    set "dtid=0005000c!endTitleId!"
     REM : if a DLC exist, download it
     type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
-        wscript /nologo !StartWait! !download! !JNUSFolder! !dtid! !decryptMode!
+        wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
+        call:monitorTransfert
     )
 
     echo ===============================================================
@@ -318,6 +355,132 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :monitorTransfert
+
+        REM : wait until all transferts are done
+        :waitingLoop
+        timeout /T 5 > NUL 2>&1
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            REM : get the JNUSTools folder size
+            call:getFolderSizeInMb !JNUSFolder! sizeDl
+
+            REM : progression
+            set /A "progression=(!sizeDl!*100)/!totalSize!"
+
+            if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+            if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+
+            goto:waitingLoop
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getSmb
+        set "sr=%~1"
+        set /A "d=%~2"
+
+        set /A "%3=!sr:~0,%d%!+1"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        REM : prevent path to be stripped if contain '
+        set "folder=!folder:'=`'!"
+        set "folder=!folder:[=`[!"
+        set "folder=!folder:]=`]!"
+        set "folder=!folder:)=`)!"
+        set "folder=!folder:(=`(!"
+
+        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+
+        set "line=NONE"
+        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
+        REM : powershell call always return %ERRORLEVEL%=0
+
+        if ["!line!"] == ["NONE"] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set "sizeRead=%line: =%"
+
+        if ["!sizeRead!"] == [" ="] (
+            set "%2=0"
+            goto:eof
+        )
+
+        set /A "im=0"
+        if not ["!sizeRead!"] == ["0"] (
+
+            REM : compute length before switching to 32bits integers
+            call:strLength !sizeRead! len
+            REM : forcing Mb unit
+            if !len! GTR 6 (
+                set /A "dif=!len!-6"
+                call:getSmb %sizeRead% !dif! smb
+                set "%2=!smb!"
+                goto:eof
+            ) else (
+                set "%2=1"
+                goto:eof
+            )
+        )
+        set "%2=0.0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : fetch size of download
+    :getSize
+        set "tid=%~1"
+        set "pat=%~2"
+        set "type=%~3"
+
+        set "key=NOT_FOUND"
+        for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!tid!" 2^>NUL') do set "key=%%b"
+
+        if ["!key!"] == ["NOT_FOUND"] (
+            echo ERROR^: why key is not found ^?
+            pause
+            goto:eof
+        )
+
+        set "logMetaFile="!BFW_LOGS:"=!\jnust_Meta.log""
+        del /F !logMetaFile! > NUL 2>&1
+        java -jar JNUSTool.jar !tid! !key! -file /meta/meta.xml > !logMetaFile! 2>&1
+
+        set "strRead="
+        for /F "delims=~: tokens=2" %%i in ('type !logMetaFile! ^| find "!pat!" 2^>NUL') do set "strRead=%%i"
+
+        set "strSize="
+        for /F "tokens=1" %%i in ("!strRead!") do set "strSize=%%i"
+
+        set /A "intSize=0"
+        for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
+
+        set /A "totalSize=!totalSize!+!intSize!+1"
+
+        echo !type! size =!strRead!
+
+        del /F !logMetaFile! > NUL 2>&1
+    goto:eof
+
     REM : create keys file
     :createKeysFile
 
@@ -342,7 +505,7 @@ REM : functions
         echo.
         echo Use Chrome browser to have less hand work to do^.
         echo Google to find ^'Open Source WiiU Title Key^'
-        echo Select and paste all in notepad        
+        echo Select and paste all in notepad
         echo.
         timeout /T 4 > NUL 2>&1
         wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"

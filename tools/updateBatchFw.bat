@@ -33,6 +33,8 @@ REM : main
     set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
@@ -56,10 +58,7 @@ REM : main
     :end
 
     if %nbArgs% EQU 1 (
-        set "BFW_VERSION=!args[0]!"
-        set "BFW_VERSION=!BFW_VERSION:"=!"
-        set "BFW_VERSION=!BFW_VERSION: =!"
-    goto:begin
+        set /A "QUIET_MODE=1"
     )
 
     REM : get the current version from setup
@@ -68,7 +67,6 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
         set "BFW_VERSION=%%i"
         set "BFW_VERSION=!BFW_VERSION:"=!"
-        goto:begin
     )
 
     :begin
@@ -135,12 +133,17 @@ REM : main
     exit /b 13
 
     :newVersion
-    echo New version available, do you want to update BatchFW to !bfwVR!^?
-    call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
-    if [!ANSWER!] == ["n"] (
-        echo Cancelled by user
-        timeout /T 4 > NUL 2>&1
-        exit /b 14
+    if !QUIET_MODE! EQU 0 (
+        echo New version available, do you want to update BatchFW to !bfwVR!^?
+        call:getUserInput "Enter your choice ? : (n by default in 30sec)" "n,y" ANSWER 30
+        if [!ANSWER!] == ["n"] (
+            echo Cancelled by user
+            timeout /T 4 > NUL 2>&1
+            exit /b 14
+        )
+    ) else (
+        cscript /nologo !MessageBox! "A new version of BatchFw is available^."
+        exit /b 0
     )
 
     REM : launch graphic pack update

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-1"
+    set "BFW_VERSION=V17-2"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -202,7 +202,7 @@ REM : main
     echo Checking for update ^.^.^.
     REM : update BatchFw
     set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    call !ubw! %BFW_VERSION%
+    call !ubw!
     set /A "cr=!ERRORLEVEL!"
     if !cr! EQU 0 (
 
