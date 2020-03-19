@@ -31,8 +31,8 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
-        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! > NUL 2>&1
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
 
     echo ---------------------------------------------------------
@@ -41,7 +41,7 @@ REM : main
     REM : kill CEMU's running process
     wmic process where "Name like '%%cemu.exe%%'" call terminate > NUL 2>&1
 
-    taskkill /TFIM "Cemu.exe" > NUL 2>&1
+    taskkill /F /IM "Cemu.exe" /T > NUL 2>&1
     
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && (
@@ -59,8 +59,8 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
-        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! > NUL 2>&1
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
     timeout /T 3 > NUL 2>&1
 exit 0

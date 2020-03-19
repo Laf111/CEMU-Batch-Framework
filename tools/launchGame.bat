@@ -101,7 +101,7 @@ REM : main
     echo ========================================================= >> !batchFwLog!
     REM : search in logFile, getting only the last occurence
     set "bfwVersion=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION="  ^| find /V "msg" 2^>NUL') do (
         set "bfwVersion=%%i"
         set "bfwVersion=!bfwVersion:"=!"
         goto:displayVersion

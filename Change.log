@@ -1,6 +1,8 @@
-18/03/2020 V17-2 :
+19/03/2020 V17-2 :
+fix : error when getting BatchFw version from setup.bat
 add : game, update and DLC size support, compute needed and available space left (+check)
-      progression in the title bar, increase passes number from 5 to 8
+      progression in the title bar, increase passes number from 5 to 15
+      paralellize treatments, close child windows on size criterion
 add : a silent mode to updateBatchFw.bat
 add : warn user if a BatchFw update is available in launchGame.bat
       (in a separate process)

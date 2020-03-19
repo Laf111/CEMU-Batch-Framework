@@ -37,7 +37,7 @@ REM : main
     )
 
     REM : number of downloading attempts
-    set dlLoopCount=8
+    set dlLoopCount=15
 
     REM : checking arguments
     set /A "nbArgs=0"

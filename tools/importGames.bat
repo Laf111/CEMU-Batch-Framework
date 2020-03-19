@@ -140,11 +140,11 @@ REM : main
         pause
         goto:askInputFolder
     )
-    title Move Games with updates and DLC and prepare them to emulation from !INPUT_FOLDER:"=!
+    title Move Games with updates and DLC from !INPUT_FOLDER:"=! and prepare them to emulation
     echo.
     choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
     if !ERRORLEVEL! EQU 1 (
-        title Copy Games with updates and DLC and prepare them to emulation from !INPUT_FOLDER:"=!
+        title Copy Games with updates and DLC from !INPUT_FOLDER:"=! and prepare them to emulation
         set /A "moveFlag=0"
     )
     :inputsAvailable
@@ -226,10 +226,8 @@ REM : main
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
             for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
 
-            echo !GAME_FOLDER_PATH! | find /I /V "(DLC)" | find /I /V "(UPDATE DATA)" > NUL 2>&1 && call:prepareGame
-            echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && call:installUpdate
-            echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL 2>&1 && call:installDlc
-
+            call:treatGameFolders
+            
         ) else (
             pushd !GAMES_FOLDER!
 
@@ -321,6 +319,22 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :treatGameFolders
+
+        echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && (
+            call:installUpdate
+            goto:eof
+        )
+        echo !GAME_FOLDER_PATH! | find "(DLC)" > NUL 2>&1 && (
+            call:installDlc
+            goto:eof
+        )
+
+        call:prepareGame
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :getSmb
         set "sr=%~1"
@@ -429,13 +443,6 @@ REM : functions
 
         set "target="!GAMES_FOLDER:"=!\!GAME_TITLE!""
 
-        if exist !target! goto:eof
-
-        echo =========================================================
-        echo - !GAME_TITLE!
-        echo ---------------------------------------------------------
-        echo.
-
         set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
         if not exist !META_FILE! (
             echo No meta folder not found under game folder !GAME_TITLE! ^?^, skipping ^!
@@ -448,8 +455,14 @@ REM : functions
         for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
         if [!titleLine!] == ["NONE"] goto:eof
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-
         set "endTitleId=%titleId:~8,8%"
+
+        if exist !target! goto:eof
+
+        echo =========================================================
+        echo - !GAME_TITLE!
+        echo ---------------------------------------------------------
+        echo.
 
         REM : moving game's folder
         set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
@@ -502,6 +515,7 @@ REM : functions
         if not exist !META_FILE! (
             echo No meta folder not found under update folder !GAME_FOLDER_NAME! ^?^, skipping ^!
             echo ---------------------------------------------------------
+            pause
             goto:eof
         )
 
@@ -514,8 +528,13 @@ REM : functions
         set "endTitleIdU=%titleIdU:~8,8%"
 
         if not ["!endTitleIdU!"] == ["!endTitleId!"] (
-            echo This update is not related to a game that exists in !INPUT_FOLDER!^, skipping ^!
+            echo endTitleIdU=!endTitleIdU!
+            echo endTitleId=!endTitleId!
+
+            echo !GAME_FOLDER_PATH! is not related to a game
+            echo that exists in !INPUT_FOLDER!^, skipping ^!
             echo ---------------------------------------------------------
+            pause
             goto:eof
         )
 

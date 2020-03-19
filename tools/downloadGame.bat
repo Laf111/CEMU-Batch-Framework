@@ -32,6 +32,7 @@ REM : main
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
+    set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
@@ -229,6 +230,16 @@ REM : main
     call:secureGameTitle !gameFolderName! gameFolderName
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
+
+    REM : get current date
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "date=%ldt%"
+    REM : starting DATE
+
+    echo Starting at !date!
+    echo.
+
     if !decryptMode! EQU 0 (
         echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^.
         title Downloading WUP of !titles[%index%]! [!regions[%index%]!]
@@ -250,22 +261,29 @@ REM : main
     REM : download the game
     wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
 
-    call:monitorTransfert
 
     REM : if a update exist, download it
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
-        call:monitorTransfert
     )
 
     REM : if a DLC exist, download it
     type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
-        call:monitorTransfert
     )
 
+    call:monitorTransfert
+
+    REM : get current date
+    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+    set "date=%ldt%"
+
+    REM : ending DATE
+    echo.
+    echo Ending at !date!
     echo ===============================================================
 
     REM : update and DLC target folder names
@@ -297,7 +315,7 @@ REM : main
         echo WUP packages created in !JNUSFolder:"=!
 
     ) else (
-
+     
         REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
         if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
 
@@ -311,20 +329,19 @@ REM : main
 
             move /Y !updatePath! !uName! > NUL 2>&1
             rmdir /Q /S !folder!
+            move /Y !uName! ..\..\.. > NUL 2>&1
         )
 
         REM : if exist "GAME_TITLE [XXXXXX]\aoc0005000C101D6000"
         set "dlcPath="!gameFolderName:"=!\aoc!dtid!""
         REM : move "GAME_TITLE [XXXXXX]\updates" to "GAME_TITLE [XXXXXX] (DLC)" in !GAMES_FOLDER!
-        if exist !dlcPath!  move /Y !dlcPath! !dName! > NUL 2>&1
+        if exist !dlcPath! (
+            move /Y !dlcPath! !dName! > NUL 2>&1
+            move /Y !dName! ..\..\.. > NUL 2>&1
+        )
 
+        move /Y !gameFolderName! ..\..\.. > NUL 2>&1
 
-        REM : call importGames.bat on current folder
-        set "tobeLaunch="!BFW_TOOLS_PATH:"=!\importGames.bat""
-        call !tobeLaunch! !JNUSFolder!
-
-        echo ---------------------------------------------------------
-        echo ^> Games ready for emulation
         echo.
         echo.
 
@@ -343,8 +360,8 @@ REM : main
         ) else (
             wscript /nologo !Start! !setup!
         )
-        
     )
+
     rmdir /Q /S !initialGameFolderName! > NUL 2>&1
 
     endlocal
@@ -355,18 +372,40 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :endAllTransferts
+
+        for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%downloadTitleId%%^'^" get ProcessID^,commandline') do (
+            set "line=%%p"
+            set "line2=!line:""="!"
+            set "pid=NOT_FOUND"
+            echo !line2! | find /V "wmic" | find /V "ProcessID"  > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+            if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :monitorTransfert
 
         REM : wait until all transferts are done
         :waitingLoop
-        timeout /T 5 > NUL 2>&1
+        timeout /T 3 > NUL 2>&1
         wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+
             REM : get the JNUSTools folder size
-            call:getFolderSizeInMb !JNUSFolder! sizeDl
+            call:getFolderSizeInMb !initialGameFolderName! sizeDl
 
             REM : progression
-            set /A "progression=(!sizeDl!*100)/!totalSize!"
+            set /A "curentSize=!sizeDl!
 
+            if !curentSize! LSS !totalSize! (
+                set /A "progression=(!curentSize!*100)/!totalSize!"
+            ) else (
+                set /A "progression=100"
+                call:endAllTransferts
+                echo.
+                echo downloaded successfully
+            )
+            
             if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
             if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
 

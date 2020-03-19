@@ -64,12 +64,11 @@ REM : main
     REM : get the current version from setup
     set "BFW_VERSION=NONE"
     set "setup="!BFW_PATH:"=!\setup.bat""
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" 2^>NUL') do (
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_VERSION=" ^| find /V "msg" 2^>NUL') do (
         set "BFW_VERSION=%%i"
         set "BFW_VERSION=!BFW_VERSION:"=!"
     )
 
-    :begin
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
