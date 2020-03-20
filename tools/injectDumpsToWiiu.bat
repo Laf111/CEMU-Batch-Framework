@@ -623,7 +623,7 @@ REM        set /A "totalGameSize+=!sgDlc!"
         set "folder=!folder:)=`)!"
         set "folder=!folder:(=`(!"
 
-        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+        set "psCommand=-noprofile -command "ls -r -force '!folder:"=!' | measure -s Length""
 
         set "line=NONE"
         for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"

@@ -2403,16 +2403,10 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             goto:eof
         )
 
-        set "defaultBrowser="NOT_FOUND""
-
-        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-            for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-            if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-        )
-        if [!defaultBrowser!] == ["NOT_FOUND"] goto:eof
+        if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:eof
 
         REM : open a google search
-        wscript /nologo !Start! !defaultBrowser! "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
+        wscript /nologo !Start! explorer "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
 
         cscript /nologo !MessageBox! "Let CEMU launch the game a first time then close it and use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache'. Browse to the file downloaded, no need to rename-it, BatchFw will do it for you"
 

@@ -190,6 +190,11 @@ REM : main
 
     type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && call:getSize !dtid! !str! "DLC   "
 
+    REM : add one Mb
+    set /A "n1=totalSize*1024"
+    set /A "n2=n1*1024"
+    set /A "totalSize=%n2:~0,-6%"
+
     for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
 
     REM : get size left on !targetDrive! in Gb
@@ -197,9 +202,11 @@ REM : main
     set /A "leftKb=%leftBytes:~0,-3%"
 
     set /A "intSizeLeft=!leftKb!/1024"
+
+    echo.
     echo.
     if !intSizeLeft! GTR !totalSize! (
-        echo !totalSize! Mb needed on !targetDrive! ^(!intSizeLeft! Mb left^)^.
+        echo !totalSize! Mb needed on disk !targetDrive! ^(!intSizeLeft! Mb left^)^.
     ) else (
         echo ERROR ^: not enought space left on !targetDrive!
         echo Needed !totalSize! Mb ^/ available !intSizeLeft!
@@ -237,11 +244,15 @@ REM : main
     set "date=%ldt%"
     REM : starting DATE
 
+    set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
+
+    echo Starting at !date! > !gamelogFile!
     echo Starting at !date!
     echo.
 
     if !decryptMode! EQU 0 (
         echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^.
+        echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         title Downloading WUP of !titles[%index%]! [!regions[%index%]!]
     ) else (
 
@@ -255,6 +266,7 @@ REM : main
         )
 
         echo ^> Downloading RPX package of !titles[%index%]! [!regions[%index%]!]^.^.^.
+        echo ^> Downloading RPX package of !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         title Downloading RPX package of !titles[%index%]! [!regions[%index%]!]
     )
 
@@ -265,12 +277,14 @@ REM : main
     REM : if a update exist, download it
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
+        echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
     )
 
     REM : if a DLC exist, download it
     type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
+        echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
     )
 
@@ -284,6 +298,7 @@ REM : main
     REM : ending DATE
     echo.
     echo Ending at !date!
+    echo Ending at !date! >> !gamelogFile!
     echo ===============================================================
 
     REM : update and DLC target folder names
@@ -400,10 +415,27 @@ REM : functions
             if !curentSize! LSS !totalSize! (
                 set /A "progression=(!curentSize!*100)/!totalSize!"
             ) else (
+                echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
+
                 set /A "progression=100"
+                if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: 100%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: 100%%
+                timeout /T 90 > NUL 2>&1
+
+                REM : get the initialGameFolderName folder size
+                call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+                REM : progression
+                set /A "curentSize=!sizeDl!
+
                 call:endAllTransferts
                 echo.
                 echo downloaded successfully
+                echo.  >> !gamelogFile!
+                echo data size expected ^: !totalSize! >> !gamelogFile!
+                echo data size downloaded ^: !curentSize! >> !gamelogFile!
+                echo.  >> !gamelogFile!
+                goto:eof
             )
             
             if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
@@ -446,7 +478,7 @@ REM : functions
         set "folder=!folder:)=`)!"
         set "folder=!folder:(=`(!"
 
-        set "psCommand=-noprofile -command "ls -r '!folder:"=!' | measure -s Length""
+        set "psCommand=-noprofile -command "ls -r -force '!folder:"=!' | measure -s Length""
 
         set "line=NONE"
         for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
@@ -513,7 +545,7 @@ REM : functions
         set /A "intSize=0"
         for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
 
-        set /A "totalSize=!totalSize!+!intSize!+1"
+        set /A "totalSize=!totalSize!+!intSize!"
 
         echo !type! size =!strRead!
 

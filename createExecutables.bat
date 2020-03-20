@@ -294,13 +294,7 @@ REM : main
 
     REM : check if an internet connexion is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
-    set "defaultBrowser="NOT_FOUND""
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
-
-    if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_CURRENT_USER\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-        if [!defaultBrowser!] == ["NOT_FOUND"] for /f "delims=Z tokens=2" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Clients\StartMenuInternet" /s 2^>NUL ^| findStr /ri "\.exe.$"') do set "defaultBrowser=%%a"
-    )
 
     if !QUIET_MODE! EQU 0 (
         echo Creating own shortcuts
@@ -1597,7 +1591,7 @@ REM
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo No icons found for !GAME_TITLE!
 
-            if [!defaultBrowser!] == ["NOT_FOUND"] (
+            if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
                 echo Download a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
                 echo ^(no need to rename it^) then use the shortcut
                 echo Wii-U Games^\_BatchFw^\Tools^\Games^'s icons^\Convert all jpg files to centered icons^.lnk
@@ -1606,7 +1600,7 @@ REM
             echo.
             echo. Opening up a google search^.^.^.
             REM : open a google search
-            wscript /nologo !StartWait! !defaultBrowser! "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
+            wscript /nologo !StartWait! explorer "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
             echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
             echo ^(no need to rename it^)
             pause
