@@ -2,7 +2,6 @@
 hotfix : on last feature added (to get it : create shortcuts for a version of CEMU, even a already registered one)
       - take "size on disk" into account (transferts was stopped too early)
 fix : replace registry acces to read default browser. Using explorer.exe instead
-add : update embeded V3/4 GFX packs to v641
 
 19/03/2020 V17-2 :
 fix : error when getting BatchFw version from setup.bat
