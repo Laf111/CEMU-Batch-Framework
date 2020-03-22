@@ -1,6 +1,12 @@
+22/03/2020 V17-4 :
+fix : int32 overflow when computing size of "big" titles (Xenoblade Chronicles X...)
+fix : size on disk estimation (using target drive cluster size)
+add : choice of checking for BatchFw's update (when launching games) in setup.bat
+add : choice to remove all (including games) in uninstall.bat 
+
 20/03/2020 V17-3 :
 hotfix : on last feature added (to get it : create shortcuts for a version of CEMU, even a already registered one)
-      - take "size on disk" into account (transferts was stopped too early)
+         take "size on disk" into account (transferts was stopped too early)
 fix : replace registry acces to read default browser. Using explorer.exe instead
 
 19/03/2020 V17-2 :

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-3"
+    set "BFW_VERSION=V17-4"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -396,7 +396,7 @@ REM : main
     echo resulting mod ^'ready to use^'^.
     echo.
     call:getUserInput "Have you got some mods for your games that you wish to import (y,n)? " "y,n" ANSWER
-    if [!ANSWER!] == ["n"] goto:askGpCompletion
+    if [!ANSWER!] == ["n"] goto:askGpCheckUpdate
 
     :askAnotherModFolder
     set "im="!BFW_TOOLS_PATH:"=!\importModsForAllGames.bat""
@@ -409,7 +409,17 @@ REM : main
 
     echo ^> Mods were imported in each game^'s folder
 
-    :askGpCompletion
+    :askGpCheckUpdate
+    echo ---------------------------------------------------------
+    REM : flush logFile of CHECK_UPDATE
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "CHECK_UPDATE" 2^>NUL') do call:cleanHostLogFile CHECK_UPDATE
+
+    choice /C yn /N /M "Do you want to check for BatchFW's update ? (y,n):"
+    if !ERRORLEVEL! EQU 1 (
+        set "msg="CHECK_UPDATE=YES""
+        call:log2HostFile !msg!
+    )
+
     echo ---------------------------------------------------------
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP

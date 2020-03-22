@@ -37,6 +37,7 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "download="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
+    set "multiplyLongInteger="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
 
     set "notePad="%windir%\System32\notepad.exe""
     set "explorer="%windir%\explorer.exe""
@@ -183,45 +184,14 @@ REM : main
     set "str="Total Size of Content Files""
     if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
 
-    set /A "totalSize=0"
-    call:getSize !titleId! !str! "Game  "
-
-    type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && call:getSize !utid! !str! Update
-
-    type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && call:getSize !dtid! !str! "DLC   "
-
-    REM : add one Mb
-    set /A "n1=totalSize*1024"
-    set /A "n2=n1*1024"
-    set /A "totalSize=%n2:~0,-6%"
-
-    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
-
-    REM : get size left on !targetDrive! in Gb
-    for /F "tokens=1" %%i in ('wmic logicaldisk get Name^,FreeSpace ^| find "!targetDrive!" 2^>NUL') do set "leftBytes=%%i"
-    set /A "leftKb=%leftBytes:~0,-3%"
-
-    set /A "intSizeLeft=!leftKb!/1024"
-
-    echo.
-    echo.
-    if !intSizeLeft! GTR !totalSize! (
-        echo !totalSize! Mb needed on disk !targetDrive! ^(!intSizeLeft! Mb left^)^.
-    ) else (
-        echo ERROR ^: not enought space left on !targetDrive!
-        echo Needed !totalSize! Mb ^/ available !intSizeLeft!
+    set /A "totalSizeInMb=0"
+    call:getSize !titleId! !str! "Game  " gSize
+    if !totalSizeInMb! EQU 0 (
+        echo ERROR^: Java call failed^, check system^'s security policies
         pause
-        exit 78
+        exit /b 65
     )
-    echo.
-    set /P "answer=Continue (y/n)? : "
-    if not ["!answer!"] == ["y"] (
-        echo Cancelled by user^.
-        timeout /T 2 > NUL 2>&1
-        exit 95
-    )
-    echo ---------------------------------------------------------------
-    
+
     REM : get the last modified folder in
     set "initialGameFolderName="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do set "initialGameFolderName="%%x""
@@ -237,16 +207,89 @@ REM : main
     call:secureGameTitle !gameFolderName! gameFolderName
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
+    set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
+    echo Game   size = !gSize! Mb > !gamelogFile!
 
+    type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
+        call:getSize !utid! !str! Update uSize
+        echo Update size = !uSize! Mb >> !gamelogFile!
+    )
+
+    type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && (
+        call:getSize !dtid! !str! "DLC   " dSize
+        echo DLC    size = !dSize! Mb >> !gamelogFile!
+    )
+
+    REM : compute sizes on disk JNUSFolder    
+    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+
+    set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
+    for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
+        set "fsbStr=%%i"
+        set /A "clusterSizeInB=%%j"
+    )
+
+    REM : free space in Kb
+    set /A "fskb=!fsbStr:~0,-3!"
+    set /A "fsmb=fskb/1024"
+
+    echo.
+    echo Free Space left on !targetDrive!   ^: !fsmb! Mb >> !gamelogFile!
+    echo Free Space left on !targetDrive!   ^: !fsmb! Mb
+    echo Cluster size on !targetDrive! in b ^: !clusterSizeInB! Mb >> !gamelogFile!
+    echo Cluster size on !targetDrive! in b ^: !clusterSizeInB! Mb
+    echo.
+
+    REM : compute size need on targetDrive
+    call:getSizeOnDisk !totalSizeInMb! sizeNeededOnDiskInMb
+
+    echo Space need on disk !targetDrive! ^: !sizeNeededOnDiskInMb! Mb >> !gamelogFile!
+    echo Space need on disk !targetDrive! ^: !sizeNeededOnDiskInMb! Mb
+
+    echo. >> !gamelogFile!
+    echo.
+    echo.
+    if !sizeNeededOnDiskInMb! LSS !fsmb! (
+        echo !sizeNeededOnDiskInMb! Mb needed on disk !targetDrive! ^(!fsmb! Mb left^)^.
+    ) else (
+        echo ERROR ^: not enought space left on !targetDrive!
+        echo Needed !sizeNeededOnDiskInMb! ^/ available !fsmb! Mb
+        pause
+        exit 78
+    )
+    echo.
+    set /P "answer=Continue (y/n)? : "
+    if not ["!answer!"] == ["y"] (
+        echo Cancelled by user^.
+        timeout /T 2 > NUL 2>&1
+        exit 95
+    )
+    echo ---------------------------------------------------------------
+    
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "date=%ldt%"
     REM : starting DATE
 
-    set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
+    set "mode=sequential"
+    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
 
-    echo Starting at !date! > !gamelogFile!
+    echo. >> !gamelogFile!
+    echo.
+    echo nbCpuThreads ^: !nbCpuThreads! >> !gamelogFile!
+    echo nbCpuThreads ^: !nbCpuThreads!
+
+    REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
+    if !nbCpuThreads! GTR 2 set "mode=parallelized"
+    echo Transfert mode ^: !mode! >> !gamelogFile!
+    echo Transfert mode ^: !mode!
+    echo. >> !gamelogFile!
+    echo.
+    echo. >> !gamelogFile!
+    echo.
+    
+    echo Starting at !date! >> !gamelogFile!
     echo Starting at !date!
     echo.
 
@@ -273,12 +316,16 @@ REM : main
     REM : download the game
     wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
 
+    if ["!mode!"] == ["sequential"] call:monitorTransfert !gSize!
 
     REM : if a update exist, download it
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
         echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
+        set /A "guSize=gSize+uSize"
+
+        if ["!mode!"] == ["sequential"] call:monitorTransfert !guSize!
     )
 
     REM : if a DLC exist, download it
@@ -286,9 +333,11 @@ REM : main
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
         echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
         wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
+
+        if ["!mode!"] == ["sequential"] call:monitorTransfert !totalSizeInMb!
     )
 
-    call:monitorTransfert
+    if ["!mode!"] == ["parallelized"] call:monitorTransfert !totalSizeInMb!
 
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -387,6 +436,29 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : compute size on disk according to getFolderSizeInMb result
+    REM : note that the estimatation here is lower than the real size
+    REM : and will be used as thershold
+    :getSizeOnDisk
+
+        set "sizeInMb=%~1"
+
+        for /f %%b in ('powershell !sizeInMb!*1024*1024') do set "sizeInB=%%b"
+
+        for /f %%b in ('powershell !sizeInB!/!clusterSizeInB!') do set "nbClustersNeeded=%%b"
+
+        for /f %%b in ('powershell ^(!nbClustersNeeded!+1^)*!clusterSizeInB!') do set "sizeOnDiskNeededinB=%%b"
+
+        echo !sizeOnDiskNeededinB! | find "," > NUL 2>&1 && for /F "delims=, tokens=1" %%b in ("!sizeOnDiskNeededinB!") do set /A "sizeOnDiskNeededinB=%%b"
+        echo !sizeOnDiskNeededinB! | find "." > NUL 2>&1 && for /F "delims=. tokens=1" %%b in ("!sizeOnDiskNeededinB!") do set /A "sizeOnDiskNeededinB=%%b"
+
+        set "sizeOnDiskNeededinMb=!sizeOnDiskNeededinB:~0,-6!"
+
+        set /A "%2=!sizeOnDiskNeededinMb!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :endAllTransferts
 
         for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%downloadTitleId%%^'^" get ProcessID^,commandline') do (
@@ -401,6 +473,13 @@ REM : functions
 
     :monitorTransfert
 
+        set /A "t=%~1"
+
+        REM : compute size on disk
+        call:getSizeOnDisk !t! thresholdMb
+
+        echo threshold used ^: !thresholdMb! >> !gamelogFile!
+        
         REM : wait until all transferts are done
         :waitingLoop
         timeout /T 3 > NUL 2>&1
@@ -411,15 +490,18 @@ REM : functions
 
             REM : progression
             set /A "curentSize=!sizeDl!
-
-            if !curentSize! LSS !totalSize! (
-                set /A "progression=(!curentSize!*100)/!totalSize!"
+            
+            if !curentSize! LSS !thresholdMb! (
+                set /A "progression=(!curentSize!*100)/!sizeNeededOnDiskInMb!"
             ) else (
+                echo. >> !gamelogFile!
+                echo threshold !thresholdMb! reached >> !gamelogFile!
                 echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
 
-                set /A "progression=100"
-                if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: 100%%
-                if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: 100%%
+                set /A "progression=(!curentSize!*100)/!sizeNeededOnDiskInMb!"
+                if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+
                 timeout /T 90 > NUL 2>&1
 
                 REM : get the initialGameFolderName folder size
@@ -429,10 +511,10 @@ REM : functions
                 set /A "curentSize=!sizeDl!
 
                 call:endAllTransferts
-                echo.
                 echo downloaded successfully
+                echo.
                 echo.  >> !gamelogFile!
-                echo data size expected ^: !totalSize! >> !gamelogFile!
+                echo data size expected ^: !thresholdMb! >> !gamelogFile!
                 echo data size downloaded ^: !curentSize! >> !gamelogFile!
                 echo.  >> !gamelogFile!
                 goto:eof
@@ -512,7 +594,7 @@ REM : functions
                 goto:eof
             )
         )
-        set "%2=0.0"
+        set "%2=0"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -522,6 +604,7 @@ REM : functions
         set "tid=%~1"
         set "pat=%~2"
         set "type=%~3"
+        set "%4=0"
 
         set "key=NOT_FOUND"
         for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!tid!" 2^>NUL') do set "key=%%b"
@@ -545,9 +628,10 @@ REM : functions
         set /A "intSize=0"
         for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
 
-        set /A "totalSize=!totalSize!+!intSize!"
+        set "%4=!intSize!"
+        set /A "totalSizeInMb=!totalSizeInMb!+!intSize!"
 
-        echo !type! size =!strRead!
+        echo !type! size = !strSize! Mb
 
         del /F !logMetaFile! > NUL 2>&1
     goto:eof

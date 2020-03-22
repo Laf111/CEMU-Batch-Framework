@@ -26,6 +26,7 @@ REM : main
     !cmdOw! @ /MAX > NUL 2>&1
 
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     
@@ -92,6 +93,15 @@ REM : main
     echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:eof
 
+    call:getUserInput "Do you want to delete all (including games) ? (y, n)" "y,n" ANSWER
+    echo ---------------------------------------------------------
+    if [!ANSWER!] == ["y"] (
+        call:getUserInput "Are you sure ? (y, n)" "y,n" ANSWER
+        if [!ANSWER!] == ["y"] (
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C rmdir /Q /S !GAMES_FOLDER! > NUL 2>&1
+            goto:eof
+        )
+    )
     set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if not exist !BatchFW_Graphic_Packs! goto:removeWiiuFolder
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER

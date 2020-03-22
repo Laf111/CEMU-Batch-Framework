@@ -48,9 +48,15 @@ REM : main
         wscript /nologo !StartHidden! !initProgressBar!
         set /A "usePbFlag=1"
     )
-    REM :  Checking for BatchFw update silently and in background
-    set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
-    wscript /nologo !StartHidden! !ubw! silent
+
+    REM : if choosen, check update availability
+    type !logFile! | find /I "CHECK_UPDATE=YES" > NUL && (
+        REM :  Checking for BatchFw update silently and in background
+        set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
+        wscript /nologo !StartHidden! !ubw! silent
+    )
+    echo Stop
+    pause
     
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
