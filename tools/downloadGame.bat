@@ -279,7 +279,7 @@ REM : main
     echo nbCpuThreads ^: !nbCpuThreads!
 
     REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
-    if !nbCpuThreads! GTR 6 set "mode=parallelized"
+    if !nbCpuThreads! GTR 2 set "mode=parallelized"
     echo Transfert mode ^: !mode! >> !gamelogFile!
     echo Transfert mode ^: !mode!
     echo. >> !gamelogFile!
