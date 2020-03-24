@@ -1600,7 +1600,7 @@ REM
             echo.
             echo. Opening up a google search^.^.^.
             REM : open a google search
-            wscript /nologo !StartWait! explorer "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
+            wscript /nologo !StartWait! "%windir%\explorer.exe" "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
             echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
             echo ^(no need to rename it^)
             pause

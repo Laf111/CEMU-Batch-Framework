@@ -1,3 +1,14 @@
+24/03/2020 V17-6 :
+hot fix : use 'size' instead of 'size on disk' for the threshold used to close
+          suspended transferts (freezed windows consoles)
+          handle integers bigger than 32bits 
+fix : remove explorer popup message
+add : don't use progress bar by default (lower pre and post times significatively)
+
+22/03/2020 V17-5 :
+hot fix : pause left in launchGame.bat (game not launching). 
+fix : lower the threshold on size
+
 22/03/2020 V17-4 :
 fix : int32 overflow when computing size of "big" titles (Xenoblade Chronicles X...)
 fix : size on disk estimation (using target drive cluster size)

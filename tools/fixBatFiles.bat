@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V17-4"
+    set "BFW_NEXT_VERSION=V17-6"
 
     set "THIS_SCRIPT=%~0"
 
@@ -72,7 +72,7 @@ REM : main
     echo ^> Check bat files^, convert them to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger"') do (
 
         set "filePath="%%f""
 

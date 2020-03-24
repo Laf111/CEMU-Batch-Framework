@@ -23,10 +23,12 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "duLogFile="!BFW_LOGS:"=!\du.log""
 
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
+    set "du="!BFW_RESOURCES_PATH:"=!\du.exe""
     set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -265,7 +267,7 @@ REM : main
         exit 95
     )
     echo ---------------------------------------------------------------
-    
+
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -314,31 +316,8 @@ REM : main
     )
 
     REM : download the game
-    wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
-
-    if ["!mode!"] == ["sequential"] call:monitorTransfert !gSize!
-
-    REM : if a update exist, download it
-    type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
-        echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
-        echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
-        wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
-        set /A "guSize=gSize+uSize"
-
-        if ["!mode!"] == ["sequential"] call:monitorTransfert !guSize!
-    )
-
-    REM : if a DLC exist, download it
-    type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
-        echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
-        echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
-        wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
-
-        if ["!mode!"] == ["sequential"] call:monitorTransfert !totalSizeInMb!
-    )
-
-    if ["!mode!"] == ["parallelized"] call:monitorTransfert !totalSizeInMb!
-
+    call:download
+    
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -436,7 +415,38 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : compute size on disk according to getFolderSizeInMb result
+    :download
+
+        wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
+
+        if ["!mode!"] == ["sequential"] call:monitorTransfert !gSize!
+
+        REM : if a update exist, download it
+        type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
+            echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
+            echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
+            wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
+            set /A "guSize=gSize+uSize"
+
+            if ["!mode!"] == ["sequential"] call:monitorTransfert !guSize!
+        )
+
+        REM : if a DLC exist, download it
+        type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
+            echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
+            echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
+            wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
+
+            if ["!mode!"] == ["sequential"] call:monitorTransfert !totalSizeInMb!
+        )
+
+        if ["!mode!"] == ["parallelized"] call:monitorTransfert !totalSizeInMb!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : compute size on disk
     REM : note that the estimatation here is lower than the real size
     REM : and will be used as thershold
     :getSizeOnDisk
@@ -470,19 +480,15 @@ REM : functions
         )
     goto:eof
     REM : ------------------------------------------------------------------
-
     :monitorTransfert
 
         set /A "t=%~1"
-
-        REM : compute size on disk
-        call:getSizeOnDisk !t! thresholdMb
 
         echo threshold used ^: !thresholdMb! >> !gamelogFile!
         
         REM : wait until all transferts are done
         :waitingLoop
-        timeout /T 3 > NUL 2>&1
+        timeout /T 2 > NUL 2>&1
         wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
 
             REM : get the JNUSTools folder size
@@ -492,8 +498,11 @@ REM : functions
             set /A "curentSize=!sizeDl!
             
             if !curentSize! LSS !thresholdMb! (
+
                 set /A "progression=(!curentSize!*100)/!sizeNeededOnDiskInMb!"
+
             ) else (
+
                 echo. >> !gamelogFile!
                 echo threshold !thresholdMb! reached >> !gamelogFile!
                 echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
@@ -529,72 +538,26 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :getSmb
-        set "sr=%~1"
-        set /A "d=%~2"
-
-        set /A "%3=!sr:~0,%d%!+1"
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :strLength
-        Set "s=#%~1"
-        Set "len=0"
-        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
-          if "!s:~%%N,1!" neq "" (
-            set /a "len+=%%N"
-            set "s=!s:~%%N!"
-          )
-        )
-        set /A "%2=%len%"
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :getFolderSizeInMb
 
         set "folder="%~1""
-        REM : prevent path to be stripped if contain '
-        set "folder=!folder:'=`'!"
-        set "folder=!folder:[=`[!"
-        set "folder=!folder:]=`]!"
-        set "folder=!folder:)=`)!"
-        set "folder=!folder:(=`(!"
+        set "%2=-1"
 
-        set "psCommand=-noprofile -command "ls -r -force '!folder:"=!' | measure -s Length""
+        !du! /accepteula -nobanner -q !folder! > !duLog!
 
         set "line=NONE"
-        for /F "usebackq tokens=2 delims=:" %%a in (`powershell !psCommand! ^| find /I "Sum"`) do set "line=%%a"
-        REM : powershell call always return %ERRORLEVEL%=0
+        for /F "delims=~: tokens=2" %%a in ('type !duLog! ^| find /I "Size:"') do set "line=%%a"
 
-        if ["!line!"] == ["NONE"] (
-            set "%2=0"
-            goto:eof
-        )
-
+        if ["!line!"] == ["NONE"] goto:eof
         set "sizeRead=%line: =%"
+        set "sizeRead=%sizeRead:?=%"
+        set "sizeRead=%sizeRead:bytes=%"
 
-        if ["!sizeRead!"] == [" ="] (
-            set "%2=0"
-            goto:eof
-        )
+        REM : 1/(1024^2)=0.00000095367431640625
+        for /F %%a in ('!multiLongInt! !sizeRead! 95367431640625') do set "result=%%a"
 
-        set /A "im=0"
-        if not ["!sizeRead!"] == ["0"] (
-
-            REM : compute length before switching to 32bits integers
-            call:strLength !sizeRead! len
-            REM : forcing Mb unit
-            if !len! GTR 6 (
-                set /A "dif=!len!-6"
-                call:getSmb %sizeRead% !dif! smb
-                set "%2=!smb!"
-                goto:eof
-            ) else (
-                set "%2=1"
-                goto:eof
-            )
-        )
-        set "%2=0"
+        REM : size in Mb
+        set /A "%2=!result:~0,-20!"
 
     goto:eof
     REM : ------------------------------------------------------------------

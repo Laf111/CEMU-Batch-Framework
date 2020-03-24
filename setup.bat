@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-4"
+    set "BFW_VERSION=V17-6"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -1251,7 +1251,7 @@ REM : ------------------------------------------------------------------
         )
 
         echo ---------------------------------------------------------
-        call:getUserInput "BatchFw launching mode? (s = silent, OR p = use progress bar : default in 10sec): " "p,s" ANSWER 10
+        call:getUserInput "BatchFw launching mode? (s = silent : default in 10sec, OR p = use progress bar): " "p,s" ANSWER 10
         if [!ANSWER!] == ["p"] (
             set "msg="USE_PROGRESSBAR=YES""
             call:log2HostFile !msg!
