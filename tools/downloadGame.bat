@@ -260,12 +260,8 @@ REM : main
         exit 78
     )
     echo.
-    set /P "answer=Continue (y/n)? : "
-    if not ["!answer!"] == ["y"] (
-        echo Cancelled by user^.
-        timeout /T 2 > NUL 2>&1
-        exit 95
-    )
+
+    pause
     echo ---------------------------------------------------------------
 
     REM : get current date
@@ -283,7 +279,7 @@ REM : main
     echo nbCpuThreads ^: !nbCpuThreads!
 
     REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
-    if !nbCpuThreads! GTR 2 set "mode=parallelized"
+    if !nbCpuThreads! GTR 6 set "mode=parallelized"
     echo Transfert mode ^: !mode! >> !gamelogFile!
     echo Transfert mode ^: !mode!
     echo. >> !gamelogFile!
@@ -329,6 +325,12 @@ REM : main
     echo Ending at !date! >> !gamelogFile!
     echo ===============================================================
 
+    REM : get the JNUSTools folder size
+    call:getFolderSizeInMb !initialGameFolderName! sizeDl
+    echo Downloaded !sizeDl! / !totalSizeInMb!
+    echo Downloaded !sizeDl! / !totalSizeInMb! >> !gamelogFile!
+    timeout /t 4 > NUL 2>&1
+    
     REM : update and DLC target folder names
     set "uName="!gameFolderName:"=! (UPDATE DATA)""
     set "dName="!gameFolderName:"=! (DLC)""
@@ -484,7 +486,7 @@ REM : functions
 
         set /A "t=%~1"
 
-        echo threshold used ^: !thresholdMb! >> !gamelogFile!
+        echo threshold used ^: !t! >> !gamelogFile!
         
         REM : wait until all transferts are done
         :waitingLoop
@@ -496,18 +498,17 @@ REM : functions
 
             REM : progression
             set /A "curentSize=!sizeDl!
-            
-            if !curentSize! LSS !thresholdMb! (
+            if !curentSize! LSS !t! (
 
-                set /A "progression=(!curentSize!*100)/!sizeNeededOnDiskInMb!"
+                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
 
             ) else (
 
                 echo. >> !gamelogFile!
-                echo threshold !thresholdMb! reached >> !gamelogFile!
+                echo threshold !t! reached >> !gamelogFile!
                 echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
 
-                set /A "progression=(!curentSize!*100)/!sizeNeededOnDiskInMb!"
+                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
                 if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
                 if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
 
@@ -520,10 +521,10 @@ REM : functions
                 set /A "curentSize=!sizeDl!
 
                 call:endAllTransferts
-                echo downloaded successfully
-                echo.
+                echo downloaded successfully  >> !gamelogFile!
                 echo.  >> !gamelogFile!
-                echo data size expected ^: !thresholdMb! >> !gamelogFile!
+                echo.  >> !gamelogFile!
+                echo data size expected ^: !totalSizeInMb! >> !gamelogFile!
                 echo data size downloaded ^: !curentSize! >> !gamelogFile!
                 echo.  >> !gamelogFile!
                 goto:eof
@@ -538,27 +539,46 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    
+    REM : ------------------------------------------------------------------
     :getFolderSizeInMb
 
         set "folder="%~1""
-        set "%2=-1"
+        set "smb=-1"
 
-        !du! /accepteula -nobanner -q !folder! > !duLog!
+        !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
 
-        set "line=NONE"
-        for /F "delims=~: tokens=2" %%a in ('type !duLog! ^| find /I "Size:"') do set "line=%%a"
+        set /A "sizeRead=0"
+        for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set /A "sizeRead=%%a"
 
-        if ["!line!"] == ["NONE"] goto:eof
-        set "sizeRead=%line: =%"
-        set "sizeRead=%sizeRead:?=%"
-        set "sizeRead=%sizeRead:bytes=%"
-
+        if !sizeRead! EQU 0 goto:endFct
+        
         REM : 1/(1024^2)=0.00000095367431640625
-        for /F %%a in ('!multiLongInt! !sizeRead! 95367431640625') do set "result=%%a"
+        for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
 
+        set /A "lr=0"
+        call:strLength !result! lr
         REM : size in Mb
-        set /A "%2=!result:~0,-20!"
+        if !lr! GTR 20 (
+            set /A "smb=!result:~0,-20!"
+        ) else (
+            set /A "smb=0"
+        )
 
+        :endFct
+
+        set "%2=!smb!"
     goto:eof
     REM : ------------------------------------------------------------------
 
