@@ -221,8 +221,6 @@ REM : main
         call:getSize !dtid! !str! "DLC   " dSize
         echo DLC    size = !dSize! Mb >> !gamelogFile!
     )
-    REM : remove 1Mb for threshold
-    set /A "totalSizeInMb-=1"
     
     REM : compute sizes on disk JNUSFolder    
     for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
