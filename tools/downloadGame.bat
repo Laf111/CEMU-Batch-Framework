@@ -504,7 +504,7 @@ REM : functions
             set /A "curentSize=!sizeDl!
             if !curentSize! LSS !t! (
 
-                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"         
+                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
 
             ) else (
 
@@ -577,7 +577,6 @@ REM : functions
         if !lr! GTR 20 (
             set /A "smb=!result:~0,-20!"
         ) else (
-            REM : TODO check max integer reached ? 
             set /A "smb=0"
         )
 
