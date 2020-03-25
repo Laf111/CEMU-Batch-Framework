@@ -561,10 +561,10 @@ REM : functions
         set "folder="%~1""
         set "smb=-1"
 
-        !du! /accepteula -nobanner -q -ct !folder! > !duLogFile!
+        !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
 
         set "sizeRead=0"
-        for /F "delims=	 tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
+        for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
 
         if ["!sizeRead!"] == ["0"] goto:endFct
         
