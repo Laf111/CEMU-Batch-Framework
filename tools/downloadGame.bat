@@ -221,7 +221,9 @@ REM : main
         call:getSize !dtid! !str! "DLC   " dSize
         echo DLC    size = !dSize! Mb >> !gamelogFile!
     )
-
+    REM : remove 1Mb for threshold
+    set /A "totalSizeInMb-=1"
+    
     REM : compute sizes on disk JNUSFolder    
     for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
 
@@ -329,7 +331,8 @@ REM : main
     call:getFolderSizeInMb !initialGameFolderName! sizeDl
     echo Downloaded !sizeDl! / !totalSizeInMb!
     echo Downloaded !sizeDl! / !totalSizeInMb! >> !gamelogFile!
-    timeout /t 4 > NUL 2>&1
+    echo.
+    pause
     
     REM : update and DLC target folder names
     set "uName="!gameFolderName:"=! (UPDATE DATA)""
@@ -358,6 +361,7 @@ REM : main
         call:cleanTargetFolder
 
         echo WUP packages created in !JNUSFolder:"=!
+        pause
 
     ) else (
      
@@ -500,7 +504,7 @@ REM : functions
             set /A "curentSize=!sizeDl!
             if !curentSize! LSS !t! (
 
-                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"         
 
             ) else (
 
@@ -557,12 +561,12 @@ REM : functions
         set "folder="%~1""
         set "smb=-1"
 
-        !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
+        !du! /accepteula -nobanner -q -ct !folder! > !duLogFile!
 
-        set /A "sizeRead=0"
-        for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set /A "sizeRead=%%a"
+        set "sizeRead=0"
+        for /F "delims=	 tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
 
-        if !sizeRead! EQU 0 goto:endFct
+        if ["!sizeRead!"] == ["0"] goto:endFct
         
         REM : 1/(1024^2)=0.00000095367431640625
         for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
@@ -573,6 +577,7 @@ REM : functions
         if !lr! GTR 20 (
             set /A "smb=!result:~0,-20!"
         ) else (
+            REM : TODO check max integer reached ? 
             set /A "smb=0"
         )
 
