@@ -192,7 +192,7 @@ REM : main
     set "GAME_TITLE=%title: =_%"
 
     REM get all title Id for this game (in case of a new res gp creation)
-    set "titleIdList="
+    set "titleIdList=%titleId%"
     call:getAllTitleIds
 
 
@@ -324,15 +324,14 @@ REM : functions
     :getAllTitleIds
 
         REM now searching using icoId
-        set "line="NONE""
-
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";'%icoId%';"') do (
-            for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
-               set "titleIdRead=%%a"
-               set "titleIdList=!titleIdList!^,!titleIdRead:'=!"
-             )
+        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
+            set "titleIdRead=%%i"
+            set "titleIdRead=!titleIdRead:'=!"
+            echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
+                set "titleIdList=!titleIdList!^,!titleIdRead!"
+            )
         )
-        set "titleIdList=!titleIdList:~1!"
+
     goto:eof
 
     REM : ------------------------------------------------------------------
