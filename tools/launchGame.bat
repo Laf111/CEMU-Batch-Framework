@@ -532,7 +532,11 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : copy transferable shader cache, if exist in GAME_FOLDER_PATH
     set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
-    if not exist !gtscf! goto:getSettings
+    if not exist !gtscf! (
+        mkdir !gtscf! > NUL 2>&1
+        call:getTransferableCache
+        goto:Launch3rdPartySoftware
+    )
 
     set "cacheFile=NONE"
     pushd !gtscf!
@@ -555,7 +559,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : if not file found
     if ["!cacheFile!"] == ["NONE"] (
         call:getTransferableCache
-        goto:getSettings
+        goto:Launch3rdPartySoftware
     )
 
     if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "backup and provide transferable cache"
@@ -600,6 +604,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : copy all !sci!.bin file (2 files if separable and conventionnal)
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /IS /IT > NUL 2>&1
 
+    :Launch3rdPartySoftware
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
@@ -618,7 +623,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         if !usePbFlag! EQU 1 call:setProgressBar 50 54 "pre processing" "getting CEMU options saved for !currentUser!"
     )
 
-    :getSettings
     REM : Settings folder for CEMU_FOLDER_NAME
     set "SETTINGS_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
 

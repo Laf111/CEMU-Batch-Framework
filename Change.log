@@ -1,3 +1,15 @@
+27/03/2020 V17-8 :
+fix : third party software were not launched on the first run (when wizardFirstSaving.bat is called)
+fix : empty transferable cache detection failure on the first run (when wizardFirstSaving.bat is called)
+fix : lower size threshold of the new feature
+fix : set choices timeout in setup.bat 
+fix : when creating new Graphic packs, setting the complete titleId list (regions) in rules.txt was broken
+
+
+25/03/2020 V17-7 :
+fix : msg when reaching the max integer of int32
+fix : lower size threshold
+
 24/03/2020 V17-6 :
 hot fix : use 'size' instead of 'size on disk' for the threshold used to close
           suspended transferts (freezed windows consoles)

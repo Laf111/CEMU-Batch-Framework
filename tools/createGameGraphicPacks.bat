@@ -541,7 +541,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM now searching using icoId
         set "line="NONE""
 
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I ";'%icoId%';"') do (
             for /F "tokens=1-11 delims=;" %%a in ("%%i") do (
                set "titleIdRead=%%a"
                set "titleIdList=!titleIdList!^,!titleIdRead:'=!"

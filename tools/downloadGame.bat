@@ -85,12 +85,14 @@ REM : main
     set /A "nbRes=0"
 
     for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!pat!" ^| find /I "00050000" ^| find /I /V "Demo" 2^>NUL') do (
-        set "titleIds[!nbRes!]=%%a"
-        set "titleKeys[!nbRes!]=%%b"
-        set "titles[!nbRes!]="%%c""
-        set "regions[!nbRes!]=%%d"
-        set /A "nbRes+=1"
-        echo !nbRes! ^: %%c [%%d] %%a
+        if not ["%%c"] == ["EUR"] if not ["%%c"] == ["USA"] if not ["%%c"] == ["JPN"] (
+            set "titleIds[!nbRes!]=%%a"
+            set "titleKeys[!nbRes!]=%%b"
+            set "titles[!nbRes!]="%%c""
+            set "regions[!nbRes!]=%%d"
+            set /A "nbRes+=1"
+            echo !nbRes! ^: %%c [%%d] %%a
+        )
     )
 
     echo ===============================================================
@@ -235,34 +237,46 @@ REM : main
     set /A "fskb=!fsbStr:~0,-3!"
     set /A "fsmb=fskb/1024"
 
+    echo. >> !gamelogFile!
     echo.
-    echo Free Space left on !targetDrive!   ^: !fsmb! Mb >> !gamelogFile!
-    echo Free Space left on !targetDrive!   ^: !fsmb! Mb
-    echo Cluster size on !targetDrive! in b ^: !clusterSizeInB! Mb >> !gamelogFile!
-    echo Cluster size on !targetDrive! in b ^: !clusterSizeInB! Mb
+    echo Raw size of game^'s files ^(might be greater than real^) ^: !totalSizeInMb! Mb
+    echo Raw size of game's files ^(might be greater than real^) ^: !totalSizeInMb! Mb >> !gamelogFile!
+    echo. >> !gamelogFile!
+    echo.
+    echo Free Space left on !targetDrive! !fsmb! Mb >> !gamelogFile!
+    echo Free Space left on !targetDrive! !fsmb! Mb
+    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes >> !gamelogFile!
+    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes
     echo.
 
     REM : compute size need on targetDrive
     call:getSizeOnDisk !totalSizeInMb! sizeNeededOnDiskInMb
 
-    echo Space need on disk !targetDrive! ^: !sizeNeededOnDiskInMb! Mb >> !gamelogFile!
-    echo Space need on disk !targetDrive! ^: !sizeNeededOnDiskInMb! Mb
-
+    REM : remove 10Mb to totalSizeInMb (threshold)
+    set /A "threshold=totalSizeInMb-9"
+    
     echo. >> !gamelogFile!
     echo.
     echo.
     if !sizeNeededOnDiskInMb! LSS !fsmb! (
-        echo !sizeNeededOnDiskInMb! Mb needed on disk !targetDrive! ^(!fsmb! Mb left^)^.
+        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!fsmb! Mb left^) >> !gamelogFile!
+        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!fsmb! Mb left^)
+
     ) else (
         echo ERROR ^: not enought space left on !targetDrive!
         echo Needed !sizeNeededOnDiskInMb! ^/ available !fsmb! Mb
         pause
         exit 78
     )
-    echo.
 
-    pause
     echo ---------------------------------------------------------------
+    echo.
+    echo Hit any key to download !gameFolderName! 
+    echo.
+    echo If you want to pause and relaunch the transfert later^, just close this windows
+    echo then all cmd consoles in your task bar
+    echo.
+    pause
 
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -274,19 +288,15 @@ REM : main
     for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
 
     echo. >> !gamelogFile!
-    echo.
     echo nbCpuThreads ^: !nbCpuThreads! >> !gamelogFile!
-    echo nbCpuThreads ^: !nbCpuThreads!
 
     REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
     if !nbCpuThreads! GTR 2 set "mode=parallelized"
     echo Transfert mode ^: !mode! >> !gamelogFile!
-    echo Transfert mode ^: !mode!
-    echo. >> !gamelogFile!
-    echo.
     echo. >> !gamelogFile!
     echo.
     
+    echo ===============================================================
     echo Starting at !date! >> !gamelogFile!
     echo Starting at !date!
     echo.
@@ -441,10 +451,10 @@ REM : functions
             echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
             wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
 
-            if ["!mode!"] == ["sequential"] call:monitorTransfert !totalSizeInMb!
+            if ["!mode!"] == ["sequential"] call:monitorTransfert !threshold!
         )
 
-        if ["!mode!"] == ["parallelized"] call:monitorTransfert !totalSizeInMb!
+        if ["!mode!"] == ["parallelized"] call:monitorTransfert !threshold!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -514,7 +524,11 @@ REM : functions
                 if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
                 if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
 
-                timeout /T 90 > NUL 2>&1
+                echo. >> !gamelogFile!
+                echo.
+                echo ^> Finalizing ^.^.^. >> !gamelogFile!
+                echo ^> Finalizing ^.^.^.
+                timeout /T 120 > NUL 2>&1
 
                 REM : get the initialGameFolderName folder size
                 call:getFolderSizeInMb !initialGameFolderName! sizeDl
@@ -526,7 +540,7 @@ REM : functions
                 echo downloaded successfully  >> !gamelogFile!
                 echo.  >> !gamelogFile!
                 echo.  >> !gamelogFile!
-                echo data size expected ^: !totalSizeInMb! >> !gamelogFile!
+                echo data size expected ^(could be bigger than downloaded^): !totalSizeInMb! >> !gamelogFile!
                 echo data size downloaded ^: !curentSize! >> !gamelogFile!
                 echo.  >> !gamelogFile!
                 goto:eof

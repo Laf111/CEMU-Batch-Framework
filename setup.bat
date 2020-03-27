@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-6"
+    set "BFW_VERSION=V17-8"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -316,7 +316,7 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
-            call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER
+            call:getUserInput "Renaming folder for you? (y,n): " "y,n" ANSWER 30
 
             if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
@@ -359,28 +359,28 @@ REM : main
     if %QUIET_MODE% EQU 0 (
 
         echo ---------------------------------------------------------
-        call:getUserInput "Read the goals of BatchFW? (y,n)" "y,n" ANSWER
+        call:getUserInput "Read the goals of BatchFW? (y,n = default in 10s)" "n,y" ANSWER 10
         if [!ANSWER!] == ["n"] goto:goalsOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :goalsOK
-        call:getUserInput "Read informations on CEMU interfaces history? (y,n)" "y,n" ANSWER
+        call:getUserInput "Read informations on CEMU interfaces history? (y,n = default in 10s)" "n,y" ANSWER 10
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :iFOK
-        call:getUserInput "Read how graphic packs are handled? (y,n)" "y,n" ANSWER
+        call:getUserInput "Read how graphic packs are handled? (y,n = default in 10s)" "n,y" ANSWER 10
         if [!ANSWER!] == ["n"] goto:wiiuOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :wiiuOK
-        call:getUserInput "Read about Wii-U transferts feature? (y,n)" "y,n" ANSWER
+        call:getUserInput "Read about Wii-U transferts feature? (y,n = default in 10s)" "n,y" ANSWER 10
         if [!ANSWER!] == ["n"] goto:useProgressBar
 
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
@@ -402,7 +402,7 @@ REM : main
     set "im="!BFW_TOOLS_PATH:"=!\importModsForAllGames.bat""
     wscript /nologo !StartWait! !im!
 
-    call:getUserInput "Do you want to add another mod folder (y,n)?" "y,n" ANSWER
+    call:getUserInput "Do you want to add another mod folder (y,n = default in 10s)?" "n,y" ANSWER 10
     if [!ANSWER!] == ["y"] goto:askAnotherModFolder
     echo Next time use the shortcut in
     echo Wii-U Games^\_BatchFw^\Tools^\Graphic packs^\Import Mods for my games^.lnk
@@ -414,8 +414,8 @@ REM : main
     REM : flush logFile of CHECK_UPDATE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "CHECK_UPDATE" 2^>NUL') do call:cleanHostLogFile CHECK_UPDATE
 
-    choice /C yn /N /M "Do you want to check for BatchFW's update ? (y,n):"
-    if !ERRORLEVEL! EQU 1 (
+    call:getUserInput "Do you want to check for BatchFW's update (y = default in 10s, n)? " "y,n" ANSWER 10
+    if [!ANSWER!] == ["y"] (
         set "msg="CHECK_UPDATE=YES""
         call:log2HostFile !msg!
     )
@@ -469,8 +469,9 @@ REM : main
 
     set "ARLIST=!ARLIST:EMPTY=!"
     echo Aspect ratios already defined in BatchFW: !ARLIST!
-    choice /C ny /N /M "Change this list? (y = add an aspect ratio or define a custom one, n): "
-    if !ERRORLEVEL! EQU 1 goto:askScreenMode
+
+    call:getUserInput "Change this list? (y = add an aspect ratio or define a custom one, n = default in 20s)" "n,y" ANSWER 20
+    if [!ANSWER!] == ["n"] goto:askScreenMode
 
     echo ---------------------------------------------------------
     echo Choose your display ratio ^(for extra graphic packs^) ^:
@@ -697,8 +698,9 @@ REM : main
 
     set "usersList=!usersList:EMPTY=!"
     echo Users already registered in BatchFW: !usersList!
-    choice /C ny /N /M "Change this list? (y,n): "
-    if !ERRORLEVEL! EQU 1 goto:getSoftware
+
+    call:getUserInput "Change this list (y,n = default in 20s)? " "n,y" ANSWER 20
+    if [!ANSWER!] == ["n"] goto:getSoftware
 
     REM : flush logFile of USER_REGISTERED
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "USER_REGISTERED" 2^>NUL') do call:cleanHostLogFile USER_REGISTERED
@@ -1124,7 +1126,7 @@ REM : main
 
     if %QUIET_MODE% EQU 1 goto:done
 
-    call:getUserInput "Would you like to see how BatchFW works? (y,n)" "y,n" ANSWER
+    call:getUserInput "Would you like to see how BatchFW works? (y,n = default in 10s)" "n,y" ANSWER 10
     if [!ANSWER!] == ["n"] goto:done
 
     set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""
@@ -1251,7 +1253,7 @@ REM : ------------------------------------------------------------------
         )
 
         echo ---------------------------------------------------------
-        call:getUserInput "BatchFw launching mode? (s = silent : default in 10sec, OR p = use progress bar): " "p,s" ANSWER 10
+        call:getUserInput "BatchFw launching mode? (s = silent : default in 20sec, OR p = use progress bar): " "s,p" ANSWER 20
         if [!ANSWER!] == ["p"] (
             set "msg="USE_PROGRESSBAR=YES""
             call:log2HostFile !msg!
@@ -1456,7 +1458,7 @@ REM : ------------------------------------------------------------------
         set "argOpt="
         set "IMPORT_MODE=ENABLED"
 
-REM        call:getUserInput "Disable automatic settings import? (y,n : default in 10sec): " "n,y" ANSWER 10
+REM        call:getUserInput "Disable automatic settings import? (y,n : default in 20sec): " "n,y" ANSWER 20
 REM
 REM        if [!ANSWER!] == ["y"] (
 REM            set "argOpt=-noImport"
