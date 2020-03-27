@@ -284,12 +284,15 @@ Dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 
 ## Recommendations: 
 
-If you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
 
-I recommend to not clone the repository : use the last released version (i also recommend to skip release candidate versions which are not fully validated).
-Using the main branch could lead in regressions and troubles as bacth scripting is really difficult to check (no IDE, no compilation, poorly and unchecked syntax, file format issues...)  
+Do not clone the repository because GitHub will format all files from ANSI to UTF-8 and it might broke silentlty some scripts : use the last released version (i also recommend to skip release candidate versions which are not fully validated).
 
 But if you clone the repository anyway, take care that some files might be encoded in UTF8. You might use the script ./tools/fixBatFiles.bat (used to produce a release) to force the ANSI encoding and remove trailing spaces in all files (this script also put files in read only).
+
+Using the main branch could lead in regressions and troubles as bacth scripting is really difficult to check (no IDE, no compilation, poorly and unchecked syntax, file format issues...)  
+
+Also if you edit the source code, use a text editor that doesn't change ANSI files format to UTF8!
+
 
 
 If you have any trouble don't seek for help or support on CEMU's subreddits or discords, send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
