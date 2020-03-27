@@ -187,7 +187,7 @@ Code is well commented and is read only.
 
 ## Tutorials & videos:
 
-Install, create a portable loadiine library, complete/create and custom GFX packs, synchronize installs, revert, uninstall : https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
+Install, create a portable loadiine library, complete/create custom GFX packs, synchronize installs, revert, uninstall : https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
 
 - 02:00 : install games directly (only put game, DLC and update folder in your games'folder)
 
