@@ -185,7 +185,7 @@ REM : main
     )
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"

@@ -37,6 +37,7 @@ REM : main
     
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -1336,9 +1337,9 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
         echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)

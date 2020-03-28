@@ -160,7 +160,7 @@ REM : ------------------------------------------------------------------
     @echo.
 
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"

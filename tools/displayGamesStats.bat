@@ -105,7 +105,7 @@ REM : ------------------------------------------------------------------
 
     set /A "GAMES_PLAYED=0"
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -317,9 +317,9 @@ REM : ------------------------------------------------------------------
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
         echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)

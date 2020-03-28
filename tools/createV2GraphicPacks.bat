@@ -134,19 +134,11 @@ REM : main
     REM : compute targetWidth
     set /A "targetWidth=!nativeWidth!/!resRatio!"
 
-    REM : force even integer
-    set /A "isEven=!targetWidth!%%2"
-    if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
-
     REM : compute half targetHeight
     set /A "halfOverwriteHeight=!overwriteHeight!/!resRatio!"
 
     REM : compute half targetWidth
     set /A "halfOverwriteWidth=!overwriteWidth!/!resRatio!"
-
-    REM : force even integer
-    set /A "isEven=!halfOverwriteWidth!%%2"
-    if !isEven! NEQ 0 set /A "targetWidth=!halfOverwriteWidth!+1"
 
     echo Creating Res/!resRatio! filter for !targetWidth!x!targetHeight! !desc!
 

@@ -374,6 +374,8 @@ REM : main
     echo ---------------------------------------------------------
     echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
+    timeout /T 3 > NUL 2>&1
+
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
@@ -512,7 +514,7 @@ REM    call:log2HostFile !msg!
     set /A NB_GAMES_TREATED=0
 
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -1819,9 +1821,9 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
         echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)

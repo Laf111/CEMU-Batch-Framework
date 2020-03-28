@@ -1,3 +1,13 @@
+IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SETTINGS 
+USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
+
+
+29/03/2020 V17-9 :
+fix : cl error msg when using version earlier than 1.15.8
+fix : avoid _BatchFw_Install folder when searching for rpx files
+fix : fixBrokenShortcuts.bat was not modified from setup.bat because of remaining read only attribute
+add : update embebed GFX pack to v642
+
 28/03/2020 V17-8 :
 fix : GFX packs not found msg after an update
 fix : third party software were not launched on the very first run of a game

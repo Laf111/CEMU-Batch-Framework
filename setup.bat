@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-8"
+    set "BFW_VERSION=V17-9"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -278,7 +278,7 @@ REM : main
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%i""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
@@ -1036,16 +1036,19 @@ REM : main
     if [!OUTPUTS_TYPE!] == ["1"] (
         REM : instanciate a fixBrokenShortcut.bat
         set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
-        if exist !fbsf! goto:getGpuVendor
 
-        if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
-        robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+        if not exist !fbsf! (
+            mkdir !fbsf! > NUL 2>&1
+            robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+        )
+        set "target="!fbsf:"=!\fixBrokenShortcuts.bat""
+        attrib -R !target!
 
         set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
         !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
         del /F !fnrLog! > NUL 2>&1
     )
-    :getGpuVendor
+
     REM : get GPU_VENDOR
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=OTHER"
@@ -1767,9 +1770,9 @@ REM        call:log2HostFile !msg!
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
         echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)

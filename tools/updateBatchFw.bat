@@ -183,7 +183,7 @@ REM : main
 
 
     REM : treatments to be done after updating to this release
-    call:cleanBeforeUpdate
+    call:cleanAfterUpdate
 
     exit /b 0
     goto:eof
@@ -195,13 +195,13 @@ REM : functions
 
 
     REM : treatments to be done after updating to this release
-   :cleanBeforeUpdate
+   :cleanAfterUpdate
 
 
         REM : clean old icons and jpg files
         pushd !GAMES_FOLDER!
 
-        for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01"') do (
+        for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
             set "codeFullPath="%%i""
             set "pat="!codeFullPath:"=!\00050000*.ico""
             for /F "delims=~" %%j in ('dir /b /s !pat! 2^>NUL') do (
@@ -278,9 +278,9 @@ REM : functions
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
         echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
 
         REM : versioning separator (init to .)

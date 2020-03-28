@@ -1759,9 +1759,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 set "previousSettingsFolder="NONE""
                 goto:continueLoad
             )
-            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^'^)^. If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
+            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
         ) else (
-            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^. If you need to edit game^'s profile ^: use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^'^)^. If you want to avoid the import^, relaunch ^'Wii-U Games^\Set BatchFw settings and register CEMU installs^.link^'^ then delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^' and relaunch^."
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
         )
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
@@ -2675,11 +2675,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "vir=%~2"
 
         REM : format strings
-        echo %vir% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
+        echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
 
         if ["!versionReadFormated!"] == ["NONE"] (
-            echo %vit% | findstr /VR [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+            echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
             echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
             set "versionReadFormated=!vit!"
         ) else (

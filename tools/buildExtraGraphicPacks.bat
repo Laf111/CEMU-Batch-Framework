@@ -29,7 +29,7 @@ REM : main
 
     pushd !GAMES_FOLDER!
     REM : searching for meta file
-    for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^| find /I /V "\mlc01"') do (
+    for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install" ^| find /I /V "\_BatchFw_Install"') do (
 
         REM : meta.xml
         set "META_FILE="%%i""

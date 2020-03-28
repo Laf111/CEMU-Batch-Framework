@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color F0
+    color 4F
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
@@ -318,15 +318,10 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM : compute targetWidth
         set /A "targetWidth=!nativeWidth!/!resRatio!"
 
-        REM : force even integer
-        set /A "isEven=!targetWidth!%%2"
-        if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
-
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
         call:writeRoundedFilters >> !bfwRulesFile!
 
-        if !targetHeight! LEQ 8 goto:addFilters
-REM        if !resRatio! GEQ 12 goto:addFilters
+        if !targetHeight! LEQ 16 goto:addFilters
         set /A "resRatio+=1"
         goto:beginLoopRes
 

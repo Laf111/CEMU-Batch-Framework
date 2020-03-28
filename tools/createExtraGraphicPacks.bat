@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color F0
+    color 4F
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
@@ -208,10 +208,6 @@ REM : main
 
     if !nativeHeight! EQU 720 set /A "nativeWidth=1280"
     if !nativeHeight! EQU 1080 set /A "nativeWidth=1920"
-
-    REM : force even integer
-    set /A "isEven=!nativeWidth!%%2"
-    if !isEven! NEQ 0 set /A "nativeWidth=!nativeWidth!+1"
  
     if not ["%gameName%"] == ["NONE"] set "GAME_TITLE=%gameName%"
 
@@ -623,15 +619,10 @@ REM : functions
         REM : compute targetWidth
         set /A "targetWidth=!nativeWidth!/!resRatio!"
 
-        REM : force even integer
-        set /A "isEven=!targetWidth!%%2"
-        if !isEven! NEQ 0 set /A "targetWidth=!targetWidth!+1"
-
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
         call:writeRoundedFilters >> !bfwRulesFile!
 
-        if !targetHeight! LEQ 8 goto:addFilters
-        if !resRatio! GEQ 12 goto:addFilters
+        if !targetHeight! LEQ 16 goto:addFilters
         set /A "resRatio+=1"
         goto:beginLoopRes
 
