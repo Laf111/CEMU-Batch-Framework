@@ -66,6 +66,22 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
+    set "config="!JNUSFolder:"=!\config""
+    type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
+        echo To use this feature^, obviously you^'ll have to setup JNUSTool
+        echo and get the files requiered by yourself^.
+        echo.
+        echo First you need to find the ^'Wii U common key^' with google
+        echo It should be 32 chars long and start with ^'D7^'^.
+        echo.
+
+        echo Then replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
+        echo and save^.
+        echo.
+        timeout /T 3 > NUL 2>&1
+        wscript /nologo !StartWait! !notePad! !config!
+    )
+
     set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
 
     if not exist !titleKeysDataBase! call:createKeysFile
@@ -223,8 +239,8 @@ REM : main
         call:getSize !dtid! !str! "DLC   " dSize
         echo DLC    size = !dSize! Mb >> !gamelogFile!
     )
-    
-    REM : compute sizes on disk JNUSFolder    
+
+    REM : compute sizes on disk JNUSFolder
     for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
 
     set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
@@ -254,7 +270,7 @@ REM : main
 
     REM : remove 10Mb to totalSizeInMb (threshold)
     set /A "threshold=totalSizeInMb-9"
-    
+
     echo. >> !gamelogFile!
     echo.
     echo.
@@ -271,7 +287,7 @@ REM : main
 
     echo ---------------------------------------------------------------
     echo.
-    echo Hit any key to download !gameFolderName! 
+    echo Hit any key to download !gameFolderName!
     echo.
     echo If you want to pause and relaunch the transfert later^, just close this windows
     echo then all cmd consoles in your task bar
@@ -295,7 +311,7 @@ REM : main
     echo Transfert mode ^: !mode! >> !gamelogFile!
     echo. >> !gamelogFile!
     echo.
-    
+
     echo ===============================================================
     echo Starting at !date! >> !gamelogFile!
     echo Starting at !date!
@@ -323,7 +339,7 @@ REM : main
 
     REM : download the game
     call:download
-    
+
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -341,7 +357,7 @@ REM : main
     echo Downloaded !sizeDl! / !totalSizeInMb! >> !gamelogFile!
     echo.
     pause
-    
+
     REM : update and DLC target folder names
     set "uName="!gameFolderName:"=! (UPDATE DATA)""
     set "dName="!gameFolderName:"=! (DLC)""
@@ -372,7 +388,7 @@ REM : main
         pause
 
     ) else (
-     
+
         REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
         if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
 
@@ -499,7 +515,7 @@ REM : functions
         set /A "t=%~1"
 
         echo threshold used ^: !t! >> !gamelogFile!
-        
+
         REM : wait until all transferts are done
         :waitingLoop
         timeout /T 2 > NUL 2>&1
@@ -545,7 +561,7 @@ REM : functions
                 echo.  >> !gamelogFile!
                 goto:eof
             )
-            
+
             if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
             if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
 
@@ -566,7 +582,7 @@ REM : functions
         )
         set /A "%2=%len%"
     goto:eof
-    
+
     REM : ------------------------------------------------------------------
     :getFolderSizeInMb
 
@@ -579,7 +595,7 @@ REM : functions
         for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
 
         if ["!sizeRead!"] == ["0"] goto:endFct
-        
+
         REM : 1/(1024^2)=0.00000095367431640625
         for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
 
@@ -638,23 +654,6 @@ REM : functions
     REM : create keys file
     :createKeysFile
 
-        echo To use this feature^, obviously you^'ll have to setup JNUSTool
-        echo and get the files requiered by yourself^.
-        echo.
-
-        set "config="!JNUSFolder:"=!\config""
-        type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
-            echo First you need to find the ^'Wii U common key^' with google
-            echo It should be 32 chars long and start with ^'D7^'^.
-            echo.
-
-            echo Then replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
-            echo and save^.
-            echo.
-            timeout /T 3 > NUL 2>&1
-            wscript /nologo !StartWait! !notePad! !config!
-        )
-
         echo You need to create the title keys file^.
         echo.
         echo Use Chrome browser to have less hand work to do^.
@@ -667,6 +666,7 @@ REM : functions
         echo.
         echo Save and relaunch this script when done^.
         pause
+
         exit 80
     goto:eof
     REM : ------------------------------------------------------------------
@@ -729,9 +729,9 @@ REM : functions
         set "string=!string:|=!"
 
         REM : WUP restrictions
-        set "string=!string:?=!"
-        set "string=!string:?=!"
-        set "string=!string:?=!"
+        set "string=!string:™=!"
+        set "string=!string:®=!"
+        set "string=!string:©=!"
 
         set "%2="!string!""
 

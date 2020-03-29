@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V17-9"
+    set "BFW_VERSION=V18"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -138,6 +138,10 @@ REM : main
 
     REM : initialize log file for current host (if needed)
     call:initLogForHost
+
+    REM : create JNUSTool config file
+    set "config="!BFW_RESOURCES_PATH:"=!\JNUST\config""
+    if not exist !config! call:createJNUSToolConfigFile > !config!
 
     :setChcp
     REM : set current char codeset
@@ -1214,6 +1218,16 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :createJNUSToolConfigFile
+
+        echo http^:^/^/ccs^.cdn^.wup^.shop^.nintendo^.net^/ccs^/download
+        echo [COMMONKEY]
+        echo updatetitles^.csv
+        echo https^:^/^/tagaya^.wup^.shop^.nintendo^.net^/tagaya^/versionlist^/EUR^/EU/^latest_version
+        echo https^:^/^/tagaya-wup^.cdn^.nintendo^.net^/tagaya^/versionlist^/EUR^/EU^/list^/%%d^.versionlist
+
+    goto:eof
 
     :reduceFraction
 

@@ -1,6 +1,9 @@
 IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SETTINGS 
 USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 
+30/03/2020 V18 :
+fix : remove config file from archive (was overwritten by the update process) 
+      create it in setup.bat if needed on the very first run or if you reset BatchFw
 
 29/03/2020 V17-9 :
 fix : cl error msg when using version earlier than 1.15.8
