@@ -1396,7 +1396,7 @@ REM
             mkdir "!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!" > NUL 2>&1
 
             REM : create a shortcut to displayGamesStats.bat (if needed)
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\BatchFw - display games stats^.lnk""
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\_BatchFw - display games stats^.lnk""
             set "LINK_DESCRIPTION="Display the golbal games^'stats for !ARGS:"=!""
             set "TARGET_PATH="!BFW_PATH:"=!\tools\displayGamesStats.bat""
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\displayGamesStats.ico""
@@ -1406,7 +1406,7 @@ REM
             )
 
             REM : create a shortcut to exportUserGamesStatsToCemu.bat (if needed)
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\BatchFw - export !ARGS:"=! games^'stats in a CEMU install^.lnk""
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\_BatchFw - export !ARGS:"=! games^'stats in a CEMU install^.lnk""
             set "LINK_DESCRIPTION="Export !ARGS:"=! games^'stats in a CEMU install""
             set "TARGET_PATH="!BFW_PATH:"=!\tools\exportUserGamesStatsToCemu.bat""
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\exportUserGamesStatsToCemu.ico""
