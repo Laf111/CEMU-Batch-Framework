@@ -214,7 +214,6 @@ REM : main
 
     if !titleId! == "################" goto:metafix
 
-    :computeSci
     set "endIdUp=!titleId!
     call:lowerCase !endIdUp! sci
 
@@ -266,7 +265,7 @@ REM : main
     echo !TRANSF_CACHE! successfully copied to
     echo !TARGET_FOLDER! as !sci!.bin
 
-    if %nbArgs% EQU 0 goto:endMain
+    if %nbArgs% NEQ 0 goto:endMain
     echo =========================================================
     echo This windows will close automatically in 12s
     echo     ^(n^) ^: don^'t close^, i want to read history log first
