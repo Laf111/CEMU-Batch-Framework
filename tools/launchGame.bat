@@ -251,8 +251,8 @@ REM : main
             cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running (nbI=%nbI%). If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
             echo "ERROR^: This script is already running ^!" >> !batchFwLog!
             echo "ERROR^: This script is already running ^!"
-            tasklist | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find" >> !batchFwLog!
-            tasklist | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find" >> !batchFwLog!
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
             exit 20
         )
     )
@@ -340,14 +340,18 @@ REM : main
     wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
+        echo ERROR while extracting V2_GFX_Packs, exiting 1
         echo ERROR while extracting V2_GFX_Packs, exiting 1 >> !batchFwLog!
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 21
     )
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] type !logFile! | find /I "COMPLETE_GP" > NUL && (
         REM : force a graphic pack update
+        echo Forcing a GFX pack update to take new ratios into account^.^.^. >> !batchFwLog!
+        echo. >> !batchFwLog!
         echo Forcing a GFX pack update to take new ratios into account^.^.^.
         echo.
+        cscript /nologo !MessageBox! "Forcing a GFX pack update to take new ratios into account^.^.^."
 
         REM : forcing a GFX pack update to add GFX packs for new games
         set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
@@ -385,7 +389,6 @@ REM : main
     if ["!sci!"] == ["NOT_FOUND"] (
         echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^! >> !batchFwLog!
         echo WARNING ^: !GAME_TITLE! shader cache name computation failed ^!
-        goto:shaderCacheComputed
     )
     set "osci=!sci!"
 
@@ -402,9 +405,8 @@ REM : main
     if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !v116! EQU 2 goto:getScreenMode
 
-    REM : if
-    set "endIdUp=!titleId!
-    call:lowerCase !endIdUp! sci  
+    REM : if v > 1.16 update sci value with titleId
+    call:lowerCase !titleId! sci  
 
     :getScreenMode
     echo Expected shaderCacheName ^: !sci! >> !batchFwLog!
@@ -535,9 +537,12 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if not exist !gtscf! (
         mkdir !gtscf! > NUL 2>&1
         call:getTransferableCache
-        goto:Launch3rdPartySoftware
+        if !ERRORLEVEL! NEQ 0 (
+            if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+            goto:launch3rdPartySoftware
+        )
     )
-
+   
     set "cacheFile=NONE"
     pushd !gtscf!
 
@@ -555,13 +560,16 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         )
     )
     pushd !BFW_TOOLS_PATH!
-
-    REM : if not file found
+    
+    REM : check if cacheFile was found
     if ["!cacheFile!"] == ["NONE"] (
         call:getTransferableCache
-        goto:Launch3rdPartySoftware
+        if !ERRORLEVEL! NEQ 0 (
+            if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+            goto:launch3rdPartySoftware
+        )
     )
-
+    
     if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "backup and provide transferable cache"
 
     REM : backup transferable cache in case of CEMU corrupt it
@@ -604,7 +612,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : copy all !sci!.bin file (2 files if separable and conventionnal)
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /IS /IT > NUL 2>&1
 
-    :Launch3rdPartySoftware
+    :launch3rdPartySoftware
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
@@ -2402,22 +2410,32 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     goto:eof
     REM : ------------------------------------------------------------------
 
-
     :getTransferableCache
 
-        cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
-        if !ERRORLEVEL! EQU 2 (
-            cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you"
-            goto:eof
+        if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+            cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
+            if !ERRORLEVEL! EQU 2 (
+                cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you"
+                exit /b 1
+            )
+            REM : open a google search
+            wscript /nologo !Start! "%windir%\explorer.exe" "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
+            timeout /T 25 > NUL 2>&1
+            
+            wscript /nologo !MessageBox! "If you found a cache, import it now ?" 4164
+            if !ERRORLEVEL! EQU 2 exit /b 1
+
+        ) else (
+            wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now ^?" 4164
+            if !ERRORLEVEL! EQU 2 exit /b 1
         )
-
-        if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:eof
-
-        REM : open a google search
-        wscript /nologo !Start! "%windir%\explorer.exe" "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
-
-        cscript /nologo !MessageBox! "Let CEMU launch the game a first time then close it and use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache'. Browse to the file downloaded, no need to rename-it, BatchFw will do it for you"
-
+        
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\importTransferableCache.bat""
+                
+        REM : import the downloaded cache
+        wscript /nologo !StartWait! !toBeLaunch! !GAME_FOLDER_PATH! !sci!
+        exit /b 0
+        
     goto:eof
     REM : ------------------------------------------------------------------
 

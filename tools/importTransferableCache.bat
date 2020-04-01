@@ -52,23 +52,37 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
 
+    if %nbArgs% EQU 0 goto:beginImport
+    if %nbArgs% NEQ 2 (
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" GAME_FOLDER_PATH ShaderCacheName
+        echo given {%*}
+        pause
+        exit 1
+    )
+    
+    set "GAME_FOLDER_PATH=!args[0]!"
+
+    set "sci=!args[1]!"
+    set "sci=!sci:"=!"
+    
+    :beginImport
     cls
     echo =========================================================
     echo Import a transferable cache file
     echo =========================================================
     echo.
 
-    REM : Ask if tc for CEMU > 1.16 => newTc=1
-    set /A "newTc=0"
-
-    choice /C yn /N /M "Is this cache is for versions of CEMU > 1.16 (y, n)? : "
-    if %ERRORLEVEL% EQU 1 set /A "newTc=1"
-    
     REM : browse to the file
     :askInputFile
     echo.
@@ -80,10 +94,42 @@ REM : main
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askInputFile
     )
-
+    
+    REM : check the extension
+    for /F %%i in (!TRANSF_CACHE!) do set "ext=%%~xi"
+    if not ["!ext!"] == [".bin"] (
+        echo Please browse to a bin file ^(^.bin^)
+        goto:askInputFile
+    )
     for %%a in (!TRANSF_CACHE!) do set "folder="%%~dpa""
     set "SOURCE_FOLDER=!folder:~0,-2!""
+    
+    REM : with args
+    if %nbArgs% NEQ 0 goto:getTargetFolder
+    
+    REM : Ask if tc for CEMU > 1.16 => newTc=1
+    set /A "newTc=0"
+        
+    REM : analyse length of file
+    for /F %%i in (!TRANSF_CACHE!) do set "fn=%%~ni"
 
+    REM : cache > 1.16
+    echo !fn! | findStr /R "^[a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9].$" > NUL 2>&1 && (
+        echo !fn! | find "00050000" > NUL 2>&1 && (
+            set /A "newTc=1"
+            goto:askGameFolder
+        )
+    )
+    REM : is it look like an old shader cache name
+    echo !fn! | findStr /R "^[a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9].$" > NUL 2>&1 && (
+        set /A "newTc=0"
+        goto:askGameFolder
+    )
+    
+    REM : else ask user
+    choice /C yn /N /M "Is this cache is for versions of CEMU > 1.16 (y, n)? : "
+    if %ERRORLEVEL% EQU 1 set /A "newTc=1"
+    
     :askGameFolder
     echo.
     echo Please browse to the game^'s folder
@@ -126,7 +172,6 @@ REM : main
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
     REM : compute shaderCacheId
-
     set "sci=NOT_FOUND"
     call:getShaderCacheName
     if !newTc! EQU 0 goto:checkSizes
@@ -169,6 +214,7 @@ REM : main
 
     if !titleId! == "################" goto:metafix
 
+    :computeSci
     set "endIdUp=!titleId!
     call:lowerCase !endIdUp! sci
 
@@ -182,7 +228,8 @@ REM : main
 
     REM : check the files sizes
     for /F "tokens=*" %%a in (!TRANSF_CACHE!)  do set "newSize=%%~za"
-
+   
+    :getTargetFolder
     REM : search for existing cache
     set "TARGET_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\ShaderCache\transferable""
     if not exist !TARGET_FOLDER! mkdir !TARGET_FOLDER! > NUL 2>&1
@@ -219,6 +266,7 @@ REM : main
     echo !TRANSF_CACHE! successfully copied to
     echo !TARGET_FOLDER! as !sci!.bin
 
+    if %nbArgs% EQU 0 goto:endMain
     echo =========================================================
     echo This windows will close automatically in 12s
     echo     ^(n^) ^: don^'t close^, i want to read history log first
@@ -229,7 +277,8 @@ REM : main
         REM : Waiting before exiting
         pause
     )
-
+    
+    :endMain
     if %nbArgs% EQU 0 endlocal
     exit 0
 

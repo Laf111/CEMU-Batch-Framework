@@ -47,6 +47,19 @@ REM : main
     REM : output folder
     set "targetFolder=!GAMES_FOLDER!"
 
+    REM : search if this script is not already running (nb of search results)
+    set /A "nbI=0"
+
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "downloadGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
+        if %nbI% GEQ 2 (
+            echo "ERROR^: This script is already running ^!"
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "downloadGame.bat" | find /I /V "find"
+            pause
+            exit 20
+        )
+    )
+
     REM : check if java is installed
     java -version > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
@@ -92,12 +105,106 @@ REM : main
         exit 52
     )
 
+    
+    set /A "decryptMode=0"
+
+    echo You can download a WUP package for the game to be installed on
+    echo your Wii-U using WUP Installer GX2^. You^'ll have to browse to the
+    echo target location in this case ^(for example^: %%SD_CARD%%\install^)
+    echo.
+    echo If you choose to extract the game ^(for CEMU^)^, game will be
+    echo extracted and prepared for emulation^.
+    echo.
+    choice /C yn /N /M "Extract games (= RPX format for CEMU)? :"
+    if !ERRORLEVEL! EQU 1 set /A "decryptMode=1" && goto:selectGames
+
+    :askOutputFolder
+    set "targetFolder="NONE""
+    for /F %%b in ('cscript /nologo !browseFolder! "Please, browse to the output folder"') do set "folder=%%b" && set "targetFolder=!folder:?= !"
+    if [!targetFolder!] == ["NONE"] (
+        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
+        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
+        goto:askOutputFolder
+    )
+
+    REM : copy JNUSFolder content in !targetFolder!
+    robocopy !JNUSFolder! !targetFolder! /S /IS /IT  > NUL 2>&1
+
+    REM : override JNUSFolder path
+    set "JNUSFolder=!targetFolder!"
+    
+    :selectGames
+
+    REM : pattern used to evaluate size of games
+    set "str="Total Size of Content Files""
+    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
+    
+    set "mode=sequential"
+    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
+
+    echo ---------------------------------------------------------------
+    echo nbCpuThreads detected ^: !nbCpuThreads!
+
+    REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
+    if !nbCpuThreads! GTR 2 set "mode=parallelized"
+    echo Transfert mode ^: !mode!
+    echo.
+    
+    pushd !JNUSFolder!
+    set "jnusTool="!JNUSFolder:"=!\JNUSTool.jar""
+    
+    REM : compute sizes on disk JNUSFolder
+    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+
+    set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
+    for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
+        set "fsbStr=%%i"
+        set /A "clusterSizeInB=%%j"
+    )
+
+    REM : free space in Kb
+    set /A "fskb=!fsbStr:~0,-3!"
+    set /A "totalFreeSpaceLeft=fskb/1024"
+
+    REM cls
+    echo Free Space left on !targetDrive! ^: !totalFreeSpaceLeft! Mb
+    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes
+    
+    REM : number of games selected
+    set /A "nbGames=0"
+    set /A "freeSpaceLeft=totalFreeSpaceLeft"
+    set /A "totalSpaceNeeded=0"
+    
+    if !decryptMode! EQU 1  (
+    
+        set "mf="NOT_FOUND""
+        REM : get the last modified folder in JNUSFolder
+        for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do (
+            if [!mf!] == ["NOT_FOUND"] echo ---------------------------------------------------------------
+            echo Uncomplete download detected : "%%x"
+
+            choice /C yn /T 6 /D n /N /M "Remove it (y/n = default in 15 sec)? :"
+            if !ERRORLEVEL! EQU 1 rmdir /Q /S "%%x" > NUL 2>&1
+            REM : at least delete meta.xml to for last modified folder detection
+            set "mf="%%x\meta\meta.xml""
+            del /F !mf! > NUL 2>&1
+            echo.
+        )
+        if not [!mf!] == ["NOT_FOUND"] (
+            echo.
+            echo Relaunch these downloads to complete them
+        )
+    )
+    timeout /T 3 > NUL 2>&1
+    set "gamesList="!BFW_LOGS:"=!\jnust_gamesList.log""
+    
     :askKeyWord
     cls
+    echo ---------------------------------------------------------------
     set /P  "pat=Enter a key word to search for the game (part of the title, titleId...): "
     echo.
     echo =========================== Matches ===========================
-    REM : get userArray
+    REM : number of resuts returned
     set /A "nbRes=0"
 
     for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!pat!" ^| find /I "00050000" ^| find /I /V "Demo" 2^>NUL') do (
@@ -115,19 +222,21 @@ REM : main
     echo s ^: to relaunch your search
     echo c ^: to cancel
     echo ---------------------------------------------------------------
-    echo.
-    echo If your search failed^, check the format of
-    echo !titleKeysDataBase!
-    echo.
-    echo The text file must use the following format ^:
-    echo.
-    echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
-    echo ^(use TAB as separator^)
-    echo.
-    echo.
-    echo If your search failed on a ^"recent game^"^, try to update
-    echo !titleKeysDataBase!
-    echo with a newer database^.
+    if !nbGames! EQU 0 (
+        echo.
+        echo If your search failed^, check the format of
+        echo !titleKeysDataBase!
+        echo.
+        echo The text file must use the following format ^:
+        echo.
+        echo [TitleID]^\t[TitleKey]^\t[Name]^\t[Region]^\t[Type]^\t[Ticket]
+        echo ^(use TAB as separator^)
+        echo.
+        echo.
+        echo If your search failed on a ^"recent game^"^, try to update
+        echo !titleKeysDataBase!
+        echo with a newer database^.
+    )
     echo.
     echo.
 
@@ -139,70 +248,25 @@ REM : main
         echo.
         echo Cancelled by user
         pause
-        exit 55
+        goto:launchDownload
     )
 
     echo !answer! | findstr /R "^[0-9]*.$" > NUL 2>&1 && goto:checkInteger
     goto:askChoice
 
     :checkInteger
-    set /A "index=answer-1"
+    set /A "index=!answer!-1"
     if !index! GEQ !nbRes! goto:askChoice
 
-    set /A "decryptMode=0"
-
-    title Download !titles[%index%]! [!regions[%index%]!]
-    cls
     echo ===============================================================
-    echo !titles[%index%]! [!regions[%index%]!] ^(!titleIds[%index%]!^)
-    echo ===============================================================
-    echo.
-    echo You can download a WUP package for the game to be installed on
-    echo your Wii-U using WUP Installer GX2^. You^'ll have to browse to the
-    echo target location in this case ^(for example^: %%SD_CARD%%\install^)
-    echo.
-    echo If you choose to extract the game ^(for CEMU^)^, game will be
-    echo extracted and prepared for emulation^.
-    echo.
-    choice /C yn /N /M "Extract games (= RPX format for CEMU)? :"
-    if !ERRORLEVEL! EQU 1 set /A "decryptMode=1" && goto:begin
-
-    :askOutputFolder
-    set "targetFolder="NONE""
-    for /F %%b in ('cscript /nologo !browseFolder! "Please, browse to the output folder"') do set "folder=%%b" && set "targetFolder=!folder:?= !"
-    if [!targetFolder!] == ["NONE"] (
-        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
-        goto:askOutputFolder
-    )
-
-    REM : copy JNUSFolder content in !targetFolder!
-    robocopy !JNUSFolder! !targetFolder! /S /IS /IT  > NUL 2>&1
-
-    REM : override JNUSFolder path
-    set "JNUSFolder=!targetFolder!"
-
-    :begin
-
+    REM : download meta/meta.xml to get the title name
+    
     REM : compute update and DLC titleId
     set "titleId=!titleIds[%index%]!"
     set "endTitleId=%titleId:~8,8%"
 
     set "utid=0005000e!endTitleId!"
     set "dtid=0005000c!endTitleId!"
-
-    cls
-    echo ===============================================================
-    echo Temporary folder ^: !JNUSFolder!
-    echo ---------------------------------------------------------------
-    set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
-    set "jnusTool="!JNUSFolder:"=!\JNUSTool.jar""
-
-    REM : download meta/meta.xml to get the title name
-    pushd !JNUSFolder!
-
-    set "str="Total Size of Content Files""
-    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
 
     set /A "totalSizeInMb=0"
     call:getSize !titleId! !str! "Game  " gSize
@@ -211,210 +275,141 @@ REM : main
         pause
         exit /b 65
     )
-
+    
     REM : get the last modified folder in
-    set "initialGameFolderName="NOT_FOUND""
-    for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do set "initialGameFolderName="%%x""
-    if [!initialGameFolderName!] == ["NOT_FOUND"] (
+    set "mf="NOT_FOUND""
+    for /F "delims=~" %%x in ('dir /O:D /T:W /B /S meta.xml 2^>NUL ^| find /V /I "aoc" ^| find /V /I "update"') do set "mf="%%x""
+    if [!mf!] == ["NOT_FOUND"] (
         echo ERROR^: failed to download meta^.xlm
         echo Check security policy
         pause
         exit 60
     )
+    
+    set "initialGameFolderName="NOT_FOUND""
+    
+    for %%a in (!mf!) do set "parentFolder="%%~dpa""
+    set "dirname=!parentFolder:~0,-2!""
+    for %%a in (!dirname!) do set "parentFolder="%%~dpa""
+    set "fullPath=!parentFolder:~0,-2!""
+    set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
+
     set "gameFolderName=!initialGameFolderName:?=!"
 
     REM : secureGameTitle
     call:secureGameTitle !gameFolderName! gameFolderName
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
-    set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
-    echo Game   size = !gSize! Mb > !gamelogFile!
-
     type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
         call:getSize !utid! !str! Update uSize
-        echo Update size = !uSize! Mb >> !gamelogFile!
     )
 
     type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && (
         call:getSize !dtid! !str! "DLC   " dSize
-        echo DLC    size = !dSize! Mb >> !gamelogFile!
     )
 
-    REM : compute sizes on disk JNUSFolder
-    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
-
-    set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
-    for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
-        set "fsbStr=%%i"
-        set /A "clusterSizeInB=%%j"
-    )
-
-    REM : free space in Kb
-    set /A "fskb=!fsbStr:~0,-3!"
-    set /A "fsmb=fskb/1024"
-
-    echo. >> !gamelogFile!
     echo.
     echo Raw size of game^'s files ^(might be greater than real^) ^: !totalSizeInMb! Mb
-    echo Raw size of game's files ^(might be greater than real^) ^: !totalSizeInMb! Mb >> !gamelogFile!
-    echo. >> !gamelogFile!
     echo.
-    echo Free Space left on !targetDrive! !fsmb! Mb >> !gamelogFile!
-    echo Free Space left on !targetDrive! !fsmb! Mb
-    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes >> !gamelogFile!
-    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes
+    echo Free Space left on !targetDrive! ^: !freeSpaceLeft! Mb
     echo.
-
+    
     REM : compute size need on targetDrive
     call:getSizeOnDisk !totalSizeInMb! sizeNeededOnDiskInMb
-
-    REM : remove 10Mb to totalSizeInMb (threshold)
-    set /A "threshold=totalSizeInMb-9"
-
-    echo. >> !gamelogFile!
+    set /A "totalSpaceNeeded+=sizeNeededOnDiskInMb"
     echo.
     echo.
-    if !sizeNeededOnDiskInMb! LSS !fsmb! (
-        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!fsmb! Mb left^) >> !gamelogFile!
-        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!fsmb! Mb left^)
+    if !sizeNeededOnDiskInMb! LSS !freeSpaceLeft! (
+        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!freeSpaceLeft! Mb estimate left^)
 
     ) else (
         echo ERROR ^: not enought space left on !targetDrive!
-        echo Needed !sizeNeededOnDiskInMb! ^/ available !fsmb! Mb
-        pause
-        exit 78
+        echo Needed !sizeNeededOnDiskInMb! ^/ still available !freeSpaceLeft! Mb
+        echo Ignoring this game
+        goto:askKeyWord
     )
 
     echo ---------------------------------------------------------------
     echo.
-    echo Hit any key to download !gameFolderName!
-    echo.
-    echo If you want to pause and relaunch the transfert later^, just close this windows
-    echo then all cmd consoles in your task bar
-    echo.
-    pause
-
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "date=%ldt%"
-    REM : starting DATE
-
-    set "mode=sequential"
-    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
-
-    echo. >> !gamelogFile!
-    echo nbCpuThreads ^: !nbCpuThreads! >> !gamelogFile!
-
-    REM : parallelized only if more than 2 CPU thread are available (JNUSTool is already mutli-threaded)
-    if !nbCpuThreads! GTR 2 set "mode=parallelized"
-    echo Transfert mode ^: !mode! >> !gamelogFile!
-    echo. >> !gamelogFile!
-    echo.
-
-    echo ===============================================================
-    echo Starting at !date! >> !gamelogFile!
-    echo Starting at !date!
-    echo.
-
-    if !decryptMode! EQU 0 (
-        echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^.
-        echo ^> Downloading WUP of !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
-        title Downloading WUP of !titles[%index%]! [!regions[%index%]!]
+    if !nbGames! GEQ 1 (
+        set /A "nbg=nbGames-1"
+        echo Your current downloads list ^:
+        echo.
+        echo. > !gamesList!
+        for /L %%l in (0,1,!nbg!) do (
+            echo !titlesArray[%%l]! [!regionsArray[%%l]!]
+            echo !titlesArray[%%l]! [!regionsArray[%%l]!] >> !gamesList!
+        )    
+        echo.
     ) else (
+        del /F !gamesList! > NUL 2>&1
+    )
+    echo.
+    
+    if exist !gamesList! type !gamesList! | find /I !gameFolderName! && (
+        echo This game is already in the list ^!
+        pause
+        goto:askKeyWord
+    )
+    
+    choice /C yn /N /M "Add !gameFolderName:"=! to the list (y/n)? : "
+    if !ERRORLEVEL! EQU 2 (
+        rmdir /Q /S !initialGameFolderName! > NUL 2>&1
+        goto:askKeyWord
+    )
+    REM : delete meta file because dir on date accuracy is minute !
+    del /F !mf! > NUL 2>&1
 
-        set "finalPath="!GAMES_FOLDER:"=!\!gameFolderName:"=!"
+    REM : fill arrays
+    set "titleIdsArray[!nbGames!]=!titleIds[%index%]!"
+    set "titleKeysArray[!nbGames!]=!titleKeys[%index%]!"
+    set "titlesArray[!nbGames!]=!titles[%index%]!"
+    set "regionsArray[!nbGames!]=!regions[%index%]!"
+    
+    set /A "nbGames+=1"
+    set /A "freeSpaceLeft-=sizeNeededOnDiskInMb"
+    
+    :launchDownload
+    echo ===============================================================
+    choice /C yn /N /M "Download your games now (y/n = add another game)? : "
+    if !ERRORLEVEL! EQU 2 goto:askKeyWord
 
-        if exist !finalPath! (
-            echo ERROR^: Game already exist in !finalPath!^, exiting
-            rmdir /Q /S !initialGameFolderName! > NUL 2>&1
-            pause
-            exit 61
-        )
-
-        echo ^> Downloading RPX package of !titles[%index%]! [!regions[%index%]!]^.^.^.
-        echo ^> Downloading RPX package of !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
-        title Downloading RPX package of !titles[%index%]! [!regions[%index%]!]
+    set /A "nbGames-=1"
+    
+    cls
+    echo If you want to pause the current tranfert or if you get errors during the transfert^, 
+    echo close this windows then all opened cmd consoles in your task bar
+    echo and relaunch this script to complete the download^.
+    echo.
+    echo.
+    echo Your downloads list ^:
+    echo.
+    for /L %%l in (0,1,!nbGames!) do echo !titlesArray[%%l]! [!regionsArray[%%l]!]
+    echo.
+    echo.
+    echo !totalSpaceNeeded! Mb to download
+    echo !freeSpaceLeft! Mb left on !targetDrive! at the end of all transferts
+    echo.
+    echo.
+    echo Hit any key to launch your downloads
+    echo.
+    
+    pause
+    
+    set "initialGameFolderName="NOT_FOUND""
+    
+    REM : loop on game selected
+    for /L %%l in (0,1,!nbGames!) do (
+    
+        title Download !titlesArray[%%l]! [!regionsArray[%%l]!]
+        
+        REM : download the game
+        call:downloadGame !titlesArray[%%l]! !titleIdsArray[%%l]! !titleKeysArray[%%l]! !regionsArray[%%l]!
     )
 
-    REM : download the game
-    call:download
-
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "date=%ldt%"
-
-    REM : ending DATE
-    echo.
-    echo Ending at !date!
-    echo Ending at !date! >> !gamelogFile!
-    echo ===============================================================
-
-    REM : get the JNUSTools folder size
-    call:getFolderSizeInMb !initialGameFolderName! sizeDl
-    echo Downloaded !sizeDl! / !totalSizeInMb!
-    echo Downloaded !sizeDl! / !totalSizeInMb! >> !gamelogFile!
-    echo.
-    pause
-
-    REM : update and DLC target folder names
-    set "uName="!gameFolderName:"=! (UPDATE DATA)""
-    set "dName="!gameFolderName:"=! (DLC)""
-
-    if !decryptMode! EQU 0 (
-        REM : WUP format (saved in tmp_%titleId% folder)
-
-        set "folder=tmp_!titleId!"
-        if not exist !folder! (
-            echo ERROR^: failed to download !titleId!^?
-            echo ERROR^: tmp_!titleId! was not found
-            pause
-            exit 70
-        )
-
-        move /Y !folder! !gameFolderName! > NUL 2>&1
-
-        set "folder=tmp_!utid!"
-        if exist !folder! move /Y !folder! !uName! > NUL 2>&1
-
-        set "folder=tmp_!dtid!"
-        if exist !folder! move /Y !folder! !dName! > NUL 2>&1
-
-        REM : clean targetFolder from JNUSFolder files
-        call:cleanTargetFolder
-
-        echo WUP packages created in !JNUSFolder:"=!
-        pause
-
-    ) else (
-
-        REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
-        if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
-
-        REM : if exist "GAME_TITLE [XXXXXX]\updates"
-        set "folder="!gameFolderName:"=!\updates""
-
-        REM : move "GAME_TITLE [XXXXXX]\updates" to "GAME_TITLE [XXXXXX] (UPDATE DATA)"
-        if exist !folder! (
-            for /F "delims=~" %%x in ('dir /b !folder! 2^>NUL') do set "version=%%x"
-            set "updatePath="!gameFolderName:"=!\updates\!version!""
-
-            move /Y !updatePath! !uName! > NUL 2>&1
-            rmdir /Q /S !folder!
-            move /Y !uName! ..\..\.. > NUL 2>&1
-        )
-
-        REM : if exist "GAME_TITLE [XXXXXX]\aoc0005000C101D6000"
-        set "dlcPath="!gameFolderName:"=!\aoc!dtid!""
-        REM : move "GAME_TITLE [XXXXXX]\updates" to "GAME_TITLE [XXXXXX] (DLC)" in !GAMES_FOLDER!
-        if exist !dlcPath! (
-            move /Y !dlcPath! !dName! > NUL 2>&1
-            move /Y !dName! ..\..\.. > NUL 2>&1
-        )
-
-        move /Y !gameFolderName! ..\..\.. > NUL 2>&1
-
+    if [!initialGameFolderName!] == ["NOT_FOUND"] goto:endDg
+    
+    if !decryptMode! EQU 1 if !nbGames! GEQ 0 (
         echo.
         echo.
 
@@ -434,9 +429,9 @@ REM : main
             wscript /nologo !Start! !setup!
         )
     )
-
     rmdir /Q /S !initialGameFolderName! > NUL 2>&1
-
+    
+    :endDg
     endlocal
     exit 0
 
@@ -445,16 +440,223 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :download
+    :downloadGame
 
-        wscript /nologo !StartMinimized! !download! !JNUSFolder! !titleIds[%index%]! !decryptMode! !titleKeys[%index%]!
+        set "currentTitle="%~1""
+        set "currentTitleId=%~2"
+        set "currentTitleKey=%~3"
+        set "currentTitleRegion=%~4"
+        
+        title Download !currentTitle! [!currentTitleRegion!]
+        cls
+        echo ===============================================================
+        echo !currentTitle! [!currentTitleRegion!] ^(!currentTitleId!^)
+
+        REM : compute update and DLC titleId
+        set "titleId=!currentTitleId!"
+        set "endTitleId=%titleId:~8,8%"
+
+        set "utid=0005000e!endTitleId!"
+        set "dtid=0005000c!endTitleId!"
+
+        set /A "totalSizeInMb=0"
+        call:getSize !titleId! !str! "Game  " gSize
+        if !totalSizeInMb! EQU 0 (
+            echo ERROR^: Java call failed^, check system^'s security policies
+            pause
+            exit /b 65
+        )
+        
+        REM : get the last modified folder in
+        set "mf="NOT_FOUND""
+        for /F "delims=~" %%x in ('dir /O:D /T:W /B /S meta.xml 2^>NUL ^| find /V /I "aoc" ^| find /V /I "update"') do set "mf="%%x""
+        if [!mf!] == ["NOT_FOUND"] (
+            echo ERROR^: failed to download meta^.xlm
+            echo Check security policy
+            pause
+            exit 60
+        )
+        
+        for %%a in (!mf!) do set "parentFolder="%%~dpa""
+        set "dirname=!parentFolder:~0,-2!""
+        for %%a in (!dirname!) do set "parentFolder="%%~dpa""
+        set "fullPath=!parentFolder:~0,-2!""
+        set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
+        set "gameFolderName=!initialGameFolderName:?=!"
+        
+        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:?=!"
+        echo ---------------------------------------------------------------
+        
+        REM : secureGameTitle
+        call:secureGameTitle !gameFolderName! gameFolderName
+        echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
+
+        set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
+        
+        set /A "totalSizeInMb=0"
+        call:getSize !titleId! !str! "Game  " gSize
+        if !totalSizeInMb! EQU 0 (
+            echo ERROR^: Java call failed^, check system^'s security policies
+            pause
+            exit /b 65
+        )
+        echo Game   size = !gSize! Mb > !gamelogFile!
+
+        type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
+            call:getSize !utid! !str! Update uSize
+            echo Update size = !uSize! Mb >> !gamelogFile!
+        )
+
+        type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && (
+            call:getSize !dtid! !str! "DLC   " dSize
+            echo DLC    size = !dSize! Mb >> !gamelogFile!
+        )
+
+        REM : remove 10Mb to totalSizeInMb (threshold)       
+        set /A "threshold=!totalSizeInMb!-9"
+
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+        REM : starting DATE
+
+        echo.
+        echo ===============================================================
+        echo Starting at !date! >> !gamelogFile!
+        echo Starting at !date!
+        echo.
+        
+        if !decryptMode! EQU 0 (
+            echo ^> Downloading WUP of !currentTitle! [!currentTitleRegion!]^.^.^.
+            echo ^> Downloading WUP of !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
+            title Downloading WUP of !currentTitle! [!currentTitleRegion!]
+        ) else (
+
+            set "finalPath="!GAMES_FOLDER:"=!\!gameFolderName:"=!"
+
+            if exist !finalPath! (
+                echo ERROR^: Game already exist in !finalPath!^, skip this game
+                rmdir /Q /S !initialGameFolderName! > NUL 2>&1
+                pause
+                goto:eof
+            )
+
+            echo ^> Downloading RPX package of !currentTitle! [!currentTitleRegion!]^.^.^.
+            echo ^> Downloading RPX package of !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
+            title Downloading RPX package of !currentTitle! [!currentTitleRegion!]
+        )
+        set /A "progression=0"
+        
+        :initDownload        
+
+        REM : download the game
+        call:download
+
+        REM : get the JNUSTools folder size
+        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+        
+        REM : do not continue if not complete (in case of user close downloading windows before this windows)
+        set /A "progression=(!sizeDl!*100)/!totalSizeInMb!"
+        
+        if !progression! LSS 85 (
+            echo ---------------------------------------------------------------
+            echo Transfert seems to be incomplete^, relaunching^.^.^.
+            echo.
+            echo Transfert seems to be incomplete^, relaunching^.^.^. >> !gamelogFile!
+            echo. >> !gamelogFile!
+            goto:initDownload
+        )
+        
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+        
+        REM : ending DATE
+        echo.
+        echo Ending at !date!
+        echo Ending at !date! >> !gamelogFile!
+        echo ===============================================================
+        
+        echo Downloaded !sizeDl! / !totalSizeInMb!
+        echo Downloaded !sizeDl! / !totalSizeInMb! >> !gamelogFile!
+        echo.
+        
+        REM : update and DLC target folder names
+        set "uName="!gameFolderName:"=! (UPDATE DATA)""
+        set "dName="!gameFolderName:"=! (DLC)""
+
+        if !decryptMode! EQU 0 (
+            REM : WUP format (saved in tmp_%titleId% folder)
+
+            set "folder=tmp_!titleId!"
+            if not exist !folder! (
+                echo ERROR^: failed to download !titleId!^?
+                echo ERROR^: tmp_!titleId! was not found
+                pause
+                exit 70
+            )
+
+            move /Y !folder! !gameFolderName! > NUL 2>&1
+
+            set "folder=tmp_!utid!"
+            if exist !folder! move /Y !folder! !uName! > NUL 2>&1
+
+            set "folder=tmp_!dtid!"
+            if exist !folder! move /Y !folder! !dName! > NUL 2>&1
+
+            REM : clean targetFolder from JNUSFolder files
+            call:cleanTargetFolder
+
+            echo WUP packages created in !JNUSFolder:"=!
+            echo.
+            
+        ) else (
+
+            REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
+            if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
+
+            REM : if exist "GAME_TITLE [XXXXXX]\updates"
+            set "folder="!gameFolderName:"=!\updates""
+
+            REM : move "GAME_TITLE [XXXXXX]\updates" to "GAME_TITLE [XXXXXX] (UPDATE DATA)"
+            if exist !folder! (
+                for /F "delims=~" %%x in ('dir /b !folder! 2^>NUL') do set "version=%%x"
+                set "updatePath="!gameFolderName:"=!\updates\!version!""
+
+                move /Y !updatePath! !uName! > NUL 2>&1
+                rmdir /Q /S !folder!
+                move /Y !uName! ..\..\.. > NUL 2>&1
+            )
+
+            REM : if exist "GAME_TITLE [XXXXXX]\aoc0005000C101D6000"
+            set "dlcPath="!gameFolderName:"=!\aoc!dtid!""
+            REM : move "GAME_TITLE [XXXXXX]\updates" to "GAME_TITLE [XXXXXX] (DLC)" in !GAMES_FOLDER!
+            if exist !dlcPath! (
+                move /Y !dlcPath! !dName! > NUL 2>&1
+                move /Y !dName! ..\..\.. > NUL 2>&1
+            )
+
+            move /Y !gameFolderName! ..\..\.. > NUL 2>&1
+            
+            echo RPX packages moved to !GAMES_FOLDER:"=!
+            echo.
+            
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :download
+    
+        wscript /nologo !StartMinimized! !download! !JNUSFolder! !currentTitleId! !decryptMode! !currentTitleKey!
 
         if ["!mode!"] == ["sequential"] call:monitorTransfert !gSize!
 
         REM : if a update exist, download it
         type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
-            echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^.
-            echo ^> Downloading update found for !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
+            echo ^> Downloading update found for !currentTitle! [!currentTitleRegion!]^.^.^.
+            echo ^> Downloading update found for !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
             wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
             set /A "guSize=gSize+uSize"
 
@@ -463,8 +665,8 @@ REM : functions
 
         REM : if a DLC exist, download it
         type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
-            echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^.
-            echo ^> Downloading DLC found !titles[%index%]! [!regions[%index%]!]^.^.^. >> !gamelogFile!
+            echo ^> Downloading DLC found !currentTitle! [!currentTitleRegion!]^.^.^.
+            echo ^> Downloading DLC found !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
             wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
 
             if ["!mode!"] == ["sequential"] call:monitorTransfert !threshold!
@@ -515,10 +717,14 @@ REM : functions
         set /A "t=%~1"
 
         echo threshold used ^: !t! >> !gamelogFile!
+        set /A "previous=0"
+        set /A "nb2sec=0"
 
         REM : wait until all transferts are done
         :waitingLoop
-        timeout /T 2 > NUL 2>&1
+        timeout /T 5 > NUL 2>&1
+        set /A "nb5sec+=1"
+
         wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
 
             REM : get the JNUSTools folder size
@@ -529,7 +735,22 @@ REM : functions
             if !curentSize! LSS !t! (
 
                 set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                
+                set /A "mod=nb5sec%%20"                
+                if !mod! EQU 0 if !previous! EQU !curentSize! (
+                    echo. >> !gamelogFile!
+                    echo.
+                    echo Inactivity detected^! ^, closing current transferts >> !gamelogFile!
+                    echo Inactivity detected^! ^, closing current transferts
+                    echo. >> !gamelogFile!
+                    echo.
+                    REM : exit, stop transferts, they will be relaunched
+                    call:endAllTransferts
+                    goto:eof
 
+                )
+                set /A "previous=!curentSize!"
+                    
             ) else (
 
                 echo. >> !gamelogFile!
@@ -537,14 +758,16 @@ REM : functions
                 echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
 
                 set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
-                if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
-                if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
 
                 echo. >> !gamelogFile!
                 echo.
                 echo ^> Finalizing ^.^.^. >> !gamelogFile!
                 echo ^> Finalizing ^.^.^.
                 timeout /T 120 > NUL 2>&1
+                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: 100%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: 100%%
 
                 REM : get the initialGameFolderName folder size
                 call:getFolderSizeInMb !initialGameFolderName! sizeDl
@@ -562,8 +785,8 @@ REM : functions
                 goto:eof
             )
 
-            if !decryptMode! EQU 0 title Downloading WUP of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
-            if !decryptMode! EQU 1 title Downloading RPX package of !titles[%index%]! [!regions[%index%]!] ^: !progression!%%
+            if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+            if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
 
             goto:waitingLoop
         )
@@ -591,10 +814,11 @@ REM : functions
 
         !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
 
-        set "sizeRead=0"
+        set "sizeRead=-1"
         for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
 
-        if ["!sizeRead!"] == ["0"] goto:endFct
+        if ["!sizeRead!"] == ["-1"] goto:endFct
+        if ["!sizeRead!"] == ["0"] set "smb=0" & goto:endFct
 
         REM : 1/(1024^2)=0.00000095367431640625
         for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
