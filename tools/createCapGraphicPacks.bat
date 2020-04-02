@@ -242,11 +242,11 @@ REM : main
 
         set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
         if exist !fnrLogLggp! del /F !fnrLogLggp!
-        REM : Search FPS++ or 60FPS patch
+        REM : Search FPS++ patch
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPP=1"
+rem        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPP=1"
     )
 
     REM : search V2 FPS++ graphic pack or patch for this game
@@ -258,11 +258,11 @@ REM : main
 
     )
 
-    REM : when a FPS++ or a 60FPS GFX is found on rules.txt, vsync is defined in => exit
-    if !fpsPP! EQU 1 echo FPS^+^+ or 60FPS GFX pack was found >> !cgpLogFile! & echo FPS^+^+ or 60FPS GFX pack was found & goto:computeFactor
+    REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
+    if !fpsPP! EQU 1 echo FPS^+^+ was found >> !cgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
     if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
-    echo no FPS^+^+ or 60FPS GFX pack found >> !cgpLogFile!
-    echo no FPS^+^+ or 60FPS GFX pack found
+    echo no FPS^+^+ GFX pack found >> !cgpLogFile!
+    echo no FPS^+^+ GFX pack found
 
     :computeFactor
     REM : initialized for 60FPS games running @60FPS on WiiU
@@ -401,13 +401,13 @@ REM : functions
 
         if !nativeFps! EQU 30 (
             echo description = Adjust the speed in game when engine model is FPS based^. ^
-You need to disable vsync^. BatchFw assume that the native FPS is 30^. ^
-If it is not^,change the native FPS to 60 in ^
+^(DO NOT USE WITH THE 60FPS ONE^)^. You need to disable vsync^. ^
+BatchFw assume that the native FPS is 30^. ^If it is not^,change the native FPS to 60 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
             echo description = Adjust the speed in game when engine model is FPS based^. ^
-You need to disable vsync^. BatchFw assume that the native FPS is 60^. ^
-If it is not^,change the native FPS to 30 in ^
+^(DO NOT USE WITH THE 60FPS ONE^)^. You need to disable vsync^. ^
+BatchFw assume that the native FPS is 60^. ^If it is not^,change the native FPS to 30 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
 

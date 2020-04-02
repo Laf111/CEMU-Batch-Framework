@@ -162,6 +162,9 @@ REM : main
         exit /b 6
     )
 
+    REM : treatments to be done before updating to this release
+    call:cleanBeforeUpdate
+    
     pushd !GAMES_FOLDER!
 
     REM : launching powerShell script to downaload and extract archive
@@ -193,7 +196,19 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : treatments to be done before updating to this release
+    :cleanBeforeUpdate
+        
+        set "toBeRenamed="!BFW_TOOLS_PATH:"=!\downloadGame.bat""
+        set "newName="!BFW_TOOLS_PATH:"=!\downloadGames.bat""
+        if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1
 
+        set "toBeRenamed="!BFW_RESOURCES_PATH:"=!\icons\downloadGame.ico""
+        set "newName="!BFW_RESOURCES_PATH:"=!\icons\downloadGames.ico""
+        if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1        
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : treatments to be done after updating to this release
    :cleanAfterUpdate
 

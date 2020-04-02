@@ -1086,13 +1086,13 @@ REM
         )
         set "ARGS="NONE""
 
-        REM : create a shortcut to downloadGame.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download a Game^.lnk""
-        set "LINK_DESCRIPTION="Download a Wii-U title for CEMU or your Wii-U""
-        set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGame.bat""
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGame.ico""
+        REM : create a shortcut to downloadGames.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download Games^.lnk""
+        set "LINK_DESCRIPTION="Download a Wii-U titles for CEMU or your Wii-U using JNUSTool""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGames.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGames.ico""
         if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 echo Creating a shortcut to downloadGame^.bat
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to downloadGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
         

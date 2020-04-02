@@ -1,6 +1,11 @@
 IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SETTINGS 
 USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 
+02/04/2020 V18-2 :
+fix : cosmetic things (minor changes)
+add : create FPS GFX pack now also if a 60FPS patch exists for a game (to set emulation speed)
+      (DO NOT USE WITH THE 60FPS ONE)
+
 01/04/2020 V18-1 :
 add : improve the latest feature
 add : a parameter to importTransferableCache.bat to define if the cache is
