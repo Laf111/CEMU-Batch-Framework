@@ -1,4 +1,4 @@
-#titleid;description;productcode[xxx-x-xxxx];companycode;notes;versions;region;availableoncdn;icofileid;nativeresolution;nativefps
+Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available on cdn;ico file Id;Native Resolution; Native Fps
 '0005000010013000';Nintendo TV II ;wup-x-hbcj;-;-;-;jap;notmd;'0005000010013000';720;60
 '0005000010100600';Tekken Tag Tournament 2 Wii U Edition;wup-n-aknj;00af;-;v16;jap;yes;'0005000010100600';720;60
 '0005000010100D00';Nintendo Joysound Wii U;wup-n-wahj;-;-;v112;jap;yes;'0005000010100D00';720;60
@@ -7,9 +7,9 @@
 '0005000010101A00';Lego City Undercover;wup-n-aple;-;-;v0;usa;yes;'0005000010101A00';720;30
 '0005000010101B00';Lego City Undercover;wup-p-aplp;1;-;v16;eur;yes;'0005000010101A00';720;30
 '0005000010101C00';New Super Mario Bros.u;wup-p-arpj;-;-;v16;jpn;yes;'0005000010101D00';720;60
-'0005000010101C00';New U;wup-n-arpj;1;-;v16,v65[didthiseverexist];jap;yes;'0005000010101C00';720;60
+'0005000010101C00';New U;wup-n-arpj;1;-;v16,v65[?];jap;yes;'0005000010101C00';720;60
 '0005000010101D00';New Super Mario Bros U;wup-n-arpe;1;-;v64;usa;yes;'0005000010101D00';720;60
-'0005000010101E00';New Super Mario Bros U;wup-p-arpp;1;-;v0,v80[didthiseverexist];eur;yes;'0005000010101D00';720;60
+'0005000010101E00';New Super Mario Bros U;wup-p-arpp;1;-;v0,v80[?];eur;yes;'0005000010101D00';720;60
 '0005000010101F00';Nintendoland;wup-n-alcj;1;-;v32;jap;yes;'0005000010102100';720;60
 '0005000010102000';Nintendoland;wup-n-alce;1;-;v32;usa;yes;'0005000010102100';720;60
 '0005000010102100';Nintendoland;wup-p-alcp;1;-;v32;eur;yes;'0005000010102100';720;60
@@ -72,19 +72,19 @@
 '000500001010B000';Rabbids Land;wup-n-arbe;41;-;v16;usa;yes;'000500001010FC00';720;60
 '000500001010B100';Rayman Legends;wup-n-arme;41;-;v0;usa;yes;'0005000010111400';1080;60
 '000500001010B200';Scribblenauts Unlimited;wup-n-asce;00wr;-;v0;usa;yes;'000500001010B200';720;60
-'000500001010B300';Sonic All Stars Racing Sonic And All Stars Racing Transformed;wup-n-as2e;008p;-;v48;usa;yes;'000500001010B300';720;60
+'000500001010B300';Sonic And All Stars Racing Transformed;wup-n-as2e;008p;-;v48;usa;yes;'000500001010B300';720;60
 '000500001010B400';Espn Sports Connection;wup-n-aspe;41;-;v33;usa;yes;'000500001010B400';720;60
 '000500001010B500';Transformers Prime;wup-p-atre;-;-;v0;usa;yes;'000500001010B500';720;60
 '000500001010B600';Your Shape Fitness Evolved 2013;wup-n-ayse;41;-;v32;usa;yes;'000500001010B600';720;60
-'000500001010C700';Mario and Sonic at the Sochi 2014 Olympic Winter Games;wup-p-aure;1;-;v32;usa;yes;'000500001010C800';720;60
-'000500001010C800';Mario and Sonic at the Sochi 2014 Olympic Winter Games;wup-p-aurp;1;-;v32;eur;yes;'000500001010C800';720;60
+'000500001010C700';Mario and Sonic-Sochi 2014 Olympic Winter Games;wup-p-aure;1;-;v32;usa;yes;'000500001010C800';720;60
+'000500001010C800';Mario and Sonic-Sochi 2014 Olympic Winter Games;wup-p-aurp;1;-;v32;eur;yes;'000500001010C800';720;60
 '000500001010CF00';Call Of Duty Black Ops II;wup-p-aece;52;-;v128;usa;notmd;'0005000010113400';720;60
 '000500001010D700';Skylanders Giants;wup-p-asle;-;-;v0;usa;notmd;'000500001010D700';720;60
 '000500001010D800';Madden Nfl 13;wup-n-amde;69;-;v0;usa;yes;'000500001010D800';720;60
 '000500001010D900';EA Sports Fifa Soccer 2013;wup-n-af3e;69;-;v0;usa;yes;'000500001010D900';720;60
 '000500001010DA00';NBA 2013;wup-n-anbe;54;-;v32;usa;yes;'0005000010112F00';720;60
 '000500001010DB00';Disney Epic Mickey 2 The Power Of Two;wup-n-aeme;004q;-;v0;usa;yes;'000500001010DB00';720;60
-'000500001010DC00';Mass Effect 3 Special Edition;wup-p-amee;69;-;v16;usa;notmd;000500001010DC00';720;30
+'000500001010DC00';Mass Effect 3 Special Edition;wup-p-amee;69;-;v16;usa;notmd;'000500001010DC00';720;30
 '000500001010DD00';ZombiU;wup-n-azue;41;-;v16;usa;yes;'000500001011A700';720;30
 '000500001010E300';Tom Clancy s Splinter Cell Black List;wup-n-as9e;41;-;v48;usa;yes;'000500001012AC00';720;60
 '000500001010E400';Game Party Champions;wup-n-agpe;00wr;-;v0;usa;yes;'000500001010E400';720;60
@@ -136,7 +136,7 @@
 '0005000010111B00';3ds3g;wup-n-wlyj;-;-;v32;jap;yes;'0005000010111B00';720;60
 '0005000010111D00';Sports Connection;wup-p-aspp;41;-;v16;eur;yes;'0005000010111D00';720;60
 '0005000010111E00';Scribblenauts Unlimited;-;-;-;v0;eur;notmd;'000500001010B200';720;60
-'0005000010111F00';Sonic All Stars Racing Sonic And All Stars Racing Transformed;wup-p-as2p;008p;-;v48;eur;yes;'000500001010B300';720;60
+'0005000010111F00';Sonic And All Stars Racing Transformed;wup-p-as2p;008p;-;v48;eur;yes;'000500001010B300';720;60
 '0005000010112000';The Croods Prehistoric Party;wup-n-acre;00g9;-;v16;usa;yes;'000500001012C500';720;60
 '0005000010112100';Know Your Friends;wup-u-akfp;41;-;v16;eur;notmd;'0005000010112100';720;60
 '0005000010112200';Trine 2 Director s Cut;wup-p-wbdp;00fz;-;v16;eur;yes;'00050000101B7800';720;30
@@ -208,7 +208,7 @@
 '000500001011AC00';Lode Runner;wup-n-fave;-;-;v0;usa;yes;'000500001011AC00';720;60
 '000500001011AD00';Lode Runner;wup-n-favp;-;-;v0;eur;yes;'000500001011AC00';720;60
 '000500001011AE00';Gradius;wup-n-fate;-;-;v0;usa;yes;'0005000010119700';720;60
-'000500001011AF00';Bit Trip Presents runner 2 Future Legend Of Rhythm Alien;wup-n-wbte;00xy;-;v33;usa;yes;'0005000010136300';720;60
+'000500001011AF00';Runner 2 Future Legend Of Rhythm Alien;wup-n-wbte;00xy;-;v33;usa;yes;'0005000010136300';720;60
 '000500001011B000';Disney Epic Mickey 2 The Power Of Two;wup-p-aems;-;-;v0;eur;yes;'000500001010DB00';720;60
 '000500001011B100';Mighty Switch Force Hyperdrive Edition;wup-n-whye;-;-;v16;usa;yes;'000500001011B100';720;60
 '000500001011B200';Little Inferno;wup-n-wlfe;-;-;v0;usa;yes;'000500001011B200';720;60
@@ -268,7 +268,6 @@
 '000500001012CF00';Resident Evil Revelations;wup-n-abhe;8;-;v16;usa;yes;'000500001012B400';720;60
 '000500001012D000';Cocoto Magic Circus 2;-;-;-;v0;eur;notmd;'000500001012D000';720;60
 '000500001012D800';Kungfu Rabbit;wup-n-wkfe;-;-;v0;usa;yes;'0005000010117800';720;60
-'000500001012DA00';Fast and Furious;-;-;-;v0;eur;notmd;'0005000010111600';720;60
 '000500001012DC00';The Wonderful 101;wup-n-acme;1;-;v16;usa;yes;'0005000010135300';720;60
 '000500001012DF00';Wrecking Crew;wup-n-fa4e;-;-;v0;usa;yes;'000500001012E000';720;60
 '000500001012E000';Wrecking Crew;wup-n-fa4p;-;-;v0;eur;yes;'000500001012E000';720;60
@@ -330,14 +329,14 @@
 '0005000010132B00';Lego Marvel Superheroes;wup-n-alme;00wr;-;v32;usa;yes;'00050000101BE900';720;30
 '0005000010132C00';Scribblenauts Unmasked A DC Comics Adventure;wup-n-adce;00wr;-;v1;usa;yes;'0005000010132D00';720;60
 '0005000010132D00';Scribblenauts Unmasked A DC Comics Adventure;-;-;-;v0;eur;yes;'0005000010132D00';720;60
-'0005000010132F00';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-p-wlyp;-;-;v16;eur;yes;'0005000010117200';720;30
+'0005000010132F00';Monster Hunter 3 Ultimate;wup-p-wlyp;-;-;v16;eur;yes;'0005000010117200';720;30
 '0005000010133000';Mother;wup-n-fbdj;-;-;v0;jap;yes;'0005000010133000';720;60
 '0005000010133100';Earthbound Beginnings;wup-n-fbde;-;-;v0;usa;yes;'0005000010133100';720;60
 '0005000010133200';Earthbound Beginnings;wup-n-fbdp;-;-;v0;eur;yes;'0005000010133100';720;60
 '0005000010133300';Mother 2;wup-n-jbbj;-;-;v0;jap;yes;'0005000010133300';720;60
 '0005000010133400';Earthbound;wup-n-jbbe;-;-;v0;usa;yes;'0005000010133400';720;60
 '0005000010133500';Earthbound;wup-n-jbbp;-;-;v0;eur;yes;'0005000010133400';720;60
-'0005000010133600';Monster Hunter 3 Ultimatepacketrelaytoolsfornintendo3ds;wup-n-wlye;-;-;v16;usa;yes;'0005000010117200';720;30
+'0005000010133600';Monster Hunter 3 Ultimate;wup-n-wlye;-;-;v16;usa;yes;'0005000010117200';720;30
 '0005000010133700';CastleStorm;wup-n-wcse;-;-;v0;usa;yes;'0005000010113A00';720;60
 '0005000010133800';Tank Tank Tank;wup-n-wake;-;-;v0;usa;yes;'000500001010FE00';720;60
 '0005000010133900';Turbo-Super Stunt Squad;wup-n-atbe;00g9;-;v0;usa;yes;'0005000010136700';720;60
@@ -361,7 +360,7 @@
 '0005000010135700';Sonic Lost World;wup-n-asnj;008p;-;v48;jap;yes;'000500001012B100';720;60
 '0005000010135E00';Lego Batman 2 DC Superheroes;wup-n-albe;00wr;-;v0;usa;yes;'0005000010135500';720;30
 '0005000010136000';Romance Of The Three Kingdoms IV Wall Of Fire;wup-n-jbcp;-;-;v0;eur;yes;'0005000010134700';720;60
-'0005000010136300';Bit Trip Presents runner 2 Future Legend Of Rhythm Alien;wup-p-wbtp;00xy;-;v17;eur;yes;'0005000010136300';720;60
+'0005000010136300';Runner 2 Future Legend Of Rhythm Alien;wup-p-wbtp;00xy;-;v17;eur;yes;'0005000010136300';720;60
 '0005000010136500';12hdforwiiu;wup-n-aryj;-;-;v0;jap;yes;'0005000010136500';720;60
 '0005000010136700';Turbo-Super Stunt Squad;wup-p-atbp;00af;-;v0;eur;yes;'0005000010136700';720;60
 '0005000010136900';Disney Planes;wup-p-apap;-;-;v0;eur;yes;'0005000010136900';720;30
@@ -408,8 +407,8 @@
 '0005000010140800';Arc Style SP;wup-n-wbsj;-;-;v0;jap;yes;'0005000010140800';720;60
 '0005000010140E00';Cybernator;wup-n-jbne;-;-;v0;usa;yes;'0005000010140E00';720;60
 '0005000010140F00';Cybernator;wup-n-jbnp;-;-;v0;eur;yes;'0005000010140E00';720;60
-'0005000010141200'Uncharted Waters New Horizons;wup-n-jbqe;-;-;v0;usa;yes;'0005000010141200';720;60
-'0005000010141300'Uncharted Waters New Horizons;wup-n-jbqp;-;-;v0;eur;yes;'0005000010141200';720;60
+'0005000010141200';Uncharted Waters New Horizons;wup-n-jbqe;-;-;v0;usa;yes;'0005000010141200';720;60
+'0005000010141300';Uncharted Waters New Horizons;wup-n-jbqp;-;-;v0;eur;yes;'0005000010141200';720;60
 '0005000010141500';If;wup-n-jbsj;-;-;v0;jap;yes;'0005000010141500';720;60
 '0005000010141600';X2;wup-n-jbtj;-;-;v0;jap;yes;'0005000010141600';720;60
 '0005000010141700';Megaman x2;wup-n-jbte;-;-;v0;usa;yes;'0005000010141700';720;60
@@ -433,7 +432,7 @@
 '0005000010143500';TLOZ The Wind Waker HD;wup-n-bcze;1;-;v0;usa;yes;'0005000010143600';1080;30
 '0005000010143600';TLOZ The Wind Waker HD;wup-p-bczp;1;-;v0;eur;yes;'0005000010143600';1080;30
 '0005000010143F00';Just Dance 2014;wup-p-aj5p;41;-;v16;eur;yes;'0005000010139900';720;60
-'0005000010144000';Adventure Time Explore The Dungeon Because I Don t Know;wup-n-adve;00g9;-;v16;usa;yes;'0005000010144000';1080;60
+'0005000010144000';Adventure Time Explore The Dungeon Because I Dont Know;wup-n-adve;00g9;-;v16;usa;yes;'0005000010144000';1080;60
 '0005000010144D00';Wii Sports Club;wup-n-awse;1;-;v112;usa;yes;'000500001012F100';720;60
 '0005000010144E00';Wii Sports Club;wup-n-awsp;1;-;v112;eur;yes;'000500001012F100';720;60
 '0005000010110E00';Super Smash Bros WiiU;wup-n-axfe;1;-;v80;jap;yes;'0005000010145000';1080;60
@@ -517,7 +516,7 @@
 '000500001014DE00';The Lego Movie Videogame;wup-n-alae;00wr;-;v16;usa;yes;'000500001014DE00';720;30
 '000500001014DF00';Spot The Differences Party;wup-n-wdfe;-;-;v0;usa;yes;'0005000010149200';720;60
 '000500001014E000';The Lego Movie Videogame;wup-p-alap;00wr;-;v18;eur;yes;'000500001014DE00';720;30
-'000500001014E100';Adventure Time Explore The Dungeon Because I Don t Know;wup-p-advp;00af;-;v16;eur;yes;'0005000010144000';1080;60
+'000500001014E100';Adventure Time Explore The Dungeon Because I Dont Know;wup-p-advp;00af;-;v16;eur;yes;'0005000010144000';1080;60
 '000500001014E200';Phineas And Ferb Quest For Cool Stuff;-;-;-;v0;eur;notmd;'0005000010139400';720;60
 '000500001014E300';Zumba Fitness World Party;wup-u-azbp;00gt;-;v16;eur;notmd;'000500001014E300';720;60
 '000500001014EF00';Knytt Underground;wup-n-wbce;-;-;v0;usa;yes;'000500001014D800';720;60
@@ -727,7 +726,7 @@
 '000500001016DC00';Disney Infinity 2;wup-n-adre;004q;-;v32;usa;yes;'000500001016DC00';720;60
 '000500001016DD00';Mon Premier Karaoke;wup-n-wmke;-;-;v0;usa;yes;'000500001016DD00';720;60
 '000500001016DE00';Super Toy Cars;wup-n-wcte;009y;-;v16;usa;yes;'000500001016D500';720;60
-'000500001016DF00';Batman Arkham Originsblackgate-deluxeedition;wup-n-wbme;-;-;v16;usa;yes;'000500001016DF00';720;30
+'000500001016DF00';Batman Arkham Origins Blackgate Deluxe;wup-n-wbme;-;-;v16;usa;yes;'000500001016DF00';720;30
 '000500001016E000';Stick It To The Man;wup-n-wmne;-;-;v0;usa;yes;'000500001016D400';720;60
 '000500001016E100';Shovel Knight;wup-n-wkne;00ay;-;v48;usa;yes;'000500001016E100';1080;60
 '000500001016E200';XType Plus;wup-p-wexp;-;-;v32;eur;yes;'000500001016E200';720;60
@@ -757,12 +756,12 @@
 '0005000010170800';R-type;wup-n-ppaj;-;-;v0;jap;yes;'000500001016A500';720;60
 '0005000010170900';Castlevania;wup-n-pasp;-;-;v0;eur;yes;'0005000010151400';720;60
 '0005000010170B00';The Revenge;-;-;-;v0;jap;yes;'0005000010170B00';720;60
-'0005000010170C00';Double Dragon II - The Revenge;wup-n-fc8e;-;-;v0;usa;yes;'0005000010170C00';720;60
-'0005000010170D00';Double Dragon II - The Revenge;wup-n-fc8p;-;-;v0;eur;yes;'0005000010170D00';720;60
+'0005000010170C00';Double Dragon II-The Revenge;wup-n-fc8e;-;-;v0;usa;yes;'0005000010170C00';720;60
+'0005000010170D00';Double Dragon II-The Revenge;wup-n-fc8p;-;-;v0;eur;yes;'0005000010170D00';720;60
 '0005000010170F00';LifeForce;wup-n-fc9e;-;-;v0;usa;yes;'0005000010170F00';720;60
 '0005000010171000';LifeForce;wup-n-fc9p;-;-;v0;eur;yes;'0005000010170F00';720;60
-'0005000010171200';Ufouria - The Saga;wup-n-fdae;-;-;v0;usa;yes;'0005000010171200';720;60
-'0005000010171300';Ufouria - The Saga;wup-n-fdap;-;-;v0;eur;yes;'0005000010171200';720;60
+'0005000010171200';Ufouria-The Saga;wup-n-fdae;-;-;v0;usa;yes;'0005000010171200';720;60
+'0005000010171300';Ufouria-The Saga;wup-n-fdap;-;-;v0;eur;yes;'0005000010171200';720;60
 '0005000010171B00';Super;wup-n-jclj;-;-;v0;jap;yes;'0005000010158D00';720;60
 '0005000010171C00';Nobunaga s Ambition;wup-n-jcle;-;-;v0;usa;yes;'0005000010171C00';720;60
 '0005000010171D00';Nobunaga s Ambition;wup-n-jclp;-;-;v0;eur;yes;'0005000010171C00';720;60
@@ -777,12 +776,12 @@
 '0005000010172A00';Crunchyroll;wup-n-hrle;009z;-;v16;usa;yes;'0005000010172A00';720;60
 '0005000010172B00';Crunchyroll;wup-n-hrlp;009z;-;v17;eur;yes;'0005000010172A00';720;60
 '0005000010172C00';Kirby Nightmare In Dream Land;wup-n-patp;-;-;v0;eur;yes;'000500001016F400';576;60
-'0005000010172D00';Super Mario World - Super Mario Advance 2;wup-n-paup;-;-;-;eur;yes;'000500001016F600';720;60
+'0005000010172D00';Super Mario World-Super Mario Advance 2;wup-n-paup;-;-;-;eur;yes;'000500001016F600';720;60
 '0005000010172E00';Mario Golf Advance Tour;wup-n-pavp;-;-;v0;eur;yes;'000500001016F800';720;60
 '0005000010172F00';Metroid Zero Mission;wup-n-pawp;-;-;v0;eur;yes;'000500001016FA00';720;60
 '0005000010173100';I ve Got To Run;wup-n-wgte;-;-;v0;usa;yes;'0005000010173100';720;60
 '0005000010173200';Another World 20th Anniversary Edition;wup-p-weup;-;-;v16;eur;yes;'0005000010173200';720;60
-'0005000010173300';Stealth Inc 2 - A Game Of Clones;wup-p-wcgp;00ub;-;v16;eur;yes;'0005000010176500';720;60
+'0005000010173300';Stealth Inc 2-A Game Of Clones;wup-p-wcgp;00ub;-;v16;eur;yes;'0005000010176500';720;60
 '0005000010173400';Transformers Rise Of The Dark Spark;wup-p-ayep;52;-;v0;eur;yes;'0005000010173400';720;60
 '0005000010173600';Super Mario Advance;wup-n-paxe;-;-;v0;usa;yes;'0005000010173600';720;60
 '0005000010173700';Super Mario Advance;wup-n-paxp;-;-;-;eur;yes;'0005000010173600';720;60
@@ -810,7 +809,7 @@
 '0005000010175800';My Jurassic Farm;wup-n-wmje;-;-;v0;usa;yes;'0005000010175800';720;60
 '0005000010175900';My Arctic Farm;wup-n-wmae;-;-;v0;usa;yes;'0005000010175900';720;60
 '0005000010175A00';6180 The Moon;wup-n-wm6e;-;-;-;usa;yes;'0005000010175A00';720;60
-'0005000010175B00';Sonic Boom - Rise Of Lyric;wup-n-bsse;008p;-;v0;eur;yes;'0005000010177800';720;60
+'0005000010175B00';Sonic Boom-Rise Of Lyric;wup-n-bsse;008p;-;v0;eur;yes;'0005000010177800';720;60
 '0005000010175C00';One Piece Unlimited World Red;wup-n-aune;-;-;v0;usa;yes;'0005000010175C00';720;60
 '0005000010175D00';One Piece Unlimited World Red;wup-p-aunp;00af;-;v16;eur;yes;'0005000010175C00';720;60
 '0005000010175F00';D.m.l.c.--;wup-n-wdmj;-;-;v0;jap;yes;'0005000010175F00';720;60
@@ -819,13 +818,13 @@
 '0005000010176200';Castlevania Harmony Of Dissonance;wup-n-pa5p;-;-;v0;eur;yes;'0005000010176100';720;60
 '0005000010176300';Little Inferno;wup-n-wlfj;-;-;v0;jap;yes;'000500001011B200';720;60
 '0005000010176400';Pixel Paint;wup-n-wd9e;-;-;v0;usa;yes;'0005000010176400';720;60
-'0005000010176500';Stealth Inc 2 - A Game Of Clones;wup-n-wcge;00ub;-;v16;usa;yes;'0005000010176500';720;60
+'0005000010176500';Stealth Inc 2-A Game Of Clones;wup-n-wcge;00ub;-;v16;usa;yes;'0005000010176500';720;60
 '0005000010176800';Guacamelee Super Turbo Championship Edition;wup-n-wgce;-;-;v0;usa;yes;'0005000010176800';720;60
 '0005000010176900';Splatoon;wup-n-agme;1;-;v96;usa;yes;'0005000010176A00';720;60
 '0005000010176A00';Splatoon;wup-p-agmp;1;-;v80;eur;yes;'0005000010176A00';720;60
 '0005000010176B00';1001 Spikes;wup-n-wm9e;-;-;v32;usa;yes;'0005000010176B00';720;60
-'0005000010176D00';Golden Sun - The Lost Age;wup-n-pa6e;-;-;v0;usa;yes;'0005000010176D00';720;60
-'0005000010176E00';Golden Sun - The Lost Age;wup-n-pa6p;-;-;v0;eur;yes;'0005000010176D00';720;60
+'0005000010176D00';Golden Sun-The Lost Age;wup-n-pa6e;-;-;v0;usa;yes;'0005000010176D00';720;60
+'0005000010176E00';Golden Sun-The Lost Age;wup-n-pa6p;-;-;v0;eur;yes;'0005000010176D00';720;60
 '0005000010176F00';Just Dance 2015;wup-p-bjdp;41;-;v16;eur;yes;'0005000010176F00';720;60
 '0005000010177000';Hello Kitty Kruisers;wup-p-ahkp;-;-;v0;eur;yes;'0005000010147E00';720;60
 '0005000010177200';Citizens Of Earth;wup-n-wcue;-;-;v0;usa;yes;'0005000010177200';720;60
@@ -834,12 +833,12 @@
 '0005000010177500';Nihilumbra;wup-n-whle;-;-;v0;usa;yes;'000500001016DA00';720;60
 '0005000010177600';Devil s Third;wup-n-adne;1;-;v16;usa;yes;'0005000010177600';720;60
 '0005000010177700';Devil s Third;wup-p-adnp;1;-;v16;eur;yes;'0005000010177600';720;60
-'0005000010177800';Sonic Boom - Rise Of Lyric;wup-p-bssp;008p;-;v16;eur;yes;'0005000010177800';720;60
+'0005000010177800';Sonic Boom-Rise Of Lyric;wup-p-bssp;008p;-;v16;eur;yes;'0005000010177800';720;60
 '0005000010177B00';Mighty Final Fight;wup-n-fdke;-;-;v0;usa;yes;'0005000010177B00';720;60
 '0005000010177C00';Mighty Final Fight;wup-n-fdkp;-;-;v0;eur;yes;'0005000010177B00';720;60
 '0005000010177D00';2010;wup-n-fdlj;-;-;v0;jap;yes;'0005000010177D00';720;60
-'0005000010177E00';Street Fighter 2010 - The Final Fight;wup-n-fdle;-;-;v0;usa;yes;'0005000010177E00';720;60
-'0005000010177F00';Street Fighter 2010 - The Final Fight;wup-n-fdlp;-;-;v0;eur;yes;'0005000010177E00';720;60
+'0005000010177E00';Street Fighter 2010-The Final Fight;wup-n-fdle;-;-;v0;usa;yes;'0005000010177E00';720;60
+'0005000010177F00';Street Fighter 2010-The Final Fight;wup-n-fdlp;-;-;v0;eur;yes;'0005000010177E00';720;60
 '0005000010178300';Wild Guns;wup-n-jcte;-;-;v0;usa;yes;'0005000010178300';720;60
 '0005000010178400';Wild Guns;wup-n-jctp;-;-;v0;eur;yes;'0005000010178300';720;60
 '0005000010178600';Natsume Championship Wrestling;wup-n-jcue;-;-;v0;usa;yes;'0005000010178600';720;60
@@ -858,7 +857,7 @@
 '0005000010179700';Guacamelee Super Turbo Championship Edition;wup-p-wgcp;-;-;v0;eur;yes;'0005000010176800';720;60
 '0005000010179900';Chariot;wup-p-wc4p;-;-;v0;eur;yes;'0005000010179900';720;60
 '0005000010179A00';Ds;wup-n-daaj;-;-;v16;jap;yes;'0005000010179A00';720;60
-'0005000010179B00';Brain Age - Train Your Brain In Minutes A Day;wup-n-daae;-;-;-;usa;yes;'0005000010179B00';720;60
+'0005000010179B00';Brain Age-Train Your Brain In Minutes A Day;wup-n-daae;-;-;-;usa;yes;'0005000010179B00';720;60
 '0005000010179C00';Dr Kawashima s brain training;wup-n-daap;-;-;v0,v16;eur;yes;'0005000010179C00';720;60
 '0005000010179E00';Yoshi Touch Go;wup-n-dabe;-;-;v16;usa;yes;'0005000010179E00';720;60
 '0005000010179F00';Yoshi Touch Go;wup-n-dabp;-;-;v0,v16;eur;yes;'0005000010179E00';720;60
@@ -877,12 +876,12 @@
 '000500001017B100';Shuttle Rush;wup-n-wc5e;-;-;v0;usa;yes;'000500001017B100';720;60
 '000500001017B200';Turtle Tale;wup-n-wk8e;-;-;v0;usa;yes;'000500001017B200';720;60
 '000500001017B300';A World Of Keflings;wup-n-wkle;-;-;v0;usa;yes;'000500001017B300';720;60
-'000500001017B500';Art Academy - Atelier;wup-p-bxap;1;-;v17;eur;yes;'000500001017B500';720;60
+'000500001017B500';Art Academy-Atelier;wup-p-bxap;1;-;v17;eur;yes;'000500001017B500';720;60
 '000500001017B800';Sp;wup-n-wbwj;-;-;v1;jap;yes;'000500001017B800';720;60
 '000500001017BA00';Namco Museum;wup-n-pa7p;-;-;v0;eur;yes;'000500001017A000';720;60
 '000500001017BB00';Kurukuru Kururin;wup-n-pa8p;-;-;v0;eur;yes;'000500001017BC00';720;60
 '000500001017BC00';Kurukuru Kururin;wup-n-pa8z;-;-;-;usa;yes;'000500001017BC00';720;60
-'000500001017BF00';Art Academy - Home Studio;wup-n-bxae;1;-;v17;usa;yes;'000500001017BF00';720;60
+'000500001017BF00';Art Academy-Home Studio;wup-n-bxae;1;-;v17;usa;yes;'000500001017BF00';720;60
 '000500001017C200';Baila Latino;wup-p-ablp;-;-;v0;eur;yes;'000500001017C200';720;60
 '000500001017C400';Baila Latino;wup-n-able;-;-;v0;usa;yes;'000500001017C200';720;60
 '000500001017C600';Skylanders Trap Team;wup-p-bk7e;52;-;v16;usa;yes;'000500001017C600';720;60
@@ -890,8 +889,8 @@
 '000500001017C800';Swords Soldiers;wup-p-wksp;-;-;v0;eur;yes;'000500001017C700';720;60
 '000500001017C900';Edge;wup-n-wedj;-;-;v0;jap;yes;'0005000010152100';720;60
 '000500001017CA00';Toki Tori 2;wup-n-waaj;-;-;v0;jap;yes;'0005000010116500';720;60
-'000500001017CF00';Fire Emblem - The Sacred Stones;wup-n-pbbe;-;-;v0;usa;yes;'000500001017CF00';720;60
-'000500001017D000';Fire Emblem - The Sacred Stones;wup-n-pbbp;-;-;v0;eur;yes;'000500001017CF00';720;60
+'000500001017CF00';Fire Emblem-The Sacred Stones;wup-n-pbbe;-;-;v0;usa;yes;'000500001017CF00';720;60
+'000500001017D000';Fire Emblem-The Sacred Stones;wup-n-pbbp;-;-;v0;eur;yes;'000500001017CF00';720;60
 '000500001017D200';Mario Kart Super Circuit;wup-n-pbdp;-;-;v0;eur;yes;'000500001017D200';720;60
 '000500001017D300';Mario Kart Super Circuit;wup-n-pbde;-;-;v0;usa;yes;'000500001017D300';720;60
 '000500001017D600';Dk-king Of Swing;wup-n-pbce;-;-;v0;usa;yes;'000500001017D600';720;60
@@ -920,23 +919,23 @@
 '000500001017F800';Shadow Of The Ninja;wup-n-fdtp;-;-;v0;eur;yes;'000500001017F700';720;60
 '000500001017F900';S.c.a.t.;wup-n-fdue;-;-;v0;usa;yes;'000500001017F900';720;60
 '000500001017FA00';S.c.a.t.;wup-n-fdup;-;-;v0;eur;yes;'000500001017F900';720;60
-'000500001017FC00';Donkey Kong Country 3 - Dixie Kong s Double Trouble;wup-n-jcxe;-;-;v0;usa;yes;'000500001017FC00';720;60
-'000500001017FD00';Donkey Kong Country 3 - Dixie Kong s Double Trouble;wup-n-jcxp;-;-;v0;eur;yes;'000500001017FC00';720;60
+'000500001017FC00';Donkey Kong Country 3-Dixie Kong s Double Trouble;wup-n-jcxe;-;-;v0;usa;yes;'000500001017FC00';720;60
+'000500001017FD00';Donkey Kong Country 3-Dixie Kong s Double Trouble;wup-n-jcxp;-;-;v0;eur;yes;'000500001017FC00';720;60
 '000500001017FF00';Mega Man Battle Network;wup-n-pbae;-;-;v0;usa;yes;'000500001017FF00';720;60
 '0005000010180000';Mega Man Battle Network;wup-n-pbap;-;-;v0;eur;yes;'0005000010180000';720;60
 '0005000010180100';Mega Man Battle Chip Challenge;wup-n-pa9e;-;-;v0;usa;yes;'0005000010180100';720;60
 '0005000010180200';Mega Man Zero;wup-n-pbep;-;-;v0;eur;yes;'0005000010180200';720;60
 '0005000010180300';Mega Man Zero;wup-n-pbee;-;-;v0;usa;yes;'0005000010180200';720;60
 '0005000010180600';Captain Toad Treasure Tracker;wup-n-akbe;1;-;v0;usa;yes;'0005000010180700';720;60
-'0005000010180700';Captain Toad Treasure Tracker;wup-p-akbp;1;-;v0,v16[doesn'tcurrentlyexist15/05/2017-ifiteverdid];eur;yes;'0005000010180700';720;60
+'0005000010180700';Captain Toad Treasure Tracker;wup-p-akbp;1;-;v0,v16[?];eur;yes;'0005000010180700';720;60
 '0005000010180B00';Citizens Of Earth;wup-p-wcup;-;-;v32;eur;yes;'0005000010177200';720;60
 '0005000010180D00';Shiny The Firefly;wup-p-wfrp;-;-;v0;eur;yes;'0005000010179600';720;60
 '0005000010180E00';Roving Rogue;wup-p-wcjp;-;-;v0;eur;yes;'000500001017B000';720;60
 '0005000010181100';Mario Party Advance;wup-n-pbfe;-;-;v0;usa;yes;'0005000010181100';720;60
 '0005000010181200';Mario Party Advance;wup-n-pbfp;-;-;v0;eur;yes;'0005000010181100';720;60
 '0005000010181700';The Letter;wup-n-atle;-;-;v32;usa;yes;'0005000010181700';720;60
-'0005000010181B00';Zombie brigade - No Brain No Gain;wup-p-bnrp;-;-;-;eur;yes;'0005000010181B00';720;60
-'0005000010181C00';Zombie brigade - No Brain No Gain;wup-p-bnre;-;-;-;usa;yes;'0005000010181B00';720;60
+'0005000010181B00';Zombie brigade-No Brain No Gain;wup-p-bnrp;-;-;-;eur;yes;'0005000010181B00';720;60
+'0005000010181C00';Zombie brigade-No Brain No Gain;wup-p-bnre;-;-;-;usa;yes;'0005000010181B00';720;60
 '0005000010181F00';Skylanders Trap Team;wup-p-bk7p;52;-;v16;eur;yes;'000500001017C600';720;60
 '0005000010182600';Ice Cream Surfer;wup-n-wsfe;-;-;v2;usa;yes;'000500001017E100';720;60
 '0005000010182700';99 Seconds;wup-p-wcqp;-;-;v0;eur;yes;'000500001016E700';720;60
@@ -946,14 +945,14 @@
 '0005000010182B00';F-zero-gplegend;wup-n-pbgp;-;-;v0;eur;yes;'0005000010182A00';720;60
 '0005000010182C00';Jett Tailfin;wup-p-ajtp;00xt;-;v16;eur;yes;'000500001012CD00';720;60
 '0005000010182D00';Fat City;wup-n-afte;-;-;v1;usa;yes;'0005000010182D00';720;60
-'0005000010182E00';GetClose - A Game for Rivals;wup-n-agce;-;-;v48;usa;yes;'0005000010182E00';720;60
+'0005000010182E00';GetClose-A Game for Rivals;wup-n-agce;-;-;v48;usa;yes;'0005000010182E00';720;60
 '0005000010182F00';Midtown Crazy Race;wup-n-bcre;-;-;v0;usa;yes;'0005000010189B00';720;60
 '0005000010183000';Runbow;wup-n-arne;010p;-;v16;usa;yes;'0005000010183000';720;60
 '0005000010183100';Snakeden;wup-n-asde;-;-;v0;usa;yes;'0005000010183100';720;60
 '0005000010183300';The Voice;-;-;-;v0;usa;yes;'0005000010183300';720;60
 '0005000010183400';U Host;wup-n-auhe;-;-;-;usa;yes;'0005000010183400';720;60
-'0005000010183600';Pokemon Pinball - Ruby Sapphire;wup-n-pbhe;-;-;v0;usa;yes;'0005000010183700';720;60
-'0005000010183700';Pokemon Pinball - Ruby Sapphire;wup-n-pbhp;-;-;v0;eur;yes;'0005000010183700';720;60
+'0005000010183600';Pokemon Pinball-Ruby Sapphire;wup-n-pbhe;-;-;v0;usa;yes;'0005000010183700';720;60
+'0005000010183700';Pokemon Pinball-Ruby Sapphire;wup-n-pbhp;-;-;v0;eur;yes;'0005000010183700';720;60
 '0005000010183900';99 Moves;wup-n-bmve;00up;-;v16;usa;yes;'0005000010183900';720;60
 '0005000010183A00';Mario Kart 8;-;-;-;v16;jap;yes;'0005000010183A00';720;60
 '0005000010183C00';Infinity Runner;wup-n-brne;-;-;-;usa;yes;'0005000010183C00';720;60
@@ -961,14 +960,14 @@
 '0005000010183F00';Castlevania Aria Of Sorrow;wup-n-pbje;-;-;v0;usa;yes;'0005000010183F00';720;60
 '0005000010184000';Castlevania Aria Of Sorrow;wup-n-pbjp;-;-;v0;eur;yes;'0005000010183F00';720;60
 '0005000010184200';G2;wup-n-pbkj;-;-;v0;jap;yes;'0005000010184200';720;60
-'0005000010184300';Klonoa 2 - Dream Champ Tournament;wup-n-pbke;-;-;v0;usa;yes;'0005000010184300';720;60
+'0005000010184300';Klonoa 2-Dream Champ Tournament;wup-n-pbke;-;-;v0;usa;yes;'0005000010184300';720;60
 '0005000010184400';Infinity Runner;wup-p-brnp;-;-;-;eur;yes;'0005000010183C00';720;60
-'0005000010184500';Frederic - Resurrection Of Music;wup-n-brme;-;-;v0;usa;yes;'0005000010184500';720;60
-'0005000010184900';Slender - The Arrival;wup-n-bsae;-;-;v0;usa;yes;'0005000010184900';720;60
+'0005000010184500';Frederic-Resurrection Of Music;wup-n-brme;-;-;v0;usa;yes;'0005000010184500';720;60
+'0005000010184900';Slender-The Arrival;wup-n-bsae;-;-;v0;usa;yes;'0005000010184900';720;60
 '0005000010184D00';Yoshi s Woolly World;wup-n-ayce;1;-;v0,v17;usa;yes;'0005000010184D00';720;60
 '0005000010184E00';Yoshi s Woolly World;wup-p-aycp;1;-;v0;eur;yes;'0005000010184E00';720;60
 '0005000010185100';Nintendoland;-;-;-;v32;jap;yes;'0005000010102100';720;60
-'0005000010185200';New Super Mario Bros U;-;-;unreleased.;v64;jap;yes;'0005000010101D00';720;60
+'0005000010185200';New Super Mario Bros U;-;-;-;v64;jap;yes;'0005000010101D00';720;60
 '0005000010185300';Pikmin 3;-;-;-;v96;jap;yes;'000500001012BE00';720;30
 '0005000010185500';Game Wario;-;-;-;v0;jap;yes;'0005000010128900';720;60
 '0005000010185600';The Wonderful 101;-;-;-;v16;jap;yes;'0005000010135300';720;60
@@ -1011,7 +1010,7 @@
 '000500001018A200';Darts Up;wup-p-wdup;-;-;v0;eur;yes;'0005000010135100';720;60
 '000500001018A400';Poker Dice Solitaire Future;wup-n-bpse;-;-;v0;usa;yes;'000500001018A400';720;60
 '000500001018A700';Dinox;wup-p-bdnp;-;-;-;eur;yes;'000500001018A700';720;60
-'000500001018A800';Smart Adventures Mission Math - Sabotage At The Space Station;wup-p-admp;-;-;-;eur;yes;'000500001018A800';720;60
+'000500001018A800';Mission Math-Sabotage At The Space Station;wup-p-admp;-;-;-;eur;yes;'000500001018A800';720;60
 '000500001018A900';Thomas Was Alone;wup-p-btwp;-;-;v0;eur;yes;'000500001018A900';720;60
 '000500001018AB00';Affordable Space Adventures;wup-n-afse;-;-;v0;usa;yes;'000500001018AB00';720;60
 '000500001018AF00';Teslapunk;wup-p-btle;-;-;-;usa;yes;'000500001018AF00';720;60
@@ -1025,14 +1024,14 @@
 '000500001018C400';Fsf;wup-n-bsfj;00af;-;v16;jap;yes;'000500001018C400';720;60
 '000500001018C600';The Swapper;wup-p-axzp;-;-;v1;eur;yes;'000500001018C600';720;60
 '000500001018C700';The Swapper;wup-n-axzj;-;-;v0;jap;yes;'000500001018C600';720;60
-'000500001018CB00';Lone Survivor - The Director s Cut;wup-p-bswp;-;-;v1;eur;yes;'000500001018CB00';720;60
+'000500001018CB00';Lone Survivor-The Director s Cut;wup-p-bswp;-;-;v1;eur;yes;'000500001018CB00';720;60
 '000500001018CC00';Planes Fire Rescue;wup-p-afrp;-;-;v0;eur;yes;'000500001018CC00';720;60
-'000500001018CD00';Cake Ninja 3 - The Legend Continues;wup-p-acnp;-;-;v0;eur;yes;'000500001018CD00';720;60
+'000500001018CD00';Cake Ninja 3-The Legend Continues;wup-p-acnp;-;-;v0;eur;yes;'000500001018CD00';720;60
 '000500001018CF00';Adventures Of Pip;wup-n-bape;-;-;v0;usa;yes;'00050000101E5600';720;60
 '000500001018D000';Iqtest;wup-n-aqte;-;-;v0;usa;yes;'000500001018D000';720;60
-'000500001018D100';Lone Survivor - The Director s Cut;wup-n-alse;-;-;v1;usa;yes;'000500001018CB00';720;60
+'000500001018D100';Lone Survivor-The Director s Cut;wup-n-alse;-;-;v1;usa;yes;'000500001018CB00';720;60
 '000500001018D300';The Swapper;wup-n-axze;-;-;v0;usa;yes;'000500001018C600';720;60
-'000500001018D400';Cake Ninja 3 - The Legend Continues;wup-n-acne;-;-;v0;usa;yes;'000500001018CD00';720;60
+'000500001018D400';Cake Ninja 3-The Legend Continues;wup-n-acne;-;-;v0;usa;yes;'000500001018CD00';720;60
 '000500001018D700';Shut The Box;wup-n-bshe;-;-;v0;usa;yes;'000500001018D700';720;60
 '000500001018D800';Steamworld Dig;wup-p-adgp;-;-;v0;eur;yes;'000500001018D800';720;60
 '000500001018D900';Lost Reavers;wup-n-aphj;00af;-;v17;jap;yes;'000500001018D900';720;60
@@ -1054,7 +1053,7 @@
 '000500001018F400';Angry Video Game Nerd Adventures;wup-n-avge;-;-;v1;usa;yes;'000500001018F400';720;60
 '000500001018F500';Dinox;wup-n-bdne;-;-;-;usa;yes;'000500001018A700';720;60
 '000500001018F600';Jumpy Cat;-;-;-;v0;usa;yes;'000500001018F600';720;60
-'000500001018F800';Smart Adventures Mission Math - Sabotage At The Space Station;wup-n-adme;-;-;-;usa;yes;'000500001018F800';720;60
+'000500001018F800';Mission Math-Sabotage At The Space Station;wup-n-adme;-;-;-;usa;yes;'000500001018F800';720;60
 '000500001018F900';Toss N Go;wup-n-atge;-;-;v1;usa;yes;'000500001018F900';720;60
 '000500001018FB00';Alphadia Genesis;wup-n-wgee;-;-;v1;usa;yes;'000500001018FB00';720;60
 '000500001018FD00';Penguins Of Madagascar;wup-n-apge;-;-;v0;usa;yes;'000500001018FD00';720;60
@@ -1064,7 +1063,7 @@
 '0005000010190100';Amiibo;wup-p-aalj;-;-;v0;jap;notmd;'0005000010190100';720;60
 '0005000010190300';Mario And Sonic The Rio 2016 Olympic Games;wup-u-abjj;1;-;48;jap;yes;'0005000010190300';720;60
 '0005000010190400';Red Riding Hood;wup-n-arhe;-;-;v0;usa;yes;'0005000010190400';720;60
-'0005000010190E00';Genghis Khan II - Clan Of The Grey Wolf;wup-n-jc7e;-;-;v0;usa;yes;'0005000010190E00';720;60
+'0005000010190E00';Genghis Khan II-Clan Of The Grey Wolf;wup-n-jc7e;-;-;v0;usa;yes;'0005000010190E00';720;60
 '0005000010191100';Super Edfearth Defense Force;wup-n-jdaj;-;-;v0;jap;yes;'0005000010191100';720;60
 '0005000010191200';Super Edfearth Defense Force;wup-n-jdae;-;-;v0;usa;yes;'0005000010191100';720;60
 '0005000010191400';Rival Turf;wup-n-jdbe;-;-;v0;usa;yes;'0005000010191400';720;60
@@ -1108,16 +1107,16 @@
 '0005000010196900';The Ignition Factor;wup-n-jene;-;-;v0;usa;yes;'0005000010196900';720;60
 '0005000010196B00';Flight of Light;-;-;-;-;-;-;'0005000010196B00';1080;60 
 '0005000010197200';Cosmophony;wup-n-bcye;-;-;v16;usa;yes;'0005000010195C00';720;60
-'0005000010197300';Electronic Super Joy - Groove City;wup-n-bese;-;-;v16;usa;yes;'0005000010197300';1080;60
+'0005000010197300';Electronic Super Joy-Groove City;wup-n-bese;-;-;v16;usa;yes;'0005000010197300';1080;60
 '0005000010197800';Costume Quest 2;wup-p-acqp;011s;-;v0;eur;yes;'000500001017DA00';720;60
 '0005000010197D00';Devil s Third;-;-;-;v0;jap;yes;'0005000010177600';720;60
-'0005000010197E00';Medabots - Rokusho;wup-n-pb5p;-;-;v0;eur;yes;'0005000010197E00';720;60
-'0005000010197F00';Medabots - Rokusho;wup-n-pb5e;-;-;-;usa;yes;'0005000010197F00';720;60
+'0005000010197E00';Medabots-Rokusho;wup-n-pb5p;-;-;v0;eur;yes;'0005000010197E00';720;60
+'0005000010197F00';Medabots-Rokusho;wup-n-pb5e;-;-;-;usa;yes;'0005000010197F00';720;60
 '0005000010198000';Corever;wup-n-pb5j;-;-;v0;jap;yes;'0005000010198000';720;60
-'0005000010198100';Medabots - Metabee;wup-n-pb6p;-;-;v0;eur;yes;'0005000010198100';720;60
-'0005000010198200';Medabots - Metabee;wup-n-pb6e;-;-;-;usa;yes;'0005000010198200';720;60
+'0005000010198100';Medabots-Metabee;wup-n-pb6p;-;-;v0;eur;yes;'0005000010198100';720;60
+'0005000010198200';Medabots-Metabee;wup-n-pb6e;-;-;-;usa;yes;'0005000010198200';720;60
 '0005000010198300';Core ver;wup-n-pb6j;-;-;v0;jap;yes;'0005000010198300';720;60
-'0005000010198700';Watchup - Your Daily Newscast;wup-n-awue;-;-;v1;usa;yes;'0005000010198700';720;60
+'0005000010198700';Watchup-Your Daily Newscast;wup-n-awue;-;-;v1;usa;yes;'0005000010198700';720;60
 '0005000010198900';Yoshis Island DS;wup-n-daee;-;-;v0;usa;yes;'0005000010198900';720;60
 '0005000010198A00';Yoshis Island DS;wup-n-daep;-;-;v0;eur;yes;'0005000010198900';720;60
 '0005000010198C00';Big Brain Academy;wup-n-dafe;-;-;-;usa;yes;'0005000010198C00';720;60
@@ -1134,7 +1133,7 @@
 '0005000010199F00';Maze;wup-n-bmze;-;-;v0;usa;yes;'0005000010199F00';720;60
 '000500001019A100';Shapes Of Gray;wup-n-bsge;-;-;v0;usa;yes;'000500001019A100';720;60
 '000500001019A300';Spikey Walls;wup-n-bwle;-;-;v0;usa;yes;'000500001019A300';720;60
-'000500001019A600';Badland - Game Of The Year Edition;wup-n-bade;-;-;v0;usa;yes;'00050000101A5D00';720;60
+'000500001019A600';Badland-Game Of The Year Edition;wup-n-bade;-;-;v0;usa;yes;'00050000101A5D00';720;60
 '000500001019A700';Blok Drop X Twisted Fusion;wup-n-blxe;-;-;v0;usa;yes;'000500001019A700';720;60
 '000500001019AB00';High Strangeness;wup-p-bhsp;-;-;v0;eur;yes;'0005000010199E00';720;60
 '000500001019AD00';Elliot Quest;wup-n-beqe;011a;-;v48;usa;yes;'000500001019AD00';720;60
@@ -1143,9 +1142,9 @@
 '000500001019B200';Tachyon Project;wup-p-btcp;-;-;-;eur;yes;'000500001019B200';720;60
 '000500001019B900';Super Robo Mouse;wup-p-wmwp;-;-;-;eur;yes;'000500001017A900';720;60
 '000500001019BA00';Blok Drop X Twisted Fusion;wup-p-bldp;-;-;v0;eur;yes;'000500001019A700';720;60
-'000500001019BC00';Super Street Fighter II - Turbo Revival;wup-n-pb9p;-;-;v0;eur;yes;'000500001019BC00';720;60
-'000500001019BD00';Super Street Fighter II - Turbo Revival;wup-n-pb9e;-;-;-;usa;yes;'000500001019BD00';720;60
-'000500001019BE00';Super Street Fighter II - X Revival;wup-n-pb9j;-;-;v0;jap;yes;'000500001019BE00';720;60
+'000500001019BC00';Super Street Fighter II-Turbo Revival;wup-n-pb9p;-;-;v0;eur;yes;'000500001019BC00';720;60
+'000500001019BD00';Super Street Fighter II-Turbo Revival;wup-n-pb9e;-;-;-;usa;yes;'000500001019BD00';720;60
+'000500001019BE00';Super Street Fighter II-X Revival;wup-n-pb9j;-;-;v0;jap;yes;'000500001019BE00';720;60
 '000500001019C100';Spy Chameleon;wup-n-bc9e;-;-;v0;usa;yes;'000500001019C100';720;60
 '000500001019C300';Terraria;wup-n-btxe;-;-;-;usa;yes;'0005000010198F00';720;60
 '000500001019C800';TLOZ Twilight Princess HD;wup-n-azaj;-;-;v82;jap;yes;'000500001019E500';1080;30
@@ -1166,11 +1165,11 @@
 '000500001019D900';Xenoblade Chronicles;wup-n-vaep;-;-;v0;eur;yes;'000500001019D700';1080;30
 '000500001019DA00';New Super Mario Broswii;-;-;-;v1;jap;yes;'000500001019DA00';720;60
 '000500001019DC00';New Super Mario Broswii;wup-n-vafp;-;-;v0;eur;yes;'000500001019DA00';720;60
-'000500001019DD00';Metroid Prime - Trilogy;wup-n-vage;-;-;v0;usa;yes;'000500001019DE00';720;60
-'000500001019DE00';Metroid Prime - Trilogy;wup-n-vagp;-;-;v0;eur;yes;'000500001019DE00';720;60
-'000500001019DF00';Metroid - Other M;wup-n-vahj;-;-;v0;jap;yes;'000500001019DF00';720;60
-'000500001019E000';Metroid - Other M;wup-n-vahe;-;-;-;usa;yes;'000500001019E000';720;60
-'000500001019E100';Metroid - Other M;wup-n-vahp;-;-;-;eur;yes;'000500001019E000';720;60
+'000500001019DD00';Metroid Prime-Trilogy;wup-n-vage;-;-;v0;usa;yes;'000500001019DE00';720;60
+'000500001019DE00';Metroid Prime-Trilogy;wup-n-vagp;-;-;v0;eur;yes;'000500001019DE00';720;60
+'000500001019DF00';Metroid-Other M;wup-n-vahj;-;-;v0;jap;yes;'000500001019DF00';720;60
+'000500001019E000';Metroid-Other M;wup-n-vahe;-;-;-;usa;yes;'000500001019E000';720;60
+'000500001019E100';Metroid-Other M;wup-n-vahp;-;-;-;eur;yes;'000500001019E000';720;60
 '000500001019E200';PokePark Wii Pikachu s Adventure;-;-;-;v0;jap;notmd;'000500001019E200';720;60
 '000500001019E300';PokePark Wii Pikachu s Adventure;wup-n-vaje;-;-;-;usa;yes;'000500001019E200';720;60
 '000500001019E400';PokePark Wii Pikachu s Adventure;wup-n-vajp;-;-;v0;eur;yes;'000500001019E200';720;60
@@ -1191,7 +1190,7 @@
 '00050000101A0500';River City Ransom;wup-n-fese;-;-;v0;usa;yes;'00050000101A0500';720;60
 '00050000101A0600';Street Gangs;wup-n-fesp;-;-;v0;eur;yes;'00050000101A0600';720;60
 '00050000101A0C00';Spiral Nemesis;-;-;-;v0;jap;yes;'00050000101A0C00';720;60
-'00050000101A0E00';Kirby 64 - The Crystal Shards;wup-n-naee;-;-;v0;eur;yes;'00050000101A0E00';576;60
+'00050000101A0E00';Kirby 64-The Crystal Shards;wup-n-naee;-;-;v0;eur;yes;'00050000101A0E00';576;60
 '00050000101A1000';Mario Tennis;wup-n-nafe;-;-;v0;eur;yes;'00050000101A1000';720;60
 '00050000101A1200';Affordable Space Adventures;wup-p-afsp;-;-;v0;eur;yes;'000500001018AB00';720;60
 '00050000101A1300';Paper Monsters Recut;wup-p-wm3p;-;-;v16;eur;yes;'0005000010175400';720;60
@@ -1200,11 +1199,11 @@
 '00050000101A1800';Zombie Defense;wup-p-azdp;-;-;v1;eur;yes;'000500001019EE00';720;60
 '00050000101A1B00';Swords Soldiers II;wup-n-bs2e;00rg;-;v0;usa;yes;'00050000101A1B00';720;60
 '00050000101A1C00';Ultratron;wup-n-aute;-;-;v0;usa;yes;'00050000101A1400';720;60
-'00050000101A1F00';WarioWare - Touched;wup-n-dage;-;-;v0;usa;yes;'00050000101A1F00';720;60
-'00050000101A2000';WarioWare - Touched;wup-n-dagp;-;-;v0;eur;yes;'00050000101A1F00';720;60
+'00050000101A1F00';WarioWare-Touched;wup-n-dage;-;-;v0;usa;yes;'00050000101A1F00';720;60
+'00050000101A2000';WarioWare-Touched;wup-n-dagp;-;-;v0;eur;yes;'00050000101A1F00';720;60
 '00050000101A2100';Rpg2;wup-n-dahj;-;-;v0;jap;yes;'00050000101A2100';720;60
-'00050000101A2200';Mario And Luigi - Partners in Time;wup-n-dahe;-;-;v0;usa;yes;'00050000101A2300';720;60
-'00050000101A2300';Mario And Luigi - Partners in Time;wup-n-dahp;-;-;v0;eur;yes;'00050000101A2300';720;60
+'00050000101A2200';Mario And Luigi-Partners in Time;wup-n-dahe;-;-;v0;usa;yes;'00050000101A2300';720;60
+'00050000101A2300';Mario And Luigi-Partners in Time;wup-n-dahp;-;-;v0;eur;yes;'00050000101A2300';720;60
 '00050000101A2400';Tested With Robots;wup-p-ar5p;-;-;v0;eur;yes;'00050000101A2400';720;60
 '00050000101A2500';Wooden Sen SeY;wup-n-wdsj;-;-;v2;jap;yes;'00050000101A2500';720;60
 '00050000101A2800';Hd;wup-n-adgj;-;-;v1;jap;yes;'00050000101A2800';720;60
@@ -1212,15 +1211,15 @@
 '00050000101A2D00';Lego;wup-n-almj;-;-;v1;jap;yes;'0005000010192100';720;30
 '00050000101A2E00';Xtype+;wup-n-wexj;00tf;-;v16;jap;yes;'00050000101A2E00';720;60
 '00050000101A2F00';Super Toy Cars;wup-n-wctj;-;-;v2;jap;yes;'000500001016D500';720;60
-'00050000101A3000';Advance Wars 2 - Black Hole Rising;wup-n-pcdp;-;-;v0;eur;yes;'00050000101A3000';720;60
-'00050000101A3100';Advance Wars 2 - Black Hole Rising;wup-n-pcde;-;-;v0;usa;yes;'00050000101A3000';720;60
+'00050000101A3000';Advance Wars 2-Black Hole Rising;wup-n-pcdp;-;-;v0;eur;yes;'00050000101A3000';720;60
+'00050000101A3100';Advance Wars 2-Black Hole Rising;wup-n-pcde;-;-;v0;usa;yes;'00050000101A3000';720;60
 '00050000101A3500';Mario Tennis Ultra Smash;wup-n-avxe;1;-;v32;usa;yes;'00050000101A3500';720;60
 '00050000101A3600';Mario Tennis Ultra Smash;wup-p-avxp;1;-;v16;eur;yes;'00050000101A3500';720;60
 '00050000101A3700';SteamWorld Heist;wup-p-ay5p;-;-;-;eur;yes;'00050000101A3700';720;60
 '00050000101A3800';Spy Chameleon;wup-p-bc9p;-;-;v0;eur;yes;'000500001019C100';720;60
 '00050000101A3900';Blek;wup-p-bl9p;-;-;v0;eur;yes;'00050000101A3900';720;60
 '00050000101A3B00';Life of Pixel;wup-n-blpe;00ly;-;v1;usa;yes;'00050000101A3B00';720;60
-'00050000101A3C00';The Binding Of Isaac - Rebirth;wup-n-brxe;-;-;v1;usa;yes;'00050000101A3C00';720;60
+'00050000101A3C00';The Binding Of Isaac-Rebirth;wup-n-brxe;-;-;v1;usa;yes;'00050000101A3C00';720;60
 '00050000101A3E00';Defense Dome;wup-n-bdfe;-;-;v4;usa;yes;'00050000101A3E00';720;60
 '00050000101A3F00';Heptrix;wup-n-bhpe;-;-;v0;usa;yes;'00050000101A3F00';720;60
 '00050000101A4000';SteamWorld Heist;wup-n-ay5e;-;-;-;usa;yes;'00050000101A3700';720;60
@@ -1237,14 +1236,14 @@
 '00050000101A5900';Mario Golf;wup-n-nage;-;-;v0;eur;yes;'00050000101A5900';720;60
 '00050000101A5B00';1080d Snowboarding;wup-n-nahe;-;-;-;eur,usa;yes;'00050000101A5B00';720;60
 '00050000101A5C00';Lego Jurassic World;wup-p-aljp;00wr;-;v0;eur;yes;'00050000101A5C00';720;30
-'00050000101A5D00';Badland - Game Of The Year Edition;wup-p-badp;-;-;v0;eur;yes;'00050000101A5D00';720;60
+'00050000101A5D00';Badland-Game Of The Year Edition;wup-p-badp;-;-;v0;eur;yes;'00050000101A5D00';720;60
 '00050000101A5E00';OlliOlli;wup-p-allp;00ub;-;v0;eur;yes;'00050000101A5E00';720;60
 '00050000101A5F00';Shantae And The Pirate s Curse;wup-n-bsxe;00wy;-;v16;usa;yes;'00050000101A5F00';1080;60
 '00050000101A6000';Tadpole Treble;wup-n-atae;-;-;-;usa;yes;'00050000101A6000';720;60
-'00050000101A6100';Shantae - Risky s Revenge Directo s Cut;wup-n-arre;-;-;-;usa;yes;'00050000101A6100';1080;60
+'00050000101A6100';Shantae-Risky s Revenge Directo s Cut;wup-n-arre;-;-;-;usa;yes;'00050000101A6100';1080;60
 '00050000101A6200';Lego Jurassic World;wup-n-alje;00wr;-;v0;usa;yes;'00050000101A5C00';720;30
-'00050000101A6300';Cube Life - Island Survival;wup-p-acup;00yr;-;v1;eur;yes;'00050000101A6300';720;60
-'00050000101A6400';Cube Life - Island Survival;wup-n-acue;00yr;-;v0;usa;yes;'00050000101A6300';720;60
+'00050000101A6300';Cube Life-Island Survival;wup-p-acup;00yr;-;v1;eur;yes;'00050000101A6300';720;60
+'00050000101A6400';Cube Life-Island Survival;wup-n-acue;00yr;-;v0;usa;yes;'00050000101A6300';720;60
 '00050000101A6500';Kung Fu Panda Showdown Of Legendary Legends;wup-n-bkfe;00vz;-;v0,v16;usa;yes;'00050000101AA500';720;60
 '00050000101A6700';Suspension Railroad Simulator;wup-p-as3p;-;-;v0;eur;yes;'00050000101A6700';720;60
 '00050000101A6900';OlliOlli;wup-n-alle;00ub;-;v17;usa;yes;'00050000101A5E00';720;60
@@ -1270,7 +1269,7 @@
 '00050000101A9300';Onimusha Tactics;wup-n-pcke;-;-;v0;usa;yes;'00050000101A9300';720;60
 '00050000101A9400';Onimusha Tactics;wup-n-pckj;-;-;v0;jap;yes;'00050000101A9400';720;60
 '00050000101A9500';Shantae And The Pirate s Curse;wup-p-bsxp;00wy;-;v16;eur;yes;'00050000101A5F00';1080;60
-'00050000101A9600';Shantae - Risky s Revenge Directo s Cut;wup-p-arrp;-;-;-;eur;yes;'00050000101A6100';1080;60
+'00050000101A9600';Shantae-Risky s Revenge Directo s Cut;wup-p-arrp;-;-;-;eur;yes;'00050000101A6100';1080;60
 '00050000101A9800';Pocky And Rocky With Becky;wup-n-pcje;-;-;v0;eur;yes;'00050000101A9800';720;60
 '00050000101A9900';Car Battler Joe;wup-n-pcle;-;-;v0;usa;yes;'00050000101A9900';720;60
 '00050000101A9B00';Rakoo And Friends;wup-p-arvp;-;-;v0;eur;yes;'00050000101A9B00';720;60
@@ -1285,14 +1284,15 @@
 '00050000101AAF00';Factotum;wup-n-bfte;-;-;v0;usa;yes;'00050000101AAF00';720;60
 '00050000101AB100';Outer World 20th Anniversary Edition;wup-n-weuj;-;-;v0;jap;yes;'00050000101AB100';720;60
 '00050000101ABB00';Color Bombs;wup-n-bw2e;-;-;v1;usa;yes;'00050000101ABB00';720;60
-'00050000101ABC00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;usa;yes;0005000E10188B00';720;60
-'00050000101ABE00';Wario - Master Of Disguise;wup-n-dale;-;-;-;usa;yes;'00050000101ABE00';720;60
-'00050000101ABF00';Wario - Master Of Disguise;wup-n-dalp;-;-;v0;eur;yes;'00050000101ABF00';720;60
+'00050000101ABC00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;usa;yes;'00050000101ABC00';720;60
+'0005000010188B00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;jpn;yes;'00050000101ABC00';720;60
+'00050000101ABE00';Wario-Master Of Disguise;wup-n-dale;-;-;-;usa;yes;'00050000101ABE00';720;60
+'00050000101ABF00';Wario-Master Of Disguise;wup-n-dalp;-;-;v0;eur;yes;'00050000101ABF00';720;60
 '00050000101AC100';Star Fox Command;wup-n-dame;-;-;v0;usa;yes;'00050000101AC100';720;60
 '00050000101AC200';Star Fox Command;wup-n-damp;-;-;v0;eur;yes;'00050000101AC100';720;60
 '00050000101AC400';Star Fox 64;wup-n-naje;-;-;-;eur;yes;'00050000101AC400';720;60
 '00050000101AC600';Wave Race 64;wup-n-nake;-;-;-;eur;yes;'00050000101AC600';720;60
-'00050000101AC700';Adventure Time - Finn And Jake Investigations;wup-n-bfne;00vz;-;v0;usa;yes;'00050000101AC700';1080;60
+'00050000101AC700';Adventure Time-Finn And Jake Investigations;wup-n-bfne;00vz;-;v0;usa;yes;'00050000101AC700';1080;60
 '00050000101AC900';Disney Infinity3 Edition;wup-n-bd3e;004q;-;v32;usa;yes;'00050000101B3D00';720;60
 '00050000101ACA00';Free Balling;wup-n-bfre;-;-;-;usa;yes;'00050000101ACA00';720;60
 '00050000101ACB00';Psyscrolr;wup-n-bpye;-;-;v16;usa;yes;'00050000101ACB00';720;60
@@ -1306,26 +1306,26 @@
 '00050000101AD900';Dare Up Adrenaline;wup-n-bdue;-;-;v1;usa;yes;'00050000101AD900';720;60
 '00050000101ADE00';Space Hulk;wup-n-bhke;-;-;-;usa;yes;'00050000101ADE00';720;60
 '00050000101AE300';Toto Temple Deluxe;wup-n-bt2e;-;-;v1;usa;yes;'00050000101AE300';720;60
-'00050000101AE400';Contra Advance - The Alien Wars Ex;wup-n-pcsp;-;-;v0;eur;yes;'00050000101AE400';720;60
-'00050000101AE500';Contra Advance - The Alien Wars Ex;wup-n-pcse;-;-;-;usa;yes;'00050000101AE500';720;60
+'00050000101AE400';Contra Advance-The Alien Wars Ex;wup-n-pcsp;-;-;v0;eur;yes;'00050000101AE400';720;60
+'00050000101AE500';Contra Advance-The Alien Wars Ex;wup-n-pcse;-;-;-;usa;yes;'00050000101AE500';720;60
 '00050000101AE700';Konami Krazy Racers;wup-n-pctp;-;-;v0;eur;yes;'00050000101AE700';720;60
 '00050000101AE800';Konami Krazy Racers;wup-n-pcte;-;-;-;usa;yes;'00050000101AE800';720;60
 '00050000101AEB00';SDK Paint;wup-p-wspp;-;-;v16;eur;yes;'000500001017EB00';720;60
 '00050000101AEF00';Midnight;wup-n-bmde;-;-;v0;usa;yes;'00050000101AEF00';720;60
 '00050000101AF400';PixlCross;wup-n-axle;-;-;-;usa;yes;'00050000101AF400';720;60
-'00050000101AFA00';Tilelicious - Delicious Tiles;wup-n-btse;-;-;v0;usa;yes;'00050000101AFA00';720;60
+'00050000101AFA00';Tilelicious-Delicious Tiles;wup-n-btse;-;-;v0;usa;yes;'00050000101AFA00';720;60
 '00050000101AFC00';Puzzle Monkeys;wup-p-bpzp;-;-;v0;eur;yes;'00050000101A8600';720;60
 '00050000101AFD00';Crab Cakes Rescue;wup-n-bcee;-;-;v0;usa;yes;'00050000101AFD00';720;60
-'00050000101AFE00';Adventure Time - Finn And Jake Investigations;wup-p-bfnp;00vz;-;v0;eur;yes;'00050000101AC700';1080;60
+'00050000101AFE00';Adventure Time-Finn And Jake Investigations;wup-p-bfnp;00vz;-;v0;eur;yes;'00050000101AC700';1080;60
 '00050000101B0000';Candy Hoarder;wup-p-bcqe;-;-;-;usa;yes;'00050000101B0000';720;60
 '00050000101B0100';Funk Of Titans;wup-n-bfse;-;-;v16;usa;yes;'00050000101B0100';720;60
 '00050000101B0200';PixelJunk Monsters;wup-n-bphe;-;-;-;usa;yes;'00050000101E1200';720;60
 '00050000101B0400';Star Fox Zero;wup-n-afxe;1;-;16;usa;yes;'00050000101B0400';720;60
 '00050000101B0500';Star Fox Zero;wup-p-afxp;-;-;-;eur;yes;'00050000101B0400';720;60
 '00050000101B0700';Rhythm Heaven Fever;wup-n-vake;-;-;-;usa;yes;'00050000101B0700';720;60
-'00050000101B0800';Beat the Beat - Rhythm Paradise;wup-n-vakp;-;-;-;eur;yes;'00050000101B0800';720;60
-'00050000101B0A00';Sin And Punishment - Star Successor;wup-n-vale;-;-;v1;usa;yes;'00050000101B0A00';720;60
-'00050000101B0B00';Sin And Punishment - Star Successor Of The Skies;wup-n-valp;-;-;v0;eur;yes;'00050000101B0B00';720;60
+'00050000101B0800';Beat the Beat-Rhythm Paradise;wup-n-vakp;-;-;-;eur;yes;'00050000101B0800';720;60
+'00050000101B0A00';Sin And Punishment-Star Successor;wup-n-vale;-;-;v1;usa;yes;'00050000101B0A00';720;60
+'00050000101B0B00';Sin And Punishment-Star Successor Of The Skies;wup-n-valp;-;-;v0;eur;yes;'00050000101B0B00';720;60
 '00050000101B0F00';TLOZ Skyward Sword;-;-;-;v0;jap;yes;'00050000101B0F00';720;60
 '00050000101B1000';TLOZ Skyward Sword;wup-n-vane;-;-;-;usa;yes;'00050000101B1000';720;60
 '00050000101B1100';TLOZ Skyward Sword;wup-n-vanp;-;-;-;eur;yes;'00050000101B1000';720;60
@@ -1338,27 +1338,27 @@
 '00050000101B1900';Mario Sports Mix;wup-n-vasj;-;-;-;jap;yes;'00050000101B1A00';720;60
 '00050000101B1A00';Mario Sports Mix;wup-n-vase;-;-;-;usa;yes;'00050000101B1A00';720;60
 '00050000101B1B00';Mario Sports Mix;wup-n-vasp;-;-;v0;eur;yes;'00050000101B1A00';720;60
-'00050000101B2400';ProjectZero 2 - Wii Edition;wup-n-vawp;-;-;-;eur;yes;'00050000101B2400';720;60
+'00050000101B2400';ProjectZero 2-Wii Edition;wup-n-vawp;-;-;-;eur;yes;'00050000101B2400';720;60
 '00050000101B2600';Excitebots Trick Racing;wup-n-vaxe;-;-;-;usa;yes;'00050000101B2600';720;60
 '00050000101B2700';Lego3;wup-n-btmj;-;-;v0;jap;yes;'00050000101B2700';720;30
 '00050000101B2800';The Fall;wup-p-btfp;-;-;v0;eur;yes;'0005000010189300';720;60
-'00050000101B2900';Dragon Fantasy - The Black Tome Of Ice;wup-n-afye;-;-;-;usa;yes;'00050000101B2900';720;60
-'00050000101B2A00';Dragon Fantasy - The Volumes Of Westeria;wup-n-adwe;-;-;v1;usa;yes;'00050000101B2A00';720;60
+'00050000101B2900';Dragon Fantasy-The Black Tome Of Ice;wup-n-afye;-;-;-;usa;yes;'00050000101B2900';720;60
+'00050000101B2A00';Dragon Fantasy-The Volumes Of Westeria;wup-n-adwe;-;-;v1;usa;yes;'00050000101B2A00';720;60
 '00050000101B2C00';ShÅtshimi;wup-n-bsee;-;-;-;usa;yes;'00050000101B2C00';720;60
 '00050000101B2E00';Tri-Strip;wup-n-atpe;-;-;v0;usa;yes;'00050000101B2E00';720;60
 '00050000101B2F00';2014;wup-n-bdkj;-;-;v0;jap;yes;'00050000101B2F00';720;60
 '00050000101B3000';2014;wup-n-bmjj;-;-;v0;jap;yes;'00050000101B3000';720;60
 '00050000101B3100';2014;wup-n-bysj;-;-;v0;jap;yes;'00050000101B3100';720;60
 '00050000101B3600';2014;wup-n-altj;-;-;v0;jap;yes;'00050000101B3600';720;60
-'00050000101B3800';Fire Emblem - Shadow Dragon;wup-n-dane;-;-;-;usa;yes;'00050000101B3800';720;60
-'00050000101B3900';Fire Emblem - Shadow Dragon;wup-n-danp;-;-;v0;eur;yes;'00050000101B3800';720;60
+'00050000101B3800';Fire Emblem-Shadow Dragon;wup-n-dane;-;-;-;usa;yes;'00050000101B3800';720;60
+'00050000101B3900';Fire Emblem-Shadow Dragon;wup-n-danp;-;-;v0;eur;yes;'00050000101B3800';720;60
 '00050000101B3B00';Metroid Prime Hunters;wup-n-dape;-;-;-;usa;yes;'00050000101B3B00';720;60
 '00050000101B3C00';Metroid Prime Hunters;wup-n-dapp;-;-;-;eur;yes;'00050000101B3B00';720;60
 '00050000101B3D00';Disney Infinity 3;wup-p-bd3p;004q;-;v32;eur;yes;'00050000101B3D00';720;60
 '00050000101B3E00';Disney Infinity 3;wup-p-bd3z;004q;-;v32;eur;yes;'00050000101B3D00';720;60
 '00050000101B4100';Amiibo;wup-n-aavj;-;-;v0;jap;yes;'00050000101B4100';720;60
-'00050000101B4200';Amiibo Tap - Nintendo s Greatest Bits;wup-n-aave;-;-;v0;usa;yes;'00050000101B4200';720;60
-'00050000101B4300';Amiibo Touch And Play - Nintendo Classics Highlights;wup-p-aavp;-;-;v0;eur;yes;'00050000101B4300';720;60
+'00050000101B4200';Amiibo Tap-Nintendo s Greatest Bits;wup-n-aave;-;-;v0;usa;yes;'00050000101B4200';720;60
+'00050000101B4300';Amiibo Touch And Play-Nintendo Classics Highlights;wup-p-aavp;-;-;v0;eur;yes;'00050000101B4300';720;60
 '00050000101B4400';Chariot;wup-n-wc4j;-;-;v1;jap;yes;'0005000010179900';720;60
 '00050000101B4600';Mario Kart 64;wup-n-nale;-;-;-;eur;yes;'00050000101B4600';720;60
 '00050000101B4800';Sin And Punishment;wup-n-name;-;-;v0;eur;yes;'00050000101B4800';720;60
@@ -1370,8 +1370,8 @@
 '00050000101B5600';Hogan s Alley;wup-n-fhap;-;-;v0;eur;yes;'00050000101B5600';720;60
 '00050000101B5A00';Star Tropics;wup-n-fe2e;-;-;-;usa;yes;'00050000101B5A00';720;60
 '00050000101B5B00';Star Tropics;wup-n-fe2p;-;-;v0;eur;yes;'00050000101B5A00';720;60
-'00050000101B5C00';Zoda s Revenge - Star Tropics II;wup-n-fe3e;-;-;-;usa;yes;'00050000101B5C00';720;60
-'00050000101B5D00';Zoda s Revenge - Star Tropics II;wup-n-fe3p;-;-;v0;eur;yes;'00050000101B5C00';720;60
+'00050000101B5C00';Zoda s Revenge-Star Tropics II;wup-n-fe3e;-;-;-;usa;yes;'00050000101B5C00';720;60
+'00050000101B5D00';Zoda s Revenge-Star Tropics II;wup-n-fe3p;-;-;v0;eur;yes;'00050000101B5C00';720;60
 '00050000101B5E00';Splashy Duck;wup-p-bwlp;-;-;-;eur;yes;'00050000101B5E00';720;60
 '00050000101B5F00';Tabletop Gallery;wup-p-atyp;-;-;v0;eur;yes;'00050000101B5F00';720;60
 '00050000101B6000';Space Hulk;wup-p-bhkp;-;-;-;eur;yes;'00050000101ADE00';720;60
@@ -1419,7 +1419,7 @@
 '00050000101BC700';Blocky Bot;wup-n-bybe;-;-;v1;usa;yes;'00050000101BB700';720;60
 '00050000101BC800';Paranautical Activity;wup-n-apre;-;-;-;usa;yes;'00050000101BC800';720;60
 '00050000101BCA00';Napster;wup-n-anap;-;-;-;eur;yes;'00050000101BCA00';720;60
-'00050000101BCB00';Rhapsody - Music And Radio;wup-n-anae;-;-;-;usa;yes;'00050000101BCB00';720;60
+'00050000101BCB00';Rhapsody-Music And Radio;wup-n-anae;-;-;-;usa;yes;'00050000101BCB00';720;60
 '00050000101BCD00';Underground;wup-n-buge;-;-;v0;usa;yes;'0005000010187100';720;60
 '00050000101BCE00';Woah Dave;wup-n-awee;-;-;v2;usa;yes;'00050000101BCE00';720;60
 '00050000101BCF00';Word Search by Powgi;wup-n-awbe;-;-;v1;usa;yes;'00050000101CF900';720;60
@@ -1428,13 +1428,13 @@
 '00050000101BD200';Super Paper Mario;wup-n-vbbp;-;-;-;eur;yes;'00050000101BD200';720;60
 '00050000101BD700';Resident Evil 4 Wii Edition;wup-n-vbde;-;-;-;usa;yes;'00050000101BD700';720;60
 '00050000101BD800';Resident Evil 4 Wii Edition;wup-n-vbdp;-;-;v0;eur;yes;'00050000101BD700';720;60
-'00050000101BDA00';Zack And Wiki - Quest For Barbaros Treasure;wup-n-vbee;-;-;-;usa;yes;'00050000101BDA00';720;60
-'00050000101BDB00';Zack And Wiki - Quest For Barbaros Treasure;wup-n-vbep;-;-;-;eur;yes;'00050000101BDB00';720;60
+'00050000101BDA00';Zack And Wiki-Quest For Barbaros Treasure;wup-n-vbee;-;-;-;usa;yes;'00050000101BDA00';720;60
+'00050000101BDB00';Zack And Wiki-Quest For Barbaros Treasure;wup-n-vbep;-;-;-;eur;yes;'00050000101BDB00';720;60
 '00050000101BDC00';Mario Strikers Charged Football;-;-;-;v0;jap;yes;'00050000101BDC00';720;60
 '00050000101BDD00';Mario Strikers Charged Football;wup-n-vbfp;-;-;-;eur;yes;'00050000101BDC00';720;60
-'00050000101BDE00';Wario Land - Shake It;-;-;-;v0;jap;yes;'00050000101BDE00';720;60
-'00050000101BDF00';Wario Land - Shake It;wup-n-vbge;-;-;-;usa;yes;'00050000101BDF00';720;60
-'00050000101BE000';Wario Land - The Shake Dimension;wup-n-vbgp;-;-;-;eur;yes;'00050000101BE000';720;60
+'00050000101BDE00';Wario Land-Shake It;-;-;-;v0;jap;yes;'00050000101BDE00';720;60
+'00050000101BDF00';Wario Land-Shake It;wup-n-vbge;-;-;-;usa;yes;'00050000101BDF00';720;60
+'00050000101BE000';Wario Land-The Shake Dimension;wup-n-vbgp;-;-;-;eur;yes;'00050000101BE000';720;60
 '00050000101BE100';Mario Super Sluggers;-;-;-;v0;jap;yes;'00050000101BE100';720;60
 '00050000101BE200';Mario Super Sluggers;wup-n-vbhe;-;-;-;usa;yes;'00050000101BE100';720;60
 '00050000101BE600';Mario Strikers Charged;wup-n-vbfe;-;-;-;usa;yes;'00050000101BE600';720;60
@@ -1459,16 +1459,16 @@
 '00050000101C0C00';The Swindle;wup-p-bs7p;00ub;-;v0;eur;yes;'00050000101C0B00';720;60
 '00050000101C2000';City Connection;wup-n-fe4e;-;-;-;usa;yes;'00050000101C2000';720;60
 '00050000101C2100';Lost Reavers Beta Version;-;-;-;v1;jap;yes;'000500001018D900';720;60
-'00050000101C2200';Ninja Gaiden II - The Dark Sword Of Chaos;wup-n-fe5e;-;-;-;usa;yes;'00050000101C2200';720;60
-'00050000101C2300';Ninja Gaiden II - The Dark Sword Of Chaos;wup-n-fe5p;-;-;-;eur;yes;'00050000101C2200';720;60
-'00050000101C2400';Ninja Gaiden III - The Ancient Ship Of Doom;wup-n-fe6e;-;-;-;usa;yes;'00050000101C2500';720;60
-'00050000101C2500';Ninja Gaiden III - The Ancient Ship Of Doom;wup-n-fe6p;-;-;-;eur;yes;'00050000101C2500';720;60
+'00050000101C2200';Ninja Gaiden II-The Dark Sword Of Chaos;wup-n-fe5e;-;-;-;usa;yes;'00050000101C2200';720;60
+'00050000101C2300';Ninja Gaiden II-The Dark Sword Of Chaos;wup-n-fe5p;-;-;-;eur;yes;'00050000101C2200';720;60
+'00050000101C2400';Ninja Gaiden III-The Ancient Ship Of Doom;wup-n-fe6e;-;-;-;usa;yes;'00050000101C2500';720;60
+'00050000101C2500';Ninja Gaiden III-The Ancient Ship Of Doom;wup-n-fe6p;-;-;-;eur;yes;'00050000101C2500';720;60
 '00050000101C2600';Tecmo Bowl;wup-n-fe7e;-;-;v0;usa;yes;'00050000101C2600';720;60
 '00050000101C2700';Tecmo Bowl;wup-n-fe7p;-;-;v0;eur;yes;'00050000101C2600';720;60
-'00050000101C2800';Double Dragon III - The Sacred Stones;wup-n-fe8e;-;-;-;usa;yes;'00050000101C2800';720;60
-'00050000101C2900';Double Dragon III - The Sacred Stones;wup-n-fe8p;-;-;-;eur;yes;'00050000101C2900';720;60
-'00050000101C2A00';Pac-Man 2 - The New Adventures;wup-n-jdke;-;-;-;usa;yes;'00050000101C2A00';720;60
-'00050000101C2B00';Pac-Man 2 - The New Adventures;wup-n-jdkp;-;-;v0;eur;yes;'00050000101C2A00';720;60
+'00050000101C2800';Double Dragon III-The Sacred Stones;wup-n-fe8e;-;-;-;usa;yes;'00050000101C2800';720;60
+'00050000101C2900';Double Dragon III-The Sacred Stones;wup-n-fe8p;-;-;-;eur;yes;'00050000101C2900';720;60
+'00050000101C2A00';Pac-Man 2-The New Adventures;wup-n-jdke;-;-;-;usa;yes;'00050000101C2A00';720;60
+'00050000101C2B00';Pac-Man 2-The New Adventures;wup-n-jdkp;-;-;v0;eur;yes;'00050000101C2A00';720;60
 '00050000101C3000';The Perplexing Orb;wup-n-apee;-;-;-;usa;yes;'00050000101C3000';720;60
 '00050000101C3100';Freedom Planet;wup-n-afee;167;-;v0;usa;yes;'00050000101C3100';720;60
 '00050000101C3300';64 DS;wup-n-dasj;-;-;v0;jap;yes;'00050000101C3300';720;60
@@ -1481,8 +1481,8 @@
 '00050000101C3F00';Mother 3;wup-n-pc9j;-;-;-;jap;yes;'00050000101C3F00';720;60
 '00050000101C4000';Rodea The Sky Soldier;wup-p-brdp;-;-;v0;eur;yes;'00050000101C4000';720;60
 '00050000101C4100';Fullblast;wup-p-aflp;-;-;v0;eur;yes;'00050000101C4100';720;60
-'00050000101C4200';The Peanuts Movie - Snoopy s Grand Adventure;wup-n-bpee;-;-;v0;usa;yes;'00050000101C4200';720;60
-'00050000101C4300';Don t Starve - Giant Edition;wup-n-adae;-;-;v1;usa;yes;'00050000101C4300';720;60
+'00050000101C4200';The Peanuts Movie-Snoopy s Grand Adventure;wup-n-bpee;-;-;v0;usa;yes;'00050000101C4200';720;60
+'00050000101C4300';Don t Starve-Giant Edition;wup-n-adae;-;-;v1;usa;yes;'00050000101C4300';720;60
 '00050000101C4500';Year Walk;wup-n-apnj;-;-;v1;jap;yes;'00050000101CA600';720;60
 '00050000101C4600';99 Seconds;wup-n-wcqj;-;-;v1;jap;yes;'000500001016E700';720;60
 '00050000101C4A00';Word Party;wup-p-awpp;-;-;v0;eur;yes;'00050000101C4A00';720;60
@@ -1491,7 +1491,7 @@
 '00050000101C5400';The Bridge;wup-n-abce;-;-;v1;usa;yes;'00050000101C5400';720;60
 '00050000101C5500';Word Party;wup-n-awpe;-;-;-;usa;yes;'00050000101C4A00';720;60
 '00050000101C5700';Abyss;wup-n-wagj;-;-;v1;jap;yes;'000500001016D900';720;60
-'00050000101C5800';Pokkêemon Tournament;wup-n-apkj;002p;-;v16;jap;yes;'00050000101C5800';720;60
+'00050000101C5800';Pokkemon Tournament;wup-n-apkj;002p;-;v16;jap;yes;'00050000101DF500';720;60
 '00050000101C5900';3-in-1;wup-n-atyj;-;-;v0;jap;yes;'00050000101C5900';720;60
 '00050000101C5A00';Mighty No9;wup-p-amqp;-;-;-;eur;yes;'00050000101C5A00';720;60
 '00050000101C5B00';Secret Files Tunguska;-;-;-;v0;eur;yes;'00050000101C5B00';720;60
@@ -1502,10 +1502,10 @@
 '00050000101C6100';Amiibo;wup-n-ap5j;-;-;-;jap;yes;'00050000101C6100';720;60
 '00050000101C6200';Mini Mario And Friends amiibo Challenge;wup-n-ap5e;-;-;-;usa;yes;'00050000101C6200';720;60
 '00050000101C6300';Mini Mario And Friends amiibo Challenge;wup-p-ap5p;-;-;-;eur;yes;'00050000101C6200';720;60
-'00050000101C6400';Animal Crossing - Amiibo Festival;wup-p-aale;-;-;-;usa;notmd;'00050000101C6500';720;60
-'00050000101C6500';Animal Crossing - Amiibo Festival;wup-p-aalp;-;-;v0;eur;yes;'00050000101C6500';720;60
+'00050000101C6400';Animal Crossing-Amiibo Festival;wup-p-aale;-;-;-;usa;notmd;'00050000101C6500';720;60
+'00050000101C6500';Animal Crossing-Amiibo Festival;wup-p-aalp;-;-;v0;eur;yes;'00050000101C6500';720;60
 '00050000101C6900';Tabletop Gallery;wup-n-ar2e;-;-;-;usa;yes;'00050000101B5F00';720;60
-'00050000101C6A00';Octodad - Dadliest Catch;wup-n-ad5e;-;-;v4;usa;yes;'00050000101C6A00';720;60
+'00050000101C6A00';Octodad-Dadliest Catch;wup-n-ad5e;-;-;v4;usa;yes;'00050000101C6A00';720;60
 '00050000101C6B00';Peg Solitaire;wup-n-anee;-;-;-;usa;yes;'00050000101C6B00';720;60
 '00050000101C6C00';Typoman;wup-n-atve;-;-;-;usa;yes;'00050000101C6C00';720;60
 '00050000101C6D00';Race The Sun;wup-p-arcp;-;-;v0;eur;yes;'00050000101BF000';720;60
@@ -1514,7 +1514,7 @@
 '00050000101C7300';The Stonecutter;wup-n-btte;-;-;v0;usa;yes;'00050000101C7300';720;60
 '00050000101C7400';Momonga Pinball Adventures;wup-p-ampp;-;-;v0;eur;yes;'00050000101C7400';720;60
 '00050000101C7600';Pumped BMX +;wup-p-bpbp;-;-;v16;eur;yes;'00050000101C7600';1080;60
-'00050000101C7B00';Chronicles Of Teddy - Harmony Of Exidus;wup-n-af2e;-;-;-;usa;yes;'00050000101C7B00';720;60
+'00050000101C7B00';Chronicles Of Teddy-Harmony Of Exidus;wup-n-af2e;-;-;-;usa;yes;'00050000101C7B00';720;60
 '00050000101C7D00';Pumped BMX +;wup-n-bpbe;-;-;v1;usa;yes;'00050000101C7600';1080;60
 '00050000101C7E00';Whispering Willows;wup-n-awwe;-;-;v0;usa;yes;'00050000101C7E00';720;60
 '00050000101C7F00';Toto Temple Deluxe;wup-p-bt2p;-;-;v0;eur;yes;'00050000101AE300';720;60
@@ -1531,11 +1531,11 @@
 '00050000101C9400';TLOZ Breath Of The Wild;wup-n-alze;-;-;-;usa;yes;'00050000101C9500';720;30
 '00050000101C9500';TLOZ Breath Of The Wild;wup-n-alzp;-;-;v208;eur;yes;'00050000101C9500';720;30
 '00050000101C9600';Mighty No9;wup-n-amqe;-;-;-;usa;yes;'00050000101C5A00';720;60
-'00050000101C9A00';Don t Starve - Giant Edition;wup-p-adap;-;-;v0;eur;yes;'00050000101C4300';720;60
-'00050000101C9B00';The Binding Of Isaac - Rebirth;wup-p-brxp;-;-;v0;eur;yes;'00050000101A3C00';720;60
+'00050000101C9A00';Don t Starve-Giant Edition;wup-p-adap;-;-;v0;eur;yes;'00050000101C4300';720;60
+'00050000101C9B00';The Binding Of Isaac-Rebirth;wup-p-brxp;-;-;v0;eur;yes;'00050000101A3C00';720;60
 '00050000101CA000';1001 Spikes;wup-p-wm9p;-;-;v16;eur;yes;'0005000010176B00';720;60
 '00050000101CA100';Bigley s Revenge;wup-n-at3e;-;-;-;usa;yes;'00050000101CA100';720;60
-'00050000101CA200';Lucentek - Activate;wup-n-alue;-;-;-;usa;yes;'00050000101CA200';720;60
+'00050000101CA200';Lucentek-Activate;wup-n-alue;-;-;-;usa;yes;'00050000101CA200';720;60
 '00050000101CA300';Neon Battle;wup-n-anle;-;-;v0;usa;yes;'00050000101CA300';720;60
 '00050000101CA600';Year Walk;wup-n-apne;-;-;v0;usa;yes;'00050000101CA600';720;60
 '00050000101CA700';Poncho;wup-p-bp4p;-;-;-;eur;yes;'00050000101CA700';720;60
@@ -1543,8 +1543,8 @@
 '00050000101CA900';Monster High New Ghoul In School;wup-p-bmsp;00vz;-;v;eur;yes;'00050000101C8D00';720;60
 '00050000101CAF00';Drill Dozer;wup-n-pdep;-;-;-;eur;yes;'00050000101CAF00';720;60
 '00050000101CB000';Drill Dozer;wup-n-pdee;-;-;-;usa;yes;'00050000101CAF00';720;60
-'00050000101CB100';Game And Watch - Gallery Advance;wup-n-pdfp;-;-;-;eur;yes;'00050000101CB100';720;60
-'00050000101CB200';Game And Watch - Gallery 4;wup-n-pdfe;-;-;-;usa;yes;'00050000101CB200';720;60
+'00050000101CB100';Game And Watch-Gallery Advance;wup-n-pdfp;-;-;-;eur;yes;'00050000101CB100';720;60
+'00050000101CB200';Game And Watch-Gallery 4;wup-n-pdfe;-;-;-;usa;yes;'00050000101CB200';720;60
 '00050000101CB400';Forma 8;-;-;-;v0;usa;yes;'00050000101CBC00';720;60
 '00050000101CB500';Freedom Planet;-;-;-;v0;usa;yes;'00050000101CB500';720;60
 '00050000101CB600';Event Preview Version Lovely P;-;-;-;v0;usa;yes;'00050000101CB600';720;60
@@ -1559,10 +1559,10 @@
 '00050000101CC000';Poncho;wup-n-bp4e;-;-;-;usa;yes;'00050000101CA700';720;60
 '00050000101CC300';Pokemon Ranger;wup-n-dawe;-;-;-;usa;yes;'00050000101CC300';720;60
 '00050000101CC400';Pokemon Ranger;wup-n-dawp;-;-;-;eur;yes;'00050000101CC300';720;60
-'00050000101CC700';Pokemon Mystery Dungeon - Blue Rescue Team;wup-n-daxe;-;-;-;usa;yes;'00050000101CC700';720;60
-'00050000101CC800';Pokemon Mystery Dungeon - Blue Rescue Team;wup-n-daxp;-;-;-;eur;yes;'00050000101CC700';720;60
+'00050000101CC700';Pokemon Mystery Dungeon-Blue Rescue Team;wup-n-daxe;-;-;-;usa;yes;'00050000101CC700';720;60
+'00050000101CC800';Pokemon Mystery Dungeon-Blue Rescue Team;wup-n-daxp;-;-;-;eur;yes;'00050000101CC700';720;60
 '00050000101CC900';Freedom Planet;wup-p-afep;167;-;v0;eur;yes;'00050000101C3100';720;60
-'00050000101CCD00';The Rivers Of Alice - Extended Version;wup-n-brae;-;-;v0;usa;yes;'00050000101CCD00';720;60
+'00050000101CCD00';The Rivers Of Alice-Extended Version;wup-n-brae;-;-;v0;usa;yes;'00050000101CCD00';720;60
 '00050000101CCF00';Never Alone;wup-n-bnae;-;-;v0;usa;yes;'00050000101CCF00';720;60
 '00050000101CD100';Soul Axiom;-;-;-;v0;eur;yes;'00050000101CBA00';720;60
 '00050000101CD200';Extreme Exorcism;-;-;-;v0;eur;yes;'00050000101B9F00';720;60
@@ -1596,13 +1596,13 @@
 '00050000101CFF00';Job the Leprechaun;wup-n-ajle;-;-;v0;usa;yes;'00050000101CFF00';720;60
 '00050000101D0000';Solitaire Dungeon Escape;wup-n-ad7e;-;-;v0;usa;yes;'00050000101D0000';720;60
 '00050000101D0100';The Quiet Collection;wup-n-aqce;-;-;v1;usa;yes;'00050000101D0100';720;60
-'00050000101D0300';Project Zero - Maiden Of Black Water;wup-p-al5p;1;-;v0;eur;notmd;'00050000101D0300';720;30
-'00050000101D0600';Fatal Frame - Maiden Of Black Water;wup-n-al5e;-;-;v0;usa;yes;'00050000101D0600';720;60
+'00050000101D0300';Project Zero-Maiden Of Black Water;wup-p-al5p;1;-;v0;eur;notmd;'00050000101D0300';720;30
+'00050000101D0600';Fatal Frame-Maiden Of Black Water;wup-n-al5e;-;-;v0;usa;yes;'00050000101D0600';720;60
 '00050000101D0700';Canvaleon;wup-p-achp;175;-;v16;eur;yes;'00050000101CE100';720;60
 '00050000101D0800';Outside the Realm;wup-n-arle;-;-;-;usa;yes;'00050000101D0800';720;60
 '00050000101D0900';Gunman Clive HD Collection;wup-n-agwe;00fv;-;v1;usa;yes;'00050000101D0900';720;60
-'00050000101D0A00';Pokemon Mystery Dungeon - Red Rescue Team;wup-n-pdgp;-;-;-;eur;yes;'00050000101D0A00';720;60
-'00050000101D0C00';Pokemon Mystery Dungeon - Red Rescue Team;wup-n-pdge;-;-;-;usa;yes;'00050000101D0A00';720;60
+'00050000101D0A00';Pokemon Mystery Dungeon-Red Rescue Team;wup-n-pdgp;-;-;-;eur;yes;'00050000101D0A00';720;60
+'00050000101D0C00';Pokemon Mystery Dungeon-Red Rescue Team;wup-n-pdge;-;-;-;usa;yes;'00050000101D0A00';720;60
 '00050000101D1000';Barbie And Her Sisters Puppy Rescue;wup-n-brqe;-;-;v0;usa;yes;'00050000101D1D00';720;60
 '00050000101D1300';Blue-Collar Astronaut;wup-p-bc5e;-;-;-;usa;yes;'00050000101D1300';720;60
 '00050000101D1400';Endless Golf;wup-n-aege;-;-;v0;usa;yes;'00050000101D1400';720;60
@@ -1610,8 +1610,8 @@
 '00050000101D1800';Girls Like Robots;wup-n-agte;-;-;v0;usa;yes;'00050000101D1800';720;60
 '00050000101D1A00';Aenigma Os;wup-n-base;-;-;-;usa;yes;'00050000101D1A00';720;60
 '00050000101D1D00';Barbie And Her Sisters Puppy Rescue;wup-p-brqp;-;-;-;eur;yes;'00050000101D1D00';720;60
-'00050000101D2000';Animal Crossing - Wild World;wup-n-daye;-;-;-;usa;yes;'00050000101D2000';720;60
-'00050000101D2100';Animal Crossing - Wild World;wup-n-dayp;-;-;-;eur;yes;'00050000101D2000';720;60
+'00050000101D2000';Animal Crossing-Wild World;wup-n-daye;-;-;-;usa;yes;'00050000101D2000';720;60
+'00050000101D2100';Animal Crossing-Wild World;wup-n-dayp;-;-;-;eur;yes;'00050000101D2000';720;60
 '00050000101D2200';Ds;wup-n-dazj;-;-;-;jap;yes;'00050000101D2200';720;60
 '00050000101D2300';Mario Party DS;wup-n-daze;-;-;-;usa;yes;'00050000101D2300';720;60
 '00050000101D2400';Mario Party DS;wup-n-dazp;-;-;-;eur;yes;'00050000101D2300';720;60
@@ -1624,14 +1624,14 @@
 '00050000101D3100';Darts Up;wup-n-wduj;-;-;v1;jap;yes;'0005000010135100';720;60
 '00050000101D3200';99 Moves;wup-n-bmvj;-;-;v2;jap;yes;'0005000010183900';720;60
 '00050000101D3300';6180 The Moon;wup-p-wm6p;-;-;-;eur;yes;'0005000010175A00';720;60
-'00050000101D3700';Ninja Strike - Dangerous Dash;wup-n-anje;-;-;v0;usa;yes;'00050000101D3700';720;60
+'00050000101D3700';Ninja Strike-Dangerous Dash;wup-n-anje;-;-;v0;usa;yes;'00050000101D3700';720;60
 '00050000101D3900';The Quiet Collection;wup-p-aqcp;017d;-;v0;eur;yes;'00050000101D0100';720;60
-'00050000101D3A00';Ninja Strike - Dangerous Dash;wup-p-anjp;-;-;-;eur;yes;'00050000101D3700';720;60
+'00050000101D3A00';Ninja Strike-Dangerous Dash;wup-p-anjp;-;-;-;eur;yes;'00050000101D3700';720;60
 '00050000101D3B00';Level 22;wup-p-al2p;-;-;-;eur;yes;'00050000101D3B00';720;60
 '00050000101D3C00';Level 22;wup-n-al2e;-;-;-;usa;yes;'00050000101D3B00';720;60
 '00050000101D4200';Brunswick Pro Bowling;wup-n-abpe;00dv;-;v16;usa;yes;'00050000101D4200';720;60
 '00050000101D4500';Grumpy Reaper;wup-n-agqe;-;-;-;usa;yes;'00050000101D4500';720;60
-'00050000101D4600';Frankenstein - Master of Death;wup-p-afqp;-;-;-;eur;yes;'00050000101D4600';720;60
+'00050000101D4600';Frankenstein-Master of Death;wup-p-afqp;-;-;-;eur;yes;'00050000101D4600';720;60
 '00050000101D4700';Starwhal;wup-p-bjtp;-;-;v0;eur;yes;'000500001019ED00';720;60
 '00050000101D4800';Whispering Willows;wup-p-awwp;-;-;v0;eur;yes;'00050000101C7E00';720;60
 '00050000101D4A00';Rakoo And Friends;wup-n-arfe;-;-;v0;usa;yes;'00050000101A9B00';720;60
@@ -1639,7 +1639,7 @@
 '00050000101D4C00';Sketch Wars;wup-n-awre;-;-;-;usa;yes;'00050000101D4C00';720;60
 '00050000101D4D00';Joe s Diner;wup-p-ajap;-;-;-;eur;yes;'00050000101D4D00';720;60
 '00050000101D4E00';Jones On Fire;wup-p-ajfp;-;-;-;eur;yes;'00050000101D4E00';720;60
-'00050000101D5000';The Peanuts Movie - Snoopy s Grand Adventure;wup-p-bpep;-;-;v0;eur;yes;'00050000101C4200';720;60
+'00050000101D5000';The Peanuts Movie-Snoopy s Grand Adventure;wup-p-bpep;-;-;v0;eur;yes;'00050000101C4200';720;60
 '00050000101D5100';Stone Shire;wup-p-bsvp;-;-;v0;eur;yes;'00050000101A4C00';720;60
 '00050000101D5300';Cutie Pets Pick Berries;wup-n-acke;-;-;v0;usa;yes;'00050000101D5300';720;60
 '00050000101D5500';Joe s Diner;wup-n-ajae;-;-;-;usa;yes;'00050000101D4D00';720;60
@@ -1660,50 +1660,50 @@
 '00050000101D7300';Molly Maggot;wup-n-am5e;-;-;-;usa;yes;'00050000101D7300';720;60
 '00050000101D7400';Totem Topple;wup-p-attp;-;-;v0;eur;yes;'00050000101BAA00';720;60
 '00050000101D7500';Minecraft Wii U Edition;wup-p-aump;00du;-;v16;eur;yes;'00050000101D7500';720;60
-'00050000101D7600';Slots - Pharaoh s Riches;wup-n-bp3e;-;-;-;usa;yes;'00050000101D7600';720;60
+'00050000101D7600';Slots-Pharaoh s Riches;wup-n-bp3e;-;-;-;usa;yes;'00050000101D7600';720;60
 '00050000101D7700';Explody Bomb;wup-n-aexe;-;-;v0;usa;yes;'00050000101D7700';720;60
-'00050000101D7800';Hold Your Fire - A Game About Responsibility;wup-n-ahge;-;-;v1;usa;yes;'00050000101D7800';720;60
+'00050000101D7800';Hold Your Fire-A Game About Responsibility;wup-n-ahge;-;-;v1;usa;yes;'00050000101D7800';720;60
 '00050000101D7A00';6-Hand Video Poker;wup-n-akpe;-;-;-;usa;yes;'00050000101D7A00';720;60
-'00050000101D7E00';Mini-Games Madness Vol1 - Hello World;wup-n-bm2e;-;-;-;usa;yes;'00050000101D7E00';720;60
+'00050000101D7E00';Mini-Games Madness Vol1-Hello World;wup-n-bm2e;-;-;-;usa;yes;'00050000101D7E00';720;60
 '00050000101D7F00';153 Hand Video Poker;wup-n-bp6e;-;-;-;usa;yes;'00050000101D7F00';720;60
 '00050000101D8000';QUBE Director s Cut;wup-n-aqee;-;-;v1;usa;yes;'000500001014FB00';720;60
 '00050000101D8300';Electronic Super Joy;wup-p-aejp;00tj;-;v16;eur;yes;'00050000101CEE00';720;60
-'00050000101D8900';Slender - The Arrival;wup-p-bsap;-;-;v0;eur;yes;'0005000010184900';720;60
+'00050000101D8900';Slender-The Arrival;wup-p-bsap;-;-;v0;eur;yes;'0005000010184900';720;60
 '00050000101D8A00';Star Sky;wup-n-atze;-;-;v0;usa;yes;'00050000101D6700';720;60
 '00050000101D8D00';Rock n Racing Off Roaddx;wup-n-arxe;-;-;v0;usa;yes;'00050000101D9600';720;60
 '00050000101D9100';Dragon Skills;wup-n-bd5e;-;-;-;usa;yes;'00050000101D9100';720;60
-'00050000101D9200';The Rivers Of Alice - Extended Version;wup-p-brap;-;-;v0;eur;yes;'00050000101CCD00';720;60
+'00050000101D9200';The Rivers Of Alice-Extended Version;wup-p-brap;-;-;v0;eur;yes;'00050000101CCD00';720;60
 '00050000101D9500';Steel Rivals;wup-n-brce;-;-;-;usa;yes;'00050000101D9500';720;60
 '00050000101D9600';Rock n Racing Off Roaddx;wup-p-arxp;-;-;v0;eur;yes;'00050000101D9600';720;60
 '00050000101D9700';Kick And Fennick;wup-p-akkp;-;-;-;eur;yes;'00050000101D9700';720;60
 '00050000101D9B00';Discovery;wup-n-adue;-;-;-;usa;yes;'00050000101D9B00';720;60
 '00050000101D9C00';Funky Physics;wup-n-af5e;-;-;v0;usa;yes;'00050000101D9C00';720;60
 '00050000101D9D00';Minecraft Wii U Edition;wup-n-aume;00du;-;v16;usa;yes;'00050000101D7500';720;60
-'00050000101D9E00';Bike Rider UltraDX - World Tour;wup-p-atxp;-;-;v0;eur;yes;'00050000101D9E00';720;60
+'00050000101D9E00';Bike Rider UltraDX-World Tour;wup-p-atxp;-;-;v0;eur;yes;'00050000101D9E00';720;60
 '00050000101D9F00';Job the Leprechaun;wup-p-ajlp;-;-;-;eur;yes;'00050000101CFF00';720;60
 '00050000101DA100';3on3;wup-n-da2j;-;-;-;jap;yes;'00050000101DA100';720;60
 '00050000101DA200';Mario Hoops 3-on-3;wup-n-da2e;-;-;-;usa;yes;'00050000101DA200';720;60
 '00050000101DA300';Mario Slam Basketball;wup-n-da2p;-;-;-;eur;yes;'00050000101DA300';720;60
-'00050000101DA500';Advance Wars - Dual Strike;wup-n-da3e;-;-;-;usa;yes;'00050000101DA500';720;60
-'00050000101DA600';Advance Wars - Dual Strike;wup-n-da3p;-;-;-;eur;yes;'00050000101DA500';720;60
+'00050000101DA500';Advance Wars-Dual Strike;wup-n-da3e;-;-;-;usa;yes;'00050000101DA500';720;60
+'00050000101DA600';Advance Wars-Dual Strike;wup-n-da3p;-;-;-;eur;yes;'00050000101DA500';720;60
 '00050000101DA800';Pokemon Snap;wup-n-nase;-;-;-;usa;yes;'00050000101DA800';720;60
 '00050000101DA900';Pokemon Snap;wup-n-nasp;-;-;-;eur;yes;'00050000101DA900';720;60
 '00050000101DAA00';Lego Star Wars The Force Awakens;wup-p-blgp;-;-;-;eur;yes;'00050000101DAA00';720;30
 '00050000101DAB00';Lego Star Wars The Force Awakens;wup-n-blge;-;-;-;usa;yes;'00050000101DAA00';720;30
 '00050000101DAC00';Swap Fire;wup-n-af7e;-;-;-;usa;yes;'00050000101DAC00';720;60
 '00050000101DAD00';Tumblestone;wup-n-at7e;-;-;-;usa;yes;'00050000101DAD00';720;60
-'00050000101DAF00';Chronicles Of Teddy - Harmony Of Exidus;wup-p-af2p;-;-;-;eur;yes;'00050000101C7B00';720;60
-'00050000101DB000';Oddworld - New n Tasty;wup-n-anwe;-;-;-;usa;yes;'00050000101DB000';720;60
+'00050000101DAF00';Chronicles Of Teddy-Harmony Of Exidus;wup-p-af2p;-;-;-;eur;yes;'00050000101C7B00';720;60
+'00050000101DB000';Oddworld-New n Tasty;wup-n-anwe;-;-;-;usa;yes;'00050000101DB000';720;60
 '00050000101DB100';PictoParty;wup-n-apqe;-;-;v0;usa;yes;'00050000101C3C00';720;60
-'00050000101DB200';Shantae - Half-Genie Hero;wup-p-ahfe;-;-;-;usa;yes;'00050000101DB200';1080;60
+'00050000101DB200';Shantae-Half-Genie Hero;wup-p-ahfe;-;-;-;usa;yes;'00050000101DB200';1080;60
 '00050000101DB600';Tiny Thief;wup-n-aahj;-;-;-;jap;yes;'00050000101DB600';720;60
 '00050000101DB800';VoxelMaker;wup-n-avme;-;-;v0;usa;yes;'00050000101DB800';720;60
-'00050000101DBB00';Oddworld - New n Tasty;wup-p-anwp;-;-;-;eur;yes;'00050000101DB000';720;60
+'00050000101DBB00';Oddworld-New n Tasty;wup-p-anwp;-;-;-;eur;yes;'00050000101DB000';720;60
 '00050000101DBC00';Star Ghost;wup-p-bd6p;-;-;-;eur;yes;'00050000101DBC00';720;60
 '00050000101DBE00';Minecraft Wii U Edition;wup-n-aumj;188;-;v16;jap;yes;'00050000101D7500';720;60
 '00050000101DBF00';Angry Video Game Nerd Adventures;wup-p-avgp;-;-;-;eur;yes;'000500001018F400';720;60
 '00050000101DC000';Vektor Wars;wup-n-avwe;-;-;-;usa;yes;'00050000101DC000';720;60
-'00050000101DC100';Octodad - Dadliest Catch;wup-p-ad5p;-;-;v1;eur;yes;'00050000101C6A00';720;60
+'00050000101DC100';Octodad-Dadliest Catch;wup-p-ad5p;-;-;v1;eur;yes;'00050000101C6A00';720;60
 '00050000101DC200';Vektor Wars;wup-p-avwp;-;-;-;eur;yes;'00050000101DC000';720;60
 '00050000101DC300';Kick And Fennick;wup-n-akke;-;-;-;usa;yes;'00050000101D9700';720;60
 '00050000101DCA00';VoxelMaker;wup-p-avmp;017d;-;v16;eur;yes;'00050000101DB800';720;60
@@ -1727,27 +1727,27 @@
 '00050000101DFD00';Snowball;wup-n-blle;-;-;-;usa;yes;'00050000101DFD00';720;60
 '00050000101DFF00';Petitcom BIG;wup-u-bp5j;00r8;-;17;jap;yes;'00050000101DFF00';720;60
 '00050000101E0000';U-Explore Space Adventures;wup-n-afsj;-;-;-;jap;yes;'00050000101E0000';720;60
-'00050000101E0100';Minecraft Story Mode - E1 The Order of the Stone;wup-n-bmte;-;-;-;usa;yes;'000500001020A300';720;60
+'00050000101E0100';Minecraft Story Mode-E1 The Order of the Stone;wup-n-bmte;-;-;-;usa;yes;'000500001020A300';720;60
 '00050000101E0600';Final Fantasy Tactics Advance;wup-n-pdtp;-;-;-;eur;yes;'00050000101E0600';720;60
 '00050000101E0700';Final Fantasy Tactics Advance;wup-n-pdte;-;-;-;usa;yes;'00050000101E0600';720;60
 '00050000101E0900';Lovely Planet;wup-n-blve;-;-;-;usa;yes;'00050000101E0900';720;60
 '00050000101E0A00';Lovely Planet;wup-p-blvp;-;-;-;eur;yes;'00050000101E0900';720;60
-'00050000101E0D00';Pokemon Mystery Dungeon - Explorers of Sky;wup-n-da4e;-;-;-;usa;yes;'00050000101E0D00';720;60
-'00050000101E0E00';Pokemon Mystery Dungeon - Explorers of Sky;wup-n-da4p;-;-;-;eur;yes;'00050000101E0D00';720;60
-'00050000101E1000';Pokemon Ranger - Shadows of Almia;wup-n-da5e;-;-;-;usa;yes;'00050000101E1000';720;60
-'00050000101E1100';Pokemon Ranger - Shadows of Almia;wup-n-da5p;-;-;-;eur;yes;'00050000101E1000';720;60
+'00050000101E0D00';Pokemon Mystery Dungeon-Explorers of Sky;wup-n-da4e;-;-;-;usa;yes;'00050000101E0D00';720;60
+'00050000101E0E00';Pokemon Mystery Dungeon-Explorers of Sky;wup-n-da4p;-;-;-;eur;yes;'00050000101E0D00';720;60
+'00050000101E1000';Pokemon Ranger-Shadows of Almia;wup-n-da5e;-;-;-;usa;yes;'00050000101E1000';720;60
+'00050000101E1100';Pokemon Ranger-Shadows of Almia;wup-n-da5p;-;-;-;eur;yes;'00050000101E1000';720;60
 '00050000101E1200';PixelJunk Monsters;wup-p-bphp;015d;-;16;eur;yes;'00050000101E1200';720;60
-'00050000101E1500';Fire - Ungh s Quest;wup-p-bfqp;-;-;-;eur;yes;'00050000101E1500';720;60
+'00050000101E1500';Fire-Ungh s Quest;wup-p-bfqp;-;-;-;eur;yes;'00050000101E1500';720;60
 '00050000101E1800';Human Resource Machine;wup-n-ahme;-;-;v0;usa;yes;'00050000101E1800';720;60
-'00050000101E1900';Rynn s Adventure - Trouble In The Enchanted Forest;wup-n-ar6e;-;-;-;usa;yes;'00050000101E1900';720;60
+'00050000101E1900';Rynn s Adventure-Trouble In The Enchanted Forest;wup-n-ar6e;-;-;-;usa;yes;'00050000101E1900';720;60
 '00050000101E1A00';Human Resource Machine;wup-p-ahmp;-;-;-;eur;yes;'00050000101E1800';720;60
 '00050000101E1B00';Shadow Puppeteer;wup-p-bpwp;-;-;-;eur;yes;'0005000010189F00';720;60
 '00050000101E1E00';Psibo;wup-n-bp8e;-;-;-;usa;yes;'00050000101E1E00';720;60
 '00050000101E1F00';B3 Game Expo For Bees;wup-n-ab3e;-;-;-;usa;yes;'00050000101E1F00';720;60
 '00050000101E2C00';Bit Dungeon+;wup-p-bdyp;-;-;-;eur;yes;'00050000101A7E00';720;60
-'00050000101E2D00';REPLAY - VHS is not dead;wup-p-brep;-;-;-;eur;yes;'00050000101E2D00';720;60
+'00050000101E2D00';REPLAY-VHS is not dead;wup-p-brep;-;-;-;eur;yes;'00050000101E2D00';720;60
 '00050000101E2E00';Christmas Adventure Of Rocket Penguin;wup-n-bcke;-;-;v0;usa;yes;'00050000101E2E00';720;60
-'00050000101E3000';REPLAY - VHS is not dead;wup-n-bree;-;-;-;usa;yes;'00050000101E2D00';720;60
+'00050000101E3000';REPLAY-VHS is not dead;wup-n-bree;-;-;-;usa;yes;'00050000101E2D00';720;60
 '00050000101E3200';Jewel Quest;wup-n-ajqe;190;-;16;usa;yes;'00050000101E3200';720;60
 '00050000101E3300';Olympia Rising;wup-p-ar7p;011a;-;v16;eur;yes;'00050000101E3300';720;60
 '00050000101E3400';Olympia Rising;wup-n-ar7e;-;-;-;usa;yes;'00050000101E3300';720;60
@@ -1762,7 +1762,7 @@
 '00050000101E4C00';Bird Mania Party;wup-n-abke;-;-;-;usa;yes;'00050000101E4B00';720;60
 '00050000101E5000';The Gem Collector;wup-n-ag2e;-;-;-;usa;yes;'00050000101E5000';720;60
 '00050000101E5300';Mario And Sonic The Rio 2016 Olympic Games;wup-u-abje;1;-;16;usa;yes;'0005000010190300';720;60
-'00050000101E5400';Mario And Sonic At The Rio 2016 Olympic Games;wup-p-abjp;-;-;-;eur;yes;'00050000101E5400';720;60
+'00050000101E5400';Mario and Sonic-Rio 2016 Olympic Games;wup-p-abjp;-;-;-;eur;yes;'00050000101E5400';720;60
 '00050000101E5500';Escape From Flare Industries;wup-n-aefe;-;-;-;usa;yes;'00050000101E5500';720;60
 '00050000101E5600';Adventures Of Pip;wup-p-bapp;-;-;-;eur;yes;'00050000101E5600';720;60
 '00050000101E5800';Inside My Radio;wup-p-arqp;-;-;-;eur;yes;'00050000101E5800';720;60
@@ -1771,13 +1771,13 @@
 '00050000101E6200';Shooting Range By Thornbury Software;wup-n-aaze;-;-;-;usa;yes;'00050000101E6200';720;60
 '00050000101E6300';Archery By Thornbury Software;wup-n-aa2e;-;-;-;usa;yes;'00050000101E6300';720;60
 '00050000101E6500';Excitebike 64;wup-n-nate;-;-;-;eur,usa;yes;'00050000101E6500';720;60
-'00050000101E6700';Ogre Battle 64 - Person Of Lordly Caliber;wup-n-naue;-;-;-;eur,usa;yes;'00050000101E6700';720;60
+'00050000101E6700';Ogre Battle 64-Person Of Lordly Caliber;wup-n-naue;-;-;-;eur,usa;yes;'00050000101E6700';720;60
 '00050000101E6800';Girls Mode;wup-n-da6j;-;-;-;jap;yes;'00050000101E6800';720;60
 '00050000101E6900';Style Savvy;wup-n-da6e;-;-;-;usa;yes;'00050000101E6900';720;60
-'00050000101E6A00';Nintendo Presents - Style Boutique;wup-n-da6p;-;-;-;eur;yes;'00050000101E6A00';720;60
+'00050000101E6A00';Nintendo Presents-Style Boutique;wup-n-da6p;-;-;-;eur;yes;'00050000101E6A00';720;60
 '00050000101E6E00';Picross 3D;wup-n-da8p;-;-;-;eur;yes;'00050000101E6E00';720;60
-'00050000101E7000';Pokemon Ranger - Guardian Signs;wup-n-da9e;-;-;-;usa;yes;'00050000101E7000';720;60
-'00050000101E7100';Pokemon Ranger - Guardian Signs;wup-n-da9p;-;-;-;eur;yes;'00050000101E7000';720;60
+'00050000101E7000';Pokemon Ranger-Guardian Signs;wup-n-da9e;-;-;-;usa;yes;'00050000101E7000';720;60
+'00050000101E7100';Pokemon Ranger-Guardian Signs;wup-n-da9p;-;-;-;eur;yes;'00050000101E7000';720;60
 '00050000101E7300';The Deer God;wup-n-aa3e;-;-;-;usa;yes;'00050000101E7300';720;60
 '00050000101E7400';Grumpy Reaper;wup-p-agqp;-;-;-;eur;yes;'00050000101D4500';720;60
 '00050000101E7500';Dragon Skills;wup-p-bd5p;-;-;-;eur;yes;'00050000101D9100';720;60
@@ -1807,7 +1807,7 @@
 '00050000101EA000';Lego;wup-n-blgj;-;-;-;jap;yes;'0005000010192100';720;30
 '00050000101EA100';Lego;wup-n-alrj;-;-;-;jap;yes;'0005000010192100';720;30
 '00050000101EA200';The Book Of Unwritten Tales 2;wup-n-bute;-;-;-;usa;yes;'00050000101E9F00';720;60
-'00050000101EA500';Noitu Love - Devolution;wup-n-akle;-;-;-;usa;yes;'00050000101EA500';720;60
+'00050000101EA500';Noitu Love-Devolution;wup-n-akle;-;-;-;usa;yes;'00050000101EA500';720;60
 '00050000101EAA00';Just Dance 2017;wup-p-bj7p;-;-;-;eur;yes;'00050000101EAA00';720;60
 '00050000101EAB00';Dreamals;wup-p-wrlp;-;-;-;eur;yes;'00050000101EAB00';720;60
 '00050000101EAE00';Lucentek Beyond;wup-p-wlbe;-;-;-;usa;yes;'00050000101EAE00';720;60
@@ -1816,20 +1816,20 @@
 '00050000101EB300';The Beggar s Ride;wup-n-wtre;-;-;-;usa;yes;'00050000101EB300';720;60
 '00050000101EB400';Volcanic Field 2;wup-n-wvfe;-;-;-;usa;yes;'00050000101EB400';720;60
 '00050000101EB500';Dreamals;wup-n-wrle;-;-;-;usa;yes;'00050000101EB500';720;60
-'00050000101EB600';Act It Out - A Game of Charades;wup-p-wgqp;-;-;-;eur;yes;'00050000101EB600';720;60
+'00050000101EB600';Act It Out-A Game of Charades;wup-p-wgqp;-;-;-;eur;yes;'00050000101EB600';720;60
 '00050000101EB700';Color Symphony 2;wup-p-wcyp;-;-;-;eur;yes;'00050000101EAF00';720;60
 '00050000101EBB00';F-Zero X;wup-n-nawj;-;-;-;jap;yes;'00050000101EBB00';720;60
 '00050000101EBC00';F-Zero X;wup-p-nawp;1;-;-;eur;yes;'00050000101EBB00';720;60
 '00050000101EBF00';Pikmin 2;wup-n-vbtp;-;-;-;eur;yes;'00050000101EBF00';720;30
 '00050000101EC100';Pikmin;wup-n-vbue;-;-;-;usa;yes;'00050000101EC100';720;30
 '00050000101EC200';Pikmin;wup-n-vbup;-;-;-;eur;yes;'00050000101EC100';720;30
-'00050000101EC500';Act It Out - A Game of Charades;wup-n-wgqe;-;-;-;usa;yes;'00050000101EB600';720;60
+'00050000101EC500';Act It Out-A Game of Charades;wup-n-wgqe;-;-;-;usa;yes;'00050000101EB600';720;60
 '00050000101EC600';Defense Dome;wup-p-bdfp;-;-;-;eur;yes;'00050000101A3E00';720;60
 '00050000101EC700';The Beggar s Ride;wup-p-wtrp;-;-;-;eur;yes;'00050000101EB300';720;60
-'00050000101ECA00';WarioWare - Smooth Moves;wup-n-vbve;-;-;-;usa;yes;'00050000101ECA00';720;60
-'00050000101ECB00';WarioWare - Smooth Moves;wup-n-vbvp;-;-;-;eur;yes;'00050000101ECB00';720;60
-'00050000101ECD00';Resident Evil - The Umbrella Chronicles;wup-n-vbwe;-;-;-;usa;yes;'00050000101ECD00';720;60
-'00050000101ECF00';Buddy And Me - Dream Edition;wup-n-wyme;-;-;-;usa;yes;'00050000101ECF00';720;60
+'00050000101ECA00';WarioWare-Smooth Moves;wup-n-vbve;-;-;-;usa;yes;'00050000101ECA00';720;60
+'00050000101ECB00';WarioWare-Smooth Moves;wup-n-vbvp;-;-;-;eur;yes;'00050000101ECB00';720;60
+'00050000101ECD00';Resident Evil-The Umbrella Chronicles;wup-n-vbwe;-;-;-;usa;yes;'00050000101ECD00';720;60
+'00050000101ECF00';Buddy And Me-Dream Edition;wup-n-wyme;-;-;-;usa;yes;'00050000101ECF00';720;60
 '00050000101ED000';Spaceroads;wup-n-wsse;-;-;-;usa;yes;'00050000101ED000';720;60
 '00050000101ED200';DK Jungle Beat;wup-n-vbxe;-;-;-;usa;yes;'00050000101ED300';720;60
 '00050000101ED300';DK Jungle Beat;wup-n-vbxp;-;-;-;eur;yes;'00050000101ED300';720;60
@@ -1837,13 +1837,13 @@
 '00050000101ED700';Tokyo Mirage Sessions #FE;wup-p-asep;-;-;-;eur;yes;'00050000101ED800';720;60
 '00050000101ED800';Tokyo Mirage Sessions #FE;wup-u-asee;1;-;16;usa;yes;'00050000101ED800';720;60
 '00050000101EF400';Demonic Karma Summoner;wup-p-bkse;-;-;-;usa;yes;'00050000101EF400';720;60
-'00050000101EF500';Emojikara - A Clever Emoji Match Game;wup-n-bmke;-;-;-;usa;yes;'00050000101EF500';720;60
+'00050000101EF500';Emojikara-A Clever Emoji Match Game;wup-n-bmke;-;-;-;usa;yes;'00050000101EF500';720;60
 '00050000101EFF00';Asdivine Hearts;wup-p-ab8p;-;-;-;eur;yes;'00050000101E7B00';720;60
 '00050000101F0200';Back to Bed;wup-p-bzde;-;-;-;usa;yes;'00050000101F0200';720;60
-'00050000101F0300';Star Splash - Shattered Star;wup-p-bz4e;-;-;-;usa;yes;'00050000101F0300';720;60
+'00050000101F0300';Star Splash-Shattered Star;wup-p-bz4e;-;-;-;usa;yes;'00050000101F0300';720;60
 '00050000101F0B00';Quest Of Dungeons;wup-p-bqdp;-;-;-;eur;yes;'00050000101F0B00';720;60
 '00050000101F0F00';Paranautical Activity;wup-p-aprp;-;-;-;eur;yes;'00050000101BC800';720;60
-'00050000101F1100';Noitu Love - Devolution;wup-p-aklp;-;-;-;eur;yes;'00050000101EA500';720;60
+'00050000101F1100';Noitu Love-Devolution;wup-p-aklp;-;-;-;eur;yes;'00050000101EA500';720;60
 '00050000101F1300';Armikrog;wup-n-br2e;-;-;-;usa;yes;'00050000101F1300';720;60
 '00050000101F1400';Quest Of Dungeons;wup-n-bqde;-;-;-;usa;yes;'00050000101F0B00';720;60
 '00050000101F1600';Steel Rivals;wup-p-brcp;-;-;-;eur;yes;'00050000101D9500';720;60
@@ -1858,21 +1858,21 @@
 '00050000101F4700';Queen s Garden;wup-n-aqne;-;-;-;usa;yes;'00050000101F4200';720;60
 '00050000101F4800';Sweetest Thing;wup-n-aere;-;-;-;usa;yes;'00050000101F4300';720;60
 '00050000101F4900';Tallowmere;wup-n-aeue;-;-;-;usa;yes;'00050000101F4900';720;60
-'00050000101F4A00';Buddy And Me - Dream Edition;wup-p-wymp;-;-;-;eur;yes;'00050000101ECF00';720;60
+'00050000101F4A00';Buddy And Me-Dream Edition;wup-p-wymp;-;-;-;eur;yes;'00050000101ECF00';720;60
 '00050000101F4C00';Reptilian Rebellion;wup-n-brle;-;-;-;usa;yes;'00050000101F4C00';720;60
 '00050000101F4D00';Skylanders Imaginators;wup-p-bl6e;-;-;-;usa;notmd;'00050000101F4D00';720;60
 '00050000101F4F00';Dracula s Legacy;wup-p-agjp;-;-;-;eur;yes;'00050000101F4F00';720;60
 '00050000101F5000';Dracula s Legacy;wup-n-agje;-;-;-;usa;yes;'00050000101F4F00';720;60
 '00050000101F5400';Reptilian Rebellion;wup-p-brlp;-;-;-;eur;yes;'00050000101F4C00';720;60
-'00050000101F5500';Letter Quest - Remastered;wup-n-ag8e;-;-;-;usa;yes;'00050000101F6400';720;60
-'00050000101F5700';Jotun - Valhalla Edition;wup-n-ajve;-;-;-;usa;yes;'00050000101F6F00';720;60
+'00050000101F5500';Letter Quest-Remastered;wup-n-ag8e;-;-;-;usa;yes;'00050000101F6400';720;60
+'00050000101F5700';Jotun-Valhalla Edition;wup-n-ajve;-;-;-;usa;yes;'00050000101F6F00';720;60
 '00050000101F5900';Pentapuzzle;wup-p-ap8p;-;-;-;eur;yes;'00050000101BA700';720;60
 '00050000101F5A00';Defend Your Crypt;wup-p-alfp;-;-;-;eur;yes;'00050000101F5A00';720;60
 '00050000101F5D00';PixelMaker;wup-n-ahye;-;-;-;usa;yes;'00050000101F5D00';720;60
 '00050000101F5E00';Defend Your Crypt;wup-n-alfe;-;-;-;usa;yes;'00050000101F5A00';720;60
 '00050000101F5F00';Hot Rod Racer;wup-n-ahze;-;-;-;usa;yes;'00050000101F5F00';720;60
-'00050000101F6000';Surfin Sam - Attack Of The Aqualites;wup-n-ah3e;-;-;-;usa;yes;'00050000101F6000';720;60
-'00050000101F6200';Adventure Party - Cats And Caverns;wup-n-ah4e;-;-;-;usa;yes;'00050000101F6200';720;60
+'00050000101F6000';Surfin Sam-Attack Of The Aqualites;wup-n-ah3e;-;-;-;usa;yes;'00050000101F6000';720;60
+'00050000101F6200';Adventure Party-Cats And Caverns;wup-n-ah4e;-;-;-;usa;yes;'00050000101F6200';720;60
 '00050000101F6300';Run Run and Die;wup-p-brrp;-;-;-;eur;yes;'00050000101F2D00';720;60
 '00050000101F6400';Letter Quest Remastered;wup-p-ag8p;-;-;-;eur;yes;'00050000101F6400';720;60
 '00050000101F6600';Gravity+;wup-p-ah6e;-;-;-;usa;yes;'00050000101F6600';720;60
@@ -1892,8 +1892,8 @@
 '00050000101F8100';Gravity+;wup-p-ah6p;-;-;-;eur;yes;'00050000101F6600';720;60
 '00050000101F8400';Jackpot 777;wup-p-bmwp;-;-;-;eur;yes;'00050000101F8400';720;60
 '00050000101F8500';Ectoplaza;wup-p-aeze;-;-;-;usa;yes;'00050000101F8500';720;60
-'00050000101F8800';Toby - The Secret Mine;wup-p-btqe;-;-;-;usa;yes;'00050000101F8800';720;60
-'00050000101F8800';Toby - The Secret Mine;wup-p-btqe;-;-;-;usa;yes;'00050000101F8800';720;60
+'00050000101F8800';Toby-The Secret Mine;wup-p-btqe;-;-;-;usa;yes;'00050000101F8800';720;60
+'00050000101F8800';Toby-The Secret Mine;wup-p-btqe;-;-;-;usa;yes;'00050000101F8800';720;60
 '00050000101F8900';Twin Robots;wup-p-ajhp;-;-;-;eur;yes;'00050000101F8900';720;60
 '00050000101F8A00';Dungeon Hearts DX;wup-n-bxde;-;-;-;usa;yes;'00050000101F8A00';720;60
 '00050000101F8B00';Pirate Pop Plus;wup-n-ajme;-;-;-;usa;yes;'00050000101F8B00';720;60
@@ -1913,8 +1913,8 @@
 '00050000101F9D00';The Girl And The Robot;-;-;-;-;-;-;'00050000101F9D00';720;30
 '00050000101FA000';Ohayou Beginner s Japanese;wup-u-ajue;011f;-;16;usa;yes;'00050000101FA000';720;60
 '00050000101FA100';Forma 8;wup-p-bf8e;-;-;-;usa;yes;'00050000101CBC00';720;60
-'00050000101FA900';Blasting Agent - Ultimate Edition;wup-p-abzp;-;-;-;eur;yes;'00050000101FA900';720;60
-'00050000101FAA00';Blasting Agent - Ultimate Edition;wup-n-abze;-;-;-;usa;yes;'00050000101FA900';720;60
+'00050000101FA900';Blasting Agent-Ultimate Edition;wup-p-abzp;-;-;-;eur;yes;'00050000101FA900';720;60
+'00050000101FAA00';Blasting Agent-Ultimate Edition;wup-n-abze;-;-;-;usa;yes;'00050000101FA900';720;60
 '00050000101FAB00';Collateral Thinking;wup-n-ajxe;-;-;-;usa;yes;'00050000101FAB00';720;60
 '00050000101FAC00';Invanoid;wup-n-ajye;-;-;-;usa;yes;'00050000101FAC00';720;60
 '00050000101FAD00';Shooty Space;wup-n-ajze;-;-;-;usa;yes;'00050000101FAD00';720;60
@@ -1937,7 +1937,7 @@
 '00050000101FD400';FreezeME;wup-n-af4j;-;-;-;jap;yes;'00050000101D5F00';720;30
 '00050000101FD800';Prism Pets;wup-n-br4e;-;-;-;usa;yes;'00050000101FD800';720;60
 '00050000101FDA00';Hurry Up Bird Hunter;wup-p-bhbp;-;-;-;eur;yes;'00050000101FDA00';720;60
-'00050000101FDB00';Toby - The Secret Mine;wup-p-btqp;-;-;-;eur;yes;'00050000101F8800';720;60
+'00050000101FDB00';Toby-The Secret Mine;wup-p-btqp;-;-;-;eur;yes;'00050000101F8800';720;60
 '00050000101FDE00';Steel Lords;wup-p-alqp;-;-;-;eur;yes;'00050000101FDE00';720;60
 '00050000101FE200';Cup Critters;wup-n-azhe;-;-;-;usa;yes;'00050000101FE200';720;60
 '00050000101FE300';Cup Critters;wup-p-azhp;-;-;-;eur;yes;'00050000101FE200';720;60
@@ -1945,7 +1945,6 @@
 '00050000101FE600';Amazon;wup-n-akuj;-;-;-;jap;yes;'00050000101FE600';720;60
 '00050000101FEA00';Harvest Moon64;wup-n-na2e;-;-;-;eur,usa;yes;'00050000101FEA00';720;60
 '00050000101FEC00';Toon Tanks;wup-p-atnp;-;-;-;eur;yes;'00050000101A4400';720;60
-'00050000101FED00';Fast Racing Neo;wup-p-br5p;00jx;-;-;eur;yes;'00050000101D6000';720;60
 '00050000101FF000';Vrog;wup-p-avqp;-;-;-;eur;yes;'00050000101FF000';720;60
 '00050000101FF200';Exile s End;wup-n-ae4e;-;-;-;usa;yes;'00050000101FF200';720;60
 '00050000101FF900';Test Your Mind;wup-p-athp;-;-;-;eur;yes;'00050000101D6200';720;60
@@ -1965,7 +1964,7 @@
 '0005000010200900';Mahjong;wup-p-bm7p;-;-;-;eur;yes;'00050000101FFD00';720;60
 '0005000010200A00';Brick Breaker;wup-p-bb2p;-;-;-;eur;yes;'00050000101FFB00';720;60
 '0005000010200B00';Tetraminos;wup-p-bt6p;-;-;-;eur;yes;'00050000101FFE00';720;60
-'0005000010200D00';MikroGame - Rotator;wup-n-br7e;-;-;-;usa;yes;'0005000010200D00';720;60
+'0005000010200D00';MikroGame-Rotator;wup-n-br7e;-;-;-;usa;yes;'0005000010200D00';720;60
 '0005000010200E00';Panda Love;wup-n-blbe;-;-;-;usa;yes;'0005000010200E00';720;60
 '0005000010200F00';Panda Love;wup-p-blbp;-;-;-;eur;yes;'0005000010200E00';720;60
 '0005000010201000';Shoot The Ball;wup-n-akwe;-;-;-;usa;yes;'0005000010201000';720;60
@@ -1986,14 +1985,14 @@
 '0005000010202B00';Laser Blaster;wup-p-al7p;-;-;-;eur;yes;'0005000010202600';720;60
 '0005000010202D00';360 Breakout;wup-n-bu3e;-;-;-;usa;yes;'0005000010202D00';720;60
 '0005000010202E00';360 Breakout;wup-p-bu3p;-;-;-;eur;yes;'0005000010202D00';720;60
-'0005000010203200';Shantae - Half-Genie Hero;wup-p-ahfp;-;-;-;eur;yes;'00050000101DB200';1080;60
+'0005000010203200';Shantae-Half-Genie Hero;wup-p-ahfp;-;-;-;eur;yes;'00050000101DB200';1080;60
 '0005000010203300';Pirate Pop Plus;wup-p-ajmp;-;-;-;eur;yes;'00050000101F8B00';720;60
 '0005000010203500';Sky Force Anniversary;wup-p-anvp;-;-;v0;eur;-;'0005000010203500';720;60
 '0005000010203600';Rorrim;wup-p-bwrp;-;-;-;eur;yes;'0005000010202700';720;60
-'0005000010203700';Dreamals - Dream Quest;wup-p-aqbp;-;-;-;eur;yes;'0005000010203700';720;60
+'0005000010203700';Dreamals-Dream Quest;wup-p-aqbp;-;-;-;eur;yes;'0005000010203700';720;60
 '0005000010203800';Ninja Pizza Girl;wup-p-anpp;-;-;-;eur;yes;'0005000010196000';720;60
 '0005000010203900';Alice In Wonderland;wup-p-awkp;-;-;-;eur;yes;'0005000010202500';720;60
-'0005000010203B00';Dreamals - Dream Quest;wup-n-aqbe;-;-;-;usa;yes;'0005000010203B00';720;60
+'0005000010203B00';Dreamals-Dream Quest;wup-n-aqbe;-;-;-;usa;yes;'0005000010203B00';720;60
 '0005000010204200';Mr Pumpkin Adventure;wup-p-bame;-;-;-;usa;yes;'0005000010204200';720;60
 '0005000010204400';Plantera;wup-p-al8p;-;-;-;eur;yes;'0005000010204400';720;60
 '0005000010204500';Lost Reaver Notice;wup-p-bl2p;-;-;-;eur;yes;'0005000010204500';720;60
@@ -2002,7 +2001,7 @@
 '0005000010204D00';TorqueL;wup-n-bklj;-;-;-;jap;yes;'0005000010204D00';720;60
 '0005000010204F00';Lost Reavers;wup-n-bl2e;-;-;-;usa;yes;'000500001018D900';720;60
 '0005000010205400';Double Breakout;wup-p-bwbp;-;-;-;eur;yes;'0005000010205400';720;60
-'0005000010205500';MikroGame - Rotator;wup-p-br7p;-;-;-;eur;yes;'0005000010200D00';720;60
+'0005000010205500';MikroGame-Rotator;wup-p-br7p;-;-;-;eur;yes;'0005000010200D00';720;60
 '0005000010205600';Run Run and Die;wup-n-brrj;-;-;-;jap;yes;'00050000101F2D00';720;60
 '0005000010205700';Double Breakout;wup-n-bwbe;-;-;-;usa;yes;'0005000010205400';720;60
 '0005000010205800';Skorb;wup-n-bkre;-;-;-;usa;yes;'0005000010205800';720;60
@@ -2017,12 +2016,12 @@
 '0005000010207A00';Ace Of Seafood;wup-p-bfyj;237;-;32;jap;yes;'0005000010207A00';720;60
 '0005000010207B00';Shadow Archer;wup-p-barp;-;-;-;eur;yes;'00050000101FB400';720;60
 '0005000010208300';Pinball Breakout;wup-p-bbpp;-;-;-;eur;yes;'0005000010206C00';720;60
-'0005000010208500';Octocopter - Super Sub Squid Escape;wup-p-be3p;-;-;-;eur;yes;'0005000010208500';720;60
-'0005000010208700';Octocopter - Super Sub Squid Escape;wup-p-be3e;-;-;-;usa;yes;'0005000010208500';720;60
+'0005000010208500';Octocopter-Super Sub Squid Escape;wup-p-be3p;-;-;-;eur;yes;'0005000010208500';720;60
+'0005000010208700';Octocopter-Super Sub Squid Escape;wup-p-be3e;-;-;-;usa;yes;'0005000010208500';720;60
 '0005000010208900';Words Up Academy;wup-n-aw5e;-;-;-;usa;yes;'0005000010208900';720;60
 '0005000010209300';Teslapunk;wup-n-btlj;-;-;-;jap;yes;'000500001018AF00';720;60
 '000500001020A300';Minecraft Story Mode;wup-u-bakp;00tl;-;16;eur;yes;'000500001020A300';720;60
-'000500001020A400';Cars 3 - Driven to Win;wup-p-ba4p;-;-;v0;eur;-;'000500001020A400';720;60
+'000500001020A400';Cars 3-Driven to Win;wup-p-ba4p;-;-;v0;eur;-;'000500001020A400';720;60
 '000500001020B000';Bridge Constructor Playground;wup-p-bwep;-;-;-;eur;yes;'000500001020B000';720;60
 '000500001020B100';Bridge Constructor Playground;wup-p-bwee;-;-;-;usa;yes;'000500001020B000';720;60
 '000500001020B200';Vaccine;wup-n-avne;-;-;-;usa;yes;'000500001020B200';720;60
@@ -2034,13 +2033,13 @@
 '000500001020BB00';Scribble;wup-p-azje;-;-;-;usa;yes;'000500001020B800';720;60
 '000500001020C000';I C Redd;wup-n-az3e;-;-;-;usa;yes;'000500001020C000';720;60
 '000500001020C100';I C Redd;wup-p-az3p;-;-;-;eur;yes;'000500001020C000';720;60
-'000500001020C300';Radiantflux - Hyperfractal;wup-p-azke;-;-;-;usa;yes;'000500001020C300';720;60
-'000500001020C400';Radiantflux - Hyperfractal;wup-p-azkp;-;-;-;eur;yes;'000500001020C300';720;60
+'000500001020C300';Radiantflux-Hyperfractal;wup-p-azke;-;-;-;usa;yes;'000500001020C300';720;60
+'000500001020C400';Radiantflux-Hyperfractal;wup-p-azkp;-;-;-;eur;yes;'000500001020C300';720;60
 '000500001020D200';Words Up Academy;wup-p-aw5p;-;-;-;eur;yes;'0005000010208900';720;60
 '000500001020D400';Candy Hoarder;wup-p-bcqp;-;-;-;eur;yes;'00050000101B0000';720;60
 '000500001020D500';Maze Break;wup-p-bwjp;-;-;-;eur;yes;'000500001020D500';720;60
 '000500001020D900';Maze Break;wup-p-bwje;-;-;-;usa;yes;'000500001020D500';720;60
-'000500001020DF00';Star Splash - Shattered Star;wup-p-bz4p;-;-;-;eur;yes;'00050000101F0300';720;60
+'000500001020DF00';Star Splash-Shattered Star;wup-p-bz4p;-;-;-;eur;yes;'00050000101F0300';720;60
 '000500001020E000';Brick Race;wup-n-bkee;-;-;-;usa;yes;'000500001020E000';720;60
 '000500001020E100';Brick Race;wup-p-bkep;-;-;-;eur;yes;'000500001020E000';720;60
 '000500001020E200';Color Cubes;wup-p-bzfp;-;-;-;eur;yes;'000500001020E200';720;60
