@@ -204,7 +204,7 @@ REM : main
         echo.
         echo Check if ^: 
         echo - resolution is 1280x720 ^(CEMU menu ^/ Debug ^/ view texture cache informations^) else change to 1920x1080
-        echo - and if the game run at 60FPS ^(while in game and not in cutscene^)
+        echo - and if the game run at 60FPS ^(while in game and not in cutscenes^)
         echo.
         echo Edit and fix !wiiTitlesDataBase! if needed
         echo ---------------------------------------------------------
@@ -228,44 +228,43 @@ REM : main
             goto:checkProfile
     ) else (
             title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
-    )
 
-    REM : comparing version to V1.17.2
-    set /A "v1172=2"
-    call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
-    if ["!v1172!"] == [""] echo Error when comparing versions
-    if !v1172! EQU 50 echo Error when comparing versions
+        REM : comparing version to V1.17.2
+        set /A "v1172=2"
+        call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
+        if ["!v1172!"] == [""] echo Error when comparing versions
+        if !v1172! EQU 50 echo Error when comparing versions
     
-    REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
-    set /A "v11515=1"
-    set /A "v1156=1"
-    set /A "v1116=1"
+        REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
+        set /A "v11515=1"
+        set /A "v1156=1"
+        set /A "v1116=1"
 
-    REM : version > 1.17.2 => > v1.15.15
-    if !v1172! LEQ 1 goto:checkProfile
+        REM : version > 1.17.2 => > v1.15.15
+        if !v1172! LEQ 1 goto:checkProfile
 
-    REM : else comparing version to V1.15.15
-    set /A "v11515=2"
-    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
-    if ["!v11515!"] == [""] echo Error when comparing versions
-    if !v11515! EQU 50 echo Error when comparing versions
+        REM : else comparing version to V1.15.15
+        set /A "v11515=2"
+        call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
+        if ["!v11515!"] == [""] echo Error when comparing versions
+        if !v11515! EQU 50 echo Error when comparing versions
 
-    REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
-    if !v11515! LEQ 1 goto:checkProfile
+        REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
+        if !v11515! LEQ 1 goto:checkProfile
 
-    REM : else compare
-    set /A "v1156=2"
-    call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
-    if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
+        REM : else compare
+        set /A "v1156=2"
+        call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
+        if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
-    REM : version > 1.15.6 => > v1.11.6
-    if !v1156! LEQ 1 goto:checkProfile
+        REM : version > 1.15.6 => > v1.11.6
+        if !v1156! LEQ 1 goto:checkProfile
 
-    REM : else compare
-    set /A "v1116=2"
-    call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
-    if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
-
+        REM : else compare
+        set /A "v1116=2"
+        call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
+        if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
+    )
     :checkProfile
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 

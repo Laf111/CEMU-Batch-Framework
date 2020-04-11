@@ -356,7 +356,6 @@ REM : main
         REM : forcing a GFX pack update to add GFX packs for new games
         set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
         call !gfxUpdate! -silent
-        goto:getGfxpacks
     )
 
     :getTitleId
@@ -373,7 +372,6 @@ REM : main
 
     set "endTitleId=%titleId:~8,8%"
 
-    :getGfxpacks
     REM : link game's packs
     echo Checking !GAME_TITLE! graphic packs availability ^.^.^. >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 12 16 "pre processing" "checking game graphic packs availability"
@@ -1379,9 +1377,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : restore CEMU's graphicPacks subfolder
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
-    
-echo rmdir /Q /S !graphicPacks! >> !batchFwLog!    
-    rmdir /Q /S !graphicPacks!
+    rmdir /Q /S !graphicPacks! > NUL 2>&1
     if exist !graphicPacksBackup! move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     if not exist !graphicPacks! mkdir !graphicPacks! > NUL 2>&1
 
@@ -2170,7 +2166,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
 
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
         
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""

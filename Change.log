@@ -4,13 +4,11 @@ USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 11/04/2020 V18-3 :
 fix : remove links for GFX packs used in game's folder. Windows failed to copy/move the 
       game (it creates folder instead of copy links in the target folder and fail to copy
-      or move broken ones.      
+      or move broken ones).      
 fix : regression on ccerts and scerts not copied when installing online files
 fis : when a game not listed in the internal Wii-U title database is added, handle readonly
       rights on WiiU-Titles-Library.csv
 fix : regression on GFX packs gathering that could longer launching time a bit
-add : a loop in LaunchGame.bat when forcing a GFX packs update after extracting V2 ones
-      to avoid to relaunch the game
 add : in wizardFirstSaving.bat a number of CPU threads computation to help user to set 
       a correct cpuMode (Single/Dual/TripleCore) when version of CEMU >= 1.17.2
 
