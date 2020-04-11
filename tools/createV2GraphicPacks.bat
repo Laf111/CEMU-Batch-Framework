@@ -92,7 +92,7 @@ REM : main
 
     echo !desc! | find /I " (TV DCI 1.89:1)" > NUL 2>&1 && set "sd=TvDci_r189"
 
-    set "gp="!bfwgpv2:"=!\_BatchFW_!gameName!_!overwriteHeight!p!sd!""
+    set "gp="!bfwgpv2:"=!\_BatchFw_!gameName!_!overwriteHeight!p!sd!""
 
     echo Creating !gp!
 

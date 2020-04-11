@@ -327,8 +327,9 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     echo ---------------------------------------------------------
     echo opening CEMU^.^.^.
     echo.
-    echo If a mlc01 folder creation message popup^, answer 'Yes'
-    echo Ignore graphic pack folder download notification^.
+    echo - If a mlc01 folder creation message popup^, answer 'Yes'
+    echo - Ignore graphic pack folder download notification^.
+    echo - Ignore quick start assistant ^(next^).
     echo.
     echo Set your REGION^, language and all common settings for your
     echo games ^(sound^, overlay^.^.^.^)

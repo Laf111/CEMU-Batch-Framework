@@ -102,7 +102,7 @@ REM    call:checkGpFolders
     set "LastVersion=!LastVersion:"=!"
 
     set "gfxType=!args[0]!"
-    set "gfxType=%gfxType:"=%"
+    set "gfxType=V%gfxType:"=%"
 
     REM : get and check BFW_GP_FOLDER
     set "GAME_FOLDER_PATH=!args[1]!"
@@ -248,7 +248,10 @@ REM    call:checkGpFolders
     call:linkGraphicPacks
 
     REM : GFX pack V3 and up : import mods and other ratios already treated in importGraphicPacks
-    if not ["!gfxType!"] == ["V2"] call:linkMods & goto:checkPackLinks
+    if not ["!gfxType!"] == ["V2"] (
+        call:linkMods
+        goto:checkPackLinks
+    )
 
     REM : get DESIRED_ASPECT_RATIO and SCREEN_MODE
     for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
@@ -464,13 +467,22 @@ REM : functions
     :createGpLinks
         set "str="%~1""
         set "str=!str:~2!"
-
-        set "gp="!str:\rules=!"
+        
+        set "gp=!str:\rules=!"
+        echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
+        echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
+        
+        set "rgp=!gp!"
+        
         REM : if more than one folder level exist (LastVersion packs, get only the first level
-        call:getFirstFolder rgp
+        echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && (
+            call:getFirstFolder
+        )
+
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
+        set "linkPath=!linkPath:\_graphicPacksV2=!"
+        
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
-        if ["!gfxType!"] == ["V2"] set "targetPath="!BFW_GP_FOLDER:"=!\_graphicPacksV2\!gp:"=!""
 
         REM : links are already deleted earlier (more efficient than doing it here)
         REM : if not exist !linkPath! => because of GFX pack subfolder (FPS++ ect...)
@@ -493,11 +505,7 @@ REM : functions
 
     :linkGraphicPacks
 
-    if ["!gfxType!"] == ["V2"] (
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find /I /V "p1610" ^| find /I /V "p219" ^| find /I /V "p489" ^| find /I /V "p43" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-    ) else (
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
-    )
 
     goto:eof
     REM : ------------------------------------------------------------------

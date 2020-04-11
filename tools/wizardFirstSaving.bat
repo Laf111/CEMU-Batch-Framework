@@ -198,10 +198,14 @@ REM : main
         echo ---------------------------------------------------------
         echo No informations found on the game with a titleId %titleId%
         echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
+        attrib +r !wiiTitlesDataBase! > NUL 2>&1
         echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
-
-        echo Check if the game is really in 1280x720 ^(else change to 1920x1080^)
-        echo and if 60FPS is the FPS when playing the game
+        attrib -r !wiiTitlesDataBase! > NUL 2>&1
+        echo.
+        echo Check if ^: 
+        echo - resolution is 1280x720 ^(CEMU menu ^/ Debug ^/ view texture cache informations^) else change to 1920x1080
+        echo - and if the game run at 60FPS ^(while in game and not in cutscene^)
+        echo.
         echo Edit and fix !wiiTitlesDataBase! if needed
         echo ---------------------------------------------------------
         pause
@@ -226,15 +230,25 @@ REM : main
             title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
     )
 
-    REM : comparing version to V1.15.15
+    REM : comparing version to V1.17.2
+    set /A "v1172=2"
+    call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
+    if ["!v1172!"] == [""] echo Error when comparing versions
+    if !v1172! EQU 50 echo Error when comparing versions
+    
+    REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
+    set /A "v11515=1"
+    set /A "v1156=1"
+    set /A "v1116=1"
+
+    REM : version > 1.17.2 => > v1.15.15
+    if !v1172! LEQ 1 goto:checkProfile
+
+    REM : else comparing version to V1.15.15
     set /A "v11515=2"
     call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
     if ["!v11515!"] == [""] echo Error when comparing versions
     if !v11515! EQU 50 echo Error when comparing versions
-
-    REM : suppose that version > 1.15.6 => > 1.11.6
-    set /A "v1156=1"
-    set /A "v1116=1"
 
     REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
     if !v11515! LEQ 1 goto:checkProfile
@@ -600,7 +614,41 @@ REM : main
         echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
     )
 
+    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
+
     echo ---------------------------------------------------------
+    echo nbCpuThreads detected on !USERDOMAIN! ^: !nbCpuThreads!
+
+    REM : version >=1.17.2
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (
+    
+        REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
+        set /A "cpuNeeded=3"
+        set "recommendedMode=SingleCore-recompiler"
+        
+        REM : get GPU_VENDOR
+        set "gpuType=NO_NVIDIA"
+        for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
+            set "string=%%i"
+            echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+                set "gpuType=NVIDIA"
+            )
+        )
+        if ["!gpuType!"] == ["NVIDIA"] (
+            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in 
+            echo in 3D settings of the control panel
+            set /A "cpuNeeded+=1"
+        )
+        if !nbCpuThreads! GTR !cpuNeeded! (
+            set "recommendedMode=DualCore-recompiler"
+            set /A "cpuNeeded+=1"
+            if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
+            
+        )
+        echo Recommended cpuMode ^: !recommendedMode!        
+    )
+    echo ---------------------------------------------------------
+    
     echo Then close CEMU to continue
 
     REM : link to graphic pack folder

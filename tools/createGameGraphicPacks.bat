@@ -268,12 +268,12 @@ REM : functions
         echo name = Resolution >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
         if !nativeHeight! EQU 720 (
-            echo description = Created by BatchFW considering that the native resolution is 720p^. ^
+            echo description = Created by BatchFw considering that the native resolution is 720p^. ^
 Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. ^
 If it is not^, change the native resolution to 1080p in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
-            echo description = Created by BatchFW considering that the native resolution is 1080p. ^
+            echo description = Created by BatchFw considering that the native resolution is 1080p. ^
 Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. ^
 If it is not^, change the native resolution to 720p in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
