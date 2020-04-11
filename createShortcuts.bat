@@ -61,6 +61,14 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : set current char codeset
     call:setCharSet
 
+    if not exist !logFile! (
+        echo You have to launch the setup before this script ^^! launching setup^.bat
+        set "setup="!BFW_PATH:"=!\setup.bat""
+        wscript /nologo !Start! !setup!
+        timeout /t 4 > NUL 2>&1
+        exit 51
+    )
+
     set "USERSLIST="
     set /A "nbUsers=0"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
@@ -68,7 +76,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         set /A "nbUsers+=1"
     )
     if ["!USERSLIST!"] == [""] (
-        echo You have to use the setup before this script ^^! launching setup^.bat
+        echo You have to launch the setup before this script ^^! launching setup^.bat
         set "setup="!BFW_PATH:"=!\setup.bat""
         wscript /nologo !Start! !setup!
         timeout /t 4 > NUL 2>&1
