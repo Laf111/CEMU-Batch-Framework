@@ -469,6 +469,7 @@ REM : functions
         set "str=!str:~2!"
         
         set "gp=!str:\rules=!"
+        
         echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
         

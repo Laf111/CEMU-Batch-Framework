@@ -299,25 +299,45 @@ REM : main
     if not exist !cemuLog! goto:getTitleId
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-    if ["!versionRead!"] == ["NOT_FOUND"] set "gfxType=V2" & goto:getTitleId
+    if ["!versionRead!"] == ["NOT_FOUND"] set "gfxType=2" & goto:getTitleId
 
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
     REM : comparing version to V1.15.15
     set /A "v11515=2"
+    set /A "v1156=2"
+    set /A "v114=2"
     call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
     if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-    REM : if version < 1.15.15 : compare to 1.14 and update v114
+    REM : if version < 1.15.15 : compare to 1.15.6 and update v1156
     if !v11515! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-        if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
-        if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
-        if !v114! EQU 2 set "gfxType=V2"
-        if !v114! LEQ 1 goto:getTitleId
+        call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
+        if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
+        if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
+        
+        if !v1156! EQU 2 (
+            call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+            if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
+            if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
+            
+            if !v114! EQU 2 set "gfxType=2"
+            if !v114! LEQ 1 goto:getTitleId
+            
+            if !v114! LEQ 1 goto:getTitleId
+        ) else (
+            REM : version > 1.15.6 => version > 1.14
+            set "v114=1"
+
+            REM : do build old update/dlc paths in mlc
+            set /A "buildOldUpdatePaths=0"
+            goto:getTitleId
+        )
     ) else (
+        REM : version > 1.15.15 => version > 1.15.6
+        set "v1156=1"
         REM : version > 1.15.15 => version > 1.14
         set "v114=1"
 
@@ -463,8 +483,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
     REM : importing game's saves for !user!
-    set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
-    if not exist !rarFile! (
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
+    if not exist !userGameSave! (
         REM : search the last modified save file for other user
         set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
@@ -481,19 +501,19 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one (from another user) ?" 4132
         if !ERRORLEVEL! EQU 7 goto:savesLoaded
         set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
-        copy /Y !isv! !rarFile! > NUL 2>&1
+        copy /Y !isv! !userGameSave! > NUL 2>&1
     )
 
-    REM : make a backup of saves fo rarFile
-    set "backup=!rarFile:.rar=-backupLaunchN.rar!"
+    REM : make a backup of saves fo userGameSave
+    set "saveBackup=!userGameSave:.rar=-backupLaunchN.rar!"
 
     REM : add a supplementary level of backup because the launch following the crash that have corrupt file
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
-    set "lastValid=!rarFile:.rar=-backupLaunchN-1.rar!"
+    set "lastValid=!userGameSave:.rar=-backupLaunchN-1.rar!"
 
-    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !backup! !lastValid! > NUL 2>&1
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !rarFile! !backup! > NUL 2>&1
+    if exist !saveBackup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !saveBackup! !lastValid! > NUL 2>&1
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !userGameSave! !saveBackup! > NUL 2>&1
 
     set "PREVIOUS_SHADER_CACHE_ID=NONE"
 
@@ -516,7 +536,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     pushd !BFW_TOOLS_PATH!
     echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !EXTRACT_PATH!
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !userGameSave! !EXTRACT_PATH!
 
     :savesLoaded
 
@@ -574,26 +594,26 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : backup transferable cache in case of CEMU corrupt it
     set "transF="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!cacheFile:"=!""
-    set "backup="!transF:"=!-backupLaunchN""
+    set "tcBackup="!transF:"=!-backupLaunchN""
 
     REM : add a supplementary level of backup because the launch following the crash that have corrupt file
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1""
-    if exist !backup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !backup! !lastValid!
+    if exist !tcBackup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !tcBackup! !lastValid!
 
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !transF! !backup!
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !transF! !tcBackup!
 
     REM : get backup files sizes
-    if exist !backup! (
-        for /F "tokens=*" %%a in (!backup!)  do set "newSize=%%~za"
+    if exist !tcBackup! (
+        for /F "tokens=*" %%a in (!tcBackup!)  do set /A "newSize=%%~za"
     ) else (
-        set "newSize=0"
+        set /A "newSize=0"
     )
     if exist !lastValid! (
-        for /F "tokens=*" %%a in (!lastValid!)  do set "oldSize=%%~za"
+        for /F "tokens=*" %%a in (!lastValid!)  do set /A "oldSize=%%~za"
     ) else (
-        set "oldSize=0"
+        set /A "oldSize=0"
     )
 
     REM : compare their size : size of N always > N-1
@@ -1329,8 +1349,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     if %cr_cemu% NEQ 0 goto:endMain
 
-    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
-
     if exist !userGameSave! (
         echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar >> !batchFwLog!
     )
@@ -1344,7 +1362,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 96 98 "post processing" "saving settings for !currentUser!"
 
     call:saveCemuOptions
-
+    
     :endMain
 
 
@@ -1393,7 +1411,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         rmdir /Q !gpLink! > NUL 2>&1
     )
        
-    REM :restoreBackups
+    REM : restoreBackups
     if exist !cs! call:restoreFile !cs!
     if exist !csb! call:restoreFile !csb!
     if exist !chs! call:restoreFile !chs!
@@ -1401,6 +1419,21 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
+    
+    if %cr_cemu% EQU 0 if exist !userGameSave! (
+        set "logFileTmp="!TMP:"=!\BatchFw_process.list""
+
+        :waitRar
+        wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+
+        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitRar
+        
+        call:checkUserSave
+        
+        REM : remove trace
+        del /F !logFileTmp! > NUL 2>&1
+
+    )
     echo =========================================================>> !batchFwLog!
     echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
 
@@ -1414,6 +1447,31 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :checkUserSave
+
+        REM : get the size of the new save file
+        set /A "newSaveSize=0"        
+        for /F "tokens=*" %%a in (!userGameSave!)  do set /A "newSaveSize=%%~za"
+
+        if not exist !saveBackup! goto:eof
+        
+        REM : get backup N save file size
+        set /A "oldSaveSize=0"        
+        for /F "tokens=*" %%a in (!saveBackup!)  do set /A "oldSaveSize=%%~za"
+        
+        REM : compare sizes
+        if !newSaveSize! GEQ !oldSaveSize! goto:eof
+        
+        REM : KO => warn user and propose to restore backup N
+        cscript /nologo !MessageBox! "Save file size () lower than backuped one ()! If you have reset your save, ignore this message (NO) else revert backup file (YES) ?" 4148
+        if !ERRORLEVEL! EQU 2 goto:eof
+        
+        REM : revert save file backup
+        copy /Y !saveBackup! !userGameSave! > NUL 2>&1
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     :getShaderCacheName
 
         pushd !getShaderCacheFolder!
@@ -1421,6 +1479,7 @@ REM : functions
         for /F %%l in ('getShaderCacheName.exe !RPX_FILE_PATH!') do set "sci=%%l"
 
         pushd !GAMES_FOLDER!
+        
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1445,15 +1504,15 @@ REM : functions
     REM : function to backup an EXISTANT file
     :backupFile
         set "file="%~1%""
-        set "backup="!file:"=!_bfw_old""
+        set "fileBackup="!file:"=!_bfw_old""
 
-        if exist !backup! (
+        if exist !fileBackup! (
             REM : last execution failed : restore backup before continue
             del /F !file! > NUL 2>&1
-            move /Y !backup! !file! > NUL 2>&1
+            move /Y !fileBackup! !file! > NUL 2>&1
         )
 
-        copy /Y !file! !backup! > NUL 2>&1
+        copy /Y !file! !fileBackup! > NUL 2>&1
 
     goto:eof
 
@@ -1463,12 +1522,12 @@ REM : functions
         set "tmpFile="!file:"=!_bfw_tmp""
         if exist !tmpFile! del /F !tmpFile! > NUL 2>&1
         
-        set "backup="!file:"=!_bfw_old""
+        set "fileBackup="!file:"=!_bfw_old""
 
-        if not exist !backup! goto:eof
+        if not exist !fileBackup! goto:eof
 
         del /F !file! > NUL 2>&1
-        move /Y !backup! !file! > NUL 2>&1
+        move /Y !fileBackup! !file! > NUL 2>&1
 
     goto:eof
     
@@ -1765,6 +1824,17 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
+        
+        REM : force integer values if needed for !versionRead! < 1.15.6
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:syncCP
+        if !v1156! LEQ 1 goto:syncCP
+        
+        REM : log file
+        set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
+        set "PF="!CEMU_FOLDER:"=!\gameProfiles""
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "low" --replace "2" --logFile !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "medium" --replace "1" --logFile !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "high" --replace "0" --logFile !fnrLogFile!        
 
         :syncCP
         REM : synchronized controller profiles (import)
@@ -1985,9 +2055,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     :getSettingsFolder
 
         REM : get the size of the settings.bin of the launched version
-        set "csbSize=0"
+        set /A "csbSize=0"
         if exist !csb! (
-            for /F "tokens=*" %%a in (!csb!)  do set "csbSize=%%~za"
+            for /F "tokens=*" %%a in (!csb!)  do set /A "csbSize=%%~za"
         )
    
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!""
@@ -2028,17 +2098,24 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         pushd !BFW_TOOLS_PATH!
 
-        set "sSetBinSize=0"
+        set /A "sSetBinSize=0"
         if exist !sSetBin! (
-            for /F "tokens=*" %%a in (!sSetBin!)  do set "sSetBinSize=%%~za"
+        
+            if exist !csb! (
+                for /F "tokens=*" %%a in (!sSetBin!)  do set /A "sSetBinSize=%%~za"
 
-            REM : invalidate the import if size of source^'s file lower than target one
-            if !sSetBinSize! LSS !csbSize! (
-                echo Import cancelled bin size of source^'s file lower than target one>> !batchFwLog!
-                echo source !sSetBinSize! bytes>> !batchFwLog!
-                echo target !csbSize! bytes>> !batchFwLog!
-                set /A "%2=0" && goto:eof
+                REM : invalidate the import if size of source^'s file lower than target one
+                if !sSetBinSize! LSS !csbSize! (
+                    echo Import cancelled bin size of source^'s file lower than target one>> !batchFwLog!
+                    echo source !sSetBinSize! bytes>> !batchFwLog!
+                    echo target !csbSize! bytes>> !batchFwLog!
+                    set /A "%2=0" && goto:eof
+                )
             )
+            
+        ) else (
+            REM : it exists !csb! but no !sSetBin! = > exit and cancel import
+            if exist !csb! set /A "%2=0" && goto:eof
         )
 
         if exist !sSetXml! (
@@ -2539,14 +2616,14 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "ntscf="!cemuShaderCache:"=!\transferable\!NEW_TRANS_SHADER!""
 
         if exist !ntscf! (
-            for /F "tokens=*" %%a in (!ntscf!)  do set "newSize=%%~za"
+            for /F "tokens=*" %%a in (!ntscf!)  do set /A "newSize=%%~za"
         ) else (
-            set "newSize=0"
+            set /A "newSize=0"
         )
         if exist !otscf! (
-            for /F "tokens=*" %%a in (!otscf!)  do set "oldSize=%%~za"
+            for /F "tokens=*" %%a in (!otscf!)  do set /A "oldSize=%%~za"
         ) else (
-            set "oldSize=0"
+            set /A "oldSize=0"
         )
 
         echo CEMU transferable cache file !NEW_TRANS_SHADER! have a size of  ^:  %newSize%>> !batchFwLog!
@@ -2715,8 +2792,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : versioning separator (init to .)
         set "sep=."
-        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 && set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 && set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr

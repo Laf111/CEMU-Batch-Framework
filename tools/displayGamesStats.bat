@@ -324,8 +324,8 @@ REM : ------------------------------------------------------------------
 
         REM : versioning separator (init to .)
         set "sep=."
-        @echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        @echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        @echo !vit! | find "-" > NUL 2>&1 && set "sep=-"
+        @echo !vit! | find "_" > NUL 2>&1 && set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr

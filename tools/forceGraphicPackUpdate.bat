@@ -3,7 +3,6 @@ setlocal EnableExtensions
 REM : ------------------------------------------------------------------
 REM : main
 
-
     setlocal EnableDelayedExpansion
 
     color 4F

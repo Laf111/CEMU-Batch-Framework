@@ -353,8 +353,10 @@ REM : main
 
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "v1151=2"
-     set "versionRead=NOT_FOUND"
-     if not exist !clog! goto:openCemuAFirstTime
+    set /A "v114=1"
+    set /A "v1116=1"
+    set "versionRead=NOT_FOUND"
+    if not exist !clog! goto:openCemuAFirstTime
 
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
     if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
@@ -365,11 +367,22 @@ REM : main
 
     REM : is version < 1.15.1
     if !v1151! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
-        if ["!result!"] == [""] echo Error when comparing versions
-        if !result! EQU 50 echo Error when comparing versions
-        if !result! EQU 1 goto:checkCemuHook
-        if !result! EQU 0 goto:checkCemuHook
+        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+        if ["!v114!"] == [""] echo Error when comparing versions
+        if !v114! EQU 50 echo Error when comparing versions
+        if !v114! EQU 2 (
+            call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
+            if ["!v1116!"] == [""] echo Error when comparing versions
+            if !v1116! EQU 50 echo Error when comparing versions
+            if !v1116! EQU 2 (
+                echo ERROR this version is not supported by BatchFw
+                echo ^(only versions ^>= 1^.11^.6^)
+                pause
+                exit /b 99
+            )
+        )
+        if !v114! EQU 1 goto:checkCemuHook
+        if !v114! EQU 0 goto:checkCemuHook
     ) else (
         goto:checkCemuHook
     )
@@ -521,6 +534,7 @@ REM    call:log2HostFile !msg!
     pushd !GAMES_FOLDER!
 
     set /A NB_GAMES_TREATED=0
+    set /A "NB_OUTPUTS=0"
 
     REM : loop on game's code folders found
     for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
@@ -575,6 +589,7 @@ REM    call:log2HostFile !msg!
     echo =========================================================
 
     echo Treated !NB_GAMES_TREATED! games
+    if !nbUsers! GTR 1 echo Created !NB_OUTPUTS! Executables
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo BatchFw share a common GFX packs folder with all versions
@@ -1629,6 +1644,8 @@ REM
 
         :icoSet
         set /A "gameDisplayed=0"
+
+        set /A "previousNumber=!NB_OUTPUTS!"
         REM : create shortcuts for all users
         for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
             set "user="%%a""
@@ -1642,10 +1659,12 @@ REM
                 if !QUIET_MODE! EQU 0 echo ---------------------------------------------------------
                 if !QUIET_MODE! EQU 0 echo !GAME_TITLE! ^: executable for !user:"=! already exists^, skipped
             ) else (
-                if !gameDisplayed! EQU 1 set /A NB_GAMES_TREATED+=1
                 call:userGameExe !user!
             )
         )
+
+        if !NB_OUTPUTS! NEQ !previousNumber! set /A "NB_GAMES_TREATED+=1"
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1741,7 +1760,8 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         pushd !GAMES_FOLDER!
         if !QUIET_MODE! EQU 0 echo - Executable for !user:"=! created ^!
-    goto:eof
+        set /A "NB_OUTPUTS+=1"
+goto:eof
     REM : ------------------------------------------------------------------
 
     :getIcon
@@ -1837,8 +1857,8 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         REM : versioning separator (init to .)
         set "sep=."
-        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 && set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 && set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr

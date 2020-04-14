@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V18-3"
+    set "BFW_VERSION=V18-4"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -235,9 +235,7 @@ REM : main
             echo your RPX games ^(loadiines format^) using many versions of
             echo CEMU^.
             echo.
-            echo It is now limited only to CEMU's versions ^>=1^.11 that^:
-            echo -support the -mlc argument
-            echo -use the last saves format
+            echo It is now limited only to CEMU's versions ^>=1^.11^.6 that^:
             echo.
             echo It gathers all game^'s data in each game^'s folder and so
             echo ease the CEMU^'s update process and make your loadiine
@@ -1791,8 +1789,8 @@ REM        call:log2HostFile !msg!
 
         REM : versioning separator (init to .)
         set "sep=."
-        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 && set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 && set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr

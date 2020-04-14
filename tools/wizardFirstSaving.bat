@@ -31,6 +31,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MIN > NUL 2>&1
     !cmdOw! @ /MAX > NUL 2>&1
 
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
@@ -227,7 +228,7 @@ REM : main
     if ["!versionRead!"] == ["NOT_FOUND"] (
             goto:checkProfile
     ) else (
-            title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
+        title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
 
         REM : comparing version to V1.17.2
         set /A "v1172=2"
@@ -268,6 +269,36 @@ REM : main
     :checkProfile
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
+    REM : get CPU threads number
+    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
+    set "recommendedMode=SingleCore-recompiler"
+    
+    REM : version >=1.17.2
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (
+    
+        REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
+        set /A "cpuNeeded=3"
+        
+        REM : get GPU_VENDOR
+        set "gpuType=NO_NVIDIA"
+        for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
+            set "string=%%i"
+            echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+                set "gpuType=NVIDIA"
+            )
+        )
+        if ["!gpuType!"] == ["NVIDIA"] (
+            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in 
+            echo in 3D settings of the control panel
+            set /A "cpuNeeded+=1"
+        )
+        if !nbCpuThreads! GTR !cpuNeeded! (
+            set "recommendedMode=DualCore-recompiler"
+            set /A "cpuNeeded+=1"
+            if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
+        )
+    )
+    
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
 
@@ -289,7 +320,7 @@ REM : main
         robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
         goto:handleVersions
     )
-
+    
     REM : else, create profile file in CEMU_FOLDER
     if not exist !PROFILE_FILE! call:createGameProfile > NUL 2>&1
 
@@ -577,6 +608,8 @@ REM : main
 
     REM : remove trace
     del /F !logFileTmp! > NUL 2>&1
+    REM : wait 1 sec for GFX detection
+    timout /T 1 > NUL 2>&1
 
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
@@ -613,37 +646,11 @@ REM : main
         echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
     )
 
-    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
-
     echo ---------------------------------------------------------
     echo nbCpuThreads detected on !USERDOMAIN! ^: !nbCpuThreads!
 
     REM : version >=1.17.2
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (
-    
-        REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
-        set /A "cpuNeeded=3"
-        set "recommendedMode=SingleCore-recompiler"
-        
-        REM : get GPU_VENDOR
-        set "gpuType=NO_NVIDIA"
-        for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
-            set "string=%%i"
-            echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
-                set "gpuType=NVIDIA"
-            )
-        )
-        if ["!gpuType!"] == ["NVIDIA"] (
-            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in 
-            echo in 3D settings of the control panel
-            set /A "cpuNeeded+=1"
-        )
-        if !nbCpuThreads! GTR !cpuNeeded! (
-            set "recommendedMode=DualCore-recompiler"
-            set /A "cpuNeeded+=1"
-            if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
-            
-        )
+    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (    
         echo Recommended cpuMode ^: !recommendedMode!        
     )
     echo ---------------------------------------------------------
@@ -903,12 +910,12 @@ REM : functions
         REM : if [Graphics] found in file :
         if exist !fnrLogFile! del /F !fnrLogFile!
         for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --useEscapeChars --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
             goto:eof
         )
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --useEscapeChars --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
 
 
     goto:eof
@@ -1315,9 +1322,9 @@ REM : functions
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
         if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
-            echo GPUBufferCacheAccuracy = 1 >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = 0 >> %PROFILE_FILE%
         ) else (
-            echo GPUBufferCacheAccuracy = medium >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = high >> %PROFILE_FILE%
         )
 
         REM : if version of CEMU < 1.11.6 (v1116<=1)
@@ -1330,7 +1337,7 @@ REM : functions
         echo accurateShaderMul = min >> %PROFILE_FILE%
         echo [CPU] >> %PROFILE_FILE%
         echo cpuTimer = hostBased >> %PROFILE_FILE%
-        echo cpuMode = Singlecore-Recompiler >> %PROFILE_FILE%
+        echo cpuMode = !recommendedMode! >> %PROFILE_FILE%
         echo threadQuantum = 45000 >> %PROFILE_FILE%
 
         echo Creating a Game profile for tilte Id ^: %titleId%
@@ -1391,8 +1398,8 @@ REM : functions
 
         REM : versioning separator (init to .)
         set "sep=."
-        echo !vit! | find "-" > NUL 2>&1 set "sep=-"
-        echo !vit! | find "_" > NUL 2>&1 set "sep=_"
+        echo !vit! | find "-" > NUL 2>&1 && set "sep=-"
+        echo !vit! | find "_" > NUL 2>&1 && set "sep=_"
 
         call:countSeparators !vit! nbst
         call:countSeparators !vir! nbsr
