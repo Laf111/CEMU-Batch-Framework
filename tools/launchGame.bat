@@ -1832,9 +1832,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
         set "PF="!CEMU_FOLDER:"=!\gameProfiles""
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "low" --replace "2" --logFile !fnrLogFile!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "medium" --replace "1" --logFile !fnrLogFile!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --fileMask !titleId!.ini --find "high" --replace "0" --logFile !fnrLogFile!        
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "=[ ]*low" --replace "= 2" --logFile !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "=[ ]*medium" --replace "= 1" --logFile !fnrLogFile!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "=[ ]*high" --replace "= 0" --logFile !fnrLogFile!        
 
         :syncCP
         REM : synchronized controller profiles (import)
