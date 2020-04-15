@@ -533,7 +533,7 @@ REM    call:log2HostFile !msg!
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    set /A NB_GAMES_TREATED=0
+    set /A "NB_GAMES_TREATED=0"
     set /A "NB_OUTPUTS=0"
 
     REM : loop on game's code folders found
@@ -1112,7 +1112,7 @@ REM
 
         REM : create a shortcut to downloadGames.bat (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download Games^.lnk""
-        set "LINK_DESCRIPTION="Download a Wii-U titles for CEMU or your Wii-U using JNUSTool""
+        set "LINK_DESCRIPTION="Download Wii-U titles for CEMU or your Wii-U using JNUSTool""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGames.ico""
         if not exist !LINK_PATH! (
@@ -1624,7 +1624,7 @@ REM
                 goto:icoSet
             )
             echo.
-            echo. Opening up a google search^.^.^.
+            echo Opening up a google search^.^.^.
             REM : open a google search
             wscript /nologo !StartWait! "%windir%\explorer.exe" "https://www.google.com/search?q=!GAME_TITLE!+Wii-U+jpg+box+art&source=lnms&tbm=isch&sa=X"
             echo Save a jpg box-art in !GAME_FOLDER_PATH:"=!\Cemu
