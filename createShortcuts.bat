@@ -342,8 +342,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :openCemuAFirstTime
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-
-    if exist !cs! goto:getCemuVersion
+    set "clog="!CEMU_FOLDER:"=!\log.txt""
+    if exist !cs! if exist !clog! goto:getCemuVersion
     echo ---------------------------------------------------------
     echo opening CEMU^.^.^.
     echo.
