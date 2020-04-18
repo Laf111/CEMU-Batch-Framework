@@ -171,12 +171,9 @@ REM : ------------------------------------------------------------------
             @echo WARNING^: No log^.txt found in the last Cemu^'s install in !cemuInstallFolder:"=! ^!
             goto:eof
         )
-
+        
         for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-        if ["!versionRead!"] == ["NOT_FOUND"] (
-            @echo WARNING^: Version of CEMU not found in log^.txt ^!
-            goto:eof
-        )
+        if ["!versionRead!"] == ["NOT_FOUND"] goto:eof
 
         REM : if current version >=1.12.0
         call:compareVersions !versionRead! "1.12.0" result > NUL 2>&1

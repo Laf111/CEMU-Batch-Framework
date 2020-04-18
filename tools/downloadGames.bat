@@ -135,9 +135,10 @@ REM : main
     
     :selectGames
 
-    REM : pattern used to evaluate size of games
-    set "str="Total Size of Content Files""
-    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
+    REM : pattern used to evaluate size of games : set always extracted size since size of some cryted titles are wrong
+    set "str="Total Size of Decrypted Files""
+REM    set "str="Total Size of Content Files""
+REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     
     set "mode=sequential"
     for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
@@ -195,7 +196,7 @@ REM : main
             echo Relaunch these downloads to complete them
         )
     )
-    timeout /T 3 > NUL 2>&1
+    timeout /T 5 > NUL 2>&1
     set "gamesList="!BFW_LOGS:"=!\jnust_gamesList.log""
     
     :askKeyWord
@@ -807,7 +808,7 @@ REM : functions
     goto:eof
 
     REM : ------------------------------------------------------------------
-    :getFolderSizeInMb
+    :getSizeInMb
 
         set "folder="%~1""
         set "smb=-1"
@@ -838,6 +839,36 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    
+    REM : ------------------------------------------------------------------
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        set /A "sizeofAll=0"
+        
+        REM : when data kept crypted 
+        if !decryptMode! EQU 0 (
+            set /A "sg=0"
+            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            call:getSizeInMb !tmpGf! sg            
+            set /A "sd=0"
+            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            call:getSizeInMb !tmpDf! sd
+            set /A "su=0"
+            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            call:getSizeInMb !tmpUf! su
+            
+            set /A "sizeofAll=sg+sd+su"
+            
+        ) else (
+            call:getSizeInMb !folder! sizeofAll
+        )
+        
+        set "%2=!sizeofAll!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+        
+    
     REM : fetch size of download
     :getSize
         set "tid=%~1"
@@ -902,7 +933,8 @@ REM : functions
 
         del /F config > NUL 2>&1
         del /F JNUSTool.* > NUL 2>&1
-        del /F titleKeys.txt"
+        del /F titleKeys.txt > NUL 2>&1 
+        del /F updatetitles.csv > NUL 2>&1 
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -107,7 +107,7 @@ REM : main
     if not exist !cemuLog! goto:getGameData
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-    if not ["!versionRead!"] == ["NOT_FOUND"] set "VERSION=!versionRead!"
+    set "VERSION=!versionRead!"
 
     :getGameData
 
@@ -176,16 +176,6 @@ REM : main
     REM : ShaderCache Id
     if not ["%SHADER_CACHE_ID%"] == ["NOT_FOUND"] echo ShaderCache Id   ="%SHADER_CACHE_ID%" >> !gameInfoFile!
 
-    if ["!versionRead!"] == ["NOT_FOUND"] (
-        call:getVersion
-        if not ["!VERSION!"] == ["NONE"] (
-            REM : ShaderCache Id
-            echo Last launch with ="!VERSION!" >> !gameInfoFile!
-        ) else (
-            REM : using folder name
-            set "VERSION=!CEMU_FOLDER_NAME!"
-        )
-    )
     REM : update reports
     REM --------------------------------------------------------------------------------
 
@@ -315,26 +305,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-    REM : try to get version of CEMU from install folder name
-    :getVersion
-
-        set /A "CEMU_2ND_DIGIT=0"
-        set /A "CEMU_3RD_DIGIT=0"
-        set "VERSION=NONE"
-        for /F "tokens=2 delims=_ " %%i in ("!CEMU_FOLDER_NAME!") do set "VERSION=%%i"
-
-        REM : failed to compute version from folder name : VERSION=NONE
-        if ["!VERSION!"] == ["NONE"] goto:eof
-
-        for /F "tokens=1-3 delims=." %%i in ("!VERSION!") do (
-            set "CEMU_1ST_DIGIT=%%i"
-            set "CEMU_2ND_DIGIT=%%j"
-            set "CEMU_3RD_DIGIT=%%k"
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :checkPathForDos
 

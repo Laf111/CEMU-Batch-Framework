@@ -172,7 +172,7 @@ REM    call:checkGpFolders
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
-    if exist !fnrLogUggp! del /F !fnrLogUggp!
+    if exist !fnrLogUggp! del /F !fnrLogUggp! > NUL 2>&1
     echo titleId^: %titleId% >> !myLog!
 
     REM : launching the search in all gfx pack folder (V2 and up)
@@ -228,6 +228,8 @@ REM    call:checkGpFolders
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
+    
+    del /F !fnrLogUggp! > NUL 2>&1
 
     REM : relaunching the search in all gfx pack folder (V2 and up)
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!

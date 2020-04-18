@@ -914,8 +914,11 @@ REM pause
         REM : if BFW_GPV2_FOLDER exist
         if exist !BFW_GPV2_FOLDER! (
 
-            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
-            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Graphics=!""
+            set "str=!gpFolderName:_Resolution=!"
+            set "str=!str:_Graphics=!"            
+            
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!str:"=!""
+        
             set "newGp="!gpPath:"=!_!hc!p""
             set "gpResX2="!gpPath:"=!_%resX2%p""
 
@@ -1075,8 +1078,10 @@ REM pause
         REM : if BFW_GPV2_FOLDER exist
         if exist !BFW_GPV2_FOLDER! (
 
-            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Resolution=!""
-            set "gpPath="!BFW_GPV2_FOLDER:"=!\!gpFolderName:_Graphics=!""
+            set "str=!gpFolderName:_Resolution=!"
+            set "str=!str:_Graphics=!"            
+            
+            set "gpPath="!BFW_GPV2_FOLDER:"=!\!str:"=!""
             set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
             set "gpResX2="!gpPath:"=!_%resX2%p""
 
@@ -1100,7 +1105,9 @@ REM pause
                 if exist !gpResX2p! (
                     set "gpResX2=!gpResX2p!"
                 )
+                               
                 wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" > NUL 2>&1
+                
                 echo + !wc!x!hc!!desc! V2 pack >> !cgpLogFile!
                 echo + !wc!x!hc!!desc! V2 pack
             ) else (

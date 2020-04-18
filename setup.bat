@@ -235,7 +235,9 @@ REM : main
             echo your RPX games ^(loadiines format^) using many versions of
             echo CEMU^.
             echo.
-            echo It is now limited only to CEMU's versions ^>=1^.11^.6 that^:
+            echo It is now limited only to CEMU's versions ^>=1^.11 that^:
+            echo -support the -mlc argument
+            echo -use the last saves format
             echo.
             echo It gathers all game^'s data in each game^'s folder and so
             echo ease the CEMU^'s update process and make your loadiine
@@ -470,7 +472,7 @@ REM : main
     )
 
     set "ARLIST=!ARLIST:EMPTY=!"
-    echo Aspect ratios already defined in BatchFW: !ARLIST!
+    echo Aspect ratios already defined in BatchFW for all hosts you already used: !ARLIST!
 
     call:getUserInput "Change this list? (y = add an aspect ratio or define a custom one, n = default in 20s)" "n,y" ANSWER 20
     if [!ANSWER!] == ["n"] goto:askScreenMode
@@ -1027,6 +1029,7 @@ REM : main
     if exist !cemuFolderCheck! (
         echo Not a Cemu install folder^, please enter the output folder
         echo ^(where shortcuts or exe will be created^)
+        pause
         goto:getOuptutsFolder
     )
 
@@ -1116,7 +1119,19 @@ REM : main
         goto:askCemuFolder
     )
 
-    REM : basename of CEMU_FOLDER to get CEMU version
+    set "clog="!CEMU_FOLDER:"=!\log.txt""
+    if exist !clog! (
+        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+        if ["!versionRead!"] == ["NOT_FOUND"] (
+            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo Install earlier versions per game and per user
+            pause
+            set /A "NBCV-=1"
+            goto:askCemuFolder
+        )
+    )
+
+    REM : basename of CEMU_FOLDER
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
     echo CEMU install %NBCV%^: !CEMU_FOLDER!
     call:regCemuInstall %NBCV% !CEMU_FOLDER!
@@ -1205,6 +1220,13 @@ REM : main
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
+    )
+    REM : here %nbArgs% EQU 0
+    if !QUIET_MODE! EQU 0 (
+        REM : readonly batchFw files
+        pushd !BFW_PATH!
+        attrib +r *.bat
+        for /F "delims=~" %%f in ('dir /S /B tools\*.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadTitleId" ^| find /V "downloadGame" ^| find /V "fixBrokenShortcuts"') do attrib +r "%%f" > NUL 2>&1
     )
 
     endlocal
@@ -1332,8 +1354,6 @@ REM : ------------------------------------------------------------------
         REM : cemuHook for versions < 1.12.1
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1116_0564.rar""
 
-        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractCemuHook
-
         call:compareVersions !versionRead! "1.12.1" result > NUL 2>&1
         if ["!result!"] == [""] echo Error when comparing with version 1^.12^.1
         if !result! EQU 50 echo Error when comparing with version 1^.12^.1
@@ -1406,11 +1426,24 @@ REM : ------------------------------------------------------------------
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         set /A "v1151=2"
-         set "versionRead=NOT_FOUND"
-         if not exist !clog! goto:openCemuAFirstTime
+        set "versionRead=NOT_FOUND"
+        if not exist !clog! goto:openCemuAFirstTime
 
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
+        if ["!versionRead!"] == ["NOT_FOUND"] (
+            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo Install earlier versions per game and per user
+            echo exiting
+            pause
+            exit /b 77
+        )
+        echo !versionRead! | findStr /R /I "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+
+        echo ERROR^: BatchFw can^'t get CEMU version from log^.
+        echo This version seems to be not supported.
+        echo exiting
+        pause
+        exit /b 78
 
         call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
         if ["!v1151!"] == [""] echo Error when comparing versions
@@ -1426,7 +1459,7 @@ REM : ------------------------------------------------------------------
         ) else (
             goto:checkCemuHook
         )
-       :extractV2Packs
+
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:checkCemuHook
 

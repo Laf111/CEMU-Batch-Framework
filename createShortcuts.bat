@@ -152,6 +152,18 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         goto:askCemuFolder
     )
 
+    set "clog="!CEMU_FOLDER:"=!\log.txt""
+    if exist !clog! (
+        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+        if ["!versionRead!"] == ["NOT_FOUND"] (
+            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo Install earlier versions per game and per user
+            pause
+            set /A "NBCV-=1"
+            goto:askCemuFolder
+        )
+    )
+
     set "folder=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "folder=%%i"
     if ["!folder!"] == ["NOT_FOUND"] goto:askOutputFolder
@@ -316,7 +328,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call:syncControllerProfiles
     echo ---------------------------------------------------------
     echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
-    if !QUIET_MODE! EQU 1 goto:scanGamesFolder
+    if !QUIET_MODE! EQU 1 goto:getCemuVersion
 
     echo ---------------------------------------------------------
     REM : flush logFile of SCREEN_MODE
@@ -356,12 +368,33 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "v1151=2"
     set /A "v114=1"
-    set /A "v1116=1"
-    set "versionRead=NOT_FOUND"
-    if not exist !clog! goto:openCemuAFirstTime
 
+    if not exist !clog! (
+        echo ERROR^: BatchFw can^'t get CEMU version from log^.
+        echo This version seems to be not supported.
+        echo exiting
+        pause
+        exit /b 78
+    )
+
+    set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:extractV2Packs
+    if ["!versionRead!"] == ["NOT_FOUND"] (
+        echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+        echo Install earlier versions per game and per user
+        echo exiting
+        pause
+        exit /b 77
+    )
+    echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+
+    echo ERROR^: BatchFw can^'t get CEMU version from log^.
+    echo This version seems to be not supported.
+    echo exiting
+    pause
+    exit /b 78
+
+    :versionOK
 
     call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
     if ["!v1151!"] == [""] echo Error when comparing versions
@@ -388,7 +421,6 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     ) else (
         goto:checkCemuHook
     )
-    :extractV2Packs
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:checkCemuHook
 
@@ -656,8 +688,6 @@ REM : functions
 
         REM : cemuHook for versions < 1.12.1
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1116_0564.rar""
-
-        if ["!versionRead!"] == ["NOT_FOUND"] goto:extractCemuHook
 
         call:compareVersions !versionRead! "1.12.1" result > NUL 2>&1
         if ["!result!"] == [""] echo Error when comparing with version 1^.12^.1

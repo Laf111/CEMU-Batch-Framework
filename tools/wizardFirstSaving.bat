@@ -31,6 +31,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
     !cmdOw! @ /MIN > NUL 2>&1
     !cmdOw! @ /MAX > NUL 2>&1
 
@@ -225,47 +226,35 @@ REM : main
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
-    if ["!versionRead!"] == ["NOT_FOUND"] (
-            goto:checkProfile
-    ) else (
-        title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
+    title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
 
-        REM : comparing version to V1.17.2
-        set /A "v1172=2"
-        call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
-        if ["!v1172!"] == [""] echo Error when comparing versions
-        if !v1172! EQU 50 echo Error when comparing versions
-    
-        REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
-        set /A "v11515=1"
-        set /A "v1156=1"
-        set /A "v1116=1"
+    REM : comparing version to V1.17.2
+    set /A "v1172=2"
+    call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
+    if ["!v1172!"] == [""] echo Error when comparing versions
+    if !v1172! EQU 50 echo Error when comparing versions
 
-        REM : version > 1.17.2 => > v1.15.15
-        if !v1172! LEQ 1 goto:checkProfile
+    REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
+    set /A "v11515=1"
+    set /A "v1156=1"
 
-        REM : else comparing version to V1.15.15
-        set /A "v11515=2"
-        call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
-        if ["!v11515!"] == [""] echo Error when comparing versions
-        if !v11515! EQU 50 echo Error when comparing versions
+    REM : version > 1.17.2 => > v1.15.15
+    if !v1172! LEQ 1 goto:checkProfile
 
-        REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
-        if !v11515! LEQ 1 goto:checkProfile
+    REM : else comparing version to V1.15.15
+    set /A "v11515=2"
+    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
+    if ["!v11515!"] == [""] echo Error when comparing versions
+    if !v11515! EQU 50 echo Error when comparing versions
 
-        REM : else compare
-        set /A "v1156=2"
-        call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
-        if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
+    REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
+    if !v11515! LEQ 1 goto:checkProfile
 
-        REM : version > 1.15.6 => > v1.11.6
-        if !v1156! LEQ 1 goto:checkProfile
+    REM : else compare
+    set /A "v1156=2"
+    call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
+    if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
-        REM : else compare
-        set /A "v1116=2"
-        call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
-        if ["!v1116!"] == [""] echo Error when comparing versions ^, result ^= !v1116!
-    )
     :checkProfile
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
@@ -274,7 +263,7 @@ REM : main
     set "recommendedMode=SingleCore-recompiler"
     
     REM : version >=1.17.2
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (
+    if !v1172! LEQ 1 (
     
         REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
         set /A "cpuNeeded=3"
@@ -353,18 +342,10 @@ REM : main
     set /A "v114=1"
     set /A "v112=1"
 
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:backupDefaultSettings
     REM : version > 1.15.6 => > 1.14 => > v1.12
     if !v1156! LEQ 1 goto:backupDefaultSettings
-    REM : version < v1.11.6 => < 1.14 et < 1.12
-    if !v1116! EQU 2 (
-        set /A "v114=2"
-        set /A "v112=2"
-        set "gfxType=V2"
-        goto:backupDefaultSettings
-    )
 
-    REM : 1.15.6 > version > 1.11.6
+    REM : 1.15.6 > version > 1.14
     call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
     if ["!v114!"] == [""] echo Error when comparing versions
     if !v114! EQU 50 echo Error when comparing versions
@@ -390,13 +371,19 @@ REM : main
     REM : path to cemuHook Ssettings
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
-    REM : old versions
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:patchForIgnorePrecomp
-
+    REM : log file
+    set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
+    set "PF="!CEMU_FOLDER:"=!\gameProfiles""
+    REM : replace gpuBufferCacheAccuracy = low
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
+    REM : replace gpuBufferCacheAccuracy = medium
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
+    REM : replace gpuBufferCacheAccuracy = high
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!        
+    
     REM : version >= 1.15.6 ignoring the precompile cache is handle by CEMU throught the game's profile
     if !v1156! LEQ 1 goto:patchCemuSetting
 
-    :patchForIgnorePrecomp
     REM : patching files for ignoring precompiled cache
     if ["!IGNORE_PRECOMP!"] == ["DISABLED"] call:ignorePrecompiled false
     if ["!IGNORE_PRECOMP!"] == ["ENABLED"] call:ignorePrecompiled true
@@ -540,7 +527,7 @@ REM : main
     :openProfileFile
 
     REM : if version of CEMU >= 1.15.6 (v1156<=1) : use CEMU to open profile file
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:step2
+    if !v1156! LEQ 1 goto:step2
 
     echo opening !PROFILE_FILE:"=! ^.^.^.
     echo Complete it ^(if needed^) then close notepad to continue
@@ -577,7 +564,7 @@ REM : main
     call:checkCemuSettings
 
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 goto:wait
+    if !v1156! LEQ 1 goto:wait
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
@@ -628,7 +615,7 @@ REM : main
     echo    CEMU settings ^:
     echo.
     REM : if version of CEMU >= 1.12 (v112<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v112! LEQ 1 echo    REFRESH games^'list  ^(right click^)
+    if !v112! LEQ 1 echo    REFRESH games^'list  ^(right click^)
     echo.
 
     echo    - set all controller profiles for all players
@@ -637,20 +624,16 @@ REM : main
 
     
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! LEQ 1 echo    - set game^'s profile ^(right click on the game in the list^)
+    if !v1156! LEQ 1 echo    - set game^'s profile ^(right click on the game in the list^)
 
-    REM : if version of CEMU < 1.11.6 (v1116<=1)
-    if not ["!versionRead!"] == ["NOT_FOUND"] (
-        if !v1116! EQU 2 echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
-    ) else (
-        echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
-    )
+    REM : version of CEMU < 1.11.6
+    echo    - set game^'s profile GPUBufferCacheAccuracy^,cpuMode^,cpuTimer
 
     echo ---------------------------------------------------------
     echo nbCpuThreads detected on !USERDOMAIN! ^: !nbCpuThreads!
 
     REM : version >=1.17.2
-    if not ["!versionRead!"] == ["NOT_FOUND"] if !v1172! LEQ 1 (    
+    if !v1172! LEQ 1 (    
         echo Recommended cpuMode ^: !recommendedMode!        
     )
     echo ---------------------------------------------------------
@@ -677,9 +660,6 @@ REM : main
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
     for %%a in (!graphicPacks!) do set "d2=%%~da"
 
-    REM : on very first versions
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:linkGpFolder
-
     REM : suppose that version > 1.15.3b
     set /A "v1153b=1"
 
@@ -698,7 +678,7 @@ REM : main
             set /A "v1153b=2"
         )
     )
-    :linkGpFolder
+
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
@@ -722,8 +702,6 @@ REM : main
     !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
 
     del /F !csTmp0! > NUL 2>&1
-
-    if ["!versionRead!"] == ["NOT_FOUND"] goto:saveOptions
 
     REM : if current version >=1.15.18 get last game stats
     if !v1153b! GEQ 1 (
@@ -902,21 +880,14 @@ REM : functions
         REM : if strWithoutSpace found in file : strTargetWithoutSpace
         if exist !fnrLogFile! del /F !fnrLogFile!
         for /F "delims=~" %%i in ('type !file! ^| find /I "!strWithoutSpace!" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --useRegEx --useEscapeChars --fileMask %filter% --find "!strWithoutSpace!" --replace "!strTargetWithoutSpace!" --logFile !fnrLogFile!
 
             goto:eof
         )
 
         REM : if [Graphics] found in file :
         if exist !fnrLogFile! del /F !fnrLogFile!
-        for /F "delims=~" %%i in ('type !file! ^| find /I "[Graphics]" 2^>NUL') do (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --useEscapeChars --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
-
-            goto:eof
-        )
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --fileMask %filter% --find "[Graphics]" --useEscapeChars --replace "[Graphics]\r\n!strTarget!" --logFile !fnrLogFile!
-
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !parentFolder! --useRegEx --useEscapeChars --fileMask %filter% --find "\[Graphics\] *" --replace "[Graphics]\n!strTarget!" --logFile !fnrLogFile!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -927,7 +898,7 @@ REM : functions
         set "value=%1"
 
         set /A "v1158=2"
-        if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 1 (
+        if !v1156! EQU 1 (
             call:compareVersions !versionRead! "1.15.8" v1158 > NUL 2>&1
             if ["!v1158!"] == [""] echo Error when comparing versions
             if !v1158! EQU 50 echo Error when comparing versions
@@ -949,8 +920,6 @@ REM : functions
         call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
 
         :patchGp
-
-        if ["!versionRead!"] == ["NOT_FOUND"] call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value% && goto:eof
 
         if !v1158! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
         if !v1158! LEQ 1 (
@@ -1321,18 +1290,12 @@ REM : functions
         echo [Graphics] >> %PROFILE_FILE%
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
-        if not ["!versionRead!"] == ["NOT_FOUND"] if !v1156! EQU 2 (
+        if !v1156! EQU 2 (
             echo GPUBufferCacheAccuracy = 0 >> %PROFILE_FILE%
         ) else (
             echo GPUBufferCacheAccuracy = high >> %PROFILE_FILE%
         )
-
-        REM : if version of CEMU < 1.11.6 (v1116<=1)
-        if not ["!versionRead!"] == ["NOT_FOUND"] (
-            if !v1116! EQU 2 echo disableGPUFence = true >> %PROFILE_FILE%
-        ) else (
-            echo disableGPUFence = true >> %PROFILE_FILE%
-        )
+        echo disableGPUFence = true >> %PROFILE_FILE%
 
         echo accurateShaderMul = min >> %PROFILE_FILE%
         echo [CPU] >> %PROFILE_FILE%
