@@ -154,6 +154,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     if exist !clog! (
+        set "versionRead=NOT_FOUND"
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] (
             echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
@@ -343,7 +344,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     :openCemuAFirstTime
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
     set "clog="!CEMU_FOLDER:"=!\log.txt""
-    if exist !cs! if exist !clog! goto:getCemuVersion
+    if exist !clog! if exist !cs! goto:getCemuVersion
     echo ---------------------------------------------------------
     echo opening CEMU^.^.^.
     echo.
@@ -507,7 +508,6 @@ REM    call:log2HostFile !msg!
     set "noIntel=!GPU_VENDOR:Intel=!"
     if ["!gpuType!"] == ["OTHER"] if not ["!noIntel!"] == ["!GPU_VENDOR!"] (
 
-        echo ---------------------------------------------------------
         REM : CEMU < 1.15.1
         if !v1151! LEQ 1 (
             call:getUserInput "Disable all Intel GPU workarounds (add -NoLegacy)? (y,n): " "n,y" ANSWER

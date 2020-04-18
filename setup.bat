@@ -1120,8 +1120,9 @@ REM : main
         goto:askCemuFolder
     )
 
-    set "clog="!CEMU_FOLDER:"=!\log.txt""
+    set "clog="!CEMU_FOLDER:"=!\log.txt""   
     if exist !clog! (
+        set "versionRead=NOT_FOUND"
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] (
             echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
@@ -1406,7 +1407,7 @@ REM : ------------------------------------------------------------------
        
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "clog="!CEMU_FOLDER:"=!\log.txt""
-        if exist !cs! if exist !clog! goto:getCemuVersion
+        if exist !clog! if exist !cs! goto:getCemuVersion
         echo ---------------------------------------------------------
         echo opening CEMU^.^.^.
         echo.
