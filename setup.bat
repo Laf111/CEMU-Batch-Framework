@@ -472,8 +472,9 @@ REM : main
     )
 
     set "ARLIST=!ARLIST:EMPTY=!"
+    echo.
     echo Aspect ratios already defined in BatchFW for all hosts you already used: !ARLIST!
-
+    echo.
     call:getUserInput "Change this list? (y = add an aspect ratio or define a custom one, n = default in 20s)" "n,y" ANSWER 20
     if [!ANSWER!] == ["n"] goto:askScreenMode
 
@@ -1402,14 +1403,16 @@ REM : ------------------------------------------------------------------
         if !cr! EQU 2 call:copy
 
        :openCemuAFirstTime
+       
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         if exist !cs! if exist !clog! goto:getCemuVersion
         echo ---------------------------------------------------------
         echo opening CEMU^.^.^.
         echo.
-        echo If a mlc01 folder creation message popup^, answer 'Yes'
-        echo Ignore graphic pack folder download notification^.
+        echo - If a mlc01 folder creation message popup^, answer 'Yes'
+        echo - Ignore graphic pack folder download notification^.
+        echo - Ignore quick start assistant ^(next^).
         echo.
         echo Set your REGION^, language and all common settings for your
         echo games ^(sound^, overlay^.^.^.^)
@@ -1424,13 +1427,13 @@ REM : ------------------------------------------------------------------
         wscript /nologo !StartWait! !cemu!
 
        :getCemuVersion
-
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         set /A "v1151=2"
         set "versionRead=NOT_FOUND"
         if not exist !clog! goto:openCemuAFirstTime
 
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+
         if ["!versionRead!"] == ["NOT_FOUND"] (
             echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
             echo Install earlier versions per game and per user
@@ -1438,7 +1441,7 @@ REM : ------------------------------------------------------------------
             pause
             exit /b 77
         )
-        echo !versionRead! | findStr /R /I "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+        echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
 
         echo ERROR^: BatchFw can^'t get CEMU version from log^.
         echo This version seems to be not supported.
@@ -1446,6 +1449,7 @@ REM : ------------------------------------------------------------------
         pause
         exit /b 78
 
+        :versionOK
         call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
         if ["!v1151!"] == [""] echo Error when comparing versions
         if !v1151! EQU 50 echo Error when comparing versions
