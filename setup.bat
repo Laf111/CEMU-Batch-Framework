@@ -1123,7 +1123,7 @@ REM : main
     if exist !clog! (
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
             echo Install earlier versions per game and per user
             pause
             set /A "NBCV-=1"
@@ -1431,7 +1431,7 @@ REM : ------------------------------------------------------------------
 
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
             echo Install earlier versions per game and per user
             echo exiting
             pause

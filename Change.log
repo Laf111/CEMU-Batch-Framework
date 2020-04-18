@@ -2,7 +2,7 @@ IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SE
 USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 
 18/04/2020 V18-4 : 
-fix : minimal CEMU version handled to 1.11.6
+fix : minimal CEMU version handled is now 1.11.6
 fix : WUP package size threshold didn't work
 fix : regression = V2 GFX pack missings with CEMU < 1.14
 fix : do not import settings when settings.bin exist only on one side 
