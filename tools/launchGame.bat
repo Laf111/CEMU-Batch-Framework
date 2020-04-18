@@ -1059,8 +1059,9 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
             timeout /T 1 > NUL 2>&1
             !cmdOw! log* /top            
+            set /A "cr_cemu=99"
         )
-        set /A "cr_cemu=99"
+
     )
 
     if %cr_cemu% NEQ 0 goto:getTransCacheBack
@@ -1342,8 +1343,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     goto:endMain
 
     :titleIdChecked
-
-    echo Stop 3rd party software ^!>> !batchFwLog!
 
     REM : stoping user's software
     type !logFile! | find /I "TO_BE_LAUNCHED" | find /I "@Y"> NUL 2>&1 && (
