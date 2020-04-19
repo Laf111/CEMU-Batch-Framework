@@ -18,34 +18,36 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 ## Main purpose:
 
-- **Making easier the installation of many versions of CEMU to launch your games (with BatchFw CEMU installs size only few MB);**
+- **Making easier the installation of many versions of CEMU** to launch your games (with BatchFw CEMU installs size only few MB);
 
-- **Avoid regression on games (and downgrade CEMU version) by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);** 
+- **Avoid regression on games (and downgrade CEMU version)** by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);
 
-- **Handle more than one user/save (also with versions of CEMU < 1.15.19);**
+- **Handle more than one user/save also with versions of CEMU < 1.15.19**;
 
 - **Make your loadiine games library portable :**
-    - **save settings PER user (including GFX and mods packs) and PER host,**
-    - **game stats per user (using all version of CEMU that supports it) for all hosts used** 
+    - save settings PER user (including GFX and mods packs) and PER host,
+    - game stats per user (using all version of CEMU that supports it) for all hosts used
 
-- **Switch freely from a version of CEMU to another for a given game, and play with the same data you had on the first one;**
+- **Switch freely from a version of CEMU** to another for a given game, and play with the same data you had on the first one;
 
-- **Switch from game to game and automatically have all your data saved or restored on a given version of the CEMU emulator;**
+- **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
 
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games (no need to dig in the mlc01 folder);**
 
-- **Complete/create GFX packs for ALL games (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones**
+- **Secure your saves and trabferable cache** with 2 levels of backup
 
-- **create FPS packs : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).**
+- **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones
+
+- **create FPS packs** : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).
 
 - **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
-    - **get/sync online files (account, friends'list),** 
-    - **sync saves between CEMU with the Wii-U**
-    - **sync game stats between CEMU and the Wii-U,**
-    - **get a snapshot of the games installed (saves, update, dlc, location mlc/usb),**
-    - **dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),**
-    - **enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update)** 
-    - **ping the wii-U to avoid online simultaneous access** 
+    - get/sync online files (account, friends'list),
+    - sync saves between CEMU with the Wii-U
+    - sync game stats between CEMU and the Wii-U,
+    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb),
+    - dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),
+    - enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update)
+    - ping the wii-U to avoid online simultaneous access
     
 
 
