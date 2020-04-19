@@ -10,6 +10,7 @@ fix : do not import settings when settings.bin exist only on one side
 fix : if needed after a settings import, replace high/medium/low values by integers when version < 1.15.6
 fix : in Create*.bat, NB_GAMES left to 0 when defining only one user
 add : in Create*.bat, NB_OUTPUTS counting shortcuts or executables created 
+add : update rar to V5 in order to support very long file's name in common folder (MK8 for example)
 add : catch exceptions in Cemu's log (when return code = 0)
 add : update ./doc/CemuInterfacesHistory.log
 add : in wizardFirstLaunch.bat create a missing game's profile accordingly to the number 
@@ -17,7 +18,7 @@ add : in wizardFirstLaunch.bat create a missing game's profile accordingly to th
 add : when Cemu return code = 0, add a check on user save's file size to avoid save 
       corruption by Cemu. If the size of the new file < backup one, warn user :
       - if he resets his save : ignore
-      - else restore backup N
+      - else restore backup N (BatchFw handle 2 levels of backup for saves and transferable cache)
 
 11/04/2020 V18-3 :
 fix : remove links for GFX packs used in game's folder. Windows failed to copy/move the 
