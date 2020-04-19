@@ -10,6 +10,7 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 **Last GFX packs checked (presets completion) : V642**
 
+**Do not clone the repository (unless you're familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : see recommendations at the end of this page.
 
 ## Main purpose:
 
