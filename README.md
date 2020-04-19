@@ -13,7 +13,7 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 
 # 
-**IMPORTANT : Do not clone the repository (unless you're familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "releases" tab to get the last released version (see recommendations at the end of this page).
+**IMPORTANT : Do not clone the repository (unless you're familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "releases" tab of this page to get the last released version (see recommendations at the end of this page).
 #
 
 ## Main purpose:
