@@ -523,22 +523,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if exist !saveBackup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !saveBackup! !lastValid! > NUL 2>&1
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C copy /Y !userGameSave! !saveBackup! > NUL 2>&1
 
-    set "PREVIOUS_SHADER_CACHE_ID=NONE"
-
-    set "oldSavePath="!MLC01_FOLDER_PATH:"=!\emulatorSave""
-    if not exist !oldSavePath! goto:LoadingSaves
-    pushd !oldSavePath!
-
-    REM : delete old saves path in MLC01_FOLDER_PATH
-    for /F "delims=~" %%i in ('dir /b /O:D /T:W /a:d * 2^>NUL') do set "PREVIOUS_SHADER_CACHE_ID=%%i"
-
-    if not ["!PREVIOUS_SHADER_CACHE_ID!"] == ["NONE"] (
-        set "folder="!oldSavePath:"=!\!PREVIOUS_SHADER_CACHE_ID!""
-        if exist !folder! rmdir /Q /S !folder! > NUL 2>&1
-    )
-
-    :LoadingSaves
-
     for %%a in (!MLC01_FOLDER_PATH!) do set "parentFolder="%%~dpa""
     set "EXTRACT_PATH=!parentFolder:~0,-2!""
 
@@ -1431,7 +1415,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         :waitRar
         wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
-        type !logFileTmp! | find /V "Winrar.exe" | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitRar
+        type !logFileTmp! | find /I !GAMES_FOLDER! | find /I "rar.exe" | find /V "Winrar.exe" > NUL 2>&1 && goto:waitRar
         
         call:checkUserSave
         
@@ -1441,7 +1425,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     )
     echo =========================================================>> !batchFwLog!
     echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
-
     
     exit 0
 
@@ -1471,15 +1454,15 @@ REM : functions
         echo Save backup file size  ^: !oldSaveSize!
         echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
-        REM : add 4 bytes to newSaveSize to avoid false positive
-        set /A "newSaveSize+=4"
-        
-        REM : compare sizes
-        if !newSaveSize! GEQ !oldSaveSize! goto:eof
+        REM : set a half size threshold
+        set /A "saveSizeThreshold=oldSaveSize/2"
+
+        REM : compare sizes : > 50% => OK
+        if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
         
         REM : KO => warn user and propose to restore backup N
-        cscript /nologo !MessageBox! "Save file size (!newSaveSize! b) lower than backuped one (!oldSaveSize! b)! If you have modify/reset your save while in game ignore this message (NO) else revert last backup file (YES) ?" 4148
-        if !ERRORLEVEL! EQU 2 goto:eof
+        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is twice smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
+        if !ERRORLEVEL! EQU 7 goto:eof
         
         REM : revert save file backup
         copy /Y !saveBackup! !userGameSave! > NUL 2>&1

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V18-4"
+    set "BFW_VERSION=V18-5"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -1120,7 +1120,7 @@ REM : main
         goto:askCemuFolder
     )
 
-    set "clog="!CEMU_FOLDER:"=!\log.txt""   
+    set "clog="!CEMU_FOLDER:"=!\log.txt""
     if exist !clog! (
         set "versionRead=NOT_FOUND"
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
@@ -1404,7 +1404,7 @@ REM : ------------------------------------------------------------------
         if !cr! EQU 2 call:copy
 
        :openCemuAFirstTime
-       
+
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         if exist !clog! if exist !cs! goto:getCemuVersion

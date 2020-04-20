@@ -83,15 +83,6 @@ REM : main
 
     set "user=!args[2]!"
 
-    REM : No need to handles saves in function of their nature :
-    REM : CEMU version earlier than 1.10 : mlc01/emulatorSave in CEMU_FOLDER
-    REM : CEMU version from 1.10         : mlc01/usr/save/titleId[0:8]\titleId[8:15] in MLC01_FOLDER
-
-    REM : Because, what happen in CEMU if 2 folders are present in an old version -> nothing
-    REM : in a newer version : ask for change location -> create a the new saves files and use them
-
-    REM : So backup systematically /mlc01/emulatorSave and /usr/save.
-
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
@@ -165,19 +156,6 @@ REM : main
     set "strTmp=!strTmp: =!"
     set "shaderCacheId=!strTmp:"=!"
 
-    if [!shaderCacheId!] == ["NONE"] goto:done
-    set "pat="!emulatorSaveFolder:"=!\!shaderCacheId!*""
-    REM : in case of a future playing game with old save format on a version >= 1.11
-    REM : to avoid loosing saves (in old format), systematically backup-it in a !GAME_TITLE!_emulatorSave.rar
-    REM : under inGameSaves
-    set "rarFileEmuSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_emulatorSave.rar""
-
-    for /F "delims=~" %%i in ('dir /b /o:n !pat! 2^>NUL') do (
-        set "folder="!emulatorSaveFolder:"=!\%%i""
-        !rarExe! u -ed -ap"mlc01\emulatorSave" -ep1 -r -inul !rarFileEmuSave! !folder! > NUL 2>&1
-    )
-
-    :done
     if !cr! EQU 0 (
         if exist !rarFile! (
             echo Backup in !rarFile!

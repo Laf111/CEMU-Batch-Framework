@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V18-4"
+    set "BFW_NEXT_VERSION=V18-5"
 
     set "THIS_SCRIPT=%~0"
 
@@ -62,20 +62,25 @@ REM : main
     REM : Patch version in setup.bat
     if not ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
         echo Replacing !BFW_OLD_VERSION! with !BFW_NEXT_VERSION! in setup.bat
+        attrib -R !sf! > NUL 2>&1
         !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
     )
 
-    echo ^> Remove trailing spaces^.^.^.
-    REM : remove trailing space
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "*.bat" --excludeFileMask "multiplyLongInteger.bat, downloadGame.bat"--includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
-
-    echo ^> Check bat files^, convert them to ANSI and set them readonly^.^.^.
+    echo ^> Check bat files^, remove trailing spaces, convert them to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set them readonly
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGame" ^| find /V "downloadTitleId" ^|  find /V "fixBrokenShortcuts"') do (
 
         set "filePath="%%f""
+        
+        attrib -R !filePath! > NUL 2>&1
 
+        REM : file name
+        for /F "delims=~" %%i in (!filePath!) do set "fileName=%%~nxi"
+        
+        REM : remove trailing space
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "!fileName!" --excludeFileMask "multiplyLongInteger.bat, downloadGame.bat"--includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
+        
         call:checkFile
 
         set "tmpFile=!filePath:.bat=.bfw_tmp!"

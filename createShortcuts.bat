@@ -505,7 +505,7 @@ REM    call:log2HostFile !msg!
     call:log2HostFile !msg!
 
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
-    
+
     REM : check if main GPU is iGPU. Ask for -nolegacy if it is the case
     set "noIntel=!GPU_VENDOR:Intel=!"
     if ["!gpuType!"] == ["OTHER"] if not ["!noIntel!"] == ["!GPU_VENDOR!"] (
