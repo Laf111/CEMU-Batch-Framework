@@ -1454,10 +1454,11 @@ REM : functions
         echo Save backup file size  ^: !oldSaveSize!
         echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
-        REM : set a half size threshold
-        set /A "saveSizeThreshold=oldSaveSize/2"
+        REM : set a threshold at 99%
+        set /A "onePercent=oldSaveSize/100"
+        set /A "saveSizeThreshold=oldSaveSize-onePercent"
 
-        REM : compare sizes : > 50% => OK
+        REM : compare sizes : > ~99% => OK
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
 
         REM : KO => warn user and propose to restore backup N

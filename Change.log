@@ -3,7 +3,7 @@ USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 
 20/04/2020 V18-5 : 
 fix : popup return code bug on saves checker
-fix : set a threshold at half size for saves integrity checker
+fix : set a threshold at 99% for saves integrity checker
 
 19/04/2020 V18-4 : 
 fix : minimal CEMU version handled is now 1.11.6
