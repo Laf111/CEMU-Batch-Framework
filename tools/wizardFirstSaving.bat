@@ -204,7 +204,7 @@ REM : main
         echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
         attrib -r !wiiTitlesDataBase! > NUL 2>&1
         echo.
-        echo Check if ^: 
+        echo Check if ^:
         echo - resolution is 1280x720 ^(CEMU menu ^/ Debug ^/ view texture cache informations^) else change to 1920x1080
         echo - and if the game run at 60FPS ^(while in game and not in cutscenes^)
         echo.
@@ -261,13 +261,13 @@ REM : main
     REM : get CPU threads number
     for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
     set "recommendedMode=SingleCore-recompiler"
-    
+
     REM : version >=1.17.2
     if !v1172! LEQ 1 (
-    
+
         REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
         set /A "cpuNeeded=3"
-        
+
         REM : get GPU_VENDOR
         set "gpuType=NO_NVIDIA"
         for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
@@ -277,7 +277,7 @@ REM : main
             )
         )
         if ["!gpuType!"] == ["NVIDIA"] (
-            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in 
+            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in
             echo in 3D settings of the control panel
             set /A "cpuNeeded+=1"
         )
@@ -379,7 +379,7 @@ REM : main
     REM : replace gpuBufferCacheAccuracy = medium
     type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
     REM : replace gpuBufferCacheAccuracy = high
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!        
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
     
     REM : version >= 1.15.6 ignoring the precompile cache is handle by CEMU throught the game's profile
     if !v1156! LEQ 1 goto:patchCemuSetting
@@ -633,11 +633,11 @@ REM : main
     echo nbCpuThreads detected on !USERDOMAIN! ^: !nbCpuThreads!
 
     REM : version >=1.17.2
-    if !v1172! LEQ 1 (    
-        echo Recommended cpuMode ^: !recommendedMode!        
+    if !v1172! LEQ 1 (
+        echo Recommended cpuMode ^: !recommendedMode!
     )
     echo ---------------------------------------------------------
-    
+
     echo Then close CEMU to continue
 
     REM : link to graphic pack folder

@@ -17,8 +17,8 @@ REM : main
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
     for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
-    set "BFW_PATH=!parentFolder:~0,-2!""
-    pushd !BFW_PATH!
+    set "BFW_PATH=%parentFolder:~0,-2%""
+    pushd %BFW_PATH%
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
@@ -66,20 +66,25 @@ REM : main
         !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
     )
 
+    set "toBeRemoved=%BFW_PATH:"=%\"
+     
     echo ^> Check bat files^, remove trailing spaces, convert them to ANSI and set them readonly^.^.^.
     REM : ------------------------------------------------------------------
     REM : Convert all files to ANSI and set them readonly
     for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGame" ^| find /V "downloadTitleId" ^|  find /V "fixBrokenShortcuts"') do (
 
         set "filePath="%%f""
-        
+
         attrib -R !filePath! > NUL 2>&1
+
+        echo ^> !filePath:%toBeRemoved%=!
+        echo ---------------------------------------------------------
 
         REM : file name
         for /F "delims=~" %%i in (!filePath!) do set "fileName=%%~nxi"
         
         REM : remove trailing space
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "!fileName!" --excludeFileMask "multiplyLongInteger.bat, downloadGame.bat"--includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "!fileName!"  --includeSubDirectories --excludeFileMask "multiplyLongInteger.bat, downloadGame.bat"--includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
         
         call:checkFile
 

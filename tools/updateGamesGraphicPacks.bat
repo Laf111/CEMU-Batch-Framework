@@ -228,7 +228,7 @@ REM    call:checkGpFolders
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
-    
+
     del /F !fnrLogUggp! > NUL 2>&1
 
     REM : relaunching the search in all gfx pack folder (V2 and up)
@@ -469,14 +469,14 @@ REM : functions
     :createGpLinks
         set "str="%~1""
         set "str=!str:~2!"
-        
+
         set "gp=!str:\rules=!"
-        
+
         echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
-        
+
         set "rgp=!gp!"
-        
+
         REM : if more than one folder level exist (LastVersion packs, get only the first level
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && (
             call:getFirstFolder
@@ -484,7 +484,7 @@ REM : functions
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "linkPath=!linkPath:\_graphicPacksV2=!"
-        
+
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
 
         REM : links are already deleted earlier (more efficient than doing it here)

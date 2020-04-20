@@ -294,14 +294,14 @@ REM : main
 
     set "versionRead=NOT_FOUND"
     if not exist !cemuLog! (
-    
+
         REM : CEMU's exe
         set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe""
         REM : Warn user with message box
         cscript /nologo !MessageBox! "No CEMU's log file was found. Start !cemuExe! and relaunch" 4112
         echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch >> !batchFwLog!
         echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch
-        
+
         tumeout /T 3 > NUL 2>&1
         exit /b 77
     )
@@ -324,15 +324,15 @@ REM : main
         call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
         if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
         if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
-        
+
         if !v1156! EQU 2 (
             call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
             if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
             if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
-            
+
             if !v114! EQU 2 set "gfxType=2"
             if !v114! LEQ 1 goto:getTitleId
-            
+
             if !v114! LEQ 1 goto:getTitleId
         ) else (
             REM : version > 1.15.6 => version > 1.14
@@ -410,7 +410,7 @@ REM : main
 
     REM : create shortcut to logFile
     call:createBatchFwLogShorcut
-    
+
     REM : handle transferable shader cache comptability since 1.16
     set "sci=NOT_FOUND"
     REM : old shader cache id (rpx hash)
@@ -572,7 +572,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         )
     )
     pushd !BFW_TOOLS_PATH!
-    
+
     REM : check if cacheFile was found
     if ["!cacheFile!"] == ["NONE"] (
         call:getTransferableCache
@@ -581,7 +581,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             goto:launch3rdPartySoftware
         )
     )
-    
+
     if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "backup and provide transferable cache"
 
     REM : backup transferable cache in case of CEMU corrupt it
@@ -1035,14 +1035,14 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     ) else (
         echo !CEMU_FOLDER_NAME! return code ^: %cr_cemu% >> !batchFwLog!
-        
+
         REM : analyse log file
         type !cemuLog! | find /I "Exception" > NUL 2>&1 && (
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! return 0 but an exception was raised, openning its log ^.^.^."
             timeout /T 1 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
             timeout /T 1 > NUL 2>&1
-            !cmdOw! log* /top            
+            !cmdOw! log* /top
             set /A "cr_cemu=99"
         )
 
@@ -1351,7 +1351,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if !usePbFlag! EQU 1 call:setProgressBar 96 98 "post processing" "saving settings for !currentUser!"
 
     call:saveCemuOptions
-    
+
     :endMain
 
 
@@ -1393,7 +1393,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     ) else (
         if !usePbFlag! EQU 1 call:setProgressBar 98 100 "post processing" "waiting child processes end before exiting"
     )
-    
+
     REM : clean GFX packs links in game's folder
     for /F "delims=~" %%a in ('dir /A:L /B !GAME_GP_FOLDER! 2^>NUL') do (
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
@@ -1408,7 +1408,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
-    
+
     if %cr_cemu% EQU 0 if exist !userGameSave! (
         set "logFileTmp="!TMP:"=!\BatchFw_process.list""
 
@@ -1416,16 +1416,16 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
 
         type !logFileTmp! | find /I !GAMES_FOLDER! | find /I "rar.exe" | find /V "Winrar.exe" > NUL 2>&1 && goto:waitRar
-        
+
         call:checkUserSave
-        
+
         REM : remove trace
         del /F !logFileTmp! > NUL 2>&1
 
     )
     echo =========================================================>> !batchFwLog!
     echo Waiting the end of all child processes before ending ^.^.^.>> !batchFwLog!
-    
+
     exit 0
 
     goto:eof
@@ -1438,15 +1438,15 @@ REM : functions
     :checkUserSave
 
         REM : get the size of the new save file
-        set /A "newSaveSize=0"        
+        set /A "newSaveSize=0"
         for /F "tokens=*" %%a in (!userGameSave!)  do set /A "newSaveSize=%%~za"
 
         if not exist !saveBackup! goto:eof
-        
+
         REM : get backup N save file size
-        set /A "oldSaveSize=0"        
+        set /A "oldSaveSize=0"
         for /F "tokens=*" %%a in (!saveBackup!)  do set /A "oldSaveSize=%%~za"
-        echo --------------------------------------------------- >> !batchFwLog! 
+        echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
         echo Save archive file size ^: !newSaveSize!>> !batchFwLog!
         echo Save archive file size ^: !newSaveSize!
@@ -1459,17 +1459,17 @@ REM : functions
 
         REM : compare sizes : > 50% => OK
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
-        
+
         REM : KO => warn user and propose to restore backup N
         cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is twice smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
         if !ERRORLEVEL! EQU 7 goto:eof
-        
+
         REM : revert save file backup
         copy /Y !saveBackup! !userGameSave! > NUL 2>&1
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :getShaderCacheName
 
         pushd !getShaderCacheFolder!
@@ -1477,7 +1477,7 @@ REM : functions
         for /F %%l in ('getShaderCacheName.exe !RPX_FILE_PATH!') do set "sci=%%l"
 
         pushd !GAMES_FOLDER!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1822,10 +1822,10 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
-        
+
         REM : force integer values if needed for !versionRead! < 1.15.6
         if !v1156! LEQ 1 goto:syncCP
-        
+
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
         set "PF="!CEMU_FOLDER:"=!\gameProfiles""
@@ -1834,7 +1834,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : replace gpuBufferCacheAccuracy = medium
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
         REM : replace gpuBufferCacheAccuracy = high
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!        
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
 
         :syncCP
         REM : synchronized controller profiles (import)
@@ -2096,7 +2096,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set /A "sSetBinSize=0"
         if exist !sSetBin! (
-        
+
             if exist !csb! (
                 for /F "tokens=*" %%a in (!sSetBin!)  do set /A "sSetBinSize=%%~za"
 
@@ -2108,7 +2108,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                     set /A "%2=0" && goto:eof
                 )
             )
-            
+
         ) else (
             REM : it exists !csb! but no !sSetBin! = > exit and cancel import
             if exist !csb! set /A "%2=0" && goto:eof
@@ -2121,7 +2121,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 echo Import cancelled because non macthing nodes in xml file>> !batchFwLog!
                 set /A "%2=0" && goto:eof
             )
-        ) 
+        )
         set "%2=1"
 
     goto:eof
@@ -2500,7 +2500,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             REM : open a google search
             wscript /nologo !Start! "%windir%\explorer.exe" "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
             timeout /T 25 > NUL 2>&1
-            
+
             wscript /nologo !MessageBox! "If you found a cache, import it now ?" 4164
             if !ERRORLEVEL! EQU 2 exit /b 1
 
@@ -2510,7 +2510,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         )
         
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\importTransferableCache.bat""
-                
+
         REM : import the downloaded cache
         wscript /nologo !StartWait! !toBeLaunch! !GAME_FOLDER_PATH! !sci!
         exit /b 0

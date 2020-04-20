@@ -70,12 +70,12 @@ REM : main
         pause
         exit 1
     )
-    
+
     set "GAME_FOLDER_PATH=!args[0]!"
 
     set "sci=!args[1]!"
     set "sci=!sci:"=!"
-    
+
     :beginImport
     cls
     echo =========================================================
@@ -94,7 +94,7 @@ REM : main
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askInputFile
     )
-    
+
     REM : check the extension
     for /F %%i in (!TRANSF_CACHE!) do set "ext=%%~xi"
     if not ["!ext!"] == [".bin"] (
@@ -103,13 +103,13 @@ REM : main
     )
     for %%a in (!TRANSF_CACHE!) do set "folder="%%~dpa""
     set "SOURCE_FOLDER=!folder:~0,-2!""
-    
+
     REM : with args
     if %nbArgs% NEQ 0 goto:getTargetFolder
-    
+
     REM : Ask if tc for CEMU > 1.16 => newTc=1
     set /A "newTc=0"
-        
+
     REM : analyse length of file
     for /F %%i in (!TRANSF_CACHE!) do set "fn=%%~ni"
 
@@ -125,7 +125,7 @@ REM : main
         set /A "newTc=0"
         goto:askGameFolder
     )
-    
+
     REM : else ask user
     choice /C yn /N /M "Is this cache is for versions of CEMU > 1.16 (y, n)? : "
     if %ERRORLEVEL% EQU 1 set /A "newTc=1"
@@ -227,7 +227,7 @@ REM : main
 
     REM : check the files sizes
     for /F "tokens=*" %%a in (!TRANSF_CACHE!)  do set "newSize=%%~za"
-   
+
     :getTargetFolder
     REM : search for existing cache
     set "TARGET_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\ShaderCache\transferable""
@@ -276,7 +276,7 @@ REM : main
         REM : Waiting before exiting
         pause
     )
-    
+
     :endMain
     if %nbArgs% EQU 0 endlocal
     exit 0
