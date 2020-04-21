@@ -26,7 +26,7 @@ REM : main
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
+    set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
@@ -137,7 +137,7 @@ REM : main
 
     REM : display documentation
     set "doc="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
-    wscript /nologo !Start! "%windir%\System32\notepad.exe" !doc!
+    wscript /nologo !StartMaximized! "%windir%\System32\notepad.exe" !doc!
 
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
