@@ -36,6 +36,6 @@ About CemuHook :
 Since CemuHook 0.5.6.0 for 1.8.1-1.11.3, appears a new option in Debug menu : 
     - Precompiled shader cache On/Off, in case you want to use only your GLCache (GPU OpenGL cache).
 
-On newer versions (>=1.15), the GLCache is now protected in CEMU's folder under shaderCahce/driver/nvidia
+On newer versions (>=1.15), the GLCache is not protected in CEMU's folder under shaderCahce/driver/nvidia
 
 

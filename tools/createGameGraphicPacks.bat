@@ -26,6 +26,7 @@ REM : main
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
@@ -133,6 +134,11 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+
+    REM : display documentation
+    set "doc="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
+    wscript /nologo !Start! "%windir%\System32\notepad.exe" !doc!
+
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""

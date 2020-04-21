@@ -1548,36 +1548,36 @@ REM : functions
     :waitProcessesEnd
 
         REM : debug trace
-rem        set "logFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
-rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+rem        set "launchGameLogFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
+rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !launchGameLogFileTmp!
 
         set /A "disp=0"
-        set "logFileTmp="!TMP:"=!\BatchFw_process.list""
+        set "launchGameLogFileTmp="!TMP:"=!\BatchFw_launchGame_process.list""
 
         :waitingLoopProcesses
-        wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+        wmic process get Commandline 2>NUL | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !launchGameLogFileTmp!
 
-        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGameStats.bat" > NUL 2>&1 && (
+        type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "updateGameStats.bat" > NUL 2>&1 && (
             echo waitProcessesEnd : updateGameStats still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /I "copy" | find /I "!CEMU_FOLDER_NAME!" > NUL 2>&1 && (
+        type !launchGameLogFileTmp! | find /I "copy" | find /I "!CEMU_FOLDER_NAME!" > NUL 2>&1 && (
             echo waitProcessesEnd : a copy is still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && (
+        type !launchGameLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && (
             echo waitProcessesEnd : rar^.exe still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
-        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
+        type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "updateGraphicPacksFolder.bat" > NUL 2>&1 && (
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
 
-        type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
+        type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
             if !disp! EQU 0 echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
-            if !disp! EQU 0 type !logFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+            if !disp! EQU 0 type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
                 echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
                 if !usePbFlag! EQU 1 call:setProgressBar 90 94 "pre processing" "GFX packs completion, please wait"
                 if !usePbFlag! EQU 0 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
@@ -1591,7 +1591,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
         
         REM : remove trace
-        del /F !logFileTmp! > NUL 2>&1
+        del /F !launchGameLogFileTmp! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

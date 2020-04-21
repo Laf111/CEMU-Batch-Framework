@@ -578,14 +578,14 @@ REM : main
     REM : waiting updateGamesGraphicPacks processes ending
     :wait
     set /A "disp=0"
-    set "logFileTmp="!TMP:"=!\BatchFw_process.list""
+    set "wfsLogFileTmp="!TMP:"=!\BatchFw_wizardFirstSaving_process.list""
 
     :waitingLoop
     timeout /T 1 > NUL 2>&1
-    wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !logFileTmp!
+    wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
-    type !logFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-        if !disp! EQU 7 (
+    type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
+        if !disp! EQU 5 (
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
         )
@@ -594,7 +594,7 @@ REM : main
     )
 
     REM : remove trace
-    del /F !logFileTmp! > NUL 2>&1
+    del /F !wfsLogFileTmp! > NUL 2>&1
     REM : wait 1 sec for GFX detection
     timout /T 1 > NUL 2>&1
 

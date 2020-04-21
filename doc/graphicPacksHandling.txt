@@ -2,11 +2,19 @@
 GRAPHIC_PACKS :
 =========================================================
 
+
+1°) common graphic pack folder, update process
+----------------------------------------------
+
 BatchFw has an auto-update process for its graphic packs folder (_BatchFW_Graphic_Packs) and therefore autmoatically checks
 updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
 or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
 Only graphic packs needed for your games are installed.
+
+
+2°) graphic pack created for unsupported game (official repo)
+-------------------------------------------------------------
 
 If a game is not supported in the Slashiee's repository, BatchFW creates a generic one for resolution scaling.
 
@@ -17,16 +25,25 @@ When an official pack comes out BatchFW will replace its packs with the official
 (during the graphics packs folder auto-update process) and add missing presets for your desired 
 aspect ratios (16/10 for example);
 
-If on a new game graphics packs are not applied or if you have any issue, the native resolution 
-in BatchFW's internal database might be wrong for this game. Get the actual native resolution 
-using CEMU's feature in the "/ Debug / View texture cache info" menu and update BatchFW's database. 
-Also check if the cemu FPS value is correct (speed adjustement (FPS CAP) graphic packs)
+If on a new game graphics packs are not applied or if you have any issue, THE NATIVE RESOLUTION 
+in BatchFW's internal database MIGHT BE WRONG for this game. 
 
-If you have customized graphics pack import them (or create them) under %GAME_FOLDER_PATH%\Cemu\graphicPacks.
+> Get the actual native resolution using CEMU's feature in the "/ Debug / View texture cache info" menu and 
+update BatchFW's database. 
+
+Also check if the cemu FPS value while in game (not in cutscene) is correct (for speed adjustement (FPS CAP) graphic packs) compared to BatchFW's database value set by default.
+Update BatchFW's database value is needed.
+
+
+3°) User graphic packs
+----------------------
+
+If you have customized graphic packs, create them under %GAME_FOLDER_PATH%\Cemu\graphicPacks.
 
 BatchFW uses this folder to gather all graphics packs available for a game (V2 or V3). Then creates links (junction)
-to its graphic packs folder (_BatchFW_Graphic_Packs). 
+to its graphic packs folders (_BatchFW_Graphic_Packs). 
 
-Those links are automatically updated (if drive letter changes), deleted (broken links) and recreated each time you launch the game.
+Those links are automatically updated (if drive letter changes), they are deleted and recreated each time you launch the game.
+
 This to ensure your games library portability as WINDOWS links does not truly handle relative path for the target 
 (the drive letter might change if you have your games on an external USB drive)

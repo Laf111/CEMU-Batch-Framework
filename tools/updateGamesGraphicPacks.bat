@@ -174,10 +174,6 @@ REM    call:checkGpFolders
     set "gpfound=0"
     call:updateGraphicPacks
 
-    del /F !fnrLogUggp! > NUL 2>&1
-    REM : relaunching the search in all gfx pack folder (V2 and up)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
-
     REM : log in game library log
     if not ["!newVersion!"] == ["NOT_FOUND"] (
 
@@ -197,11 +193,15 @@ REM    call:checkGpFolders
 
     :waitLoop
     wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
-    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" > NUL 2>&1 && goto:waitLoop
+    type !logFileTmp! | find /I "create" | find /I "GraphicPacks" > NUL 2>&1 && goto:waitLoop
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
 
+    del /F !fnrLogUggp! > NUL 2>&1
+    REM : relaunching the search in all gfx pack folder (V2 and up)
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+    
     :createLinks
     REM : before waitingLoop :
 
@@ -235,7 +235,6 @@ REM    call:checkGpFolders
 
     REM : import GFX packs
     call:linkGraphicPacks
-    set /A "nbCheckTry=1"
 
     REM : GFX pack V3 and up : import mods and other ratios already treated in importGraphicPacks
     if not ["!gfxType!"] == ["V2"] (
@@ -262,8 +261,8 @@ REM    call:checkGpFolders
 
     :checkPackLinks
     REM :Rebuild links on GFX packs
-    echo Check links on GFX packs ^(!nbCheckTry! pass^) >> !myLog!
-    echo Check links on GFX packs ^(!nbCheckTry! pass^)
+    echo Check links on GFX packs  >> !myLog!
+    echo Check links on GFX packs 
 
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && (
@@ -275,8 +274,6 @@ REM    call:checkGpFolders
             for /F "delims=~" %%i in ('dir /B /S *_1440p*') do set "resPack="%%i""
         )
 
-        set /A "nbCheckTry+=1"
-        if !nbCheckTry! EQU 2 goto:checkPackLinks
         if not [!resPack!] == ["NOT_FOUND"] goto:endMain
     )
 
