@@ -1,6 +1,13 @@
 IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SETTINGS 
 USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
 
+21/04/2020 V18-6 : 
+fix : popup return code bug on saves checker
+fix : set a threshold at 90% for saves integrity checker (to avoid false positive due to Rar upgrade since 18-4
+fix : resolution GFX V3 pack sometimes not listed in CEMU despite link to it exists
+opt : slightly lower pre-processing time
+add : enhancements in fixBatfiles.bat
+
 20/04/2020 V18-5 : 
 fix : popup return code bug on saves checker
 fix : set a threshold at 99% for saves integrity checker

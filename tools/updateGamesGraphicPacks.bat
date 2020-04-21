@@ -9,15 +9,6 @@ REM : main
 
     set "THIS_SCRIPT=%~0"
 
-    REM : checking THIS_SCRIPT path
-    call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! NEQ 0 (
-        echo ERROR ^: Remove DOS reserved characters from the path "!THIS_SCRIPT!" ^(such as ^&^, %% or ^^!^)^, cr=!cr!
-
-        exit 1
-    )
-
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -44,9 +35,6 @@ REM : main
 
     set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
     set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
-
-    REM : set current char codeset
-    call:setCharSet
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -186,6 +174,10 @@ REM    call:checkGpFolders
     set "gpfound=0"
     call:updateGraphicPacks
 
+    del /F !fnrLogUggp! > NUL 2>&1
+    REM : relaunching the search in all gfx pack folder (V2 and up)
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+
     REM : log in game library log
     if not ["!newVersion!"] == ["NOT_FOUND"] (
 
@@ -195,6 +187,20 @@ REM    call:checkGpFolders
         set "msg="!GAME_TITLE! graphic packs version=!newVersion!""
         call:log2GamesLibraryFile !msg!
     )
+
+    REM : monitor LaunchGame.bat until cemu is launched
+    set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
+
+    REM : wait the create*.bat end before continue
+    echo Waiting all child processes end >> !myLog!
+    echo Waiting all child processes end
+
+    :waitLoop
+    wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" > NUL 2>&1 && goto:waitLoop
+    type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
+
+    del /F !logFileTmp! > NUL 2>&1
 
     :createLinks
     REM : before waitingLoop :
@@ -215,25 +221,6 @@ REM    call:checkGpFolders
 
     call:linkMlcFolder
 
-    REM : monitor LaunchGame.bat until cemu is launched
-    set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
-
-    REM : wait the create*.bat end before continue
-    echo Waiting all child processes end >> !myLog!
-    echo Waiting all child processes end
-
-    :waitLoop
-    wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
-    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" > NUL 2>&1 && goto:waitLoop
-    type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
-
-    del /F !logFileTmp! > NUL 2>&1
-
-    del /F !fnrLogUggp! > NUL 2>&1
-
-    REM : relaunching the search in all gfx pack folder (V2 and up)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
-
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
 
     REM : clean links in game's graphic pack folder
@@ -248,6 +235,7 @@ REM    call:checkGpFolders
 
     REM : import GFX packs
     call:linkGraphicPacks
+    set /A "nbCheckTry=1"
 
     REM : GFX pack V3 and up : import mods and other ratios already treated in importGraphicPacks
     if not ["!gfxType!"] == ["V2"] (
@@ -273,13 +261,24 @@ REM    call:checkGpFolders
     for %%a in (!ARLIST!) do call:linkOtherV2GraphicPacks "%%a"
 
     :checkPackLinks
-
     REM :Rebuild links on GFX packs
-    echo Check links on GFX packs >> !myLog!
-    echo Check links on GFX packs
+    echo Check links on GFX packs ^(!nbCheckTry! pass^) >> !myLog!
+    echo Check links on GFX packs ^(!nbCheckTry! pass^)
 
     REM : check that at least one GFX pack was listed
-    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
+    dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && (
+
+        set "resPack="NOT_FOUND""
+        if not ["!gfxType!"] == ["V2"] (
+            for /F "delims=~" %%i in ('dir /B /S *_Resolution') do set "resPack="%%i""
+        ) else (
+            for /F "delims=~" %%i in ('dir /B /S *_1440p*') do set "resPack="%%i""
+        )
+
+        set /A "nbCheckTry+=1"
+        if !nbCheckTry! EQU 2 goto:checkPackLinks
+        if not [!resPack!] == ["NOT_FOUND"] goto:endMain
+    )
 
     REM : stop execution something wrong happens
     REM : warn user
@@ -710,54 +709,6 @@ REM    REM : ------------------------------------------------------------------
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
-    :checkPathForDos
-
-        set "toCheck=%1"
-
-        REM : if implicit expansion failed (when calling this script)
-        if ["!toCheck!"] == [""] (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 13
-            exit /b 13
-        )
-
-        REM : try to resolve
-        if not exist !toCheck! (
-            echo Remove DOS reserved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 11
-            exit /b 11
-        )
-
-        REM : try to list
-        dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
-            echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
-            exit /b 12
-        )
-
-        exit /b 0
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to get and set char set code for current host
-    :setCharSet
-
-        REM : get charset code for current HOST
-        set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
-
-        if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
-            exit /b 9
-        )
-        REM : set char code set, output to host log file
-
-        chcp %CHARSET% > NUL 2>&1
-        call:log2HostFile "charCodeSet=%CHARSET%"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     REM : function to log info for current host
     :log2GamesLibraryFile
         REM : arg1 = msg
@@ -784,20 +735,3 @@ REM    REM : ------------------------------------------------------------------
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : function to log info for current host
-    :log2HostFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        if not exist !logFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2HostFile
-        )
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
-        :logMsg2HostFile
-        echo !msg!>> !logFile!
-
-    goto:eof
-    REM : ------------------------------------------------------------------

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V18-5"
+    set "BFW_VERSION=V18-6"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -245,8 +245,8 @@ REM : main
         )
     ) else (
         echo =========================================================
-        echo Set your BatchFw^'s settings and register more than
-        echo one CEMU's version
+        echo Set your BatchFw^'s settings and register many versions
+        echo of CEMU
         echo =========================================================
         echo ^(in case of false input close this main window to cancel^)
     )
@@ -1227,8 +1227,10 @@ REM : main
     if !QUIET_MODE! EQU 0 (
         REM : readonly batchFw files
         pushd !BFW_PATH!
-        attrib +r *.bat
-        for /F "delims=~" %%f in ('dir /S /B tools\*.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadTitleId" ^| find /V "downloadGame" ^| find /V "fixBrokenShortcuts"') do attrib +r "%%f" > NUL 2>&1
+        attrib +r *.bat > NUL 2>&1
+        pushd !BFW_TOOLS_PATH!
+        attrib +r *.bat > NUL 2>&1
+
     )
 
     endlocal

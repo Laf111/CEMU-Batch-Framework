@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V18-5"
+    set "BFW_NEXT_VERSION=V18-6"
 
     set "THIS_SCRIPT=%~0"
 
@@ -67,33 +67,78 @@ REM : main
     )
 
     set "toBeRemoved=%BFW_PATH:"=%\"
-     
-    echo ^> Check bat files^, remove trailing spaces, convert them to ANSI and set them readonly^.^.^.
-    REM : ------------------------------------------------------------------
+
+    echo ^> Check bat files^.^.^.
+    echo.
+
+    set "fixBatFilesLog="!BFW_PATH:"=!\logs\fixBatFiles.log""
+
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGame" ^| find /V "downloadTitleId" ^|  find /V "fixBrokenShortcuts"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGame" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo ^> !filePath:%toBeRemoved%=!
+        echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        echo - remove readonly attribute
         attrib -R !filePath! > NUL 2>&1
 
-        echo ^> !filePath:%toBeRemoved%=!
-        echo ---------------------------------------------------------
-
+        echo - remove trailing spaces
         REM : file name
         for /F "delims=~" %%i in (!filePath!) do set "fileName=%%~nxi"
-        
+
         REM : remove trailing space
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "!fileName!"  --includeSubDirectories --excludeFileMask "multiplyLongInteger.bat, downloadGame.bat"--includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace ""
-        
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_PATH! --fileMask "!fileName!"  --includeSubDirectories --useRegEx --find "[ ]{1,}\r" --replace "" --logFile !fixBatFilesLog!
+
+        echo - check file consistency
         call:checkFile
 
+        echo - convert file to ANSI
         set "tmpFile=!filePath:.bat=.bfw_tmp!"
         type !filePath! > !tmpFile!
         del /F !filePath! > NUL 2>&1
         move /Y !tmpFile! !filePath! > NUL 2>&1
+
+        echo - set readonly attribute
         attrib +R !filePath! > NUL 2>&1
     )
+
+    REM : remove readonly attribute on fixBrokenShortcuts.bat
+    set "filePath="!BFW_TOOLS_PATH:"=!\fixBrokenShortcuts.bat""
+    attrib -R !filePath! > NUL 2>&1
+
+    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    echo.
+    echo checking specific files^.^.^.
+    echo.
+
+    set "filePath="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
+    echo ^> tools/downloadTitleId.bat
+
+    type !filePath! | find /I "delims=~	" > NUL 2>&1 && goto:checkDownloadGames
+    echo ERROR^: TAB was not found line 105^, the file format is not ANSI anymore ^?
+
+    :checkDownloadGames
+    set "filePath="!BFW_TOOLS_PATH:"=!\downloadGames.bat""
+    echo ^> tools/downloadGames.bat
+
+    type !filePath! | find /I "™" > NUL 2>&1 && goto:checkMultiplyLongInteger
+    echo ERROR^: Specific char not found line 988^, the file format is not ANSI anymore ^?
+
+    :checkMultiplyLongInteger
+    set "filePath="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
+    echo ^> tools/multiplyLongInteger.bat
+
+    pushd !BFW_TOOLS_PATH!
+    for /F %%a in ('!filePath! 1234 4321') do set /A "result=%%a"
+    if !result! NEQ 5332114 (
+        echo ERROR^: 1234x4321 ^<^> 5332114 ^(=!result!^) the file format is not ANSI anymore ^?
+    )
+    echo.
+    echo =========================================================
+    echo done
+    echo.
 
     pause
     exit /b 0
@@ -157,5 +202,6 @@ REM : functions
                 set /A "wngDetected=1"
             )
         )
-REM        if !wngDetected! EQU 1 pause
+        if !wngDetected! EQU 1 timeout /T 3 > NUL 2>&1
+
     goto:eof

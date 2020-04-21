@@ -1454,15 +1454,16 @@ REM : functions
         echo Save backup file size  ^: !oldSaveSize!
         echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
-        REM : set a threshold at 99%
-        set /A "onePercent=oldSaveSize/100"
-        set /A "saveSizeThreshold=oldSaveSize-onePercent"
+        REM : set a threshold at 90
+        set /A "tenPercent=oldSaveSize/10"
 
-        REM : compare sizes : > ~99% => OK
+        set /A "saveSizeThreshold=oldSaveSize-tenPercent"
+
+        REM : compare sizes : > ~90% => OK
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
 
         REM : KO => warn user and propose to restore backup N
-        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is twice smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
+        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is at least 10%% smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
         if !ERRORLEVEL! EQU 7 goto:eof
 
         REM : revert save file backup
@@ -1572,6 +1573,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             echo waitProcessesEnd : updateGraphicPacksFolder still running >> !batchFwLog!
             goto:waitingLoopProcesses
         )
+
         type !logFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
             if !disp! EQU 0 echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
@@ -1581,6 +1583,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
                 if !usePbFlag! EQU 0 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
                 set /A "disp=disp+1"
             )
+            timeout /T 1 > NUL 2>&1
             goto:waitingLoopProcesses
         )
         if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
