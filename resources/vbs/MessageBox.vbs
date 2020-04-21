@@ -3,6 +3,10 @@ Set objArgs = WScript.Arguments
 ' message
 messageText = objArgs(0)
 
+If (objArgs.Count = 1) Then
+    createobject("wscript.shell").popup messageText, 40, "CEMU's BatchFw", 64
+Else
+
 ' critLevel values : 
 
 ' Constant              Value   Description
@@ -44,24 +48,24 @@ messageText = objArgs(0)
 '       vbRetryCancel+vbInformation+vbSystemModal+vbDefaultButton2           = 4421
 
        
-critLevel = objArgs(1)
+    critLevel = objArgs(1)
 
-' open msg box
-returnValue = MsgBox(messageText, critLevel, "CEMU's BatchFw")
+    ' open msg box
+    returnValue = MsgBox(messageText, critLevel, "CEMU's BatchFw")
 
-' The MsgBox function has the following return values:
-' 
-' Constant    Value   Button
-' --------------------------
-' vbOK        1       OK
-' vbCancel    2       Cancel
-' vbAbort     3       Abort
-' vbRetry     4       Retry
-' vbIgnore    5       Ignore
-' vbYes       6       Yes
-' vbNo        7       No
+    ' The MsgBox function has the following return values:
+    ' 
+    ' Constant    Value   Button
+    ' --------------------------
+    ' vbOK        1       OK
+    ' vbCancel    2       Cancel
+    ' vbAbort     3       Abort
+    ' vbRetry     4       Retry
+    ' vbIgnore    5       Ignore
+    ' vbYes       6       Yes
+    ' vbNo        7       No
 
-WScript.Quit(returnValue)
-
+    WScript.Quit(returnValue)
+End If
 
 
