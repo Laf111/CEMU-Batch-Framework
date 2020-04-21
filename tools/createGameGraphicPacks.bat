@@ -26,7 +26,6 @@ REM : main
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "StartMaximized="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximized.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
@@ -135,10 +134,6 @@ REM : main
 
     :inputsAvailables
 
-    REM : display documentation
-    set "doc="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
-    wscript /nologo !StartMaximized! "%windir%\System32\notepad.exe" !doc!
-
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
@@ -190,7 +185,7 @@ REM : main
     REM get all title Id for this game
     set "titleIdList=%titleId%"
     call:getAllTitleIds
-
+    
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
     echo Create graphic packs for !GAME_TITLE! >> !cgpLogFile!

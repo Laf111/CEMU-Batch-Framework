@@ -668,6 +668,8 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
+        cscript /nologo !MessageBox! "Create BatchFw packs for this game : the native resolution and FPS in internal database resources/wiiTitlesDataBase.csv are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. Edit and update resources/wiiTitlesDataBase.csv if needed"
+
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""

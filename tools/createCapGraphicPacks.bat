@@ -145,6 +145,7 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
     set "titleId=%titleId: =%"
 
@@ -187,7 +188,7 @@ REM : main
        set "nativeHeight=%%j"
        set "nativeFps=%%k"
        )
-
+       
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =_%"
 
