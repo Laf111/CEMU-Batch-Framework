@@ -72,7 +72,7 @@ REM : main
     echo =========================================================
     echo BatchFw pre-requisites check^.^.^.
     echo =========================================================
-    
+
     REM : check if file system is NTFS (BatchFw use Symlinks and need to be installed on a NTFS volume)
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
 
@@ -511,7 +511,7 @@ REM : main
             echo.
             REM : compute current aspect ratio
             call:reduceFraction !widthRead! !heightRead! width height
-    
+
             choice /C ny /N /M "Define !width!/!height! as aspect ratio ? (y,n): "
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
@@ -642,7 +642,7 @@ REM : main
 
     REM : here ["!ACTIVE_ADAPTER!"] != ["NOT_FOUND"]
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-   
+
     if exist !glogFile! if !changeArList! EQU 1 (
         REM : clean all entries in glogFile to force bathFw to complete
         REM : GFX packs on next launch
@@ -1175,7 +1175,7 @@ REM : main
     echo current^) before removing the previous one if the last one runs all
     echo your games without any issue.
     echo ---------------------------------------------------------
-    pause
+    if %nbArgs% EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
     echo entered here^:
@@ -1184,7 +1184,7 @@ REM : main
     echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
     echo to register a SINGLE version of CEMU
     echo ---------------------------------------------------------
-    pause
+    if %nbArgs% EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you encounter any issues or have made a mistake when
     echo collecting settings for a game^:
@@ -1193,7 +1193,7 @@ REM : main
     echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
     echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     echo ---------------------------------------------------------
-    pause
+    if %nbArgs% EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change Batch^'s settings ^(such as graphic
     echo pack completion^, aspects ratios^) and^/or^ register more
@@ -1207,7 +1207,8 @@ REM : main
     echo There^'s no need to launch scripts from _BatchFw_Install now^!
     pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if %nbArgs% EQU 1 exit 0
+    if %nbArgs% EQU 1 goto:endMain
+
     echo opening !OUTPUT_FOLDER:"=!\Wii-U Games^.^.^.
     timeout /T 4 > NUL 2>&1
 
@@ -1223,15 +1224,13 @@ REM : main
         REM : Waiting before exiting
         pause
     )
-    REM : here %nbArgs% EQU 0
-    if !QUIET_MODE! EQU 0 (
-        REM : readonly batchFw files
-        pushd !BFW_PATH!
-        attrib +r *.bat > NUL 2>&1
-        pushd !BFW_TOOLS_PATH!
-        attrib +r *.bat > NUL 2>&1
 
-    )
+    :endMain
+    REM : readonly batchFw files
+    pushd !BFW_PATH!
+    attrib +r *.bat > NUL 2>&1
+    pushd !BFW_TOOLS_PATH!
+    attrib +r *.bat > NUL 2>&1
 
     endlocal
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
@@ -1364,7 +1363,7 @@ REM : ------------------------------------------------------------------
         if !result! EQU 2 goto:extractCemuHook
 
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
-        
+
         :extractCemuHook
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
