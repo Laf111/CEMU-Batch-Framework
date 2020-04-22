@@ -31,7 +31,7 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
         if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
 
@@ -59,7 +59,7 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "robocopy" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
         if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
     timeout /T 3 > NUL 2>&1

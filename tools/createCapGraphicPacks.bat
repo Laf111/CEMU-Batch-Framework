@@ -188,7 +188,7 @@ REM : main
        set "nativeHeight=%%j"
        set "nativeFps=%%k"
        )
-       
+
     set "title=%Desc:"=%"
     set "GAME_TITLE=%title: =_%"
 
@@ -402,13 +402,13 @@ REM : functions
 
         if !nativeFps! EQU 30 (
             echo description = Adjust the speed in game when engine model is FPS based^. ^
-^(DO NOT USE WITH THE 60FPS ONE^)^. You need to disable vsync^. ^
-BatchFw assume that the native FPS is 30^. ^If it is not^,change the native FPS to 60 in ^
+You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS^
+is 30^. If it is not^, change the native FPS to 60 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
             echo description = Adjust the speed in game when engine model is FPS based^. ^
-^(DO NOT USE WITH THE 60FPS ONE^)^. You need to disable vsync^. ^
-BatchFw assume that the native FPS is 60^. ^If it is not^,change the native FPS to 30 in ^
+You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS^
+is 60^. If it is not^, change the native FPS to 30 in ^
 _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
 

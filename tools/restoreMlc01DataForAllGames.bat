@@ -233,10 +233,16 @@ REM : main
             set "str=!str:^=!"
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
+            :tryToMove
+            call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
-            call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
-
-            if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+            if [!ANSWER!] == ["y"] (
+                move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
+                )
+            )
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

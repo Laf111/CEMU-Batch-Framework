@@ -185,7 +185,7 @@ REM : main
     REM get all title Id for this game
     set "titleIdList=%titleId%"
     call:getAllTitleIds
-    
+
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
     echo Create graphic packs for !GAME_TITLE! >> !cgpLogFile!
@@ -322,7 +322,8 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
         call:writeRoundedFilters >> !bfwRulesFile!
 
-        if !targetHeight! LEQ 16 goto:addFilters
+        if !targetHeight! LEQ 8 goto:addFilters
+        if !resRatio! GEQ 12 goto:addFilters
         set /A "resRatio+=1"
         goto:beginLoopRes
 

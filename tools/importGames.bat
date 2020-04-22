@@ -247,9 +247,16 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
-            call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
+            :tryToMove
+            call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
-            if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+            if [!ANSWER!] == ["y"] (
+                move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
+                )
+            )
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -470,12 +477,24 @@ REM : functions
         :treatGame
         if !moveFlag! EQU 1 (
             echo Moving game^'s files^.^.^.
-            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+            if not exist !source! (
+                move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:treatGame
+
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
+                    goto:eof
+                )
+            )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
-                cscript /nologo !MessageBox! "ERROR While moving game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatGame
+
+                cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatGame
+
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
+                goto:eof
             )
         ) else (
             echo Copying game^'s files^.^.^.
@@ -483,9 +502,11 @@ REM : functions
             robocopy !source! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
-                cscript /nologo !MessageBox! "ERROR While copying game cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatGame
+                cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatGame
+
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files !" 4112
+                goto:eof
             )
         )
         REM : creating mlc01 folder structure
@@ -549,20 +570,26 @@ REM : functions
         :treatUpdate
         if !moveFlag! EQU 1 (
             set "source="!INPUT_FOLDER:"=!\%endTitleId%""
-            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-            call:moveFolder !source! !target! cr
-            if !cr! NEQ 0 (
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update cr=!cr!, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatUpdate
+
+            if not exist !source! (
+                move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:treatUpdate
+
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
+                    goto:eof
+                )
             )
         ) else (
             robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatUpdate
+                cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatUpdate
+
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !" 4112
+                goto:eof
             )
 
         )
@@ -603,12 +630,23 @@ REM : functions
         :treatDlc
         if !moveFlag! EQU 1 (
             set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
-            move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+            if not exist !source! (
+                move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:treatDlc
+
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
+                    goto:eof
+                )
+            )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC cr=!cr!, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatDlc
+                cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatDlc
+
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
+                goto:eof
             )
             move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
 
@@ -616,9 +654,11 @@ REM : functions
             robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC cr=!cr!^, close all explorer^.exe that might interfer ^!" 4113
-                if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files !"
-                if !ERROLRLEVEL! EQU 1 goto:treatDlc
+                cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatDlc
+
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files !" 4112
+                goto:eof
             )
         )
 

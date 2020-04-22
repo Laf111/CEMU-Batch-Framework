@@ -319,7 +319,12 @@ REM : main
         for %%a in (!cemuFolder!) do set "parentFolder="%%~dpa""
         set "GAME_FOLDER=!parentFolder:~0,-2!""
 
+        :tryToMove
         move /Y "%%i" !GAME_FOLDER! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+            cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMove
+        )
     )
 
     for /F "delims=~" %%x in ('dir /b /a:d /s code 2^>NUL') do (

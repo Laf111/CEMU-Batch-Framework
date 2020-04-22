@@ -68,6 +68,26 @@ REM : main
 
     set "toBeRemoved=%BFW_PATH:"=%\"
 
+    REM : check Wii-U Title database integrity
+    echo ^> Check Wii-U Title database integrity^.^.^.
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    
+    set /A "nbLines=0"
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /C ";"') do set /A "nbLines=%%i"
+    if !nbLines! EQU 0 (
+        echo ERROR^: !wiiTitlesDataBase! seems to be corrupted
+    ) else (
+        set /A "nbEntries=nbLines-1"
+        echo  Number of entries ^(games declined by regions^) ^: !nbEntries!
+        
+        type !wiiTitlesDataBase! | find /V "Native Fps" | find /V "';" && (
+            echo ERROR^: line above in !wiiTitlesDataBase! seems to be misformed
+        )
+        type !wiiTitlesDataBase! | find /V "Native Fps" | find /V ";'" && (
+            echo ERROR^: line above in !wiiTitlesDataBase! seems to be misformed
+        )
+    )
+    
     echo ^> Check bat files^.^.^.
     echo.
 

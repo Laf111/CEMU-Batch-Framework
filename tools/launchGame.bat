@@ -946,7 +946,15 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
 
-    if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
+    :tryToBackupGp
+    if exist !graphicPacks! (
+        move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+            cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !graphicPacks:"=!. Retry ?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToBackupGp
+        )
+    )
+
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
     REM : when using a simlink with a the target on another partition
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
@@ -2496,21 +2504,19 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     :getTransferableCache
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-            cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ?" 4145
-            if !ERRORLEVEL! EQU 2 (
-                cscript /nologo !MessageBox! "If you want to import a cache for this game afterward, use the shortcut 'Wii-U Games\BatchFw\Tools\Shaders Caches\Import transferable cache' and browse to your cache file. No need to rename-it, BatchFw will do it for you"
-                exit /b 1
-            )
+            cscript /nologo !MessageBox! "No transferable shader cache was found, do you want to search one on internet ? If you don't, you can import a cache afterward using the shortcut 'BatchFw\Tools\Shaders Caches\Import transferable cache'. No need to rename-it" 4145
+            if !ERRORLEVEL! EQU 2 exit /b 1
+
             REM : open a google search
             wscript /nologo !Start! "%windir%\explorer.exe" "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
             timeout /T 25 > NUL 2>&1
 
             wscript /nologo !MessageBox! "If you found a cache, import it now ?" 4164
-            if !ERRORLEVEL! EQU 2 exit /b 1
+            if !ERRORLEVEL! EQU 7 exit /b 1
 
         ) else (
             wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now ^?" 4164
-            if !ERRORLEVEL! EQU 2 exit /b 1
+            if !ERRORLEVEL! EQU 7 exit /b 1
         )
         
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\importTransferableCache.bat""

@@ -157,9 +157,16 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
-            call:getUserInput "Renaming folder for you ? (y, n) : " "y,n" ANSWER
+            :tryToMove
+            call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
-            if [!ANSWER!] == ["y"] move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+            if [!ANSWER!] == ["y"] (
+                move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
+                )
+            )
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
             if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -320,7 +327,9 @@ REM : functions
         if [!libFileLine!] == ["NONE"] (
              set "titleIdIco=%titleId%"
              REM : add a line in wiiTitlesDataBase
-             echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;1080^;60 >> !wiiTitlesDataBase!
+             attrib -r !wiiTitlesDataBase! > NUL 2>&1
+             echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;720^;60 >> !wiiTitlesDataBase!
+             attrib +r !wiiTitlesDataBase! > NUL 2>&1
              goto:searchTgaFile
         )
 

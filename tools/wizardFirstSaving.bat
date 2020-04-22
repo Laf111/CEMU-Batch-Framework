@@ -200,9 +200,9 @@ REM : main
         echo ---------------------------------------------------------
         echo No informations found on the game with a titleId %titleId%
         echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
-        attrib +r !wiiTitlesDataBase! > NUL 2>&1
-        echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
         attrib -r !wiiTitlesDataBase! > NUL 2>&1
+        echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
+        attrib +r !wiiTitlesDataBase! > NUL 2>&1
         echo.
         echo Check if ^:
         echo - resolution is 1280x720 ^(CEMU menu ^/ Debug ^/ view texture cache informations^) else change to 1920x1080
@@ -366,8 +366,11 @@ REM : main
     :backupDefaultSettings
 
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
-    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
-
+    if not exist !GAME_GP_FOLDER! (
+        mkdir !GAME_GP_FOLDER! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !GAME_GP_FOLDER!
+    )
     REM : path to cemuHook Ssettings
     set "chs="!CEMU_FOLDER:"=!\cemuhook.ini""
 
@@ -460,6 +463,12 @@ REM : main
 
     REM : saved settings folder path for this game
     set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+    if not exist !sf! (
+        mkdir !sf! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !sf!
+    )
+
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if exist !lls! (
@@ -596,7 +605,7 @@ REM : main
     REM : remove trace
     del /F !wfsLogFileTmp! > NUL 2>&1
     REM : wait 1 sec for GFX detection
-    timout /T 1 > NUL 2>&1
+    timeout /T 1 > NUL 2>&1
 
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
@@ -713,6 +722,12 @@ REM : main
     
     REM : update !cs! games stats for !GAME_TITLE!
     set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+    if not exist !sf! (
+        mkdir !sf! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !sf!
+    )
+
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
@@ -753,7 +768,12 @@ REM : main
 
     :saveOptions
     set "scp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
-    if not exist !scp! mkdir !scp! > NUL 2>&1
+    if not exist !scp! (
+        mkdir !scp! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !scp!
+    )
+
 
     if not exist !SETTINGS_FOLDER! mkdir !SETTINGS_FOLDER! > NUL 2>&1
 
@@ -782,7 +802,11 @@ REM : main
 
     REM : create transferable schader cache folder
     set "tsc="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
-    if not exist !tsc! mkdir !tsc! > NUL 2>&1
+    if not exist !tsc! (
+        mkdir !tsc! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !tsc!
+    )
 
     REM : if a TMP_GAME_FOLDER_PATH was used, delete it
     if exist !TMP_GAME_FOLDER_PATH! rmdir /Q !TMP_GAME_FOLDER_PATH! > NUL 2>&1
@@ -803,6 +827,26 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :checkOwnerShip
+
+        set "folder="%~1""
+        set "folderTmp="!folder:"=!_tmp""
+
+        move /Y !folder! !folderTmp! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+            cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !folder:"=!. Abort ?" 4116
+            if !ERRORLEVEL! EQU 6 (
+                set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+                call !killBatchFw! & pause
+            )
+        ) else (
+            REM : move back
+            move /Y !folderTmp! !folder! > NUL 2>&1
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :getAccount
         REM : account file
@@ -918,7 +962,7 @@ REM : functions
 
         REM : force ignorePrecompiledShaderCache = true in cemuHook.ini
         call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
-
+        
         :patchGp
 
         if !v1158! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%

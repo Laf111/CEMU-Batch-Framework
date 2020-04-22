@@ -184,24 +184,6 @@ REM    call:checkGpFolders
         call:log2GamesLibraryFile !msg!
     )
 
-    REM : monitor LaunchGame.bat until cemu is launched
-    set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
-
-    REM : wait the create*.bat end before continue
-    echo Waiting all child processes end >> !myLog!
-    echo Waiting all child processes end
-
-    :waitLoop
-    wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
-    type !logFileTmp! | find /I "create" | find /I "GraphicPacks" > NUL 2>&1 && goto:waitLoop
-    type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
-
-    del /F !logFileTmp! > NUL 2>&1
-
-    del /F !fnrLogUggp! > NUL 2>&1
-    REM : relaunching the search in all gfx pack folder (V2 and up)
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
-    
     :createLinks
     REM : before waitingLoop :
 
@@ -219,7 +201,40 @@ REM    call:checkGpFolders
     set "oldUpdateFolder="!ffTitleFolder:"=!\!endIdUp!""
     set "newUpdateFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endIdLow!""
 
+    set /A "success=1"
     call:linkMlcFolder
+
+    REM : v> 1.15.11 and especially v1.16 and up => delete the folder to avoid popup move message
+    if !success! EQU 1 if !buildOldUpdatePaths! EQU 0 if exist !oldUpdateFolder! (
+
+        move /Y !oldUpdateFolder! "!oldUpdateFolder:"=!_tmp" >  NUL 2>&1
+        REM : fail to delete folder
+        if !ERRORLEVEL! NEQ 0 (
+            cscript /nologo !MessageBox! "Fail to delete old update location, check that you have the ownership on !oldUpdateFolder:"=!. Cemu will fail to move update/DLC folders to new locations as well" 4112
+        ) else (
+            rmdir /Q /S "!oldUpdateFolder:"=!_tmp" > NUL 2>&1
+        )
+    )
+
+    REM : monitor LaunchGame.bat until cemu is launched
+    set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
+
+    REM : wait the create*.bat end before continue
+    echo Waiting all child processes end >> !myLog!
+    echo Waiting all child processes end
+
+    :waitLoop
+    wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
+    type !logFileTmp! | find /I "create" | find /I "GraphicPacks" > NUL 2>&1 && goto:waitLoop
+    type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
+
+    del /F !logFileTmp! > NUL 2>&1
+
+    if not ["!lastInstalledVersion!"] == ["!newVersion!"] (
+        del /F !fnrLogUggp! > NUL 2>&1
+        REM : relaunching the search in all gfx pack folder (V2 and up)
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogUggp!
+    )
 
     REM : link GFX packs in GAMES_FOLDER_PATH\Cemu\graphicPacks
 
@@ -316,7 +331,7 @@ REM : functions
             mkdir !link! > NUL 2>&1
         )
 
-        for /F "delims=~" %%a in ('dir /B !target! 2^>NUL') do (
+        for /F "delims=~" %%a in ('dir /B /A:D !target! 2^>NUL') do (
 
             for /F "delims=~" %%b in ("%%a") do set "name=%%~nxb"
 
@@ -341,35 +356,51 @@ REM : functions
         if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! goto:eof
         if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
 
+        :tryToMove
         REM : check if newUpdateFolder exist
         if not exist !newUpdateMetaXml! (
 
-            REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
-            cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations if needed (old versions)"
             set "oldDlcMetaXml="!oldDlcFolder:"=!\meta\meta.xml""
 
             if exist !oldDlcMetaXml! (
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c""
                 if not exist !folder! mkdir !folder! > NUL 2>&1
+
+                REM : move dlc in new folder tree
                 if !ERRORLEVEL! EQU 0 move !oldDlcFolder! !folder! > NUL 2>&1
 
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
-                move !folder! !newDlcFolder! > NUL 2>&1
-                if !ERRORLEVEL! EQU 0 rmdir /Q !oldDlcFolder!
+                move /Y !folder! !newDlcFolder! > NUL 2>&1
+                if !ERRORLEVEL! EQU 0 (
+                    rmdir /Q !oldDlcFolder!
+                ) else (
+                    set /A "success=0"
+                )
             )
 
             REM : new folder does not exist and the old one yes
-            REM : move update and DLC in new folder tree, delete old tree
+            REM : move update in new folder tree, delete old tree
             set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e""
-            mkdir !folder! > NUL 2>&1
+            if not exist !folder! mkdir !folder! > NUL 2>&1
+
             move /Y !oldUpdateFolder! !folder! > NUL 2>&1
+            if !ERRORLEVEL! EQU 0 (
+                rmdir /Q !oldUpdateFolder!
+            ) else (
+                set /A "success=0"
+            )
+
+            if !success! EQU 1 (
+                REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
+                cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations if needed (old versions)"
+            ) else (
+                REM : fail to move folder
+                cscript /nologo !MessageBox! "Fail to move folders of update/DLC to the new locations, close any program that could use this location and check that you have the ownership on !oldUpdateFolder:"=!. Update and/or DLC might be missing !, retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:tryToMove
+            )
         )
 
-        if !buildOldUpdatePaths! EQU 0 (
-            REM : v> 1.15.11 and especially v1.16 and up => delete the folder to avoid popup move message
-            rmdir /Q /S !ffTitleFolder! > NUL 2>&1
-            goto:eof
-        )
+        if !buildOldUpdatePaths! EQU 0 goto:eof
 
         if not exist !newDlcMetaXml! goto:linkUpdate
 
@@ -668,7 +699,7 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        cscript /nologo !MessageBox! "Create BatchFw packs for this game : the native resolution and FPS in internal database resources/wiiTitlesDataBase.csv are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. Edit and update resources/wiiTitlesDataBase.csv if needed"
+        cscript /nologo !MessageBox! "Create BatchFw packs for this game : the native resolution and FPS in internal database resources/wiiTitlesDataBase.csv are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. Edit and update resources/wiiTitlesDataBase.csv and force a graphic pack update to regenerate the packs if needed"
 
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack

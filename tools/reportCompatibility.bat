@@ -119,7 +119,9 @@ REM : main
 
     REM : add-it to the library
     if [!libFileLine!] == ["NONE"] (
-       echo ^'%titleId%^';!GAME_TITLE!;-;-;Created by BatchFW;v0;^?;^?;^'%titleId%^';720;60 >> !wiiTitlesDataBase!
+        attrib -r !wiiTitlesDataBase! > NUL 2>&1
+        echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;720^;60 >> !wiiTitlesDataBase!
+        attrib +r !wiiTitlesDataBase! > NUL 2>&1
     )
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)

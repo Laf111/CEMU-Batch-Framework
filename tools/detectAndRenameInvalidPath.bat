@@ -147,8 +147,12 @@ REM : main
         )
 
         pushd !basename!
+        :tryToMove
         move /Y !FOLDER_PATH! !newName!
         if !ERRORLEVEL! NEQ 0 (
+            cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !FOLDER_PATH:"=!. Retry ?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMove
+
             echo Failed to rename !FOLDER_PATH! to !newName!^, please do it by yourself ^!
 
             set cr=4

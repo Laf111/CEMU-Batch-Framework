@@ -32,6 +32,13 @@ REM : main
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
+    set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
 
@@ -56,6 +63,7 @@ REM : main
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
 
     REM : check if an internet connexion is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
@@ -63,8 +71,11 @@ REM : main
 
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        echo No active connection was found, cancel updating
-        pause
+        cscript /nologo !MessageBox! "No active connection was found, do you want to restore embeded GFX packs ?" 4116
+        if !ERRORLEVEL! EQU 6 (
+            call:restoreEmbededGfxPacks
+            goto:endMain
+        )
         if !QUIET_MODE! EQU 1 exit /b 20
         if !QUIET_MODE! EQU 0 exit 20
     )
@@ -93,7 +104,6 @@ REM : main
     cls
 
     :launchUpdate
-    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
 
         REM : delete the graphicPacks*.doNotDelete file
@@ -115,7 +125,7 @@ REM : main
         REM : flush GamesLibrary log
         if exist !GLFile! call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
-
+    :endMain
     if !QUIET_MODE! EQU 0 (
         echo =========================================================
         echo Done
@@ -134,6 +144,29 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :restoreEmbededGfxPacks
+
+        REM : clean old packs
+        for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV2"') do (
+            set "pack="!BFW_GP_FOLDER:"=!\%%a""
+            if exist !pack! rmdir /Q /S !pack! > NUL 2>&1
+        )
+
+        REM : extract embeded packs
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\GFX_Packs.rar""
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            cscript /nologo !MessageBox! "ERROR while extracting GFX_Packs.rar please check what happened" 4112
+            exit /b 1
+        )
+
+        REM : rename GFX folders that contains forbiden characters : & ! .
+        wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :cleanGameLibFile
         REM : pattern to ignore in log file

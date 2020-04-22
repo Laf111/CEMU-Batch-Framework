@@ -1,14 +1,42 @@
-IF YOU ENCOUNTER ANY ISSUE (GFX PACKS NOT FOUND...) RESET BATCH FW TO FACTORY SETTINGS 
-USING "Wii-U Games\BatchFw\Reset BatchFw.lnk"
+======================================================================================================
+PLEASE DON'T TOUCH/MOVE FILES UNDER ./LOGS ESPECIALLY HOST_*.LOG BECAUSE THESE FILES ARE USED TO 
+SAVED BATCHFW'S SETTINGS FOR EACH HOST USED
+
+IF YOU ENCOUNTER ANY ISSUE, TRY RESET BATCH FW TO FACTORY SETTINGS USING "WII-U GAMES\BATCHFW\RESET BATCHFW.LNK"
+
+IF YOU ENCOUNTER ANY ISSUE WITH CEMU : 
+1) if settings for this version were imported from another one, try to delete your settings 
+   using the dedicated shortcut "wii-u games\cemu\cemu_x.y.z\delete all my cemu_x.y.z's settings.lnk"
+2) refuse the import the next run to use the factory settings from this version
+3) if your issue persist, DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
+======================================================================================================
+
+
+22/04/2020 V18-7 : 
+fix : limit the range of scaling directives created from [1 - 1/12] when creating new res graphic packs 
+      (fix black textures issue in some games) 
+fix : now display only one pop message when no transferable cache is found      
+fix : popup return code bug on importing a transferable cache on the fly when launching game     
+add : popup message to help fixing created packs (res and FPS cap packs) if needed (wrong native resolution and/or
+      native FPS in the Wii-U internal database). 
+add : detect windows ownerships issues when trying to move/copy in a folder
+      If you get a game, update or DLC created by another user on another host (USER_CREATOR rights) move 
+      operations will failed (CEMU's assistant will also failed to migrate update and DLC paths and you'll 
+      get a 'permission denied' popup and so CEMU will launch its assistant on every run)
+      Extend this check to every move operations (that are few because as windows shell do not catch
+      signals, BatchFw moves files only if he cannot do otherwise. That also right concerning links
+      poorly handled under windows)
+add : internal Wii-U database integrity check in fixBatFiles.bat
+add : forcing GFX pack folder update will re-install embeded GFX packs if no active network connection is found
 
 21/04/2020 V18-6 : 
-fix : set a threshold at 90% for saves integrity checker (to avoid false positive due to Rar upgrade since 18-4
+fix : set a threshold at 90% for saves integrity checker (to avoid false positive due to Rar upgrade since 18-4)
 fix : resolution GFX V3 pack sometimes not listed in CEMU despite link to it exists
 opt : slightly lower pre-processing time
 add : enhancements in fixBatfiles.bat
 add : update doc\graphicPacksHandling.txt
 add : display a "what to do" pop message when creating a graphic pack for a new game if it does not work 
-      on the first run (depends on default values set in internal Wii-U title database
+      on the first run (depends on default values set in internal Wii-U title database)
 
 20/04/2020 V18-5 : 
 fix : popup return code bug on saves checker
