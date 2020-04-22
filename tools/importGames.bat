@@ -158,7 +158,7 @@ REM : main
         call:getFolderSizeInMb !INPUT_FOLDER! sizeNeeded
 
         echo Only if you copy data or move data from another partition^:
-        choice /C yn /N /M "!sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
+        choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed ^(size of !INPUT_FOLDER:"=!^) on the target partition^, continue ^(y^, n^)^? ^: "
         if !ERRORLEVEL! EQU 2 (
             REM : Cancelling
             echo Cancelled by user^, exiting in 2s
@@ -278,11 +278,13 @@ REM : main
     )
 
     :launchSetup
-    cls
+
+    echo.
     if !NB_GAMES_TREATED! NEQ 0 if %nbArgs% EQU 0 (
+        echo =========================================================
         echo New Games were added to your library^, launching setup^.bat^.^.^.
         set "setup="!BFW_PATH:"=!\setup.bat""
-        timeout /T 3 > NUL 2>&1
+        timeout /T 8 > NUL 2>&1
 
         REM : last loaction used for batchFw outputs
 
@@ -464,12 +466,21 @@ REM : functions
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
         set "endTitleId=%titleId:~8,8%"
 
-        if exist !target! goto:eof
+        if exist !target! (
+            if [!INPUT_FOLDER!] == [!GAMES_FOLDER!] (
+                echo =========================================================
+                echo - !GAME_TITLE!
+                echo ---------------------------------------------------------
+                echo.
+                set /A "NB_GAMES_TREATED+=1"
+            )
+            goto:eof
+        )
 
         echo =========================================================
         echo - !GAME_TITLE!
         echo ---------------------------------------------------------
-        echo.
+        echo.        
 
         REM : moving game's folder
         set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
@@ -477,6 +488,7 @@ REM : functions
         :treatGame
         if !moveFlag! EQU 1 (
             echo Moving game^'s files^.^.^.
+
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
@@ -525,7 +537,7 @@ REM : functions
         REM : check if a GFX pack exist (V2 or up)
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] if exist !BFW_GP_FOLDER! call:checkGfxPacksAvailability
 
-        set /A NB_GAMES_TREATED+=1
+        set /A "NB_GAMES_TREATED+=1"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -581,6 +593,15 @@ REM : functions
                     goto:eof
                 )
             )
+            call:moveFolder !source! !target! cr
+            if !cr! NEQ 0 (
+
+                cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatGame
+
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
+                goto:eof
+            )
         ) else (
             robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
@@ -591,7 +612,6 @@ REM : functions
                 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !" 4112
                 goto:eof
             )
-
         )
 
     goto:eof

@@ -12,7 +12,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-22/04/2020 V18-7 : 
+23/04/2020 V18-7 : 
 fix : limit the range of scaling directives created from [1 - 1/12] when creating new res graphic packs 
       (fix black textures issue in some games) 
 fix : now display only one pop message when no transferable cache is found      
