@@ -988,6 +988,7 @@ REM : functions
         set "string=!string:™=!"
         set "string=!string:®=!"
         set "string=!string:©=!"
+        set "string=!string:É=E!"
 
         set "%2="!string!""
 
