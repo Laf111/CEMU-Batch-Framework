@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V18-6"
+    set "BFW_NEXT_VERSION=V18-7"
 
     set "THIS_SCRIPT=%~0"
 
@@ -126,7 +126,7 @@ REM : main
 
     REM : remove readonly attribute on fixBrokenShortcuts.bat
     set "filePath="!BFW_TOOLS_PATH:"=!\fixBrokenShortcuts.bat""
-    attrib -R !filePath! > NUL 2>&1
+    attrib +R !filePath! > NUL 2>&1
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo.
@@ -136,6 +136,7 @@ REM : main
     set "filePath="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
     echo ^> tools/downloadTitleId.bat
 
+    attrib +R !filePath! > NUL 2>&1    
     type !filePath! | find /I "delims=~	" > NUL 2>&1 && goto:checkDownloadGames
     echo ERROR^: TAB was not found line 105^, the file format is not ANSI anymore ^?
 
@@ -143,6 +144,7 @@ REM : main
     set "filePath="!BFW_TOOLS_PATH:"=!\downloadGames.bat""
     echo ^> tools/downloadGames.bat
 
+    attrib +R !filePath! > NUL 2>&1
     type !filePath! | find /I "™" > NUL 2>&1 && goto:checkMultiplyLongInteger
     echo ERROR^: Specific char not found line 988^, the file format is not ANSI anymore ^?
 
@@ -150,6 +152,7 @@ REM : main
     set "filePath="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
     echo ^> tools/multiplyLongInteger.bat
 
+    attrib +R !filePath! > NUL 2>&1
     pushd !BFW_TOOLS_PATH!
     for /F %%a in ('!filePath! 1234 4321') do set /A "result=%%a"
     if !result! NEQ 5332114 (
