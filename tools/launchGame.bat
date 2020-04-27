@@ -1463,15 +1463,15 @@ REM : functions
         echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
         REM : set a threshold at 90
-        set /A "thirdPercent=oldSaveSize/33"
+        set /A "half=oldSaveSize/2"
 
-        set /A "saveSizeThreshold=oldSaveSize-thirdPercent"
+        set /A "saveSizeThreshold=oldSaveSize-half"
 
         REM : compare sizes : > ~90% => OK
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
 
         REM : KO => warn user and propose to restore backup N
-        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is at least 10%% smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
+        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is at least half smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
         if !ERRORLEVEL! EQU 7 goto:eof
 
         REM : revert save file backup
