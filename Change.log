@@ -13,7 +13,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 27/04/2020 V18-8 :
 fix : fixBatFile's log file error when resetting BatchFw to default
-fix : lower threshold at 66% for saves integrity checker
+fix : lower threshold to 50% for saves integrity checker
 fix : collision on temporary files (same file used by different scripts) that might occurs on low end PC
 fix : in setup.bat wii-u user accounts detection when importing setting from another host was broken
 fix : GFX pack name not matching between res and FPS cap packs created when special characters are in game's name

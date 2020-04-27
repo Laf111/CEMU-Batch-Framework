@@ -92,7 +92,7 @@ REM : main
     echo HostName=!portRead!
     echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if %ERRORLEVEL% EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -160,7 +160,7 @@ REM : main
     choice /C yn /N /M "Is it still up to date (y, n)? : "
     echo.
     echo Get games candidates^.^.^.
-    if !ERRORLEVEL! EQU 1 goto:getLocalTitleId
+    if %ERRORLEVEL% EQU 1 goto:getLocalTitleId
 
     rmdir /Q /S !BFW_WIIUSCAN_FOLDER! > NUL 2>&1
     goto:scanMyWii
@@ -239,11 +239,11 @@ REM : main
 
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
     call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
+    if %ERRORLEVEL% NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
-    if !ERRORLEVEL! EQU 2 goto:getList
+    if %ERRORLEVEL% EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if %ERRORLEVEL% EQU 2 goto:getList
 
     cls
     echo =========================================================
@@ -269,7 +269,7 @@ echo prepare !title!
     echo !totalMoNeeded! Mb are needed on the Wii-U ^!
     echo.
     choice /C yn /N /M "Do you want to continue (y, n)? : "
-    if !ERRORLEVEL! EQU 2 (
+    if %ERRORLEVEL% EQU 2 (
         echo Cancelled by user^, exiting
         timeout /t 8 > NUL 2>&1
         exit 13
@@ -314,7 +314,7 @@ echo prepare !title!
     echo ---------------------------------------------------------
     pause
     
-    if !ERRORLEVEL! NEQ 0 exit !ERRORLEVEL!
+    if %ERRORLEVEL% NEQ 0 exit !ERRORLEVEL!
     exit 0
 
     goto:eof
@@ -365,13 +365,13 @@ REM : functions
         echo.
 
         choice /C yn /N /M "Do you want to export Wii-U saves during the process (y, n)? : "
-        if !ERRORLEVEL! EQU 2 goto:eof
+        if %ERRORLEVEL% EQU 2 goto:eof
 
         choice /C yn /N /M "For all users (y, n)? : "
-        if !ERRORLEVEL! EQU 1 set "%1=all" & goto:eof
+        if %ERRORLEVEL% EQU 1 set "%1=all" & goto:eof
 
         choice /C yn /N /M "Do you want to choose a user now  (y, n = select users during process)? : "
-        if !ERRORLEVEL! EQU 2 set "%1=select" & goto:eof
+        if %ERRORLEVEL% EQU 2 set "%1=select" & goto:eof
 
         set /A "nbUserm1=nbUsers-1"
         for /L %%i in (0,1,!nbUserm1!) do echo %%i ^: !USERSARRAY[%%i]!
@@ -689,7 +689,7 @@ REM        set /A "totalGameSize+=!sgDlc!"
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if !ERRORLEVEL! EQU 0 set /A "state=1"
+        if %ERRORLEVEL% EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof

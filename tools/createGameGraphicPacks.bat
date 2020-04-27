@@ -70,7 +70,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
     if [!BFW_GP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGpFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -213,7 +213,7 @@ REM : main
     echo     ^(n^) ^: cancel
     echo ---------------------------------------------------------
     choice /C yn /T 15 /D y /N /M "Enter your choice ? : "
-    if !ERRORLEVEL! EQU 2 (
+    if %ERRORLEVEL% EQU 2 (
         echo Cancelled by user ^!
         goto:eof
     )

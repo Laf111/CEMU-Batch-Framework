@@ -83,7 +83,7 @@ REM : main
     echo HostName=!portRead!
     echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if %ERRORLEVEL% EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -149,7 +149,7 @@ REM : main
 
     echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
-    if !ERRORLEVEL! EQU 1 goto:getLocalTitleId
+    if %ERRORLEVEL% EQU 1 goto:getLocalTitleId
 
     rmdir /Q /S !BFW_WIIUSCAN_FOLDER! > NUL 2>&1
     goto:scanMyWii
@@ -206,11 +206,11 @@ REM : main
 
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
     call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
+    if %ERRORLEVEL% NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
-    if !ERRORLEVEL! EQU 2 goto:getList
+    if %ERRORLEVEL% EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
+    if %ERRORLEVEL% EQU 2 goto:getList
 
     cls
     echo =========================================================
@@ -309,9 +309,9 @@ REM : main
     echo.
     
     if %nbArgs% EQU 0 pause
-    if !ERRORLEVEL! NEQ 0 timeout /T 3 > NUL 2>&1
+    if %ERRORLEVEL% NEQ 0 timeout /T 3 > NUL 2>&1
 
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         if %nbArgs% NEQ 0 exit /b !ERRORLEVEL!
         exit /b !ERRORLEVEL!
     )
@@ -574,7 +574,7 @@ REM : functions
             REM : else update it
             set "stmp=!saveInfo!tmp"
             xml ed -u "//info/account[@persistentId='!folder!']" -v "!hexValue!" !saveInfo! > !stmp!
-            if !ERRORLEVEL! EQU 0 del /F !saveInfo! > NUL 2>&1 & move /Y !stmp! !saveInfo!
+            if %ERRORLEVEL% EQU 0 del /F !saveInfo! > NUL 2>&1 & move /Y !stmp! !saveInfo!
             goto:eof
         )
         REM : if saveinfo.xml does not exist
@@ -597,7 +597,7 @@ REM : functions
 
             if [!userSavesToExport!] == ["select"] (
                 choice /C yn /N /M "Upload !currentUser! saves on Wii-U (y, n)? : "
-                if !ERRORLEVEL! EQU 2 goto:eof
+                if %ERRORLEVEL% EQU 2 goto:eof
             ) else (
                 REM : here userSavesToExport define a user name
                 if not [!userSavesToExport!] == ["!currentUser!"] goto:eof
@@ -664,7 +664,7 @@ REM : functions
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if !ERRORLEVEL! EQU 0 set /A "state=1"
+        if %ERRORLEVEL% EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof

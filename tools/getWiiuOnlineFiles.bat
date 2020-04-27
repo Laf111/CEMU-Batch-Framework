@@ -86,7 +86,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Browse to the folder containing those files"') do set "folder=%%b" && set "BUP_FOLDER=!folder:?= !"
     if [!BUP_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
+        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askOutputFolder
     )
     robocopy !BUP_FOLDER! !BFW_ONLINE_FOLDER! "otp.bin" > NUL 2>&1
@@ -140,7 +140,7 @@ REM : main
     echo HostName=!portRead!
     echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if %ERRORLEVEL% EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -287,7 +287,7 @@ REM : main
         call:setUsersFromWiiu
     )
     
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         if %nbArgs% EQU 0 exit 0
         if %nbArgs% NEQ 0 exit /b 0
     )
@@ -397,7 +397,7 @@ REM : functions
         :askUser
         set /P "input=Please enter BatchFw's user name : "
         call:secureUserNameForBfw "!input!" safeInput
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo ^~^, ^* or ^= are not allowed characters ^!
             echo Please remove them
             goto:askUser
@@ -407,7 +407,7 @@ REM : functions
             echo Some unhandled characters were found ^!
             echo list = ^^ ^| ^< ^> ^" ^: ^/ ^\ ^? ^. ^! ^& %%
             choice /C yn /N /M "Use !safeInput! instead ? (y,n): "
-            if !ERRORLEVEL! EQU 2 goto:askUser
+            if %ERRORLEVEL% EQU 2 goto:askUser
         )
         set "%1="!safeInput!""
 
@@ -418,7 +418,7 @@ REM : functions
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if !ERRORLEVEL! EQU 0 set /A "state=1"
+        if %ERRORLEVEL% EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof

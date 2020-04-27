@@ -30,7 +30,7 @@ REM : main
 
     REM : check if java is installed
     java -version > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         echo ERROR^: java is not installed^, exiting
         tiemout /T 10 > NUL 2>&1
         exit /b 50

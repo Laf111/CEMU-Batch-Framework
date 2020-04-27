@@ -60,7 +60,7 @@ REM : main
     REM : get and check wiiuIp
     set "wiiuIp=!args[0]!"
     ping -n 1 !wiiuIp! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         echo ERROR^: !wiiuIp! was not found on your network ^!
         pause
         exit /b 1

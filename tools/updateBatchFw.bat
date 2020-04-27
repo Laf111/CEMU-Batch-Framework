@@ -87,7 +87,7 @@ REM : main
 
     set "bfwVR=NONE"
     for /F "usebackq delims=" %%i in (`Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion!`) do set "bfwVR=%%i"
-    if !ERRORLEVEL! EQU 1 (
+    if %ERRORLEVEL% EQU 1 (
         echo Failed to get the last BatchFw version available
         exit /b 11
     )
@@ -521,7 +521,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

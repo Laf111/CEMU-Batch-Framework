@@ -83,7 +83,7 @@ REM : main
     echo BatchFw saves all your GPU Caches in !OPENGL_CACHE:"=!
     echo.
     choice /C yn /N /M "Do you want to also remove your GPU caches ? (y, n)"
-    if !ERRORLEVEL! EQU 2 goto:ending
+    if %ERRORLEVEL% EQU 2 goto:ending
 
     set "GLCacheSavesFolder=!OPENGL_CACHE:GLCache=_BatchFW_CemuGLCache!\"
 
@@ -174,7 +174,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

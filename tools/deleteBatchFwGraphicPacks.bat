@@ -187,12 +187,12 @@ REM : functions
 
         :tryToDelete
         rmdir /Q /S !gpFolder! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo ERROR^: Fail to delete folder ^(cr=!ERRORLEVEL!^)^, close any program that could use this location
             echo also check that you have the ownership on !gpFolder:"=!
             echo.
             choice /C yn /N /M "Retry (y/n)?"
-            if !ERRORLEVEL! EQU 1 goto:tryToDelete
+            if %ERRORLEVEL% EQU 1 goto:tryToDelete
         )
         echo ^> !gpFolder:"=! deleted
 
@@ -233,7 +233,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

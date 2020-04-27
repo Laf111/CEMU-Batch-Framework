@@ -446,7 +446,7 @@ REM : main
     if not exist !exampleFile! goto:openProfileFile
 
     choice /C yn /CS /N /M "Do you want to open !exampleFile:"=! to see all settings you can set? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:diffProfileFile
+    if %ERRORLEVEL% EQU 2 goto:diffProfileFile
 
     wscript /nologo !Start! !exampleFile!
 
@@ -479,7 +479,7 @@ REM : main
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
         choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, compare or use ^(if no differences were found^) this game profile file ? (y, n) : "
-        if !ERRORLEVEL! EQU 2 goto:askToCompare
+        if %ERRORLEVEL% EQU 2 goto:askToCompare
 
         REM : search in logFile, getting only the last occurence
         set "pat="!proposedVersion! install folder path""
@@ -498,7 +498,7 @@ REM : main
     :askToCompare
 
     choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:openProfileFile
+    if %ERRORLEVEL% EQU 2 goto:openProfileFile
     
     REM : get cemu install folder for existing game's profile
     :askRefCemuFolder
@@ -576,12 +576,12 @@ REM : main
     
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:reopen
+    if %ERRORLEVEL% EQU 2 goto:reopen
 
     wscript /nologo !Start! !exampleFile!
     :reopen
     choice /C yn /CS /N /M "Do you need to re-open profile file to modify overrided settings? (y, n) : "
-    if !ERRORLEVEL! EQU 1 goto:openProfileFile
+    if %ERRORLEVEL% EQU 1 goto:openProfileFile
 
     REM : waiting updateGamesGraphicPacks processes ending
     :wait
@@ -690,7 +690,7 @@ REM : main
     )
 
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
+    if %ERRORLEVEL% NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
 
     :launchCemu
 
@@ -834,9 +834,9 @@ REM : functions
         set "folderTmp="!folder:"=!_tmp""
 
         move /Y !folder! !folderTmp! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !folder:"=!. Abort ?" 4116
-            if !ERRORLEVEL! EQU 6 (
+            if %ERRORLEVEL% EQU 6 (
                 set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
                 call !killBatchFw! & pause
             )
@@ -1087,7 +1087,7 @@ REM : functions
         call:getHostState !ipRead! state
         if !state! EQU 1 (
             cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now before continue" 4112
-            if !ERRORLEVEL! EQU 2 goto:eof
+            if %ERRORLEVEL% EQU 2 goto:eof
         )
 
         :installAccount
@@ -1564,7 +1564,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 12
             exit /b 12
         )

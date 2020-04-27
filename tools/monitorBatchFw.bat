@@ -79,7 +79,7 @@ REM : functions
 
         REM : warn user with a retry/cancel msgBox
         cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? Wait a little longer [Yes] or kill it [No] ?" 4100
-        if !ERRORLEVEL! EQU 6 set /A "duration-=30" && goto:eof
+        if %ERRORLEVEL% EQU 6 set /A "duration-=30" && goto:eof
         del /F !logFileTmp! > NUL 2>&1
         call !killBatchFw! & exit 1
 

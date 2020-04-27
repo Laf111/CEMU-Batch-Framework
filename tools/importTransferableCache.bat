@@ -91,7 +91,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFile! "select a the transferable cache file"') do set "file=%%b" && set "TRANSF_CACHE=!file:?= !"
     if [!TRANSF_CACHE!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askInputFile
     )
 
@@ -138,7 +138,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "select a game's folder"') do set "folder=%%b" && set "GAME_FOLDER_PATH=!folder:?= !"
     if [!GAME_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askGameFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -362,7 +362,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

@@ -89,7 +89,7 @@ REM : main
     echo HostName=!portRead!
     echo.
     choice /C yn /N /M "Use this setup (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if %ERRORLEVEL% EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -158,7 +158,7 @@ REM : main
 
     echo The last WiiU^'s scan found is !LAST_SCAN!
     choice /C yn /N /M "Is it still up to date (y, n)? : "
-    if !ERRORLEVEL! EQU 1 goto:getLocalTitleId
+    if %ERRORLEVEL% EQU 1 goto:getLocalTitleId
 
     rmdir /Q /S !BFW_WIIUSCAN_FOLDER! > NUL 2>&1
     goto:scanMyWii
@@ -215,17 +215,17 @@ REM : main
 
     set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
     call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         echo Invalid numbers or forbiden characters found^, please retry
         pause
         goto:getList
     )
     call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
+    if %ERRORLEVEL% NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
-    if !ERRORLEVEL! EQU 2 goto:getList
+    if %ERRORLEVEL% EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if %ERRORLEVEL% EQU 2 goto:getList
 
     cls
     if !nbGamesSelected! EQU 0 (
@@ -314,7 +314,7 @@ REM : main
     echo =========================================================
     if %nbArgs% EQU 0 pause
 
-    if !ERRORLEVEL! NEQ 0 (
+    if %ERRORLEVEL% NEQ 0 (
         if %nbArgs% NEQ 0 exit /b !ERRORLEVEL!
         exit /b !ERRORLEVEL!
     )
@@ -397,7 +397,7 @@ REM : functions
             set "ltmp=!lst!0"
             xml ed -u "//GameCache/Entry[path='!RPX_FILE:"=!']/time_played" -v "!tp!" !lst! > !ltmp!
             xml ed -u "//GameCache/Entry[path='!RPX_FILE:"=!']/last_played" -v "!wtsj1970!" !ltmp! > !lst!
-            if !ERRORLEVEL! EQU 0 del /F !lst! > NUL 2>&1 & move /Y !ltmp! !lst!
+            if %ERRORLEVEL% EQU 0 del /F !lst! > NUL 2>&1 & move /Y !ltmp! !lst!
         )
 
     goto:eof
@@ -524,7 +524,7 @@ REM : functions
 
             if [!userSavesToImport!] == ["select"] (
                 choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
-                if !ERRORLEVEL! EQU 2 goto:eof
+                if %ERRORLEVEL% EQU 2 goto:eof
             ) else (
                 REM : here userSavesToImport define a user name
                 if not [!userSavesToImport!] == ["!currentUser!"] goto:eof
@@ -651,7 +651,7 @@ REM : functions
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if !ERRORLEVEL! EQU 0 set /A "state=1"
+        if %ERRORLEVEL% EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof

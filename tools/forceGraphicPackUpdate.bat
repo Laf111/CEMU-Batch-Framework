@@ -72,7 +72,7 @@ REM : main
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
         cscript /nologo !MessageBox! "No active connection was found, do you want to restore embeded GFX packs ?" 4116
-        if !ERRORLEVEL! EQU 6 (
+        if %ERRORLEVEL% EQU 6 (
             call:restoreEmbededGfxPacks
             goto:endMain
         )
@@ -199,7 +199,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

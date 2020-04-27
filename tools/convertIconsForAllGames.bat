@@ -162,13 +162,13 @@ REM : main
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if !ERRORLEVEL! NEQ 0 (
+                if %ERRORLEVEL% NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if !ERRORLEVEL! EQU 6 goto:tryToMove
+                    if %ERRORLEVEL% EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            if [!ANSWER!] == ["y"] if %ERRORLEVEL% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if %ERRORLEVEL% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -237,7 +237,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove special characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
@@ -411,7 +411,7 @@ REM : functions
         REM : convert-it in ICO centered format
         call !imgConverter! !INPUT_IMG! -resize 256x256 !ICO_PATH!
 
-        if !ERRORLEVEL! EQU 0 (
+        if %ERRORLEVEL% EQU 0 (
             echo !GAME_TITLE! icon created^!
             if !tgaFound! EQU 0 del /F !NEW_JPG_PATH! > NUL 2>&1
             set /A NB_GAMES_TREATED+=1
