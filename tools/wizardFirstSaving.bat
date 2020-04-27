@@ -32,7 +32,6 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
-    !cmdOw! @ /TOP > NUL 2>&1
 
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
     
@@ -597,7 +596,7 @@ REM : main
     type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
 
         type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
-            if !disp! EQU 1 (
+            if !disp! EQU 0 (
                 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 echo Creating ^/ completing graphic packs^, please wait ^.^.^.
             )
