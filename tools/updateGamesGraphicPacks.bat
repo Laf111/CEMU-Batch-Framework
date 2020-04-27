@@ -231,7 +231,7 @@ REM    call:checkGpFolders
 
         move /Y !oldUpdateFolder! "!oldUpdateFolder:"=!_tmp" >  NUL 2>&1
         REM : fail to delete folder
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             cscript /nologo !MessageBox! "Fail to delete old update location, check that you have the ownership on !oldUpdateFolder:"=!. Cemu will fail to move update/DLC folders to new locations as well" 4112
         ) else (
             rmdir /Q /S "!oldUpdateFolder:"=!_tmp" > NUL 2>&1
@@ -391,11 +391,11 @@ REM : functions
                 if not exist !folder! mkdir !folder! > NUL 2>&1
 
                 REM : move dlc in new folder tree
-                if !ERRORLEVEL! EQU 0 move !oldDlcFolder! !folder! > NUL 2>&1
+                if %ERRORLEVEL% EQU 0 move !oldDlcFolder! !folder! > NUL 2>&1
 
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
                 move /Y !folder! !newDlcFolder! > NUL 2>&1
-                if !ERRORLEVEL! EQU 0 (
+                if %ERRORLEVEL% EQU 0 (
                     rmdir /Q !oldDlcFolder!
                 ) else (
                     set /A "success=0"
@@ -408,7 +408,7 @@ REM : functions
             if not exist !folder! mkdir !folder! > NUL 2>&1
 
             move /Y !oldUpdateFolder! !folder! > NUL 2>&1
-            if !ERRORLEVEL! EQU 0 (
+            if %ERRORLEVEL% EQU 0 (
                 rmdir /Q !oldUpdateFolder!
             ) else (
                 set /A "success=0"

@@ -424,13 +424,14 @@ REM : functions
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if !ERRORLEVEL! NEQ 0 (
+                set "crm=%ERRORLEVEL%"
+                if %crm% NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-                if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:eof
-                if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            if [!ANSWER!] == ["y"] if %crm% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if %crm% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
                 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             )
         )
@@ -565,7 +566,7 @@ REM : functions
         REM : loop on bin file found under !GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\*.bin""
         dir /B /S !pat! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo ^? No transferable shader cache found >> !myLog!
             echo ^? No transferable shader cache found
             goto:eof
@@ -702,7 +703,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

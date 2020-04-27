@@ -949,7 +949,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     :tryToBackupGp
     if exist !graphicPacks! (
         move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
-        if !ERRORLEVEL! NEQ 0 (
+        if %ERRORLEVEL% NEQ 0 (
             cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !graphicPacks:"=!. Retry ?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToBackupGp
         )
