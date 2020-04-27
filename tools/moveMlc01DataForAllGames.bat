@@ -72,7 +72,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askMlc01Folder
     )
 
@@ -141,7 +141,7 @@ REM : main
     call:getFolderSizeInMb !MLC01_FOLDER_PATH! sizeNeeded
 
     choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
-    if %ERRORLEVEL% EQU 2 (
+    if !ERRORLEVEL! EQU 2 (
         REM : Cancelling
         echo Cancelled by user^, exiting in 2s
         exit /b 49
@@ -227,13 +227,13 @@ REM : main
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:tryToMove
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -522,7 +522,7 @@ REM : functions
             set "mlc01Folder="!GAME_FOLDER_PATH:"=!\mlc01""
             if exist !mlc01Folder! (
                 choice /C yn /N /M "A mlc01 folder already exists in !GAME_FOLDER_PATH:"=!^, continue ^(y^, n^)^? ^: "
-                if %ERRORLEVEL% EQU 2 goto:eof
+                if !ERRORLEVEL! EQU 2 goto:eof
             )
         )
         echo ---------------------------------------------------------
@@ -643,7 +643,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

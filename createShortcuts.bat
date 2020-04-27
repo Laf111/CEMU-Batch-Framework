@@ -131,7 +131,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder"') do set "folder=%%b" && set "CEMU_FOLDER=!folder:?= !"
     if [!CEMU_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askCemuFolder
     )
 
@@ -178,7 +178,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     for /F %%b in ('cscript /nologo !browseFolder! "Select an output folder (a Wii-U Games subfolder will be created)"') do set "folder=%%b" && set "OUTPUT_FOLDER=!folder:?= !"
     if [!OUTPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askOutputFolder
     )
     REM : check if folder name contains forbiden character for batch file
@@ -336,7 +336,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call:cleanHostLogFile SCREEN_MODE
 
     choice /C yn /N /M "Do you want to launch CEMU in fullscreen (y, n)? : "
-    if %ERRORLEVEL% EQU 1 goto:openCemuAFirstTime
+    if !ERRORLEVEL! EQU 1 goto:openCemuAFirstTime
 
     set "msg="SCREEN_MODE=windowed""
     call:log2HostFile !msg!
@@ -611,13 +611,13 @@ REM    call:log2HostFile !msg!
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:tryToMove
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -896,7 +896,7 @@ REM : functions
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
 
-        if %ERRORLEVEL% EQU 0 (
+        if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
         ) else (
             echo ERROR^: in !TMP_VBS_FILE!
@@ -1797,7 +1797,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
 
-        if %ERRORLEVEL% EQU 0 del /F  !TMP_VBS_FILE!
+        if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
         if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
         set /A "NB_OUTPUTS+=1"
@@ -2054,7 +2054,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

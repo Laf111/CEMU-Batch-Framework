@@ -96,7 +96,7 @@ REM : main
 
     choice /C yn /N /M "Use this setup (y, n)? : "
 
-    if %ERRORLEVEL% EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
+    if !ERRORLEVEL! EQU 1 set "wiiuIp=!ipRead!" && goto:checkConnection
 
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
@@ -316,7 +316,7 @@ REM : functions
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if %ERRORLEVEL% EQU 0 set /A "state=1"
+        if !ERRORLEVEL! EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof

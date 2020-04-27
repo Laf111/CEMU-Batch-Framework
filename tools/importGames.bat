@@ -127,7 +127,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a source folder"') do set "folder=%%b" && set "INPUT_FOLDER=!folder:?= !"
     if [!INPUT_FOLDER!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 75
         goto:askInputFolder
     )
 
@@ -143,7 +143,7 @@ REM : main
     title Move Games with updates and DLC from !INPUT_FOLDER:"=! and prepare them to emulation
     echo.
     choice /C yn /N /M "Do you want to copy instead of moving files (y, n)? : "
-    if %ERRORLEVEL% EQU 1 (
+    if !ERRORLEVEL! EQU 1 (
         title Copy Games with updates and DLC from !INPUT_FOLDER:"=! and prepare them to emulation
         set /A "moveFlag=0"
     )
@@ -159,7 +159,7 @@ REM : main
 
         echo Only if you copy data or move data from another partition^:
         choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed ^(size of !INPUT_FOLDER:"=!^) on the target partition^, continue ^(y^, n^)^? ^: "
-        if %ERRORLEVEL% EQU 2 (
+        if !ERRORLEVEL! EQU 2 (
             REM : Cancelling
             echo Cancelled by user^, exiting in 2s
             exit /b 49
@@ -252,13 +252,13 @@ REM : main
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:tryToMove
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -270,7 +270,7 @@ REM : main
         echo No GFX pack were found for at least one game^.
         echo.
         choice /C yn /N /M "Do you want to update GFX packs folder ? (y,n):"
-        if %ERRORLEVEL% EQU 1 (
+        if !ERRORLEVEL! EQU 1 (
             set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
             call !ugp!
         )
@@ -497,9 +497,9 @@ REM : functions
 
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:treatGame
+                    if !ERRORLEVEL! EQU 6 goto:treatGame
 
                     cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
                     goto:eof
@@ -509,7 +509,7 @@ REM : functions
             if !cr! NEQ 0 (
 
                 cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatGame
+                if !ERRORLEVEL! EQU 6 goto:treatGame
 
                 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
                 goto:eof
@@ -521,7 +521,7 @@ REM : functions
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatGame
+                if !ERRORLEVEL! EQU 6 goto:treatGame
 
                 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files !" 4112
                 goto:eof
@@ -591,9 +591,9 @@ REM : functions
 
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:treatUpdate
+                    if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
                     cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
                     goto:eof
@@ -603,7 +603,7 @@ REM : functions
             if !cr! NEQ 0 (
 
                 cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatGame
+                if !ERRORLEVEL! EQU 6 goto:treatGame
 
                 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
                 goto:eof
@@ -613,7 +613,7 @@ REM : functions
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatUpdate
+                if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
                 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !" 4112
                 goto:eof
@@ -658,9 +658,9 @@ REM : functions
             set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:treatDlc
+                    if !ERRORLEVEL! EQU 6 goto:treatDlc
 
                     cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
                     goto:eof
@@ -669,7 +669,7 @@ REM : functions
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
                 cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatDlc
+                if !ERRORLEVEL! EQU 6 goto:treatDlc
 
                 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
                 goto:eof
@@ -681,7 +681,7 @@ REM : functions
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                if %ERRORLEVEL% EQU 6 goto:treatDlc
+                if !ERRORLEVEL! EQU 6 goto:treatDlc
 
                 cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files !" 4112
                 goto:eof
@@ -757,7 +757,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

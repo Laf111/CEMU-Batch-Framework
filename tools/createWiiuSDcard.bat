@@ -75,7 +75,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select the drive of your SDCard"') do set "folder=%%b" && set "SDCARD=!folder:?= !"
     if [!SDCARD!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askDrive
     )
 
@@ -83,7 +83,7 @@ REM : main
     :formatDrive
     REM : format %SDCARD% with fat32format.exe
     !ffat32! -c64 %SDCARD%
-    if %ERRORLEVEL% NEQ 0 goto:formatDrive
+    if !ERRORLEVEL! NEQ 0 goto:formatDrive
     echo.
     echo ---------------------------------------------------------
     echo Installing content^.^.^.
@@ -124,7 +124,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

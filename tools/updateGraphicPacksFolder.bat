@@ -90,7 +90,7 @@ REM : main
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
     Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
-    if %ERRORLEVEL% EQU 1 (
+    if !ERRORLEVEL! EQU 1 (
         echo Failed to get the last graphic Packs update available
         type !lgpvLog!
         if !QUIET_MODE! EQU 0 timeout /T 4 > NUL 2>&1
@@ -134,7 +134,7 @@ REM : main
         exit /b 0
     ) else (
         cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
-        if %ERRORLEVEL% EQU 2 exit /b 2
+        if !ERRORLEVEL! EQU 2 exit /b 2
     )
     :updateGP
 
@@ -262,7 +262,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

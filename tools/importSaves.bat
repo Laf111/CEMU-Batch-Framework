@@ -84,7 +84,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Select a mlc01 folder"') do set "folder=%%b" && set "MLC01_FOLDER_PATH=!folder:?= !"
     if [!MLC01_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
         goto:askMlc01Folder
     )
 
@@ -142,7 +142,7 @@ REM : main
     if not exist !cs! goto:getAccountsUsed
 
     choice /C yn /N /M "Do you want to import games stats from !CEMU_FOLDER:"=! ? (y/n) :"
-    if %ERRORLEVEL% EQU 1 set /A "importGsFlag=1"
+    if !ERRORLEVEL! EQU 1 set /A "importGsFlag=1"
 
     REM : get userArray, choice args
     set /A "nbUsers=0"
@@ -188,7 +188,7 @@ REM : main
         REM :
         echo ---------------------------------------------------------------
         choice /C yn /N /M "Account 8000000!nbAccount! detected, import it ? (y/n) :"
-        if %ERRORLEVEL% EQU 2 (
+        if !ERRORLEVEL! EQU 2 (
             echo.
             echo skipping account 8000000!nbAccount!
             set /A "ua=!nbAccount!-1"
@@ -339,13 +339,13 @@ REM        )
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                if %ERRORLEVEL% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
-                    if %ERRORLEVEL% EQU 6 goto:tryToMove
+                    if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if %ERRORLEVEL% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^' ^?^), please do it by yourself otherwise game will be ignored ^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
@@ -573,7 +573,7 @@ REM : functions
                 echo.
                 if exist !rarFile! (
                     choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
-                    if %ERRORLEVEL% EQU 1 (
+                    if !ERRORLEVEL! EQU 1 (
                         REM : prepare the archive with commonRarFile
                         copy /Y !commonRarFile! !rarFile! > NUL 2>&1
 
@@ -623,7 +623,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )

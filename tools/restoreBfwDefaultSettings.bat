@@ -68,6 +68,8 @@ REM : main
     rmdir /Q /S !BFW_LOGS!
 
     mkdir !BFW_LOGS! > NUL 2>&1
+    pushd !GAMES_FOLDER!
+    
 
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
@@ -133,7 +135,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

@@ -20,7 +20,7 @@ REM : main
     echo There^'s no need to fix shortcuts.
     echo.
     choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games (y, n)? : "
-    if %ERRORLEVEL% EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
+    if !ERRORLEVEL! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
     echo.
     echo done
     echo.
@@ -41,7 +41,7 @@ REM : main
     for /F %%b in ('cscript /nologo !browseFolder! "Enter the new location of your games"') do set "folder=%%b" && set "NEW_GAMES_FOLDER_PATH=!folder:?= !"
     if [!NEW_GAMES_FOLDER_PATH!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if %ERRORLEVEL% EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
+        if !ERRORLEVEL! EQU 1 timeout /T 1 > NUL 2>&1 && exit 75
         goto:askGamesFolder
     )
 
@@ -169,7 +169,7 @@ REM : functions
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
 
-        if %ERRORLEVEL% EQU 0 (
+        if !ERRORLEVEL! EQU 0 (
             del /F !TMP_VBS_FILE! > NUL 2>&1
             echo ^> !shortcut:%tobeRemoved%=!
         )

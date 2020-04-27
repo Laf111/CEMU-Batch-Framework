@@ -61,7 +61,7 @@ REM : main
     )
 
     dir !FOLDER_PATH! > NUL 2>&1
-    if %ERRORLEVEL% NEQ 0 (
+    if !ERRORLEVEL! NEQ 0 (
         echo This folder !FOLDER_PATH! is not compatible with DOS^. Remove ^^! from this path.
         exit /b 3
     )
@@ -109,7 +109,7 @@ REM : main
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )
@@ -149,9 +149,9 @@ REM : main
         pushd !basename!
         :tryToMove
         move /Y !FOLDER_PATH! !newName!
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !FOLDER_PATH:"=!. Retry ?" 4116
-            if %ERRORLEVEL% EQU 6 goto:tryToMove
+            if !ERRORLEVEL! EQU 6 goto:tryToMove
 
             echo Failed to rename !FOLDER_PATH! to !newName!^, please do it by yourself ^!
 
