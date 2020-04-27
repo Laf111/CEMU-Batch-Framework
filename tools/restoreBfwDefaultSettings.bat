@@ -92,7 +92,7 @@ REM : main
 
     REM : convert all bat files to AINSI, remove trailling spaces
     set "fixBatFile="!BFW_TOOLS_PATH:"=!\fixBatFiles.bat""
-    wscript /nologo !StartMaximizedWait! !fixBatFile!
+    call !fixBatFile!
 
     echo =========================================================
     echo Done

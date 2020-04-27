@@ -563,13 +563,14 @@ REM : functions
         REM : if exist saveInfo.xml check if !folder! exist in saveinfo.xml
         if exist !saveInfo! (
             REM : if the account is not present in saveInfo.xml
-            type !saveInfo! | find /V !folder! > NUL 2>&1 && (
-                REM : add it
-                set "stmp=!saveInfo!tmp"
-                xml ed -s "//info" -t elem -n "account persistentId=""!folder!""" !saveInfo! > !stmp!
-                xml ed -s "//info/account[@persistentId='!folder!']" -t elem -n "timestamp" -v "!hexValue!" !stmp! > !saveInfo!
-                goto:eof
-            )
+            type !saveInfo! | find /I !folder! > NUL 2>&1 && goto:updateSaveInfo
+            REM : add it
+            set "stmp=!saveInfo!tmp"
+            xml ed -s "//info" -t elem -n "account persistentId=""!folder!""" !saveInfo! > !stmp!
+            xml ed -s "//info/account[@persistentId='!folder!']" -t elem -n "timestamp" -v "!hexValue!" !stmp! > !saveInfo!
+            goto:eof
+
+            :updateSaveInfo
             REM : else update it
             set "stmp=!saveInfo!tmp"
             xml ed -u "//info/account[@persistentId='!folder!']" -v "!hexValue!" !saveInfo! > !stmp!

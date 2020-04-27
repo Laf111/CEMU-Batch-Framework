@@ -175,10 +175,11 @@ REM    call:checkGpFolders
     echo newVersion  ^: !newVersion! >> !myLog!
 
     REM : check if BatchFw have to complete graphic packs for this game
-    type !logFile! | find /V "COMPLETE_GP" > NUL 2>&1 && goto:CreateLinks
+    type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && goto:searchForGfxPacks
+    goto:CreateLinks
 
+    :searchForGfxPacks
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
-
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
     if exist !fnrLogUggp! del /F !fnrLogUggp! > NUL 2>&1

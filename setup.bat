@@ -453,12 +453,12 @@ REM : main
 
     set "msg="DESIRED_ASPECT_RATIO=!sWr!-!sHr!=!sWr!/!sHr!""
 
-    type !logFile! | find /V !msg! > NUL 2>&1 && (
-        REM : will force BatchFw to complete GFX packs/presets
-        set /A "changeArList=1"
-        call:log2HostFile !msg!
-    )
+    type !logFile! | find /I !msg! > NUL 2>&1 && goto:getArList
+    REM : will force BatchFw to complete GFX packs/presets
+    set /A "changeArList=1"
+    call:log2HostFile !msg!
 
+    :getArList
     REM : get the users list
     set "ARLIST=EMPTY"
 
@@ -528,82 +528,42 @@ REM : main
             set "desc=!desc:"=!"
 
             set "msg="DESIRED_ASPECT_RATIO=!width!-!height!=!desc!""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=!width!-!height!" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["2"] (
             set "msg="DESIRED_ASPECT_RATIO=4-3=4/3""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=4-3" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["3"] (
             set "msg="DESIRED_ASPECT_RATIO=16-9=16/9""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=21-9" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["4"] (
             set "msg="DESIRED_ASPECT_RATIO=21-9=21/9""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=21-9" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["5"] (
             set "msg="DESIRED_ASPECT_RATIO=64-27=21/9 UltraWide 2.37:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=64-27" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["6"] (
             set "msg="DESIRED_ASPECT_RATIO=32-15=21/9 UltraWide 2.4:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=32-15" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["7"] (
             set "msg="DESIRED_ASPECT_RATIO=12-15=21/9 UltraWide 2.13:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=12-15" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["8"] (
             set "msg="DESIRED_ASPECT_RATIO=37-20=TV Flat 1.85:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=37-20" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["9"] (
             set "msg="DESIRED_ASPECT_RATIO=1024-429=TV Scope 2.39:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=1024-429" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         if ["!ANSWER!"] == ["10"] (
             set "msg="DESIRED_ASPECT_RATIO=256-135=TV DCI 1.89:1""
-            type !logFile! | find /V "DESIRED_ASPECT_RATIO=256-135" > NUL 2>&1 && (
-                set /A "changeArList=1"
-                call:log2HostFile !msg!
-            )
             goto:anotherRatio
         )
         goto:askRatioAgain
@@ -611,6 +571,13 @@ REM : main
         goto:askScreenMode
     )
     :anotherRatio
+
+    type !logFile! | find /I !msg! > NUL 2>&1 && goto:getAnotherRatio
+    set /A "changeArList=1"
+    call:log2HostFile !msg!
+
+    :getAnotherRatio
+    
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 

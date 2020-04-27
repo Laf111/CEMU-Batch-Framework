@@ -11,16 +11,15 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 3) if your issue persist, DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-
 27/04/2020 V18-8 :
-fix : fixBatFile's log file error when reset BatchFw to default
+fix : fixBatFile's log file error when resetting BatchFw to default
 fix : lower threshold at 66% for saves integrity checker
 fix : collision on temporary files (same file used by different scripts) that might occurs on low end PC
 fix : in setup.bat wii-u user accounts detection when importing setting from another host was broken
 fix : GFX pack name not matching between res and FPS cap packs created when special characters are in game's name
 fix : "Complete GFX packs for all my games" do not update gameLibrary.log
 fix : also patch enum to integer for GpuBufferAccuracy in wizardFirstSaving.bat (when cemu < 1.15.6)
-fix : move create/complete GFX packs message to createCapGraphicPacks.bat 
+fix : move create/complete GFX packs message to updateGameGraphicPacks.bat 
 fix : wrong titleId in %GAME_FOLDER_PATH%\Cemu\%GAME_TITLE% (file not used)
 fix : setup.bat add a BatchFw's user without Wii-U is more simple now
 opt : skip games already installed in importGames.bat
