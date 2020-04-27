@@ -836,7 +836,7 @@ REM : functions
         set "folderTmp="!folder:"=!_tmp""
 
         move /Y !folder! !folderTmp! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !folder:"=!. Abort ?" 4116
             if !ERRORLEVEL! EQU 6 (
                 set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
@@ -1566,7 +1566,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^!^)^, exiting 12
             exit /b 12
         )

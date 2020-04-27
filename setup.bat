@@ -326,20 +326,20 @@ REM : main
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
-                set "crm=%ERRORLEVEL%"
-                if %crm% NEQ 0 (
+                if !ERRORLEVEL! NEQ 0 (
                     cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
-            if [!ANSWER!] == ["y"] if %crm% EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
-            if [!ANSWER!] == ["y"] if %crm% NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise the game will be ignored^!
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! EQU 0 timeout /t 2 > NUL 2>&1 && goto:scanGamesFolder
+            if [!ANSWER!] == ["y"] if !ERRORLEVEL! NEQ 0 echo Failed to rename game^'s folder ^(contain ^'^^!^'^?^), please do it by yourself otherwise game will be ignored^!
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         )
     )
 
     echo =========================================================
     echo ^> !NB_GAMES_VALID! valid games found
+
     if !NB_GAMES_VALID! EQU 0 (
 
         echo No RPX games were found
@@ -578,7 +578,7 @@ REM : main
     call:log2HostFile !msg!
 
     :getAnotherRatio
-    
+
     choice /C yn /N /M "Add another ratio? (y,n): "
     if !ERRORLEVEL! EQU 1 goto:askRatioAgain
 
@@ -1982,7 +1982,7 @@ REM        call:log2HostFile !msg!
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo Remove DOS reverved characters from the path %1 ^(such as ^&^, %% or ^^!^)^, exiting 12
             exit /b 12
         )
@@ -2106,10 +2106,12 @@ REM        call:log2HostFile !msg!
         set "pat="!BFW_WIIU_FOLDER:"=!\OnlineFiles\usersAccounts\*.dat""
         for /F "delims=~" %%i in ('dir /B !pat! 2^> NUL') do (
             REM : get user name
-            for /F "tokens=1 delims=_" %%j in ("%%i") do (
-                echo ^> Found %%j user with an online account
-                echo USER_REGISTERED=%%j>>!logFile!
-            )
+
+            set "account="%%i""
+            set "user=!account:~1,-13!"
+
+            echo ^> Found user !user! with an online account
+            echo USER_REGISTERED=!user!>>!logFile!
         )
         echo.
         echo. ^(you can modify users list later in the setup process^)

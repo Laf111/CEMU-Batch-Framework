@@ -258,7 +258,7 @@ REM : main
 
     REM : report exist, find in !GAME_TITLE!
     type !GAMES_REPORT_PATH! | find /I "%titleId%" > NUL 2>&1
-    if %ERRORLEVEL% EQU 0 goto:gameReportUpToDate
+    if !ERRORLEVEL! EQU 0 goto:gameReportUpToDate
 
     REM : add line for current game
     echo !GAME_TITLE!;!CEMU_FOLDER_NAME!;!OS_VERSION!;!REGION!;%CPU:"=%;%GPU_VENDOR:"=% with drivers %GPU_DRIVERS_VERSION:"=%;!user!;%CEMU_STATUS%;!ADD_NOTES!;'%titleId%';%EXIST_IN_DATABASE%;%GAME_VERSION%;%DLC%;%SAVES_FOUND%;%SHADER_CACHE_ID% >> !GAMES_REPORT_PATH!
@@ -285,7 +285,7 @@ REM : main
 
     REM : report exist, find in !GAME_TITLE!
     type !CEMU_REPORT_PATH! | find /I "%titleId%" > NUL 2>&1
-    if %ERRORLEVEL% EQU 0 goto:reportUpToDate
+    if !ERRORLEVEL! EQU 0 goto:reportUpToDate
 
     REM : report line for http://compat.cemu.info/
     for /F "tokens=1-3 delims=~." %%f in ("!VERSION!") do set "MAIN_VERSION=%%f.%%g"
@@ -326,7 +326,7 @@ REM : functions
 
         REM : try to list
         dir !toCheck! > NUL 2>&1
-        if %ERRORLEVEL% NEQ 0 (
+        if !ERRORLEVEL! NEQ 0 (
             echo This path ^(!toCheck!^) is not compatible with DOS^. Remove specials characters from this path ^(such as ^&,^(,^),^!^)^, exiting 12
             exit /b 12
         )

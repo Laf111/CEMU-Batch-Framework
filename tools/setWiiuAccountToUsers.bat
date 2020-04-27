@@ -97,7 +97,7 @@ REM : main
         call:getUser user
 
         REM : copy the file
-        set "uf="!usersFolderAccount:"=!\!user!_%%d.dat""
+        set "uf="!usersFolderAccount:"=!\!user!%%d.dat""
 
         copy /Y !af! !uf! > NUL 2>&1
         echo saving \%%d\account.dat to !uf!

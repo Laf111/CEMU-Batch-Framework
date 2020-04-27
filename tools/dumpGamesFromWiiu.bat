@@ -661,7 +661,7 @@ REM : functions
         set "ipaddr=%~1"
         set /A "state=0"
         ping -n 1 !ipaddr! > NUL 2>&1
-        if %ERRORLEVEL% EQU 0 set /A "state=1"
+        if !ERRORLEVEL! EQU 0 set /A "state=1"
 
         set "%2=%state%"
     goto:eof
