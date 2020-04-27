@@ -13,6 +13,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 
 27/04/2020 V18-8 :
+fix : fixBatFile's log file error when reset BatchFw to default
 fix : lower threshold at 66% for saves integrity checker
 fix : collision on temporary files (same file used by different scripts) that might occurs on low end PC
 fix : in setup.bat wii-u user accounts detection when importing setting from another host was broken
@@ -27,7 +28,7 @@ opt : lower the finalizing step
 add : script to delete/reset BatchFw's GFX packs created (all of them or per game)
       Shortcuts are created under "Wii-U Games\BatchFw\Tools\Graphic packs" 
       one for deleting all and one per game (using game icon)
-add : update embeded GFX pack to v651
+add : update embeded GFX pack to v653
 
 23/04/2020 V18-7 : 
 fix : limit the range of scaling directives created from [1 - 1/12] when creating new res graphic packs 

@@ -24,8 +24,6 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
-    set "logFolder="!BFW_PATH:"=!\logs""
-    if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : get the last version

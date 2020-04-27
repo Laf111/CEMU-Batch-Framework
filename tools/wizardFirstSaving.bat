@@ -32,8 +32,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
-    !cmdOw! @ /MIN > NUL 2>&1
-    !cmdOw! @ /MAX > NUL 2>&1
+    !cmdOw! @ /TOP > NUL 2>&1
 
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
     
@@ -587,6 +586,7 @@ REM : main
 
     REM : waiting updateGamesGraphicPacks processes ending
     :wait
+
     set /A "disp=0"
     set "wfsLogFileTmp="!TMP:"=!\BatchFw_wizardFirstSaving_process.list""
 
@@ -596,20 +596,20 @@ REM : main
 
     type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
 
-    type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
-        if !disp! EQU 1 (
-            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            echo Creating ^/ completing graphic packs^, please wait ^.^.^.
+        type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+            if !disp! EQU 1 (
+                echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                echo Creating ^/ completing graphic packs^, please wait ^.^.^.
+            )
+            set /A "disp=1"
+            goto:waitingLoop
         )
-        set /A "disp=1"
-        goto:waitingLoop
     )
-
     REM : remove trace
     del /F !wfsLogFileTmp! > NUL 2>&1
     REM : wait 1 sec for GFX detection
     timeout /T 1 > NUL 2>&1
-
+ 
     REM : synchronized controller profiles (import)
     call:syncControllerProfiles
 
@@ -666,7 +666,6 @@ REM : main
     )
 
     if exist !graphicPacks! move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
-
     REM : issue with CEMU 1.15.3 that does not compute cortrectly relative path to GFX folder
     REM : when using a simlink with a the target on another partition
     for %%a in (!GAME_GP_FOLDER!) do set "d1=%%~da"
@@ -697,7 +696,6 @@ REM : main
     :launchCemu
 
     !cmdOw! @ /NOT > NUL 2>&1
-
 
     REM : launching CEMU
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""

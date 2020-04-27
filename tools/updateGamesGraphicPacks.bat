@@ -136,10 +136,6 @@ REM    call:checkGpFolders
     echo Update all graphic packs for !GAME_TITLE! >> !myLog!
     echo ========================================================= >> !myLog!
 
-    REM : check if BatchFw have to complete graphic packs for this game
-    set "completeGP="NONE""
-    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "COMPLETE_GP" 2^>NUL') do set "completeGP="YES""
-
     REM : get the last version used
     set "newVersion=NOT_FOUND"
 
@@ -179,7 +175,7 @@ REM    call:checkGpFolders
     echo newVersion  ^: !newVersion! >> !myLog!
 
     REM : check if BatchFw have to complete graphic packs for this game
-REM    type !logFile! | find /I "COMPLETE_GP" > NUL 2>&1 && goto:CreateLinks
+    type !logFile! | find /V "COMPLETE_GP" > NUL 2>&1 && goto:CreateLinks
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
 
@@ -319,7 +315,7 @@ REM    type !logFile! | find /I "COMPLETE_GP" > NUL 2>&1 && goto:CreateLinks
 
     REM : stop execution something wrong happens
     REM : warn user
-    cscript /nologo !MessageBox! "ERROR ^: No GFX packs were found ^!, let CEMU start but check what happens" 4112
+    cscript /nologo !MessageBox! "WARNING : No GFX packs were found !" 4112
 
     REM : delete lock file in CEMU_FOLDER
     if exist !lockFile! del /F !lockFile! > NUL 2>&1

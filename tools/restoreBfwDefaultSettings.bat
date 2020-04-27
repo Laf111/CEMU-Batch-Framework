@@ -67,7 +67,7 @@ REM : main
     echo ^> Deleting !BFW_LOGS! ^.^.^.
     rmdir /Q /S !BFW_LOGS!
 
-    pushd !GAMES_FOLDER!
+    mkdir !BFW_LOGS! > NUL 2>&1
 
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
