@@ -535,7 +535,7 @@ REM    call:log2HostFile !msg!
     :scanGamesFolder
 
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_cs.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
@@ -933,7 +933,7 @@ REM : functions
         call:createFolder !subfolder!
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Games's data""
         call:createFolder !subfolder!
-        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs""
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\BatchFw^'s packs""
         call:createFolder !subfolder!
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shaders Caches""
         call:createFolder !subfolder!
@@ -1344,8 +1344,8 @@ REM
         )
 
         REM : create a shortcut to buildExtraGraphicPacks.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Complete GFX packs for all my games^.lnk""
-        set "LINK_DESCRIPTION="Complete GFX packs for games installed""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\Create GFX packs and complete presets for all my games^.lnk""
+        set "LINK_DESCRIPTION="Create GFX packs and complete presets for games installed""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\buildExtraGraphicPacks.ico""
         if not exist !LINK_PATH! (
@@ -1479,6 +1479,18 @@ REM
             )
 
         )
+        set "ARGS=ALL"
+
+        REM : create a shortcut to deleteBatchFwGraphicPacks.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\BatchFw^'s packs\Delete all GFX packs created by BatchFw^.lnk""
+        set "LINK_DESCRIPTION="Delete all GFX packs created by BatchFw""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteBatchFwGraphicPacks.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\delete.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to deleteBatchFwGraphicPacks^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+
         set "ARGS="!OUTPUT_FOLDER!""
 
         REM : create a shortcut to setup.bat
@@ -1818,7 +1830,7 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
 
         REM : add-it to the library
         if [!libFileLine!] == ["NONE"] goto:eof

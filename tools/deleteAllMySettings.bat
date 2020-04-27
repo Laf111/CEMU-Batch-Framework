@@ -122,7 +122,7 @@ REM : main
     cls
     :scanGamesFolder
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_dams.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls

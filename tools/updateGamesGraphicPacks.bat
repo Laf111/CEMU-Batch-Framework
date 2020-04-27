@@ -20,6 +20,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
@@ -103,13 +104,34 @@ REM    call:checkGpFolders
     set "titleId=!args[2]!"
     set "titleId=%titleId:"=%"
 
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    REM : get game's data for wii-u database file
+    set "libFileLine="NONE""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
+
+    REM : strip line to get data
+    for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+       set "titleIdRead=%%a"
+       set "DescRead="%%b""
+       set "productCode=%%c"
+       set "companyCode=%%d"
+       set "notes=%%e"
+       set "versions=%%f"
+       set "region=%%g"
+       set "acdn=%%h"
+       set "icoId=%%i"
+       set "nativeHeight=%%j"
+       set "nativeFps=%%k"
+    )
+
     set "buildOldUpdatePaths=!args[3]!"
     set /A "buildOldUpdatePaths=%buildOldUpdatePaths:"=%"
 
     set "lockFile=!args[4]!"
 
-    REM : basename of GAME FOLDER PATH (used to name shorcut)
-    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+    REM : set Game title for packs (folder name)
+    set "title=%DescRead:"=%"
+    set "GAME_TITLE=%title: =%"
 
     echo Update all graphic packs for !GAME_TITLE! >> !myLog!
     echo ========================================================= >> !myLog!
@@ -155,6 +177,9 @@ REM    call:checkGpFolders
     :treatOneGame
     echo lastInstalledVersion ^: !lastInstalledVersion! >> !myLog!
     echo newVersion  ^: !newVersion! >> !myLog!
+
+    REM : check if BatchFw have to complete graphic packs for this game
+REM    type !logFile! | find /I "COMPLETE_GP" > NUL 2>&1 && goto:CreateLinks
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
 
@@ -320,6 +345,8 @@ REM    call:checkGpFolders
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+
     :linkFolder
 
         if exist !link! (
@@ -587,26 +614,6 @@ REM    REM : ------------------------------------------------------------------
         REM : update game's graphic packs
         if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
 
-        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-        REM : get game's data for wii-u database file
-        set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
-
-        REM : strip line to get data
-        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
-           set "titleIdRead=%%a"
-           set "Desc=%%b"
-           set "productCode=%%c"
-           set "companyCode=%%d"
-           set "notes=%%e"
-           set "versions=%%f"
-           set "region=%%g"
-           set "acdn=%%h"
-           set "icoId=%%i"
-           set "nativeHeight=%%j"
-           set "nativeFps=%%k"
-        )
-
         call:updateGPFolder
         pushd !GAMES_FOLDER!
 
@@ -667,7 +674,7 @@ REM    REM : ------------------------------------------------------------------
         REM : No new gfx pack found but is a V2 gfx pack exists ?
         if not exist !BFW_LEGACY_GP_FOLDER! goto:handleGfxPacks
 
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| findstr /r "%resX2%p\\rules.txt"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| findstr /R "%resX2%p\\rules.txt"') do (
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
@@ -683,9 +690,12 @@ REM    REM : ------------------------------------------------------------------
         )
 
         REM : No GFX pack was found
+
         :handleGfxPacks
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
+
+        set /A "createPack=0"
 
         REM : no Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
@@ -699,18 +709,19 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        cscript /nologo !MessageBox! "Create BatchFw packs for this game : the native resolution and FPS in internal database resources/wiiTitlesDataBase.csv are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. Edit and update resources/wiiTitlesDataBase.csv and force a graphic pack update to regenerate the packs if needed"
-
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] cscript /nologo !MessageBox! "Complete and create packs for this game : the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. If needed, update resources/wiiTitlesDataBase.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild."
+        set /A "createPack=1"
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !>> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId%
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId%
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
 
         goto:createCapGP
 
         :checkRecentUpdate
+
 
         REM : check if a version were used for this game
         if ["!lastInstalledVersion!"] == ["NOT_FOUND"] goto:createExtraGP
@@ -718,10 +729,8 @@ REM    REM : ------------------------------------------------------------------
 
         :createExtraGP
 
-        if [!completeGP!] == ["NONE"] goto:eof
-
-        if ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! ^.^.^. >> !myLog!
-        if not ["!newVersion!"] == ["NOT_FOUND"] echo Creating Extra graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
+        if ["!newVersion!"] == ["NOT_FOUND"] echo Complete graphic packs for !GAME_TITLE! ^.^.^. >> !myLog!
+        if not ["!newVersion!"] == ["NOT_FOUND"] echo Complete graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup! >> !myLog!
@@ -729,6 +738,7 @@ REM    REM : ------------------------------------------------------------------
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
 
         :createCapGP
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game : the native FPS in internal database is !nativeFps!FPS. Check while in game (not in cutscenes) if the FPS is correct. If needed, update resources/wiiTitlesDataBase.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild."
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""

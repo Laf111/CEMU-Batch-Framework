@@ -170,7 +170,7 @@ REM : main
         if %nbArgs% NEQ 0 exit /b 2
     )
 
-    set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
+    set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck_gwof.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
         echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that FTP_every_where is launched

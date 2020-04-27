@@ -170,7 +170,7 @@ REM : functions
 
     :dosToUnix
     REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_createV2.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!

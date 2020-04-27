@@ -110,7 +110,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 

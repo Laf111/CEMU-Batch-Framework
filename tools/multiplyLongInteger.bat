@@ -6,12 +6,12 @@ SETLOCAL
 SET _FIRST=%1
 SET _SECOND=%2
 
-echo !_FIRST! | findStr /R "¨[0-9]*$" > NUL 2>&1 && (
+echo !_FIRST! | findStr /R "^[0-9]*$" > NUL 2>&1 && (
     echo ERROR^:^(!_FIRST!^)notAnInteger
     exit /b 1
 )
 
-echo !_SECOND! | findStr /R "¨[0-9]*$" > NUL 2>&1 && (
+echo !_SECOND! | findStr /R "^[0-9]*$" > NUL 2>&1 && (
     echo ERROR^:^(!_SECOND!^)notAnInteger
     exit /b 2
 )

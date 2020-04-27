@@ -110,14 +110,20 @@ REM : main
     REM : titleID and BFW_GP_FOLDER
     :getArgsValue
     echo. > !cgpLogFile!
-    if %nbArgs% NEQ 2 (
+    if %nbArgs% LSS 2 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^*
         echo given {%*}
         exit /b 99
     )
-
+    if %nbArgs% GTR 3 (
+        echo ERROR ^: on arguments passed ^!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^*
+        echo given {%*}
+        exit /b 99
+    )
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
 
@@ -128,6 +134,11 @@ REM : main
     )
     REM : get titleId
     set "titleId=!args[1]!"
+
+    if %nbArgs% EQU 3 (
+        set "str=!args[2]!"
+        set "gameName=!str:"=!"
+    )
 
     REM : with arguments to this script, deactivating user inputs
     set /A "QUIET_MODE=1"
@@ -147,7 +158,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
@@ -167,7 +178,7 @@ REM : main
     REM : strip line to get data
     for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
        set "titleIdRead=%%a"
-       set "DescRead=%%b"
+       set "DescRead="%%b""
        set "productCode=%%c"
        set "companyCode=%%d"
        set "notes=%%e"
@@ -182,6 +193,8 @@ REM : main
     set "title=%DescRead:"=%"
     set "GAME_TITLE=%title: =%"
 
+    if %nbArgs% EQU 3 set "GAME_TITLE=!gameName!"
+
     REM get all title Id for this game
     set "titleIdList=%titleId%"
     call:getAllTitleIds
@@ -195,11 +208,11 @@ REM : main
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv
     if !QUIET_MODE! EQU 1 goto:begin
-    echo Launching in 30s
+    echo Launching in 15s
     echo     ^(y^) ^: launch now
     echo     ^(n^) ^: cancel
     echo ---------------------------------------------------------
-    choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
+    choice /C yn /T 15 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
         echo Cancelled by user ^!
         goto:eof
@@ -253,7 +266,7 @@ REM : functions
 
     :dosToUnix
     REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_create.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
@@ -269,15 +282,9 @@ REM : functions
         echo name = Resolution >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
         if !nativeHeight! EQU 720 (
-            echo description = Created by BatchFw considering that the native resolution is 720p^. ^
-Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. ^
-If it is not^, change the native resolution to 1080p in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = Created by BatchFw considering that the native resolution is 720p^. Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. If it is not^, change the native resolution to 1080p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
-            echo description = Created by BatchFw considering that the native resolution is 1080p. ^
-Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. ^
-If it is not^, change the native resolution to 720p in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = Created by BatchFw considering that the native resolution is 1080p. Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. If it is not^, change the native resolution to 720p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
         echo version = 3 >> !bfwRulesFile!
         echo. >> !bfwRulesFile!

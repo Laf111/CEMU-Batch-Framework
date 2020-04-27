@@ -124,7 +124,7 @@ REM : main
         exit 2
     )
 
-    set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
+    set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck_sw.log""
     !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
         echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that FTP_every_where is launched
@@ -202,7 +202,7 @@ REM : main
 
             REM : get title using endTitleId
             set "title=NOT_FOUND"
-            for /F "delims=~; tokens=2" %%t in ('type !wiiTitlesDataBase! ^| find /I "'00050000%%j';"') do set "title=%%t"
+            for /F "delims=~; tokens=2" %%t in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'00050000%%j';"') do set "title=%%t"
 
             if not ["!title!"] == ["NOT_FOUND"] (
                 set "titles[!nbGames!]=!title!"

@@ -173,7 +173,7 @@ REM : main
     :scanGamesFolder
     cls
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_ig.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
@@ -331,6 +331,7 @@ REM : functions
 
     :treatGameFolders
 
+
         echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && (
             call:installUpdate
             goto:eof
@@ -340,7 +341,12 @@ REM : functions
             goto:eof
         )
 
-        call:prepareGame
+        set "GAME_TITLE=!GAME_FOLDER_NAME!"
+        REM : if USB Helper output : NAME[Id], get only the name
+        echo "!GAME_FOLDER_PATH!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+        
+        set "pat="!GAME_TITLE:"=!*(*)*""
+        dir /B !pat! > NUL 2>&1 && call:prepareGame
 
     goto:eof
     REM : ------------------------------------------------------------------

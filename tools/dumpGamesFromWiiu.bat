@@ -375,7 +375,7 @@ REM : functions
         :askUser
         set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
 
-        echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+        echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askUser
 
         if %num% LSS 0 goto:askUser
         if %num% GEQ %nbUsers% goto:askUser

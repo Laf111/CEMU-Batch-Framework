@@ -23,9 +23,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
-
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -158,7 +156,7 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%ftid%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%ftid%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
@@ -177,7 +175,7 @@ REM : main
     REM : strip line to get data
     for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
        set "titleIdRead=%%a"
-       set "Desc=%%b"
+       set "DescRead="%%b""
        set "productCode=%%c"
        set "companyCode=%%d"
        set "notes=%%e"
@@ -189,8 +187,8 @@ REM : main
        set "nativeFps=%%k"
        )
 
-    set "title=%Desc:"=%"
-    set "GAME_TITLE=%title: =_%"
+    set "title=%DescRead:"=%"
+    set "GAME_TITLE=%title: =%"
 
     REM get all title Id for this game (in case of a new res gp creation)
     set "titleIdList=%titleId%"
@@ -208,11 +206,11 @@ REM : main
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:begin
 
-    echo Launching in 30s
+    echo Launching in 15s
     echo     ^(y^) ^: launch now
     echo     ^(n^) ^: cancel
     echo ---------------------------------------------------------
-    choice /C yn /T 6 /D y /N /M "Enter your choice ? : "
+    choice /C yn /T 15 /D y /N /M "Enter your choice ? : "
     if !ERRORLEVEL! EQU 2 (
         echo Cancelled by user ^!
         goto:eof
@@ -311,6 +309,10 @@ echo newNativeFpsOldGp=!newNativeFpsOldGp!
     if !fpsPP! EQU 1 rmdir /Q /S !gpLastVersion! > NUL 2>&1 && set "LastVersionExistFlag=1"
     if %LastVersionExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeLastVersionCapGP
 
+    REM : create a shorcut to delete packs created for this games (as FPS CAP is called everytime
+    REM : it makes sense to do it here
+    call:createDeletePacksShorcut
+
     if %nbArgs% EQU 0 endlocal && pause
 
     exit /b 0
@@ -322,10 +324,78 @@ REM : ------------------------------------------------------------------
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :createDeletePacksShorcut
+
+        REM : main shortcut folder
+        set "WIIU_GAMES_FOLDER="NONE""
+
+        REM : get the last location from logFile
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if [!WIIU_GAMES_FOLDER!] == ["NONE"] goto:eof
+
+        REM : add a shortcut for deleting all packs created by BatchFw for thsi game
+        set "shortcutFolder="!WIIU_GAMES_FOLDER:"=!\BatchFw\Tools\Graphic packs\BatchFw^'s packs""
+        if not exist !shortcutFolder! mkdir !shortcutFolder! > NUL 2>&1
+
+        set "shortcut="!shortcutFolder:"=!\Force rebuilding !GAME_TITLE! packs.lnk""
+        if exist !shortcut! goto:eof
+
+        REM : get GAME_FOLDER_PATH
+        set "fnrSearch="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacksShortcut.log""
+
+        REM : check if the game exist in !TARGET_GAMES_FOLDER! (not dependant of the game folder's name)
+        if exist !fnrSearch! del /F !fnrSearch!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask "meta.xml" --ExcludeDir "content, code, mlc01, Cemu" --includeSubDirectories --find !titleId!  --logFile !fnrSearch!
+
+        REM : main shortcut folder
+        set "GAME_FOLDER_PATH="NONE""
+        for /F "tokens=2-3 delims=." %%j in ('type !fnrSearch! ^| find /I /V "^!" ^| find "File:"') do (
+            set "metaFile="!GAMES_FOLDER:"=!%%j.%%k""
+            set "GAME_FOLDER_PATH=!metaFile:\meta\meta.xml=!"
+        )
+        if [!GAME_FOLDER_PATH!] == ["NONE"] goto:eof
+
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\delete.ico""
+
+        pushd !GAMES_FOLDER!
+        for /F "delims=~" %%i in ('dir /A:D /S /B Cemu 2^>NUL') do (
+            set "ico="%%i\!titleId!.ico""
+            if exist !ico! set "ICO_PATH=!ico!"
+        )
+
+        REM : temporary vbs file for creating a windows shortcut
+        set "TMP_VBS_FILE="!TEMP!\delete_!GAME_TITLE!_GfxPacks_!DATE!.vbs""
+
+        set "ARGS=!titleId!"
+
+        set "LINK_DESCRIPTION="Delete !GAME_TITLE!'s packs created by BatchFw""
+
+        REM : create object
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
+        echo sLinkFile = !shortcut! >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+
+        set "TARGET_PATH="!BFW_TOOLS_PATH:"=!\deleteBatchFwGraphicPacks.bat""
+
+        echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !BFW_TOOLS_PATH! >> !TMP_VBS_FILE!
+
+        echo oLink^.Save >> !TMP_VBS_FILE!
+
+        REM : running VBS file
+        cscript /nologo !TMP_VBS_FILE!
+
+        del /F  !TMP_VBS_FILE!
+
+    goto:eof
+
     :getAllTitleIds
 
         REM now searching using icoId
-        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";'%icoId%';"') do (
             set "titleIdRead=%%i"
             set "titleIdRead=!titleIdRead:'=!"
             echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
@@ -383,7 +453,7 @@ REM : functions
 
     :dosToUnix
     REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_cap.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
@@ -401,16 +471,22 @@ REM : functions
         echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
 
         if !nativeFps! EQU 30 (
-            echo description = Adjust the speed in game when engine model is FPS based^. ^
-You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS^
-is 30^. If it is not^, change the native FPS to 60 in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = Adjust the speed in game when engine model is FPS based^. You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
-            echo description = Adjust the speed in game when engine model is FPS based^. ^
-You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS^
-is 60^. If it is not^, change the native FPS to 30 in ^
-_BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = Adjust the speed in game when engine model is FPS based^. You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
+        
+        REM if !nativeFps! EQU 30 (
+            REM echo description = Adjust the speed in game when engine model is FPS based^. ^
+REM You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS ^
+REM is 30^. If it is not^, change the native FPS to 60 in ^
+REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        REM ) else (
+            REM echo description = Adjust the speed in game when engine model is FPS based^. ^
+REM You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS ^
+REM is 60^. If it is not^, change the native FPS to 30 in ^
+REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        REM )
 
         echo version = 3 >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
@@ -472,7 +548,7 @@ _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
         set "syncValue=%~1"
         set "displayedValue=%~2"
-        set "description="!GAME_TITLE!_%displayedValue%FPS_cap"
+        set "description="!GAME_TITLE!_%displayedValue%FPS_cap by BatchFw"
 
         set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
         if not exist !bfwgpv2! goto:eof

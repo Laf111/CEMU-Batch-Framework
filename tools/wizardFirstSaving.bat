@@ -194,7 +194,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] (
         echo ---------------------------------------------------------
@@ -376,13 +376,6 @@ REM : main
 
     REM : log file
     set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
-    set "PF="!CEMU_FOLDER:"=!\gameProfiles""
-    REM : replace gpuBufferCacheAccuracy = low
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
-    REM : replace gpuBufferCacheAccuracy = medium
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
-    REM : replace gpuBufferCacheAccuracy = high
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
     
     REM : version >= 1.15.6 ignoring the precompile cache is handle by CEMU throught the game's profile
     if !v1156! LEQ 1 goto:patchCemuSetting
@@ -575,6 +568,14 @@ REM : main
     REM : if version of CEMU >= 1.15.6 (v1156<=1)
     if !v1156! LEQ 1 goto:wait
 
+    set "PF="!CEMU_FOLDER:"=!\gameProfiles""
+    REM : replace gpuBufferCacheAccuracy = low
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
+    REM : replace gpuBufferCacheAccuracy = medium
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
+    REM : replace gpuBufferCacheAccuracy = high
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
+    
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:reopen
@@ -594,11 +595,13 @@ REM : main
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
     type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-        if !disp! EQU 5 (
+
+    type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+        if !disp! EQU 1 (
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^.
+            echo Creating ^/ completing graphic packs^, please wait ^.^.^.
         )
-        set /A "disp=disp+1"
+        set /A "disp=1"
         goto:waitingLoop
     )
 

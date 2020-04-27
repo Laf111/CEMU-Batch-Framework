@@ -112,7 +112,7 @@ REM : ------------------------------------------------------------------
     echo.
     set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
 
-    echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
+    echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
 
     if %num% LSS 0 goto:getUserGamesStats
     if %num% GTR !nbUsers! goto:getUserGamesStats

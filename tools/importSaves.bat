@@ -162,7 +162,7 @@ REM : main
 
     set /P "num=Enter the BatchFw user's number [0, !nbUsers!] : "
 
-    echo %num% | findStr /RV "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
+    echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:getUserGamesStats
 
     if %num% LSS 0 goto:getUserGamesStats
     if %num% GTR !nbUsers! goto:getUserGamesStats
@@ -276,7 +276,7 @@ REM        )
     :scanGamesFolder
     pushd !GAMES_FOLDER!
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_is.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls

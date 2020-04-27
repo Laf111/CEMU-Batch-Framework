@@ -96,7 +96,7 @@ REM : main
     cls
     :scanGamesFolder
     REM : check if exist game's folder(s) containing non supported characters
-    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder.log""
+    set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_cifag.log""
     dir /B /A:D > !tmpFile! 2>&1
     for /F %%i in ('type !tmpFile! ^| find "?"') do (
         cls
@@ -321,7 +321,7 @@ REM : functions
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
 
         REM : add-it to the library
         if [!libFileLine!] == ["NONE"] (

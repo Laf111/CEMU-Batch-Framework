@@ -206,6 +206,7 @@ REM : functions
         set "toBeRenamed="!BFW_RESOURCES_PATH:"=!\icons\downloadGame.ico""
         set "newName="!BFW_RESOURCES_PATH:"=!\icons\downloadGames.ico""
         if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1
+        
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -263,6 +264,13 @@ REM : functions
                 !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!
                 del /F !fnrLog! > NUL 2>&1
             )
+
+            set "toBeRenamed="%%i\BatchFw\Tools\Graphic packs\Complete GFX packs for all my games.lnk""
+            set "toBeRenamed="%%i\BatchFw\Tools\Graphic packs\Create GFX packs and complete presets for all my games.lnk""
+            set "newName="!BFW_RESOURCES_PATH:"=!\icons\downloadGames.ico""
+            if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1
+
+
         )
 
     goto:eof

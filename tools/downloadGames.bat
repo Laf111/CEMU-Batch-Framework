@@ -184,7 +184,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
             if [!mf!] == ["NOT_FOUND"] echo ---------------------------------------------------------------
             echo Uncomplete download detected : "%%x"
 
-            choice /C yn /T 6 /D n /N /M "Remove it (y/n = default in 15 sec)? :"
+            choice /C yn /T 15 /D n /N /M "Remove it (y/n = default in 15 sec)? :"
             if !ERRORLEVEL! EQU 1 rmdir /Q /S "%%x" > NUL 2>&1
             REM : at least delete meta.xml to for last modified folder detection
             set "mf="%%x\meta\meta.xml""
@@ -196,7 +196,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
             echo Relaunch these downloads to complete them
         )
     )
-    timeout /T 5 > NUL 2>&1
+    timeout /T 4 > NUL 2>&1
     set "gamesList="!BFW_LOGS:"=!\jnust_gamesList.log""
     
     :askKeyWord
@@ -205,6 +205,8 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     set /P  "pat=Enter a key word to search for the game (part of the title, titleId...): "
     echo.
     echo =========================== Matches ===========================
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    
     REM : number of resuts returned
     set /A "nbRes=0"
 
@@ -212,10 +214,19 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
         if not ["%%c"] == ["EUR"] if not ["%%c"] == ["USA"] if not ["%%c"] == ["JPN"] (
             set "titleIds[!nbRes!]=%%a"
             set "titleKeys[!nbRes!]=%%b"
-            set "titles[!nbRes!]="%%c""
+            
+            REM : for the name displayed use Wii-U title database (and so check that the game is listed in)
+            set "titleRead="%%c""
+            for /F "delims=~; tokens=2" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%%a';" 2^>NUL') do set "titleRead="%%i""
+            if [!titleRead!] == ["%%c"] (
+                set "titles[!nbRes!]="%%c""
+            ) else (
+                set "titles[!nbRes!]=!titleRead!"
+            )
+            
             set "regions[!nbRes!]=%%d"
             set /A "nbRes+=1"
-            echo !nbRes! ^: %%c [%%d] %%a
+            echo !nbRes! ^: !titleRead! [%%d] %%a
         )
     )
 
@@ -252,7 +263,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
         goto:launchDownload
     )
 
-    echo !answer! | findstr /R "^[0-9]*.$" > NUL 2>&1 && goto:checkInteger
+    echo !answer! | findStr /R "^[0-9]*.$" > NUL 2>&1 && goto:checkInteger
     goto:askChoice
 
     :checkInteger
@@ -485,15 +496,17 @@ REM : functions
         set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
         set "gameFolderName=!initialGameFolderName:?=!"
         
-        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=!"
-        echo ---------------------------------------------------------------
-        
         REM : secureGameTitle
         call:secureGameTitle !gameFolderName! gameFolderName
         echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
         set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
-        
+
+        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=!
+        echo ---------------------------------------------------------------
+        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=! > !gamelogFile!
+        echo --------------------------------------------------------------->> !gamelogFile!
+                
         set /A "totalSizeInMb=0"
         call:getSize !titleId! !str! "Game  " gSize
         if !totalSizeInMb! EQU 0 (
@@ -501,7 +514,7 @@ REM : functions
             pause
             exit /b 65
         )
-        echo Game   size = !gSize! Mb > !gamelogFile!
+        echo Game   size = !gSize! Mb >> !gamelogFile!
 
         type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
             call:getSize !utid! !str! Update uSize
@@ -516,6 +529,29 @@ REM : functions
         REM : remove 10Mb to totalSizeInMb (threshold)       
         set /A "threshold=!totalSizeInMb!-9"
 
+        
+        REM : get game's data for wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "DescRead="%%b""
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )    
+
+        REM : set Game title for packs (folder name)
+        set "gameFolderName=%DescRead%"
+        
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
@@ -527,13 +563,13 @@ REM : functions
         echo Starting at !date! >> !gamelogFile!
         echo Starting at !date!
         echo.
-        
+
         if !decryptMode! EQU 0 (
             echo ^> Downloading WUP of !currentTitle! [!currentTitleRegion!]^.^.^.
             echo ^> Downloading WUP of !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
             title Downloading WUP of !currentTitle! [!currentTitleRegion!]
         ) else (
-
+        
             set "finalPath="!GAMES_FOLDER:"=!\!gameFolderName:"=!"
 
             if exist !finalPath! (
@@ -720,6 +756,7 @@ REM : functions
         echo threshold used ^: !t! >> !gamelogFile!
         set /A "previous=0"
         set /A "nb2sec=0"
+        set /A "finalize=0"
 
         REM : wait until all transferts are done
         :waitingLoop
@@ -728,69 +765,76 @@ REM : functions
 
         wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
 
-            REM : get the JNUSTools folder size
-            call:getFolderSizeInMb !initialGameFolderName! sizeDl
-
-            REM : progression
-            set /A "curentSize=!sizeDl!
-            if !curentSize! LSS !t! (
-
-                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
-                
-                set /A "mod=nb5sec%%20"                
-                if !mod! EQU 0 if !previous! EQU !curentSize! (
-                    echo. >> !gamelogFile!
-                    echo.
-                    echo Inactivity detected^! ^, closing current transferts >> !gamelogFile!
-                    echo Inactivity detected^! ^, closing current transferts
-                    echo. >> !gamelogFile!
-                    echo.
-                    REM : exit, stop transferts, they will be relaunched
-                    call:endAllTransferts
-                    goto:eof
-
-                )
-                set /A "previous=!curentSize!"
-                    
-            ) else (
-
-                echo. >> !gamelogFile!
-                echo threshold !t! reached >> !gamelogFile!
-                echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
-
-                set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
-                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
-                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
-
-                echo. >> !gamelogFile!
-                echo.
-                echo ^> Finalizing^.^.^. >> !gamelogFile!
-                echo ^> Finalizing^.^.^.
-                timeout /T 120 > NUL 2>&1
-                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: 100%%
-                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: 100%%
-
-                REM : get the initialGameFolderName folder size
+            if !finalize! EQU 0 (
+                REM : get the JNUSTools folder size
                 call:getFolderSizeInMb !initialGameFolderName! sizeDl
 
                 REM : progression
                 set /A "curentSize=!sizeDl!
+                if !curentSize! LSS !t! (
 
-                call:endAllTransferts
-                echo downloaded successfully  >> !gamelogFile!
-                echo.  >> !gamelogFile!
-                echo.  >> !gamelogFile!
-                echo data size expected ^(could be bigger than downloaded^): !totalSizeInMb! >> !gamelogFile!
-                echo data size downloaded ^: !curentSize! >> !gamelogFile!
-                echo.  >> !gamelogFile!
-                goto:eof
+                    if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                    
+                    set /A "mod=nb5sec%%20"                
+                    if !mod! EQU 0 if !previous! EQU !curentSize! (
+                        echo. >> !gamelogFile!
+                        echo.
+                        echo Inactivity detected^! ^, closing current transferts >> !gamelogFile!
+                        echo Inactivity detected^! ^, closing current transferts
+                        echo. >> !gamelogFile!
+                        echo.
+                        REM : exit, stop transferts, they will be relaunched
+                        call:endAllTransferts
+                        goto:eof
+
+                    )
+                    set /A "previous=!curentSize!"
+                        
+                ) else (
+
+                    echo. >> !gamelogFile!
+                    echo threshold !t! reached >> !gamelogFile!
+                    echo data size downloaded when threshold reached ^: !curentSize! >> !gamelogFile!
+
+                    if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                    if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+                    if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+
+                    echo. >> !gamelogFile!
+                    echo.
+                    echo ^> Finalizing^.^.^. >> !gamelogFile!
+                    echo ^> Finalizing^.^.^.
+                    set /A "finalize=1"
+                    goto:waitingLoop
+                )
+
+                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+        
+                goto:waitingLoop
+            ) else (
+                if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+                if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
+            
+                goto:waitingLoop
             )
-
-            if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
-            if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
-
-            goto:waitingLoop
         )
+        if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: 100%%
+        if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: 100%%
+
+        REM : get the initialGameFolderName folder size
+        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+        REM : progression
+        set /A "curentSize=!sizeDl!
+
+        echo downloaded successfully  >> !gamelogFile!
+        echo.  >> !gamelogFile!
+        echo.  >> !gamelogFile!
+        echo data size expected ^(could be bigger than downloaded^): !totalSizeInMb! >> !gamelogFile!
+        echo data size downloaded ^: !curentSize! >> !gamelogFile!
+        echo.  >> !gamelogFile!
 
     goto:eof
     REM : ------------------------------------------------------------------

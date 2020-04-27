@@ -27,6 +27,30 @@ REM : main
     REM : set current char codeset
     call:setCharSetOnly
 
+    REM : get the last version used
+    set "newVersion=NOT_FOUND"
+
+    set "pat="!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete""
+
+    set "gpl="NOT_FOUND""
+    for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
+    if not [!gpl!] == ["NOT_FOUND"] set "zipLogFile="!BFW_GP_FOLDER:"=!\!gpl:"=!""
+
+    if [!gpl!] == ["NOT_FOUND"] (
+        echo WARNING ^: !pat! not found^, force extra pack creation ^!
+        REM : create one
+        set "dnd="!BFW_GP_FOLDER:"=!\graphicPacks563.doNotDelete""
+        echo. > !dnd!
+    )
+
+    for /F "delims=~" %%i in (!zipLogFile!) do (
+        set "fileName=%%~nxi"
+        set "newVersion=!fileName:.doNotDelete=!"
+    )
+
+    REM : get the last version used for launching this game
+    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+    
     pushd !GAMES_FOLDER!
     REM : searching for meta file
     for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install" ^| find /I /V "\_BatchFw_Install"') do (
@@ -69,25 +93,40 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+        if not exist !glogFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     
     :treatGame
-
-        for %%a in (!META_FILE!) do set "parentFolder="%%~dpa""
-        set "metaF=!parentFolder:~0,-2!""
-        set "GAME_FOLDER_PATH=!metaF:\meta=!"
-
-        REM : basename of GAME_FOLDER_PATH (to get GAME_TITLE)
-        for /F "delims=~" %%l in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxl"
-
-        echo #########################################################
-        echo !GAME_TITLE!
-        echo #########################################################
 
         REM : search for a GFX pack for this game
 
         REM : get game's data for wii-u database file
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
 
         REM : strip line to get data
         for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
@@ -105,6 +144,11 @@ REM : functions
         )
         set /A "resX2=%nativeHeight%*2"
 
+        set "GAME_TITLE=%Desc: =%"
+        echo #########################################################
+        echo !GAME_TITLE!
+        echo #########################################################
+        
         if exist !fnrLogBegp! del /F !fnrLogBegp! > NUL 2>&1
 
         REM : launching the search in all gfx pack folder (V2 and up)
@@ -190,6 +234,17 @@ REM : functions
         call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !title! !argSup!
 
         echo #########################################################
+
+        REM : update GLogFile
+        REM : log in game library log
+        if not ["!newVersion!"] == ["NOT_FOUND"] (
+
+            REM : flush glogFile of !GAME_TITLE! graphic packs version
+            if exist !glogFile! for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "!GAME_TITLE! graphic packs version" 2^>NUL') do call:cleanGameLogFile "!GAME_TITLE! graphic packs version"
+
+            set "msg="!GAME_TITLE! graphic packs version=!newVersion!""
+            call:log2GamesLibraryFile !msg!
+        )
 
     goto:eof
     

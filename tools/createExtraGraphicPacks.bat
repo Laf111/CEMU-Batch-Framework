@@ -172,7 +172,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
@@ -191,7 +191,7 @@ REM : main
     REM : strip line to get data
     for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
        set "titleIdRead=%%a"
-       set "DescRead=%%b"
+       set "DescRead="%%b""
        set "productCode=%%c"
        set "companyCode=%%d"
        set "notes=%%e"
@@ -441,7 +441,7 @@ REM : functions
     :getAllTitleIds
 
         REM now searching using icoId
-        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
+        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";'%icoId%';"') do (
             set "titleIdRead=%%i"
             set "titleIdRead=!titleIdRead:'=!"
             echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
@@ -529,7 +529,7 @@ REM : functions
 
     :dosToUnix
     REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix.log""
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_extra.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
@@ -570,18 +570,25 @@ REM : functions
 
         echo name = Resolution >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
-        echo description = V2 pack ported to V3 by BatchFW^. Changes the resolution of the game >> !bfwRulesFile!
+        if !nativeHeight! EQU 720 (
+            echo description = Created by BatchFw considering that the native resolution is 720p^. Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. If it is not^, change the native resolution to 1080p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        ) else (
+            echo description = Created by BatchFw considering that the native resolution is 1080p. Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. If it is not^, change the native resolution to 720p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        )
+        REM if !nativeHeight! EQU 720 (
+            REM echo description = Created by BatchFw considering that the native resolution is 720p^. ^
+REM Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. ^
+REM If it is not^, change the native resolution to 1080p in ^
+REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        REM ) else (
+            REM echo description = Created by BatchFw considering that the native resolution is 1080p. ^
+REM Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. ^
+REM If it is not^, change the native resolution to 720p in ^
+REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        REM )
         echo version = !lastVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
-        echo [Preset] >> !bfwRulesFile!
-        echo name = !nativeWidth!x!nativeHeight! ^(Default^) >> !bfwRulesFile!
-        echo $width = !nativeWidth! >> !bfwRulesFile!
-        echo $height = !nativeHeight! >> !bfwRulesFile!
-        echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
-        echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!
-
     goto:eof
     REM : ------------------------------------------------------------------
 

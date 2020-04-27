@@ -1463,9 +1463,9 @@ REM : functions
         echo --------------------------------------------------- >> !batchFwLog!
         echo ---------------------------------------------------
         REM : set a threshold at 90
-        set /A "tenPercent=oldSaveSize/10"
+        set /A "thirdPercent=oldSaveSize/33"
 
-        set /A "saveSizeThreshold=oldSaveSize-tenPercent"
+        set /A "saveSizeThreshold=oldSaveSize-thirdPercent"
 
         REM : compare sizes : > ~90% => OK
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
@@ -1552,14 +1552,14 @@ REM : functions
 
     goto:eof
     REM : ------------------------------------------------------------------
-
+    set /A "disp=0"
     :waitProcessesEnd
 
         REM : debug trace
 rem        set "launchGameLogFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
 rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !launchGameLogFileTmp!
 
-        set /A "disp=0"
+
         set "launchGameLogFileTmp="!TMP:"=!\BatchFw_launchGame_process.list""
 
         :waitingLoopProcesses
@@ -1584,12 +1584,13 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "updateGamesGraphicPacks.bat" > NUL 2>&1 && (
 
-            if !disp! EQU 0 echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
-            if !disp! EQU 0 type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
-                echo Creating ^/ completing graphic packs if needed^, please wait ^.^.^. >> !batchFwLog!
-                if !usePbFlag! EQU 1 call:setProgressBar 90 94 "pre processing" "GFX packs completion, please wait"
-                if !usePbFlag! EQU 0 cscript /nologo !MessageBox! "Create or complete graphic packs if needed^, please wait ^.^.^."
-                set /A "disp=disp+1"
+            echo waitProcessesEnd : updateGamesGraphicPacks still running >> !batchFwLog!
+            type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+                if !disp! EQU 0 (
+                    echo Creating ^/ completing graphic packs^, please wait ^.^.^. >> !batchFwLog!
+                    if !usePbFlag! EQU 1 call:setProgressBar 90 94 "pre processing" "GFX packs creation/completion, please wait"
+                )
+                set /A "disp=1"
             )
             timeout /T 1 > NUL 2>&1
             goto:waitingLoopProcesses
@@ -1840,13 +1841,13 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
-        set "PF="!CEMU_FOLDER:"=!\gameProfiles""
+        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
         REM : replace gpuBufferCacheAccuracy = low
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
         REM : replace gpuBufferCacheAccuracy = medium
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
         REM : replace gpuBufferCacheAccuracy = high
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
 
         :syncCP
         REM : synchronized controller profiles (import)

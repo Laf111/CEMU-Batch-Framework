@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V18-7"
+    set "BFW_VERSION=V18-8"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -726,6 +726,10 @@ REM : main
 
     :useWiiU
     echo.
+    call:getUserInput "Do you want to use your Wii-U to create BatchFw's users  (y,n = default in 20s)? " "n,y" ANSWER 20
+    echo.
+    if [!ANSWER!] == ["n"] set /A "alreadyAsked=1" && goto:batchFwUsers
+    echo.
     echo You can use your Wii-U accounts to create BatchFw^'users
     echo list and get the files needed to play online^.
     echo For that^, you need to had dumped your NAND^.
@@ -1234,13 +1238,14 @@ REM : main
     )
 
     :endMain
-    REM : readonly batchFw files
-    pushd !BFW_PATH!
-    attrib +r *.bat > NUL 2>&1
-    pushd !BFW_TOOLS_PATH!
-    attrib +r *.bat > NUL 2>&1
-    attrib +r !wiiTitlesDataBase! > NUL 2>&1
-
+    if %nbArgs% EQU 0 (
+        REM : readonly batchFw files
+        pushd !BFW_PATH!
+        attrib +r *.bat > NUL 2>&1
+        pushd !BFW_TOOLS_PATH!
+        attrib +r *.bat > NUL 2>&1
+        attrib +r !wiiTitlesDataBase! > NUL 2>&1
+    )
     endlocal
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     goto:eof
@@ -2133,7 +2138,7 @@ REM        call:log2HostFile !msg!
         set "pat="!BFW_WIIU_FOLDER:"=!\OnlineFiles\usersAccounts\*.dat""
         for /F "delims=~" %%i in ('dir /B !pat! 2^> NUL') do (
             REM : get user name
-            for /F "tokens=1 delims=8" %%j in ("%%i") do (
+            for /F "tokens=1 delims=_" %%j in ("%%i") do (
                 echo ^> Found %%j user with an online account
                 echo USER_REGISTERED=%%j>>!logFile!
             )
