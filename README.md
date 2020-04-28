@@ -13,7 +13,7 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 
 # 
-**IMPORTANT : Do not clone the repository (unless you're familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "releases" tab of this page to get the last released version (see recommendations at the end of this page).
+**IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "releases" tab of this page to get the last released version (see recommendations at the end of this page).
 #
 
 ## Main purpose:
@@ -183,6 +183,20 @@ Settings are saved by host (and per users). Transferable cache, controller profi
 
 - You don't need to manually open CEMU to play. Once you have collected all the settings (on the first launch of a game) for all versions of CEMU you play on, use the shortcuts on your desktop (Or your shortcuts folder);
 
+PLEASE DON'T TOUCH/MOVE FILES UNDER ./LOGS ESPECIALLY HOST_\*.LOG BECAUSE THESE FILES ARE USED TO 
+SAVED BATCHFW'S SETTINGS FOR EACH HOST USED
+
+IF YOU ENCOUNTER ANY ISSUE, TRY RESET BATCH FW TO FACTORY SETTINGS USING "WII-U GAMES\BATCHFW\RESET BATCHFW.LNK"
+
+Once mlc01 data are moved to game's folder. BatchFw "only" prepare CEMU's workspace.
+Issues that could be affected to BatchFw are :
+- online files are missing
+- saves/games stats not found/saved
+- settings missing/not saved
+- GFX packs are missing
+- no cache found (transferable or GLCache)
+Other issues should be related to CEMU itself.
+
 "How to" informations are displayed in the console when creating shortcuts.
 
 BatchFW does not need Adminstrator rights unless you want to create shortcuts at specifics locations.
@@ -299,6 +313,11 @@ Using the main branch could lead in regressions and troubles as bacth scripting 
 
 Also if you edit the source code, use a text editor that doesn't change ANSI files format to UTF8.
 
+IF YOU ENCOUNTER ANY ISSUE WITH CEMU : 
+1) if settings for this version were IMPORTED from another one, try to delete your settings 
+   using the dedicated shortcut "wii-u games\cemu\cemu_x.y.z\delete all my cemu_x.y.z's settings.lnk"
+2) refuse the import the next run to use the factory settings from this version
+3) DISABLE ALL GFX PACKS and check if the issue persist
+4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 
-
-If you have any trouble don't seek for help or support on CEMU's subreddits or discords, send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
+Send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
