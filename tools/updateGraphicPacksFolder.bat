@@ -89,7 +89,7 @@ REM : main
 
     set "lgpvLog="!BFW_PATH:"=!\logs\latestGraphicPackVersion.log""
 
-    Powershell.exe -executionpolicy remotesigned -File !pwsGetVersion! *> !lgpvLog!
+    Powershell.exe -executionpolicy bypass -File !pwsGetVersion! *> !lgpvLog!
     if !ERRORLEVEL! EQU 1 (
         echo Failed to get the last graphic Packs update available
         type !lgpvLog!
@@ -174,7 +174,7 @@ REM : main
     pushd !BFW_GP_FOLDER!
 
     REM : launching powerShell script to downaload and extract GFX archive
-    Powershell -executionpolicy remotesigned -File updateGP.ps1 *> updateGP.log
+    Powershell -executionpolicy bypass -File updateGP.ps1 *> updateGP.log
     set /A "cr=!ERRORLEVEL!"
     if !cr! NEQ 0 (
         echo ERROR While getting and extracting graphic packs folder ^!

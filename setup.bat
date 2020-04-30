@@ -64,7 +64,6 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "ACTIVE_ADAPTER=NONE"
-    set /A "extractPacks=0"
 
     if exist !logFile! goto:setChcp
 
@@ -83,7 +82,7 @@ REM : main
         pause
         exit 2
     )
-    echo File system NTFS                        ^: OK
+    echo File system NTFS              ^: OK
 
     REM : check rights to create links
     pushd !GAMES_FOLDER!
@@ -97,7 +96,7 @@ REM : main
         pause
         exit 21
     )
-    echo Rights to create symlinks               ^: OK
+    echo Rights to create symlinks     ^: OK
 
     if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
@@ -111,37 +110,7 @@ REM : main
             exit 22
         )
     )
-    echo Rights to launch vbs scripts            ^: OK
-
-    set "ACTIVE_ADAPTER=NOT_FOUND"
-    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
-    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        echo Active network connection ^(optional^)    ^: KO
-    ) else (
-        echo Active network connection ^(optional^)    ^: OK
-        REM : check powershell policy to launch unsigned powershell scripts
-        for /F %%a in ('powershell Get-ExecutionPolicy') do (
-            set "policy=%%a"
-            if ["!policy!"] == ["Bypass"] goto:pwPolicyOk
-            if ["!policy!"] == ["Unrestricted"] goto:pwPolicyOk
-            if ["!policy!"] == ["RemoteSigned"] goto:pwPolicyOk
-            echo Compatible PowerShell policy ^(optional^) ^: KO
-            echo.
-            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
-            echo Policies expected are "Bypass", "Unrestricted" or "RemoteSigned"
-            echo BatchFw use powershell scripts to check/update itself and/or the GFX packs
-            echo Contact !USERDOMAIN!^'s administrator to launch the following command
-            echo powershell Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
-            echo.
-            pause
-            set /A "extractPacks=1"
-            :pwPolicyOk
-            if !extractPacks! EQU 0 (
-                echo Compatible PowerShell policy ^(optional^) ^: OK
-            )
-        )
-    )
-
+    echo Rights to launch vbs scripts  ^: OK
 
     echo ---------------------------------------------------------
     timeout /T 4 > NUL 2>&1
@@ -441,7 +410,6 @@ REM : main
     echo ^> Mods were imported in each game^'s folder
 
     :askGpCheckUpdate
-    if !extractPacks! EQU 1 goto:askCompleteGFXpacks
     echo ---------------------------------------------------------
     REM : flush logFile of CHECK_UPDATE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "CHECK_UPDATE" 2^>NUL') do call:cleanHostLogFile CHECK_UPDATE
@@ -451,7 +419,7 @@ REM : main
         set "msg="CHECK_UPDATE=YES""
         call:log2HostFile !msg!
     )
-    :askCompleteGFXpacks
+
     echo ---------------------------------------------------------
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
@@ -617,10 +585,6 @@ REM : main
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
     if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
-    if !extractPacks! EQU 1 (
-        set "ACTIVE_ADAPTER=NOT_FOUND"
-        goto:extractlgfxp
-    )
     REM : check if an internet connection is active
     if ["!ACTIVE_ADAPTER!"] == ["NONE"] (
         set "ACTIVE_ADAPTER=NOT_FOUND"
@@ -656,7 +620,8 @@ REM : main
 
     :beginExtraction
     REM : first launch of setup.bat
-    if exist !BFW_GP_FOLDER! if !extractPacks! EQU 0 goto:getUserMode
+    if exist !BFW_GP_FOLDER!  goto:getUserMode
+    mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo Extracting embeded graphics packs^.^.^.
