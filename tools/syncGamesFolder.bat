@@ -107,7 +107,7 @@ REM : main
     if %nbArgs% NEQ 1 (
         echo ERROR ^: on arguments passed ^!
         echo SYNTAXE ^: "!THIS_SCRIPT!" TARGET_GAMES_FOLDER
-        echo ^(^* for optionnal^ argument^)
+        echo ^(^* for optional^ argument^)
         echo given {%*}
         pause
         exit /b 99

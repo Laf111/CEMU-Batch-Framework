@@ -23,7 +23,8 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 
 30/04/2020 V18-9 :
-fix : check powershell policy allowing Restricted policy (causing GFX packs, batchFw update failure)
+fix : Wii-U 106-0502 error when going online with versions >= 1.15.19
+fix : powershell policy check (causing GFX packs, batchFw update failure)
       extract embeded GFX packs in this case
 fix : script's name error for the third choice in setup.bat when starting with no games installed
 fix : in wizardFirstLaunch.bat set threadQuantum to 100000 and disableGPUFence to false by default when

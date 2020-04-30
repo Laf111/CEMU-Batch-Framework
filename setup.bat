@@ -83,7 +83,7 @@ REM : main
         pause
         exit 2
     )
-    echo File system NTFS              ^: OK
+    echo File system NTFS                        ^: OK
 
     REM : check rights to create links
     pushd !GAMES_FOLDER!
@@ -97,7 +97,7 @@ REM : main
         pause
         exit 21
     )
-    echo Rights to create symlinks     ^: OK
+    echo Rights to create symlinks               ^: OK
 
     if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
@@ -111,31 +111,31 @@ REM : main
             exit 22
         )
     )
-    echo Rights to launch vbs scripts  ^: OK
+    echo Rights to launch vbs scripts            ^: OK
 
     set "ACTIVE_ADAPTER=NOT_FOUND"
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        echo Active network connection ^(optionnal^)      ^: KO
+        echo Active network connection ^(optional^)    ^: KO
     ) else (
-        echo Active network connection ^(optionnal^)      ^: OK
-
+        echo Active network connection ^(optional^)    ^: OK
         REM : check powershell policy to launch unsigned powershell scripts
         for /F %%a in ('powershell Get-ExecutionPolicy') do (
             set "policy=%%a"
-            if ["!policy!"] NEQ ["Unrestricted"] if ["!policy!"] NEQ ["RemoteSigned"] (
-                echo Compatible PowerShell policy ^(optionnal^) ^: KO
-                echo.
-                echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
-                echo Policies expected are "Unrestricted" or "RemoteSigned"
-                echo BatchFw use powershell scripts to check/update itself and/or the GFX packs
-                echo Contact !USERDOMAIN!^'s administrator to launch the following command
-                echo powershell Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
-                pause
-                set /A "extractPacks=1"
-            ) else (
-                echo Compatible PowerShell policy ^(optionnal^) ^: OK
-            )
+            if ["!policy!"] == ["Bypass"] goto:pwPolicyOk
+            if ["!policy!"] == ["Unrestricted"] goto:pwPolicyOk
+            if ["!policy!"] == ["RemoteSigned"] goto:pwPolicyOk
+            echo Compatible PowerShell policy ^(optional^) ^: KO
+            echo.
+            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
+            echo Policies expected are "Bypass", "Unrestricted" or "RemoteSigned"
+            echo BatchFw use powershell scripts to check/update itself and/or the GFX packs
+            echo Contact !USERDOMAIN!^'s administrator to launch the following command
+            echo powershell Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+            pause
+            set /A "extractPacks=1"
+            :pwPolicyOk
+            echo Compatible PowerShell policy ^(optional^) ^: OK
         )
     )
 
@@ -385,30 +385,30 @@ REM : main
     if %QUIET_MODE% EQU 0 (
 
         echo ---------------------------------------------------------
-        echo This is the first time you install BatchFw ^:
+        echo This is the very first time you install BatchFw ^:
         echo ---------------------------------------------------------
-        call:getUserInput "Read the goals of BatchFW? (y,n = default in 10s)" "n,y" ANSWER 10
+        call:getUserInput "Read the goals of BatchFW? (y,n = default in 6s)" "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:goalsOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :goalsOK
-        call:getUserInput "Read informations on CEMU interfaces history? (y,n = default in 10s)" "n,y" ANSWER 10
+        call:getUserInput "Read informations on CEMU interfaces history? (y,n = default in 6s)" "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :iFOK
-        call:getUserInput "Read how graphic packs are handled? (y,n = default in 10s)" "n,y" ANSWER 10
+        call:getUserInput "Read how graphic packs are handled? (y,n = default in 6s)" "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:wiiuOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :wiiuOK
-        call:getUserInput "Read about Wii-U transferts feature? (y,n = default in 10s)" "n,y" ANSWER 10
+        call:getUserInput "Read about Wii-U transferts feature? (y,n = default in 6s)" "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:useProgressBar
 
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
@@ -656,7 +656,7 @@ REM : main
 
     :beginExtraction
     REM : first launch of setup.bat
-    if exist !BFW_GP_FOLDER!  goto:getUserMode
+    if exist !BFW_GP_FOLDER! if !extractPacks! EQU 0 goto:getUserMode
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo Extracting embeded graphics packs^.^.^.
@@ -1150,7 +1150,7 @@ REM : main
 
     if %QUIET_MODE% EQU 1 goto:done
 
-    call:getUserInput "Would you like to see how BatchFW works? (y,n = default in 10s)" "n,y" ANSWER 10
+    call:getUserInput "Would you like to see how BatchFW works? (y,n = default in 6s)" "n,y" ANSWER 6
     if [!ANSWER!] == ["n"] goto:done
 
     set "tmpFile="!BFW_PATH:"=!\doc\howItWorks.txt""

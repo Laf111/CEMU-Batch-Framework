@@ -311,38 +311,48 @@ REM : main
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
-    REM : comparing version to V1.15.15
+    REM : comparing version to V1.15.19
+    set /A "v11519=2"
     set /A "v11515=2"
     set /A "v1156=2"
     set /A "v114=2"
-    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
-    if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
-    if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    call:compareVersions !versionRead! "1.15.19" v11519 > NUL 2>&1
+    if ["!v11519!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v11519! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-    REM : if version < 1.15.15 : compare to 1.15.6 and update v1156
-    if !v11515! EQU 2 (
-        call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
-        if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
-        if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    REM : if version < 1.15.19 : compare to 1.15.15 and update v1159
+    if !v11519! EQU 2 (
+        call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
+        if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
+        if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-        if !v1156! EQU 2 (
-            call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-            if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
-            if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
+        REM : if version < 1.15.15 : compare to 1.15.6 and update v1156
+        if !v11515! EQU 2 (
+            call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
+            if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
+            if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-            if !v114! EQU 2 set "gfxType=2"
-            if !v114! LEQ 1 goto:getTitleId
+            if !v1156! EQU 2 (
+                call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+                if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
+                if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-            if !v114! LEQ 1 goto:getTitleId
-        ) else (
-            REM : version > 1.15.6 => version > 1.14
-            set "v114=1"
+                if !v114! EQU 2 set "gfxType=2"
+                if !v114! LEQ 1 goto:getTitleId
 
-            REM : do build old update/dlc paths in mlc
-            set /A "buildOldUpdatePaths=0"
-            goto:getTitleId
+                if !v114! LEQ 1 goto:getTitleId
+            ) else (
+                REM : version > 1.15.6 => version > 1.14
+                set "v114=1"
+
+                REM : do build old update/dlc paths in mlc
+                set /A "buildOldUpdatePaths=0"
+                goto:getTitleId
+            )
         )
     ) else (
+        REM : version > 1.15.19 => version > 1.15.15
+        set "v11515=1"
         REM : version > 1.15.15 => version > 1.15.6
         set "v1156=1"
         REM : version > 1.15.15 => version > 1.14
@@ -2230,7 +2240,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
-            for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
+            if !v11519! EQU 1 (
+                for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
+            ) else (
+                for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "PersistentId=" 2^>NUL') do set "accId=%%j"
+            )
         )
 
         if ["!accId!"] == ["NONE"] (
@@ -2273,8 +2287,13 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         )
 
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
-
-        !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        REM : settings.xml evolved after 1.15.19 included
+        if !v11519! EQU 1 (
+            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        ) else (
+            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp!
+            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp!
+        )
 
         if exist !csTmp! (
             del /F !cs! > NUL 2>&1
