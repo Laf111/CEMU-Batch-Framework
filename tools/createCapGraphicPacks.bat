@@ -470,24 +470,13 @@ REM : functions
         echo name = Speed Adjustment >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
 
+        set "description=Adjust the emulation speed of static FPS games when engine model is FPS based^. If it is not the case only menus will be affected^. To work^, you need to disable vsync^ AND ANY 60FPS GFX pack^."
         if !nativeFps! EQU 30 (
-            echo description = Adjust the speed in game when engine model is FPS based^. You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = !description! BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (
-            echo description = Adjust the speed in game when engine model is FPS based^. You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = !description! BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
         
-        REM if !nativeFps! EQU 30 (
-            REM echo description = Adjust the speed in game when engine model is FPS based^. ^
-REM You need to disable vsync^ and 60FPS GFX pack. BatchFw assume that the native FPS ^
-REM is 30^. If it is not^, change the native FPS to 60 in ^
-REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
-        REM ) else (
-            REM echo description = Adjust the speed in game when engine model is FPS based^. ^
-REM You need to disable vsync^ and 60FPS GFX packs patch. BatchFw assume that the native FPS ^
-REM is 60^. If it is not^, change the native FPS to 30 in ^
-REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
-        REM )
-
         echo version = 3 >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
         echo [Preset] >> !bfwRulesFile!

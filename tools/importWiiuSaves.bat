@@ -51,7 +51,7 @@ REM : main
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
-    title Import CEMU saves to WiiU
+    title Import CEMU saves from WiiU
 
     echo =========================================================
     echo Import Wii-U saves to CEMU

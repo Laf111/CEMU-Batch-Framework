@@ -21,6 +21,21 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+
+29/04/2020 V18-9 :
+fix : check powershell policy allowing Restricted policy (causing GFX packs, batchFw update failure)
+      extract embeded GFX packs in this case
+fix : script's name error for the third choice in setup.bat when starting with no games installed
+fix : in wizardFirstLaunch.bat set threadQuantum to 100000 and disableGPUFence to false by default when
+      creating a game's profile (when not provided by CEMU)
+fix : import games not treat games without update (or DLC) when base folder is not your games one
+add : arguments to killBatchFw to ignore some scripts
+add : killBatchFw processes from wizardFirstSaving (on ownership issue found on a used folder) ignore
+      updateGamesGraphicPacks in order to let batchFw complete/create the GFX packs 
+add : create scripts to be launched as administrator to fix ownership issues 
+      (script are saved in Wii-U Games\OwnerShip Patchs and auto-deleted once they have been launched)
+add : one check more in fixBatFiles.bat
+
 27/04/2020 V18-8 :
 fix : fixBatFile's log file error when resetting BatchFw to default
 fix : lower threshold to 50% for saves integrity checker

@@ -64,6 +64,7 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "ACTIVE_ADAPTER=NONE"
+    set /A "extractPacks=0"
 
     if exist !logFile! goto:setChcp
 
@@ -112,25 +113,33 @@ REM : main
     )
     echo Rights to launch vbs scripts  ^: OK
 
-    REM : check powershell policy to launch unsigned powershell scripts
-    for /F %%a in ('powershell Get-ExecutionPolicy') do (
-        set "policy=%%a"
-        if ["!policy!"] EQU ["AllSigned"] (
-            echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
-            echo BatchFw use powershell scripts^, please contact !USERDOMAIN! administrator
-            pause
-            exit 24
-        )
-    )
-    echo Compatible PowerShell policy  ^: OK
-
     set "ACTIVE_ADAPTER=NOT_FOUND"
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        echo Active network connection     ^: KO
+        echo Active network connection ^(optionnal^)      ^: KO
     ) else (
-        echo Active network connection     ^: OK
+        echo Active network connection ^(optionnal^)      ^: OK
+
+        REM : check powershell policy to launch unsigned powershell scripts
+        for /F %%a in ('powershell Get-ExecutionPolicy') do (
+            set "policy=%%a"
+            if ["!policy!"] NEQ ["Unrestricted"] if ["!policy!"] NEQ ["RemoteSigned"] (
+                echo Compatible PowerShell policy ^(optionnal^) ^: KO
+                echo.
+                echo Launching unsigned powershell scripts is not allowed ^(policy=!policy!^) ^!
+                echo Policies expected are "Unrestricted" or "RemoteSigned"
+                echo BatchFw use powershell scripts to check/update itself and/or the GFX packs
+                echo Contact !USERDOMAIN!^'s administrator to launch the following command
+                echo powershell Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+                pause
+                set /A "extractPacks=1"
+            ) else (
+                echo Compatible PowerShell policy ^(optionnal^) ^: OK
+            )
+        )
     )
+
+
     echo ---------------------------------------------------------
     timeout /T 4 > NUL 2>&1
     cls
@@ -327,7 +336,11 @@ REM : main
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
-                    cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+                    REM : basename of GAME FOLDER PATH to get GAME_TITLE
+                    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+
+                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -345,7 +358,7 @@ REM : main
         echo No RPX games were found
         echo.
 
-        call:getUserInput "Dumps games from your Wii-U (1), import dumps (2), download a game (3) or cancel (c) ?" "1,2,3,c" ANSWER
+        call:getUserInput "Dumps games from your Wii-U (1), install games (2), download games (3) or cancel (c) ?" "1,2,3,c" ANSWER
         if [!ANSWER!] == ["c"] (
             echo So exiting^.^.^.
             echo _BatchFW_Install folder must be located in your loadiines ^(^*^.rpx^) games folder
@@ -360,7 +373,7 @@ REM : main
         )
         if [!ANSWER!] == ["3"] (
             REM : calling downloadGames.bat
-            set "tobeLaunch="!BFW_TOOLS_PATH:"=!\downloadGame.bat""
+            set "tobeLaunch="!BFW_TOOLS_PATH:"=!\downloadGames.bat""
             call !tobeLaunch! !GAMES_FOLDER!
         )
 
@@ -371,6 +384,8 @@ REM : main
     )
     if %QUIET_MODE% EQU 0 (
 
+        echo ---------------------------------------------------------
+        echo This is the first time you install BatchFw ^:
         echo ---------------------------------------------------------
         call:getUserInput "Read the goals of BatchFW? (y,n = default in 10s)" "n,y" ANSWER 10
         if [!ANSWER!] == ["n"] goto:goalsOK
@@ -423,6 +438,7 @@ REM : main
     echo ^> Mods were imported in each game^'s folder
 
     :askGpCheckUpdate
+    if !extractPacks! EQU 1 goto:askCompleteGFXpacks
     echo ---------------------------------------------------------
     REM : flush logFile of CHECK_UPDATE
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "CHECK_UPDATE" 2^>NUL') do call:cleanHostLogFile CHECK_UPDATE
@@ -432,7 +448,7 @@ REM : main
         set "msg="CHECK_UPDATE=YES""
         call:log2HostFile !msg!
     )
-
+    :askCompleteGFXpacks
     echo ---------------------------------------------------------
     REM : flush logFile of COMPLETE_GP
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "COMPLETE_GP" 2^>NUL') do call:cleanHostLogFile COMPLETE_GP
@@ -596,8 +612,15 @@ REM : main
     :updateGfxPacksFolder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
-    if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
+    if not exist !BFW_GP_FOLDER! (
+        mkdir !BFW_GP_FOLDER! > NUL 2>&1
+        set /A "extractPacks=1"
+    )
 
+    if !extractPacks! EQU 1 (
+        set "ACTIVE_ADAPTER=NOT_FOUND"
+        goto:extractlgfxp
+    )
     REM : check if an internet connection is active
     if ["!ACTIVE_ADAPTER!"] == ["NONE"] (
         set "ACTIVE_ADAPTER=NOT_FOUND"
@@ -634,7 +657,6 @@ REM : main
     :beginExtraction
     REM : first launch of setup.bat
     if exist !BFW_GP_FOLDER!  goto:getUserMode
-    mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo Extracting embeded graphics packs^.^.^.
@@ -1223,6 +1245,35 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :fillOwnerShipPatch
+        set "folder=%1"
+        set "title=%2"
+
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "WIIU_GAMES_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+
+            set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
+            if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
+            set "patch="!patchFolder:"=!\!title!.bat""
+        )
+        set "%3=!patch!"
+
+        echo echo off > !patch!
+        echo REM ^: RUN THIS SCRIPT AS ADMINISTRATOR >> !patch!
+
+        type !patch! | find /I !folder! > NUL 2>&1 && goto:eof
+
+        echo echo ------------------------------------------------------->> !patch!
+        echo echo Get the ownership of !folder! >> !patch!
+        echo echo ------------------------------------------------------->> !patch!
+        echo takeown /F !folder! /R /SKIPSL >> !patch!
+        echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
+        echo pause >> !patch!
+        echo del /F %%0 >> !patch!
+    goto:eof
 
     :createJNUSToolConfigFile
 

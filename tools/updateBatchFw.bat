@@ -270,7 +270,6 @@ REM : functions
             set "newName="!BFW_RESOURCES_PATH:"=!\icons\downloadGames.ico""
             if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1
 
-
         )
 
     goto:eof

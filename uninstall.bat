@@ -322,7 +322,11 @@ REM : main
         :tryToMove
         move /Y "%%i" !GAME_FOLDER! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            cscript /nologo !MessageBox! "Fail to move folder, close any program that could use this location and check that you have the ownership on !GAME_FOLDER_PATH:"=!. Retry ?" 4116
+            REM : basename of GAME FOLDER PATH to get GAME_TITLE
+            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+            call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+
+            cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMove
         )
     )
@@ -372,6 +376,35 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :fillOwnerShipPatch
+        set "folder=%1"
+        set "title=%2"
+
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "WIIU_GAMES_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+
+            set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
+            if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
+            set "patch="!patchFolder:"=!\!title!.bat""
+        )
+        set "%3=!patch!"
+
+        echo echo off > !patch!
+        echo REM ^: RUN THIS SCRIPT AS ADMINISTRATOR >> !patch!
+
+        type !patch! | find /I !folder! > NUL 2>&1 && goto:eof
+
+        echo echo ------------------------------------------------------->> !patch!
+        echo echo Get the ownership of !folder! >> !patch!
+        echo echo ------------------------------------------------------->> !patch!
+        echo takeown /F !folder! /R /SKIPSL >> !patch!
+        echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
+        echo pause >> !patch!
+        echo del /F %%0 >> !patch!
+    goto:eof
 
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput

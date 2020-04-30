@@ -27,8 +27,6 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
 
-    set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
-
     REM : optional second arg
     set "GAME_FOLDER_PATH="NONE""
 
@@ -216,7 +214,9 @@ REM    call:checkGpFolders
     set "endIdUp=%titleId:~8,8%"
     call:lowerCase !endIdUp! endIdLow
 
-    set "ffTitleFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000""
+    set "MLC01_FOLDER_PATH="!GAME_FOLDER_PATH:"=!\mlc01""
+    set "ffTitleFolder="!MLC01_FOLDER_PATH:"=!\usr\title\00050000""
+
     if not exist !ffTitleFolder! mkdir !ffTitleFolder! > NUL 2>&1
     set "oldDlcFolder="!ffTitleFolder:"=!\!endIdUp!\aoc""
     set "newDlcFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endIdLow!""
@@ -230,9 +230,12 @@ REM    call:checkGpFolders
     if !success! EQU 1 if !buildOldUpdatePaths! EQU 0 if exist !oldUpdateFolder! (
 
         move /Y !oldUpdateFolder! "!oldUpdateFolder:"=!_tmp" >  NUL 2>&1
-        REM : fail to delete folder
-        if !ERRORLEVEL! NEQ 0 (
-            cscript /nologo !MessageBox! "Fail to delete old update location, check that you have the ownership on !oldUpdateFolder:"=!. Cemu will fail to move update/DLC folders to new locations as well" 4112
+        REM : fail to move folder
+        if %ERRORLEVEL% NEQ 0 (
+            call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" !patch!
+
+            cscript /nologo !MessageBox! "Fail to delete old update location under !MLC01_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an Administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+            if !ERRORLEVEL! EQU 6 goto:createLinks
         ) else (
             rmdir /Q /S "!oldUpdateFolder:"=!_tmp" > NUL 2>&1
         )
@@ -343,6 +346,36 @@ REM    call:checkGpFolders
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :fillOwnerShipPatch
+        set "folder=%1"
+        set "title=%2"
+
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+
+        set "WIIU_GAMES_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+
+            set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
+            if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
+            set "patch="!patchFolder:"=!\!title!.bat""
+        )
+
+        set "%3=!patch!"
+
+        echo echo off > !patch!
+        echo REM ^: RUN THIS SCRIPT AS ADMINISTRATOR >> !patch!
+
+        type !patch! | find /I !folder! > NUL 2>&1 && goto:eof
+
+        echo echo ------------------------------------------------------->> !patch!
+        echo echo Get the ownership of !folder! >> !patch!
+        echo echo ------------------------------------------------------->> !patch!
+        echo takeown /F !folder! /R /SKIPSL >> !patch!
+        echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
+        echo pause >> !patch!
+        echo del /F %%0 >> !patch!
+    goto:eof
 
     :linkFolder
 
@@ -377,7 +410,24 @@ REM : functions
         set "newDlcMetaXml="!newDlcFolder:"=!\meta\meta.xml""
 
         REM : if newUpdatefolder not exist and old folder not exist : exit
-        if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! goto:eof
+        if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! (
+
+            if exist !oldDlcFolder! (
+                :tryDelete
+                set "tmpFolder="!oldDlcFolder:"=!_tmp""
+                move /Y !oldDlcFolder! !tmpFolder! >  NUL 2>&1
+                if !ERRORLEVEL! NEQ 0 (
+                    REM : fail to delete the folder
+                    call:fillOwnerShipPatch !oldUpdateFolder! "!GAME_TITLE!" !patch!
+
+                    cscript /nologo !MessageBox! "Fail to delete old DLC locations, close any program that could use this location and relaunch. If the issue persists, take the ownership on !oldUpdateFolder:"=! with running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    if !ERRORLEVEL! EQU 6 goto:tryDelete
+                ) else (
+                    rmdir /Q /S !tmpFolder! > NUl 2>&1
+                )
+            )
+            goto:eof
+        )
         if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
 
         :tryToMove
@@ -395,7 +445,7 @@ REM : functions
 
                 set "folder="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\aoc""
                 move /Y !folder! !newDlcFolder! > NUL 2>&1
-                if !ERRORLEVEL! EQU 0 (
+                if %ERRORLEVEL% NEQ 0 (
                     rmdir /Q !oldDlcFolder!
                 ) else (
                     set /A "success=0"
@@ -408,7 +458,7 @@ REM : functions
             if not exist !folder! mkdir !folder! > NUL 2>&1
 
             move /Y !oldUpdateFolder! !folder! > NUL 2>&1
-            if !ERRORLEVEL! EQU 0 (
+            if %ERRORLEVEL% NEQ 0 (
                 rmdir /Q !oldUpdateFolder!
             ) else (
                 set /A "success=0"
@@ -418,8 +468,11 @@ REM : functions
                 REM : msgbox to user : migrate DLC and update data to new locations, creates links for old locations
                 cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations if needed (old versions)"
             ) else (
+
                 REM : fail to move folder
-                cscript /nologo !MessageBox! "Fail to move folders of update/DLC to the new locations, close any program that could use this location and check that you have the ownership on !oldUpdateFolder:"=!. Update and/or DLC might be missing !, retry ?" 4116
+                call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" !patch!
+
+                cscript /nologo !MessageBox! "Fail to move folders update/DLC to the new locations, close any program that could use this location and relaunch. If the issue persists, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
                 if !ERRORLEVEL! EQU 6 goto:tryToMove
             )
         )

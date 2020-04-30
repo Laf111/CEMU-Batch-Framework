@@ -385,6 +385,15 @@ REM : main
     if ["!IGNORE_PRECOMP!"] == ["ENABLED"] call:ignorePrecompiled true
 
     :patchCemuSetting
+
+    REM : saved settings folder path for this game
+    set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
+    if not exist !sf! (
+        mkdir !sf! > NUL 2>&1
+    ) else (
+        call:checkOwnerShip !sf!
+    )
+
     if not exist !cs! goto:displayGameProfile
 
     REM : check the file size
@@ -453,14 +462,6 @@ REM : main
     wscript /nologo !Start! !exampleFile!
 
     :diffProfileFile
-
-    REM : saved settings folder path for this game
-    set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-    if not exist !sf! (
-        mkdir !sf! > NUL 2>&1
-    ) else (
-        call:checkOwnerShip !sf!
-    )
 
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
@@ -720,16 +721,10 @@ REM : main
         if ["!result!"] == [""] echo Error when comparing versions
         if !result! EQU 50 echo Error when comparing versions
         if !result! EQU 2 goto:saveOptions
-    ) else goto:saveOptions
-    
-    REM : update !cs! games stats for !GAME_TITLE!
-    set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
-    if not exist !sf! (
-        mkdir !sf! > NUL 2>&1
     ) else (
-        call:checkOwnerShip !sf!
+        goto:saveOptions
     )
-
+    
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
@@ -830,18 +825,54 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :fillOwnerShipPatch
+        set "folder=%1"
+        set "title=%2"
+
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "WIIU_GAMES_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+
+            set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
+            if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
+            set "patch="!patchFolder:"=!\!title!.bat""
+        )
+        set "%3=!patch!"
+
+        echo echo off > !patch!
+        echo REM ^: RUN THIS SCRIPT AS ADMINISTRATOR >> !patch!
+
+        type !patch! | find /I !folder! > NUL 2>&1 && goto:eof
+
+        echo echo ------------------------------------------------------->> !patch!
+        echo echo Get the ownership of !folder! >> !patch!
+        echo echo ------------------------------------------------------->> !patch!
+        echo takeown /F !folder! /R /SKIPSL >> !patch!
+        echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
+        echo pause >> !patch!
+        echo del /F %%0 >> !patch!
+    goto:eof    goto:eof
+
+    REM : ------------------------------------------------------------------
     :checkOwnerShip
 
         set "folder="%~1""
         set "folderTmp="!folder:"=!_tmp""
 
+        :tryToMove
         move /Y !folder! !folderTmp! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            cscript /nologo !MessageBox! "Fail to copy folder, close any program that could use this location and check that you have the ownership on !folder:"=!. Abort ?" 4116
-            if !ERRORLEVEL! EQU 6 (
-                set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
-                call !killBatchFw! & pause
-            )
+
+            call:fillOwnerShipPatch !folder! "!GAME_TITLE!" !patch!
+
+            cscript /nologo !MessageBox! "Check failed on !folder:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on !folder:"=! with running as an Administrator the script !patch:"=!.. If it's done, do you wish to retry" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMove
+
+            set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
+            REM : kill all BatchFw process but updateGamesGraphicPacks
+            call !killBatchFw! updateGamesGraphicPacks > NUL 2>&1
+            pause
         ) else (
             REM : move back
             move /Y !folderTmp! !folder! > NUL 2>&1
@@ -1341,13 +1372,13 @@ REM : functions
         ) else (
             echo GPUBufferCacheAccuracy = high >> %PROFILE_FILE%
         )
-        echo disableGPUFence = true >> %PROFILE_FILE%
+        echo disableGPUFence = false >> %PROFILE_FILE%
 
         echo accurateShaderMul = min >> %PROFILE_FILE%
         echo [CPU] >> %PROFILE_FILE%
         echo cpuTimer = hostBased >> %PROFILE_FILE%
         echo cpuMode = !recommendedMode! >> %PROFILE_FILE%
-        echo threadQuantum = 45000 >> %PROFILE_FILE%
+        echo threadQuantum = 100000 >> %PROFILE_FILE%
 
         echo Creating a Game profile for tilte Id ^: %titleId%
 

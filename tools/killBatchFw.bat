@@ -21,6 +21,29 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
+    REM : with no arguments to this script, activating user inputs
+    set "ignore="
+
+    REM : checking arguments
+    set /A "nbArgs=0"
+    :continue
+        if "%~1"=="" goto:end
+        set "args[%nbArgs%]="%~1""
+        set /A "nbArgs +=1"
+        shift
+        goto:continue
+    :end
+
+    if %nbArgs% NEQ 0 (
+        set "avoid=| find /V "
+        set /A "na=nbArgs-1"
+        for /L %%i in (0,1,!na!) do (
+            set "item=!args[%%i]!"
+            set "item=!item:"=!"
+            set "ignore=!ignore! !avoid!!item!"
+        )
+    )
+    
     REM : basename of GAME FOLDER PATH
     for /F "delims=~" %%i in (!GAMES_FOLDER!) do set "GAMES_FOLDER_NAME=%%~nxi"
 
@@ -31,7 +54,7 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" !ignore! > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
         if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
 
@@ -59,7 +82,7 @@ REM : main
         set "line=%%p"
         set "line2=!line:""="!"
         set "pid=NOT_FOUND"
-        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+        echo !line2! | find /V "wmic" | find /V "ProcessID" | find /V "killBatchFw" !ignore! > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
         if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
     )
     timeout /T 3 > NUL 2>&1
