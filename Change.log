@@ -22,7 +22,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-29/04/2020 V18-9 :
+30/04/2020 V18-9 :
 fix : check powershell policy allowing Restricted policy (causing GFX packs, batchFw update failure)
       extract embeded GFX packs in this case
 fix : script's name error for the third choice in setup.bat when starting with no games installed
