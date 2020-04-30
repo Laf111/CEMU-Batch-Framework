@@ -23,7 +23,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 
 30/04/2020 V18-9 :
-fix : Wii-U 106-0502 error when going online with versions >= 1.15.19
+fix : Wii-U 106-0502 error when going online with versions >= 1.15.19 and other playing online issues
 fix : powershell policy issues
 fix : script's name error for the third choice in setup.bat when starting with no games installed
 fix : in wizardFirstLaunch.bat set threadQuantum to 100000 and disableGPUFence to false by default when
