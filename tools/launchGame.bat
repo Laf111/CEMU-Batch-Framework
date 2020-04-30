@@ -2240,7 +2240,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
             set "af="!BFW_ONLINE_ACC:"=!\%%i""
-            if !v11519! EQU 1 (
+            if !v11519! EQU 2 (
                 for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
             ) else (
                 for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "PersistentId=" 2^>NUL') do set "accId=%%j"
@@ -2288,7 +2288,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
         REM : settings.xml evolved after 1.15.19 included
-        if !v11519! EQU 1 (
+        if !v11519! EQU 2 (
             !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
         ) else (
             !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp!

@@ -234,12 +234,21 @@ REM : main
     if ["!v1172!"] == [""] echo Error when comparing versions
     if !v1172! EQU 50 echo Error when comparing versions
 
-    REM : suppose that version > 1.15.15 > 1.15.6 => > 1.11.6
+    REM : suppose that version > 1.15.19 > 1.15.15 > 1.15.6 => > 1.11.6
+    set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
 
-    REM : version > 1.17.2 => > v1.15.15
+    REM : version > 1.17.2 => > v1.15.19 > ....
     if !v1172! LEQ 1 goto:checkProfile
+
+    REM : else comparing version to V1.15.19
+    call:compareVersions !versionRead! "1.15.19" v11519 > NUL 2>&1
+    if ["!v11519!"] == [""] echo Error when comparing versions
+    if !v11519! EQU 50 echo Error when comparing versions
+
+    REM : version > 1.15.19 => > v1.15.15...
+    if !v11519! LEQ 1 goto:checkProfile
 
     REM : else comparing version to V1.15.15
     set /A "v11515=2"
@@ -596,6 +605,8 @@ REM : main
     timeout /T 1 > NUL 2>&1
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
+    type !launchGameLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitingLoopProcesses
+    
     type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
 
         type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
@@ -1097,9 +1108,13 @@ REM : functions
         set "pat="!BFW_ONLINE_ACC:"=!\!currentUser!*.dat""
 
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL') do (
-            set "accountFile="!BFW_ONLINE_ACC:"=!\%%i""
+            set "af="!BFW_ONLINE_ACC:"=!\%%i""
 
-            for /F "delims=~= tokens=2" %%j in ('type !accountFile! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
+            if !v11519! EQU 2 (
+                for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "AccountId=" 2^>NUL') do set "accId=%%j"
+            ) else (
+                for /F "delims=~= tokens=2" %%j in ('type !af! ^| find /I "PersistentId=" 2^>NUL') do set "accId=%%j"
+            )
         )
 
         if ["!accId!"] == ["NONE"] (
@@ -1145,15 +1160,20 @@ REM : functions
         )
 
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
-
-        !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        REM : settings.xml evolved after 1.15.19 included
+        if !v11519! EQU 2 (
+            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+        ) else (
+            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp!
+            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp!
+        )
 
         if exist !csTmp! (
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
         )
 
-        set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
+        set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
         if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
