@@ -132,10 +132,13 @@ REM : main
             echo BatchFw use powershell scripts to check/update itself and/or the GFX packs
             echo Contact !USERDOMAIN!^'s administrator to launch the following command
             echo powershell Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+            echo.
             pause
             set /A "extractPacks=1"
             :pwPolicyOk
-            echo Compatible PowerShell policy ^(optional^) ^: OK
+            if !extractPacks! EQU 0 (
+                echo Compatible PowerShell policy ^(optional^) ^: OK
+            )
         )
     )
 
@@ -612,10 +615,7 @@ REM : main
     :updateGfxPacksFolder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     REM : check if GAMES_FOLDER\_BatchFw_Graphic_Packs exist
-    if not exist !BFW_GP_FOLDER! (
-        mkdir !BFW_GP_FOLDER! > NUL 2>&1
-        set /A "extractPacks=1"
-    )
+    if not exist !BFW_GP_FOLDER! mkdir !BFW_GP_FOLDER! > NUL 2>&1
 
     if !extractPacks! EQU 1 (
         set "ACTIVE_ADAPTER=NOT_FOUND"
