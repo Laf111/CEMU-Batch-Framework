@@ -149,6 +149,11 @@ REM : main
                 call:deleteFolder
             )
         )
+
+        REM : in case of no GFX packs were found, still clean the game library log
+        call:cleanGameLibFile "!gameTitle! graphic packs version=graphicPacks"
+
+
     )
 
     echo =========================================================

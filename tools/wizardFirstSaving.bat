@@ -602,13 +602,12 @@ REM : main
     set "wfsLogFileTmp="!TMP:"=!\BatchFw_wizardFirstSaving_process.list""
 
     :waitingLoop
-    timeout /T 1 > NUL 2>&1
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
     type !wfsLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitingLoopProcesses
     
     type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-
+        timeout /T 1 > NUL 2>&1
         type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
             if !disp! EQU 0 (
                 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

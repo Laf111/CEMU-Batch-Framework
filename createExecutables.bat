@@ -99,12 +99,12 @@ REM : main
 
     title Create CEMU^'s executables for selected games
 
-    REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename folders that contains forbiden characters : & ! . ( )
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    REM : rename GFX folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename GFX folders that contains forbiden characters : & ! . ( )
+    wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
@@ -188,7 +188,7 @@ REM : main
         pause
         goto:askOutputFolder
     )
-
+    
     goto:inputsAvailables
 
     :getArgsValue
@@ -260,6 +260,9 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+
+    choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
+    if !ERRORLEVEL! EQU 1 set /A "QUIET_MODE=1"
 
     cls
     REM : check if folder name contains forbidden character for batch file
@@ -1046,6 +1049,16 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to scanWiiU.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Wii-U error codes^.lnk""
+        set "LINK_DESCRIPTION="Wii-U errors code list""
+        set "TARGET_PATH="!BFW_PATH:"=!\doc\Wii U Error Codes.rtf""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wii-U Error Codes.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to Wii-U error codes documentation
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        
         set "scansFolder="!GAMES_FOLDER:"=!\_BatchFw_WiiU\Scans""
         if exist !scansFolder! (
             REM : create a shortcut to explore scans saved

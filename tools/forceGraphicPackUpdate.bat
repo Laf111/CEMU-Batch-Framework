@@ -162,8 +162,8 @@ REM : functions
             exit /b 1
         )
 
-        REM : rename GFX folders that contains forbiden characters : & ! .
-        wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+        REM : rename GFX folders that contains forbiden characters : & ! . ( )
+        wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -22,6 +22,16 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+02/05/2020 V19 :
+add : "Wii U Error Codes.rtf" in ./doc and a shortcut "Wii-U Games\Wii-U\Wii-U error codes.lnk"
+fix : file extension check when importing transferable cache 
+fix : add natives values to default in updateGameGraphicPaccks for displaying popup message when the game is 
+      not found in the wii-u titles internal database
+fix : update glogFile after the waiting loop in updateGameGraphicPaccks
+fix : escape character left in FPS CAP GFX packs created
+fix : missing icons for shortcut created in Wii-U Games\BatchFw\Tools\Graphic packs\BatchFw's packs
+add : possibility to treat all games in Create*.bat
+
 30/04/2020 V18-9 :
 fix : Wii-U 106-0502 error when going online with versions >= 1.15.19 and other playing online issues
 fix : powershell policy issues

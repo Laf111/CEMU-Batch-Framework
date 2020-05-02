@@ -103,25 +103,36 @@ REM    call:checkGpFolders
     set "titleId=%titleId:"=%"
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-    REM : get game's data for wii-u database file
-    set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
 
-    REM : strip line to get data
-    for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
-       set "titleIdRead=%%a"
-       set "DescRead="%%b""
-       set "productCode=%%c"
-       set "companyCode=%%d"
-       set "notes=%%e"
-       set "versions=%%f"
-       set "region=%%g"
-       set "acdn=%%h"
-       set "icoId=%%i"
-       set "nativeHeight=%%j"
-       set "nativeFps=%%k"
+    REM : default values (values add for a new game not found in the wii-u titles internal database
+    REM : basename of GAME FOLDER PATH (used to name shorcut)
+    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "DescRead=%%~nxi"
+
+    set "nativeHeight=720"
+    set "nativeFps=60"
+
+    type !wiiTitlesDataBase! | findStr /R /I "^^'!titleId!';"' > NUL 2>&1 && (
+
+        REM : get game's data for wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "DescRead="%%b""
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )
+        
     )
-
     set "buildOldUpdatePaths=!args[3]!"
     set /A "buildOldUpdatePaths=%buildOldUpdatePaths:"=%"
 
@@ -194,16 +205,6 @@ REM    call:checkGpFolders
     set "gpfound=0"
     call:updateGraphicPacks
 
-    REM : log in game library log
-    if not ["!newVersion!"] == ["NOT_FOUND"] (
-
-        REM : flush glogFile of !GAME_TITLE! graphic packs version
-        if exist !glogFile! for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "!GAME_TITLE! graphic packs version" 2^>NUL') do call:cleanGameLogFile "!GAME_TITLE! graphic packs version"
-
-        set "msg="!GAME_TITLE! graphic packs version=!newVersion!""
-        call:log2GamesLibraryFile !msg!
-    )
-
     :createLinks
     REM : before waitingLoop :
 
@@ -254,6 +255,16 @@ REM    call:checkGpFolders
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
+
+    REM : log in game library log
+    if not ["!newVersion!"] == ["NOT_FOUND"] (
+
+        REM : flush glogFile of !GAME_TITLE! graphic packs version
+        if exist !glogFile! type !glogFile! | find "!GAME_TITLE! graphic packs version" > NUL 2>&1 && call:cleanGameLogFile "!GAME_TITLE! graphic packs version"
+
+        set "msg="!GAME_TITLE! graphic packs version=!newVersion!""
+        call:log2GamesLibraryFile !msg!
+    )
 
     if not ["!lastInstalledVersion!"] == ["!newVersion!"] (
         del /F !fnrLogUggp! > NUL 2>&1
@@ -621,7 +632,7 @@ REM    :checkGpFolders
 REM
 REM        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! 2^>NUL ^| find "^!"') do (
 REM            echo Treat GFX pack folder to be DOS compliant >> !myLog!
-REM            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+REM            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 REM            goto:eof
 REM        )
 REM

@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V18-9"
+    set "BFW_VERSION=V19"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -144,8 +144,8 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename folders that contains forbiden characters : & ! . ( )
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
@@ -642,8 +642,8 @@ REM : main
     REM : get users
     :getUserMode
 
-    REM : rename GFX folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename GFX folders that contains forbiden characters : & ! . ( )
+    wscript /nologo !StartHidden! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     REM : by default: create shortcuts
     echo ---------------------------------------------------------

@@ -167,8 +167,8 @@ REM : main
     )
     pushd !INPUT_FOLDER!
 
-    REM : rename folders that contains forbiden characters : & ! .
-    if %nbArgs% EQU 0 wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename folders that contains forbiden characters : & ! . ( )
+    if %nbArgs% EQU 0 wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     :scanGamesFolder
     cls

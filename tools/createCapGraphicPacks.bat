@@ -360,7 +360,10 @@ REM : functions
         pushd !GAMES_FOLDER!
         for /F "delims=~" %%i in ('dir /A:D /S /B Cemu 2^>NUL') do (
             set "ico="%%i\!titleId!.ico""
-            if exist !ico! set "ICO_PATH=!ico!"
+            if exist !ico! (
+                set "ICO_PATH=!ico!"
+                set "ICO_PATH=!ICO_PATH:_BatchFw_Install\logs\=!"
+            )
         )
 
         REM : temporary vbs file for creating a windows shortcut
@@ -470,7 +473,7 @@ REM : functions
         echo name = Speed Adjustment >> !bfwRulesFile!
         echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
 
-        set "description=Adjust the emulation speed of static FPS games when engine model is FPS based^. If it is not the case only menus will be affected^. To work^, you need to disable vsync^ AND ANY 60FPS GFX pack^."
+        set "description=Adjust the emulation speed of static FPS games when engine model is FPS based. If it is not the case only menus will be affected. To work, you need to disable vsync AND ANY 60FPS GFX pack."
         if !nativeFps! EQU 30 (
             echo description = !description! BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         ) else (

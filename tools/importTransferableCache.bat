@@ -96,7 +96,7 @@ REM : main
     )
 
     REM : check the extension
-    for /F %%i in (!TRANSF_CACHE!) do set "ext=%%~xi"
+    for /F "delims=~" %%i in (!TRANSF_CACHE!) do set "ext=%%~xi"
     if not ["!ext!"] == [".bin"] (
         echo Please browse to a bin file ^(^.bin^)
         goto:askInputFile
@@ -111,7 +111,7 @@ REM : main
     set /A "newTc=0"
 
     REM : analyse length of file
-    for /F %%i in (!TRANSF_CACHE!) do set "fn=%%~ni"
+    for /F "delims=~" %%i in (!TRANSF_CACHE!) do set "fn=%%~ni"
 
     REM : cache > 1.16
     echo !fn! | findStr /R "^[a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9][a-z0-9].$" > NUL 2>&1 && (

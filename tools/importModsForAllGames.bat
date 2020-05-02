@@ -72,8 +72,8 @@ REM : main
         goto:askModFolder
     )
 
-    REM : rename folders that contains forbiden characters : & ! .
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
+    REM : rename folders that contains forbiden characters : & ! . ( )
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!MODS_FOLDER_PATH! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     cls
     echo =========================================================
