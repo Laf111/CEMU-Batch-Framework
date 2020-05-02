@@ -311,57 +311,53 @@ REM : main
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
-    REM : comparing version to V1.15.19
-    set /A "v11519=2"
-    set /A "v11515=2"
-    set /A "v1156=2"
-    set /A "v114=2"
+    REM : comparing version to V1.18.2
+    set /A "v1182=2"
+
+    call:compareVersions !versionRead! "1.18.2" v1182 > NUL 2>&1
+    if ["!v1182!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v1182! EQU 50 echo Error when comparing versions >> !batchFwLog!
+
+    set /A "v11519=1"
+    set /A "v11515=1"
+    set /A "v1156=1"
+    set /A "v114=1"
+
+    REM : version > 1.18.2 => > v1.15.19 > ....
+    if !v1182! LEQ 1 goto:getTitleId
+
     call:compareVersions !versionRead! "1.15.19" v11519 > NUL 2>&1
     if ["!v11519!"] == [""] echo Error when comparing versions >> !batchFwLog!
     if !v11519! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-    REM : if version < 1.15.19 : compare to 1.15.15 and update v1159
-    if !v11519! EQU 2 (
-        call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
-        if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
-        if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    REM : version > 1.15.19 => > v1.15.15 > ....
+    if !v11519! LEQ 1 goto:getTitleId
 
-        REM : if version < 1.15.15 : compare to 1.15.6 and update v1156
-        if !v11515! EQU 2 (
-            call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
-            if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
-            if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    call:compareVersions !versionRead! "1.15.15" v11515 > NUL 2>&1
+    if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-            if !v1156! EQU 2 (
-                call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-                if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
-                if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    REM : version > 1.15.15 => > v1.15.6 > ....
+    if !v11515! LEQ 1 goto:getTitleId
 
-                if !v114! EQU 2 set "gfxType=2"
-                if !v114! LEQ 1 goto:getTitleId
+    call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
+    if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v1156! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-                if !v114! LEQ 1 goto:getTitleId
-            ) else (
-                REM : version > 1.15.6 => version > 1.14
-                set "v114=1"
+    REM : version > 1.15.6 => > v1.14 > ....
+    if !v1156! LEQ 1 goto:getTitleId
 
-                REM : do build old update/dlc paths in mlc
-                set /A "buildOldUpdatePaths=0"
-                goto:getTitleId
-            )
-        )
-    ) else (
-        REM : version > 1.15.19 => version > 1.15.15
-        set "v11515=1"
-        REM : version > 1.15.15 => version > 1.15.6
-        set "v1156=1"
-        REM : version > 1.15.15 => version > 1.14
-        set "v114=1"
+    call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+    if ["!v114!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v114! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
+    if !v114! LEQ 1 (
         REM : do build old update/dlc paths in mlc
         set /A "buildOldUpdatePaths=0"
         goto:getTitleId
     )
+
+    set "gfxType=2"
     if exist !gfxv2! goto:getTitleId
 
     mkdir !gfxv2! > NUL 2>&1
@@ -759,7 +755,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : Vulkan cache (CEMU >= 1.16)
     if ["!graphicApi!"] == ["Vulkan"] set "GPU_CACHE_PATH="!CEMU_FOLDER:"=!\shaderCache\driver\vk""
-
+    
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH!
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH! >> !batchFwLog!
 
@@ -811,6 +807,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     :openGpuCache
     if !usePbFlag! EQU 1 call:setProgressBar 82 84 "pre processing" "installing GPU cache"
+    set "precompFolder="!CEMU_FOLDER:"=!\shaderCache\precompiled""
 
     REM : search GCLCache backup in _BatchFW_CemuGLCache folder
     set "gpuCacheBackupFolder="NOT_FOUND""
@@ -890,9 +887,10 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     pushd !gpuCacheBackupFolder!
     REM GPU_CACHE_PATH already created before (if missing)
-    for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%*.* 2^>NUL') do (
         set "file="%%f""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
+        echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MOV /IS /IT > NUL 2>&1
+        echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -1188,6 +1186,13 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+    )
+    if !v1182! LEQ 1 (
+        pushd !precompFolder!
+        for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%_spirv.* 2^>NUL') do (
+            set "file="%%f""
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !precompFolder! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+        )
     )
     pushd !BFW_TOOLS_PATH!
 
