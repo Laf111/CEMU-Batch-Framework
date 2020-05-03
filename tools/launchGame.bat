@@ -2294,15 +2294,60 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
         REM : settings.xml evolved after 1.15.19 included
         if !v11519! EQU 2 (
-            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+            REM : CEMU < 1.15.19 (Online/AccountId) 
+        
+            REM : Check if exist AccountId node
+            type !cs! | find "<AccountId" > NUL 2>&1 && (
+                REM : YES  : update the AccountId node
+                !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+                goto:restoreCs
+            )
+            
+            REM : NO : rename Account node to Online
+            set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+            !xmlS! ed -r "//Account" -v Online !cs! > !csTmp0!
+            REM : rename PersistentId to AccountId
+            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""            
+            !xmlS! ed -r "//PersistentId" -v AccountId !csTmp0! > !csTmp1!
+            REM : delete OnlineEnabled node
+            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
+            !xmlS! ed -d "//OnlineEnabled" !csTmp1! > !csTmp2!
+            
+            REM : set AccountId
+            !xmlS! ed -u "//AccountId" -v !accId! !csTmp2! > !csTmp!
+            
         ) else (
-            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp!
-            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp!
+            REM : CEMU >= 1.15.19 (Account/PersistentId+OnlineEnabled)             
+
+            REM : Check if exist PersitentId node
+            type !cs! | find "<PersitentId" > NUL 2>&1 && (
+            
+                REM : YES  : update PersitentId and OnlineEnabled nodes
+                set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+                !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp0!
+                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp!            
+                goto:restoreCs
+            )
+            
+            REM : NO : rename Online node to Account
+            set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+            !xmlS! ed -r "//Online" -v Account !cs! > !csTmp0!
+            REM : rename AccountId to PersistentId
+            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+            !xmlS! ed -r "//AccountId" -v PersistentId !csTmp0! > !csTmp1!
+            REM : add OnlineEnabled node
+            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""     
+            !xmlS! ed -s "//Online" -t elem -n OnlineEnabled -v true !csTmp1! > !csTmp2!
+            
+            REM : set persistentId
+            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp!            
         )
 
+        :restoreCs
         if exist !csTmp! (
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
+            del /F "!csTmp:"=!*"  > NUL 2>&1
         )
 
         REM : extract systematically (in case of sync friends list with the wii-u)
