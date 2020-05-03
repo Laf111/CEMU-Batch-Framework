@@ -889,7 +889,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM GPU_CACHE_PATH already created before (if missing)
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%*.* 2^>NUL') do (
         set "file="%%f""
-        echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MOV /IS /IT > NUL 2>&1
+        if !v1182! LEQ 1 echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MOV /IS /IT > NUL 2>&1
         echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
