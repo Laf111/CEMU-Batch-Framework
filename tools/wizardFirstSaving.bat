@@ -175,7 +175,7 @@ REM : main
     set "titleLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
     if [!titleLine!] == ["NONE"] (
-        cscript /nologo !MessageBox! "ERROR ^: unable to find titleId from meta^.xml^, please check ^! exiting^.^.^." 4112
+        cscript /nologo !MessageBox! "ERROR : unable to find titleId from meta.xml, please check ! exiting..." 4112
         goto:eof
     )
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
@@ -194,7 +194,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%titleId%';"') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] (
         echo ---------------------------------------------------------
@@ -604,19 +604,19 @@ REM : main
     :waitingLoop
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
-    type !wfsLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitingLoopProcesses
-    
-    type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && (
-        timeout /T 1 > NUL 2>&1
-        type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
-            if !disp! EQU 0 (
-                echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                echo Creating ^/ completing graphic packs^, please wait ^.^.^.
-            )
-            set /A "disp=1"
-            goto:waitingLoop
+    type !wfsLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitingLoop
+
+    type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+        if !disp! EQU 0 (
+            echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            echo Creating ^/ completing graphic packs^, please wait ^.^.^.
         )
+        set /A "disp=1"
+        goto:waitingLoop
     )
+    
+    type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && goto:waitingLoop
+    
     REM : remove trace
     del /F !wfsLogFileTmp! > NUL 2>&1
     REM : wait 1 sec for GFX detection
@@ -673,7 +673,7 @@ REM : main
     for /F "delims=~" %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
 
     if exist !graphicPacksBackup! (
-        if exist !graphicPacks! rmdir /Q !graphicPacks! > NUL 2>&1
+        if exist !graphicPacks! rmdir /Q /S !graphicPacks! > NUL 2>&1
         move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
     )
 
@@ -839,14 +839,14 @@ REM : functions
         set "folder=%1"
         set "title=%2"
 
-        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
         set "WIIU_GAMES_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
         if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
             set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
             if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
-            set "patch="!patchFolder:"=!\!title!.bat""
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
         )
         set "%3=!patch!"
 
@@ -870,13 +870,19 @@ REM : functions
         set "folder="%~1""
         set "folderTmp="!folder:"=!_tmp""
 
+        set /A "attempt=1"
         :tryToMove
         move /Y !folder! !folderTmp! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Check failed on !folder:"=!^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMove
+            )
 
-            call:fillOwnerShipPatch !folder! "!GAME_TITLE!" !patch!
+            call:fillOwnerShipPatch !folder! "!GAME_TITLE!" patch
 
-            cscript /nologo !MessageBox! "Check failed on !folder:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on !folder:"=! with running as an Administrator the script !patch:"=!.. If it's done, do you wish to retry" 4116
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !folder:"=! with running as an Administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMove
 
             set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
@@ -1133,7 +1139,7 @@ REM : functions
 
         call:getHostState !ipRead! state
         if !state! EQU 1 (
-            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now before continue" 4112
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue" 4112
             if !ERRORLEVEL! EQU 2 goto:eof
         )
 
@@ -1374,7 +1380,7 @@ REM : functions
                 echo useRDTSC = false
                 echo.
             )
-            cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU^'s default one ^(RDTSC^) is not disabled in the game^'s profile" 4144
+            cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU's default one (RDTSC) is not disabled in the game's profile" 4144
         )
 
     goto:eof
@@ -1630,10 +1636,10 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

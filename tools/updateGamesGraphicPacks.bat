@@ -111,11 +111,11 @@ REM    call:checkGpFolders
     set "nativeHeight=720"
     set "nativeFps=60"
 
-    type !wiiTitlesDataBase! | findStr /R /I "^^'!titleId!';"' > NUL 2>&1 && (
+    type !wiiTitlesDataBase! | findStr /R /I "^'!titleId!';" > NUL 2>&1 && (
 
         REM : get game's data for wii-u database file
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
 
         REM : strip line to get data
         for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
@@ -205,6 +205,7 @@ REM    call:checkGpFolders
     set "gpfound=0"
     call:updateGraphicPacks
 
+    set /A "attempt=1"
     :createLinks
     REM : before waitingLoop :
 
@@ -233,16 +234,20 @@ REM    call:checkGpFolders
         move /Y !oldUpdateFolder! "!oldUpdateFolder:"=!_tmp" >  NUL 2>&1
         REM : fail to move folder
         if %ERRORLEVEL% NEQ 0 (
-            call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" !patch!
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving !oldUpdateFolder:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:createLinks
+            )
+            call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" patch
 
-            cscript /nologo !MessageBox! "Fail to delete old update location under !MLC01_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an Administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+            cscript /nologo !MessageBox! "Move still failed^, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:createLinks
         ) else (
             rmdir /Q /S "!oldUpdateFolder:"=!_tmp" > NUL 2>&1
         )
     )
 
-    REM : monitor LaunchGame.bat until cemu is launched
     set "logFileTmp="!TMP:"=!\BatchFw_updateGameGfx_process.list""
 
     REM : wait the create*.bat end before continue
@@ -361,7 +366,7 @@ REM : functions
         set "folder=%1"
         set "title=%2"
 
-        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
 
         set "WIIU_GAMES_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
@@ -369,7 +374,7 @@ REM : functions
 
             set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
             if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
-            set "patch="!patchFolder:"=!\!title!.bat""
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
         )
 
         set "%3=!patch!"
@@ -424,14 +429,22 @@ REM : functions
         if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! (
 
             if exist !oldDlcFolder! (
+                set /A "attempt=1"
                 :tryDelete
                 set "tmpFolder="!oldDlcFolder:"=!_tmp""
                 move /Y !oldDlcFolder! !tmpFolder! >  NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
-                    REM : fail to delete the folder
-                    call:fillOwnerShipPatch !oldUpdateFolder! "!GAME_TITLE!" !patch!
 
-                    cscript /nologo !MessageBox! "Fail to delete old DLC locations, close any program that could use this location and relaunch. If the issue persists, take the ownership on !oldUpdateFolder:"=! with running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    if !attempt! EQU 1 (
+                        cscript /nologo !MessageBox! "Deleting !oldUpdateFolder:"=! failed^, close any program that could use this location" 4112
+                        set /A "attempt+=1"
+                        goto:tryDelete
+                    )
+
+                    REM : fail to delete the folder
+                    call:fillOwnerShipPatch !oldUpdateFolder! "!GAME_TITLE!" patch
+
+                    cscript /nologo !MessageBox! "Deleting still failed^, take the ownership on !oldUpdateFolder:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryDelete
                 ) else (
                     rmdir /Q /S !tmpFolder! > NUl 2>&1
@@ -441,6 +454,7 @@ REM : functions
         )
         if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
 
+        set /A "attempt=1"
         :tryToMove
         REM : check if newUpdateFolder exist
         if not exist !newUpdateMetaXml! (
@@ -480,10 +494,16 @@ REM : functions
                 cscript /nologo !MessageBox! "Migrate DLC and update data to new locations, creates links for old locations if needed (old versions)"
             ) else (
 
+                if !attempt! EQU 1 (
+                    cscript /nologo !MessageBox! "Moving update^/DLC to the new locations failed^, close any program that could use !MLC01_FOLDER_PATH:"=!" 4112
+                    set /A "attempt+=1"
+                    goto:tryToMove
+                )
+            
                 REM : fail to move folder
-                call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to move folders update/DLC to the new locations, close any program that could use this location and relaunch. If the issue persists, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Move still failed^, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:tryToMove
             )
         )
@@ -770,7 +790,7 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] cscript /nologo !MessageBox! "Complete and create packs for this game : the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS. Use texture cache info in CEMU (Debug/View texture cache info) to see if native res is correct. Check while in game (not in cutscenes) if the FPS is correct. If needed, update resources/wiiTitlesDataBase.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild."
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] cscript /nologo !MessageBox! "Complete and create packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
         set /A "createPack=1"
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
@@ -799,7 +819,7 @@ REM    REM : ------------------------------------------------------------------
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
 
         :createCapGP
-        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game : the native FPS in internal database is !nativeFps!FPS. Check while in game (not in cutscenes) if the FPS is correct. If needed, update resources/wiiTitlesDataBase.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild."
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""

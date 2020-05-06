@@ -134,7 +134,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             exit /b 9
         )
         REM : set char code set, output to host log file

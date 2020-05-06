@@ -130,10 +130,10 @@ REM : main
     :msgBox
 
     if !WARN_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!"
+        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games^\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!"
         exit /b 0
     ) else (
-        cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ^?" 4161
+        cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ?" 4161
         if !ERRORLEVEL! EQU 2 exit /b 2
     )
     :updateGP
@@ -279,7 +279,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

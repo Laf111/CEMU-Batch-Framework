@@ -42,7 +42,7 @@ REM : main
 
         if not [!program!] == ["NONE"]  if not exist !program! (
 
-                cscript /nologo !MessageBox! "WARNING !program! does not exist anymore, deleting this entry^!" 4144
+                cscript /nologo !MessageBox! "WARNING !program! does not exist anymore^, deleting this entry^!" 4144
                 call:cleanHostLogFile !program:"='!
                 set /A "nbIs=99"
             )

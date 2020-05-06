@@ -247,17 +247,24 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
+            set /A "attempt=1"
             :tryToMove
             call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attempt! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        set /A "attempt+=1"
+                        goto:tryToMove
+                    )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -337,14 +344,14 @@ REM : functions
         set "folder=%1"
         set "title=%2"
 
-        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
         set "WIIU_GAMES_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
         if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
             set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
             if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
-            set "patch="!patchFolder:"=!\!title!.bat""
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
         )
         set "%3=!patch!"
 
@@ -525,6 +532,8 @@ REM : functions
         REM : moving game's folder
         set "source="!INPUT_FOLDER:"=!\!GAME_TITLE!""
 
+        set /A "attemptSrc=1"
+        set /A "attemptTgt=1"
         :treatGame
         if !moveFlag! EQU 1 (
             echo Moving game^'s files^.^.^.
@@ -532,28 +541,40 @@ REM : functions
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attemptSrc! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !source:"=!^, close any program that could use this location" 4112
+                        set /A "attemptSrc+=1"
+                        goto:treatGame
+                    )
+
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
                     goto:eof
                 )
             )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
-
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptTgt+=1"
+                    goto:treatGame
+                )
+            
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files !" 4112
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
                 goto:eof
             )
         ) else (
@@ -562,14 +583,20 @@ REM : functions
             robocopy !source! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying game to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptSrc+=1"
+                    goto:treatGame
+                )
+
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to copy !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files !" 4112
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files ^!" 4112
                 goto:eof
             )
         )
@@ -631,6 +658,8 @@ REM : functions
         )
         echo Installing update^.^.^.
 
+        set /A "attemptSrc=1"
+        set /A "attemptTgt=1"
         :treatUpdate
         if !moveFlag! EQU 1 (
             set "source="!INPUT_FOLDER:"=!\%endTitleId%""
@@ -638,42 +667,62 @@ REM : functions
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attemptSrc! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !source:"=!^, close any program that could use this location" 4112
+                        set /A "attemptSrc+=1"
+                        goto:treatUpdate
+                    )
+
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
                     goto:eof
                 )
             )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
 
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptTgt+=1"
+                    goto:treatUpdate
+                )
+
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
-                if !ERRORLEVEL! EQU 6 goto:treatGame
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files !" 4112
+                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
                 goto:eof
             )
         ) else (
             robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
+
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptTgt+=1"
+                    goto:treatUpdate
+                )
+
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to copy !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files !" 4112
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files ^!" 4112
                 goto:eof
             )
         )
@@ -711,30 +760,47 @@ REM : functions
         )
 
         echo Installing DLC^.^.^.
+        set /A "attemptSrc=1"
+        set /A "attemptTgt=1"
+
         :treatDlc
         if !moveFlag! EQU 1 (
             set "source="!INPUT_FOLDER:"=!\%endTitleId%_aoc""
             if not exist !source! (
                 move /Y !GAME_FOLDER_PATH! !source! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attemptSrc! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !source:"=!^, close any program that could use this location" 4112
+                        set /A "attemptSrc+=1"
+                        goto:treatDlc
+                    )
+
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatDlc
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
+                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files ^!" 4112
                     goto:eof
                 )
             )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
+
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptTgt+=1"
+                    goto:treatDlc
+                )
+
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatDlc
 
                 cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
@@ -746,14 +812,20 @@ REM : functions
             robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
+                if !attemptTgt! EQU 1 (
+                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying Dlc to !target:"=!^, close any program that could use this location" 4112
+                    set /A "attemptTgt+=1"
+                    goto:treatDlc
+                )
+
                 REM : basename of GAME FOLDER PATH to get GAME_TITLE
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Fail to copy !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatDlc
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files !" 4112
+                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files ^!" 4112
                 goto:eof
             )
         )
@@ -885,7 +957,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

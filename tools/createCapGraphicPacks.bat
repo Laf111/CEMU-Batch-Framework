@@ -156,7 +156,7 @@ REM : main
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%ftid%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%ftid%';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
@@ -220,6 +220,10 @@ REM : main
     REM : FPS++ found flag
     set /A "fpsPpOld=0"
     set /A "fpsPP=0"
+    REM : 60FPS++ found flag
+    set /A "fps60=0"
+    REM : 30FPS game flag
+    set /A "g30=0"
 
     REM : initialize graphic pack
     set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
@@ -230,39 +234,48 @@ REM : main
     set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
     set "LastVersionExistFlag=1"
 
-    echo Native FPS in WiiU-Titles-Library.csv = %nativeFps%
+    echo Native FPS in WiiU-Titles-Library^.csv = %nativeFps%
     echo.
 
-    set /A "g30=0"
-    REM : for 30FPS games
-    if ["%nativeFps%"] == ["30"] (
+    set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
+    if exist !fnrLogLggp! del /F !fnrLogLggp! > NUL 2>&1
+    
+    REM : Search FPS++ patch
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
-        set /A "g30=1"
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fps60=1"
 
-        set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
-        if exist !fnrLogLggp! del /F !fnrLogLggp!
-        REM : Search FPS++ patch
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
-
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
-rem        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fpsPP=1"
+    REM : 30FPS games
+    if ["%nativeFps%"] == ["30"] set /A "g30=1"
+    
+    REM : if no 60FPS pack is found
+    if !fps60! EQU 0 goto:searchForFpsPp
+    
+    echo 60FPS was found >> !cgpLogFile!
+    echo 60FPS pack was found
+    
+    REM : that means that the nativeFPS of the game should be 30
+    if %nativeFps% EQU 60 (
+        REM : value in WiiU-Titles-Library.csv is wrong, patching the file
+        call:patchInternalDataBase
+        set "nativeFps=30"
     )
+    
+    :searchForFpsPp
+    if !g30! EQU 1 (
+        REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
+        if !fpsPP! EQU 1 echo FPS^+^+ was found >> !cgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
+        if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
+        echo no FPS^+^+ GFX pack found >> !cgpLogFile!
+        echo no FPS^+^+ GFX pack found
+    
+        REM : search V2 FPS++ graphic pack or patch for this game
+        set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
 
-    REM : search V2 FPS++ graphic pack or patch for this game
-    set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
-
-    set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
-    for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do (
-        set /A "fpsPpOld=1"
-
+        set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
+        for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do set /A "fpsPpOld=1"      
     )
-
-    REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
-    if !fpsPP! EQU 1 echo FPS^+^+ was found >> !cgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
-    if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
-    echo no FPS^+^+ GFX pack found >> !cgpLogFile!
-    echo no FPS^+^+ GFX pack found
-
     :computeFactor
     REM : initialized for 60FPS games running @60FPS on WiiU
     set /A "factor=1"
@@ -323,6 +336,53 @@ REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :patchInternalDataBase
+    
+        REM : wait that "createGameGraphicPacks.bat" or "createExtraGraphicPacks.bat" end
+        set "capLogFileTmp="!TMP:"=!\BatchFw_createCapGfx_process.list""
+
+        REM : wait the create*.bat end before continue
+        echo Waiting create^/complete GFX processes end >> !cgpLogFile!
+        echo Waiting create^/complete GFX processes end
+
+        :waitLoop
+        wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !capLogFileTmp!
+        type !capLogFileTmp! | find /I "create" | find /V "Cap" | find /I "GraphicPacks" > NUL 2>&1 && goto:waitLoop
+        type !capLogFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
+
+        del /F !capLogFileTmp! > NUL 2>&1
+
+        REM : get the lines for the game
+        set "capLinesTmp="!TMP:"=!\BatchFw_createCapGfx_newLines.list""
+        type !wiiTitlesDataBase! | find /I "%icoId%" > !capLinesTmp!
+        
+        set "fnrPacthDb="!BFW_PATH:"=!\logs\fnr_patchWiiUtitlesDataBase.log""
+        if exist !fnrPacthDb! del /F !fnrPacthDb! > NUL 2>&1
+        
+        REM : Replace 60 by 30 in capLinesTmp
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BatchFw_createCapGfx_newLines.list" --find ";60" --replace ";30" --logFile !fnrPacthDb!  > NUL
+
+        REM : remove the line and add the new one with 30FPS as nativeFps
+        set "wiiTitlesDataBaseTmp="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.tmp""        
+        type !wiiTitlesDataBase! | find /I /V "%icoId%" > !wiiTitlesDataBaseTmp!
+
+        type !capLinesTmp! >> !wiiTitlesDataBaseTmp!
+        
+        REM : remove readonly attribute
+        attrib -R !wiiTitlesDataBase! > NUL 2>&1
+        
+        REM : create new file (sorted)
+        type !wiiTitlesDataBaseTmp! | sort > !wiiTitlesDataBase!
+        
+        REM : set the readonly attribute
+        attrib +R !wiiTitlesDataBase! > NUL 2>&1
+        
+        del /F !capLinesTmp! > NUL 2>&1
+        del /F !wiiTitlesDataBaseTmp! > NUL 2>&1
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :createDeletePacksShorcut
 
@@ -391,9 +451,9 @@ REM : functions
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!
 
-        del /F  !TMP_VBS_FILE!
-
+        del /F  !TMP_VBS_FILE! > NUL 2>&1
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :getAllTitleIds
 
@@ -405,9 +465,7 @@ REM : functions
                 set "titleIdList=!titleIdList!^,!titleIdRead!"
             )
         )
-
     goto:eof
-
     REM : ------------------------------------------------------------------
 
     REM : function for multiplying integers
@@ -678,10 +736,10 @@ echo targetFps=!targetFps!
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             exit /b 9
         )
         REM : set char code set, output to host log file

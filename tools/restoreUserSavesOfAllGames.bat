@@ -252,17 +252,24 @@ REM : main
             set "newFolderName=!str:"=!"
             set "newName="!basename!!newFolderName:"=!""
 
+            set /A "attempt=1"
             :tryToMove
             call:getUserInput "Renaming folder for you? (y, n) : " "y,n" ANSWER
 
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attempt! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        set /A "attempt+=1"
+                        goto:tryToMove
+                    )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
+                    call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -310,14 +317,14 @@ REM : functions
         set "folder=%1"
         set "title=%2"
 
-        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
         set "WIIU_GAMES_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
         if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
             set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
             if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
-            set "patch="!patchFolder:"=!\!title!.bat""
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
         )
         set "%3=!patch!"
 
@@ -542,7 +549,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

@@ -124,7 +124,7 @@ REM : main
 
         set "gameTitle=NONE"
 
-        for /F "delims=~; tokens=2" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!selected!';" 2^>NUL') do set "DescRead="%%i""
+        for /F "delims=~; tokens=2" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!selected!';" 2^>NUL') do set "DescRead="%%i""
         REM : set Game title for packs (folder name)
         set "title=!DescRead:"=!"
         set "gameTitle=!title: =!"
@@ -190,10 +190,11 @@ REM : functions
         REM : flush GamesLibrary log
         call:cleanGameLibFile "!gameNameUsedForNaming! graphic packs version=graphicPacks"
 
+        set /A "attempt=1"
         :tryToDelete
         rmdir /Q /S !gpFolder! > NUL 2>&1
         if %ERRORLEVEL% NEQ 0 (
-            echo ERROR^: Fail to delete folder ^(cr=!ERRORLEVEL!^)^, close any program that could use this location
+            echo ERROR^: Fail to delete folder, close any program that could use this location
             echo also check that you have the ownership on !gpFolder:"=!
             echo.
             choice /C yn /N /M "Retry (y/n)?"
@@ -255,7 +256,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

@@ -346,7 +346,7 @@ REM : functions
         set "%3=NOT_FOUND"
 
         REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^> NUL') do (
             set "%3=%%x"
 
             goto:eof
@@ -468,6 +468,8 @@ REM : functions
         set "endTitleId=!selectedEndTitlesId[%num%]!"
         set "src=!selectedtitlesSrc[%num%]!"
 
+        timeout /T 4 > NUL 2>&1
+        cls
         echo =========================================================
         echo Import saves for !GAME_TITLE! ^(%endTitleId%^)
         echo Source location ^: ^/storage_!src!
@@ -503,6 +505,9 @@ REM : functions
             exit /b 50
         )
 
+        echo Synchronize last imported saves for !GAME_TITLE! ^(%endTitleId%^) before choosing to import
+        echo ---------------------------------------------------------
+        
         set "localFolderUser="!localFolder:"=!\user""
         if not exist !localFolderUser! (
             echo WARNING ^: no saves found for !GAME_TITLE!
@@ -632,7 +637,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

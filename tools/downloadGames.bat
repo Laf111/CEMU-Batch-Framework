@@ -217,7 +217,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
             
             REM : for the name displayed use Wii-U title database (and so check that the game is listed in)
             set "titleRead="%%c""
-            for /F "delims=~; tokens=2" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'%%a';" 2^>NUL') do set "titleRead="%%i""
+            for /F "delims=~; tokens=2" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%%a';" 2^>NUL') do set "titleRead="%%i""
             if [!titleRead!] == ["%%c"] (
                 set "titles[!nbRes!]="%%c""
             ) else (
@@ -532,7 +532,7 @@ REM : functions
         
         REM : get game's data for wii-u database file
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'!titleId!';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
 
         REM : strip line to get data
         for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
@@ -1047,7 +1047,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             pause
             exit /b 9
         )

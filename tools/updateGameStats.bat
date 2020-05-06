@@ -94,7 +94,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )
@@ -170,7 +170,7 @@ echo -------------------------------------------------------
         for /F "tokens=*" %%a in (!csTgt!) do if %%~za NEQ 0 echo done & goto:done
 
         echo done with error ^!
-        cscript /nologo !MessageBox! "ERROR ^: when patching settings^.xml^. Restoring settings^.xml backup^, game stats computation ignored ^!" 4112
+        cscript /nologo !MessageBox! "ERROR : when patching settings.xml. Restoring settings.xml backup, game stats computation ignored !" 4112
         echo see !csTmp! and !csTgtTmp!
         set "backup="!cs:"=!_bfw_old""
         if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1

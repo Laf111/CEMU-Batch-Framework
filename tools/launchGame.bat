@@ -75,7 +75,7 @@ REM : main
 
     for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" /C') do set /A "nbI=%%j"
     if %nbI% NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^! ^(nbi=%nbI%^)^. If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 4112
+        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^! ^(nbi=%nbI%^)^. If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!" 4112
         echo "ERROR^: CEMU is already running ^!" >> !batchFwLog!
         echo "ERROR^: CEMU is already running ^!"
         tasklist | find /I "cemu.exe" | find /I /V "find" >> !batchFwLog!
@@ -245,7 +245,7 @@ REM : main
     for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
     if %nbI% NEQ 0 (
         if %nbI% GEQ 2 (
-            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running (nbI=%nbI%). If needed^, use 'Wii-U Games\BatchFw\Kill BatchFw Processes.lnk'. Aborting ^!" 16
+            cscript /nologo !MessageBox! "ERROR ^: this script is already^/still running ^(nbI=%nbI%^)^. If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!" 16
             echo "ERROR^: This script is already running ^!" >> !batchFwLog!
             echo "ERROR^: This script is already running ^!"
             wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find" >> !batchFwLog!
@@ -298,7 +298,7 @@ REM : main
         REM : CEMU's exe
         set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe""
         REM : Warn user with message box
-        cscript /nologo !MessageBox! "No CEMU's log file was found. Start !cemuExe! and relaunch" 4112
+        cscript /nologo !MessageBox! "No CEMU^'s log file was found^. Start !cemuExe! and relaunch" 4112
         echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch >> !batchFwLog!
         echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch
 
@@ -366,7 +366,7 @@ REM : main
     echo --------------------------------------------------------- >> !batchFwLog!
     echo graphic pack V2 are needed for this version^, extracting^.^.^. >> !batchFwLog!
 
-    cscript /nologo !MessageBox! "Need to extract V2 GFX packs^, please wait^.^.^."
+    cscript /nologo !MessageBox! "Need to extract V2 GFX packs, please wait..."
 
     if !usePbFlag! EQU 1 call:setProgressBar 12 12 "pre processing" "installing V2 GFX packs"
 
@@ -384,7 +384,7 @@ REM : main
         echo. >> !batchFwLog!
         echo Forcing a GFX pack update to take new ratios into account^.^.^.
         echo.
-        cscript /nologo !MessageBox! "Forcing a GFX pack update to take new ratios into account^.^.^."
+        cscript /nologo !MessageBox! "Forcing a GFX pack update to take new ratios into account..."
 
         REM : forcing a GFX pack update to add GFX packs for new games
         set "gfxUpdate="!BFW_TOOLS_PATH:"=!\forceGraphicPackUpdate.bat""
@@ -574,7 +574,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             set "cacheFile=!sci!.bin"
             copy /Y !oldCache! !cacheFile! > NUL 2>&1
             echo Importing old transferable cache !oldCache! as new cache !cacheFile! >> !batchFwLog!
-            cscript /nologo !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! (after 1.16 included)"
+            cscript /nologo !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! ^(after 1^.16 included^)"
         )
     )
     pushd !BFW_TOOLS_PATH!
@@ -616,7 +616,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : compare their size : size of N always > N-1
     if %newSize% LSS %oldSize% (
-        cscript /nologo !MessageBox! "ERROR ^: old transferable cache backup is greater than new one, please check what happened ^!" 4112
+        cscript /nologo !MessageBox! "ERROR : old transferable cache backup is greater than new one, please check what happened !" 4112
         exit 30
     )
 
@@ -760,7 +760,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH! >> !batchFwLog!
 
     REM : create the default GLcache subfolder if GPU_CACHE <> NOT_FOUND
-    if not exist !GPU_CACHE_PATH! if not [!GPU_CACHE!] == ["NOT_FOUND"] mkdir !GPU_CACHE_PATH!
+    if not exist !GPU_CACHE_PATH! if not [!GPU_CACHE!] == ["NOT_FOUND"] mkdir !GPU_CACHE_PATH! > NUL 2>&1
 
     REM : check if another instance of CEMU is running
     :searchLockFile
@@ -909,7 +909,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     :moveGl
     call:moveFolder !gpuCacheSaved! !gpuCache! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving openGL save^, close all explorer^.exe that might interfer ^!" 4113
+        cscript /nologo !MessageBox! "ERROR While moving openGL save, close all explorer.exe that might interfer !" 4113
         if !ERROLRLEVEL! EQU 1 goto:moveGl
         if !ERROLRLEVEL! EQU 2 cscript /nologo !MessageBox! "ERROR While moving openGL save !"
     )
@@ -923,7 +923,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : create a lock file to protect this launch
     echo !DATE! : %user:"=% launched !GAME_TITLE! using !USERNAME! windows profile > !lockFile!
     if not exist !lockFile! (
-        cscript /nologo !MessageBox! "ERROR when creating !lockFile:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!'s administrator ^!" 4112
+        cscript /nologo !MessageBox! "ERROR when creating !lockFile:"=!^, need rights in !CEMU_FOLDER:"=!^, please contact your !USERDOMAIN:"=!^'s administrator^!" 4112
         exit 3
     )
     echo --------------------------------------------------------- >> !batchFwLog!
@@ -954,16 +954,24 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
 
+    set /A "attempt=1"
     :tryToBackupGp
     if exist !graphicPacks! (
         move /Y !graphicPacks! !graphicPacksBackup! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
-            REM : basename of GAME FOLDER PATH to get GAME_TITLE
-            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-            call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" !patch!
 
-            cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!, close any program that could use this location and relaunch. If the issue persists, take the ownership on the folder by running as an administrator the script !patch:"=!. If it's done, do you wish to retry ?" 4116
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving !graphicPacks:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToBackupGp
+            )
+
+            call:fillOwnerShipPatch !CEMU_FOLDER! !CEMU_FOLDER_NAME! patch
+
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !CEMU_FOLDER:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToBackupGp
+
+            cscript /nologo !MessageBox! "ERROR While moving graphic pack^'s folder, they won't be installed !" 4112
         )
     )
 
@@ -1039,11 +1047,11 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             REM : basename of previousSettingsFolder to get version of CEMU used to import settings
             for /F "delims=~" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed with settings imported from !CEMU_IMPORTED! ^(last version used to run the game^)^. ^
-                            Launch 'Wii-U Games\CEMU\%CEMU_FOLDER_NAME%\Delete my %CEMU_FOLDER_NAME%^'s settings' and recreate your shortcuts without ^
+                            Launch ^'Wii-U Games^\CEMU^\%CEMU_FOLDER_NAME%^\Delete my %CEMU_FOLDER_NAME%^'s settings^' and recreate your shortcuts without ^
                             automatic import^, to be sure that is not related^." 4144
         ) else (
             REM : open log.txt
-            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed, openning its log ^.^.^."
+            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed^, openning its log ^.^.^."
             timeout /T 1 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
             timeout /T 1 > NUL 2>&1
@@ -1058,7 +1066,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
         REM : analyse log file
         type !cemuLog! | find /I "Exception" > NUL 2>&1 && (
-            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! return 0 but an exception was raised, openning its log ^.^.^."
+            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! return 0 but an exception was raised^, openning its log ^.^.^."
             timeout /T 1 > NUL 2>&1
             wscript /nologo !Start! "%windir%\System32\notepad.exe" !cemuLog!
             timeout /T 1 > NUL 2>&1
@@ -1257,9 +1265,9 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if [!GpuCache!] == ["NOT_FOUND"] goto:analyseCemuLog
     if exist !GpuCache! call:moveFolder !GpuCache! !gpuCacheSaved! cr
     if !cr! NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save^, please close all explorer^.exe open in GPU cache folder" 4113
+        cscript /nologo !MessageBox! "ERROR While moving back GPU Cache save, please close all explorer.exe open in GPU cache folder" 4113
         if !ERROLRLEVEL! EQU 1 goto:moveBack
-        cscript /nologo !MessageBox! "WARNING ^: relaunch the game until GPU Cache is backup sucessfully^, if it persists close your session and retry"
+        cscript /nologo !MessageBox! "WARNING : relaunch the game until GPU Cache is backup sucessfully, if it persists close your session and retry"
     )
 
     :analyseCemuLog
@@ -1274,7 +1282,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : if BatchFw complete GFX packs, check if CEMU log contains 'contains inconsistent preset variables'
     type !logFile! | find /I "COMPLETE_GP" > NUL && (
-        type !cemuLog! | find /I "contains inconsistent preset variables" > NUL && cscript /nologo !MessageBox! "WARNING ^: some presets built by BatchFw are not valid, disable GFX packs completion, force a GFX pack update and please report this error to BatchFw's team" 4144
+        type !cemuLog! | find /I "contains inconsistent preset variables" > NUL && cscript /nologo !MessageBox! "WARNING : some presets built by BatchFw are not valid, disable GFX packs completion, force a GFX pack update and please report this error to BatchFw's team" 4144
     )
 
     :analyseCemuTitleId
@@ -1292,7 +1300,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if not [!cemuTitleLine!] == ["NONE"] goto:cemuTitleIdExist
 
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] (
-        cscript /nologo !MessageBox! "WARNING ^: TitleId not found in Cemu^'s log ^! CEMU has crashed ^?^ Disabling saving options and exiting ^!" 4144
+        cscript /nologo !MessageBox! "WARNING : TitleId not found in Cemu's log! CEMU has crashed ? Disabling saving options and exiting!" 4144
         goto:endMain
     )
     :cemuTitleIdExist
@@ -1316,7 +1324,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if /I ["%cemuTitleId%"] == ["%titleId%"] goto:titleIdChecked
 
     if ["%cemuTitleId%"] == [""] (
-        cscript /nologo !MessageBox! "Warning ^: TitleId not found in Cemu^'s log ^! CEMU has crashed ^?^ Disabling saving options and exiting ^!" 4144
+        cscript /nologo !MessageBox! "Warning : TitleId not found in Cemu's log! CEMU has crashed? Disabling saving options and exiting!" 4144
         goto:endMain
     )
 
@@ -1331,7 +1339,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         echo meta/metax.xml  : %titleId%>> !batchFwLog!
         rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
-    cscript /nologo !MessageBox! "ERROR ^: CEMU and GAME TitleId not matching ^!^, disable saving options" 4112
+    cscript /nologo !MessageBox! "ERROR : CEMU and GAME TitleId not matching !, disable saving options" 4112
     goto:endMain
 
     :useCemuTitleId
@@ -1350,7 +1358,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         echo meta/metax.xml  ^: %titleId%>> !batchFwLog!
         rmdir /Q /S !SETTINGS_FOLDER! > NUL 2>&1
     )
-    cscript /nologo !MessageBox! "ERROR ^: UNKNOWN GAME TitleId detected in CEMU Log^.txt ^!^, disable saving options" 4112
+    cscript /nologo !MessageBox! "ERROR : UNKNOWN GAME TitleId detected in CEMU Log.txt !, disable saving options" 4112
     goto:endMain
 
     :titleIdChecked
@@ -1466,14 +1474,14 @@ REM : functions
         set "folder=%1"
         set "title=%2"
 
-        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title!.bat""
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
         set "WIIU_GAMES_FOLDER="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
         if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
             set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
             if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
-            set "patch="!patchFolder:"=!\!title!.bat""
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
         )
         set "%3=!patch!"
 
@@ -1519,7 +1527,9 @@ REM : functions
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
 
         REM : KO => warn user and propose to restore backup N
-        cscript /nologo !MessageBox! "Save file size (!newSaveSize! bytes) is at least half smaller than the backuped one (!oldSaveSize! bytes)! If you have modify/reset your save or delete slots while in game : ignore this message (NO) else your save might be corrupted : revert last backup file (YES) ?" 4148
+        cscript /nologo !MessageBox! "Save file size ^(!newSaveSize! bytes^) is at least half smaller than the backuped one ^(!oldSaveSize! bytes^)^! ^
+                                      If you have modify^/reset your save or delete slots while in game ^: ^
+                                      ignore this message [NO] else your save might be corrupted ^: revert last backup file [YES]^?" 4148
         if !ERRORLEVEL! EQU 7 goto:eof
 
         REM : revert save file backup
@@ -1804,7 +1814,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         for /F "delims=~" %%a in ('dir /A:L /B !pat! 2^>NUL') do rmdir /Q !graphicPacks! > NUL 2>&1
 
         if exist !graphicPacksBackup! (
-            rmdir /Q !graphicPacks!  > NUL 2>&1
+            rmdir /Q /S !graphicPacks!  > NUL 2>&1
             move /Y !graphicPacksBackup! !graphicPacks! > NUL 2>&1
         )
 
@@ -1903,14 +1913,21 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
 
         if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] (
-            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^?" 4145
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!?" 4145
             if !ERRORLEVEL! EQU 2 (
                 set "previousSettingsFolder="NONE""
                 goto:continueLoad
             )
-            cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+            if !v11515! LEQ 1 (
+                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. ^
+                                              Online mode may not work only on the first run ^(due to CEMU that might reformat the settings^.xml^)^, relaunch if you want to play online^. ^
+                                              To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+            ) else (
+                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. ^
+                                              To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+            )
         ) else (
-            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!^. Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+            cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!. Check all settings (set/modify if needed). Use 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk' to edit the game's profile. To cancel the import, delete the settings using 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!'s settings.lnk',relaunch and refuse the import."
         )
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
@@ -2254,7 +2271,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         if ["!accId!"] == ["NONE"] (
             echo WARNING^: AccountId not found for !currentUser! >> !batchFwLog!
-            cscript /nologo !MessageBox! "AccountId not found for !currentUser!, cancel online files installation" 4160
+            cscript /nologo !MessageBox! "AccountId not found for !currentUser!^, cancel online files installation" 4160
             goto:eof
         )
         echo Found !accId! associated with !currentUser! >> !batchFwLog!
@@ -2269,7 +2286,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         call:getHostState !ipRead! state
         if !state! EQU 1 (
-            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network. Be sure that no one is using your account ^(!accId!^) to play online right now before continue^." 4112
+            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue^." 4112
         )
 
         :installAccount
@@ -2294,41 +2311,41 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
         REM : settings.xml evolved after 1.15.19 included
         if !v11519! EQU 2 (
-            REM : CEMU < 1.15.19 (Online/AccountId) 
-        
+            REM : CEMU < 1.15.19 (Online/AccountId)
+
             REM : Check if exist AccountId node
             type !cs! | find "<AccountId" > NUL 2>&1 && (
                 REM : YES  : update the AccountId node
                 !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
                 goto:restoreCs
             )
-            
+
             REM : NO : rename Account node to Online
             set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
             !xmlS! ed -r "//Account" -v Online !cs! > !csTmp0!
             REM : rename PersistentId to AccountId
-            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""            
+            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
             !xmlS! ed -r "//PersistentId" -v AccountId !csTmp0! > !csTmp1!
             REM : delete OnlineEnabled node
             set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
             !xmlS! ed -d "//OnlineEnabled" !csTmp1! > !csTmp2!
-            
+
             REM : set AccountId
             !xmlS! ed -u "//AccountId" -v !accId! !csTmp2! > !csTmp!
-            
-        ) else (
-            REM : CEMU >= 1.15.19 (Account/PersistentId+OnlineEnabled)             
 
-            REM : Check if exist PersitentId node
-            type !cs! | find "<PersitentId" > NUL 2>&1 && (
-            
-                REM : YES  : update PersitentId and OnlineEnabled nodes
+        ) else (
+            REM : CEMU >= 1.15.19 (Account/PersistentId+OnlineEnabled)
+
+            REM : Check if exist PersistentId node
+            type !cs! | find "<PersistentId" > NUL 2>&1 && (
+
+                REM : YES  : update PersistentId and OnlineEnabled nodes
                 set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
                 !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp0!
-                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp!            
+                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp!
                 goto:restoreCs
             )
-            
+
             REM : NO : rename Online node to Account
             set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
             !xmlS! ed -r "//Online" -v Account !cs! > !csTmp0!
@@ -2336,11 +2353,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
             !xmlS! ed -r "//AccountId" -v PersistentId !csTmp0! > !csTmp1!
             REM : add OnlineEnabled node
-            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""     
+            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
             !xmlS! ed -s "//Online" -t elem -n OnlineEnabled -v true !csTmp1! > !csTmp2!
-            
+
             REM : set persistentId
-            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp!            
+            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp!
         )
 
         :restoreCs
@@ -2620,7 +2637,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             if !ERRORLEVEL! EQU 7 exit /b 1
 
         ) else (
-            wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now ^?" 4164
+            wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now ?" 4164
             if !ERRORLEVEL! EQU 7 exit /b 1
         )
         
@@ -3051,8 +3068,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1>> !batchFwLog!
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?>> !batchFwLog!
+            echo Host char codeSet not found in %0 ^?
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )

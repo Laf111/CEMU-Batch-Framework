@@ -202,7 +202,7 @@ REM : main
 
             REM : get title using endTitleId
             set "title=NOT_FOUND"
-            for /F "delims=~; tokens=2" %%t in ('type !wiiTitlesDataBase! ^| findStr /R /I "^^'00050000%%j';"') do set "title=%%t"
+            for /F "delims=~; tokens=2" %%t in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'00050000%%j';"') do set "title=%%t"
 
             if not ["!title!"] == ["NOT_FOUND"] (
                 set "titles[!nbGames!]=!title!"
@@ -297,7 +297,7 @@ REM : functions
         for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
-            echo Host char codeSet not found ^?^, exiting 1
+            echo Host char codeSet not found in %0 ^?
             timeout /t 8 > NUL 2>&1
             exit /b 9
         )
