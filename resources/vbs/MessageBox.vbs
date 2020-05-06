@@ -4,7 +4,7 @@ Set objArgs = WScript.Arguments
 messageText = objArgs(0)
 
 If (objArgs.Count = 1) Then
-    createobject("wscript.shell").popup messageText, 40, "CEMU's BatchFw", 64
+    createobject("wscript.shell").popup messageText, 30, "CEMU's BatchFw", 64
 Else
 
 ' critLevel values : 
