@@ -1,4 +1,3 @@
-Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available on cdn;ico file Id;Native Resolution; Native Fps
 '0005000010013000';Nintendo TV II ;wup-x-hbcj;-;-;-;jap;notmd;'0005000010013000';720;60
 '0005000010100600';Tekken Tag Tournament 2 Wii U Edition;wup-n-aknj;00af;-;v16;jap;yes;'0005000010100600';720;60
 '0005000010100D00';Nintendo Joysound Wii U;wup-n-wahj;-;-;v112;jap;yes;'0005000010100D00';720;60
@@ -124,6 +123,7 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '0005000010110A00';Ninja Gaiden 3 Razor s Edge;wup-n-ange;1;-;v80;usa;yes;'0005000010110B00';720;60
 '0005000010110B00';Ninja Gaiden 3 Razor s Edge;wup-p-angp;1;-;v48;eur;yes;'0005000010110B00';720;60
 '0005000010110C00';FIFA 2013;wup-n-af3j;-;-;v0;jap;yes;'000500001010EE00';720;60
+'0005000010110E00';Super Smash Bros WiiU;wup-n-axfe;1;-;v80;jap;yes;'0005000010145000';1080;60
 '0005000010110F00';Darksiders II;wup-p-ad2p;78;-;v1;eur;yes;'000500001010AD00';720;30
 '0005000010111000';Ben 10 Omniverse;wup-p-abep;00af;-;v0;eur;yes;'000500001010AC00';720;60
 '0005000010111100';Jeopardy;wup-n-ajpe;-;-;v0;usa;yes;'0005000010111100';720;60
@@ -435,7 +435,6 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '0005000010144000';Adventure Time Explore The Dungeon Because I Dont Know;wup-n-adve;00g9;-;v16;usa;yes;'0005000010144000';1080;60
 '0005000010144D00';Wii Sports Club;wup-n-awse;1;-;v112;usa;yes;'000500001012F100';720;60
 '0005000010144E00';Wii Sports Club;wup-n-awsp;1;-;v112;eur;yes;'000500001012F100';720;60
-'0005000010110E00';Super Smash Bros WiiU;wup-n-axfe;1;-;v80;jap;yes;'0005000010145000';1080;60
 '0005000010144F00';Super Smash Bros WiiU;wup-n-axfe;1;-;v80;usa;yes;'0005000010145000';1080;60
 '0005000010145000';Super Smash Bros WiiU;wup-p-axfp;1;-;v96;eur;yes;'0005000010145000';1080;60
 '0005000010145100';Hotwheels World s Best Driver;wup-p-ahwp;-;-;v0;eur;yes;'0005000010145100';720;60
@@ -716,7 +715,7 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '000500001016D000';Mr Driller 2;wup-n-pamp;-;-;v0;eur;yes;'000500001016CF00';720;60
 '000500001016D100';Klonoa Empire of Dreams;wup-n-pane;-;-;v0;usa;yes;'000500001016D100';720;60
 '000500001016D200';Klonoa Empire of Dreams;wup-n-panp;-;-;v0;eur;yes;'000500001016D200';720;60
-'000500001016D300';Batman Arkham Originsblackgatedeluxeedition;wup-p-wbmp;-;-;v1;eur;yes;'000500001016DF00';720;30
+'000500001016D300';Batman Arkham Origins Blackgate Deluxe;wup-p-wbmp;-;-;v1;eur;yes;'0005000010136C00';720;30
 '000500001016D400';Stick It To The Man;wup-p-wmnp;-;-;v0;eur;yes;'000500001016D400';720;60
 '000500001016D500';Super Toy Cars;wup-p-wctp;009y;-;v22;eur;yes;'000500001016D500';720;60
 '000500001016D600';The Amazing Spider-man 2;wup-p-am9p;52;-;v0;eur;yes;'000500001016D600';720;60
@@ -726,7 +725,7 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '000500001016DC00';Disney Infinity 2;wup-n-adre;004q;-;v32;usa;yes;'000500001016DC00';720;60
 '000500001016DD00';Mon Premier Karaoke;wup-n-wmke;-;-;v0;usa;yes;'000500001016DD00';720;60
 '000500001016DE00';Super Toy Cars;wup-n-wcte;009y;-;v16;usa;yes;'000500001016D500';720;60
-'000500001016DF00';Batman Arkham Origins Blackgate Deluxe;wup-n-wbme;-;-;v16;usa;yes;'000500001016DF00';720;30
+'000500001016DF00';Batman Arkham Origins Blackgate Deluxe;wup-n-wbme;-;-;v16;usa;yes;'0005000010136C00';720;30
 '000500001016E000';Stick It To The Man;wup-n-wmne;-;-;v0;usa;yes;'000500001016D400';720;60
 '000500001016E100';Shovel Knight;wup-n-wkne;00ay;-;v48;usa;yes;'000500001016E100';1080;60
 '000500001016E200';XType Plus;wup-p-wexp;-;-;v32;eur;yes;'000500001016E200';720;60
@@ -994,6 +993,7 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '0005000010188700';3 Black;wup-n-pbrj;-;-;v0;jap;yes;'0005000010188700';720;60
 '0005000010188800';Mega Man Battle Network 3 Blue;wup-n-pbre;-;-;v0;usa;yes;'0005000010188800';720;60
 '0005000010188900';Mega Man Battle Network 3 Blue;wup-n-pbrp;-;-;v0;eur;yes;'0005000010188900';720;60
+'0005000010188B00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;jpn;yes;'00050000101ABC00';720;60
 '0005000010188C00';Disney Infinity 2;wup-p-adrp;004q;-;v32;eur;yes;'000500001016DC00';720;60
 '0005000010188D00';Disney Infinity 2;wup-p-adrz;004q;-;v32;eur;yes;'000500001016DC00';720;60
 '0005000010188E00';Soul Axiom;wup-p-baxp;-;-;-;eur;yes;'0005000010188E00';720;60
@@ -1285,7 +1285,6 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '00050000101AB100';Outer World 20th Anniversary Edition;wup-n-weuj;-;-;v0;jap;yes;'00050000101AB100';720;60
 '00050000101ABB00';Color Bombs;wup-n-bw2e;-;-;v1;usa;yes;'00050000101ABB00';720;60
 '00050000101ABC00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;usa;yes;'00050000101ABC00';720;60
-'0005000010188B00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;jpn;yes;'00050000101ABC00';720;60
 '00050000101ABE00';Wario-Master Of Disguise;wup-n-dale;-;-;-;usa;yes;'00050000101ABE00';720;60
 '00050000101ABF00';Wario-Master Of Disguise;wup-n-dalp;-;-;v0;eur;yes;'00050000101ABF00';720;60
 '00050000101AC100';Star Fox Command;wup-n-dame;-;-;v0;usa;yes;'00050000101AC100';720;60
@@ -1905,7 +1904,6 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '00050000101F9400';Super Destronaut2 -goduckyourself;wup-n-ajne;-;-;-;usa;yes;'00050000101F9400';720;60
 '00050000101F9500';Mega Maze;wup-p-bm5e;-;-;-;usa;yes;'00050000101F9500';720;60
 '00050000101F9700';Darksiders Warmastered Edition;wup-p-bedp;-;-;v0;eur;-;'00050000101F9700';720;30
-'00050000101FA600';Darksiders;wup-p-bedp;-;-;v0;eur;-;'00050000101F9700';720;30
 '00050000101F9800';B3 Game Expo For Bees;wup-p-ab3p;-;-;-;eur;yes;'00050000101E1F00';720;60
 '00050000101F9900';Aenigma Os;wup-p-basp;-;-;-;eur;yes;'00050000101D1A00';720;60
 '00050000101F9A00';Citadale;wup-p-becp;-;-;-;eur;yes;'00050000101F9A00';720;60
@@ -1913,6 +1911,7 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '00050000101F9D00';The Girl And The Robot;-;-;-;-;-;-;'00050000101F9D00';720;30
 '00050000101FA000';Ohayou Beginner s Japanese;wup-u-ajue;011f;-;16;usa;yes;'00050000101FA000';720;60
 '00050000101FA100';Forma 8;wup-p-bf8e;-;-;-;usa;yes;'00050000101CBC00';720;60
+'00050000101FA600';Darksiders;wup-p-bedp;-;-;v0;eur;-;'00050000101F9700';720;30
 '00050000101FA900';Blasting Agent-Ultimate Edition;wup-p-abzp;-;-;-;eur;yes;'00050000101FA900';720;60
 '00050000101FAA00';Blasting Agent-Ultimate Edition;wup-n-abze;-;-;-;usa;yes;'00050000101FA900';720;60
 '00050000101FAB00';Collateral Thinking;wup-n-ajxe;-;-;-;usa;yes;'00050000101FAB00';720;60
@@ -2051,3 +2050,4 @@ Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available o
 '000500001F600900';Paper Mario Color Splash;wup-n-cnfj;-;-;-;jap;yes;'000500001F600B00';720;60
 '000500001F600A00';Paper Mario Color Splash;wup-n-cnfe;-;-;-;usa;yes;'000500001F600B00';720;60
 '000500001F600B00';Paper Mario Color Splash;wup-p-cnfp;-;-;-;eur;yes;'000500001F600B00';720;60
+Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available on cdn;ico file Id;Native Resolution; Native Fps
