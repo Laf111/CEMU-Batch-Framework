@@ -8,7 +8,7 @@ BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wm
 
 I recommend to stay in that range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
-**Last GFX packs checked (presets completion) : V657**
+**Last GFX packs checked (presets completion) : V660**
 
 
 
