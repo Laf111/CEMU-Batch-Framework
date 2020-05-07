@@ -311,17 +311,17 @@ REM : main
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
-    REM : comparing version to V1.18.2
-    set /A "v1182=2"
-
-    call:compareVersions !versionRead! "1.18.2" v1182 > NUL 2>&1
-    if ["!v1182!"] == [""] echo Error when comparing versions >> !batchFwLog!
-    if !v1182! EQU 50 echo Error when comparing versions >> !batchFwLog!
-
+    REM : suppose that version > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    set /A "v1182=1"
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
     set /A "v114=1"
+
+    REM : comparing version to V1.18.2
+    call:compareVersions !versionRead! "1.18.2" v1182 > NUL 2>&1
+    if ["!v1182!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v1182! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
     REM : version > 1.18.2 => > v1.15.19 > ....
     if !v1182! LEQ 1 goto:getTitleId
@@ -1046,9 +1046,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
             REM : basename of previousSettingsFolder to get version of CEMU used to import settings
             for /F "delims=~" %%i in (!previousSettingsFolder!) do set "CEMU_IMPORTED=%%~nxi"
-            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed with settings imported from !CEMU_IMPORTED! ^(last version used to run the game^)^. ^
-                            Launch ^'Wii-U Games^\CEMU^\%CEMU_FOLDER_NAME%^\Delete my %CEMU_FOLDER_NAME%^'s settings^' and recreate your shortcuts without ^
-                            automatic import^, to be sure that is not related^." 4144
+            cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed with settings imported from !CEMU_IMPORTED! ^(last version used to run the game^)^. Launch ^'Wii-U Games^\CEMU^\%CEMU_FOLDER_NAME%^\Delete my %CEMU_FOLDER_NAME%^'s settings^' and recreate your shortcuts without automatic import^, to be sure that is not related^." 4144
         ) else (
             REM : open log.txt
             cscript /nologo !MessageBox! "!CEMU_FOLDER_NAME! crashed^, openning its log ^.^.^."
@@ -1527,9 +1525,7 @@ REM : functions
         if !newSaveSize! GEQ !saveSizeThreshold! goto:eof
 
         REM : KO => warn user and propose to restore backup N
-        cscript /nologo !MessageBox! "Save file size ^(!newSaveSize! bytes^) is at least half smaller than the backuped one ^(!oldSaveSize! bytes^)^! ^
-                                      If you have modify^/reset your save or delete slots while in game ^: ^
-                                      ignore this message [NO] else your save might be corrupted ^: revert last backup file [YES]^?" 4148
+        cscript /nologo !MessageBox! "Save file size ^(!newSaveSize! bytes^) is at least half smaller than the backuped one ^(!oldSaveSize! bytes^)^! If you have modify^/reset your save or delete slots while in game ^: ignore this message [NO] else your save might be corrupted ^: revert last backup file [YES]^?" 4148
         if !ERRORLEVEL! EQU 7 goto:eof
 
         REM : revert save file backup
@@ -1919,12 +1915,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 goto:continueLoad
             )
             if !v11515! LEQ 1 (
-                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. ^
-                                              Online mode may not work only on the first run ^(due to CEMU that might reformat the settings^.xml^)^, relaunch if you want to play online^. ^
-                                              To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. Online mode may not work only on the first run ^(due to CEMU that might reformat the settings^.xml^)^, relaunch if you want to play online^. To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
             ) else (
-                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. ^
-                                              To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
+                cscript /nologo !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
             )
         ) else (
             cscript /nologo !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!. Check all settings (set/modify if needed). Use 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk' to edit the game's profile. To cancel the import, delete the settings using 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!'s settings.lnk',relaunch and refuse the import."

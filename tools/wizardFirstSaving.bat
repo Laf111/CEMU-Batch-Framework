@@ -228,16 +228,17 @@ REM : main
 
     title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
 
-    REM : comparing version to V1.17.2
-    set /A "v1172=2"
-    call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
-    if ["!v1172!"] == [""] echo Error when comparing versions
-    if !v1172! EQU 50 echo Error when comparing versions
-
-    REM : suppose that version > 1.15.19 > 1.15.15 > 1.15.6 => > 1.11.6
+    set "versionReadFormated=NONE"
+    REM : suppose that version > 1.17.2 > 1.15.19 > 1.15.15 > 1.15.6 => > 1.11.6
+    set /A "v1172=1"
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
+    
+    REM : comparing version to V1.17.2
+    call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
+    if ["!v1172!"] == [""] echo Error when comparing versions
+    if !v1172! EQU 50 echo Error when comparing versions
 
     REM : version > 1.17.2 => > v1.15.19 > ....
     if !v1172! LEQ 1 goto:checkProfile
@@ -1458,8 +1459,13 @@ REM : functions
         REM : format strings
         echo %vir% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vir=!vir!00"
         echo !vir! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vir! vir
-        echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
-        echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+        if ["!versionReadFormated!"] == ["NONE"] (
+            echo %vit% | findstr /V /R [a-zA-Z] > NUL 2>&1 && set "vit=!vit!00"
+            echo !vit! | findstr /R [a-zA-Z] > NUL 2>&1 && call:formatStrVersion !vit! vit
+            set "versionReadFormated=!vit!"
+        ) else (
+            set "vit=!versionReadFormated!
+        )
 
         REM : versioning separator (init to .)
         set "sep=."

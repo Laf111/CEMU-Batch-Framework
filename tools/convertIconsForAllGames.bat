@@ -361,7 +361,7 @@ REM : functions
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%titleId%';"') do set "libFileLine="%%i""
 
         REM : add-it to the library
         if [!libFileLine!] == ["NONE"] (

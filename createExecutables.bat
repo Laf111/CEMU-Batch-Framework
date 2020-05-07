@@ -261,9 +261,6 @@ REM : main
 
     :inputsAvailables
 
-    choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
-    if !ERRORLEVEL! EQU 1 set /A "QUIET_MODE=1"
-
     cls
     REM : check if folder name contains forbidden character for batch file
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
@@ -278,8 +275,21 @@ REM : main
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
 
+    REM : CEMU's log file
+    set "clog="!CEMU_FOLDER:"=!\log.txt""
+    set /A "treatAllGames=0"
+    
     if !QUIET_MODE! EQU 1 goto:bfwShortcuts
     REM : when launched with shortcut = no args = QUIET_MODE=0
+    
+    if exist !clog! (
+        choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
+        if !ERRORLEVEL! EQU 1 (
+            set /A "QUIET_MODE=1"
+            set /A "treatAllGames=1"
+        )
+    )
+    
     cls
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
@@ -344,7 +354,6 @@ REM : main
 
     :openCemuAFirstTime
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    set "clog="!CEMU_FOLDER:"=!\log.txt""
     if exist !clog! if exist !cs! goto:getCemuVersion
     echo ---------------------------------------------------------
     echo opening CEMU^.^.^.
@@ -640,7 +649,7 @@ REM    call:log2HostFile !msg!
     rmdir /S /Q  !launchersFolder! > NUL 2>&1
 
 
-    if !QUIET_MODE! EQU 1 goto:log
+    if !QUIET_MODE! EQU 1 if !treatAllGames! EQU 0 goto:log
     echo =========================================================
 
     echo Treated !NB_GAMES_TREATED! games

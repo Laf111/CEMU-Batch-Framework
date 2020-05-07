@@ -22,7 +22,9 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-02/05/2020 V19 :
+06/05/2020 V19 :
+fix : reports not created (regression)
+fix : wait in WizardFirstLaunch.bat not effective and could lead in no GFX found
 fix : file extension check when importing transferable cache 
 fix : add natives values to default in updateGameGraphicPaccks for displaying popup message when the game is 
       not found in the wii-u titles internal database
@@ -32,6 +34,8 @@ fix : missing icons for shortcut created in Wii-U Games\BatchFw\Tools\Graphic pa
 add : spirv vulkan cache support (API vulkan version >= 1.18.2)
 add : "Wii U Error Codes.rtf" in ./doc and a shortcut "Wii-U Games\Wii-U\Wii-U error codes.lnk"
 add : possibility to treat all games in Create*.bat
+add : automatically correct nativeFPS to 30FPS in the internal Wii-U titles database if a 60FPS pack exists
+      (when initial value is wrong = 60FPS)
 
 30/04/2020 V18-9 :
 fix : Wii-U 106-0502 error when going online with versions >= 1.15.19 and other playing online issues
