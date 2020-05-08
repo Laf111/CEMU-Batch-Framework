@@ -239,7 +239,7 @@ REM : main
 
     set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp! > NUL 2>&1
-    
+
     REM : Search FPS++ patch
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
@@ -248,20 +248,20 @@ REM : main
 
     REM : 30FPS games
     if ["%nativeFps%"] == ["30"] set /A "g30=1"
-    
+
     REM : if no 60FPS pack is found
     if !fps60! EQU 0 goto:searchForFpsPp
-    
+
     echo 60FPS was found >> !cgpLogFile!
     echo 60FPS pack was found
-    
+
     REM : that means that the nativeFPS of the game should be 30
     if %nativeFps% EQU 60 (
         REM : value in WiiU-Titles-Library.csv is wrong, patching the file
         call:patchInternalDataBase
         set "nativeFps=30"
     )
-    
+
     :searchForFpsPp
     if !g30! EQU 1 (
         REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
@@ -269,12 +269,12 @@ REM : main
         if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
         echo no FPS^+^+ GFX pack found >> !cgpLogFile!
         echo no FPS^+^+ GFX pack found
-    
+
         REM : search V2 FPS++ graphic pack or patch for this game
         set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
 
         set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
-        for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do set /A "fpsPpOld=1"      
+        for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do set /A "fpsPpOld=1"
     )
     :computeFactor
     REM : initialized for 60FPS games running @60FPS on WiiU
@@ -338,7 +338,7 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :patchInternalDataBase
-    
+
         REM : wait that "createGameGraphicPacks.bat" or "createExtraGraphicPacks.bat" end
         set "capLogFileTmp="!TMP:"=!\BatchFw_createCapGfx_process.list""
 
@@ -356,28 +356,28 @@ REM : functions
         REM : get the lines for the game
         set "capLinesTmp="!TMP:"=!\BatchFw_createCapGfx_newLines.list""
         type !wiiTitlesDataBase! | find /I "%icoId%" > !capLinesTmp!
-        
+
         set "fnrPacthDb="!BFW_PATH:"=!\logs\fnr_patchWiiUtitlesDataBase.log""
         if exist !fnrPacthDb! del /F !fnrPacthDb! > NUL 2>&1
-        
+
         REM : Replace 60 by 30 in capLinesTmp
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BatchFw_createCapGfx_newLines.list" --find ";60" --replace ";30" --logFile !fnrPacthDb!  > NUL
 
         REM : remove the line and add the new one with 30FPS as nativeFps
-        set "wiiTitlesDataBaseTmp="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.tmp""        
+        set "wiiTitlesDataBaseTmp="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.tmp""
         type !wiiTitlesDataBase! | find /I /V "%icoId%" > !wiiTitlesDataBaseTmp!
 
         type !capLinesTmp! >> !wiiTitlesDataBaseTmp!
-        
+
         REM : remove readonly attribute
         attrib -R !wiiTitlesDataBase! > NUL 2>&1
-        
+
         REM : create new file (sorted)
         type !wiiTitlesDataBaseTmp! | sort > !wiiTitlesDataBase!
-        
+
         REM : set the readonly attribute
         attrib +R !wiiTitlesDataBase! > NUL 2>&1
-        
+
         del /F !capLinesTmp! > NUL 2>&1
         del /F !wiiTitlesDataBaseTmp! > NUL 2>&1
     goto:eof

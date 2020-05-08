@@ -464,7 +464,7 @@ REM : functions
         set "%3=NOT_FOUND"
 
         REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^>NUL') do (
             set "%3=%%x"
 
             goto:eof

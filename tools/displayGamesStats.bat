@@ -84,17 +84,17 @@ REM : ------------------------------------------------------------------
     pushd !BFW_RESOURCES_PATH!
     REM : delete node in csTgt
     set "csTmp=!cs:.xml=.bfw_tmp!"
-    "xml.exe" ed -d "//GamePaths/Entry" !cs! > !csTmp!
+    "xml.exe" ed -d "//GamePaths/Entry" !cs! > !csTmp! 2>NUL
 
     set "csTmp1=!cs:.xml=.bfw_tmp1!"
     REM : remove the node //GameCache/Entry
-    "xml.exe" ed -d "//GameCache/Entry" !csTmp! > !csTmp1!
+    "xml.exe" ed -d "//GameCache/Entry" !csTmp! > !csTmp1! 2>NUL
 
     set "csTmp2=!cs:.xml=.bfw_tmp2!"
-    "xml.exe" ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp1! > !csTmp2!
+    "xml.exe" ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !csTmp1! > !csTmp2! 2>NUL
 
     set "MLC01_FOLDER_PATH=!CEMU_FOLDER:"=!\mlc01"
-    "xml.exe" ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp2! > !cs!
+    "xml.exe" ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp2! > !cs! 2>NUL
     if exist !cs! del /F !csTmp!* > NUL 2>&1
 
     REM : loop on each games
@@ -197,7 +197,7 @@ REM : ------------------------------------------------------------------
         set "%3=NOT_FOUND"
 
         REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^>NUL') do (
             set "%3=%%x"
 
             goto:eof

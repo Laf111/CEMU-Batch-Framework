@@ -1782,7 +1782,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         set "%3=NOT_FOUND"
 
         REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^>NUL') do (
             set "%3=%%x"
 
             goto:eof
@@ -2090,12 +2090,12 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         REM : delete ignored nodes
         set "file0=!fileTmp:.bfw_tmp=.bfw_tmp0!"
-        !xmlS! ed -d "//GamePaths" !cs! > !file0!
+        !xmlS! ed -d "//GamePaths" !cs! > !file0! 2>NUL
 
         set "file1=!fileTmp:.bfw_tmp=.bfw_tmp1!"
-        !xmlS! ed -d "//GameCache" !file0! > !file1!
+        !xmlS! ed -d "//GameCache" !file0! > !file1! 2>NUL
 
-        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp!
+        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp! 2>NUL
         set "pat="!BFW_PATH:"=!\logs\settings_target.bfw_tmp*""
 
         REM : for each nodes in the filtered target xml file
@@ -2309,22 +2309,22 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             REM : Check if exist AccountId node
             type !cs! | find "<AccountId" > NUL 2>&1 && (
                 REM : YES  : update the AccountId node
-                !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+                !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp! 2>NUL
                 goto:restoreCs
             )
 
             REM : NO : rename Account node to Online
             set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
-            !xmlS! ed -r "//Account" -v Online !cs! > !csTmp0!
+            !xmlS! ed -r "//Account" -v Online !cs! > !csTmp0! 2>NUL
             REM : rename PersistentId to AccountId
             set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
-            !xmlS! ed -r "//PersistentId" -v AccountId !csTmp0! > !csTmp1!
+            !xmlS! ed -r "//PersistentId" -v AccountId !csTmp0! > !csTmp1! 2>NUL
             REM : delete OnlineEnabled node
             set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
-            !xmlS! ed -d "//OnlineEnabled" !csTmp1! > !csTmp2!
+            !xmlS! ed -d "//OnlineEnabled" !csTmp1! > !csTmp2! 2>NUL
 
             REM : set AccountId
-            !xmlS! ed -u "//AccountId" -v !accId! !csTmp2! > !csTmp!
+            !xmlS! ed -u "//AccountId" -v !accId! !csTmp2! > !csTmp! 2>NUL
 
         ) else (
             REM : CEMU >= 1.15.19 (Account/PersistentId+OnlineEnabled)
@@ -2334,23 +2334,23 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
                 REM : YES  : update PersistentId and OnlineEnabled nodes
                 set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
-                !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp0!
-                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp!
+                !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp0! 2>NUL
+                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp! 2>NUL
                 goto:restoreCs
             )
 
             REM : NO : rename Online node to Account
             set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
-            !xmlS! ed -r "//Online" -v Account !cs! > !csTmp0!
+            !xmlS! ed -r "//Online" -v Account !cs! > !csTmp0! 2>NUL
             REM : rename AccountId to PersistentId
             set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
-            !xmlS! ed -r "//AccountId" -v PersistentId !csTmp0! > !csTmp1!
+            !xmlS! ed -r "//AccountId" -v PersistentId !csTmp0! > !csTmp1! 2>NUL
             REM : add OnlineEnabled node
             set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
-            !xmlS! ed -s "//Online" -t elem -n OnlineEnabled -v true !csTmp1! > !csTmp2!
+            !xmlS! ed -s "//Online" -t elem -n OnlineEnabled -v true !csTmp1! > !csTmp2! 2>NUL
 
             REM : set persistentId
-            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp!
+            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp! 2>NUL
         )
 
         :restoreCs

@@ -234,7 +234,7 @@ REM : main
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
-    
+
     REM : comparing version to V1.17.2
     call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
     if ["!v1172!"] == [""] echo Error when comparing versions
@@ -418,20 +418,20 @@ REM : main
     REM : but not for game stats because UI games'list refresh is needed
     
     REM : remove the node //GamePaths/Entry
-    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0!
+    !xmlS! ed -d "//GamePaths/Entry" !cs! > !csTmp0! 2>NUL
 
     REM : remove the node //GameCache/Entry to force games'list refresh in UI
-    !xmlS! ed -d "//GameCache/Entry" !csTmp0! > !csTmp1!
+    !xmlS! ed -d "//GameCache/Entry" !csTmp0! > !csTmp1! 2>NUL
     
     REM : patch settings.xml to point to !GAMES_FOLDER! (GamePaths node)
-    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp1! > !csTmp2!
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !BFW_LOGS! !csTmp1! > !csTmp2! 2>NUL
 
     REM : patch settings.xml fullscreen mode
     set "screenMode=fullscreen"
     REM : get the SCREEN_MODE
     for /F "tokens=2 delims=~=" %%j in ('type !logFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
     if not ["!screenMode!"] == ["fullscreen"] (
-        !xmlS! ed -u "//fullscreen" -v "false" !csTmp2! > !csTmp!
+        !xmlS! ed -u "//fullscreen" -v "false" !csTmp2! > !csTmp! 2>NUL
     ) else (
         set "csTmp=!csTmp2!"
     )
@@ -439,7 +439,7 @@ REM : main
     REM : patch settings.xml to point to local mlc01 folder (GamePaths node)
     set "MLC01_FOLDER_PATH=!GAME_FOLDER_PATH:"=!\mlc01"
 
-    !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs!
+    !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs! 2>NUL
     if exist !cs! del /F !csTmp!* > NUL 2>&1
     goto:diffProfileFile
 
@@ -539,8 +539,8 @@ REM : main
 
     :openProfileFile
 
-    REM : if version of CEMU >= 1.15.6 (v1156<=1) : use CEMU to open profile file
-    if !v1156! LEQ 1 goto:step2
+    REM : if version of CEMU >= 1.12.0
+    if !v112! LEQ 1 goto:step2
 
     echo opening !PROFILE_FILE:"=! ^.^.^.
     echo Complete it ^(if needed^) then close notepad to continue
@@ -718,11 +718,11 @@ REM : main
 
     REM : patch @//GameCache/Entry/Path with replacing !BFW_LOGS! by !GAMES_FOLDER!
     REM : (because it was removed earlier, there is only one entry //GameCache/Entry/Path)
-    !xmlS! ed -u "//GameCache/Entry/path" -v !RPX_FILE_PATH! !cs! > !csTmp0!
+    !xmlS! ed -u "//GameCache/Entry/path" -v !RPX_FILE_PATH! !cs! > !csTmp0! 2>NUL
 
     REM : set GamePaths to !GAMES_FOLDER!
     REM : (because it was removed earlier, there is only one entry //GamePaths/Entry)
-    !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs!
+    !xmlS! ed -u "//GamePaths/Entry" -v !GAMES_FOLDER! !csTmp0! > !cs! 2>NUL
 
     del /F !csTmp0! > NUL 2>&1
 
@@ -1168,10 +1168,10 @@ REM : functions
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
         REM : settings.xml evolved after 1.15.19 included
         if !v11519! EQU 2 (
-            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp!
+            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp! 2>NUL
         ) else (
-            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp!
-            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp!
+            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp! 2>NUL
+            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp! 2>NUL
         )
 
         if exist !csTmp! (
@@ -1245,7 +1245,7 @@ REM : functions
         set "%3=NOT_FOUND"
 
         REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile!') do (
+        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^>NUL') do (
             set "%3=%%x"
 
             goto:eof

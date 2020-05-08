@@ -119,7 +119,7 @@ echo -------------------------------------------------------
 echo ^"xml^.exe^" sel -t -c ^"^/^/GameCache^/Entry^[title_id=^'!GameId!^'^]^" !csSrc!
 
         REM : get game's stats
-        "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp!
+        "xml.exe" sel -t -c "//GameCache/Entry[title_id='!GameId!']" !csSrc! > !csTmp! 2>NUL
 
 echo csTmp=!csTmp!
 echo -------------------------------------------------------
@@ -138,13 +138,13 @@ echo -------------------------------------------------------
 
         REM : delete node in csTgt
         set "csTgtTmp=!csTgt:.xml=.bfw_tmp!"
-        "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp!
+        "xml.exe" ed -d "//GameCache/Entry[title_id='!GameId!']" !csTgt! > !csTgtTmp! 2>NUL
 
         echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo Node ^:
         echo !node!
 
-        "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp!
+        "xml.exe" ed -s "//GameCache" -t elem -n "!node!" !csTgtTmp! > !csTmp! 2>NUL
         echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo replacing in temporary file
 

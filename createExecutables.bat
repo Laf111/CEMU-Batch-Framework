@@ -155,7 +155,7 @@ REM : main
         set "versionRead=NOT_FOUND"
         for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
         if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
             echo Install earlier versions per game and per user
             pause
             set /A "NBCV-=1"
@@ -188,7 +188,7 @@ REM : main
         pause
         goto:askOutputFolder
     )
-    
+
     goto:inputsAvailables
 
     :getArgsValue
@@ -278,10 +278,10 @@ REM : main
     REM : CEMU's log file
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "treatAllGames=0"
-    
+
     if !QUIET_MODE! EQU 1 goto:bfwShortcuts
     REM : when launched with shortcut = no args = QUIET_MODE=0
-    
+
     if exist !clog! (
         choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
         if !ERRORLEVEL! EQU 1 (
@@ -289,7 +289,6 @@ REM : main
             set /A "treatAllGames=1"
         )
     )
-    
     cls
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
@@ -376,7 +375,6 @@ REM : main
 
     :getCemuVersion
 
-    set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "v1151=2"
     set /A "v114=1"
 
@@ -391,7 +389,7 @@ REM : main
     set "versionRead=NOT_FOUND"
     for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
     if ["!versionRead!"] == ["NOT_FOUND"] (
-        echo ERROR^: BatchFw supports only version of CEMU ^> v1^.11^.6
+        echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
         echo Install earlier versions per game and per user
         echo exiting
         pause
@@ -406,6 +404,7 @@ REM : main
     exit /b 78
 
     :versionOK
+
     call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
     if ["!v1151!"] == [""] echo Error when comparing versions
     if !v1151! EQU 50 echo Error when comparing versions
@@ -431,7 +430,6 @@ REM : main
     ) else (
         goto:checkCemuHook
     )
-
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:checkCemuHook
 
@@ -665,7 +663,7 @@ REM    call:log2HostFile !msg!
     echo current^) before removing the previous one if the last one runs all
     echo your games without any issue.
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
     echo entered here^:
@@ -674,7 +672,7 @@ REM    call:log2HostFile !msg!
     echo Wii-U Games^\Create CEMU^'s executables for selected games^.lnk
     echo to register a SINGLE version of CEMU
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you encounter any issues or have made a mistake when
     echo collecting settings for a game^:
@@ -683,7 +681,7 @@ REM    call:log2HostFile !msg!
     echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
     echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo This windows will close automatically in 15s
     echo     ^(n^)^: don^'t close^, i want to read history log first
@@ -1545,7 +1543,6 @@ REM
             )
 
         )
-
         set "ARGS=ALL"
 
         REM : create a shortcut to deleteBatchFwGraphicPacks.bat (if needed)

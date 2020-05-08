@@ -22,7 +22,8 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-06/05/2020 V19 :
+08/05/2020 V19 :
+fix : redirect stderr to NUL on xml operations
 fix : reports not created (regression)
 fix : wait in WizardFirstLaunch.bat not effective and could lead in no GFX found
 fix : file extension check when importing transferable cache 

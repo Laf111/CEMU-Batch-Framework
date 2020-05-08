@@ -280,7 +280,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     REM : CEMU's log file
     set "clog="!CEMU_FOLDER:"=!\log.txt""
     set /A "treatAllGames=0"
-    
+
     if !QUIET_MODE! EQU 1 goto:bfwShortcuts
     REM : when launched with shortcut = no args = QUIET_MODE=0
 
@@ -623,6 +623,12 @@ REM    call:log2HostFile !msg!
             if [!ANSWER!] == ["y"] (
                 move /Y !GAME_FOLDER_PATH! !newName! > NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
+
+                    if !attempt! EQU 1 (
+                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        set /A "attempt+=1"
+                        goto:tryToMove
+                    )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
@@ -653,7 +659,7 @@ REM    call:log2HostFile !msg!
     echo current^) before removing the previous one if the last one runs all
     echo your games without any issue.
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you want to change global CEMU^'s settings you^'ve just
     echo entered here^:
@@ -662,7 +668,7 @@ REM    call:log2HostFile !msg!
     echo Wii-U Games^\Create CEMU^'s shortcuts for selected games^.lnk
     echo to register a SINGLE version of CEMU
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo If you encounter any issues or have made a mistake when
     echo collecting settings for a game^:
@@ -671,7 +677,7 @@ REM    call:log2HostFile !msg!
     echo the shortcut in Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!
     echo Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk
     echo ---------------------------------------------------------
-    pause
+    if !treatAllGames! EQU 0 pause
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     echo This windows will close automatically in 15s
     echo     ^(n^)^: don^'t close^, i want to read history log first
