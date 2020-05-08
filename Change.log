@@ -37,6 +37,7 @@ add : "Wii U Error Codes.rtf" in ./doc and a shortcut "Wii-U Games\Wii-U\Wii-U e
 add : possibility to treat all games in Create*.bat
 add : automatically correct nativeFPS to 30FPS in the internal Wii-U titles database if a 60FPS pack exists
       (when initial value is wrong = 60FPS)
+add : update embeded GFX pack to v663
 
 30/04/2020 V18-9 :
 fix : Wii-U 106-0502 error when going online with versions >= 1.15.19 and other playing online issues
