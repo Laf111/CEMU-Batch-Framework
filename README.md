@@ -246,7 +246,8 @@ Install, create a portable loadiine library, complete/create custom GFX packs, s
 #
 Dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 #
-
+Fix custom GFX packs created for games without any official packs (if needed) : https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
+#
 ## FAQ: 
 
 - **Do i need a Wii-U?**
