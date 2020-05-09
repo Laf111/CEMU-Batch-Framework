@@ -8,7 +8,7 @@ BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wm
 
 I recommend to stay in that range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
-**Last GFX packs checked (presets completion) : V660**
+**Last GFX packs checked (presets completion) : V663**
 
 
 
@@ -243,8 +243,6 @@ Install, create a portable loadiine library, complete/create custom GFX packs, s
 - 47:40 : disable progress bar on a local installation
 
 - 48:45 : uninstall BatchFw
-#
-Online files installation for all users : https://1drv.ms/v/s!Apr2zdKB1g7fgi17uiFUY7iteHet?e=qEa2ko
 #
 Dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 #
