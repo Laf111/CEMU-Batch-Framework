@@ -2,13 +2,13 @@
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-**Versions of CEMU supported : 1.11.6 to 1.18.2**
+**Versions of CEMU supported : 1.11.6 to 1.19**
 
 (if you want to use earlier versions, create an installation per game and per user)
 
 I recommend to stay in that range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
-**Last GFX packs checked (presets completion) : V663**
+**Last GFX packs checked (presets completion) : V668**
 
 
 
@@ -317,6 +317,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
    using the dedicated shortcut "wii-u games\cemu\cemu_x.y.z\delete all my cemu_x.y.z's settings.lnk"
 2) refuse the import the next run to use the factory settings from this version
 3) DISABLE ALL GFX PACKS and check if the issue persist
-4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
+4) DO NOT REPORT BUGS TO CEMU TEAM (official discord or subreddit), CONTACT ME FIRST
 
 Send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
+You can also now post your questions/issues on Cemu Underground (/r/CemuPiracy) using the dedicated flair !
