@@ -384,6 +384,7 @@ REM : main
     set "strSearched=!GAME_TITLE:TLOZ=!"
     set "strSearched=!GAME_TITLE:DKC=!"
     set "ARGS=https://wiki.cemu.info/index.php?search=!strSearched: =+!&title=Special%%3ASearch&go=Go"
+    call explorer !ARGS!
     pause
 
     :setCemuGfxFolder
