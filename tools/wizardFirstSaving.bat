@@ -121,7 +121,6 @@ REM : main
     echo - PROFILE_FILE    ^: !PROFILE_FILE!
     echo - SETTINGS_FOLDER ^: !SETTINGS_FOLDER!
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     REM : kill progress bar
     type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && (
         set "logFileTmp="!TMP:"=!\BatchFw_process_wizard.list""
@@ -136,7 +135,6 @@ REM : main
         del /F !logFileTmp! > NUL 2>&1
 
     )
-
     REM : basename of CEMU_FOLDER to get CEMU version (used to name shorcut)
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME="%%~nxa""
     set "CEMU_FOLDER_NAME=!CEMU_FOLDER_NAME:"=!"
@@ -379,8 +377,7 @@ REM : main
     set "ACTIVE_ADAPTER=NOT_FOUND"
 
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
-
-    if ["!ACTIVE_ADAPTER!] == ["NOT_FOUND"] goto:setCemuGfxFolder
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:setCemuGfxFolder
 
     choice /C yn /CS /N /M "Do you want to see if this game is reported in Cemu compatibility database? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:setCemuGfxFolder
