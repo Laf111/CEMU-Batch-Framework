@@ -204,9 +204,9 @@ REM : main
     set "endTitleId=NONE"
 
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install" ^| sort /R') do (
+    for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install" ^| sort /R') do (
 
-        set "codeFullPath="%%i""
+        set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check path
@@ -224,7 +224,7 @@ REM : main
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
-            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
+            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
 
             call:treatGameFolders
             

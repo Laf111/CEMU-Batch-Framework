@@ -196,9 +196,9 @@ REM : main
 
     set /A NB_GAMES_TREATED=0
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+    for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
-        set "codeFullPath="%%i""
+        set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check path
@@ -247,7 +247,7 @@ REM : main
                         goto:tryToMove
                     )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
-                    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116

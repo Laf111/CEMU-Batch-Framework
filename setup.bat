@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V19"
+    set "BFW_VERSION=V19-1"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -112,6 +112,12 @@ REM : main
     )
     echo Rights to launch vbs scripts  ^: OK
 
+    java -version > NUL 2>&1
+    if !ERRORLEVEL! EQU 0 (
+        echo Java is installed ^(optional^)  ^: OK
+    ) else (
+        echo Java is installed ^(optional^)  ^: WARNING
+    )
     echo ---------------------------------------------------------
     timeout /T 4 > NUL 2>&1
     cls
@@ -264,9 +270,9 @@ REM : main
     REM : scanning games folder (parent folder of _CEMU_Batch_Framework folder)
     set /A NB_GAMES_VALID=0
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+    for /F "delims=~" %%g in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
-        set "codeFullPath="%%i""
+        set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check path
@@ -316,7 +322,7 @@ REM : main
                         goto:tryToMove
                     )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
-                    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
@@ -1194,7 +1200,7 @@ REM : main
     echo     ^(n^)^: don^'t close^, i want to read history log first
     echo     ^(q^)^: close it now and quit
     echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice?: " "q, n" ANSWER 15
+    call:getUserInput "Enter your choice?: " "q,n" ANSWER 15
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -1209,6 +1215,7 @@ REM : main
         attrib +r *.bat > NUL 2>&1
         attrib +r !wiiTitlesDataBase! > NUL 2>&1
     )
+
     endlocal
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     goto:eof
@@ -1399,7 +1406,7 @@ REM : ------------------------------------------------------------------
             if %QUIET_MODE% EQU 0  wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
         )
 
-        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy/move mlc01 (updates, dlc, game saves) your game's folder? (y,n):"
+        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy^/move mlc01 ^(updates^, dlc^, game saves^) to games^' folders^? (^y^,n^)^:"
         if !ERRORLEVEL! EQU 2 goto:openCemuAFirstTime
 
         choice /C mc /CS /N /M "Move (m) or copy (c)?"
@@ -2102,11 +2109,11 @@ REM        call:log2HostFile !msg!
     REM : function to initialize log info for current host
     :initLogForHost
 
-        REM : create install log file for current host (if needed)
-
-        if exist !logFile! goto:eof
         set "logFolder="!BFW_LOGS:"=!""
         if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+
+        REM : create install log file for current host (if needed)
+        if exist !logFile! goto:eof
 
         REM : get last modified Host log (configuration)
         set "lastHostLog="NONE""

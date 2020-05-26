@@ -152,7 +152,6 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     echo.
     
     pushd !JNUSFolder!
-    set "jnusTool="!JNUSFolder:"=!\JNUSTool.jar""
     
     REM : compute sizes on disk JNUSFolder
     for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
@@ -312,24 +311,17 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     call:secureGameTitle !gameFolderName! gameFolderName
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
-    type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
+    type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
         call:getSize !utid! !str! Update uSize
     )
 
-    type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && (
+    type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
         call:getSize !dtid! !str! "DLC   " dSize
     )
 
-    echo.
-    echo Raw size of game^'s files ^(might be greater than real^) ^: !totalSizeInMb! Mb
-    echo.
-    echo Free Space left on !targetDrive! ^: !freeSpaceLeft! Mb
-    echo.
-    
     REM : compute size need on targetDrive
     call:getSizeOnDisk !totalSizeInMb! sizeNeededOnDiskInMb
     set /A "totalSpaceNeeded+=sizeNeededOnDiskInMb"
-    echo.
     echo.
     if !sizeNeededOnDiskInMb! LSS !freeSpaceLeft! (
         echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!freeSpaceLeft! Mb estimate left^)
@@ -516,12 +508,12 @@ REM : functions
         )
         echo Game   size = !gSize! Mb >> !gamelogFile!
 
-        type !titleKeysDataBase! | find "!utid!" > NUL 2>&1 && (
+        type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
             call:getSize !utid! !str! Update uSize
             echo Update size = !uSize! Mb >> !gamelogFile!
         )
 
-        type !titleKeysDataBase! | find "!dtid!" > NUL 2>&1 && (
+        type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
             call:getSize !dtid! !str! "DLC   " dSize
             echo DLC    size = !dSize! Mb >> !gamelogFile!
         )

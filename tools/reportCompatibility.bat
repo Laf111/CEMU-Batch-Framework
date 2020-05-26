@@ -220,10 +220,13 @@ REM : main
     )
 
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_ComputerSystem get TotalPhysicalMemory/value 2^>NUL ^| find "="') do (
-        set "RAM=%%i"
+        set "ramInBytes=%%i"
     )
-    set "RAM=%RAM: =%"
-    set "RAM=%RAM:~,-9%Go RAM"
+    set "ramInBytes=%ramInBytes: =%"
+    set /A "ramInKb=%ramInBytes:~,-3%"
+    set /A "ramInMb=ramInKb/1024"
+    set /A "ramInGb=ramInMb/1024"
+    set "RAM=!ramInGb!Go RAM"
 
     REM : fill additionnals notes
     set "ADD_NOTES="

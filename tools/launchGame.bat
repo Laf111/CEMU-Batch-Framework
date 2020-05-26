@@ -410,9 +410,14 @@ REM : main
     if !usePbFlag! EQU 1 call:setProgressBar 12 16 "pre processing" "checking game graphic packs availability"
 
     REM : update Game's Graphic Packs
-    set "ugp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
-    wscript /nologo !StartHidden! !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile!
-    echo !ugp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile! >> !batchFwLog!
+    set "uggp="!BFW_TOOLS_PATH:"=!\updateGamesGraphicPacks.bat""
+    wscript /nologo !StartHidden! !uggp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile!
+    echo !uggp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile! >> !batchFwLog!
+
+    REM : check if a Game's update is available
+    set "ugp="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
+    wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! !endTitleId!
+    echo !ugp! !GAME_FOLDER_PATH! !endTitleId! >> !batchFwLog!
 
     REM : create shortcut to logFile
     call:createBatchFwLogShorcut
@@ -2047,6 +2052,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : set onlines files for user if an active connection was found
         if !wizardLaunched! EQU 0 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
 
+        REM : if needed, create a game compatibility shorcut
+        call:createGameCompatibilityShorcut
+
         REM : if needed, create a game profile shorcut
         call:createGameProfileShorcut
 
@@ -2424,7 +2432,46 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         pushd !BFW_TOOLS_PATH!
 
     goto:eof
+    REM : ------------------------------------------------------------------
 
+    :createGameCompatibilityShorcut
+
+        REM : add a shortcut in Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Compatibility to edit game's compatibility
+        REM : shortcut to game's compatibility
+        set "compatShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Games Compatibility\!GAME_TITLE!.lnk""
+        if exist !compatShortcut! goto:eof
+
+        REM : temporary vbs file for creating a windows shortcut
+        set "TMP_VBS_FILE="!TEMP!\CEMU_Compatibility_!DATE!.vbs""
+
+        REM : create a shortcut to game's compatibility
+        set "gcsf="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Compatibility""
+        if not exist !gcsf! mkdir !gcsf! > NUL 2>&1
+
+        set "strSearched=!GAME_TITLE:TLOZ=!"
+        set "strSearched=!GAME_TITLE:DKC=!"
+        set "ARGS=https://wiki.cemu.info/index.php?search=!strSearched: =+!&title=Special%%3ASearch&go=Go"
+
+        set "LINK_DESCRIPTION="Get CEMU's compatibility for !GAME_TITLE!""
+
+        REM : create object
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
+        echo sLinkFile = !compatShortcut! >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+        echo oLink^.TargetPath = "!ARGS!" >> !TMP_VBS_FILE!
+
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !CEMU_FOLDER! >> !TMP_VBS_FILE!
+        echo oLink^.Save >> !TMP_VBS_FILE!
+
+        REM : running VBS file
+        cscript /nologo !TMP_VBS_FILE!
+
+        REM del /F  !TMP_VBS_FILE!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :createGameProfileShorcut
 
@@ -2462,6 +2509,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         del /F  !TMP_VBS_FILE!
 
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :createExampleIniShorcut
 
@@ -2500,6 +2548,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         del /F  !TMP_VBS_FILE!
 
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :createLogShorcut
 
@@ -2534,7 +2583,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         del /F  !TMP_VBS_FILE!
 
     goto:eof
-
+    REM : ------------------------------------------------------------------
 
     :createBatchFwLogShorcut
 
@@ -2571,6 +2620,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "prefix=%GAME_FOLDER_PATH:"=%\Cemu\settings\"
         set "%1=!css:%prefix%=!"
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :saveCemuOptions
 
@@ -2642,7 +2692,6 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         
     goto:eof
     REM : ------------------------------------------------------------------
-
 
     REM : lower case
     :lowerCase

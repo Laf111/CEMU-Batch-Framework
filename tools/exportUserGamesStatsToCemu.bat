@@ -160,9 +160,9 @@ REM : ------------------------------------------------------------------
     @echo.
 
     REM : searching for code folder to find in only one rpx file (the bigger one)
-    for /F "delims=~" %%i in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+    for /F "delims=~" %%g in ('dir /B /S /A:D code 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
-        set "codeFullPath="%%i""
+        set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check folder
@@ -179,7 +179,7 @@ REM : ------------------------------------------------------------------
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (GAME_TITLE)
-            for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
             call:exportStats
 
         ) else (

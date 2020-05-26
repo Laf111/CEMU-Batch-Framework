@@ -375,6 +375,21 @@ REM : main
 
     :backupDefaultSettings
 
+    REM : check if an internet connexion is active
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+
+    if ["!ACTIVE_ADAPTER!] == ["NOT_FOUND"] goto:setCemuGfxFolder
+
+    choice /C yn /CS /N /M "Do you want to see if this game is reported in Cemu compatibility database? (y, n) : "
+    if !ERRORLEVEL! EQU 2 goto:setCemuGfxFolder
+    set "strSearched=!GAME_TITLE:TLOZ=!"
+    set "strSearched=!GAME_TITLE:DKC=!"
+    set "ARGS=https://wiki.cemu.info/index.php?search=!strSearched: =+!&title=Special%%3ASearch&go=Go"
+    pause
+
+    :setCemuGfxFolder
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
     if not exist !GAME_GP_FOLDER! (
         mkdir !GAME_GP_FOLDER! > NUL 2>&1
@@ -564,10 +579,6 @@ REM : main
     REM : check CEMU options (and controllers settings)
 
     REM : set online files
-    REM : check if an internet connexion is active
-    set "ACTIVE_ADAPTER=NOT_FOUND"
-
-    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
     REM : account file for current user
     set "accountFile="NONE""
 

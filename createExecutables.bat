@@ -581,9 +581,9 @@ REM    call:log2HostFile !msg!
     set /A "NB_OUTPUTS=0"
 
     REM : loop on game's code folders found
-    for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+    for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
-        set "codeFullPath="%%i""
+        set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
         REM : check path
@@ -632,7 +632,7 @@ REM    call:log2HostFile !msg!
                         goto:tryToMove
                     )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
-                    for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
@@ -995,6 +995,8 @@ REM : functions
         call:createFolder !subfolder!
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Games Compatibility Reports""
         call:createFolder !subfolder!
+        set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Games Compatibility""
+        call:createFolder !subfolder!
 
         set "subfolder="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME:"=!""
         call:createFolder !subfolder!
@@ -1219,6 +1221,16 @@ REM
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to updateGames.bat (if needed)
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update Games^.lnk""
+        set "LINK_DESCRIPTION="Update Games using JNUSTool""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\updateGames.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\updateGames.ico""
+        if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to updateGames^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        
         REM : create a shortcut to progressBar.bat (if needed)
         set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar^.lnk""
         set "LINK_DESCRIPTION="Link to progressBar""

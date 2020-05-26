@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V19"
+    set "BFW_NEXT_VERSION=V19-1"
 
     set "THIS_SCRIPT=%~0"
 
@@ -94,7 +94,7 @@ REM : main
     set "fixBatFilesLog="!BFW_PATH:"=!\logs\fixBatFiles.log""
 
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGame" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameUpdateAvailability" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -158,6 +158,14 @@ REM : main
     if !result! NEQ 5332114 (
         echo ERROR^: 1234x4321 ^<^> 5332114 ^(=!result!^) the file format is not ANSI anymore ^?
     )
+
+    set "filePath="!BFW_TOOLS_PATH:"=!\updateGames.bat""
+    echo ^> tools/updateGames.bat
+    attrib +R !filePath! > NUL 2>&1
+
+    set "filePath="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
+    echo ^> tools/checkGameUpdateAvailability.bat
+    attrib +R !filePath! > NUL 2>&1    
     echo.
     echo =========================================================
     echo done

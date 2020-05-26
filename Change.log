@@ -22,6 +22,20 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+26/05/2020 V19-1 :
+fix : RAM amount conversion to GB in reports
+fix : choice error message (without consequence) at the end of setup.bat
+add : shortcut in "Wii-U Games\CEMU" to access directly to http://wiki.cemu.info/wiki/ for each games
+      installed
+add : the possibility to display CEMU's compatibility for a game when collecting settings on 
+      the first run (wizardFirstSaving.bat)
+add : check in background if a new game's update if available when launching a game
+      (outdated update can result in Wii-U's error 106-0502 when going online)
+      (java needs to be installed and check only if an active netwok connexion is found)
+add : update games feature, to update your games after checking that : 
+      - CEMU is not already running
+      - if a 60FPS or a FPS++ packs exist and handle the new version
+
 08/05/2020 V19 :
 fix : redirect stderr to NUL on xml operations
 fix : reports not created (regression)

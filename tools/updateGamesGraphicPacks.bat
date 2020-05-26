@@ -429,8 +429,9 @@ REM : functions
         if not exist !newUpdateMetaXml! if not exist !oldUpdateMetaXml! (
 
             if exist !oldDlcFolder! (
+
                 set /A "attempt=1"
-                :tryDelete
+                :tryToMoveDlc
                 set "tmpFolder="!oldDlcFolder:"=!_tmp""
                 move /Y !oldDlcFolder! !tmpFolder! >  NUL 2>&1
                 if !ERRORLEVEL! NEQ 0 (
@@ -438,14 +439,14 @@ REM : functions
                     if !attempt! EQU 1 (
                         cscript /nologo !MessageBox! "Deleting !oldUpdateFolder:"=! failed^, close any program that could use this location" 4112
                         set /A "attempt+=1"
-                        goto:tryDelete
+                        goto:tryToMoveDlc
                     )
 
                     REM : fail to delete the folder
                     call:fillOwnerShipPatch !oldUpdateFolder! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Deleting still failed^, take the ownership on !oldUpdateFolder:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
-                    if !ERRORLEVEL! EQU 6 goto:tryDelete
+                    if !ERRORLEVEL! EQU 6 goto:tryToMoveDlc
                 ) else (
                     rmdir /Q /S !tmpFolder! > NUl 2>&1
                 )
@@ -455,7 +456,7 @@ REM : functions
         if not exist !oldUpdateMetaXml! if not exist !newUpdateMetaXml! goto:eof
 
         set /A "attempt=1"
-        :tryToMove
+        :tryToMoveFolders
         REM : check if newUpdateFolder exist
         if not exist !newUpdateMetaXml! (
 
@@ -497,14 +498,14 @@ REM : functions
                 if !attempt! EQU 1 (
                     cscript /nologo !MessageBox! "Moving update^/DLC to the new locations failed^, close any program that could use !MLC01_FOLDER_PATH:"=!" 4112
                     set /A "attempt+=1"
-                    goto:tryToMove
+                    goto:tryToMoveFolders
                 )
             
                 REM : fail to move folder
                 call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" patch
 
                 cscript /nologo !MessageBox! "Move still failed^, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
-                if !ERRORLEVEL! EQU 6 goto:tryToMove
+                if !ERRORLEVEL! EQU 6 goto:tryToMoveFolders
             )
         )
 

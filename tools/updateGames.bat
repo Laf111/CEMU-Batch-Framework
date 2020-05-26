@@ -1,0 +1,752 @@
+@echo off
+endlocal
+setlocal EnableExtensions
+REM : ------------------------------------------------------------------
+REM : main
+
+    setlocal EnableDelayedExpansion
+
+    color 4F
+
+    set "THIS_SCRIPT=%~0"
+
+    title Search^, download and install games^' updates
+    REM : directory of this script
+    set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
+
+    for %%a in (!BFW_TOOLS_PATH!) do set "parentFolder="%%~dpa""
+    set "BFW_PATH=!parentFolder:~0,-2!""
+    for %%a in (!BFW_PATH!) do set "parentFolder="%%~dpa""
+    for %%a in (!BFW_PATH!) do set "drive=%%~da"
+    set "GAMES_FOLDER=!parentFolder!"
+    if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
+
+    REM : BFW_GP_FOLDER
+    set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "fnrLogUg="!BFW_PATH:"=!\logs\fnr_updateGames.log""
+
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "duLogFile="!BFW_LOGS:"=!\du.log""
+
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
+    set "du="!BFW_RESOURCES_PATH:"=!\du.exe""
+    set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
+
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "downloadTid="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
+    set "multiplyLongInteger="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
+    set "checkGameUpdateAvailability="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
+
+    set "notePad="%windir%\System32\notepad.exe""
+    set "explorer="%windir%\explorer.exe""
+
+    REM : output folder
+    set "targetFolder=!GAMES_FOLDER!"
+
+    REM : search if this script is not already running (nb of search results)
+    set /A "nbI=0"
+
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "updateGames.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
+        if %nbI% GEQ 2 (
+            echo "ERROR^: This script is already running ^!"
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "updateGames.bat" | find /I /V "find"
+            pause
+            exit 50
+        )
+    )
+
+    REM : exit in case of no JNUSFolder folder exists
+    if not exist !JNUSFolder! (
+        echo ERROR^: !JNUSFolder! not found
+        exit /b 80
+    )
+
+    REM : set current char codeset
+    call:setCharSet
+
+    REM : search if the script downloadGames is not already running (nb of search results)
+    set /A "nbI=0"
+
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "downloadGames.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
+        if %nbI% GEQ 2 (
+            echo "ERROR^: The script downloadGames is already running ^!"
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "downloadGames.bat" | find /I /V "find"
+            timeout /t 4 > NUL 2>&1
+            exit /b 50
+        )
+    )
+
+    REM : check if java is installed
+    java -version > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 (
+        echo ERROR^: java is not installed^, exiting
+        pause
+        exit 50
+    )
+
+    REM : check if an active network connexion is available
+    set "ACTIVE_ADAPTER=NOT_FOUND"
+    for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
+    if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
+        echo ERROR^: no active network connection found^, exiting
+        pause
+        exit 51
+    )
+
+    REM : set current char codeset
+    call:setCharSet
+
+    set "config="!JNUSFolder:"=!\config""
+    type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
+        echo To use this feature^, obviously you^'ll have to setup JNUSTool
+        echo and get the files requiered by yourself^.
+        echo.
+        echo First you need to find the ^'Wii U common key^' with google
+        echo It should be 32 chars long and start with ^'D7^'^.
+        echo.
+
+        echo Then replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
+        echo and save^.
+        echo.
+        timeout /T 3 > NUL 2>&1
+        wscript /nologo !StartWait! !notePad! !config!
+    )
+
+    set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
+
+    if not exist !titleKeysDataBase! call:createKeysFile
+
+    if not exist !titleKeysDataBase! (
+        echo ERROR^: no keys file found^, exiting
+        pause
+        exit 52
+    )
+
+    REM : pattern used to evaluate size of games : set always extracted size since size of some cryted titles are wrong
+    set "str="Total Size of Decrypted Files""
+
+    REM : compute sizes on disk JNUSFolder
+    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+
+    REM : cd to GAMES_FOLDER
+    pushd !GAMES_FOLDER!
+
+    set /A "NB_UPDATE_TREATED=0"
+
+    REM : loop on game's code folders found
+    for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+
+        set "codeFullPath="%%g""
+        set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
+
+        call:treatGame
+    )
+
+    echo =========================================================
+
+    echo Updated !NB_UPDATE_TREATED! games
+
+    pause
+    
+    endlocal
+    exit 0
+
+goto:eof
+
+REM : ------------------------------------------------------------------
+REM : functions
+
+    :treatGame
+    
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        set "RPX_FILE="project.rpx""
+	    REM : get bigger rpx file present under game folder
+        if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
+        )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
+
+        REM : if no rpx file found, ignore GAME
+        if [!RPX_FILE!] == ["NONE"] goto:eof
+
+        REM : GAME_FILE_PATH path (rpx file)
+        set "GAME_FILE_PATH="!GAME_FOLDER_PATH:"=!\code\!RPX_FILE:"=!""
+
+        REM : basename of GAME FOLDER PATH (used to name shorcut)
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+
+        set "updatePath="NOT_FOUND""
+        set "endTitleId=NOT_FOUND"
+        set "updateVersion=NOT_FOUND"
+        set /A "updateSize=0"
+
+        REM : check if game need to be updated
+        set "logUpdateGames="!BFW_LOGS:"=!\updateGames.log""
+        del /F !logUpdateGames! > NUL 2>&1
+
+        call !checkGameUpdateAvailability! !GAME_FOLDER_PATH! > !logUpdateGames!
+        set /A "cr=%ERRORLEVEL%"
+
+        if %cr% NEQ 1 goto:eof
+
+        for /F "delims=~? tokens=1-3" %%i in ('type !logUpdateGames! 2^>NUL') do (
+            set "updatePath=%%i"
+            set "endTitleId=%%j"
+            set /A "updateSize=%%k"
+        )
+        cls
+        echo =========================================================
+        echo - Update !GAME_TITLE! with v%updateVersion% ^(%updateSize% MB^)
+        echo ---------------------------------------------------------
+
+        REM : no new update found, exit function
+        if %updateSize% EQU 0 goto:eof
+
+        REM : Get the version of the update
+        for /F "delims=~" %%i in (!updatePath!) do set "folder=%%~nxi"
+        set "updateVersion=!folder:v=!"
+
+        for %%a in (!updatePath!) do set "parentFolder="%%~dpa""
+        set "updatesFolder=!parentFolder:~0,-2!""
+        for %%a in (!updatesFolder!) do set "parentFolder="%%~dpa""
+        set "gamesFolder=!parentFolder:~0,-2!""
+        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+
+        REM : check if a 60FPS or FPS++ pack exist
+        del /F !fnrLogUg! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %endTitleId% --logFile !fnrLogUg!
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUg! ^| find "File:" ^| find /I "FPS++"') do (
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            REM : patches.txt
+            set "patchesFile=!rulesFile:rules=patches!"
+            type !patchesFile! | find /I %updateVersion% > NUL 2>&1 && goto:patchesOK
+            REM : warn user
+            choice /C yn /N /M "Found a FPS++ GFX pack that not reference this version, continue (y = might invalidate the FPS++ packs/n)? : "
+            if !ERRORLEVEL! EQU 2 goto:eof
+
+        )
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUg! ^| find "File:" ^| find /I "60FPS"') do (
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            REM : patches.txt
+            set "patchesFile=!rulesFile:rules=patches!"
+            type !patchesFile! | find /I %updateVersion% > NUL 2>&1 && goto:patchesOK
+            REM : warn user
+            choice /C yn /N /M "Found a 60FPS GFX pack that not reference this version, continue (y = might invalidate the 60FPS packs/n)? : "
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
+
+        :patchesOK
+
+        pushd !JNUSFolder!
+        set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
+        for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
+            set "fsbStr=%%i"
+            set /A "clusterSizeInB=%%j"
+        )
+
+        REM : free space in Kb
+        set /A "fskb=!fsbStr:~0,-3!"
+        set /A "freeSpaceLeft=fskb/1024"
+
+        REM : compute size need on targetDrive
+        call:getSizeOnDisk !updateSize! sizeNeededOnDiskInMb
+        set /A "totalSpaceNeeded=sizeNeededOnDiskInMb"
+
+        echo.
+        if !totalSpaceNeeded! LSS !freeSpaceLeft! (
+            echo At least !totalSpaceNeeded! Mb are requiered on disk !targetDrive! ^(!freeSpaceLeft! Mb estimate left^)
+
+        ) else (
+            echo ERROR ^: not enought space left on !targetDrive!
+            echo Needed !totalSpaceNeeded! ^/ still available !freeSpaceLeft! Mb
+            echo Ignoring this game
+            goto:eof
+        )
+
+        choice /C yn /N /M "Download this update now (y/n)? : "
+        if !ERRORLEVEL! EQU 2 goto:eof
+
+        echo.
+        echo If you want to pause the current tranfert or if you get errors during the transfert^,
+        echo close this windows then the child cmd console in your task bar
+        echo and relaunch this script to complete the download^.
+        echo.
+
+        REM : download update
+        call:downloadUpdate
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :downloadUpdate
+
+        set /A "totalSizeInMb=%updateSize%"
+
+        REM : remove 10Mb to totalSizeInMb (threshold)
+        set /A "threshold=!totalSizeInMb!-9"
+
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+        REM : starting DATE
+
+        echo ---------------------------------------------------------------
+        echo Starting at !date!
+        echo.
+
+        set /A "progression=0"
+
+        :initDownload
+
+        REM : download the game
+        call:download
+
+        REM : get the JNUSTools folder size
+        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+        REM : do not continue if not complete (in case of user close downloading windows before this windows)
+        set /A "progression=(!sizeDl!*100)/!totalSizeInMb!"
+
+        if !progression! LSS 85 (
+            echo ---------------------------------------------------------------
+            echo Transfert seems to be incomplete^, relaunching^.^.^.
+            echo.
+            goto:initDownload
+        )
+
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+
+        REM : ending DATE
+        echo.
+        echo Ending at !date!
+        echo ===============================================================
+
+        REM : install the update
+        set "targetUpdatePath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endTitleId!""
+        set "tmpUpdatePath=!updatePath!"
+
+        set /A "attempt=1"
+        if not exist !targetUpdatePath! goto:tryToMoveNewUpdate
+
+        set "tmpUpdatePath="!targetUpdatePath:"=!_tmp""
+
+        :tryToMove
+
+        move /Y !updatePath! !tmpUpdatePath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving !tmpUpdatePath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMove
+            )
+            REM : basename of tmpUpdatePath to get folder's name
+            for /F "delims=~" %%i in (!tmpUpdatePath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !tmpUpdatePath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Move still failed^, take the ownership on !tmpUpdatePath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMove
+
+            REM : else skipping
+            echo ERROR^: failed to move !updatePath! to !tmpUpdatePath!^, skipping
+            goto:eof
+        )
+
+        REM : move old update
+        set "oldUpdatePath="!targetUpdatePath:"=!_old""
+
+        REM : move update folder (targetUpdatePath) to oldUpdatePath
+        set /A "attempt=1"
+        :tryToMoveOldUpdate
+
+        move /Y !targetUpdatePath! !oldUpdatePath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMoveOldUpdate
+            )
+            REM : basename of targetUpdatePath
+            for /F "delims=~" %%i in (!targetUpdatePath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !targetUpdatePath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveOldUpdate
+
+            REM : else skipping
+            echo ERROR^: failed to move !targetUpdatePath! to !oldUpdatePath!^, skipping and leave !tmpUpdatePath!
+            goto:eof
+
+        )
+
+        REM : move update folder (tmpUpdatePath) to targetUpdatePath
+        set /A "attempt=1"
+        :tryToMoveNewUpdate
+
+        move /Y !tmpUpdatePath! !targetUpdatePath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMoveNewUpdate
+            )
+            REM : basename of targetUpdatePath
+            for /F "delims=~" %%i in (!targetUpdatePath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !targetUpdatePath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveNewUpdate
+
+            REM : else skipping
+            echo ERROR^: failed to move !tmpUpdatePath! to !targetUpdatePath!^, skipping
+            goto:eof
+        )
+        if exist !oldUpdatePath! rmdir /Q /S !oldUpdatePath!
+        set /A "NB_UPDATE_TREATED+=1"
+        timeout /T 3 > NUL 2>&1
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :download
+
+        set "utid=0005000e!endTitleId!"
+
+        set "key=NOT_FOUND"
+        for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!utid!" 2^>NUL') do set "key=%%b"
+
+        if ["!key!"] == ["NOT_FOUND"] (
+            echo ERROR^: why key is not found ^?
+            pause
+            goto:eof
+        )
+        wscript /nologo !StartMinimized! !downloadTid! !JNUSFolder! !utid! 1 !key!
+        call:monitorTransfert !threshold!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : compute size on disk
+    REM : note that the estimatation here is lower than the real size
+    REM : and will be used as thershold
+    :getSizeOnDisk
+
+        set "sizeInMb=%~1"
+
+        for /f %%b in ('powershell !sizeInMb!*1024*1024') do set "sizeInB=%%b"
+
+        for /f %%b in ('powershell !sizeInB!/!clusterSizeInB!') do set "nbClustersNeeded=%%b"
+
+        for /f %%b in ('powershell ^(!nbClustersNeeded!+1^)*!clusterSizeInB!') do set "sizeOnDiskNeededinB=%%b"
+
+        echo !sizeOnDiskNeededinB! | find "," > NUL 2>&1 && for /F "delims=, tokens=1" %%b in ("!sizeOnDiskNeededinB!") do set /A "sizeOnDiskNeededinB=%%b"
+        echo !sizeOnDiskNeededinB! | find "." > NUL 2>&1 && for /F "delims=. tokens=1" %%b in ("!sizeOnDiskNeededinB!") do set /A "sizeOnDiskNeededinB=%%b"
+
+        set "sizeOnDiskNeededinMb=!sizeOnDiskNeededinB:~0,-6!"
+
+        set /A "%2=!sizeOnDiskNeededinMb!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :endAllTransferts
+
+        for /F "delims=~" %%p in ('wmic path Win32_Process where ^"CommandLine like ^'%%downloadTitleId%%^'^" get ProcessID^,commandline') do (
+            set "line=%%p"
+            set "line2=!line:""="!"
+            set "pid=NOT_FOUND"
+            echo !line2! | find /V "wmic" | find /V "ProcessID"  > NUL 2>&1 && for %%d in (!line2!) do set "pid=%%d"
+            if not ["!pid!"] == ["NOT_FOUND"] taskkill /F /pid !pid! /T > NUL 2>&1
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :fillOwnerShipPatch
+        set "folder=%1"
+        set "title=%2"
+
+        set "patch="%USERPROFILE:"=%\Desktop\BFW_GetOwnerShip_!title:"=!.bat""
+        set "WIIU_GAMES_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
+        if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
+
+            set "patchFolder="!WIIU_GAMES_FOLDER:"=!\OwnerShip Patchs""
+            if not exist !patchFolder! mkdir !patchFolder! > NUL 2>&1
+            set "patch="!patchFolder:"=!\!title:"=!.bat""
+        )
+        set "%3=!patch!"
+
+        echo echo off > !patch!
+        echo REM ^: RUN THIS SCRIPT AS ADMINISTRATOR >> !patch!
+
+        type !patch! | find /I !folder! > NUL 2>&1 && goto:eof
+
+        echo echo ------------------------------------------------------->> !patch!
+        echo echo Get the ownership of !folder! >> !patch!
+        echo echo ------------------------------------------------------->> !patch!
+        echo takeown /F !folder! /R /SKIPSL >> !patch!
+        echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
+        echo pause >> !patch!
+        echo del /F %%0 >> !patch!
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :monitorTransfert
+
+        set /A "t=%~1"
+
+        set /A "previous=0"
+        set /A "nb2sec=0"
+        set /A "finalize=0"
+       
+        REM : wait until all transferts are done
+        :waitingLoop
+        timeout /T 5 > NUL 2>&1
+        set /A "nb5sec+=1"
+
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+
+            if !finalize! EQU 0 (
+                REM : get the JNUSTools folder size
+                call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+                REM : progression
+                set /A "curentSize=!sizeDl!
+                if !curentSize! LSS !t! (
+
+                    if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+
+                    set /A "mod=nb5sec%%20"
+                    if !mod! EQU 0 if !previous! EQU !curentSize! (
+                        echo.
+                        echo Inactivity detected^! ^, closing current transferts
+                        echo.
+                        REM : exit, stop transferts, they will be relaunched
+                        call:endAllTransferts
+                        goto:eof
+
+                    )
+                    set /A "previous=!curentSize!"
+
+                ) else (
+
+
+                    if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                    title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+
+                    echo Finalizing^.^.^.
+                    set /A "finalize=1"
+                    goto:waitingLoop
+                )
+
+                title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+        
+                goto:waitingLoop
+            ) else (
+                if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
+                title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+
+                goto:waitingLoop
+            )
+        )
+        title Downloading update v%updateVersion% of !GAME_TITLE! ^: 100%%
+
+        REM : get the initialGameFolderName folder size
+        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+        REM : progression
+        set /A "curentSize=!sizeDl!
+
+        echo Downloaded !GAME_TITLE!^'s update v%updateVersion% successfully
+        echo.
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :getSizeInMb
+
+        set "folder="%~1""
+        set "smb=-1"
+
+        !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
+
+        set "sizeRead=-1"
+        for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
+
+        if ["!sizeRead!"] == ["-1"] goto:endFct
+        if ["!sizeRead!"] == ["0"] set "smb=0" & goto:endFct
+
+        REM : 1/(1024^2)=0.00000095367431640625
+        for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
+        set /A "lr=0"
+        call:strLength !result! lr
+
+        REM : size in Mb
+        if !lr! GTR 20 (
+            set /A "smb=!result:~0,-20!"
+        ) else (
+            set /A "smb=0"
+        )
+
+        :endFct
+
+        set "%2=!smb!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : ------------------------------------------------------------------
+    :getFolderSizeInMb
+
+        set "folder="%~1""
+        set /A "sizeofAll=0"
+
+        call:getSizeInMb !folder! sizeofAll
+
+        set "%2=!sizeofAll!"
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : fetch size of download
+    :getSize
+        set "tid=%~1"
+        set "pat=%~2"
+        set "type=%~3"
+        set "%4=0"
+
+        set "key=NOT_FOUND"
+        for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!tid!" 2^>NUL') do set "key=%%b"
+
+        if ["!key!"] == ["NOT_FOUND"] (
+            echo ERROR^: why key is not found ^?
+            pause
+            goto:eof
+        )
+
+        set "logMetaFile="!BFW_LOGS:"=!\jnust_Meta.log""
+        del /F !logMetaFile! > NUL 2>&1
+        java -jar JNUSTool.jar !tid! !key! -file /meta/meta.xml > !logMetaFile! 2>&1
+
+        set "strRead="
+        for /F "delims=~: tokens=2" %%i in ('type !logMetaFile! ^| find "!pat!" 2^>NUL') do set "strRead=%%i"
+
+        set "strSize="
+        for /F "tokens=1" %%i in ("!strRead!") do set "strSize=%%i"
+
+        set /A "intSize=0"
+        for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
+
+        set "%4=!intSize!"
+        set /A "totalSizeInMb=!totalSizeInMb!+!intSize!"
+
+        echo !type! size = !strSize! Mb
+
+        del /F !logMetaFile! > NUL 2>&1
+    goto:eof
+
+    REM : create keys file
+    :createKeysFile
+
+        echo You need to create the title keys file^.
+        echo.
+        echo Use Chrome browser to have less hand work to do^.
+        echo Google to find ^'Open Source WiiU Title Key^'
+        echo Select and paste all in notepad
+        echo.
+        timeout /T 4 > NUL 2>&1
+        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
+        echo.
+        echo.
+        echo Save and relaunch this script when done^.
+        pause
+
+        exit 80
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : function to get and set char set code for current host
+    :setCharSet
+
+        REM : get charset code for current HOST
+        set "CHARSET=NOT_FOUND"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value 2^>NUL ^| find "="') do set "CHARSET=%%f"
+
+        if ["%CHARSET%"] == ["NOT_FOUND"] (
+            echo Host char codeSet not found in %0 ^?
+            pause
+            exit /b 9
+        )
+        REM : set char code set, output to host log file
+
+        chcp %CHARSET% > NUL 2>&1
+        call:log2HostFile "charCodeSet=%CHARSET%"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : function to log info for current host
+    :log2HostFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        REM : build a relative path in case of software is installed also in games folders
+        echo msg=!msg! | find %GAMES_FOLDER% > NUL 2>&1 && set "msg=!msg:%GAMES_FOLDER:"=%=%%GAMES_FOLDER:"=%%!"
+
+        if not exist !logFile! (
+            set "logFolder="!BFW_LOGS:"=!""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2HostFile
+        )
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
+
+       :logMsg2HostFile
+        echo !msg!>> !logFile!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
