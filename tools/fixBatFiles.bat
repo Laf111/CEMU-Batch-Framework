@@ -94,7 +94,7 @@ REM : main
     set "fixBatFilesLog="!BFW_PATH:"=!\logs\fixBatFiles.log""
 
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameUpdateAvailability" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -163,8 +163,8 @@ REM : main
     echo ^> tools/updateGames.bat
     attrib +R !filePath! > NUL 2>&1
 
-    set "filePath="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
-    echo ^> tools/checkGameUpdateAvailability.bat
+    set "filePath="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
+    echo ^> tools/checkGameContentAvailability.bat
     attrib +R !filePath! > NUL 2>&1    
     echo.
     echo =========================================================

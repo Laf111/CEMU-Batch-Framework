@@ -25,6 +25,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 26/05/2020 V19-1 :
 fix : RAM amount conversion to GB in reports
 fix : choice error message (without consequence) at the end of setup.bat
+fix : fail to downloading content with size < 1MB
 add : shortcut in "Wii-U Games\CEMU" to access directly to http://wiki.cemu.info/wiki/ for each games
       installed
 add : the possibility to display CEMU's compatibility for a game when collecting settings on 

@@ -46,7 +46,7 @@ REM : main
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "downloadTid="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
     set "multiplyLongInteger="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
-    set "checkGameUpdateAvailability="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
+    set "checkGameContentAvailability="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
 
     set "notePad="%windir%\System32\notepad.exe""
     set "explorer="%windir%\explorer.exe""
@@ -67,6 +67,19 @@ REM : main
         )
     )
 
+    REM : search if the script downloadGames is not already running (nb of search results)
+    set /A "nbI=0"
+
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "downloadGames.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% NEQ 0 (
+        if %nbI% GEQ 2 (
+            echo "ERROR^: The script downloadGames is already running ^!"
+            wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "downloadGames.bat" | find /I /V "find"
+            timeout /t 2 > NUL 2>&1
+            exit /b 50
+        )
+    )
+    
     REM : exit in case of no JNUSFolder folder exists
     if not exist !JNUSFolder! (
         echo ERROR^: !JNUSFolder! not found
@@ -75,6 +88,18 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : check if cemu if not already running
+    set /A "nbI=0"
+
+    for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" /C') do set /A "nbI=%%j"
+    if %nbI% NEQ 0 (
+        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^! ^(nbi=%nbI%^)^. If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!" 4112
+        echo "ERROR^: CEMU is already running ^!"
+        tasklist | find /I "cemu.exe" | find /I /V "find"
+        timeout /t 4 > NUL 2>&1
+        exit 50
+    )
 
     REM : search if the script downloadGames is not already running (nb of search results)
     set /A "nbI=0"
@@ -144,21 +169,33 @@ REM : main
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
-    set /A "NB_UPDATE_TREATED=0"
+    echo =========================================================
+    echo Update my games ^(get and install last updates and DLC^)
+    echo =========================================================
+    echo.
 
+    set /A "askUser=1"
+    choice /C yn /N /M "Download all contents WIHTOUT confirmation (y/n : check free space left between each downloads)? : "
+    if !ERRORLEVEL! EQU 1 set /A "askUser=0"
+    cls
+    
+    set /A "NB_UPDATE_TREATED=0"
+    set /A "NB_DLC_TREATED=0"
+    
     REM : loop on game's code folders found
     for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
         set "codeFullPath="%%g""
         set "GAME_FOLDER_PATH=!codeFullPath:\code=!"
 
-        call:treatGame
+        call:treatUpdate
+        call:treatDlc
     )
 
-    echo =========================================================
-
     echo Updated !NB_UPDATE_TREATED! games
-
+    echo Installed !NB_DLC_TREATED! DLC
+    echo.
+    
     pause
     
     endlocal
@@ -169,7 +206,7 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :treatGame
+    :treatUpdate
     
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
@@ -200,7 +237,7 @@ REM : functions
         set "logUpdateGames="!BFW_LOGS:"=!\updateGames.log""
         del /F !logUpdateGames! > NUL 2>&1
 
-        call !checkGameUpdateAvailability! !GAME_FOLDER_PATH! > !logUpdateGames!
+        call !checkGameContentAvailability! !GAME_FOLDER_PATH! 0005000e > !logUpdateGames!
         set /A "cr=%ERRORLEVEL%"
 
         if %cr% NEQ 1 goto:eof
@@ -210,17 +247,16 @@ REM : functions
             set "endTitleId=%%j"
             set /A "updateSize=%%k"
         )
-        cls
-        echo =========================================================
-        echo - Update !GAME_TITLE! with v%updateVersion% ^(%updateSize% MB^)
-        echo ---------------------------------------------------------
-
         REM : no new update found, exit function
         if %updateSize% EQU 0 goto:eof
 
         REM : Get the version of the update
         for /F "delims=~" %%i in (!updatePath!) do set "folder=%%~nxi"
         set "updateVersion=!folder:v=!"
+        cls
+        echo =========================================================
+        echo - Update !GAME_TITLE! with v%updateVersion% ^(%updateSize% MB^)
+        echo ---------------------------------------------------------
 
         for %%a in (!updatePath!) do set "parentFolder="%%~dpa""
         set "updatesFolder=!parentFolder:~0,-2!""
@@ -283,9 +319,11 @@ REM : functions
             goto:eof
         )
 
-        choice /C yn /N /M "Download this update now (y/n)? : "
-        if !ERRORLEVEL! EQU 2 goto:eof
-
+        if !askUser! EQU 1 (
+            choice /C yn /N /M "Download this update now (y/n)? : "
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
+        
         echo.
         echo If you want to pause the current tranfert or if you get errors during the transfert^,
         echo close this windows then the child cmd console in your task bar
@@ -304,7 +342,8 @@ REM : functions
         set /A "totalSizeInMb=%updateSize%"
 
         REM : remove 10Mb to totalSizeInMb (threshold)
-        set /A "threshold=!totalSizeInMb!-9"
+        set /A "threshold=!totalSizeInMb!"
+        if !threshold! GEQ 10 set /A "threshold=!totalSizeInMb!-9"
 
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -318,10 +357,10 @@ REM : functions
 
         set /A "progression=0"
 
-        :initDownload
+        :initUpdateDownload
 
         REM : download the game
-        call:download
+        call:download 0005000e %updateVersion%
 
         REM : get the JNUSTools folder size
         call:getFolderSizeInMb !initialGameFolderName! sizeDl
@@ -333,7 +372,7 @@ REM : functions
             echo ---------------------------------------------------------------
             echo Transfert seems to be incomplete^, relaunching^.^.^.
             echo.
-            goto:initDownload
+            goto:initUpdateDownload
         )
 
         REM : get current date
@@ -355,7 +394,7 @@ REM : functions
 
         set "tmpUpdatePath="!targetUpdatePath:"=!_tmp""
 
-        :tryToMove
+        :tryToMoveUpdate
 
         move /Y !updatePath! !tmpUpdatePath! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
@@ -363,14 +402,14 @@ REM : functions
             if !attempt! EQU 1 (
                 cscript /nologo !MessageBox! "Moving !tmpUpdatePath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
-                goto:tryToMove
+                goto:tryToMoveUpdate
             )
             REM : basename of tmpUpdatePath to get folder's name
             for /F "delims=~" %%i in (!tmpUpdatePath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !tmpUpdatePath! "!folderName!" patch
 
             cscript /nologo !MessageBox! "Move still failed^, take the ownership on !tmpUpdatePath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
-            if !ERRORLEVEL! EQU 6 goto:tryToMove
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveUpdate
 
             REM : else skipping
             echo ERROR^: failed to move !updatePath! to !tmpUpdatePath!^, skipping
@@ -435,9 +474,272 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    
+    :treatDlc
+    
+        set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
+        REM : cd to codeFolder
+        pushd !codeFolder!
+        set "RPX_FILE="project.rpx""
+	    REM : get bigger rpx file present under game folder
+        if not exist !RPX_FILE! set "RPX_FILE="NONE"" & for /F "delims=~" %%i in ('dir /B /O:S *.rpx 2^>NUL') do (
+            set "RPX_FILE="%%i""
+        )
+        REM : cd to GAMES_FOLDER
+        pushd !GAMES_FOLDER!
+
+        REM : if no rpx file found, ignore GAME
+        if [!RPX_FILE!] == ["NONE"] goto:eof
+
+        REM : GAME_FILE_PATH path (rpx file)
+        set "GAME_FILE_PATH="!GAME_FOLDER_PATH:"=!\code\!RPX_FILE:"=!""
+
+        REM : basename of GAME FOLDER PATH (used to name shorcut)
+        for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+
+        set "dlcPath="NOT_FOUND""
+        set "endTitleId=NOT_FOUND"
+        set "dlcVersion=NOT_FOUND"
+        set /A "dlcSize=0"
+
+        REM : check if game need to be updated
+        set "logDlcGames="!BFW_LOGS:"=!\dlcGames.log""
+        del /F !logDlcGames! > NUL 2>&1
+
+        call !checkGameContentAvailability! !GAME_FOLDER_PATH! 0005000c > !logDlcGames!
+        set /A "cr=%ERRORLEVEL%"
+
+        if %cr% NEQ 1 goto:eof
+
+        for /F "delims=~? tokens=1-3" %%i in ('type !logDlcGames! 2^>NUL') do (
+            set "dlcPath=%%i"
+            set "endTitleId=%%j"
+            set /A "dlcSize=%%k"
+        )
+        REM : no new update found, exit function
+        if %dlcSize% EQU 0 goto:eof
+        
+
+        REM : get the version of the content (DLC)
+        set "metaContentPath="!dlcPath:"=!\meta\meta.xml""
+        set "newContentVersion="NONE""
+        set "versionLine="NONE""
+        for /F "tokens=1-2 delims=>" %%i in ('type !metaContentPath! ^| find "<title_version"') do set "versionLine="%%j""
+        if [!versionLine!] == ["NONE"] (
+            if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: version of DLC not found in !metaContentPath!
+            rmdir /Q /S !gamesFolder! > NUL 2>&1
+            timeout /t 2 > NUL 2>&1
+            exit /b 64
+        )
+        for /F "delims=<" %%i in (!versionLine!) do set "newContentVersion=%%i"
+        if ["!newContentVersion!"] == ["NOT_FOUND"] (
+            if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: failed to get verson of DLC in !metaContentPath!
+            rmdir /Q /S !gamesFolder! > NUL 2>&1
+            timeout /t 2 > NUL 2>&1
+            exit /b 65
+        )
+        set /A "dlcVersion=!newContentVersion!"
+
+        cls
+        echo =========================================================
+        echo - Dlc !GAME_TITLE! v%dlcVersion% ^(%dlcSize% MB^)
+        echo ---------------------------------------------------------
+        
+        for %%a in (!dlcPath!) do set "parentFolder="%%~dpa""
+        set "gamesFolder=!parentFolder:~0,-2!""
+        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+
+        pushd !JNUSFolder!
+        set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
+        for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
+            set "fsbStr=%%i"
+            set /A "clusterSizeInB=%%j"
+        )
+
+        REM : free space in Kb
+        set /A "fskb=!fsbStr:~0,-3!"
+        set /A "freeSpaceLeft=fskb/1024"
+
+        REM : compute size need on targetDrive
+        call:getSizeOnDisk !dlcSize! sizeNeededOnDiskInMb
+        set /A "totalSpaceNeeded=sizeNeededOnDiskInMb"
+
+        echo.
+        if !totalSpaceNeeded! LSS !freeSpaceLeft! (
+            echo At least !totalSpaceNeeded! Mb are requiered on disk !targetDrive! ^(!freeSpaceLeft! Mb estimate left^)
+
+        ) else (
+            echo ERROR ^: not enought space left on !targetDrive!
+            echo Needed !totalSpaceNeeded! ^/ still available !freeSpaceLeft! Mb
+            echo Ignoring this game
+            goto:eof
+        )
+
+        if !askUser! EQU 1 (
+            choice /C yn /N /M "Download this dlc now (y/n)? : "
+            if !ERRORLEVEL! EQU 2 goto:eof
+        )
+        echo.
+        echo If you want to pause the current tranfert or if you get errors during the transfert^,
+        echo close this windows then the child cmd console in your task bar
+        echo and relaunch this script to complete the download^.
+        echo.
+
+        REM : download dlc
+        call:downloadDlc
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :downloadDlc
+
+        set /A "totalSizeInMb=%dlcSize%"
+
+        REM : remove 10Mb to totalSizeInMb (threshold)
+        set /A "threshold=!totalSizeInMb!"
+        if !threshold! GEQ 10 set /A "threshold=!totalSizeInMb!-9"
+
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+        REM : starting DATE
+
+        echo ---------------------------------------------------------------
+        echo Starting at !date!
+        echo.
+
+        set /A "progression=0"
+
+        :initDlcDownload
+
+        REM : download the game
+        call:download 0005000c %dlcVersion%
+
+        REM : get the JNUSTools folder size
+        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+        REM : do not continue if not complete (in case of user close downloading windows before this windows)
+        set /A "progression=(!sizeDl!*100)/!totalSizeInMb!"
+
+        if !progression! LSS 85 (
+            echo ---------------------------------------------------------------
+            echo Transfert seems to be incomplete^, relaunching^.^.^.
+            echo.
+            goto:initDlcDownload
+        )
+
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        set "date=%ldt%"
+
+        REM : ending DATE
+        echo.
+        echo Ending at !date!
+        echo ===============================================================
+
+        REM : install the dlc
+        set "targetDlcPath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endTitleId!""
+        set "tmpDlcPath=!dlcPath!"
+
+        set /A "attempt=1"
+        if not exist !targetDlcPath! goto:tryToMoveNewDlc
+
+        set "tmpDlcPath="!targetDlcPath:"=!_tmp""
+
+        :tryToMoveDlc
+
+        move /Y !dlcPath! !tmpDlcPath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving !tmpDlcPath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMoveDlc
+            )
+            REM : basename of tmpDlcPath to get folder's name
+            for /F "delims=~" %%i in (!tmpDlcPath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !tmpDlcPath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Move still failed^, take the ownership on !tmpDlcPath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveDlc
+
+            REM : else skipping
+            echo ERROR^: failed to move !dlcPath! to !tmpDlcPath!^, skipping
+            goto:eof
+        )
+
+        REM : move old dlc
+        set "oldDlcPath="!targetDlcPath:"=!_old""
+
+        REM : move dlc folder (targetDlcPath) to oldDlcPath
+        set /A "attempt=1"
+        :tryToMoveOldDlc
+
+        move /Y !targetDlcPath! !oldDlcPath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMoveOldDlc
+            )
+            REM : basename of targetDlcPath
+            for /F "delims=~" %%i in (!targetDlcPath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !targetDlcPath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveOldDlc
+
+            REM : else skipping
+            echo ERROR^: failed to move !targetDlcPath! to !oldDlcPath!^, skipping and leave !tmpDlcPath!
+            goto:eof
+
+        )
+
+        REM : move dlc folder (tmpDlcPath) to targetDlcPath
+        set /A "attempt=1"
+        :tryToMoveNewDlc
+
+        move /Y !tmpDlcPath! !targetDlcPath! > NUL 2>&1
+        if !ERRORLEVEL! NEQ 0 (
+
+            if !attempt! EQU 1 (
+                cscript /nologo !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
+                set /A "attempt+=1"
+                goto:tryToMoveNewDlc
+            )
+            REM : basename of targetDlcPath
+            for /F "delims=~" %%i in (!targetDlcPath!) do set "folderName=%%~nxi"
+            call:fillOwnerShipPatch !targetDlcPath! "!folderName!" patch
+
+            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            if !ERRORLEVEL! EQU 6 goto:tryToMoveNewDlc
+
+            REM : else skipping
+            echo ERROR^: failed to move !tmpDlcPath! to !targetDlcPath!^, skipping
+            goto:eof
+        )
+        if exist !oldDlcPath! rmdir /Q /S !oldDlcPath!
+        set /A "NB_DLC_TREATED+=1"
+        timeout /T 3 > NUL 2>&1
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    
+    
     :download
 
-        set "utid=0005000e!endTitleId!"
+        set "startTitleId=%~1"
+        set "version=%~2"
+        
+        set "label=update"
+        if ["!startTitleId!"] ==["0005000c"] set "label=dlc"
+        
+        set "utid=!startTitleId!!endTitleId!"
 
         set "key=NOT_FOUND"
         for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!utid!" 2^>NUL') do set "key=%%b"
@@ -448,7 +750,7 @@ REM : functions
             goto:eof
         )
         wscript /nologo !StartMinimized! !downloadTid! !JNUSFolder! !utid! 1 !key!
-        call:monitorTransfert !threshold!
+        call:monitorTransfert !threshold! !version!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -524,6 +826,7 @@ REM : functions
     :monitorTransfert
 
         set /A "t=%~1"
+        set "version=%~2"
 
         set /A "previous=0"
         set /A "nb2sec=0"
@@ -560,26 +863,25 @@ REM : functions
 
                 ) else (
 
-
                     if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
-                    title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+                    title Downloading !label! v!version! of !GAME_TITLE! ^: !progression!%%
 
                     echo Finalizing^.^.^.
                     set /A "finalize=1"
                     goto:waitingLoop
                 )
 
-                title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+                title Downloading !label! v!version! of !GAME_TITLE! ^: !progression!%%
         
                 goto:waitingLoop
             ) else (
                 if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"
-                title Downloading update v%updateVersion% of !GAME_TITLE! ^: !progression!%%
+                title Downloading !label! v!version! of !GAME_TITLE! ^: !progression!%%
 
                 goto:waitingLoop
             )
         )
-        title Downloading update v%updateVersion% of !GAME_TITLE! ^: 100%%
+        title Downloading !label! v!version! of !GAME_TITLE! ^: 100%%
 
         REM : get the initialGameFolderName folder size
         call:getFolderSizeInMb !initialGameFolderName! sizeDl
@@ -587,7 +889,7 @@ REM : functions
         REM : progression
         set /A "curentSize=!sizeDl!
 
-        echo Downloaded !GAME_TITLE!^'s update v%updateVersion% successfully
+        echo Downloaded !GAME_TITLE!^'s !label! v!version! successfully
         echo.
     goto:eof
     REM : ------------------------------------------------------------------
@@ -627,7 +929,7 @@ REM : functions
         if !lr! GTR 20 (
             set /A "smb=!result:~0,-20!"
         ) else (
-            set /A "smb=0"
+            set /A "smb=1"
         )
 
         :endFct

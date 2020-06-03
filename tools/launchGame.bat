@@ -415,9 +415,9 @@ REM : main
     echo !uggp! !gfxType! !GAME_FOLDER_PATH! !titleId! !buildOldUpdatePaths! !lockFile! >> !batchFwLog!
 
     REM : check if a Game's update is available
-    set "ugp="!BFW_TOOLS_PATH:"=!\checkGameUpdateAvailability.bat""
-    wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! !endTitleId!
-    echo !ugp! !GAME_FOLDER_PATH! !endTitleId! >> !batchFwLog!
+    set "ugp="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
+    echo !ugp! !GAME_FOLDER_PATH! 0005000X !endTitleId! >> !batchFwLog!
+    wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! 0005000e !endTitleId!
 
     REM : create shortcut to logFile
     call:createBatchFwLogShorcut
@@ -1010,6 +1010,9 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     :launchCemu
 
+    REM : check if a new DLC is available
+    wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! 0005000c !endTitleId!
+    
     if !usePbFlag! EQU 1 call:setProgressBar 96 100 "pre processing" "launching Cemu !versionRead!"
 
     REM : minimize all windows befaore launching in full screen
@@ -2676,11 +2679,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             wscript /nologo !Start! "%windir%\explorer.exe" "https://www.google.com/search?q=CEMU+complete+shader+cache+collection+!GAME_TITLE!"
             timeout /T 25 > NUL 2>&1
 
-            wscript /nologo !MessageBox! "If you found a cache, import it now ?" 4164
+            wscript /nologo !MessageBox! "If you found a cache, import it now (no need to rename it)?" 4164
             if !ERRORLEVEL! EQU 7 exit /b 1
 
         ) else (
-            wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now ?" 4164
+            wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now (no need to rename it)?" 4164
             if !ERRORLEVEL! EQU 7 exit /b 1
         )
         

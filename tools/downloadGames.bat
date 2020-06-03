@@ -519,8 +519,8 @@ REM : functions
         )
 
         REM : remove 10Mb to totalSizeInMb (threshold)       
-        set /A "threshold=!totalSizeInMb!-9"
-
+        set /A "threshold=!totalSizeInMb!"
+        if !threshold! GEQ 10 set /A "threshold=!totalSizeInMb!-9"
         
         REM : get game's data for wii-u database file
         set "libFileLine="NONE""
@@ -866,7 +866,7 @@ REM : functions
         if !lr! GTR 20 (
             set /A "smb=!result:~0,-20!"
         ) else (
-            set /A "smb=0"
+            set /A "smb=1"
         )
 
         :endFct
@@ -931,9 +931,15 @@ REM : functions
         set "strSize="
         for /F "tokens=1" %%i in ("!strRead!") do set "strSize=%%i"
 
+        echo !strSize! | find /I "0." > NUL 2>&1 && (
+            set "intSize=1"
+            goto:endFctGetSize
+        )
+        
         set /A "intSize=0"
         for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
 
+        :endFctGetSize
         set "%4=!intSize!"
         set /A "totalSizeInMb=!totalSizeInMb!+!intSize!"
 
