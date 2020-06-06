@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V19-1"
+    set "BFW_NEXT_VERSION=V19-2"
 
     set "THIS_SCRIPT=%~0"
 
@@ -94,7 +94,7 @@ REM : main
     set "fixBatFilesLog="!BFW_PATH:"=!\logs\fixBatFiles.log""
 
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -166,6 +166,11 @@ REM : main
     set "filePath="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
     echo ^> tools/checkGameContentAvailability.bat
     attrib +R !filePath! > NUL 2>&1    
+    
+    set "filePath="!BFW_TOOLS_PATH:"=!\detectAndRenameInvalidPath.bat""
+    echo ^> tools/detectAndRenameInvalidPath.bat
+    attrib +R !filePath! > NUL 2>&1    
+    
     echo.
     echo =========================================================
     echo done

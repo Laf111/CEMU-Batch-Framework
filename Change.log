@@ -21,8 +21,13 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+06/06/2020 V19-2 :
+fix : GFX completion not detected (no popup displayed when GFX packs for this game once built/completed)
+fix : DLC/update install failed if 0050000c/e folder does not exist
+add : title name restrictions as WUP limitations (forbid ™, ®, ©, É otherwise GFX detection fails)
+add : update embeded GFX packs to v685
 
-26/05/2020 V19-1 :
+03/06/2020 V19-1 :
 fix : RAM amount conversion to GB in reports
 fix : choice error message (without consequence) at the end of setup.bat
 fix : fail to downloading content with size < 1MB
@@ -36,6 +41,7 @@ add : check in background if a new game's update if available when launching a g
 add : update games feature, to update your games after checking that : 
       - CEMU is not already running
       - if a 60FPS or a FPS++ packs exist and handle the new version
+add : update embeded GFX pack to v683
 
 08/05/2020 V19 :
 fix : redirect stderr to NUL on xml operations

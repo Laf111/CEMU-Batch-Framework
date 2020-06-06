@@ -791,7 +791,7 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] cscript /nologo !MessageBox! "Complete and create packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+        cscript /nologo !MessageBox! "Complete and create packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
         set /A "createPack=1"
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
@@ -820,7 +820,7 @@ REM    REM : ------------------------------------------------------------------
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
 
         :createCapGP
-        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+        if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""

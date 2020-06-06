@@ -390,8 +390,10 @@ REM : functions
         set "tmpUpdatePath=!updatePath!"
 
         set /A "attempt=1"
-        if not exist !targetUpdatePath! goto:tryToMoveNewUpdate
-
+        if not exist !targetUpdatePath! (
+            mkdir !targetUpdatePath! > NUL 2>&1
+            goto:tryToMoveNewUpdate
+        )
         set "tmpUpdatePath="!targetUpdatePath:"=!_tmp""
 
         :tryToMoveUpdate
@@ -645,7 +647,10 @@ REM : functions
         set "tmpDlcPath=!dlcPath!"
 
         set /A "attempt=1"
-        if not exist !targetDlcPath! goto:tryToMoveNewDlc
+        if not exist !targetDlcPath! (
+            mkdir !targetDlcPath! > NUL 2>&1
+            goto:tryToMoveNewDlc
+        )
 
         set "tmpDlcPath="!targetDlcPath:"=!_tmp""
 

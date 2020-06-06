@@ -133,6 +133,13 @@ REM : main
         set "str=!str:&=!"
         set "str=!str:\!=!"
         set "str=!str:%%=!"
+        
+        REM : WUP restrictions
+        set "str=!str:™=!"
+        set "str=!str:®=!"
+        set "str=!str:©=!"
+        set "str=!str:É=E!"
+        
         set "newFolderName=!str:"=!"
         set "newName="!basename!!newFolderName:"=!""
 
