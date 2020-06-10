@@ -516,10 +516,7 @@ REM : functions
             
             REM : set Game title for packs (folder name)
             set "gameFolderName=!DescRead!"
-            
-echo  gameFolderNameDB=!gameFolderName!       
-pause
-            
+
             goto:setGameLogFile
         )
 
@@ -656,11 +653,7 @@ pause
             echo.
             
         ) else (
-        
-echo  initialGameFolderName=!initialGameFolderName!       
-echo  gameFolderName=!gameFolderName!       
-echo  dName=!dName!       
-pause
+
             REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
             if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
 
