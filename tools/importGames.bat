@@ -386,9 +386,6 @@ REM : functions
 
     if [!INPUT_FOLDER!] == [!GAMES_FOLDER!] (        
         set "pat="!GAME_TITLE:"=!*(*)*""
-echo pat=!pat!
-dir /B !pat!
-pause
         dir /B !pat! > NUL 2>&1 && call:prepareGame
     ) else (
         call:prepareGame
