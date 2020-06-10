@@ -630,7 +630,7 @@ REM    call:log2HostFile !msg!
                         goto:tryToMove
                     )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
-                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116

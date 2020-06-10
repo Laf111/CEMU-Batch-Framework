@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V19-2"
+    set "BFW_VERSION=V19-3"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=3"
@@ -151,10 +151,13 @@ REM : main
     pushd !GAMES_FOLDER!
 
     REM : rename folders that contains forbiden characters : & ! . ( )
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /EXECUTE
 
     REM : check if DLC and update folders are presents (some games need to be prepared)
     call:checkGamesToBePrepared
+
+    REM : rename folders that contains forbiden characters : ( )
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!GAMES_FOLDER! /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -322,7 +325,7 @@ REM : main
                         goto:tryToMove
                     )
                     REM : basename of GAME FOLDER PATH to get GAME_TITLE
-                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+                    for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
                     cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116

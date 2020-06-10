@@ -488,10 +488,46 @@ REM : functions
         set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
         set "gameFolderName=!initialGameFolderName:?=!"
         
-        REM : secureGameTitle
+        REM : secure Game Title
+        
+        REM : if game exists in internal database
+        type !wiiTitlesDataBase! | findStr /R /I "^'!titleId!';" > NUL 2>&1 && (
+        
+            REM : get game's title for wii-u database file
+            set "libFileLine="NONE""
+            for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';" 2^>NUL') do set "libFileLine="%%i""
+
+            if [!libFileLine!] == ["NONE"] goto:setGameLogFile
+            
+            REM : strip line to get data
+            for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+               set "titleIdRead=%%a"
+               set "DescRead="%%b""
+               set "productCode=%%c"
+               set "companyCode=%%d"
+               set "notes=%%e"
+               set "versions=%%f"
+               set "region=%%g"
+               set "acdn=%%h"
+               set "icoId=%%i"
+               set "nativeHeight=%%j"
+               set "nativeFps=%%k"
+            )    
+            
+            REM : set Game title for packs (folder name)
+            set "gameFolderName=!DescRead!"
+            
+echo  gameFolderNameDB=!gameFolderName!       
+pause
+            
+            goto:setGameLogFile
+        )
+
+        REM : else        
         call:secureGameTitle !gameFolderName! gameFolderName
         echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
+        :setGameLogFile
         set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
 
         echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=!
@@ -521,28 +557,6 @@ REM : functions
         REM : remove 10Mb to totalSizeInMb (threshold)       
         set /A "threshold=!totalSizeInMb!"
         if !threshold! GEQ 10 set /A "threshold=!totalSizeInMb!-9"
-        
-        REM : get game's data for wii-u database file
-        set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
-
-        REM : strip line to get data
-        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
-           set "titleIdRead=%%a"
-           set "DescRead="%%b""
-           set "productCode=%%c"
-           set "companyCode=%%d"
-           set "notes=%%e"
-           set "versions=%%f"
-           set "region=%%g"
-           set "acdn=%%h"
-           set "icoId=%%i"
-           set "nativeHeight=%%j"
-           set "nativeFps=%%k"
-        )    
-
-        REM : set Game title for packs (folder name)
-        set "gameFolderName=%DescRead%"
         
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -642,7 +656,11 @@ REM : functions
             echo.
             
         ) else (
-
+        
+echo  initialGameFolderName=!initialGameFolderName!       
+echo  gameFolderName=!gameFolderName!       
+echo  dName=!dName!       
+pause
             REM : moving GAME_TITLE, GAME_TITLE (UPDATE DATA), GAME_TITLE (DLC) to !GAMES_FOLDER!
             if not [!initialGameFolderName!] == [!gameFolderName!] move /Y !initialGameFolderName! !gameFolderName! > NUL 2>&1
 
@@ -1025,6 +1043,9 @@ REM : functions
         set "string=!string:<=!"
         set "string=!string::=!"
         set "string=!string:|=!"
+        
+        REM : replace '_' by ' ' (if needed)
+        set "string=!string:_= !"
 
         REM : WUP restrictions
         set "string=!string:™=!"

@@ -179,7 +179,7 @@ REM : ------------------------------------------------------------------
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (GAME_TITLE)
-            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
+            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
             call:exportStats
 
         ) else (

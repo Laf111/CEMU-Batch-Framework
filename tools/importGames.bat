@@ -167,8 +167,8 @@ REM : main
     )
     pushd !INPUT_FOLDER!
 
-    REM : rename folders that contains forbiden characters : & ! . ( )
-    if %nbArgs% EQU 0 wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
+    REM : rename folders that contains forbiden characters : & ! .
+    if %nbArgs% EQU 0 wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!INPUT_FOLDER! /REPLACECI^:^^!^: /REPLACECI^:^^^&^: /REPLACECI^:^^.^:  /EXECUTE
 
     :scanGamesFolder
     cls
@@ -224,7 +224,7 @@ REM : main
             if !cr! EQU 1 goto:scanGamesFolder
 
             REM : basename of GAME FOLDER PATH (to get GAME_FOLDER_NAME)
-            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxi"
+            for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_FOLDER_NAME=%%~nxg"
 
             call:treatGameFolders
             
@@ -371,7 +371,6 @@ REM : functions
 
     :treatGameFolders
 
-
         echo !GAME_FOLDER_PATH! | find "(UPDATE DATA)" > NUL 2>&1 && (
             call:installUpdate
             goto:eof
@@ -387,6 +386,9 @@ REM : functions
 
     if [!INPUT_FOLDER!] == [!GAMES_FOLDER!] (        
         set "pat="!GAME_TITLE:"=!*(*)*""
+echo pat=!pat!
+dir /B !pat!
+pause
         dir /B !pat! > NUL 2>&1 && call:prepareGame
     ) else (
         call:prepareGame

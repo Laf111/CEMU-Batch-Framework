@@ -217,6 +217,22 @@ REM : functions
         REM : clean old icons and jpg files
         pushd !GAMES_FOLDER!
 
+        REM : fix : replace [DLC] by (DLC)
+        set "pat="*[DLC]*""
+        for /F "delims=~" %%i in ('dir /B /S /A:D !pat! 2^> NUL') do (
+            set "oldName="%%i""
+            set "newName=!oldName:[DLC]=(DLC)!"
+            move /Y !oldName! !newName! > NUL 2>&1
+        )
+
+        REM : fix : replace [UPDATE DATA] by (UPDATE DATA)
+        set "pat="*[UPDATE DATA]*""
+        for /F "delims=~" %%i in ('dir /B /S /A:D !pat! 2^> NUL') do (
+            set "oldName="%%i""
+            set "newName=!oldName:[UPDATE DATA]=(UPDATE DATA)!"
+            move /Y !oldName! !newName! > NUL 2>&1
+        )
+
         for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
             set "codeFullPath="%%i""
             set "pat="!codeFullPath:"=!\00050000*.ico""

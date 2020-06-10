@@ -777,8 +777,6 @@ REM    REM : ------------------------------------------------------------------
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
 
-        set /A "createPack=0"
-
         REM : no Gp were found but other version packs found
         REM   (it is the case when graphic pack folder were updated on games that are not supported in Slashiee repo)
 
@@ -791,8 +789,15 @@ REM    REM : ------------------------------------------------------------------
         REM : if GP found, get the last update version
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
-        cscript /nologo !MessageBox! "Complete and create packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
-        set /A "createPack=1"
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] (
+            cscript /nologo !MessageBox! "Create GFX res and FPS packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+        ) else (
+            type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateGameGraphicPacks
+            
+            cscript /nologo !MessageBox! "New GFX packs version detected, please wait : create GFX res and FPS packs for this game."
+        )
+        
+        :launchCreateGameGraphicPacks
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
@@ -814,13 +819,21 @@ REM    REM : ------------------------------------------------------------------
         if ["!newVersion!"] == ["NOT_FOUND"] echo Complete graphic packs for !GAME_TITLE! ^.^.^. >> !myLog!
         if not ["!newVersion!"] == ["NOT_FOUND"] echo Complete graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
+        if ["!lastInstalledVersion!"] == ["NOT_FOUND"] (
+            cscript /nologo !MessageBox! "Complete GFX res pack and create FPS pack for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the pack created using the dedicated shortcut in order to force it to rebuild^."
+        ) else (
+            type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateExtraGraphicPacks
+            
+            cscript /nologo !MessageBox! "New GFX packs version detected, please wait : complete GFX res pack and create FPS pack for this game."
+        )
+
+        :launchCreateExtraGraphicPacks
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup! >> !myLog!
         echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
 
         :createCapGP
-        if !createPack! EQU 0 cscript /nologo !MessageBox! "Create CAP FPS packs for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
