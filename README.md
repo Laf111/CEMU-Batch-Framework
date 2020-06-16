@@ -210,7 +210,7 @@ Code is well commented and is read only.
 
 ## Tutorials & videos:
 
-Install, create a portable loadiine library, complete/create custom GFX packs, synchronize installs, revert, uninstall : https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
+**Install, create a portable loadiine library, complete/create custom GFX packs, synchronize installs, revert, uninstall:**  https://1drv.ms/v/s!Apr2zdKB1g7fgkS7wOmXmanOFRRp?e=qhwmgU
 
 - 02:00 : install games directly (only put game, DLC and update folder in your games'folder)
 
@@ -246,9 +246,9 @@ Install, create a portable loadiine library, complete/create custom GFX packs, s
 
 - 48:45 : uninstall BatchFw
 #
-Dump a list of games from the wii-U : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
+**Dump a list of games from the wii-U:** https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 #
-Fix custom GFX packs created for games without any official packs (if needed) : https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
+**Fix custom GFX packs created for games without any official packs (if needed):** https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
 #
 ## FAQ: 
 
