@@ -13,7 +13,7 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 
 # 
-**IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" tab of this page to get the last released version else see recommendations at the end of this page.
+**IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : switch to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" tab of this page to get the last released version else **see recommendations at the end of this page**.
 #
 
 ## Main purpose:
