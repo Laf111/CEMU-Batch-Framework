@@ -28,6 +28,8 @@ I recommend to stay in that range (versions that i have checked) but you don't r
     - save settings PER user (including GFX and mods packs) and PER host,
     - game stats per user (using all version of CEMU that supports it) for all hosts used
 
+- **Keep my games up to date** (silently check update and DLC availability);
+
 - **Switch freely from a version of CEMU** to another for a given game, and play with the same data you had on the first one;
 
 - **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
@@ -244,7 +246,7 @@ Install, create a portable loadiine library, complete/create custom GFX packs, s
 
 - 48:45 : uninstall BatchFw
 #
-Dump a list of games : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
+Dump a list of games from the wii-U : https://1drv.ms/v/s!Apr2zdKB1g7fgkIKKLfU5PeveU5u?e=2DiNlg
 #
 Fix custom GFX packs created for games without any official packs (if needed) : https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
 #
@@ -256,7 +258,7 @@ Fix custom GFX packs created for games without any official packs (if needed) : 
     
 - **Dumping games via network isn't it quite slow?**
 
-    - Yes sure (Wii-U builtin network adapter suck : ~ 400Mb/h, a long night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + manual extraction with WFS Tools' time. Here all is done automatically by scripts : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
+    - Yes sure (Wii-U builtin network adapter suck : ~ 400Mb/h, a long night for BOTW) but total time has to be compared to a NANDUMPER's dump on SDCard + copy SDCard to HDD + manual extraction with WFS Tools + install in CEMU. Here all is done automatically by scripts : game are ready to be launched with saves, update and DLC already installed in the mlc01 folder located in the game one.     
     
 - **Why backup/restore GLCache?**
 
