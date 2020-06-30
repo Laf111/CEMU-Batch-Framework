@@ -282,13 +282,12 @@ REM : main
     if !QUIET_MODE! EQU 1 goto:bfwShortcuts
     REM : when launched with shortcut = no args = QUIET_MODE=0
 
-    if exist !clog! (
-        choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
-        if !ERRORLEVEL! EQU 1 (
-            set /A "QUIET_MODE=1"
-            set /A "treatAllGames=1"
-        )
+    choice /C yn /N /M "Do you want to create executables for ALL your games (y, n = select games)? : "
+    if !ERRORLEVEL! EQU 1 (
+        set /A "QUIET_MODE=1"
+        set /A "treatAllGames=1"
     )
+
     cls
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
