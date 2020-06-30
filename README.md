@@ -9,8 +9,8 @@ It allows you to launch your loadiines games (uncompressed RPX) using many versi
 
 I recommend to stay in that range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
-BatchFw detect the current aspect ratio and create resolution GFX packs for games with no GFX packs provided (those packs are automatically replaced by the official ones when they'll be available). It also create FPS GFX packs to cap the FPS for games that allow it.
-If you choose to let BatchFw complete your packs, it will creates the missing resolutions presets for the current aspect ratio.
+BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
+If you choose to let BatchFw complete your packs, it will create the missing resolutions presets for the current aspect ratio.
 
 **Last GFX packs checked (presets completion) : V686**
 
