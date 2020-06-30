@@ -1,7 +1,7 @@
 # CEMU's Batch FrameWork
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
-It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profile, saves, duplicate update installsation, shaders caches... for many users on many hosts (by making your games library portable).
+It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profile, saves, duplicating update and/or DLC, shaders caches... for many users on many hosts (by making your games library portable).
 
 **Versions of CEMU supported : 1.11.6 to 1.19.3**
 
