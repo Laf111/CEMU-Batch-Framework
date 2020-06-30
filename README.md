@@ -22,6 +22,10 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 
 - **Avoid regression on games (and downgrade CEMU version)** by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);
 
+- **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones
+
+- **create FPS packs** : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).
+
 - **Handle more than one user/save also with versions of CEMU < 1.15.19**;
 
 - **Make your loadiine games library portable :**
@@ -37,10 +41,6 @@ I recommend to stay in that range (versions that i have checked) but you don't r
 - **Ease install, backup (game+update+DLC+saves+settings) and uninstall games (no need to dig in the mlc01 folder);**
 
 - **Secure your saves and trabferable cache** with 2 levels of backup
-
-- **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones
-
-- **create FPS packs** : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).
 
 - **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
     - get/sync online files (account, friends'list),
