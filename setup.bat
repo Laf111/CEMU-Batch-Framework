@@ -347,7 +347,7 @@ REM : main
         echo No RPX games were found
         echo.
 
-        call:getUserInput "Dumps games from your Wii-U (1), install games (2), download games (3) or cancel (c) ?" "1,2,3,c" ANSWER
+        call:getUserInput "Dumps games from your Wii-U (1), install games coming with update and/or DLC (2), download games (3) or cancel (c) ?" "1,2,3,c" ANSWER
         if [!ANSWER!] == ["c"] (
             echo So exiting^.^.^.
             echo _BatchFW_Install folder must be located in your loadiines ^(^*^.rpx^) games folder
