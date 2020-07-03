@@ -2,13 +2,15 @@
 
 BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your games library portable).
+It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your games library portable without rebuild any shader cache and modify game's profiles).
+
+As the mlc01 folder and settings are located in the game's one, you can backup the whole game including saves for all users, update, DLC, settings into a single archive file easily.
 
 **Versions of CEMU supported : 1.11.6 to 1.19.3** (if you want to use earlier versions, create an installation per game and per user)
 
 BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
 
-If you choose to let BatchFw complete your packs, it will create the missing resolutions presets for the current aspect ratio.
+If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
 
 **Last GFX packs checked (presets completion) : V686**
 
