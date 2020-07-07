@@ -8,8 +8,8 @@ REM : main
     REM : set current char codeset
     call:setCharSet
     REM : ------------------------------------------------------------------
-    REM : CEMU's Batch FrameWork Version
-    set "BFW_NEXT_VERSION=V19-3"
+    REM : CEMU's Batch FrameWork Version to produce 
+    set "BFW_NEXT_VERSION=V19-5"
 
     set "THIS_SCRIPT=%~0"
 

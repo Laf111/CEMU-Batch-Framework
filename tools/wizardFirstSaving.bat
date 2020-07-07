@@ -1118,7 +1118,7 @@ REM : functions
         set "BFW_ONLINE="!BFW_WIIU_FOLDER:"=!\onlineFiles""
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
 
-        If not exist !BFW_ONLINE! goto:eof
+        If not exist !BFW_ONLINE_ACC! goto:eof
         set "accId=NONE"
         REM : get the account.dat file for the current user and the accId
         set "pat="!BFW_ONLINE_ACC:"=!\!currentUser!*.dat""
@@ -1156,13 +1156,13 @@ REM : functions
 
         :installAccount
 
-        REM : copy !accountFile! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
+        REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
         set "cemuUserFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""
 
         if not exist !cemuUserFolder! mkdir !cemuUserFolder! > NUL 2>&1
         set "target="!cemuUserFolder:"=!\account.dat""
 
-        copy /Y !accountFile! !target! > NUL 2>&1
+        copy /Y !af! !target! > NUL 2>&1
 
         REM : patch settings.xml
         REM if not nul
@@ -1178,17 +1178,63 @@ REM : functions
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
         REM : settings.xml evolved after 1.15.19 included
         if !v11519! EQU 2 (
-            !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp! 2>NUL
+            REM : CEMU < 1.15.19 (Online/AccountId)
+
+            REM : Check if exist AccountId node
+            type !cs! | find "<AccountId" > NUL 2>&1 && (
+                REM : YES  : update the AccountId node
+                !xmlS! ed -u "//AccountId" -v !accId! !cs! > !csTmp! 2>NUL
+                goto:restoreCs
+            )
+
+            REM : NO : rename Account node to Online
+            set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+            !xmlS! ed -r "//Account" -v Online !cs! > !csTmp0! 2>NUL
+            REM : rename PersistentId to AccountId
+            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+            !xmlS! ed -r "//PersistentId" -v AccountId !csTmp0! > !csTmp1! 2>NUL
+            REM : delete OnlineEnabled node
+            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
+            !xmlS! ed -d "//OnlineEnabled" !csTmp1! > !csTmp2! 2>NUL
+
+            REM : set AccountId
+            !xmlS! ed -u "//AccountId" -v !accId! !csTmp2! > !csTmp! 2>NUL
+
         ) else (
-            !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp! 2>NUL
-            !xmlS! ed -u "//OnlineEnabled" -v true !cs! > !csTmp! 2>NUL
+            REM : CEMU >= 1.15.19 (Account/PersistentId+OnlineEnabled)
+
+            REM : Check if exist PersistentId node
+            type !cs! | find "<PersistentId" > NUL 2>&1 && (
+
+                REM : YES  : update PersistentId and OnlineEnabled nodes
+                set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+                !xmlS! ed -u "//PersistentId" -v !accId! !cs! > !csTmp0! 2>NUL
+                !xmlS! ed -u "//OnlineEnabled" -v true !csTmp0! > !csTmp! 2>NUL
+                goto:restoreCs
+            )
+
+            REM : NO : rename Online node to Account
+            set "csTmp0="!CEMU_FOLDER:"=!\settings.bfw_tmp0""
+            !xmlS! ed -r "//Online" -v Account !cs! > !csTmp0! 2>NUL
+            REM : rename AccountId to PersistentId
+            set "csTmp1="!CEMU_FOLDER:"=!\settings.bfw_tmp1""
+            !xmlS! ed -r "//AccountId" -v PersistentId !csTmp0! > !csTmp1! 2>NUL
+            REM : add OnlineEnabled node
+            set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
+            !xmlS! ed -s "//Online" -t elem -n OnlineEnabled -v true !csTmp1! > !csTmp2! 2>NUL
+
+            REM : set persistentId
+            !xmlS! ed -u "//persistentId" -v !accId! !csTmp2! > !csTmp! 2>NUL
         )
 
+        :restoreCs
         if exist !csTmp! (
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
+            del /F "!csTmp:"=!*"  > NUL 2>&1
         )
 
+        REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
         if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
@@ -1201,8 +1247,8 @@ REM : functions
         set "s1="!BFW_ONLINE:"=!\otp.bin""
         set "s2="!BFW_ONLINE:"=!\seeprom.bin""
 
-        if exist !s1! if exist !t1! move !t1! !t1o! > NUL 2>&1
-        if exist !s2! if exist !t2! move !t2! !t2o! > NUL 2>&1
+        if exist !s1! if exist !t1! move /Y !t1! !t1o! > NUL 2>&1
+        if exist !s2! if exist !t2! move /Y !t2! !t2o! > NUL 2>&1
 
         if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
         if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1

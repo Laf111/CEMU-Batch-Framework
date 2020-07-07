@@ -289,7 +289,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         set /A "QUIET_MODE=1"
         set /A "treatAllGames=1"
     )
-    
+
     cls
     REM : update graphic packs
     set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
