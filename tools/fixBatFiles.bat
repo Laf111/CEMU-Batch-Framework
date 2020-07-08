@@ -8,7 +8,7 @@ REM : main
     REM : set current char codeset
     call:setCharSet
     REM : ------------------------------------------------------------------
-    REM : CEMU's Batch FrameWork Version to produce 
+    REM : CEMU's Batch FrameWork Version to produce
     set "BFW_NEXT_VERSION=V19-5"
 
     set "THIS_SCRIPT=%~0"
@@ -24,12 +24,25 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    if not exist !BFW_LOGS! mkdir !BFW_LOGS! > NUL 2>&1
+    
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : get the last version
     for /F "delims=~= tokens=2" %%i in ('type setup.bat ^| find "BFW_VERSION=V"') do set "value=%%i"
     set "BFW_OLD_VERSION=!value:"=!"
-
+    
+    REM : check if folder name contains forbiden character for batch file
+    call:securePathForDos %BFW_PATH% SAFE_PATH
+    
+    if not [%BFW_PATH%] == [!SAFE_PATH!] (
+        echo ERROR ^: please rename your folders to have this compatible path 
+        echo !SAFE_PATH!
+        pause
+        exit 95
+    )
+            
     echo =========================================================
     if ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
         echo Produce BatchFw !BFW_NEXT_VERSION!
@@ -71,7 +84,7 @@ REM : main
     REM : check Wii-U Title database integrity
     echo ^> Check Wii-U Title database integrity^.^.^.
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-    
+
     set /A "nbLines=0"
     for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /C ";"') do set /A "nbLines=%%i"
     if !nbLines! EQU 0 (
@@ -79,7 +92,7 @@ REM : main
     ) else (
         set /A "nbEntries=nbLines-1"
         echo  Number of entries ^(games declined by regions^) ^: !nbEntries!
-        
+
         type !wiiTitlesDataBase! | find /V "Native Fps" | find /V "';" && (
             echo ERROR^: line above in !wiiTitlesDataBase! seems to be misformed
         )
@@ -87,14 +100,15 @@ REM : main
             echo ERROR^: line above in !wiiTitlesDataBase! seems to be misformed
         )
     )
-    
+
     echo ^> Check bat files^.^.^.
     echo.
-
-    set "fixBatFilesLog="!BFW_PATH:"=!\logs\fixBatFiles.log""
+    
+    set "fixBatFilesLog="!BFW_LOGS:"=!\fixBatFiles.log""  
 
     REM : Convert all files to ANSI and set them readonly
-    for /F "delims=~" %%f in ('dir /S /B *.bat ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
+    set "pat="*.bat""
+    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -136,7 +150,7 @@ REM : main
     set "filePath="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
     echo ^> tools/downloadTitleId.bat
 
-    attrib +R !filePath! > NUL 2>&1    
+    attrib +R !filePath! > NUL 2>&1
     type !filePath! | find /I "delims=~	" > NUL 2>&1 && goto:checkDownloadGames
     echo ERROR^: TAB was not found line 105^, the file format is not ANSI anymore ^?
 
@@ -165,12 +179,12 @@ REM : main
 
     set "filePath="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
     echo ^> tools/checkGameContentAvailability.bat
-    attrib +R !filePath! > NUL 2>&1    
-    
+    attrib +R !filePath! > NUL 2>&1
+
     set "filePath="!BFW_TOOLS_PATH:"=!\detectAndRenameInvalidPath.bat""
     echo ^> tools/detectAndRenameInvalidPath.bat
-    attrib +R !filePath! > NUL 2>&1    
-    
+    attrib +R !filePath! > NUL 2>&1
+
     echo.
     echo =========================================================
     echo done
@@ -184,7 +198,48 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : remove DOS forbiden character from a path
+    :securePathForDos
+        REM : str is expected protected with double quotes
+        set "string=%~1"
+        
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed in path
+            set "string=!string:*=!"
+        )
 
+        echo "%~1" | find "(" > NUL 2>&1 && (
+            echo ^( is not allowed in path
+            set "string=!string:(=!"
+        )
+        echo "%~1" | find ")" > NUL 2>&1 && (
+            echo ^) is not allowed in path
+            set "string=!string:)=!"
+        )
+        if ["!string!"] == ["%~1"] (
+
+            set "string=!string:&=!"
+            set "string=!string:?=!"
+            set "string=!string:\!=!"
+            set "string=!string:%%=!"
+            set "string=!string:^=!"
+            set "string=!string:/=!"
+            set "string=!string:>=!"
+            set "string=!string:<=!"
+            set "string=!string:|=!"
+
+            REM : WUP restrictions
+            set "string=!string:™=!"
+            set "string=!string:®=!"
+            set "string=!string:©=!"
+            set "string=!string:É=E!"
+            
+        )
+        set "%2="!string!""
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     REM : function to get and set char set code for current host
     :setCharSet
 

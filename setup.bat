@@ -65,6 +65,16 @@ REM : main
 
     set "ACTIVE_ADAPTER=NONE"
 
+    REM : check if folder name contains forbiden character for batch file
+    call:securePathForDos !GAMES_FOLDER! SAFE_PATH
+
+    if not [!GAMES_FOLDER!] == [!SAFE_PATH!] (
+        echo ERROR ^: please rename your folders to have this compatible path
+        echo !SAFE_PATH!
+        pause
+        exit 95
+    )
+
     if exist !logFile! goto:setChcp
 
     REM ----------------------------------------------------------------------------------------------
@@ -529,7 +539,7 @@ REM : main
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
             set /P "desc=Please enter a description for this setting : "
-            call:secureStringPathForDos !desc! desc
+            call:secureStringForDos !desc! desc
             set "desc=!desc:"=!"
 
             set "msg="DESIRED_ASPECT_RATIO=!width!-!height!=!desc!""
@@ -1055,7 +1065,7 @@ REM : main
     )
 
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
-    call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     cls
@@ -1607,51 +1617,90 @@ REM        call:log2HostFile !msg!
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : check if a string contain *
-    :checkStr
+    REM : remove DOS forbiden character from a path
+    :secureStringForDos
+        REM : str is expected protected with double quotes
+        set "string=%~1"
 
         echo "%~1" | find "*" > NUL 2>&1 && (
-            echo ^* is not allowed
-
-            set "%2=KO"
-            goto:eof
+            echo ^* is not allowed in path
+            set "string=!string:*=!"
         )
-        set "%2=OK"
+
+        echo "%~1" | find "(" > NUL 2>&1 && (
+            echo ^( is not allowed in path
+            set "string=!string:(=!"
+        )
+        echo "%~1" | find ")" > NUL 2>&1 && (
+            echo ^) is not allowed in path
+            set "string=!string:)=!"
+        )
+
+        if ["!string!"] == ["%~1"] (
+
+            set "string=!string:&=!"
+            set "string=!string:?=!"
+            set "string=!string:\!=!"
+            set "string=!string:%%=!"
+            set "string=!string:^=!"
+            set "string=!string:/=!"
+            set "string=!string:\=!"
+            set "string=!string:>=!"
+            set "string=!string:<=!"
+            set "string=!string:|=!"
+
+            REM : replace '_' by ' ' (if needed)
+            set "string=!string:_= !"
+
+            REM : WUP restrictions
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=E!"
+
+        )
+        set "%2="!string!""
 
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : remove DOS forbiden character from a string
-    :secureStringPathForDos
-
-        echo "%~1" | find "*" > NUL 2>&1 && (
-            echo ^* is not allowed
-
-            set "%2=KO"
-            goto:eof
-        )
-
+    REM : remove DOS forbiden character from a path
+    :securePathForDos
         REM : str is expected protected with double quotes
         set "string=%~1"
 
-        call:checkStr "!string!" status
-        if ["!status!"] == ["KO"] (
-            echo string is not valid
-            pause
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed in path
+            set "string=!string:*=!"
         )
 
-        set "string=!string:&=!"
-        set "string=!string:?=!"
-        set "string=!string:\!=!"
-        set "string=!string:%%=!"
-        set "string=!string:^=!"
-        set "string=!string:\=!"
-        set "string=!string:/=!"
-        set "string=!string:>=!"
-        set "string=!string:<=!"
-        set "string=!string::=!"
-        set "string=!string:|=!"
+        echo "%~1" | find "(" > NUL 2>&1 && (
+            echo ^( is not allowed in path
+            set "string=!string:(=!"
+        )
+        echo "%~1" | find ")" > NUL 2>&1 && (
+            echo ^) is not allowed in path
+            set "string=!string:)=!"
+        )
+        if ["!string!"] == ["%~1"] (
 
+            set "string=!string:&=!"
+            set "string=!string:?=!"
+            set "string=!string:\!=!"
+            set "string=!string:%%=!"
+            set "string=!string:^=!"
+            set "string=!string:/=!"
+            set "string=!string:>=!"
+            set "string=!string:<=!"
+            set "string=!string:|=!"
+
+            REM : WUP restrictions
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=E!"
+
+        )
         set "%2="!string!""
 
     goto:eof
@@ -1996,6 +2045,7 @@ REM        call:log2HostFile !msg!
         set "%2=!str!"
 
     goto:eof
+
     REM : ------------------------------------------------------------------
     REM : function to detect DOS reserved characters in path for variable's expansion: &, %, !
     :checkPathForDos

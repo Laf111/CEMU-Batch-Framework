@@ -21,9 +21,14 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-07/07/2020 V19-5 :
+08/07/2020 V19-5 :
+fix : fixbatFiles.bat create ./logs folder if needed 
+fix : fixbatFiles.bat check if the path does not contain forbiden characters (need to be checked
+      when used after cloning repository) 
+fix : change name of the function secureStringPathForDos to secureStringForDos 
 fix : dat account file was not installed on the very first launch (in wizardFirstSaving.bat)
       leading in an incomplete installation of online files ONLY the first run
+add : check main path to GAMES_FOLDER (not only games'folders) in setup.bat and create*.bat
 add : update embeded GFX packs to v690
 
 04/07/2020 V19-4 :

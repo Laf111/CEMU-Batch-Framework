@@ -698,7 +698,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     echo gpuType ^: !GPU_VENDOR! >> !batchFwLog!
     echo gpuType ^: !GPU_VENDOR!
 
-    call:secureStringPathForDos !GPU_VENDOR! GPU_VENDOR
+    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value 2^>NUL ^| find "="') do (
@@ -1716,57 +1716,49 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : check if a string contain *
-    :checkStr
-
-        echo "%~1" | find "*" > NUL 2>&1 && (
-            echo ^* is not allowed
-
-            set "%2=KO"
-            goto:eof
-        )
-        set "%2=OK"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : remove DOS forbiden character from a string
-    :secureStringPathForDos
-
-        echo "%~1" | find "*" > NUL 2>&1 && (
-            echo ^* is not allowed
-
-            set "%2=KO"
-            goto:eof
-        )
-
+    REM : remove DOS forbiden character from a path
+    :secureStringForDos
         REM : str is expected protected with double quotes
         set "string=%~1"
 
-        call:checkStr "!string!" status
-        if ["!status!"] == ["KO"] (
-            echo string is not valid
-            pause
+        echo "%~1" | find "*" > NUL 2>&1 && (
+            echo ^* is not allowed in path
+            set "string=!string:*=!"
         )
 
-        set "string=!string:&=!"
-        set "string=!string:?=!"
-        set "string=!string:\!=!"
-        set "string=!string:%%=!"
-        set "string=!string:^=!"
-        set "string=!string:\=!"
-        set "string=!string:/=!"
-        set "string=!string:>=!"
-        set "string=!string:<=!"
-        set "string=!string::=!"
-        set "string=!string:|=!""
+        echo "%~1" | find "(" > NUL 2>&1 && (
+            echo ^( is not allowed in path
+            set "string=!string:(=!"
+        )
+        echo "%~1" | find ")" > NUL 2>&1 && (
+            echo ^) is not allowed in path
+            set "string=!string:)=!"
+        )
 
+        if ["!string!"] == ["%~1"] (
+
+            set "string=!string:&=!"
+            set "string=!string:?=!"
+            set "string=!string:\!=!"
+            set "string=!string:%%=!"
+            set "string=!string:^=!"
+            set "string=!string:/=!"
+            set "string=!string:\=!"
+            set "string=!string:>=!"
+            set "string=!string:<=!"
+            set "string=!string:|=!"
+
+            REM : WUP restrictions
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=!"
+            set "string=!string:?=E!"
+
+        )
         set "%2="!string!""
 
     goto:eof
     REM : ------------------------------------------------------------------
-
-
 
     :getModifiedFile
         set "folder="%~1""

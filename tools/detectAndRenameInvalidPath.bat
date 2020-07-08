@@ -128,10 +128,12 @@ REM : main
         REM : analysing a root path, nothing to be done exit
         if ["!folderName!"] == [""] goto:eof
 
-        REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!% are also a problem with dos expansion
+        REM : windows forbids creating folder or file with a name that contains \/:*?"<>| but &!%() are also a problem with dos expansion
         set "str="!folderName!""
         set "str=!str:&=!"
         set "str=!str:\!=!"
+        set "str=!str:)=!"
+        set "str=!str:(=!"
         set "str=!str:%%=!"
         
         REM : WUP restrictions
