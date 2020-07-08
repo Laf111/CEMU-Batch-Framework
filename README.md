@@ -12,7 +12,7 @@ BatchFw detects the current aspect ratio and creates resolution GFX packs for ga
 
 If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
 
-**Last GFX packs checked (presets completion) : V686**
+**Last GFX packs checked (presets completion) : V690**
 
 
 
