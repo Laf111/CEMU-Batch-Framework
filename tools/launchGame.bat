@@ -2368,7 +2368,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if exist !csTmp! (
             del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
-            del /F "!csTmp:"=!*"  > NUL 2>&1
+            set "pat="!csTmp:"=!*""
+            del /F !pat! > NUL 2>&1
         )
 
         REM : extract systematically (in case of sync friends list with the wii-u)

@@ -1150,8 +1150,8 @@ REM : functions
 
         call:getHostState !ipRead! state
         if !state! EQU 1 (
-            cscript /nologo !MessageBox! "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue" 4112
-            if !ERRORLEVEL! EQU 2 goto:eof
+            echo "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue"
+            pause
         )
 
         :installAccount
@@ -1176,6 +1176,7 @@ REM : functions
         )
 
         set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+
         REM : settings.xml evolved after 1.15.19 included
         if !v11519! EQU 2 (
             REM : CEMU < 1.15.19 (Online/AccountId)
@@ -1229,9 +1230,11 @@ REM : functions
 
         :restoreCs
         if exist !csTmp! (
-            del /F !cs! > NUL 2>&1
+
+            if exist !cs! del /F !cs! > NUL 2>&1
             move /Y !csTmp! !cs! > NUL 2>&1
-            del /F "!csTmp:"=!*"  > NUL 2>&1
+            set "pat="!csTmp:"=!*""
+            del /F !pat! > NUL 2>&1
         )
 
         REM : extract systematically (in case of sync friends list with the wii-u)
