@@ -539,7 +539,7 @@ REM : main
             if !ERRORLEVEL! EQU 1 goto:getcustomAr
 
             set /P "desc=Please enter a description for this setting : "
-            call:secureStringForDos !desc! desc
+            call:secureStringForDos !desc! desc > NUL 2>&1
             set "desc=!desc:"=!"
 
             set "msg="DESIRED_ASPECT_RATIO=!width!-!height!=!desc!""
@@ -1065,7 +1065,7 @@ REM : main
     )
 
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
-    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR
+    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR > NUL 2>&1
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     cls

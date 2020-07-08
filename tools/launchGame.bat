@@ -698,7 +698,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     echo gpuType ^: !GPU_VENDOR! >> !batchFwLog!
     echo gpuType ^: !GPU_VENDOR!
 
-    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR
+    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR > NUL 2>&1
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get DriverVersion /value 2^>NUL ^| find "="') do (

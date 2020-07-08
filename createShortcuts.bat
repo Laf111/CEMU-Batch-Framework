@@ -514,7 +514,7 @@ REM    call:log2HostFile !msg!
     )
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
 
-    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR
+    call:secureStringForDos !GPU_VENDOR! GPU_VENDOR > NUL 2>&1
     set "GPU_VENDOR=!GPU_VENDOR:"=!"
 
     set "IGNORE_PRECOMP=DISABLED"
