@@ -14,7 +14,7 @@ If you choose to let BatchFw complete your packs, it will create the missing res
 
 **Last GFX packs checked (presets completion) : V690**
 
-
+For Wii-U owners, BatchFw comes with a complete FTP interface to update your accounts (online files, friends list...) and mostly to import/export your saves for all users between CEMU and the Wii-U.
 
 # 
 **IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : go to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" section in this page to get the last released version else **see recommendations at the end of this page**.
