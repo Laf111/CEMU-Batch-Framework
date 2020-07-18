@@ -132,8 +132,13 @@ REM : main
         set "str="!folderName!""
         set "str=!str:&=!"
         set "str=!str:\!=!"
+        echo !str! | find /I /V "(UPDATE DATA)" > NUL 2>&1 && goto:next
+        echo !str! | find /I /V "(DLC)" > NUL 2>&1 && goto:next
+        
         set "str=!str:)=!"
         set "str=!str:(=!"
+        
+        :next
         set "str=!str:%%=!"
         
         REM : WUP restrictions

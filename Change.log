@@ -21,6 +21,11 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+18/07/2020 V19-6 :
+fix : fix CEMU version not supported when choosing to creates shortcut for all games
+fix : unexpected renaming sequence for update and DLC 
+add : update embeded GFX packs to v693
+
 08/07/2020 V19-5 :
 fix : fixbatFiles.bat create ./logs folder if needed 
 fix : fixbatFiles.bat check if the path does not contain forbiden characters (need to be checked

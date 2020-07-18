@@ -351,7 +351,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     call:syncControllerProfiles
     echo ---------------------------------------------------------
     echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)
-    if !QUIET_MODE! EQU 1 goto:getCemuVersion
+    if !QUIET_MODE! EQU 1 goto:openCemuAFirstTime
 
     echo ---------------------------------------------------------
     REM : flush logFile of SCREEN_MODE
