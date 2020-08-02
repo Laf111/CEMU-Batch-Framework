@@ -6,13 +6,13 @@ It allows you to launch your loadiines games (uncompressed RPX) using many versi
 
 As the mlc01 folder and settings are located in the game's one, you can backup the whole game including saves for all users, update, DLC, settings into a single archive file easily.
 
-**Versions of CEMU supported : 1.11.6 to 1.20.0** (if you want to use earlier versions, create an installation per game and per user)
+**Versions of CEMU supported : 1.11.6 to 1.20.1** (if you want to use earlier versions, create an installation per game and per user)
 
 BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
 
 If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
 
-**Last GFX packs checked (presets completion) : V693**
+**Last GFX packs checked (presets completion) : V697**
 
 For Wii-U owners, BatchFw comes with a complete FTP interface to update your accounts (online files, friends list...) and mostly to import/export your saves for all users between CEMU and the Wii-U.
 
