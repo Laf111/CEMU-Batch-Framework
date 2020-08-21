@@ -20,6 +20,15 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 3) DISABLE ALL GFX PACKS and check if the issue persist
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
+      
+
+21/08/2020 V19-7 :
+add : when reverting saves to a mlc01 folder, use Wii-U accounts if defined under _BatchFw_WiiU\OnlineFiles\usersAccounts
+add : 16/9 windowed aspect ratio (401/210) if you use a 16/9 monitor, let BFW complete the packs and choose to not
+      launch Cemu in full screen mode
+fix : fail GFX packs completion (add presets) for BOTW on the first run (v697) 
+fix : multiple completion of BOTW GFX pack due to the presence of many occurences of the 
+      native resolution preset
 
 18/07/2020 V19-6 :
 fix : fix CEMU version not supported when choosing to creates shortcut for all games

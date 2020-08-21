@@ -453,6 +453,8 @@ REM : functions
 
         echo !ratio! | find /I " (361/210)" > NUL 2>&1 && set "desc= (16/10) windowed"
 
+        echo !ratio! | find /I " (401/210)" > NUL 2>&1 && set "desc= (16/9) windowed"
+
         echo !ratio! | find /I " (377/192)" > NUL 2>&1 && set "desc= (16/9 laptop) windowed"
 
         echo !ratio! | find /I " (683/384)" > NUL 2>&1 && set "desc= (16/9 laptop)"
@@ -613,6 +615,8 @@ REM : functions
             if not ["!screenMode!"] == ["fullscreen"] (
                 REM : add windowed ratio for 16-10
                 if ["!aspectRatiosArray[%%a]!"] == ["16-10"] call:createGfxPacks "361-210" "16/10 windowed"
+                REM : add windowed ratio for 16-9
+                if ["!aspectRatiosArray[%%a]!"] == ["16-9"] call:createGfxPacks "401-210" "16/9 windowed"
                 REM : add windowed ratio for 683-384
                 if ["!aspectRatiosArray[%%a]!"] == ["683-384"] call:createGfxPacks "377-192" "16/9 laptop windowed"
             )

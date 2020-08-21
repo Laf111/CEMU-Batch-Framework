@@ -29,6 +29,10 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
+    set "BFW_ONLINE_FOLDER="!BFW_WIIU_FOLDER:"=!\OnlineFiles""
+    set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -142,14 +146,39 @@ REM : main
     for /F "tokens=2 delims=~=" %%a in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
 
         set "user=%%a"
-        choice /C 123456789s /N /M "Account 8000000X to associate to !user! (1-9 or s to skip this user) ? : "
-        set /A "cr=!ERRORLEVEL!"
-        if !cr! LSS 10 (
-            set "accounts[!ua!]=8000000!cr!"
+        REM : check if wii-U account was defined for this user
+
+        set "currentUser=!user:"=!"
+        set "pat="!USERS_ACCOUNTS_FOLDER:"=!\!currentUser!*.dat""
+        set "folder=NONE"
+
+        for /F "delims=~" %%j in ('dir /B !pat! 2^>NUL') do (
+            set "filename="%%j""
+            set "noext=!filename:.dat=!"
+            set "folder=!noext:%%a=!"
+            set "folder=!folder:"=!"
+        )
+
+        if ["!folder!"] == ["NONE"] (
+            REM : use it
+            set "accounts[!ua!]=!folder!"
             set /A "ua+=1"
             set "users[!nbUsers!]=%%a"
             set /A "nbUsers+=1"
+
+        ) else (
+
+            REM : no account found, ask user
+            choice /C 123456789s /N /M "Account 8000000X to associate to !user! (1-9 or s to skip this user) ? : "
+            set /A "cr=!ERRORLEVEL!"
+            if !cr! LSS 10 (
+                set "accounts[!ua!]=8000000!cr!"
+                set /A "ua+=1"
+                set "users[!nbUsers!]=%%a"
+                set /A "nbUsers+=1"
+            )
         )
+
     )
     set /A "nbUsers-=1"
 

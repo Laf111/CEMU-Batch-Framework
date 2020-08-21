@@ -72,7 +72,9 @@ REM : main
     REM : override
     echo !desc! | find /I " (16/9)" > NUL 2>&1 && set "sd=169p"
 
-   echo !desc! | find /I " (16/10)" > NUL 2>&1 && set "sd=1610p"
+    echo !desc! | find /I " (16/9) windowed" > NUL 2>&1 && set "sd=169pWin"
+
+    echo !desc! | find /I " (16/10)" > NUL 2>&1 && set "sd=1610p"
 
     echo !desc! | find /I " (16/10) windowed" > NUL 2>&1 && set "sd=1610pWin"
 
