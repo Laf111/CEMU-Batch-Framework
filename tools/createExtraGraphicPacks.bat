@@ -535,7 +535,7 @@ REM : functions
         REM : remove extra directives left alone in the file (in case of multiple default preset defined)
         if not ["!ed!"] == [""] (
             set "fnrLogFile="!fnrLogFolder:"=!\fnr_secureRulesFile.log""
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "\n\n!ed:$=\$!" --replace "\n" --logFile !fnrLogFile!
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "#.*\n\n\n!ed:$=\$!" --replace "\n" --logFile !fnrLogFile!
         )
 
         if !vGfxPack! NEQ 2 if !vGfxPack! NEQ 5 del /F !extraDirectives169! > NUL 2>&1
