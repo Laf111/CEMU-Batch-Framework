@@ -643,9 +643,9 @@
 '0005000010161300';Kung-fu Heroes;wup-n-fcwp;-;-;v0;eur;yes;'0005000010161200';720;60
 '0005000010161500';Pop'ntwinbeerainbowbelladventures;wup-n-jcfp;-;-;v0;eur;yes;'0005000010161500';720;60
 '0005000010161600';Falling Skies The Game;wup-p-af8p;-;-;v0;eur;yes;'0005000010138600';720;60
-'0005000010161700';Pikmin Short Movies HD;wup-n-mcvj;-;-;v1;jap;yes;'0005000010161700';720;30
-'0005000010161800';Pikmin Short Movies HD;wup-n-mcve;-;-;v0;usa;yes;'0005000010161700';720;30
-'0005000010161900';Pikmin Short Movies HD;wup-n-mcvp;-;-;v0;eur;yes;'0005000010161700';720;30
+'0005000010161700';Pikmin Short Movies HD;wup-n-mcvj;-;-;v1;jap;yes;'0005000010161700';1080;30
+'0005000010161800';Pikmin Short Movies HD;wup-n-mcve;-;-;v0;usa;yes;'0005000010161700';1080;30
+'0005000010161900';Pikmin Short Movies HD;wup-n-mcvp;-;-;v0;eur;yes;'0005000010161700';1080;30
 '0005000010161A00';How To Train Your Dragon 2;wup-n-atde;-;-;v0;usa;yes;'0005000010162A00';720;30
 '0005000010161B00';Teslagrad;wup-p-wgdp;-;-;v16;eur;yes;'0005000010161B00';720;60
 '0005000010162200';Monkey Pirates;wup-p-wmpp;-;-;v16;eur;yes;'0005000010162200';720;60
@@ -715,7 +715,7 @@
 '000500001016D000';Mr Driller 2;wup-n-pamp;-;-;v0;eur;yes;'000500001016CF00';720;60
 '000500001016D100';Klonoa Empire of Dreams;wup-n-pane;-;-;v0;usa;yes;'000500001016D100';720;60
 '000500001016D200';Klonoa Empire of Dreams;wup-n-panp;-;-;v0;eur;yes;'000500001016D200';720;60
-'000500001016D300';Batman Arkham Origins Blackgate Deluxe;wup-p-wbmp;-;-;v1;eur;yes;'0005000010136C00';720;30
+'000500001016D300';Batman Arkham Origins Blackgate Deluxe;wup-p-wbmp;-;-;v1;eur;yes;'000500001016DF00';720;30
 '000500001016D400';Stick It To The Man;wup-p-wmnp;-;-;v0;eur;yes;'000500001016D400';720;60
 '000500001016D500';Super Toy Cars;wup-p-wctp;009y;-;v22;eur;yes;'000500001016D500';720;60
 '000500001016D600';The Amazing Spider-man 2;wup-p-am9p;52;-;v0;eur;yes;'000500001016D600';720;60
@@ -725,7 +725,7 @@
 '000500001016DC00';Disney Infinity 2;wup-n-adre;004q;-;v32;usa;yes;'000500001016DC00';720;60
 '000500001016DD00';Mon Premier Karaoke;wup-n-wmke;-;-;v0;usa;yes;'000500001016DD00';720;60
 '000500001016DE00';Super Toy Cars;wup-n-wcte;009y;-;v16;usa;yes;'000500001016D500';720;60
-'000500001016DF00';Batman Arkham Origins Blackgate Deluxe;wup-n-wbme;-;-;v16;usa;yes;'0005000010136C00';720;30
+'000500001016DF00';Batman Arkham Origins Blackgate Deluxe;wup-n-wbme;-;-;v16;usa;yes;'000500001016DF00';720;30
 '000500001016E000';Stick It To The Man;wup-n-wmne;-;-;v0;usa;yes;'000500001016D400';720;60
 '000500001016E100';Shovel Knight;wup-n-wkne;00ay;-;v48;usa;yes;'000500001016E100';1080;60
 '000500001016E200';XType Plus;wup-p-wexp;-;-;v32;eur;yes;'000500001016E200';720;60
@@ -746,7 +746,7 @@
 '000500001016FB00';Mon Premier Karaoke;wup-p-wmkp;-;-;v0;eur;yes;'000500001016DD00';720;60
 '000500001016FD00';Ava and Avior Save the Earth;wup-n-weae;-;-;v0;usa;yes;'000500001016FD00';720;60
 '000500001016FE00';Ballpoint Universe Infinite;wup-n-wbpe;-;-;v0;usa;yes;'000500001016FE00';720;60
-'000500001016FF00';Flowerworks HD Follie s Adventure;wup-n-wfwe;00nt;-;v16;usa;yes;'000500001016FF00';720;60
+'000500001016FF00';Flowerworks HD Follie s Adventure;wup-n-wfwe;00nt;-;v16;usa;yes;'000500001016FF00';1080;60
 '0005000010170100';Monkey Pirates;wup-n-wmpe;-;-;v16;usa;yes;'0005000010162200';720;60
 '0005000010170200';Pier Solar And The Great Architects;wup-n-wgae;007z;-;v16;usa;yes;'0005000010170200';720;60
 '0005000010170400';XType Plus;wup-n-wexe;-;-;v32;usa;yes;'000500001016E200';720;60
@@ -909,7 +909,7 @@
 '000500001017E700';3Souls;wup-n-wtse;-;-;-;usa;yes;'000500001017E200';720;60
 '000500001017EB00';SDK Paint;wup-n-wspe;-;-;v32;usa;yes;'000500001017EB00';720;60
 '000500001017EC00';Guac a Mole;wup-p-wgyp;-;-;v0;eur;yes;'000500001017EC00';720;60
-'000500001017ED00';Flowerworks HD Follie s Adventure;wup-p-wfwp;-;-;v0;eur;yes;'000500001016FF00';720;60
+'000500001017ED00';Flowerworks HD Follie s Adventure;wup-p-wfwp;-;-;v0;eur;yes;'000500001016FF00';1080;60
 '000500001017EF00';Devil World;wup-n-fdmp;-;-;v0;eur;yes;'000500001017EF00';720;60
 '000500001017F000';2sos;wup-n-fdnj;-;-;v0;jap;yes;'000500001017F000';720;60
 '000500001017F500';Crash N The Boys Street Challenge;wup-n-fdse;-;-;v0;usa;yes;'000500001017F500';720;60
@@ -1206,7 +1206,7 @@
 '00050000101A2300';Mario And Luigi-Partners in Time;wup-n-dahp;-;-;v0;eur;yes;'00050000101A2300';720;60
 '00050000101A2400';Tested With Robots;wup-p-ar5p;-;-;v0;eur;yes;'00050000101A2400';720;60
 '00050000101A2500';Wooden Sen SeY;wup-n-wdsj;-;-;v2;jap;yes;'00050000101A2500';720;60
-'00050000101A2800';Hd;wup-n-adgj;-;-;v1;jap;yes;'00050000101A2800';720;60
+'00050000101A2800';Hd;wup-n-adgj;-;-;v1;jap;yes;'00050000101A2800';1080;60
 '00050000101A2C00';Family Tennis SP;wup-p-wlkp;-;-;v16;eur;yes;'000500001019AE00';720;60
 '00050000101A2D00';Lego;wup-n-almj;-;-;v1;jap;yes;'0005000010192100';720;30
 '00050000101A2E00';Xtype+;wup-n-wexj;00tf;-;v16;jap;yes;'00050000101A2E00';720;60
@@ -1517,14 +1517,14 @@
 '00050000101C7D00';Pumped BMX +;wup-n-bpbe;-;-;v1;usa;yes;'00050000101C7600';1080;60
 '00050000101C7E00';Whispering Willows;wup-n-awwe;-;-;v0;usa;yes;'00050000101C7E00';720;60
 '00050000101C7F00';Toto Temple Deluxe;wup-p-bt2p;-;-;v0;eur;yes;'00050000101AE300';720;60
-'00050000101C8100';Wicked Monsters BLAST HD+;wup-n-awme;-;-;-;usa;yes;'00050000101C8B00';720;60
+'00050000101C8100';Wicked Monsters BLAST HD+;wup-n-awme;-;-;-;usa;yes;'00050000101C8B00';1080;60
 '00050000101C8200';Momonga Pinball Adventures;wup-n-ampe;-;-;v0;usa;yes;'00050000101C8200';720;60
 '00050000101C8400';Mario vs Donkey Kong2 -marchoftheminis;wup-n-daue;-;-;-;usa;yes;'00050000101C8400';720;60
 '00050000101C8500';Mario vs Donkey Kong2 -marchoftheminis;wup-n-daup;-;-;v0;eur;yes;'00050000101C8400';720;60
 '00050000101C8700';Kirby Mass Attack;wup-n-dave;-;-;-;usa;yes;'00050000101C8700';576;60
 '00050000101C8800';Kirby Mass Attack;wup-n-davp;-;-;-;eur;yes;'00050000101C8700';576;60
 '00050000101C8900';Just Dance;wup-p-avaj;-;-;-;jap;notmd;'00050000101C8900';720;60
-'00050000101C8B00';Wicked Monsters BLAST HD+;wup-p-awmp;00yt;-;v0;eur;yes;'00050000101C8B00';720;60
+'00050000101C8B00';Wicked Monsters BLAST HD+;wup-p-awmp;00yt;-;v0;eur;yes;'00050000101C8B00';1080;60
 '00050000101C8D00';Monster High New Ghoul In School;wup-n-bmse;-;-;-;usa;yes;'00050000101C8D00';720;60
 '00050000101C9300';TLOZ Breath Of The Wild;wup-n-alzj;-;-;-;jpn;yes;'00050000101C9500';720;30
 '00050000101C9400';TLOZ Breath Of The Wild;wup-n-alze;-;-;-;usa;yes;'00050000101C9500';720;30
@@ -1599,7 +1599,7 @@
 '00050000101D0600';Fatal Frame-Maiden Of Black Water;wup-n-al5e;-;-;v0;usa;yes;'00050000101D0600';720;60
 '00050000101D0700';Canvaleon;wup-p-achp;175;-;v16;eur;yes;'00050000101CE100';720;60
 '00050000101D0800';Outside the Realm;wup-n-arle;-;-;-;usa;yes;'00050000101D0800';720;60
-'00050000101D0900';Gunman Clive HD Collection;wup-n-agwe;00fv;-;v1;usa;yes;'00050000101D0900';720;60
+'00050000101D0900';Gunman Clive HD Collection;wup-n-agwe;00fv;-;v1;usa;yes;'00050000101D0900';1080;60
 '00050000101D0A00';Pokemon Mystery Dungeon-Red Rescue Team;wup-n-pdgp;-;-;-;eur;yes;'00050000101D0A00';720;60
 '00050000101D0C00';Pokemon Mystery Dungeon-Red Rescue Team;wup-n-pdge;-;-;-;usa;yes;'00050000101D0A00';720;60
 '00050000101D1000';Barbie And Her Sisters Puppy Rescue;wup-n-brqe;-;-;v0;usa;yes;'00050000101D1D00';720;60
@@ -1645,7 +1645,7 @@
 '00050000101D5600';Jones On Fire;wup-n-ajfe;-;-;-;usa;yes;'00050000101D4E00';720;60
 '00050000101D5F00';FreezeME;wup-n-af4e;-;-;16,32;usa;yes;'00050000101D5F00';720;30
 '00050000101D6000';Fast Racing Neo;wup-p-wfsp;00jx;-;v2;eur;yes;'00050000101D6000';720;60
-'00050000101D6100';Gunman Clive HD Collection;wup-p-agwp;00fv;-;v0;eur;yes;'00050000101D0900';720;60
+'00050000101D6100';Gunman Clive HD Collection;wup-p-agwp;00fv;-;v0;eur;yes;'00050000101D0900';1080;60
 '00050000101D6200';Test Your Mind;wup-n-athe;-;-;v1;usa;yes;'00050000101D6200';720;60
 '00050000101D6300';Ascent Of Kings;wup-n-akse;-;-;v0;usa;yes;'00050000101D6300';720;60
 '00050000101D6400';Kung Fu FIGHT;wup-n-ak2e;-;-;v0;usa;yes;'00050000101D6400';720;60
@@ -1949,7 +1949,7 @@
 '00050000101FF900';Test Your Mind;wup-p-athp;-;-;-;eur;yes;'00050000101D6200';720;60
 '00050000101FFA00';Word Logic By Powgi;wup-p-awqp;-;-;-;eur;yes;'00050000101FCE00';720;60
 '00050000101FFB00';Brick Breaker;wup-n-bb2e;-;-;-;usa;yes;'00050000101FFB00';720;60
-'00050000101FFC00';Ghost Blade HD;wup-p-bghe;-;-;-;usa;yes;'00050000101FFC00';720;60
+'00050000101FFC00';Ghost Blade HD;wup-p-bghe;-;-;-;usa;yes;'00050000101FFC00';1080;60
 '00050000101FFD00';Mahjong;wup-n-bm7e;-;-;-;usa;yes;'00050000101FFD00';720;60
 '00050000101FFE00';Tetraminos;wup-n-bt6e;-;-;-;usa;yes;'00050000101FFE00';720;60
 '00050000101FFF00';Solitaire;wup-n-bt7e;-;-;-;usa;yes;'00050000101FFF00';720;60
@@ -2025,7 +2025,7 @@
 '000500001020B100';Bridge Constructor Playground;wup-p-bwee;-;-;-;usa;yes;'000500001020B000';720;60
 '000500001020B200';Vaccine;wup-n-avne;-;-;-;usa;yes;'000500001020B200';720;60
 '000500001020B300';Vaccine;wup-p-avnp;-;-;-;eur;yes;'000500001020B200';720;60
-'000500001020B600';Ghost Blade HD;wup-p-bghp;-;-;-;eur;yes;'00050000101FFC00';720;60
+'000500001020B600';Ghost Blade HD;wup-p-bghp;-;-;-;eur;yes;'00050000101FFC00';1080;60
 '000500001020B800';Scribble;wup-p-azjp;-;-;-;eur;yes;'000500001020B800';720;60
 '000500001020B900';Breakout Defense;wup-p-bbdp;-;-;-;eur;yes;'000500001020B900';720;60
 '000500001020BA00';Breakout Defense;wup-p-bbde;-;-;-;usa;yes;'000500001020B900';720;60
@@ -2050,4 +2050,4 @@
 '000500001F600900';Paper Mario Color Splash;wup-n-cnfj;-;-;-;jap;yes;'000500001F600B00';720;60
 '000500001F600A00';Paper Mario Color Splash;wup-n-cnfe;-;-;-;usa;yes;'000500001F600B00';720;60
 '000500001F600B00';Paper Mario Color Splash;wup-p-cnfp;-;-;-;eur;yes;'000500001F600B00';720;60
-Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available on cdn;ico file Id;Native Resolution; Native Fps
+_Title Id;Description;Product code;Company Code;Notes;Versions;Region;Available on cdn;ico file Id;Native Resolution; Native Fps
