@@ -244,7 +244,7 @@ REM : main
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" 2^>NUL') do set /A "fps60=1"
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
 
     REM : 30FPS games
     if ["%nativeFps%"] == ["30"] set /A "g30=1"
