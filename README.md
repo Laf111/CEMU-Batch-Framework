@@ -8,6 +8,8 @@ As the mlc01 folder and settings are located in the game's one, you can backup t
 
 **Versions of CEMU supported : 1.11.6 to 1.21.0** (if you want to use earlier versions, create an installation per game and per user)
 
+To download CEMU VX.Y.Z, go to http://cemu.info/releases/cemu_X.Y.Z.zip
+
 BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
 
 If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
