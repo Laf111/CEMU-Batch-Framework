@@ -21,6 +21,14 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+10/09/2020 V19-9 :
+add : WII-U / add NUSspli to ".\resources\WiiuSDcard.rar"
+add : WII-U / re-enable the games injection feature
+        - remove the checks on Code/title.* files
+        - remove dead code for update and DLC files
+      HowTo : inject games' files using BatchFw, finish to install games using NUSspli and install update, DLC
+      It allows you to inject many games via FTP automatically instead of install WUP packages of each games
+      (usefull if you have a "small" SDCard)
 
 04/09/2020 V19-8 :
 add : update embeded GFX packs to v698
