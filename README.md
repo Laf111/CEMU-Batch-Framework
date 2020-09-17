@@ -4,6 +4,8 @@ BatchFw is a free framework for the **CEMU** emulator (WII-U) based on batch, wm
 
 It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your game library portable without using a CEMU install and therefore there's no need to rebuild the shader cache and/or modify your games' profiles for each host).
 
+So you can run your games using the best version of CEMU available and update each version for each game gradually.
+
 As the mlc01 folder and settings are located in the game's one, you can backup the whole game including saves for all users, update, DLC, settings into a single archive file easily.
 
 **Versions of CEMU supported : 1.11.6 to 1.21.1** (if you want to use earlier versions, create an installation per game and per user)
