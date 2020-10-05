@@ -2,13 +2,15 @@
 
 BatchFw is a free framework for **CEMU** (WII-U emulator) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-It allows you to launch your loadiines games (uncompressed RPX) using many versions of CEMU without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your game library portable without using a CEMU install and therefore there's no need to rebuild the shader cache and/or modify your games' profiles for each host).
+It allows you to launch your loadiines games (uncompressed RPX) using **many versions of CEMU** without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your game library portable without using a CEMU install and therefore there's no need to rebuild the shader cache and/or modify your games' profiles for each host).
 
 **So you can keep the best version of CEMU for a given game and update each version for each game gradually.**
 
 As the mlc01 folder and settings are located in the game's one, you can backup the whole game including saves for all users, update, DLC, settings into a single archive file easily.
 
-**Versions of CEMU supported : 1.11.6 to 1.21.1** (if you want to use earlier versions, create an installation per game and per user)
+**Versions of CEMU tested : 1.11.6 to 1.21.1** (if you want to use earlier versions, create an installation per game and per user)
+
+I recommend to stay in this range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
 To download CEMU VX.Y.Z, go to http://cemu.info/releases/cemu_X.Y.Z.zip
 
@@ -18,7 +20,7 @@ If you choose to let BatchFw complete your packs, it will create the missing res
 
 **Last GFX packs checked (presets completion) : V699**
 
-For Wii-U owners, BatchFw comes with a complete FTP interface to update your accounts (online files, friends list...) and mostly to import/export your saves for all users between CEMU and the Wii-U.
+For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**.
 
 # 
 **IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : go to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" section in this page to get the last released version else **see recommendations at the end of this page**.
@@ -315,7 +317,6 @@ Code is well commented and is read only.
 
 ## Recommendations: 
 
-I recommend to stay in the defined CEMU versions range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
 **Do not clone the repository because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : use the last released version (i also recommend to skip release candidate versions which are not fully validated).
 
