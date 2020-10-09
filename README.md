@@ -351,3 +351,5 @@ Other issues should be related to CEMU itself.
 Send me a private message on reddit, Discord or GBATemp (to Laf111) and i'll gladly help you.
 
 You can also now post your questions/issues on Cemu Underground (/r/CemuPiracy) using the dedicated flair !
+
+**WINDOWS 10 2004 (2020 may update) users** : Windows Defender enhance VBS scripts security and you might need to ignore the *\_BatchFw\_Install* folder if you have registered any third party sofwtare (DS4windows ect...) otherwise you'll get a Windows Defender's notification and the program will not be launched  
