@@ -207,7 +207,7 @@ IF YOU ENCOUNTER ANY ISSUE, TRY RESET BATCH FW TO FACTORY SETTINGS USING "WII-U 
 
 Once mlc01 data are moved to game's folder. BatchFw "only" prepare CEMU's workspace.
 Issues that could be affected to BatchFw are :
-- online files are missing
+- online files are missing (if you have a Wii-U)
 - saves/games stats not found/saved
 - settings missing/not saved
 - GFX packs are missing
