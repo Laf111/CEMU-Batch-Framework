@@ -17,8 +17,8 @@ I recommend to stay in this range (versions that i have checked) but you don't r
 
 To download CEMU VX.Y.Z, go to http://cemu.info/releases/cemu_X.Y.Z.zip
 
-CEMU's process is monitored and its priority pushed from "above nromal" to "high" to minimize FPS drops while in game. 
-A lock file is used to allow only one instance of CEMU and to avoid thread safe issues. CEMU's return code is analyzed before backuping your saves in order to avoid saves corruption if CEMU crashes.
+CEMU's process is monitored and its priority pushed from "above nromal" to "high" to **minimize FPS drops while in game**. 
+A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
 
 BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
