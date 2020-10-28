@@ -17,7 +17,7 @@ I recommend to stay in this range (versions that i have checked) but you don't r
 
 To download CEMU VX.Y.Z, go to http://cemu.info/releases/cemu_X.Y.Z.zip
 
-CEMU process is monitored and its priority pushed from "above nromal" to "high" to minimize FPS drops while in game. 
+CEMU's process is monitored and its priority pushed from "above nromal" to "high" to minimize FPS drops while in game. 
 A lock file is used to allow only one instance of CEMU and to avoid thread safe issues. CEMU's return code is analyzed before backuping your saves in order to avoid saves corruption if CEMU crashes.
 
 
