@@ -896,11 +896,11 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
 
-        if not ["!edu!"] == [""] (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !wc!\n\$height = !hc!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-        )
+REM        if not ["!edu!"] == [""] (
+REM            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !wc!\n\$height = !hc!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+REM        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -916,11 +916,11 @@ REM pause
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*\n\$gameHeight[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edu!" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
 
-        if not ["!edu!"] == [""] (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-        )
+REM        if not ["!edu!"] == [""] (
+REM            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+REM        )
     goto:eof
     REM : ------------------------------------------------------------------
 

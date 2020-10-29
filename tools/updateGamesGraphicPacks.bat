@@ -322,7 +322,8 @@ REM    call:checkGpFolders
 
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && (
-
+        cd !GAME_GP_FOLDER!
+        
         set "resPack="NOT_FOUND""
         if not ["!gfxType!"] == ["V2"] (
             for /F "delims=~" %%i in ('dir /B /S *_Resolution') do set "resPack="%%i""
