@@ -21,6 +21,12 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+17/11/2020 V20-1 :
+add : CEMU V1.22 and above support in wizardFirstSaving.bat (Auto cpu Mode)
+add : when a game profile is imported (with CEMU's settings) from an older version than 1.22.0 :
+      - replace Single-core by SingleCore-recompiler
+      - replace Multi-core by recommendedMode (computed as it already done in wizardFirstSaving.bat)
+
 29/10/2020 V20 :
 fix : GFX v707 completion failure for packs with extra directives
 fix : infinite loop that could occur when completing GFX packs (checking links step)

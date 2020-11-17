@@ -228,11 +228,20 @@ REM : main
 
     set "versionReadFormated=NONE"
     REM : suppose that version > 1.17.2 > 1.15.19 > 1.15.15 > 1.15.6 => > 1.11.6
+    set /A "v122=1"
     set /A "v1172=1"
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
 
+    REM : comparing version to V1.22.0
+    call:compareVersions !versionRead! "1.22.0" v122 > NUL 2>&1
+    if ["!v122!"] == [""] echo Error when comparing versions
+    if !v122! EQU 50 echo Error when comparing versions
+
+    REM : version > 1.22.0 => > 1.17.2 > ....
+    if !v122! LEQ 1 goto:checkProfile
+    
     REM : comparing version to V1.17.2
     call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
     if ["!v1172!"] == [""] echo Error when comparing versions
@@ -270,7 +279,13 @@ REM : main
     for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
     set "recommendedMode=SingleCore-recompiler"
 
-    REM : version >=1.17.2
+    REM : version >=1.22.0
+    if !v122! LEQ 1 (
+        set "recommendedMode=Auto"
+        goto:coreModeSet
+    )
+    
+    REM : version >=1.17.2 (including 1.21.5, job is done here)
     if !v1172! LEQ 1 (
 
         REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
@@ -295,7 +310,8 @@ REM : main
             if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
         )
     )
-    
+
+    :coreModeSet
     REM : Creating game profile if needed
     if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
 
@@ -667,8 +683,8 @@ REM : main
     echo ---------------------------------------------------------
     echo nbCpuThreads detected on !USERDOMAIN! ^: !nbCpuThreads!
 
-    REM : version >=1.17.2
-    if !v1172! LEQ 1 (
+    REM : version >=1.17.2 and < 1.22
+    if !v1172! LEQ 1 if !v122! NEQ 2 (
         echo Recommended cpuMode ^: !recommendedMode!
     )
     echo ---------------------------------------------------------
@@ -749,7 +765,7 @@ REM : main
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if not exist !lls! (
-        echo Warning ^: no last settings file found
+        echo Warning ^: no last settings file found^, game stats starting from now
         timeout /T 3 > NUL 2>&1
         goto:saveOptions
     )

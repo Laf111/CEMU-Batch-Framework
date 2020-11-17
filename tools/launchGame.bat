@@ -311,12 +311,21 @@ REM : main
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
-    REM : suppose that version > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    REM : suppose that version > 1.22.0 > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    set /A "v122=1"
     set /A "v1182=1"
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
     set /A "v114=1"
+
+    REM : comparing version to V1.22.0
+    call:compareVersions !versionRead! "1.22.0" v122 > NUL 2>&1
+    if ["!v122!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v122! EQU 50 echo Error when comparing versions >> !batchFwLog!
+
+    REM : version > 1.22.0 => > v1.18.2 > ....
+    if !v122! LEQ 1 goto:getTitleId
 
     REM : comparing version to V1.18.2
     call:compareVersions !versionRead! "1.18.2" v1182 > NUL 2>&1
@@ -666,6 +675,16 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     set "graphicPacks="!CEMU_FOLDER:"=!\graphicPacks""
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
 
+    REM : get GPU_VENDOR
+    set "GPU_VENDOR=NOT_FOUND"
+    set "gpuType=NO_NVIDIA"
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
+        set "string=%%i"
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+            set "gpuType=NVIDIA"
+            set "GPU_VENDOR=!string: =!"
+        )
+    )
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -682,17 +701,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     set "gpuCacheSaved="NOT_FOUND""
 
     set "driversUpdateFlag=0"
-
-    REM : get GPU_VENDOR
-    set "GPU_VENDOR=NOT_FOUND"
-    set "gpuType=NO_NVIDIA"
-    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
-        set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
-            set "gpuType=NVIDIA"
-            set "GPU_VENDOR=!string: =!"
-        )
-    )
 
     if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
     echo gpuType ^: !GPU_VENDOR! >> !batchFwLog!
@@ -1882,6 +1890,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
         if not exist !OLD_PROFILE_FILE! goto:syncCP
+
         REM : if PROFILE_FILE does not exist use OLD_PROFILE_FILE
         if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:syncCP
 
@@ -1890,9 +1899,44 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
 
-        REM : force integer values if needed for !versionRead! < 1.15.6
-        if !v1156! LEQ 1 goto:syncCP
+        REM : v1.22.0+ -> older : conv back Single-core/Multi-core -> recommendedMode (if needed)
+        REM : avoid for >= 1.22.0
+        if !v122! LEQ 1 goto:syncCP
 
+        REM : compute recommended mode (including for 1.21.5)
+        REM : get CPU threads number
+        for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
+        set "recommendedMode=SingleCore-recompiler"
+
+        REM : version >=1.17.2 (including 1.21.5, job is done here)
+        if !v1172! LEQ 1 (
+
+            REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
+            set /A "cpuNeeded=3"
+
+            if ["!gpuType!"] == ["NVIDIA"] (
+                set /A "cpuNeeded+=1"
+            )
+            if !nbCpuThreads! GTR !cpuNeeded! (
+                set "recommendedMode=DualCore-recompiler"
+                set /A "cpuNeeded+=1"
+                if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
+            )
+        )
+
+        REM : log file
+        set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
+        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
+        REM : replace cpuMode = recommendedMode
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
+        REM : replace gpuBufferCacheAccuracy = medium
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
+
+        
+        REM : v1.15.6+ -> older : force integer values (if needed)
+        REM : avoid for >= 1.15.6
+        if !v1156! LEQ 1 goto:syncCP
+        
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
         set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
