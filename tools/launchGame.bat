@@ -1892,16 +1892,49 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if not exist !OLD_PROFILE_FILE! goto:syncCP
 
         REM : if PROFILE_FILE does not exist use OLD_PROFILE_FILE
-        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:syncCP
+        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:mapProfileFile
 
         REM : diff game's profiles, open winmerge on the two files
         set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
 
         call !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
 
-        REM : v1.22.0+ -> older : conv back Single-core/Multi-core -> recommendedMode (if needed)
-        REM : avoid for >= 1.22.0
-        if !v122! LEQ 1 goto:syncCP
+        :mapProfileFile
+        REM : PROFILE FILE Mapping (CEMU's version of PROFILE_FILE is undefined here)
+        REM : --------------------
+        REM : (profile file are not saved by BatchFw and remain with CEMU installations)
+        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
+        REM : log file
+        set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
+
+        REM : v1.15.6 replace integer values by enums for gpuBufferCacheAccuracy
+
+        REM : versionRead >= v1.15.6 goto:supOrEqualv1156
+        if !v1156! LEQ 1 goto:supOrEqualv1156
+
+        REM : versionRead < 1.15.6 replace enums by integers (if found/need)
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
+
+        REM : all treatments below are for versionRead >= 1.15.6
+        goto:syncCP
+
+        :supOrEqualv1156
+        REM : versionRead >= 1.15.6
+
+        REM : if needed (found) replace integers by enums
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "2" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*2" --replace "gpuBufferCacheAccuracy = low" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "1" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*1" --replace "gpuBufferCacheAccuracy = medium" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "0" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*0" --replace "gpuBufferCacheAccuracy = high" --logFile !fnrLogFile!
+
+
+        REM : v1.22.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
+
+        REM : versionRead >= v1.22.0 goto:supOrEqualv122
+        if !v122! LEQ 1 goto:supOrEqualv122
+
+        REM : versionRead < 1.22.0 replace enums by integers (if found/need)
 
         REM : compute recommended mode (including for 1.21.5)
         REM : get CPU threads number
@@ -1923,29 +1956,20 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
             )
         )
+        REM : replace Single/Multi-core with recommendedMode
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
 
-        REM : log file
-        set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
-        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
-        REM : replace cpuMode = recommendedMode
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
-        REM : replace gpuBufferCacheAccuracy = medium
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
+        REM : all treatments below are for versionRead >= 1.22.0
+        goto:syncCP
 
-        
-        REM : v1.15.6+ -> older : force integer values (if needed)
-        REM : avoid for >= 1.15.6
-        if !v1156! LEQ 1 goto:syncCP
-        
-        REM : log file
-        set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
-        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
-        REM : replace gpuBufferCacheAccuracy = low
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
-        REM : replace gpuBufferCacheAccuracy = medium
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
-        REM : replace gpuBufferCacheAccuracy = high
-        type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
+        :supOrEqualv122
+        REM : versionRead >= 1.22.0
+
+        REM : if needed (found) replace Single/Dual/TripleCore-recompiler with Single/Multi-core
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "SingleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*SingleCore-recompiler" --replace "cpuMode = Single-core" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "DualCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*DualCore-recompiler" --replace "cpuMode = Multi-core" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "TripleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*TripleCore-recompiler" --replace "cpuMode = Multi-core" --logFile !fnrLogFile!
 
         :syncCP
         REM : synchronized controller profiles (import)
