@@ -55,7 +55,7 @@ REM : main
         set "ubw="!BFW_TOOLS_PATH:"=!\updateBatchFw.bat""
         wscript /nologo !StartHidden! !ubw! silent
     )
-    
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -279,7 +279,7 @@ REM : main
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
 
     if !usePbFlag! EQU 1 call:setProgressBar 8 12 "pre processing" "searching for a new GFX packs release"
-    
+
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
     wscript /nologo !StartHidden! !script! -warn
@@ -443,7 +443,7 @@ REM : main
     set "osci=!sci!"
 
     echo osci=!osci! sci=!sci! >> !batchFwLog!
-    
+
     REM : is CEMU >= 1.16 ?
     set /A "v116=2
 
@@ -454,7 +454,7 @@ REM : main
     if !v116! EQU 2 goto:getScreenMode
 
     REM : if v > 1.16 update sci value with titleId
-    call:lowerCase !titleId! sci  
+    call:lowerCase !titleId! sci
 
     :getScreenMode
     echo Expected shaderCacheName ^: !sci! >> !batchFwLog!
@@ -574,7 +574,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             goto:launch3rdPartySoftware
         )
     )
-   
+
     set "cacheFile=NONE"
     pushd !gtscf!
 
@@ -658,7 +658,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         wscript /nologo !StartHidden! !launchThirdPartySoftware! >> !batchFwLog!
 
         if !usePbFlag! EQU 1 call:setProgressBar 52 54 "pre processing" "getting CEMU options saved for !currentUser!"
-        
+
     ) else (
         if !usePbFlag! EQU 1 call:setProgressBar 50 54 "pre processing" "getting CEMU options saved for !currentUser!"
     )
@@ -768,7 +768,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : Vulkan cache (CEMU >= 1.16)
     if ["!graphicApi!"] == ["Vulkan"] set "GPU_CACHE_PATH="!CEMU_FOLDER:"=!\shaderCache\driver\vk""
-    
+
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH!
     echo GPU_CACHE_PATH=!GPU_CACHE_PATH! >> !batchFwLog!
 
@@ -1020,7 +1020,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : check if a new DLC is available
     wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! 0005000c !endTitleId!
-    
+
     if !usePbFlag! EQU 1 call:setProgressBar 96 100 "pre processing" "launching Cemu !versionRead!"
 
     REM : minimize all windows befaore launching in full screen
@@ -1140,13 +1140,13 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     echo !rc! !GAME_FOLDER_PATH! !CEMU_FOLDER! !user! %titleId% !MLC01_FOLDER_PATH! !CEMU_STATUS! !NEW_SHADER_CACHE_ID! !FPS! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 call:setProgressBar 52 75 "post processing" "backup and remove !currentUser! save"
-    
+
     REM : re-search your current GLCache (also here in case of first run after a drivers upgrade)
     REM : check last path saved in log file
 
     REM : Vulkan cache (CEMU >= 1.16)
     if ["!graphicApi!"] == ["Vulkan"] goto:searchCacheFolder
-    
+
     REM : search in logFile, getting only the last occurence
     set "GPU_CACHE="NOT_FOUND""
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "OPENGL_CACHE" 2^>NUL') do set "GPU_CACHE=%%i"
@@ -1181,7 +1181,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 if %cr_cemu% NEQ 0 call:setProgressBar 75 80 "post processing" "backup GPU cache"
     )
-    
+
     REM : backup of GpuCache, get the last modified folder under GpuCache
     pushd !GPU_CACHE_PATH!
     set "newGpuCacheId=NOT_FOUND"
@@ -1448,12 +1448,12 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q !gpLink! > NUL 2>&1
     )
-       
+
     REM : restoreBackups
     if exist !cs! call:restoreFile !cs!
     if exist !csb! call:restoreFile !csb!
     if exist !chs! call:restoreFile !chs!
-    
+
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
@@ -1599,7 +1599,7 @@ REM : functions
         set "file="%~1%""
         set "tmpFile="!file:"=!_bfw_tmp""
         if exist !tmpFile! del /F !tmpFile! > NUL 2>&1
-        
+
         set "fileBackup="!file:"=!_bfw_old""
 
         if not exist !fileBackup! goto:eof
@@ -1608,7 +1608,7 @@ REM : functions
         move /Y !fileBackup! !file! > NUL 2>&1
 
     goto:eof
-    
+
     :cleanHostLogFile
 
         REM : pattern to ignore in log file
@@ -1668,7 +1668,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
             call:setProgressBar 94 96 "pre processing" "waiting all child processes end"
         )
-        
+
         REM : remove trace
         del /F !launchGameLogFileTmp! > NUL 2>&1
 
@@ -1972,6 +1972,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "TripleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*TripleCore-recompiler" --replace "cpuMode = Multi-core" --logFile !fnrLogFile!
 
         :syncCP
+
         REM : synchronized controller profiles (import)
         call:syncControllerProfiles
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
@@ -2049,7 +2050,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "rpxFilePath=!RPX_FILE_PATH!"
 
         if !usePbFlag! EQU 1 call:setProgressBar 70 78 "pre processing" "updating games stats"
-        
+
         REM : update !cs! games stats for !GAME_TITLE!
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings""
         set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
@@ -2095,7 +2096,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         :cemuHookSettings
         pushd !BFW_TOOLS_PATH!
-        
+
         set "BFW_ONLINE_ACC="!BFW_ONLINE:"=!\usersAccounts""
         if !usePbFlag! EQU 1 If not exist !BFW_ONLINE_ACC! call:setProgressBar 78 82 "pre processing" "installing online files"
 
@@ -2198,7 +2199,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if exist !csb! (
             for /F "tokens=*" %%a in (!csb!)  do set /A "csbSize=%%~za"
         )
-   
+
         set "sf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!""
         if not exist !sf! goto:eof
         pushd !sf!
@@ -2318,7 +2319,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     :setOnlineFiles
 
         If not exist !BFW_ONLINE_ACC! goto:eof
-        
+
         REM : get the account.dat file for the current user and the accId
         set "accId=NONE"
 
@@ -2436,7 +2437,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
 
         if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
-        
+
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
         set "t2="!CEMU_FOLDER:"=!\seeprom.bin""
@@ -2719,7 +2720,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "ccp="!CEMU_FOLDER:"=!\controllerProfiles""
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -2747,13 +2748,13 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             wscript /nologo !MessageBox! "No transferable shader cache was found, do want to import one now (no need to rename it)?" 4164
             if !ERRORLEVEL! EQU 7 exit /b 1
         )
-        
+
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\importTransferableCache.bat""
 
         REM : import the downloaded cache
         wscript /nologo !StartWait! !toBeLaunch! !GAME_FOLDER_PATH! !sci!
         exit /b 0
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -2796,7 +2797,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+
     :transShaderCache
 
         if !v116! EQU 2 (
