@@ -1959,8 +1959,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             )
         )
         REM : replace Single/Multi-core with recommendedMode
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
 
         REM : all treatments below are for versionRead >= 1.22.0
         goto:syncCP
@@ -1969,9 +1969,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : versionRead >= 1.22.0
 
         REM : if needed (found) replace Single/Dual/TripleCore-recompiler with Single/Multi-core
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "SingleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*SingleCore-recompiler" --replace "cpuMode = Single-core" --logFile !fnrLogFile!
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "DualCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*DualCore-recompiler" --replace "cpuMode = Multi-core" --logFile !fnrLogFile!
-        type !PROFILE_FILE! | find /I "cpuMode" | find /I "TripleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*TripleCore-recompiler" --replace "cpuMode = Multi-core" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "SingleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*SingleCore-recompiler" --replace "cpuMode = Single-core recompiler" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "DualCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*DualCore-recompiler" --replace "cpuMode = Multi-core recompiler" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "TripleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*TripleCore-recompiler" --replace "cpuMode = Multi-core recompiler" --logFile !fnrLogFile!
 
         :syncCP
 
