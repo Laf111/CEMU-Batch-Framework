@@ -27,6 +27,8 @@ REM : main
     set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
