@@ -25,7 +25,7 @@ BatchFw detects the current aspect ratio and creates resolution GFX packs for ga
 
 If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
 
-**Last GFX packs checked (presets completion) : V707**
+**Last GFX packs checked (presets completion) : V710**
 
 For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**.
 
