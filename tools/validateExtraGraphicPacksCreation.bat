@@ -19,14 +19,14 @@ REM : main
 
     REM : set current char codeset
     call:setCharSetOnly
-    
+
     pushd !BFW_GP_FOLDER!
     for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution 2^> NUL ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
         call:treatGp "%%i"
     )
-    REM : V5 gfx packs
-    for /F "delims=~" %%i in ('dir /B  /A:D *_Graphics 2^> NUL') do (
-        call:treatGp "%%i"
+    REM : V5 and up gfx packs
+    for /F "delims=~" %%i in ('dir /B /S /A:D Graphics 2^> NUL') do (
+        call:treatGpV5 "%%i"
     )
     pause
     goto:eof
@@ -77,4 +77,29 @@ REM : functions
         echo #########################################################
 
     goto:eof
-    
+
+    :treatGpV5
+        set "graphicsFolder="%~1""
+
+        for %%a in (!graphicsFolder!) do set "parentFolder="%%~dpa""
+        set "gamePackFolder=!parentFolder:~0,-2!""
+
+
+        for /F "delims=~" %%i in (!gamePackFolder!) do set "title=%%~nxi"
+        set "rulesFile="!graphicsFolder:"=!\rules.txt""
+
+        for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "tid=%%k"
+        echo #########################################################
+        echo !title!^, !tid!
+        echo #########################################################
+
+        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
+        echo.
+        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
+
+        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
+        echo.
+        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
+        echo #########################################################
+
+    goto:eof
