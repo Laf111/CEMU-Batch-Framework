@@ -292,6 +292,9 @@ REM : main
 
     set "gpNativeHeight=NOT_FOUND"
 
+    REM : resolution prefix
+    if !vGfxPack! GEQ 5 type !rulesFile! | find /I "category = TV Resolution" > NUL 2>&1 && set "tv=TV "
+    
     REM : is NO new gfx pack was found => rulesFile contain _graphicPackV2
     if !vGfxPack! EQU 2 (
 
@@ -914,7 +917,7 @@ REM        )
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFrontV5
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=[ ]*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\ncategory = Resolution\ndefault = 1" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=.*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = !tv!Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\ncategory = !tv!Resolution\ndefault = 1" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -934,7 +937,7 @@ REM        )
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBackV5
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=[ ]*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\ncategory = Resolution\ndefault = 1\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = Resolution\n$width = !wc!\n$height = !hc!" --logFile !logFileNewGp!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=.*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\ncategory = !tv!Resolution\ndefault = 1\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = !tv!Resolution\n$width = !wc!\n$height = !hc!" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1184,7 +1187,7 @@ REM        )
 
         if !vGfxPack! LSS 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
 
-        if !vGfxPack! GEQ 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight!.*\ncategory[ ]*=[ ]*resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight!\ncategory = Resolution\ndefault = 1" --logFile !logFileNewGp!
+        if !vGfxPack! GEQ 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight!.*\ncategory[ ]*=.*resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory =  !tv!Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight!\ncategory = !tv!Resolution\ndefault = 1" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------

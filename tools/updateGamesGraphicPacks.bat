@@ -327,6 +327,7 @@ REM    call:checkGpFolders
         set "resPack="NOT_FOUND""
         if not ["!gfxType!"] == ["V2"] (
             for /F "delims=~" %%i in ('dir /B /S *_Resolution') do set "resPack="%%i""
+            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /B /S Graphics') do set "resPack="%%i""
         ) else (
             for /F "delims=~" %%i in ('dir /B /S *_1440p*') do set "resPack="%%i""
         )
