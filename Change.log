@@ -21,6 +21,9 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+24/11/2020 V20-2 :
+add : V6 GFX Pack support (if you choose to let BatchFw complete the presets)
+
 19/11/2020 V20-1 :
 add : CEMU V1.22 and above support in wizardFirstSaving.bat (Auto cpu Mode)
 add : when a game profile is imported (with CEMU's settings) from an older version than 1.22.0 :
