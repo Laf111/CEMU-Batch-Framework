@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color 4F
+REM    color 4F
 
     set "THIS_SCRIPT=%~0"
 
@@ -148,6 +148,11 @@ REM : main
     set "titleId=%titleId: =%"
 
     set titleId=%titleId:"=%
+
+    REM : fix for incomplete titleId
+    call:strLength !id! length
+    if !length! EQU 13 set "titleId=000!titleId!"
+
     set "ftid=%titleId:~0,16%"
 
     REM : check if game is recognized
@@ -336,6 +341,19 @@ REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    REM : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
 
     :patchInternalDataBase
 

@@ -119,6 +119,19 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :cleanGameLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
+
+        type !glogFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     
     :treatGame
 
@@ -174,7 +187,7 @@ REM : functions
             goto:handleGfxPacks
         )
         REM : check if a gfx pack with version >=5 exists ?
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Graphics\"') do (
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "Graphics\"') do (
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""

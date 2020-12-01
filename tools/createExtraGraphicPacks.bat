@@ -5,7 +5,7 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
-    color 4F
+REM    color 4F
     set "THIS_SCRIPT=%~0"
 
     REM : directory of this script
@@ -164,6 +164,9 @@ REM : main
 
     set "titleId=!titleId:"=!"
 
+    REM : fix for incomplete titleId
+    call:strLength !id! length
+    if !length! EQU 13 set "titleId=000!titleId!"
 
     REM : check if game is recognized
     call:checkValidity !titleId!
@@ -292,9 +295,6 @@ REM : main
 
     set "gpNativeHeight=NOT_FOUND"
 
-    REM : resolution prefix
-    if !vGfxPack! GEQ 5 type !rulesFile! | find /I "category = TV Resolution" > NUL 2>&1 && set "tv=TV "
-    
     REM : is NO new gfx pack was found => rulesFile contain _graphicPackV2
     if !vGfxPack! EQU 2 (
 
@@ -303,7 +303,7 @@ REM : main
             set "gpNativeHeight=!nativeHeight!"
         )
 
-        echo !rulesFile! | find /IV "!resX2!p" > NUL 2>&1 && (
+        echo !rulesFile! | find /I /V "!resX2!p" > NUL 2>&1 && (
             echo WARNING : graphic pack folder name does not match 2 x native Height >> !cgpLogFile!
             echo WARNING : graphic pack folder name does not match 2 x native Height
         )
@@ -317,15 +317,9 @@ REM : main
     REM : Linux formating (CRLF -> LF)
     call:dosToUnix
 
-    REM : to avoid a double def in rules.txt
-    if !vGfxPack! LSS 5 (
-        REM : be sure that only one default preset exist in file
-        set "fnrLogFile="!fnrLogFolder:"=!\fnr_secureRulesFile.log""
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight!\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!" --replace "" --logFile !fnrLogFile!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack!\n"  --replace "version = !vGfxPack!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9) (Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n" --logFile !fnrLogFile!
+    set "gpNativeHeight=NOT_FOUND"
 
-        REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
-        set "gpNativeHeight=NOT_FOUND"
+    if !vGfxPack! LSS 5 (
         for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
     ) else (
         for /F "tokens=2 delims=~=" %%s in ('type !rulesFile! ^| findstr /R "^$gameHeight.*=" 2^>NUL') do set "gpNativeHeight=%%s"
@@ -346,6 +340,7 @@ REM : main
     echo Native height set to !gpNativeHeight! in rules.txt
     echo. >> !cgpLogFile!
     echo.
+    REM : Add a check consistency on Native height define in WiiU-Titles-Library.csv and rules.txt
     if not ["!gpNativeHeight!"] == ["NOT_FOUND"] if !gpNativeHeight! NEQ !nativeHeight! (
         echo WARNING : native height in rules.txt does not match >> !cgpLogFile!
         echo WARNING : native height in rules.txt does not match
@@ -454,6 +449,18 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : function to compute string length
+    :strLength
+        Set "s=#%~1"
+        Set "len=0"
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+        set /A "%2=%len%"
+    goto:eof
 
     :getAllTitleIds
 
@@ -792,10 +799,10 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
         set "hc=!hi!"
         set "wc=!wi!"
-
+        
         REM : fullscreen resolutions
         if !hi! EQU !nativeHeight! if !wi! EQU !nativeWidth! goto:eof
-        if !hr! EQU 9 if !wr! EQU 16 call:addPresets169 & goto:eof
+        if !n5Found! EQU 1 call:addPresets & goto:eof
 
         call:addCustomPresets
 
@@ -806,28 +813,120 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
     :setPresets
 
         set "ratio= (!wr!/!hr!)"
+        set "desc= !ratio:"=!"
 
-        set /A "end=5760/!hr!"
-        set /A "start=360/!hr!"
+        REM : define resolution range with height, length=25
+        set "hList=480 540 720 840 900 1080 1200 1320 1440 1560 1680 1800 2040 2160 2400 2640 2880 3240 3600 3960 4320 4440 4920 5400 5880"
+        REM : customize for */10 ratios, length=25
+        if ["!hr!"] == ["10"] set "hList=400 600 800 900 950 1050 1200 1350 1500 1600 1800 1950 2250 2400 2550 2700 3000 3200 3600 3900 4200 4500 4950 5400 5850"
 
-        set /A "step=1"
-        set /A "range=(end-start)"
-        set /A "step=range/30"
-        if !step! LSS 1 set /A "step=1"
+        set /A "nbH=0"
+        for %%i in (%hList%) do set "hArray[!nbH!]=%%i" && set /A "nbH+=1"
 
-        set /A "previous=6000
-        for /L %%i in (%end%,-!step!,%start%) do (
+        set /A "hMin=%hArray[0]%"
+        REM : compute wMin
+        set /A "wMin=!hMin!*!wr!"
+        set /A "wMin=!wMin!/!hr!"
 
-            set /A "wi=!wr!*%%i"
-            set /A "hi=!hr!*%%i"
+        set /A "isOdd=!wMin!%%2"
+        if !isOdd! EQU 1 set /A "wMin+=1"
 
-            set /A "offset=!previous!-!hi!"
-            if !hi! NEQ 0 if !offset! GEQ 180 (
-                call:addResolution
-                set /A "previous=!hi!"
-            )
+        set /A "hMax=%hArray[24]%"
+        REM : compute wMax
+        set /A "wMax=!hMax!*!wr!"
+        set /A "wMax=!wMax!/!hr!"
+
+        set /A "isOdd=!wMax!%%2"
+        if !isOdd! EQU 1 set /A "wMax+=1"
+
+        REM : in order to inser the preset sorted in the rules.txt file
+        REM : first check if the 1080 or (1050 for aspect ratio */10) preset already exist
+        REM : this prest if at the rank 6 (5 starting from 0) in the array
+
+        set /A "h5=!hArray[5]!"
+        REM : compute w5
+        set /A "w5=!h5!*!wr!"
+        set /A "w5=!w5!/!hr!"
+
+        set /A "isOdd=!w5!%%2"
+        if !isOdd! EQU 1 set /A "w5+=1"
+
+        set /A "n5Found=0"
+
+        set "logFileFindPreset="!fnrLogFolder:"=!\!gpFolderName:"=!-Find_!h5!x!w5!.log""
+        del /F !logFileFindPreset! > NUL 2>&1
+
+        if !vGfxPack! LSS 5 (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!w5!.*\n\$height[ ]*=[ ]*!h5!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n" --logFile !logFileFindPreset!
+        ) else (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt"  --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!w5!x!h5!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n" --logFile !logFileFindPreset!
         )
-    goto:eof
+        for /F "tokens=2-3 delims=." %%i in ('type !logFileFindPreset! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do set /A "n5Found=1"
+
+        if !n5Found! EQU 1 (
+
+            REM :   - loop from (4,-1,0)
+            set /A "previousH=!h5!"
+            set /A "previousW=!w5!"
+
+            for /L %%i in (4,-1,0) do (
+                set /A "hi=!hArray[%%i]!"
+
+                REM : compute wi
+                set /A "wi=!hi!*!wr!"
+                set /A "wi=!wi!/!hr!"
+
+                set /A "isOdd=!wi!%%2"
+                if !isOdd! EQU 1 set /A "wi+=1"
+
+                call:addResolution
+                set /A "previousH=!hi!"
+                set /A "previousW=!wi!"
+            )
+
+            set /A "previousH=!h5!"
+            set /A "previousW=!w5!"
+
+            REM :   - loop from (6,1,24)
+            for /L %%i in (6,1,24) do (
+                set /A "hi=!hArray[%%i]!"
+
+                REM : compute wi
+                set /A "wi=!hi!*!wr!"
+                set /A "wi=!wi!/!hr!"
+
+                set /A "isOdd=!wi!%%2"
+                if !isOdd! EQU 1 set /A "wi+=1"
+
+                call:addResolution
+                set /A "previousH=!hi!"
+                set /A "previousW=!wi!"
+            )
+            goto:eof
+        )
+
+        set /A "previousH=!hMax!"
+        set /A "previousW=!wMax!"
+
+        REM :   - loop from (24,-1,0)
+        for /L %%i in (24,-1,0) do (
+            set /A "hi=!hArray[%%i]!"
+
+            REM : compute wi
+            set /A "wi=!hi!*!wr!"
+            set /A "wi=!wi!/!hr!"
+
+            set /A "isOdd=!wi!%%2"
+            if !isOdd! EQU 1 set /A "wi+=1"
+
+            call:addResolution
+            set /A "previousH=!hi!"
+            set /A "previousW=!wi!"
+        )
+        goto:eof
+
+
+      goto:eof
     REM : ------------------------------------------------------------------
 
 
@@ -859,11 +958,10 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         if !showEdFlag! EQU 0 if not ["!ed!"] == [""] echo extra directives detected ^:  >> !cgpLogFile! & echo !ed! >> !cgpLogFile!
         if !showEdFlag! EQU 0 if not ["!ed!"] == [""] echo extra directives detected ^: & echo !ed! & set /A "showEdFlag=1"
 
-        REM : no need for 16/9
+        REM : get extradirective
         set "edu=!ed!"
         if not ["!ed!"] == [""] (
             type !extraDirectives! | find "aspectRatio" > NUL 2>&1 && call:updateExtraDirectives "aspectRatio[ ]*=[ ]*\(16.0[ ]*\/[ ]*9.0[ ]*\)" "aspectRatio = (%wr%.0/%hr%.0)"
-
             REM Handle : ratioPassed > 16/9 -> $UIAspectX and < 16/9 -> $UIAspectY
             type !extraDirectives! | find "UIAspectY" > NUL 2>&1 && call:updateExtraDirectives "UIAspectY[ ]*=[ ]*1.0" "UIAspectY = (%wr%.0/%hr%.0)/(!nativeWidth!.0/!nativeHeight!.0)"
 
@@ -892,6 +990,7 @@ REM echo.
 REM !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src!
 REM pause
 REM echo replacing
+
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !fnrLogFolder! --fileMask "extraDirectives.log" --useRegEx --useEscapeChars --find !src! --replace !target! --logFile !logFileED!
 REM more !logFileED!
 REM pause
@@ -906,44 +1005,28 @@ REM pause
     REM : add a resolution bloc BEFORE the native one in rules.txt
     :pushFront
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight!" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-
-REM        if not ["!edu!"] == [""] (
-REM            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !wc!\n\$height = !hc!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-REM        )
+        if !vGfxPack! LSS 5 (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edup!" --replace "[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\n$width = !previousW!\n$height = !previousH!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+        ) else (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n" --logFile !logFileNewGp!
+        )
     goto:eof
     REM : ------------------------------------------------------------------
-
-    REM : add a resolution bloc BEFORE the native one in rules.txt
-    :pushFrontV5
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=.*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = !tv!Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight! (16/9 Default)\ncategory = !tv!Resolution\ndefault = 1" --logFile !logFileNewGp!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
 
     REM : add a resolution bloc AFTER the native one in rules.txt
     :pushBack
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*.*\n\$width[ ]*=[ ]*!nativeWidth![ ]*.*\n\$height[ ]*=[ ]*!nativeHeight![ ]*\n\$gameWidth[ ]*=[ ]*!nativeWidth![ ]*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edu!" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\n$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-
-REM        if not ["!edu!"] == [""] (
-REM            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^\$width = !nativeWidth!\n\$height = !nativeHeight!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!" --replace "$width = !nativeWidth!\n$height = !nativeHeight!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
-REM        )
+        if !vGfxPack! LSS 5 (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edup!" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\n$width = !previousW!\n$height = !previousH!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+        ) else (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : add a resolution bloc AFTER the native one in rules.txt
-    :pushBackV5
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight![ ]*.*\ncategory[ ]*=.*Resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !nativeWidth!x!nativeHeight!  (16/9 Default)\ncategory = !tv!Resolution\ndefault = 1\n\n[Preset]\nname = !wc!x!hc!!ratio:"=!\ncategory = !tv!Resolution\n$width = !wc!\n$height = !hc!" --logFile !logFileNewGp!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to add an extra 16/9 preset in graphic pack of the game
-    :addPresets169
+    :addPresets
 
         REM : if BFW_GPV2_FOLDER exist
         if exist !BFW_GPV2_FOLDER! (
@@ -987,6 +1070,7 @@ REM        )
             echo - !wc!x!hc!!ratio! preset already exists
             goto:eof
         )
+
         echo + !wc!x!hc!!ratio! preset >> !cgpLogFile!
         echo + !wc!x!hc!!ratio! preset
 
@@ -994,12 +1078,27 @@ REM        )
         set "logFileNewGp="!fnrLogFolder:"=!\!gpFolderName:"=!-NewGp_!hc!x!wc!.log""
         if exist !logFileNewGp! del /F !logFileNewGp! > NUL 2>&1
 
-        if !hc! GTR !nativeHeight! (
-            if !vGfxPack! LSS 5 call:pushBack
-            if !vGfxPack! GEQ 5 call:pushBackV5
+
+        if !vGfxPack! LSS 5 if not ["!edu!"] == [""] (
+            REM : replace $ by \$ for fnr.exe
+            REM : replace integer by * (regexp)
+            set "edup=!edu:$=\$!"
+            set "edup=!edup:0=*.!"
+            set "edup=!edup:1=*.!"
+            set "edup=!edup:2=*.!"
+            set "edup=!edup:3=*.!"
+            set "edup=!edup:4=*.!"
+            set "edup=!edup:5=*.!"
+            set "edup=!edup:6=*.!"
+            set "edup=!edup:7=*.!"
+            set "edup=!edup:8=*.!"
+            set "edup=!edup:9=*.!"
+        )
+
+        if !hc! GTR !h5! (
+            call:pushBack
         ) else (
-            if !vGfxPack! LSS 5 call:pushFront
-            if !vGfxPack! GEQ 5 call:pushFrontV5
+            call:pushFront
         )
 
     goto:eof
@@ -1175,19 +1274,25 @@ REM        )
         echo + !wc!x!hc!!desc! preset >> !cgpLogFile!
         echo + !wc!x!hc!!desc! preset
 
-        REM : Adding !h!x!w! in rules.txt
+        REM : replacing %wToReplace%xresX2 in rules.txt
         set "logFileNewGp="!fnrLogFolder:"=!\!gpFolderName:"=!-NewGp_!hc!x!wc!.log""
         if exist !logFileNewGp! del /F !logFileNewGp! > NUL 2>&1
 
-        if not ["!edu!"] == [""] (
+        REM : add presets at the begining of rules.txt (after version =)
+        REM : earlier than V5
+        if !vGfxPack! LSS 5 (
+            if not ["!edu!"] == [""] (
 
-            if !vGfxPack! LSS 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
+                goto:eof
+            )
+            REM : else
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
             goto:eof
+            )
         )
-
-        if !vGfxPack! LSS 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!" --logFile !logFileNewGp!
-
-        if !vGfxPack! GEQ 5 wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^[[]Preset[]].*\nname[ ]*=[ ]*!nativeWidth!x!nativeHeight!.*\ncategory[ ]*=.*resolution[ ]*.*\ndefault[ ]*=[ ]*1" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory =  !tv!Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !nativeWidth!x!nativeHeight!\ncategory = !tv!Resolution\ndefault = 1" --logFile !logFileNewGp!
+        REM : V5 and older
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
 
     goto:eof
     REM : ------------------------------------------------------------------

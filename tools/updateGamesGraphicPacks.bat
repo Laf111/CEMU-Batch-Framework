@@ -326,8 +326,8 @@ REM    call:checkGpFolders
         
         set "resPack="NOT_FOUND""
         if not ["!gfxType!"] == ["V2"] (
-            for /F "delims=~" %%i in ('dir /B /S *_Resolution') do set "resPack="%%i""
-            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /B /S Graphics') do set "resPack="%%i""
+            for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution') do set "resPack="%%i""
+            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S Graphics') do set "resPack="%%i""
         ) else (
             for /F "delims=~" %%i in ('dir /B /S *_1440p*') do set "resPack="%%i""
         )
@@ -748,9 +748,11 @@ REM    REM : ------------------------------------------------------------------
             echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
 
             set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            for %%a in (!gpLastVersionRes!) do set "parentFolder="%%~dpa""
+            set "titleFolder=!parentFolder:~0,-2!""
+            
             REM : get the game's name from it
-            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
-            set "gameName=!str:_Graphics=!"
+            for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
 
             goto:handleGfxPacks
         )

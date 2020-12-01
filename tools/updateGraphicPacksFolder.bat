@@ -196,6 +196,26 @@ REM : main
     del /F !pws_target! > NUL 2>&1
     del /F !uplog! > NUL 2>&1
 
+    if !QUIET_MODE! EQU 0 (
+
+        type !logFile! | find "COMPLETE_GP=YES" > NUL 2>&1 && (
+
+            echo.
+            echo If you do not plan to play at once^, you can now complete GFX packs
+            echo for ALL your games in a row ^? ^(to avoid build on each next run^)
+            echo.
+            call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 20sec)" "n,y" ANSWER 20
+            if [!ANSWER!] == ["n"] (
+                exit /b 0
+            )
+
+            REM : complete all GFX packs for games installed
+            set "tobeLaunch="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
+            call !tobeLaunch!
+
+        )
+    )
+    
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
