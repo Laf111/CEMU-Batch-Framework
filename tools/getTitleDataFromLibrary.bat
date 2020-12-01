@@ -104,7 +104,7 @@ REM : main
     set "titleId=%titleId:"=%"
 
     REM : fix for incomplete titleId
-    call:strLength !id! length
+    call:strLength %titleId% length
     if !length! EQU 13 set "titleId=000%titleId%"
 
     REM : check if game is recognized

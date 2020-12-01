@@ -33,6 +33,7 @@ REM : main
     set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
@@ -211,7 +212,7 @@ REM : main
 
             REM : complete all GFX packs for games installed
             set "tobeLaunch="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
-            call !tobeLaunch!
+            wscript /nologo !Start! !tobeLaunch!
 
         )
     )
