@@ -21,14 +21,14 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-01/12/2020 V20-2 :
+02/12/2020 V20-2 :
 add : V6 GFX Pack support (if you choose to let BatchFw complete the resolution presets)
 add : rewrite code for adding resolution preset (used for all GFX packs versions) :
       - insert presets for existing aspects ratios in a way to have them sorted when displayed in CEMU's GFX packs UI
       - force to define presets multiples than 1050 for */10 aspect ratios and multiple of 1080 otherwise (including custom ones)        
 add : possibility to complete all resolution presets for your games in a row after a GFX pack folder update (forced or not)
 add : WII-U / add dumpling to homebrew apps in resources\WiiuSDcard.rar
-add : Aperion Cyberstorm in WiiU-Titles-Library.csv      
+add : Update WiiU-Titles-Library.csv (add titles and Wii-U app)      
 
 19/11/2020 V20-1 :
 add : CEMU V1.22 and above support in wizardFirstSaving.bat (Auto cpu Mode)
