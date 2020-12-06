@@ -105,22 +105,33 @@ REM    color 4F
     )
     set "titleId=%titleId%"
 
+    REM : get gfxType version to create
+    echo.
+    echo Which version of pack to you wish to create ^?
+    echo.
+    echo     - 2 ^: CEMU ^< 1^.14
+    echo     - 4 ^: 1^.14 ^< CEMU ^< 1^.21
+    echo     - 6 ^: 1^.21 ^< CEMU
+    echo.
+    choice /C 246 /T 15 /D 6 /N /M "Enter your choice ? : "
+    set "gfxType=V!ERRORLEVEL!"
+
     goto:inputsAvailables
 
     REM : titleID and BFW_GP_FOLDER
     :getArgsValue
     echo. > !cgpLogFile!
-    if %nbArgs% LSS 2 (
+    if %nbArgs% LSS 3 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^*
         echo given {%*}
         exit /b 99
     )
-    if %nbArgs% GTR 3 (
+    if %nbArgs% GTR 4 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^*
         echo given {%*}
         exit /b 99
     )
@@ -132,11 +143,15 @@ REM    color 4F
         echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
         exit /b 1
     )
-    REM : get titleId
-    set "titleId=!args[1]!"
+    REM : get gfxType
+    set "gfxType=!args[1]!"
+    set "gfxType=!gfxType:"=!"
 
-    if %nbArgs% EQU 3 (
-        set "str=!args[2]!"
+    REM : get titleId
+    set "titleId=!args[2]!"
+
+    if %nbArgs% EQU 4 (
+        set "str=!args[3]!"
         set "gameName=!str:"=!"
     )
 
@@ -148,6 +163,7 @@ REM    color 4F
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
     set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
+    set "gfxPacksV4Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV4""
 
     set "titleId=!titleId:"=!"
 
@@ -197,7 +213,7 @@ REM    color 4F
     set "title=%DescRead:"=%"
     set "GAME_TITLE=%title: =%"
 
-    if %nbArgs% EQU 3 set "GAME_TITLE=!gameName!"
+    if %nbArgs% EQU 4 set "GAME_TITLE=!gameName!"
 
     REM get all title Id for this game
     set "titleIdList=%titleId%"
@@ -205,8 +221,8 @@ REM    color 4F
 
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
-    echo Create graphic packs for !GAME_TITLE! >> !cgpLogFile!
-    echo Create graphic packs for !GAME_TITLE!
+    echo Create !gfxType! graphic packs for !GAME_TITLE! >> !cgpLogFile!
+    echo Create !gfxType! graphic packs for !GAME_TITLE!
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
@@ -302,8 +318,20 @@ REM : functions
         ) else (
             echo description = Created by BatchFw considering that the native resolution is 1080p. Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. If it is not^, change the native resolution to 720p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
-        echo version = 3 >> !bfwRulesFile!
+        echo version = !gfxType:V=! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
+
+        if ["!gfxType!"] == ["V6"] (
+            echo. >> !bfwRulesFile!
+            echo [Default] >> !bfwRulesFile!
+            echo $width = !nativeWidth! >> !bfwRulesFile!
+            echo $height = !nativeHeight! >> !bfwRulesFile!
+            echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
+            echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
+            echo. >> !bfwRulesFile!
+        )
+        echo. >> !bfwRulesFile!
+        echo. >> # TV Resolution
         echo. >> !bfwRulesFile!
     goto:eof
     REM : ------------------------------------------------------------------
@@ -314,10 +342,18 @@ REM : functions
 
         echo [Preset] >> !bfwRulesFile!
         echo name = %overwriteWidth%x%overwriteHeight% %~3 >> !bfwRulesFile!
+
+        if ["!gfxType!"] == ["V6"] (
+            echo category = TV Resolution >> !bfwRulesFile!
+        )
+
         echo $width = %overwriteWidth% >> !bfwRulesFile!
         echo $height = %overwriteHeight% >> !bfwRulesFile!
-        echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
-        echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
+
+        if ["!gfxType!"] == ["V4"] (
+            echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
+            echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
+        )
         echo. >> !bfwRulesFile!
 
     goto:eof
@@ -510,25 +546,32 @@ REM : functions
 
         set "ratio= (!wr!/!hr!)"
 
-        set /A "end=5760/!hr!"
-        set /A "start=360/!hr!"
+        REM : define resolution range with height, length=25
+        set "hList=480 540 720 840 900 1080 1200 1320 1440 1560 1680 1800 2040 2160 2400 2640 2880 3240 3600 3960 4320 4440 4920 5400 5880"
+        REM : customize for */10 ratios, length=25
+        if ["!hr!"] == ["10"] set "hList=400 600 800 900 950 1050 1200 1350 1500 1600 1800 1950 2250 2400 2550 2700 3000 3200 3600 3900 4200 4500 4950 5400 5850"
 
-        set /A "step=1"
-        set /A "range=(end-start)"
-        set /A "step=range/30"
-        if !step! LSS 1 set /A "step=1"
+        set /A "nbH=0"
+        for %%i in (%hList%) do set "hArray[!nbH!]=%%i" && set /A "nbH+=1"
 
-        set /A "previous=6000
-        for /L %%i in (%end%,-!step!,%start%) do (
+        set /A "hMax=%hArray[24]%"
+        set /A "previous=!hMax!"
 
-            set /A "wi=!wr!*%%i"
-            set /A "hi=!hr!*%%i"
-            set /A "offset=!previous!-!hi!"
-            if !hi! NEQ 0 if !offset! GEQ 180 (
-                call:addResolution
-                set /A "previous=!hi!"
-            )
+        REM :   - loop from (24,-1,0)
+        for /L %%i in (24,-1,0) do (
+            set /A "hi=!hArray[%%i]!"
+
+            REM : compute wi
+            set /A "wi=!hi!*!wr!"
+            set /A "wi=!wi!/!hr!"
+
+            set /A "isOdd=!wi!%%2"
+            if !isOdd! EQU 1 set /A "wi+=1"
+
+            call:addResolution
+            set /A "previous=!hi!"
         )
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -613,7 +656,9 @@ REM : functions
         )
 
         REM : initialize graphic pack
-        set "newGp="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Resolution""
+        set "newGp="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\Graphics""
+        if ["!gfxType!"] == ["V4"] set "newGp="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_Resolution""
+
         if exist !newGp! (
             echo ^^! !GAME_TITLE! already exists, skipped ^^! >> !cgpLogFile!
             echo ^^! !GAME_TITLE! already exists, skipped ^^!

@@ -68,8 +68,9 @@ REM : main
 
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    REM : BatchFW folders
-    set "BFW_LEGACY_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+    REM : BatchFW GFX packs folders
+    set "gfxPacksV2Folder="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+    set "gfxPacksV4Folder="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
 
     set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
 
@@ -89,7 +90,6 @@ REM    call:checkGpFolders
     set "LastVersion=!LastVersion:"=!"
 
     set "gfxType=!args[0]!"
-    set "gfxType=V%gfxType:"=%"
 
     REM : get and check BFW_GP_FOLDER
     set "GAME_FOLDER_PATH=!args[1]!"
@@ -312,7 +312,7 @@ REM    call:checkGpFolders
     echo ARLIST=!ARLIST! >> !myLog!
     echo ARLIST=!ARLIST!
 
-    REM : import user defined ratios graphic packs
+    REM : import user defined ratios graphic packs (specific V2 pack as aspect ratio is used in folder's name) 
     for %%a in (!ARLIST!) do call:linkOtherV2GraphicPacks "%%a"
 
     :checkPackLinks
@@ -322,12 +322,18 @@ REM    call:checkGpFolders
 
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && (
-        cd !GAME_GP_FOLDER!
+        pushd !GAME_GP_FOLDER!
         
         set "resPack="NOT_FOUND""
-        if not ["!gfxType!"] == ["V2"] (
-            for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution') do set "resPack="%%i""
-            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S Graphics') do set "resPack="%%i""
+        if not ["!gfxType!"] == ["V2"] (        
+            REM : check V6 packs
+            for /F "delims=~" %%i in ('dir /A:D /B /S Graphics') do set "resPack="%%i""
+            
+            REM : none, search V4 packs near V6 packs
+            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution ^| find /V "_graphicPacksV4"') do set "resPack="%%i""
+            
+            REM : none, if not found search for V4 packs under _graphicPacksV4
+            if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution') do set "resPack="%%i""
         ) else (
             for /F "delims=~" %%i in ('dir /B /S *_1440p*') do set "resPack="%%i""
         )
@@ -612,16 +618,21 @@ REM : functions
 
         echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
+        
+        REM : TODO uncomment when V6 and V4 packs not mixed together anymore
+        REM echo !gp! | find /I "_graphicPacksV4" > NUL 2>&1 && if not ["!gfxType!"] == ["V4"] goto:eof
+        REM echo !gp! | find /V "_graphicPacksV4" > NUL 2>&1 && if ["!gfxType!"] == ["V4"] goto:eof
 
         set "rgp=!gp!"
 
         REM : if more than one folder level exist (LastVersion packs, get only the first level
-        echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && (
+        echo !gp! | find /V "_graphicPacksV" > NUL 2>&1 && (
             call:getFirstFolder
         )
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "linkPath=!linkPath:\_graphicPacksV2=!"
+        set "linkPath=!linkPath:\_graphicPacksV4=!"
 
         set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
 
@@ -715,27 +726,7 @@ REM    REM : ------------------------------------------------------------------
         set "LastVersionfound=0"
         set "gameName=NONE"
 
-        REM : check if a gfx pack with version > 2 exists ?
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
-            set "gpfound=1"
-
-            REM : rules.txt
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-
-            REM : graphic pack
-            set "LastVersionfound=1"
-
-            echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
-
-            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
-            REM : get the game's name from it
-            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
-            set "gameName=!str:_Resolution=!"
-
-            goto:handleGfxPacks
-        )
-
-        REM : check if a gfx pack with version >= 5 exists ?
+        REM : check if a gfx pack exist (latest version of packs)
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "Graphics\"') do (
             set "gpfound=1"
 
@@ -745,7 +736,7 @@ REM    REM : ------------------------------------------------------------------
             REM : graphic pack
             set "LastVersionfound=1"
 
-            echo Found a V!LastVersion! graphic pack ^: !rulesFile! >> !myLog!
+            echo Found a V6 graphic pack ^: !rulesFile! >> !myLog!
 
             set "gpLastVersionRes=!rulesFile:\rules.txt=!"
             for %%a in (!gpLastVersionRes!) do set "parentFolder="%%~dpa""
@@ -755,10 +746,35 @@ REM    REM : ------------------------------------------------------------------
             for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
 
             goto:handleGfxPacks
+        )        
+
+        REM : No new gfx pack found but is a V4 gfx pack exists ?
+        
+        REM : TODO update when V6 GFX packs only in _BatchFw_Graphic_Packs root 
+        REM : if not exist !gfxPacksV4Folder! goto:checkV2packs        
+        
+        REM : check if a gfx pack with version > 2 exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
+            set "gpfound=1"
+
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            set "LastVersionfound=1"
+
+            echo Found a V4 graphic pack ^: !rulesFile! >> !myLog!
+
+            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            REM : get the game's name from it
+            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
+            set "gameName=!str:_Resolution=!"
+
+            goto:handleGfxPacks
         )
 
+        :checkV2packs
         REM : No new gfx pack found but is a V2 gfx pack exists ?
-        if not exist !BFW_LEGACY_GP_FOLDER! goto:handleGfxPacks
+        if not exist !gfxPacksV2Folder! goto:handleGfxPacks
 
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| findstr /R "%resX2%p\\rules.txt"') do (
 
@@ -774,7 +790,7 @@ REM    REM : ------------------------------------------------------------------
 
             goto:handleGfxPacks
         )
-
+        
         REM : No GFX pack was found
 
         :handleGfxPacks
@@ -805,9 +821,9 @@ REM    REM : ------------------------------------------------------------------
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup!
 
         goto:createCapGP
 
@@ -833,17 +849,17 @@ REM    REM : ------------------------------------------------------------------
 
         :launchCreateExtraGraphicPacks
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !rulesFile! !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !rulesFile! !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !rulesFile! !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !rulesFile! !argSup!
 
         :createCapGP
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! %titleId% !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup! >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !argSup!
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -21,12 +21,13 @@ REM : main
     call:setCharSetOnly
 
     pushd !BFW_GP_FOLDER!
+    REM : V2 to V6 gfx packs
     for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution 2^> NUL ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
         call:treatGp "%%i"
     )
-    REM : V5 and up gfx packs
+    REM : V6 and up gfx packs
     for /F "delims=~" %%i in ('dir /B /S /A:D Graphics 2^> NUL') do (
-        call:treatGpV5 "%%i"
+        call:treatGpLatestVersion "%%i"
     )
     pause
     goto:eof
@@ -78,7 +79,7 @@ REM : functions
 
     goto:eof
 
-    :treatGpV5
+    :treatGpLatestVersion
         set "graphicsFolder="%~1""
 
         for %%a in (!graphicsFolder!) do set "parentFolder="%%~dpa""

@@ -148,7 +148,7 @@ REM : functions
     :restoreEmbededGfxPacks
 
         REM : clean old packs
-        for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV2"') do (
+        for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV"') do (
             set "pack="!BFW_GP_FOLDER:"=!\%%a""
             if exist !pack! rmdir /Q /S !pack! > NUL 2>&1
         )

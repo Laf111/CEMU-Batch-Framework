@@ -5,6 +5,8 @@ REM : main
 
     setlocal EnableDelayedExpansion
 
+    title -= Build extra GFX presets^/packs =-
+
     REM : directory of this script
     set "SCRIPT_FOLDER="%~dp0"" && set "BFW_TOOLS_PATH=!SCRIPT_FOLDER:\"="!"
 
@@ -27,6 +29,12 @@ REM : main
     REM : set current char codeset
     call:setCharSetOnly
 
+    set "setup="!BFW_PATH:"=!\setup.bat""
+    REM : GFX version to set
+    set "LastVersion=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
+    set "LastVersion=!LastVersion:"=!"
+
     REM : get the last version used
     set "newVersion=NOT_FOUND"
 
@@ -39,7 +47,7 @@ REM : main
     if [!gpl!] == ["NOT_FOUND"] (
         echo WARNING ^: !pat! not found^, force extra pack creation ^!
         REM : create one
-        set "dnd="!BFW_GP_FOLDER:"=!\graphicPacks563.doNotDelete""
+        set "dnd="!BFW_GP_FOLDER:"=!\graphicPacks703.doNotDelete""
         echo. > !dnd!
     )
 
@@ -54,6 +62,9 @@ REM : main
     pushd !GAMES_FOLDER!
     REM : searching for meta file
     for /F "delims=~" %%i in ('dir /B /S meta.xml 2^> NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
+
+        REM : set/reset gfxType
+        set "gfxType=V!LastVersion!"
 
         REM : meta.xml
         set "META_FILE="%%i""
@@ -165,19 +176,55 @@ REM : functions
         if exist !fnrLogBegp! del /F !fnrLogBegp! > NUL 2>&1
 
         REM : launching the search in all gfx pack folder (V2 and up)
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find %titleId:~3% --logFile !fnrLogBegp!
+
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogBegp!
 
         set "gameName=NONE"
-        set /A "v5pack=0"
 
-        REM : check if a gfx pack with version > 2 exists ?
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
+REM : DEBUG
+REM type !fnrLogBegp! ^| find "File:" | find /I /V "_BatchFw" | find "Graphics\"
+REM pause
+
+        REM : check if a gfx pack exist (latest version of packs)
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "Graphics\"') do (
+            set "gpfound=1"
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo GFX pack found ^: !rulesFile!
-            echo.
+            REM : TODO uncomment when batchFw will create latest GFX packs
+REM            echo Found a V!LastVersion! graphic pack ^: !rulesFile!
+            echo Found a V6 graphic pack ^: !rulesFile!
+
+            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
+            for %%a in (!gpLastVersionRes!) do set "parentFolder="%%~dpa""
+            set "titleFolder=!parentFolder:~0,-2!""
+
+            REM : get the game's name from it
+            for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
+
+            goto:handleGfxPacks
+        )
+
+        REM : No new gfx pack found but is a V4 gfx pack exists ?
+
+        REM : TODO update when V6 GFX packs only in _BatchFw_Graphic_Packs root
+        REM : if not exist !gfxPacksV4Folder! goto:checkV2packs
+
+REM : DEBUG
+REM type !fnrLogBegp! | find "File:" | find /I /V "_BatchFw" | find "_Resolution\" | find /I /V "_Gamepad" | find /I /V "_Performance_"
+REM pause
+
+        REM : check if a gfx pack with version > 2 exists ?
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
+            set "gpfound=1"
+
+            REM : rules.txt
+            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
+
+            REM : TODO replace LastVersion by V4 when batchFw will create latest GFX packs
+            echo Found a V4 graphic pack ^: !rulesFile!
+            set "gfxType=V4"
 
             set "gpLastVersionRes=!rulesFile:\rules.txt=!"
             REM : get the game's name from it
@@ -186,32 +233,20 @@ REM : functions
 
             goto:handleGfxPacks
         )
-        REM : check if a gfx pack with version >=5 exists ?
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "Graphics\"') do (
-
-            REM : rules.txt
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-
-            echo GFX pack found ^: !rulesFile!
-            echo.
-
-            set "gpLastVersionRes=!rulesFile:\rules.txt=!"
-            REM : get the game's name from it
-            for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
-            set "gameName=!str:_Graphics=!"
-            set /A "v5pack=1"
-
-            goto:handleGfxPacks
-        )
-
+        :checkV2packs
         REM : No new gfx pack found but is a V2 gfx pack exists ?
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| findstr /r "%resX2%p\\rules.txt"') do (
+        if not exist !gfxPacksV2Folder! goto:createPacks
+
+REM : DEBUG
+REM type !fnrLogBegp! | find "File:" | findstr /R "%resX2%p\\rules.txt"
+REM pause
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogBegp! ^| find "File:" ^| findstr /R "%resX2%p\\rules.txt"') do (
 
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
 
-            echo Only V2 GFX pack found ^: !rulesFile!
-            echo.
+            set "gfxType=V2"
+
             REM : V2 graphic pack
             set "str=%%i"
             set "str=!str:rules=!"
@@ -222,29 +257,32 @@ REM : functions
             goto:handleGfxPacks
         )
 
-        REM : No GFX pack was found : createCapGraphicPacks.bat
+        :createPacks
+        REM : No GFX pack was found
+
         echo No GFX pack found ^: create them
         echo.
-        echo "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId%
+        echo "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId%
         echo.
-        call "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId%
+        call "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId%
         goto:creatCap
 
 
         :handleGfxPacks
+
         set "argSup=%gameName%"
         if ["%gameName%"] == ["NONE"] set "argSup="
 
-        REM : only V2 found or V3 found
-        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !rulesFile! !title! !argSup!
+        REM : only V2 found or V4 found
+        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId% !rulesFile! !argSup!
         echo.
-        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !rulesFile! !title! !argSup!
+        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId% !rulesFile! !argSup!
 
         :creatCap
 
-        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !title! !argSup!
+        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId% !argSup!
         echo.
-        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" %titleId% !title! !argSup!
+        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId% !argSup!
 
         echo #########################################################
 

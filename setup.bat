@@ -11,7 +11,7 @@ REM : main
     set "BFW_VERSION=V20-2"
 
     REM : version of GFX packs created
-    set "BFW_GFXP_VERSION=3"
+    set "BFW_GFXP_VERSION=6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -1469,7 +1469,7 @@ REM : ------------------------------------------------------------------
             pause
             exit /b 77
         )
-        echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+        echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:checkV2Packs
 
         echo ERROR^: BatchFw can^'t get CEMU version from log^.
         echo This version seems to be not supported.
@@ -1477,22 +1477,37 @@ REM : ------------------------------------------------------------------
         pause
         exit /b 78
 
-        :versionOK
+        :checkV2Packs
+        REM : suppose : version > 1.15.1
+        set /A "v1151=1"
+
+        call:compareVersions !versionRead! "1.22" v121 > NUL 2>&1
+        if ["!v121!"] == [""] echo Error when comparing versions
+        if !v121! EQU 50 echo Error when comparing versions
+
+        REM : version >= 1.22 (V6+V4 packs)
+        if !v121! LEQ 1 goto:checkCemuHook
+
+        REM : version < 1.22
+
+        REM : comparing to 1.15.1 (used later)
         call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
         if ["!v1151!"] == [""] echo Error when comparing versions
         if !v1151! EQU 50 echo Error when comparing versions
 
-        REM : is version < 1.15.1
-        if !v1151! EQU 2 (
-            call:compareVersions !versionRead! "1.14.0" result > NUL 2>&1
-            if ["!result!"] == [""] echo Error when comparing versions
-            if !result! EQU 50 echo Error when comparing versions
-            if !result! EQU 1 goto:checkCemuHook
-            if !result! EQU 0 goto:checkCemuHook
-        ) else (
-            goto:checkCemuHook
-        )
+        REM : version >= 1.15.1 (V4 packs)
+        if !v1151! LEQ 1 goto:checkV4Packs
 
+        REM : version < 1.15.1
+
+        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+        if ["!v114!"] == [""] echo Error when comparing versions
+        if !v114! EQU 50 echo Error when comparing versions
+
+        REM : version >= 1.14
+        if !v114! LEQ 1 goto:checkV4Packs
+
+        REM : version < 1.14 (V2 packs)
         set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
         if exist !gfxv2! goto:checkCemuHook
 
@@ -1505,11 +1520,33 @@ REM : ------------------------------------------------------------------
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
-            echo ERROR while extracting V2_GFX_Packs, exiting 1
+            echo ERROR while extracting V2_GFX_Packs^, exiting 21
             pause
             exit /b 21
         )
+        goto:checkCemuHook
 
+       :checkV4Packs
+        REM : 1.14 <= version < 1.22
+        REM : TODO uncomment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+    REM    set "gfxv4="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
+    REM    if exist !gfxv4! goto:checkCemuHook
+        REM : TODO comment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+        goto:checkCemuHook
+
+        mkdir !gfxv4! > NUL 2>&1
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\V4_GFX_Packs.rar""
+
+        echo ---------------------------------------------------------
+        echo graphic pack V4 are needed for this version^, extracting^.^.^.
+
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+        set /A "cr=!ERRORLEVEL!"
+        if !cr! GTR 1 (
+            echo ERROR while extracting V4_GFX_Packs^, exiting 22
+            pause
+            exit /b 22
+        )
 
        :checkCemuHook
         REM : check if CemuHook is installed

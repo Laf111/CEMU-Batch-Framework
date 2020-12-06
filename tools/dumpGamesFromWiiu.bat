@@ -275,7 +275,7 @@ REM : main
     for /F "delims=~" %%p in ('dir /B /S !pat! 2^>NUL') do echo "%%p\rules.txt" >> !rulesFiles!
 
     pushd !BFW_GP_FOLDER!
-    REM : V5 gfx packs support
+    REM : V6 gfx packs support
     for /F "delims=~" %%p in ('dir /A:D /B /S Graphics 2^>NUL') do echo "%%p\rules.txt" >> !rulesFiles!
 
     REM : check if an internet connection is active

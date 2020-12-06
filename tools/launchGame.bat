@@ -291,8 +291,10 @@ REM : main
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
     set "LastVersion=!LastVersion:"=!"
 
-    set "gfxType=!LastVersion!"
+    REM : init to version of packs created by BatchFw
+    set "gfxType=V!LastVersion!"
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
+    set "gfxv4="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
 
     set "versionRead=NOT_FOUND"
     if not exist !cemuLog! (
@@ -313,22 +315,49 @@ REM : main
     echo Version read in log ^: !versionRead! >> !batchFwLog!
 
     set "versionReadFormated=NONE"
-    REM : suppose that version > 1.22.0 > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
-    set /A "v122=1"
+    REM : suppose that version > 1.21.0 > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    set /A "v121=1"
     set /A "v1182=1"
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
     set /A "v114=1"
 
-    REM : comparing version to V1.22.0
-    call:compareVersions !versionRead! "1.22.0" v122 > NUL 2>&1
-    if ["!v122!"] == [""] echo Error when comparing versions >> !batchFwLog!
-    if !v122! EQU 50 echo Error when comparing versions >> !batchFwLog!
+    REM : comparing version to V1.21.0
+    call:compareVersions !versionRead! "1.21.0" v121 > NUL 2>&1
+    if ["!v121!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v121! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-    REM : version > 1.22.0 => > v1.18.2 > ....
-    if !v122! LEQ 1 goto:getTitleId
+    REM : version > 1.21.0 => > v1.18.2 > ....
+    if !v121! LEQ 1 goto:getTitleId
 
+    REM : V4 packs support
+    set "gfxType=V4"
+
+    REM : TODO : uncomment when V4 and V6 not mixed anymore
+    if exist !gfxv4! goto:checkV1182
+
+    mkdir !gfxv4! > NUL 2>&1
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\V4_GFX_Packs.rar""
+
+    echo --------------------------------------------------------- >> !batchFwLog!
+    echo graphic pack V4 are needed for this version^, extracting^.^.^. >> !batchFwLog!
+
+    cscript /nologo !MessageBox! "Need to extract V4 GFX packs, please wait..."
+
+    if !usePbFlag! EQU 1 call:setProgressBar 12 12 "pre processing" "installing V4 GFX packs"
+
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+    set /A cr=!ERRORLEVEL!
+    if !cr! GTR 1 (
+        echo ERROR while extracting V4_GFX_Packs, exiting 1
+        echo ERROR while extracting V4_GFX_Packs, exiting 1 >> !batchFwLog!
+        wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
+        exit 21
+    )
+    goto:forceGfxPacksUpdate
+
+    :checkV1182
     REM : comparing version to V1.18.2
     call:compareVersions !versionRead! "1.18.2" v1182 > NUL 2>&1
     if ["!v1182!"] == [""] echo Error when comparing versions >> !batchFwLog!
@@ -368,7 +397,7 @@ REM : main
         goto:getTitleId
     )
 
-    set "gfxType=2"
+    set "gfxType=V2"
     if exist !gfxv2! goto:getTitleId
 
     mkdir !gfxv2! > NUL 2>&1
@@ -389,6 +418,7 @@ REM : main
         wscript /nologo !Start! "%windir%\System32\notepad.exe" !batchFwLog!
         exit 21
     )
+    :forceGfxPacksUpdate
     if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] type !logFile! | find /I "COMPLETE_GP" > NUL && (
         REM : force a graphic pack update
         echo Forcing a GFX pack update to take new ratios into account^.^.^. >> !batchFwLog!
@@ -1931,12 +1961,12 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "0" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*0" --replace "gpuBufferCacheAccuracy = high" --logFile !fnrLogFile!
 
 
-        REM : v1.22.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
+        REM : v1.21.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
 
-        REM : versionRead >= v1.22.0 goto:supOrEqualv122
-        if !v122! LEQ 1 goto:supOrEqualv122
+        REM : versionRead >= v1.21.0 goto:supOrEqualv121
+        if !v121! LEQ 1 goto:supOrEqualv121
 
-        REM : versionRead < 1.22.0 replace enums by integers (if found/need)
+        REM : versionRead < 1.21.0 replace enums by integers (if found/need)
 
         REM : compute recommended mode (including for 1.21.5)
         REM : get CPU threads number
@@ -1962,11 +1992,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
 
-        REM : all treatments below are for versionRead >= 1.22.0
+        REM : all treatments below are for versionRead >= 1.21.0
         goto:syncCP
 
-        :supOrEqualv122
-        REM : versionRead >= 1.22.0
+        :supOrEqualv121
+        REM : versionRead >= 1.21.0
 
         REM : if needed (found) replace Single/Dual/TripleCore-recompiler with Single/Multi-core
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "SingleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*SingleCore-recompiler" --replace "cpuMode = Single-core recompiler" --logFile !fnrLogFile!

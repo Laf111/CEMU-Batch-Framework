@@ -102,22 +102,33 @@ REM    color 4F
         goto:getTitleId
     )
 
+    REM : get gfxType version to create
+    echo.
+    echo Which version of pack to you wish to create ^?
+    echo.
+    echo     - 2 ^: CEMU ^< 1^.14
+    echo     - 4 ^: 1^.14 ^< CEMU ^< 1^.21
+    echo     - 6 ^: 1^.21 ^< CEMU
+    echo.
+    choice /C 246 /T 15 /D 6 /N /M "Enter your choice ? : "
+    set "gfxType=V!ERRORLEVEL!"
+
     goto:inputsAvailables
 
     REM : titleID and BFW_GP_FOLDER
     :getArgsValue
     echo. > !cgpLogFile!
-    if %nbArgs% GTR 3 (
+    if %nbArgs% GTR 4 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^*
         echo given {%*}
         exit /b 99
     )
-    if %nbArgs% LSS 2 (
+    if %nbArgs% LSS 3 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER TITLE_ID GP_NAME^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^*
         echo given {%*}
         exit /b 99
     )
@@ -130,12 +141,16 @@ REM    color 4F
         echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
         exit /b 1
     )
+    REM : get gfxType
+    set "gfxType=!args[1]!"
+    set "gfxType=!gfxType:"=!"
+
     REM : get titleId
-    set "titleId=!args[1]!"
+    set "titleId=!args[2]!"
     set "titleId=%titleId: =%"
 
-    if %nbArgs% EQU 3 (
-        set "gameName=!args[2]!"
+    if %nbArgs% EQU 4 (
+        set "gameName=!args[3]!"
         set "gameName=!gameName:"=!"
     )
 
@@ -205,8 +220,8 @@ REM    color 4F
 
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
-    echo Create FPS cap graphic packs for !GAME_TITLE! >> !cgpLogFile!
-    echo Create FPS cap graphic packs for !GAME_TITLE!
+    echo Create !gfxType! FPS cap graphic packs for !GAME_TITLE! >> !cgpLogFile!
+    echo Create !gfxType! FPS cap graphic packs for !GAME_TITLE!
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:begin
@@ -231,12 +246,19 @@ REM    color 4F
     set /A "g30=0"
 
     REM : initialize graphic pack
-    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!_Speed""
+    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\Speed""
+    if ["!gfxType!"] == ["V4"] set "gpLastVersion="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_Speed""
+
+    set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
+    if exist !bfwRulesFile! (
+        echo !bfwRulesFile! already exist^, cancelling >> !cgpLogFile!
+        echo !bfwRulesFile! already exist^, cancelling
+        exit /b 1
+    )
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
-    set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
     set "LastVersionExistFlag=1"
 
     echo Native FPS in WiiU-Titles-Library^.csv = %nativeFps%
@@ -246,7 +268,7 @@ REM    color 4F
     if exist !fnrLogLggp! del /F !fnrLogLggp! > NUL 2>&1
 
     REM : Search FPS++ patch
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
@@ -476,7 +498,7 @@ REM : functions
     :getAllTitleIds
 
         REM now searching using icoId
-        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";'%icoId%';"') do (
+        for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             set "titleIdRead=%%i"
             set "titleIdRead=!titleIdRead:'=!"
             echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
@@ -555,12 +577,22 @@ REM : functions
         ) else (
             echo description = !description! BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
-        
-        echo version = 3 >> !bfwRulesFile!
+        echo version = !gfxType:V=! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
-        echo [Preset] >> !bfwRulesFile!
-        echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
-        echo $FPS = !newNativeFps! >> !bfwRulesFile!
+
+        if ["!gfxType!"] == ["V4"] (
+            echo. >> !bfwRulesFile!
+            echo [Preset] >> !bfwRulesFile!
+            echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
+            echo $FPS = !newNativeFps! >> !bfwRulesFile!
+            echo. >> !bfwRulesFile!
+        )
+        if ["!gfxType!"] == ["V6"] (
+            echo. >> !bfwRulesFile!
+            echo [Default] >> !bfwRulesFile!
+            echo $FPS = !newNativeFps! >> !bfwRulesFile!
+            echo. >> !bfwRulesFile!
+        )
         echo. >> !bfwRulesFile!
 
     goto:eof

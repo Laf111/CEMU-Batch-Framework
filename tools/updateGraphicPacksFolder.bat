@@ -148,7 +148,7 @@ REM : main
     :noMsg
 
     REM : clean old packs
-    for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV2"') do (
+    for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV"') do (
         set "pack="!BFW_GP_FOLDER:"=!\%%a""
         if exist !pack! rmdir /Q /S !pack! > NUL 2>&1
     )
@@ -205,11 +205,12 @@ REM : main
             echo If you do not plan to play at once^, you can now complete GFX packs
             echo for ALL your games in a row ^? ^(to avoid build on each next run^)
             echo.
-            call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 20sec)" "n,y" ANSWER 20
+            call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 20sec)" "y,n" ANSWER 20
             if [!ANSWER!] == ["n"] (
                 exit /b 0
             )
-
+            pushd !BFW_TOOLS_PATH!
+            
             REM : complete all GFX packs for games installed
             set "tobeLaunch="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
             wscript /nologo !Start! !tobeLaunch!

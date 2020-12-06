@@ -414,32 +414,49 @@ REM : main
     exit /b 78
 
     :versionOK
+    REM : suppose : version > 1.15.1
+    set /A "v1151=1"
+    set /A "v114=1"
+    set /A "v1116=1"
 
+    call:compareVersions !versionRead! "1.22" v121 > NUL 2>&1
+    if ["!v121!"] == [""] echo Error when comparing versions
+    if !v121! EQU 50 echo Error when comparing versions
+
+    REM : version >= 1.22 (V6+V4 packs)
+    if !v121! LEQ 1 goto:checkCemuHook
+
+    REM : version < 1.22
+
+    REM : comparing to 1.15.1 (used later)
     call:compareVersions !versionRead! "1.15.1" v1151 > NUL 2>&1
     if ["!v1151!"] == [""] echo Error when comparing versions
     if !v1151! EQU 50 echo Error when comparing versions
 
-    REM : is version < 1.15.1
-    if !v1151! EQU 2 (
-        call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
-        if ["!v114!"] == [""] echo Error when comparing versions
-        if !v114! EQU 50 echo Error when comparing versions
-        if !v114! EQU 2 (
-            call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
-            if ["!v1116!"] == [""] echo Error when comparing versions
-            if !v1116! EQU 50 echo Error when comparing versions
-            if !v1116! EQU 2 (
-                echo ERROR this version is not supported by BatchFw
-                echo ^(only versions ^>= 1^.11^.6^)
-                pause
-                exit /b 99
-            )
-        )
-        if !v114! EQU 1 goto:checkCemuHook
-        if !v114! EQU 0 goto:checkCemuHook
-    ) else (
-        goto:checkCemuHook
+    REM : version >= 1.15.1 (V4 packs)
+    if !v1151! LEQ 1 goto:checkV4Packs
+
+    REM : version < 1.15.1
+
+    call:compareVersions !versionRead! "1.14.0" v114 > NUL 2>&1
+    if ["!v114!"] == [""] echo Error when comparing versions
+    if !v114! EQU 50 echo Error when comparing versions
+
+    REM : version >= 1.14
+    if !v114! LEQ 1 goto:checkV4Packs
+
+    REM : version < 1.14
+    call:compareVersions !versionRead! "1.11.6" v1116 > NUL 2>&1
+    if ["!v1116!"] == [""] echo Error when comparing versions
+    if !v1116! EQU 50 echo Error when comparing versions
+    if !v1116! EQU 2 (
+        echo ERROR this version is not supported by BatchFw
+        echo ^(only versions ^>= 1^.11^.6^)
+        pause
+        exit /b 99
     )
+    REM : 1.14 > version >= 1.11.6
+
     set "gfxv2="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV2""
     if exist !gfxv2! goto:checkCemuHook
 
@@ -449,14 +466,35 @@ REM : main
     echo ---------------------------------------------------------
     echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    timeout /T 3 > NUL 2>&1
-
     wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting V2_GFX_Packs^, exit 21
         pause
         exit /b 21
+    )
+    goto:checkCemuHook
+
+   :checkV4Packs
+    REM : 1.14 <= version < 1.22
+    REM : TODO uncomment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+REM    set "gfxv4="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
+REM    if exist !gfxv4! goto:checkCemuHook
+    REM : TODO comment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+    goto:checkCemuHook
+
+    mkdir !gfxv4! > NUL 2>&1
+    set "rarFile="!BFW_RESOURCES_PATH:"=!\V4_GFX_Packs.rar""
+
+    echo ---------------------------------------------------------
+    echo graphic pack V4 are needed for this version^, extracting^.^.^.
+
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+    set /A "cr=!ERRORLEVEL!"
+    if !cr! GTR 1 (
+        echo ERROR while extracting V4_GFX_Packs^, exiting 22
+        pause
+        exit /b 22
     )
 
     :checkCemuHook

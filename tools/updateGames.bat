@@ -266,7 +266,8 @@ REM : functions
 
         REM : check if a 60FPS or FPS++ pack exist
         del /F !fnrLogUg! > NUL 2>&1
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %endTitleId% --logFile !fnrLogUg!
+        REM : note that fnr --ExcludeDir _graphicPacksV handle all _graphicPacksV* folders
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %endTitleId% --logFile !fnrLogUg!
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUg! ^| find "File:" ^| find /I "FPS++"') do (
             REM : rules.txt
             set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
