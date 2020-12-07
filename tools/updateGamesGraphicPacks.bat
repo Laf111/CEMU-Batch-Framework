@@ -615,31 +615,28 @@ REM : functions
         set "str=!str:~2!"
 
         set "gp=!str:\rules=!"
-
+        
         echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
         
-        REM : TODO uncomment when V6 and V4 packs not mixed together anymore
-        REM echo !gp! | find /I "_graphicPacksV4" > NUL 2>&1 && if not ["!gfxType!"] == ["V4"] goto:eof
-        REM echo !gp! | find /V "_graphicPacksV4" > NUL 2>&1 && if ["!gfxType!"] == ["V4"] goto:eof
-
         set "rgp=!gp!"
 
         REM : if more than one folder level exist (LastVersion packs, get only the first level
         echo !gp! | find /V "_graphicPacksV" > NUL 2>&1 && (
             call:getFirstFolder
-        )
+        )       
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "linkPath=!linkPath:\_graphicPacksV2=!"
-        set "linkPath=!linkPath:\_graphicPacksV4=!"
+        set "linkPath=!linkPath:\_graphicPacksV4=!"       
 
-        set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
+        set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""      
 
         REM : links are already deleted earlier (more efficient than doing it here)
         REM : if not exist !linkPath! => because of GFX pack subfolder (FPS++ ect...)
-        if not exist !linkPath! mklink /J /D !linkPath! !targetPath! >> !myLog!
-
+        if not exist !linkPath! (
+            mklink /J /D !linkPath! !targetPath! >> !myLog!
+        )       
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -656,8 +653,8 @@ REM : functions
 
 
     :linkGraphicPacks
-
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
+        REM : sort /R the output to treat GFX packs under root before those in _graphicPacksV* folders
+        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| sort /R ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGpLinks "%%i"
 
     goto:eof
     REM : ------------------------------------------------------------------

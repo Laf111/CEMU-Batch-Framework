@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version to produce
-    set "BFW_NEXT_VERSION=V20-2"
+    set "BFW_NEXT_VERSION=V21"
 
     set "THIS_SCRIPT=%~0"
 
@@ -108,7 +108,7 @@ REM : main
 
     REM : Convert all files to ANSI and set them readonly
     set "pat="*.bat""
-    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 

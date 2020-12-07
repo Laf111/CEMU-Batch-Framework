@@ -22,16 +22,17 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-06/12/2020 V20-2 :
+07/12/2020 V21 :
 add : V6 GFX Pack support (if you choose to let BatchFw complete the resolution presets)
 add : rewrite code for adding resolution preset and creating packs (used for all GFX packs versions) :
       - insert presets for existing aspects ratios in a way to have them sorted when displayed in CEMU's GFX packs UI
       - force to define presets multiples than 1050 for */10 aspect ratios and multiple of 1080 otherwise (including custom ones)        
 add : possibility to complete all resolution presets for your games in a row after a GFX pack folder update (forced or not)
-add : update embeded GFX packs to v719
-add : embeded V4 packs with v703
+add : update embeded GFX packs to v720
+add : embeded V4 packs with v703 completed with the ones updated in V720
 add : WII-U / add dumpling to homebrew apps in resources\WiiuSDcard.rar
-add : Update WiiU-Titles-Library.csv (add titles and Wii-U app)      
+add : Update WiiU-Titles-Library.csv (add titles and Wii-U app)
+fix : update documentation on GFX packs     
 
 19/11/2020 V20-1 :
 add : CEMU V1.22 and above support in wizardFirstSaving.bat (Auto cpu Mode)

@@ -331,7 +331,7 @@ REM : functions
             echo. >> !bfwRulesFile!
         )
         echo. >> !bfwRulesFile!
-        echo. >> # TV Resolution
+        echo # TV Resolution >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
     goto:eof
     REM : ------------------------------------------------------------------
