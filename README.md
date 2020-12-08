@@ -269,6 +269,9 @@ Code is well commented and is read only.
 #
 **Fix custom GFX packs created for games without any official packs (if needed):** https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
 #
+#
+**FPS CAP packs, side by side games comparison:** https://1drv.ms/v/s!Apr2zdKB1g7fgmlsZDp66rDYY-Y3?e=V4LNda 
+#
 ## FAQ: 
 
 - **Do i need a Wii-U?**
