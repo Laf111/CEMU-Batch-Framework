@@ -320,7 +320,7 @@ Code is well commented and is read only.
 - **Why BatchFw's size is so big?**
 
     - Because of the third party software it comes with but mostly because of it packages files for offline installations :
-        - GFX packs V2 and V3
+        - GFX packs V2 and V4
         - CemuHook 0.5.7.3 and 0.5.6.4
         - shared fonts
     
