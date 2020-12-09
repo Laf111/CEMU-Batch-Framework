@@ -131,7 +131,7 @@ REM    call:checkGpFolders
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-        
+
     )
     set "buildOldUpdatePaths=!args[3]!"
     set /A "buildOldUpdatePaths=%buildOldUpdatePaths:"=%"
@@ -312,26 +312,26 @@ REM    call:checkGpFolders
     echo ARLIST=!ARLIST! >> !myLog!
     echo ARLIST=!ARLIST!
 
-    REM : import user defined ratios graphic packs (specific V2 pack as aspect ratio is used in folder's name) 
+    REM : import user defined ratios graphic packs (specific V2 pack as aspect ratio is used in folder's name)
     for %%a in (!ARLIST!) do call:linkOtherV2GraphicPacks "%%a"
 
     :checkPackLinks
     REM :Rebuild links on GFX packs
     echo Check links on GFX packs  >> !myLog!
-    echo Check links on GFX packs 
+    echo Check links on GFX packs
 
     REM : check that at least one GFX pack was listed
     dir /B /A:L !GAME_GP_FOLDER! > NUL 2>&1 && (
         pushd !GAME_GP_FOLDER!
-        
+
         set "resPack="NOT_FOUND""
-        if not ["!gfxType!"] == ["V2"] (        
+        if not ["!gfxType!"] == ["V2"] (
             REM : check V6 packs
             for /F "delims=~" %%i in ('dir /A:D /B /S Graphics') do set "resPack="%%i""
-            
+
             REM : none, search V4 packs near V6 packs
             if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution ^| find /V "_graphicPacksV4"') do set "resPack="%%i""
-            
+
             REM : none, if not found search for V4 packs under _graphicPacksV4
             if [!resPack!] == ["NOT_FOUND"] for /F "delims=~" %%i in ('dir /A:D /B /S *_Resolution') do set "resPack="%%i""
         ) else (
@@ -508,7 +508,7 @@ REM : functions
                     set /A "attempt+=1"
                     goto:tryToMoveFolders
                 )
-            
+
                 REM : fail to move folder
                 call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" patch
 
@@ -615,28 +615,28 @@ REM : functions
         set "str=!str:~2!"
 
         set "gp=!str:\rules=!"
-        
+
         echo !gp! | find /I "_graphicPacksV2" > NUL 2>&1 && if not ["!gfxType!"] == ["V2"] goto:eof
         echo !gp! | find /V "_graphicPacksV2" > NUL 2>&1 && if ["!gfxType!"] == ["V2"] goto:eof
-        
+
         set "rgp=!gp!"
 
         REM : if more than one folder level exist (LastVersion packs, get only the first level
         echo !gp! | find /V "_graphicPacksV" > NUL 2>&1 && (
             call:getFirstFolder
-        )       
+        )
 
         set "linkPath="!GAME_GP_FOLDER:"=!\!rgp:"=!""
         set "linkPath=!linkPath:\_graphicPacksV2=!"
-        set "linkPath=!linkPath:\_graphicPacksV4=!"       
+        set "linkPath=!linkPath:\_graphicPacksV4=!"
 
-        set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""      
+        set "targetPath="!BFW_GP_FOLDER:"=!\!rgp:"=!""
 
         REM : links are already deleted earlier (more efficient than doing it here)
         REM : if not exist !linkPath! => because of GFX pack subfolder (FPS++ ect...)
         if not exist !linkPath! (
             mklink /J /D !linkPath! !targetPath! >> !myLog!
-        )       
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -738,18 +738,18 @@ REM    REM : ------------------------------------------------------------------
             set "gpLastVersionRes=!rulesFile:\rules.txt=!"
             for %%a in (!gpLastVersionRes!) do set "parentFolder="%%~dpa""
             set "titleFolder=!parentFolder:~0,-2!""
-            
+
             REM : get the game's name from it
             for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
 
             goto:handleGfxPacks
-        )        
+        )
 
         REM : No new gfx pack found but is a V4 gfx pack exists ?
-        
-        REM : TODO update when V6 GFX packs only in _BatchFw_Graphic_Packs root 
-        REM : if not exist !gfxPacksV4Folder! goto:checkV2packs        
-        
+
+        REM : TODO update when V6 GFX packs only in _BatchFw_Graphic_Packs root
+        REM : if not exist !gfxPacksV4Folder! goto:checkV2packs
+
         REM : check if a gfx pack with version > 2 exists ?
         for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| find "File:" ^| find /I /V "_BatchFw" ^| find "_Resolution\" ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
             set "gpfound=1"
@@ -787,7 +787,7 @@ REM    REM : ------------------------------------------------------------------
 
             goto:handleGfxPacks
         )
-        
+
         REM : No GFX pack was found
 
         :handleGfxPacks
@@ -810,10 +810,10 @@ REM    REM : ------------------------------------------------------------------
             cscript /nologo !MessageBox! "Create GFX res and FPS packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
         ) else (
             type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateGameGraphicPacks
-            
+
             cscript /nologo !MessageBox! "New GFX packs version detected, please wait : create GFX res and FPS packs for this game."
         )
-        
+
         :launchCreateGameGraphicPacks
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
@@ -840,7 +840,7 @@ REM    REM : ------------------------------------------------------------------
             cscript /nologo !MessageBox! "Complete GFX res pack and create FPS pack for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the pack created using the dedicated shortcut in order to force it to rebuild^."
         ) else (
             type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateExtraGraphicPacks
-            
+
             cscript /nologo !MessageBox! "New GFX packs version detected, please wait : complete GFX res pack and create FPS pack for this game."
         )
 

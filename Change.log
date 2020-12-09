@@ -22,6 +22,9 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+XX/XX/XXXX V21-1 :
+add : replace multiplyLongInteger.bat with multiply.bat (floats support)
+
 07/12/2020 V21 :
 add : V6 GFX Pack support (if you choose to let BatchFw complete the resolution presets)
 add : rewrite code for adding resolution preset and creating packs (used for all GFX packs versions) :

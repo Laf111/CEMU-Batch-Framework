@@ -45,7 +45,7 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "downloadTid="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
-    set "multiplyLongInteger="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
+    set "multiply="!BFW_TOOLS_PATH:"=!\multiply.bat""
     set "checkGameContentAvailability="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
 
     set "notePad="%windir%\System32\notepad.exe""
@@ -79,7 +79,7 @@ REM : main
             exit /b 50
         )
     )
-    
+
     REM : exit in case of no JNUSFolder folder exists
     if not exist !JNUSFolder! (
         echo ERROR^: !JNUSFolder! not found
@@ -178,10 +178,10 @@ REM : main
     choice /C yn /N /M "Download all contents WIHTOUT confirmation (y/n : check free space left between each downloads)? : "
     if !ERRORLEVEL! EQU 1 set /A "askUser=0"
     cls
-    
+
     set /A "NB_UPDATE_TREATED=0"
     set /A "NB_DLC_TREATED=0"
-    
+
     REM : loop on game's code folders found
     for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
@@ -195,7 +195,7 @@ REM : main
     echo Updated !NB_UPDATE_TREATED! games
     echo Installed !NB_DLC_TREATED! DLC
     echo.
-    
+
     pause
     
     endlocal
@@ -324,7 +324,7 @@ REM : functions
             choice /C yn /N /M "Download this update now (y/n)? : "
             if !ERRORLEVEL! EQU 2 goto:eof
         )
-        
+
         echo.
         echo If you want to pause the current tranfert or if you get errors during the transfert^,
         echo close this windows then the child cmd console in your task bar
@@ -477,9 +477,9 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
+
     :treatDlc
-    
+
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
@@ -521,7 +521,7 @@ REM : functions
         )
         REM : no new update found, exit function
         if %dlcSize% EQU 0 goto:eof
-        
+
 
         REM : get the version of the content (DLC)
         set "metaContentPath="!dlcPath:"=!\meta\meta.xml""
@@ -547,7 +547,7 @@ REM : functions
         echo =========================================================
         echo - Dlc !GAME_TITLE! v%dlcVersion% ^(%dlcSize% MB^)
         echo ---------------------------------------------------------
-        
+
         for %%a in (!dlcPath!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
         set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
@@ -731,20 +731,20 @@ REM : functions
         if exist !oldDlcPath! rmdir /Q /S !oldDlcPath!
         set /A "NB_DLC_TREATED+=1"
         timeout /T 3 > NUL 2>&1
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
-    
+
+
     :download
 
         set "startTitleId=%~1"
         set "version=%~2"
-        
+
         set "label=update"
         if ["!startTitleId!"] ==["0005000c"] set "label=dlc"
-        
+
         set "utid=!startTitleId!!endTitleId!"
 
         set "key=NOT_FOUND"
@@ -927,7 +927,7 @@ REM : functions
         if ["!sizeRead!"] == ["0"] set "smb=0" & goto:endFct
 
         REM : 1/(1024^2)=0.00000095367431640625
-        for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
+        for /F %%a in ('!multiply! !sizeRead! 95367431640625') do set "result=%%a"
         set /A "lr=0"
         call:strLength !result! lr
 

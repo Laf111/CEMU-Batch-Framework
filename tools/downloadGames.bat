@@ -39,7 +39,7 @@ REM : main
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "download="!BFW_TOOLS_PATH:"=!\downloadTitleId.bat""
-    set "multiplyLongInteger="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
+    set "multiply="!BFW_TOOLS_PATH:"=!\multiply.bat""
 
     set "notePad="%windir%\System32\notepad.exe""
     set "explorer="%windir%\explorer.exe""
@@ -869,7 +869,7 @@ REM : functions
         if ["!sizeRead!"] == ["0"] set "smb=0" & goto:endFct
 
         REM : 1/(1024^2)=0.00000095367431640625
-        for /F %%a in ('!multiplyLongInteger! !sizeRead! 95367431640625') do set "result=%%a"
+        for /F %%a in ('!multiply! !sizeRead! 95367431640625') do set "result=%%a"
 
         set /A "lr=0"
         call:strLength !result! lr

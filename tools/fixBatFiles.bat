@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version to produce
-    set "BFW_NEXT_VERSION=V21"
+    set "BFW_NEXT_VERSION=V21-1"
 
     set "THIS_SCRIPT=%~0"
 
@@ -108,7 +108,7 @@ REM : main
 
     REM : Convert all files to ANSI and set them readonly
     set "pat="*.bat""
-    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiplyLongInteger" ^| find /V "downloadGames" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiply" ^| find /V "downloadGames" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -159,12 +159,12 @@ REM : main
     echo ^> tools/downloadGames.bat
 
     attrib +R !filePath! > NUL 2>&1
-    type !filePath! | find /I "™" > NUL 2>&1 && goto:checkMultiplyLongInteger
+    type !filePath! | find /I "™" > NUL 2>&1 && goto:checkmultiply
     echo ERROR^: Specific char not found line 988^, the file format is not ANSI anymore ^?
 
-    :checkMultiplyLongInteger
-    set "filePath="!BFW_TOOLS_PATH:"=!\multiplyLongInteger.bat""
-    echo ^> tools/multiplyLongInteger.bat
+    :checkmultiply
+    set "filePath="!BFW_TOOLS_PATH:"=!\multiply.bat""
+    echo ^> tools/multiply.bat
 
     attrib +R !filePath! > NUL 2>&1
     pushd !BFW_TOOLS_PATH!
