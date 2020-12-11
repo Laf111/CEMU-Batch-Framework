@@ -197,7 +197,7 @@ REM : main
     echo.
 
     pause
-    
+
     endlocal
     exit 0
 
@@ -207,7 +207,7 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :treatUpdate
-    
+
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
         REM : cd to codeFolder
         pushd !codeFolder!
@@ -264,33 +264,11 @@ REM : functions
         set "gamesFolder=!parentFolder:~0,-2!""
         set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
 
-        REM : check if a 60FPS or FPS++ pack exist
-        del /F !fnrLogUg! > NUL 2>&1
-        REM : note that fnr --ExcludeDir _graphicPacksV handle all _graphicPacksV* folders
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %endTitleId% --logFile !fnrLogUg!
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUg! ^| find "File:" ^| find /I "FPS++"') do (
-            REM : rules.txt
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-
-            REM : patches.txt
-            set "patchesFile=!rulesFile:rules=patches!"
-            type !patchesFile! | find /I %updateVersion% > NUL 2>&1 && goto:patchesOK
-            REM : warn user
-            choice /C yn /N /M "Found a FPS++ GFX pack that not reference this version, continue (y = might invalidate the FPS++ packs/n)? : "
-            if !ERRORLEVEL! EQU 2 goto:eof
-
-        )
-        for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUg! ^| find "File:" ^| find /I "60FPS"') do (
-            REM : rules.txt
-            set "rulesFile="!BFW_GP_FOLDER:"=!%%i.%%j""
-
-            REM : patches.txt
-            set "patchesFile=!rulesFile:rules=patches!"
-            type !patchesFile! | find /I %updateVersion% > NUL 2>&1 && goto:patchesOK
-            REM : warn user
-            choice /C yn /N /M "Found a 60FPS GFX pack that not reference this version, continue (y = might invalidate the 60FPS packs/n)? : "
-            if !ERRORLEVEL! EQU 2 goto:eof
-        )
+        echo.
+        echo Note that if 60FPS and^/or FPS^+^+ GFX packs for this game were not built
+        echo for this version^, updating could break them^.
+        echo.
+        pause
 
         :patchesOK
 
@@ -473,7 +451,7 @@ REM : functions
         if exist !oldUpdatePath! rmdir /Q /S !oldUpdatePath!
         set /A "NB_UPDATE_TREATED+=1"
         timeout /T 3 > NUL 2>&1
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -837,7 +815,7 @@ REM : functions
         set /A "previous=0"
         set /A "nb2sec=0"
         set /A "finalize=0"
-       
+
         REM : wait until all transferts are done
         :waitingLoop
         timeout /T 5 > NUL 2>&1
@@ -878,7 +856,7 @@ REM : functions
                 )
 
                 title Downloading !label! v!version! of !GAME_TITLE! ^: !progression!%%
-        
+
                 goto:waitingLoop
             ) else (
                 if !curentSize! LEQ !totalSizeInMb! set /A "progression=(!curentSize!*100)/!totalSizeInMb!"

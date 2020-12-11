@@ -265,26 +265,6 @@ REM : main
         timeout /t 4 > NUL 2>&1
         exit /b 1
     )
-
-
-
-
-
-    REM : update game title
-    REM : loop on meta.xml with path that contain mlc01 without aoc without 0050000c
-
-    REM : function updateTitle
-
-    REM : check 60FPS and FPS++ pack (edit or search vXX in patches.txt)
-
-    REM : use GAME_TITLE from titleKey
-    REM : call checkGameUpdateAvailability.bat titleId ???
-
-    REM : DL
-    REM : mv endTitle_old
-    REM : mv update to endTitleId
-    REM : then remove endTitle_old
-
     rmdir /Q /S !gamesFolder! > NUL 2>&1
 
     endlocal
