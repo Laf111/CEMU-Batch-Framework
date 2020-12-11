@@ -89,7 +89,7 @@ REM : main
     REM : args 2
     set "contentType=!args[1]!"
     set "contentType=!contentType:"=!"
-    
+
     set "label=update"
     set "searchOption=find /I ^"update^""
     if ["!contentType!"] == ["0005000c"] (
@@ -140,7 +140,7 @@ REM : main
 
     REM : delete subfolders in !JNUSFolder!
     for /F "delims=~" %%x in ('dir /O:D /T:W /B /S *') do rmdir /Q /S "%%x"  > NUL 2>&1
-    
+
     set "tid=!contentType!!endTitleId!"
     REM : pattern used to evaluate size of games : set always extracted size since size of some cryted titles are wrong
     set "str="Total Size of Decrypted Files""
@@ -156,7 +156,7 @@ REM : main
         timeout /t 2 > NUL 2>&1
         exit /b 83
     )
-    
+
     REM : get the last modified meta.xml in !label! folder
     set "mf="NOT_FOUND""
     for /F "delims=~" %%x in ('dir /O:D /T:W /B /S meta.xml 2^>NUL ^| !searchOption!') do set "mf="%%x""
@@ -174,7 +174,7 @@ REM : main
     set "dirname=!parentFolder:~0,-2!""
     for %%a in (!dirname!) do set "parentFolder="%%~dpa""
     set "fullPath=!parentFolder:~0,-2!""
-    
+
     if ["!contentType!"] == ["0005000e"] (
         REM : Get the version of the !label!
         for /F "delims=~" %%i in (!fullPath!) do set "folder=%%~nxi"
@@ -185,13 +185,13 @@ REM : main
         for %%a in (!contentFolder!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
         set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
-        
+
     ) else (
-    
+
         for %%a in (!fullPath!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
         set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
-        
+
         REM : get the version of the content (DLC)
         set "metaContentPath="!fullPath:"=!\meta\meta.xml""
         set "newContentVersion="NONE""
@@ -213,15 +213,15 @@ REM : main
         set /A "contentVersion=!newContentVersion!"
 
     )
-    
+
     if ["!initialGameFolderName!"] == ["NOT_FOUND"] (
         if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: failed to get folder of !label!
         timeout /t 2 > NUL 2>&1
         exit /b 61
     )
-    
+
     if !DIAGNOSTIC_MODE! EQU 0 rmdir /Q /S !gamesFolder! > NUL 2>&1
-    
+
     REM : check if an !label! exist for the game
     set "oldContentPath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\!contentType!\!endTitleId!""
 
@@ -245,7 +245,7 @@ REM : main
             timeout /t 2 > NUL 2>&1
             exit /b 65
         )
-        set /A "oldVersion=!oldContentVersion!"
+        set /A "oldVersion=!oldContentVersion:0=!"
 
         if !oldVersion! GEQ !newVersion! (
             REM : new <= old, skip
@@ -291,7 +291,7 @@ REM : functions
         set "pat=%~2"
         set "type=%~3"
         set "%4=0"
-        
+
         set "key=NOT_FOUND"
         for /F "delims=~	 tokens=1-4" %%a in ('type !titleKeysDataBase! ^| find /I "!tid!" 2^>NUL') do set "key=%%b"
 
@@ -314,12 +314,12 @@ REM : functions
             set "intSize=1"
             goto:endFctGetSize
         )
-        
+
         set /A "intSize=0"
         for /F "delims=~. tokens=1" %%i in ("!strSize!") do set /A "intSize=%%i"
 
         :endFctGetSize
-         
+
         set "%4=!intSize!"
         set /A "totalSizeInMb=!totalSizeInMb!+!intSize!"
 
