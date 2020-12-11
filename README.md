@@ -21,13 +21,13 @@ CEMU's process is monitored and its priority pushed from "above nromal" to "high
 A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
 
-BatchFw computes the current aspect ratio using your screen resolution (so it works on every display configuration setup, dual triple screen...) and creates resolution GFX packs for games with no GFX packs provided (which are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to control the **emulation's speed or increasing FPS** for games that allow it (V-Sync needs to be disabled).
+BatchFw computes the current aspect ratio using your screen resolution (so it works on every display configuration setup, dual triple screen...) and **creates resolution GFX packs for games with no GFX packs provided** (which are automatically replaced by the official ones when they'll be available). It also **creates FPS GFX packs** to control the **emulation's speed or increasing FPS** for games that allow it (V-Sync needs to be disabled).
 
 If you choose to let BatchFw complete your packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
 **Last GFX packs checked (presets completion) : V720**
 
-If you update to a more recent configuration not deisgned as supported here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (and so use stocks ones).
+If you update to a more recent configuration not listed here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (to use stocks ones).
 
 
 For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**.
