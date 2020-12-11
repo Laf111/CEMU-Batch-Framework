@@ -6,11 +6,11 @@ GRAPHIC_PACKS :
 1°) Common GFX packs folder and update process
 ----------------------------------------------
 
-BatchFw has an auto-update process for its graphic packs folder (_BatchFW_Graphic_Packs) and therefore autmoatically checks
+BatchFw has an auto-update process for his graphic packs folder (_BatchFW_Graphic_Packs) and therefore autmoatically checks
 updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
 or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
-Note that only graphic packs needed for your games are installed when CEMU is launched
+Note that only graphic packs needed for your games are installed when CEMU is launched.
 
 This GFX packs folder is shared with all version of CEMU.
 BatchFw embeded the last official version of outdated packs (V2 and V4).
@@ -25,7 +25,7 @@ It will creates all missing presets for your aspect ratio (for every host you us
 During the setup, BatchFw compute your aspect ratio with your current screen resolution.
 So it will work whatever the display configuration you use.
 
-The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the offcial repository.
+The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the official repository.
 
 Also, BatchFw create FPS CAP packs to control the emulation speed on games that use a dynamic FPS engine such as : Mario Kart 8, DKTF, Wind waker...
 They are created only if no FPS++ and/or a 60FPS is/are found.
