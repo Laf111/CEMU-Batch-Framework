@@ -154,8 +154,10 @@ REM : main
     set "versionLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_version"') do set "versionLine="%%j""
     if [!versionLine!] == ["NONE"] goto:dlc
-    for /F "delims=<" %%i in (!versionLine!) do set "GAME_VERSION=%%i"
-
+    for /F "delims=<" %%i in (!versionLine!) do (
+        set "GAME_VERSION=%%i"
+        set "GAME_VERSION=%GAME_VERSION:0=!%"
+    )
     :dlc
     REM : check if a DLC is present :
     set "DLC=no"

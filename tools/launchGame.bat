@@ -457,7 +457,7 @@ REM : main
 
     REM : check if a Game's update is available
     set "ugp="!BFW_TOOLS_PATH:"=!\checkGameContentAvailability.bat""
-    echo !ugp! !GAME_FOLDER_PATH! 0005000X !endTitleId! >> !batchFwLog!
+    echo !ugp! !GAME_FOLDER_PATH! 0005000e !endTitleId! >> !batchFwLog!
     wscript /nologo !StartHidden! !ugp! !GAME_FOLDER_PATH! 0005000e !endTitleId!
 
     REM : create shortcut to logFile

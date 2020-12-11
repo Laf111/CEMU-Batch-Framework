@@ -210,7 +210,7 @@ REM : main
             timeout /t 2 > NUL 2>&1
             exit /b 65
         )
-        set /A "contentVersion=!newContentVersion!"
+        set /A "contentVersion=!newContentVersion:0=!!"
 
     )
 
