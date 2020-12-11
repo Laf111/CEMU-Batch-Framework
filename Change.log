@@ -24,6 +24,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 XX/XX/XXXX V21-1 :
 add : replace multiplyLongInteger.bat with multiply.bat (floats support)
+fix : false detection of update/DLC of a game when the version is defined with leading 0 in meta.xml
 
 07/12/2020 V21 :
 add : V6 GFX Pack support (if you choose to let BatchFw complete the resolution presets)
