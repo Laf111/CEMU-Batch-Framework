@@ -2,9 +2,9 @@
 
 BatchFw is a free framework for **CEMU** (WII-U emulator) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-It allows you to launch your loadiines games (uncompressed RPX) using **many versions of CEMU** without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (by making your game library portable without using a CEMU install and therefore there's no need to rebuild the shader cache and/or modify your games' profiles for each host).
+It allows you to launch your loadiines games (uncompressed RPX) using **many versions of CEMU** without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (making your game library portable using the -mlc argument. CEMU needs to be installed on each host as the shader cache is host dependant).
 
-**So you can keep the best version of CEMU for a given game and update each version for each game gradually.**
+**You can keep the best version of CEMU for a given game and update each version for each game gradually.**
 
 ![CEMU-Batch-Framework](resources/BatchFw.png)
 
@@ -15,17 +15,20 @@ As the mlc01 folder and settings are located in the game's one, you can backup t
 
 I recommend to stay in this range (versions that i have checked) but you don't really risk much to try newer versions (all manipulations on xml files in BatchFw use the least restrictive XPath requests possible and must therefore work even if the settings.xml file is reorganized)
 
-To download CEMU VX.Y.Z, go to http://cemu.info/releases/cemu_X.Y.Z.zip
+To download a previous version of CEMU (VX.Y.Z), go to http://cemu.info/releases/cemu_X.Y.Z.zip
 
 CEMU's process is monitored and its priority pushed from "above nromal" to "high" to **minimize FPS drops while in game**. 
 A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
 
-BatchFw detects the current aspect ratio and creates resolution GFX packs for games with no GFX packs provided (BatchFw's packs are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to cap the FPS for games that allow it.
+BatchFw computes the current aspect ratio using your screen resolution (so it works on every display configuration setup, dual triple screen...) and creates resolution GFX packs for games with no GFX packs provided (which are automatically replaced by the official ones when they'll be available). It also creates FPS GFX packs to control the **speed emulation or increasing FPS** for games that allow it (V-Sync needs to be disabled).
 
-If you choose to let BatchFw complete your packs, it will create the missing resolution presets for the current aspect ratio.
+If you choose to let BatchFw complete your packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
 **Last GFX packs checked (presets completion) : V720**
+
+If you update to a more recent configuration not deisgned as supported here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (and so use stocks ones).
+
 
 For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**.
 
