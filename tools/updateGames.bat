@@ -175,9 +175,9 @@ REM : main
     echo.
 
     set /A "askUser=1"
-    choice /C yn /N /M "Download all contents WIHTOUT confirmation (y/n : check free space left between each downloads)? : "
+    choice /C yn /N /M "Download all contents WIHTOUT any space left checks between each download (y/n)? : "
     if !ERRORLEVEL! EQU 1 set /A "askUser=0"
-    cls
+    echo.
 
     set /A "NB_UPDATE_TREATED=0"
     set /A "NB_DLC_TREATED=0"
@@ -228,6 +228,8 @@ REM : functions
         REM : basename of GAME FOLDER PATH (used to name shorcut)
         for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
 
+        echo treating "!GAME_TITLE!"^.^.^.
+
         set "updatePath="NOT_FOUND""
         set "endTitleId=NOT_FOUND"
         set "updateVersion=NOT_FOUND"
@@ -253,7 +255,7 @@ REM : functions
         REM : Get the version of the update
         for /F "delims=~" %%i in (!updatePath!) do set "folder=%%~nxi"
         set "updateVersion=!folder:v=!"
-        cls
+
         echo =========================================================
         echo - Update !GAME_TITLE! with v%updateVersion% ^(%updateSize% MB^)
         echo ---------------------------------------------------------
@@ -268,9 +270,7 @@ REM : functions
         echo Note that if 60FPS and^/or FPS^+^+ GFX packs for this game were not built
         echo for this version^, updating could break them^.
         echo.
-        pause
-
-        :patchesOK
+        if !askUser! EQU 1 pause
 
         pushd !JNUSFolder!
         set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
@@ -311,6 +311,22 @@ REM : functions
 
         REM : download update
         call:downloadUpdate
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    :renameFolder
+        set "srcFolderPath=%~1"
+        set "tgtFolderPath=%~2"
+
+        REM : basename of tmpFolderPath
+        for /F "delims=~" %%i in ("%srcFolderPath%") do set "folderName=%%~nxi"
+
+        set "initialFolder="%tgtFolderPath%\%folderName%""
+        set "finalFolder="%tgtFolderPath%\!endTitleId!""
+
+        move /Y !initialFolder! !finalFolder! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -365,7 +381,7 @@ REM : functions
         echo ===============================================================
 
         REM : install the update
-        set "targetUpdatePath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endTitleId!""
+        set "targetUpdatePath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e""
         set "tmpUpdatePath=!updatePath!"
 
         set /A "attempt=1"
@@ -396,6 +412,7 @@ REM : functions
             echo ERROR^: failed to move !updatePath! to !tmpUpdatePath!^, skipping
             goto:eof
         )
+        call:renameFolder !updatePath! !tmpUpdatePath!
 
         REM : move old update
         set "oldUpdatePath="!targetUpdatePath:"=!_old""
@@ -424,6 +441,7 @@ REM : functions
             goto:eof
 
         )
+        call:renameFolder !targetUpdatePath! !oldUpdatePath!
 
         REM : move update folder (tmpUpdatePath) to targetUpdatePath
         set /A "attempt=1"
@@ -449,6 +467,9 @@ REM : functions
             goto:eof
         )
         if exist !oldUpdatePath! rmdir /Q /S !oldUpdatePath!
+
+        call:renameFolder !tmpUpdatePath! !targetUpdatePath!
+
         set /A "NB_UPDATE_TREATED+=1"
         timeout /T 3 > NUL 2>&1
 
@@ -520,7 +541,6 @@ REM : functions
 
         call !checkGameContentAvailability! !GAME_FOLDER_PATH! 0005000c > !logDlcGames!
         set /A "cr=%ERRORLEVEL%"
-
         if %cr% NEQ 1 goto:eof
 
         for /F "delims=~? tokens=1-3" %%i in ('type !logDlcGames! 2^>NUL') do (
@@ -554,7 +574,6 @@ REM : functions
         REM : str2int
         call:getInteger !newContentVersion! dlcVersion
 
-        cls
         echo =========================================================
         echo - Dlc !GAME_TITLE! v%dlcVersion% ^(%dlcSize% MB^)
         echo ---------------------------------------------------------
@@ -655,7 +674,7 @@ REM : functions
         echo ===============================================================
 
         REM : install the dlc
-        set "targetDlcPath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c\!endTitleId!""
+        set "targetDlcPath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000c""
         set "tmpDlcPath=!dlcPath!"
 
         set /A "attempt=1"
@@ -687,6 +706,7 @@ REM : functions
             echo ERROR^: failed to move !dlcPath! to !tmpDlcPath!^, skipping
             goto:eof
         )
+        call:renameFolder !dlcPath! !tmpDlcPath!
 
         REM : move old dlc
         set "oldDlcPath="!targetDlcPath:"=!_old""
@@ -715,6 +735,7 @@ REM : functions
             goto:eof
 
         )
+        call:renameFolder !targetDlcPath! !oldDlcPath!
 
         REM : move dlc folder (tmpDlcPath) to targetDlcPath
         set /A "attempt=1"
@@ -739,6 +760,8 @@ REM : functions
             echo ERROR^: failed to move !tmpDlcPath! to !targetDlcPath!^, skipping
             goto:eof
         )
+        call:renameFolder !tmpDlcPath! !targetDlcPath!
+
         if exist !oldDlcPath! rmdir /Q /S !oldDlcPath!
         set /A "NB_DLC_TREATED+=1"
         timeout /T 3 > NUL 2>&1

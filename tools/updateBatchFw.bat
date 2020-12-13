@@ -233,61 +233,6 @@ REM : functions
             move /Y !oldName! !newName! > NUL 2>&1
         )
 
-        for /F "delims=~" %%i in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
-            set "codeFullPath="%%i""
-            set "pat="!codeFullPath:"=!\00050000*.ico""
-            for /F "delims=~" %%j in ('dir /b /s !pat! 2^>NUL') do (
-                set "icoFile="%%j""
-                del /F !icoFile! > NUL 2>&1
-            )
-            for %%a in (!codeFullPath!) do set "parentFolder="%%~dpa""
-            set "GAME_FOLDER_PATH=!parentFolder:~0,-2!""
-
-            for /F "delims=~" %%b in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxb"
-
-            set "jpgFile="!codeFullPath:"=!\!GAME_TITLE!.jpg""
-
-            del /F !jpgFile! > NUL 2>&1
-        )
-
-        REM : now Host share all controller profiles
-        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
-
-        pushd !CONTROLLER_PROFILE_FOLDER!
-
-        REM : move each USERDOMAIN folder contain ..
-        for /F "delims=~" %%x in ('dir /B /S /A:D * 2^>NUL') do (
-
-            move /Y "%%x\*" . > NUL 2>&1
-
-            rmdir /Q /S "%%x" > NUL 2>&1
-        )
-
-        REM : delete old GFX packs archive
-        set "gfxRar="!BFW_RESOURCES_PATH:"=!\V3_GFX_Packs.rar""
-        if exist !gfxRar! del /F /S !gfxRar! > NUL 2>&1
-
-        REM : update fixBrokenSHortcuts in ALL shortcuts folder
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do (
-            REM : instanciate a fixBrokenShortcut.bat
-            set "fbsf="%%i\BatchFw\Tools\Shortcuts""
-            if exist !fbsf! (
-
-                if not exist !fbsf! mkdir !fbsf! > NUL 2>&1
-                robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
-
-                set "fnrLog="!BFW_PATH:"=!\logs\fnr_setup.log""
-                !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!
-                del /F !fnrLog! > NUL 2>&1
-            )
-
-            set "toBeRenamed="%%i\BatchFw\Tools\Graphic packs\Complete GFX packs for all my games.lnk""
-            set "toBeRenamed="%%i\BatchFw\Tools\Graphic packs\Create GFX packs and complete presets for all my games.lnk""
-            set "newName="!BFW_RESOURCES_PATH:"=!\icons\downloadGames.ico""
-            if exist !toBeRenamed! move /Y !toBeRenamed! !newName! > NUL 2>&1
-
-        )
-
     goto:eof
     REM : ------------------------------------------------------------------
 
