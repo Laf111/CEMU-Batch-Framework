@@ -21,7 +21,7 @@ CEMU's process is monitored and its priority pushed from "above nromal" to "high
 A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
 
-If you choose to let BatchFw complete your packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
+If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
 **Last GFX packs checked (presets completion) : V720**
 
