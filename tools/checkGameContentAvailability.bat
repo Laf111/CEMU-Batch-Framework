@@ -210,8 +210,8 @@ REM : main
             timeout /t 2 > NUL 2>&1
             exit /b 65
         )
-        set /A "contentVersion=!newContentVersion:0=!!"
-
+        REM : str2int
+        call:getInteger !newContentVersion! contentVersion
     )
 
     if ["!initialGameFolderName!"] == ["NOT_FOUND"] (
@@ -239,13 +239,16 @@ REM : main
             timeout /t 2 > NUL 2>&1
             exit /b 64
         )
+
+        :cleanOldVersionLine
         for /F "delims=<" %%i in (!versionLine!) do set "oldContentVersion=%%i"
         if ["!oldContentVersion!"] == ["NOT_FOUND"] (
             if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: failed to get verson of !label! in !mf!
             timeout /t 2 > NUL 2>&1
             exit /b 65
         )
-        set /A "oldVersion=!oldContentVersion:0=!"
+        REM : str2int
+        call:getInteger !oldContentVersion! oldVersion
 
         if !oldVersion! GEQ !newVersion! (
             REM : new <= old, skip
@@ -284,6 +287,38 @@ goto:eof
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    REM : function to compute string length
+    :getInteger
+        Set "str=%~1"
+
+        Set "s=#%str%"
+        Set "len=0"
+
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+
+        set /A "index=0"
+        set /A "left=len"
+        set /A "lm1=len-1"
+
+        for /L %%l in (0,1,%lm1%) do (
+            set "char=!str:~%%l,1!"
+            if not ["!char!"] == ["0"] (
+                set /A "left=%len%-%%l"
+                set /A "index=%%l"
+                goto:intFound
+            )
+        )
+        :intFound
+
+        set "%2=!str:~%index%,%left%!"
+
+    goto:eof
 
     REM : fetch size of download
     :getSize

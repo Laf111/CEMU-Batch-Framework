@@ -26,7 +26,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 add : replace multiplyLongInteger.bat with multiply.bat (floats support)
 add : updating games : remove FPS++/60FPS warning raised when a GFX pack is found for the game
 (those packs used internal memory adresses which could be changed when applying the update and
-so it could break the pack). Considering now that GFX packs are up to date (use the latest
+so it could break the pack). Considering now this GFX packs are up to date (use the latest
 update).
 fix : when searching silently for update/DLC of a game (if an active network connection is on and if
 you have setup JNUSTool), fix false detection of update/DLC that could occurs when the version is

@@ -455,7 +455,38 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    :getInteger
+        Set "str=%~1"
 
+        Set "s=#%str%"
+        Set "len=0"
+
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+
+        set /A "index=0"
+        set /A "left=len"
+        set /A "lm1=len-1"
+
+        for /L %%l in (0,1,%lm1%) do (
+            set "char=!str:~%%l,1!"
+            if not ["!char!"] == ["0"] (
+                set /A "left=%len%-%%l"
+                set /A "index=%%l"
+                goto:intFound
+            )
+        )
+        :intFound
+
+        set "%2=!str:~%index%,%left%!"
+
+    goto:eof
+
+    
     :treatDlc
 
         set "codeFolder="!GAME_FOLDER_PATH:"=!\code""
@@ -519,7 +550,9 @@ REM : functions
             timeout /t 2 > NUL 2>&1
             exit /b 65
         )
-        set /A "dlcVersion=!newContentVersion!"
+
+        REM : str2int
+        call:getInteger !newContentVersion! dlcVersion
 
         cls
         echo =========================================================

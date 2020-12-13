@@ -195,7 +195,7 @@ REM : main
     )
 
     REM : Get the version of the update
-    set "updateVersion="NONE""
+    set "updateVersionStr="NONE""
     set "versionLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !mf! ^| find "<title_version"') do set "versionLine="%%j""
     if [!versionLine!] == ["NONE"] (
@@ -204,13 +204,16 @@ REM : main
         timeout /t 4 > NUL 2>&1
         exit /b 62
     )
-    for /F "delims=<" %%i in (!versionLine!) do set "updateVersion=%%i"
-    if ["!updateVersion!"] == ["NOT_FOUND"] (
+    for /F "delims=<" %%i in (!versionLine!) do set "updateVersionStr=%%i"
+    if ["!updateVersionStr!"] == ["NOT_FOUND"] (
         if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: failed to get verson of update in !mf!
         rmdir /Q /S !gamesFolder! > NUL 2>&1
         timeout /t 4 > NUL 2>&1
         exit /b 63
     )
+
+    REM : str2int
+    call:getInteger !updateVersionStr! updateVersion
     
     REM : check if an update exist for the game
     set "oldUpdatePath="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\0005000e\!endTitleId!""
@@ -239,7 +242,9 @@ REM : main
             timeout /t 4 > NUL 2>&1
             exit /b 65
         )
-        set /A "oldVersion=!oldUpdateVersion!"
+
+        REM : str2int
+        call:getInteger !oldUpdateVersion! oldVersion
 
         if !oldVersion! GEQ !newVersion! (
             REM : new <= old, skip
@@ -275,6 +280,39 @@ goto:eof
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : function to compute string length
+    :getInteger
+        Set "str=%~1"
+
+        Set "s=#%str%"
+        Set "len=0"
+
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+
+        set /A "index=0"
+        set /A "left=len"
+        set /A "lm1=len-1"
+
+        for /L %%l in (0,1,%lm1%) do (
+            set "char=!str:~%%l,1!"
+            if not ["!char!"] == ["0"] (
+                set /A "left=%len%-%%l"
+                set /A "index=%%l"
+                goto:intFound
+            )
+        )
+        :intFound
+
+        set "%2=!str:~%index%,%left%!"
+
+    goto:eof
+
+    
     REM : fetch size of download
     :getSize
         set "tid=%~1"

@@ -154,10 +154,10 @@ REM : main
     set "versionLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_version"') do set "versionLine="%%j""
     if [!versionLine!] == ["NONE"] goto:dlc
-    for /F "delims=<" %%i in (!versionLine!) do (
-        set "GAME_VERSION=%%i"
-        set "GAME_VERSION=%GAME_VERSION:0=!%"
-    )
+    for /F "delims=<" %%i in (!versionLine!) do set "str=%%i"
+    REM : str2int
+    call:getInteger !str! GAME_VERSION
+
     :dlc
     REM : check if a DLC is present :
     set "DLC=no"
@@ -313,6 +313,39 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    REM : function to compute string length
+    :getInteger
+        Set "str=%~1"
+
+        Set "s=#%str%"
+        Set "len=0"
+
+        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+          if "!s:~%%N,1!" neq "" (
+            set /a "len+=%%N"
+            set "s=!s:~%%N!"
+          )
+        )
+
+        set /A "index=0"
+        set /A "left=len"
+        set /A "lm1=len-1"
+
+        for /L %%l in (0,1,%lm1%) do (
+            set "char=!str:~%%l,1!"
+            if not ["!char!"] == ["0"] (
+                set /A "left=%len%-%%l"
+                set /A "index=%%l"
+                goto:intFound
+            )
+        )
+        :intFound
+
+        set "%2=!str:~%index%,%left%!"
+
+    goto:eof
+
 
     :checkPathForDos
 
