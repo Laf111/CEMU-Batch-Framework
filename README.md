@@ -25,7 +25,7 @@ If you choose to let BatchFw complete your GFX packs during the setup, it will c
 
 **Last GFX packs checked (presets completion) : V720**
 
-BatchFw computes the current aspect ratio using your screen resolution (so it **works on every display configuration setup**, dual triple screen...) and **creates resolution GFX packs for games with no GFX packs provided** (which are automatically replaced by the official ones when they'll be available). It also **creates FPS GFX packs** to control the **emulation's speed or increasing FPS** for games that allow it (V-Sync needs to be disabled).
+BatchFw computes the current aspect ratio using your screen resolution (**works on every display configuration setup**, dual triple screen...) and **creates resolution GFX packs for games with no GFX packs provided** (which are automatically replaced by the official ones when they'll be available). It also **creates FPS GFX packs** to control the **emulation's speed or increasing FPS** for games that allow it (V-Sync needs to be disabled).
 
 If you update to a more recent configuration not listed here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (to use stocks ones).
 
