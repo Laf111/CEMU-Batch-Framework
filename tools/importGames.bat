@@ -151,13 +151,18 @@ REM : main
     set "INPUT_FOLDER=!INPUT_FOLDER:\\=\!"
 
     if !QUIET_MODE! EQU 0 (
+
+
+        REM : compute size needed only if source and target partitions are differents
+        for %%a in (!INPUT_FOLDER!) do set "driveInput=%%~da"
+        if ["!driveInput!"] == ["!drive!"] goto:beginTreatment
+
         echo.
         echo Computing the size needed^.^.^.
         echo.
         REM : compute the size needed
         call:getFolderSizeInMb !INPUT_FOLDER! sizeNeeded
 
-        echo Only if you copy data or move data from another partition^:
         choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed ^(size of !INPUT_FOLDER:"=!^) on the target partition^, continue ^(y^, n^)^? ^: "
         if !ERRORLEVEL! EQU 2 (
             REM : Cancelling
@@ -165,6 +170,7 @@ REM : main
             exit /b 49
         )
     )
+    :beginTreatment
     pushd !INPUT_FOLDER!
 
     REM : rename folders that contains forbiden characters : & ! .

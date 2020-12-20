@@ -19,6 +19,7 @@ CEMU HISTORY :
     CEMU 1.15.19 Accounts handling (multi users)
     CEMU 1.16    Vulkan API
     CEMU 1.17.2  Enhance multi-core recompiler compatibility (more games support it)
+    CEMU 1.19.0  Vulkan async compilation
     CEMU 1.21.0  Introduced V6 packs
     CEMU 1.22.0  New multi-core modes : Auto / Single-core, Multi-core
                 

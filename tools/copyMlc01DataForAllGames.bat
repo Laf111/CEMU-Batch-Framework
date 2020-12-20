@@ -134,7 +134,13 @@ REM : main
     )
     echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
     echo  - source mlc01 folder^: !MLC01_FOLDER_PATH!
+    echo =========================================================
     echo.
+
+    REM : compute size needed only if source and target partitions are differents
+    for %%a in (!MLC01_FOLDER_PATH!) do set "driveMlc=%%~da"
+    if ["!driveMlc!"] == ["!drive!"] goto:beginScan
+
     echo Computing the size needed^.^.^.
     echo.
     REM : compute the size needed
@@ -145,7 +151,8 @@ REM : main
         echo Cancelled by user^, exiting in 2s
         exit /b 49
     )
-    echo =========================================================
+
+    :beginScan
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
     echo Launching in 30s
     echo     ^(y^)^: launch now

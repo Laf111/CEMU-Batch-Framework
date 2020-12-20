@@ -46,7 +46,8 @@ REM : main
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
-
+    set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
+    
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -372,7 +373,7 @@ REM : main
     echo - Ignore quick start assistant ^(next^).
     echo.
     echo Set your REGION^, language and all common settings for your
-    echo games ^(sound^, overlay^.^.^.^)
+    echo games ^(default GFX API^, controllers^, sound^, overlay^.^.^.^)
     echo.
     echo Then close CEMU to continue
     echo.
@@ -382,6 +383,14 @@ REM : main
 
     set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
     wscript /nologo !StartWait! !cemu!
+
+    REM : set GAMES_FOLDER as Games Path (to avoid CEMU popup on first run)
+    set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+    !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !cs! > !csTmp! 2>NUL
+    if exist !csTmp! (
+        del /F !cs! > NUL 2>&1
+        move /Y !csTmp! !cs! > NUL 2>&1
+    )
 
     :getCemuVersion
 

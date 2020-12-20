@@ -118,7 +118,7 @@ REM    call:checkGpFolders
         for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
 
         REM : strip line to get data
-        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+        for /F "tokens=1-12 delims=;" %%a in (!libFileLine!) do (
            set "titleIdRead=%%a"
            set "DescRead="%%b""
            set "productCode=%%c"
@@ -130,6 +130,7 @@ REM    call:checkGpFolders
            set "icoId=%%i"
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
+           set "typeCapFps=%%l"
         )
 
     )
@@ -256,7 +257,7 @@ REM    call:checkGpFolders
 
     :waitLoop
     wmic process get Commandline 2>NUL | find /I ".exe" | find /I /V "wmic" | find /I /V "find" > !logFileTmp!
-    type !logFileTmp! | find /I "create" | find /I "GraphicPacks" > NUL 2>&1 && goto:waitLoop
+    type !logFileTmp! | find /I "create" | find /I "GraphicPacks.bat" | find /V "updateGame" > NUL 2>&1 && goto:waitLoop
     type !logFileTmp! | find /I "fnr.exe" > NUL 2>&1 && goto:waitLoop
 
     del /F !logFileTmp! > NUL 2>&1
@@ -341,7 +342,9 @@ REM    call:checkGpFolders
         if not [!resPack!] == ["NOT_FOUND"] goto:endMain
     )
 
-    REM : stop execution something wrong happens
+    REM : check if a at least a user gp exits (folder)
+    dir /B /A:D !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
+
     REM : warn user
     cscript /nologo !MessageBox! "WARNING : No GFX packs were found !" 4112
 
@@ -761,6 +764,9 @@ REM    REM : ------------------------------------------------------------------
 
             echo Found a V4 graphic pack ^: !rulesFile! >> !myLog!
 
+            REM : force gfxType
+            set "gfxType=V4"
+
             set "gpLastVersionRes=!rulesFile:\rules.txt=!"
             REM : get the game's name from it
             for /F "delims=~" %%i in (!gpLastVersionRes!) do set "str=%%~nxi"
@@ -807,7 +813,13 @@ REM    REM : ------------------------------------------------------------------
         if %LastVersionfound% EQU 1 goto:checkRecentUpdate
 
         if ["!lastInstalledVersion!"] == ["NOT_FOUND"] (
-            cscript /nologo !MessageBox! "Create GFX res and FPS packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+
+            if ["!typeCapFps!"] == ["NOEF"] (
+                cscript /nologo !MessageBox! "Create GFX res packs for this game ^: the native resolution in internal database is !nativeHeight!p^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+            ) else (
+                cscript /nologo !MessageBox! "Create GFX res and FPS packs for this game ^: the native resolution and FPS in internal database are !nativeHeight!p and !nativeFps!FPS^. Use texture cache info in CEMU ^(Debug^/View texture cache info^) to see if native res is correct^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the packs created using the dedicated shortcut in order to force them to rebuild^."
+            )
+
         ) else (
             type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateGameGraphicPacks
 
@@ -837,7 +849,9 @@ REM    REM : ------------------------------------------------------------------
         if not ["!newVersion!"] == ["NOT_FOUND"] echo Complete graphic packs for !GAME_TITLE! based on !newVersion! ^.^.^. >> !myLog!
 
         if ["!lastInstalledVersion!"] == ["NOT_FOUND"] (
-            cscript /nologo !MessageBox! "Complete GFX res pack and create FPS pack for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the pack created using the dedicated shortcut in order to force it to rebuild^."
+
+            if not ["!typeCapFps!"] == ["NOEF"] cscript /nologo !MessageBox! "Complete GFX res pack and create FPS pack for this game ^: the native FPS in internal database is !nativeFps!FPS^. Check while in game ^(not in cutscenes^) if the FPS is correct^. If needed^, update resources^/wiiTitlesDataBase^.csv then delete the pack created using the dedicated shortcut in order to force it to rebuild^."
+
         ) else (
             type !logFile! | find "USE_PROGRESSBAR=YES" > NUL 2>&1 && goto:launchCreateExtraGraphicPacks
 
@@ -851,6 +865,9 @@ REM    REM : ------------------------------------------------------------------
         wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !gfxType! %titleId% !rulesFile! !argSup!
 
         :createCapGP
+
+        REM : if FPS CAP does not work on this game, skipping
+        if ["!typeCapFps!"] == ["NOEF"] goto:eof
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""

@@ -265,6 +265,9 @@ REM pause
         echo "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId%
         echo.
         call "!BFW_PATH:"=!\tools\createGameGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !gfxType! %titleId%
+
+        set "argSup=%Desc: =%"
+
         goto:creatCap
 
 

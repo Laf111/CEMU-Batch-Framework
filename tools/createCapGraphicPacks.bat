@@ -193,7 +193,7 @@ REM    color 4F
 
     :stripLine
     REM : strip line to get data
-    for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+    for /F "tokens=1-12 delims=;" %%a in (!libFileLine!) do (
        set "titleIdRead=%%a"
        set "DescRead="%%b""
        set "productCode=%%c"
@@ -205,6 +205,7 @@ REM    color 4F
        set "icoId=%%i"
        set "nativeHeight=%%j"
        set "nativeFps=%%k"
+       set "typeCapFps=%%l"
        )
 
     set "title=%DescRead:"=%"
@@ -246,8 +247,8 @@ REM    color 4F
     set /A "g30=0"
 
     REM : initialize graphic pack
-    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\Speed""
-    if ["!gfxType!"] == ["V4"] set "gpLastVersion="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_Speed""
+    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\SetFps""
+    if ["!gfxType!"] == ["V4"] set "gpLastVersion="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_SetFps""
 
     set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
     if exist !bfwRulesFile! (
@@ -271,7 +272,7 @@ REM    color 4F
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
 
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
-    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
+REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
 
     REM : 30FPS games
     if ["%nativeFps%"] == ["30"] set /A "g30=1"
@@ -283,7 +284,7 @@ REM    color 4F
     echo 60FPS pack was found
 
     REM : that means that the nativeFPS of the game should be 30
-    if %nativeFps% EQU 60 (
+    if ["%nativeFps%"] == ["60"]  (
         REM : value in WiiU-Titles-Library.csv is wrong, patching the file
         call:patchInternalDataBase
         set "nativeFps=30"
@@ -568,14 +569,23 @@ REM : functions
         echo [Definition] > !bfwRulesFile!
         echo titleIds = !titleIdList! >> !bfwRulesFile!
 
-        echo name = Speed Adjustment >> !bfwRulesFile!
-        echo path = "!GAME_TITLE!/Modifications/Speed Adjustment" >> !bfwRulesFile!
-
-        set "description=Adjust the emulation speed of static FPS games when engine model is FPS based. If it is not the case only menus will be affected. To work, you need to disable vsync AND ANY 60FPS GFX pack."
-        if !nativeFps! EQU 30 (
-            echo description = !description! BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        if ["!typeCapFps!"] == ["SYNCSCR"] (
+            echo name = FPS adjustment >> !bfwRulesFile!
+            echo path = "!GAME_TITLE!/Modifications/FPS adjustment" >> !bfwRulesFile!
         ) else (
-            echo description = !description! BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo name = Emulation speed adjustment >> !bfwRulesFile!
+            echo path = "!GAME_TITLE!/Modifications/Emulation speed adjustment" >> !bfwRulesFile!
+        )
+        set "descSpeed=Adjust the emulation speed"
+        set "descFPS=Increase the FPS"
+
+        set "description=!descSpeed!"
+        if ["!typeCapFps!"] == ["SYNCSCR"] set "description=!descFPS!"
+
+        if ["%nativeFps%"] == ["30"] (
+            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^). BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+        ) else (
+            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^). BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
         echo version = !gfxType:V=! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
@@ -670,7 +680,7 @@ REM : functions
         echo version = 2 >> !rulesFileV2!
         echo. >> !rulesFileV2!
 
-        echo # Cap FPS to %displayedValue% Allows you to adjust the game speed in game where engine is FPS dependant ^(need vsync to be disabled^)^. >> !rulesFileV2!
+        echo # Cap FPS to %displayedValue% Allows you to adjust the game speed or the FPS only ^(need vsync to be disabled^)^. >> !rulesFileV2!
         echo [Control] >> !rulesFileV2!
 
         echo vsyncFrequency = %syncValue% >> !rulesFileV2!
@@ -685,6 +695,8 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :createCapGP
+
+    if ["!typeCapFps!"] == ["SYNCSCR"] goto:syncScr
 
 echo g30=!g30!
 echo fpsPP=!fpsPP!
@@ -723,17 +735,21 @@ echo targetFps=!targetFps!
         if !g30! EQU 1 goto:cap
 
         REM : 106% emulation speed preset
-        call:createCapPreset 106
+        call:createCapPreset 104
 
         :cap
         REM : emulation speed presets
-        set /A "max=136"
-        if !g30! EQU 0 set /A "max=118"
-        for /L %%i in (109,3,!max!) do call:createCapPreset "%%i"
+        set /A "max=135"
+        set /A "dt=6"
+        if !g30! EQU 0 (
+            set /A "max=124"
+            set /A "dt=3"
+        )
+        for /L %%i in (108,!dt!,!max!) do call:createCapPreset "%%i"
 
         :capMenu
-        if !fpsPP! EQU 0 goto:done
-        if !fpsPpOld! EQU 0 goto:done
+        if !fpsPP! EQU 0 goto:syncScr
+        if !fpsPpOld! EQU 0 goto:syncScr
 
         REM : 140-200% emulation speed presets
         for /L %%i in (140,20,240) do call:createCapPreset "%%i"
@@ -741,7 +757,10 @@ echo targetFps=!targetFps!
         REM : 250% emulation speed preset
         call:createCapPreset 250
 
-        :done
+        :syncScr
+
+        if ["!typeCapFps!"] == ["SYNCSCR"] call:createRefreshRatesGp
+
         echo ========================================================= >> !cgpLogFile!
         echo =========================================================
         echo FPS cap graphic packs created ^! >> !cgpLogFile!
@@ -749,7 +768,76 @@ echo targetFps=!targetFps!
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :create
+    :createRfGp
+        set /A "fps=%~1"
+        set /A "fpsToDisplay=%fps%"
+        set "h=%~2"
+
+        if !g30! EQU 1 set /A "fps=%fps%*2"
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+        echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !cgpLogFile!
+        echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)
+        echo ---------------------------------- >> !cgpLogFile!
+        echo ----------------------------------
+
+        echo [Preset] >> !bfwRulesFile!
+        echo name = %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !bfwRulesFile!
+        echo $FPS = %fps% >> !bfwRulesFile!
+        echo. >> !bfwRulesFile!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    :createRefreshRatesGp
+
+        set "refreshRatesArray="
+        set "refreshRatesList="
+        set "hostsArray="
+
+        set /A "nbRf=0"
+
+        REM : search in all Host_*.log
+        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+
+        for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
+            set "currentLogFile="%%i""
+
+            REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
+            for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "REFRESH_RATE" 2^>NUL') do (
+                REM : if not already in the list
+                echo !refreshRatesList! | find /I /V "%%j" > NUL 2>&1 && (
+
+                    set "rf=%%j"
+
+                    REM : if different than nativeFPS
+                    if not ["%rf%"] == ["%nativeFps%"] (
+                        REM : if preset does not already exist in the list the rules.txt
+                        type !bfwRulesFile! | find /I "$FPS = !rf!" > NUL 2>&1 && goto:skip
+
+                        set "tmpStr=!currentLogFile:*Host_=!"
+                        set "host=!tmpStr:.log=!"
+                        set "host=!host:"=!"
+
+                        set "hostsArray[!nbRf!]=!host!"
+                        set "refreshRatesArray[!nbRf!]=!rf!"
+
+                        set /A "nbRf+=1"
+                        set "refreshRatesList=!refreshRatesList! !rf!"
+
+                        :skip
+                        set "rf=0"
+                    )
+                )
+            )
+        )
+        set /A "nm1=nbRf-1"
+        for /L %%i in (0,1,%nm1%) do (
+            call:createRfGp !refreshRatesArray[%%i]! !hostsArray[%%i]!
+        )
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     REM : function to check unrecognized game
     :checkValidity

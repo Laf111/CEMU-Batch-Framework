@@ -121,7 +121,12 @@ REM : main
     REM : add-it to the library
     if [!libFileLine!] == ["NONE"] (
         attrib -r !wiiTitlesDataBase! > NUL 2>&1
-        echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;720^;60 >> !wiiTitlesDataBase!
+        echo ^'%titleId%^'^;!GAME_TITLE!^;-^;-^;-^;-^;-^;-^;^'%titleId%^'^;720^;60^;SYNCSCR >> !wiiTitlesDataBase!
+        REM sorting the file
+        set "tmpFile=!wiiTitlesDataBase:.csv=.tmp!"
+        type !wiiTitlesDataBase! | sort > !tmpFile!
+        move /Y !tmpFile! !wiiTitlesDataBase! > NUL 2>&1
+        del /F !tmpFile! > NUL 2>&1
         attrib +r !wiiTitlesDataBase! > NUL 2>&1
     )
 

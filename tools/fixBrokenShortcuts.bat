@@ -19,8 +19,10 @@ REM : main
     echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
     echo There^'s no need to fix shortcuts.
     echo.
-    choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games (y, n)? : "
-    if !ERRORLEVEL! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
+    choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games/Cemu versions (y, n)? : "
+    set /A "allShortcuts=!ERRORLEVEL!"
+    if !allShortcuts! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
+
     echo.
     echo done
     echo.
@@ -68,7 +70,11 @@ REM : main
     set "tobeRemoved=!wiiuGF:"=!\"
 
     REM : Loop on every shorcuts found recursively
-    for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL') do call:fixShortcut "%%i"
+    if !allShortcuts! EQU 1 (
+        for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL ^| find /V "BatchFw\" ^| find /V "_BatchFw " ^| find /V "CEMU\" ^| find /V "Wii-U\"') do call:fixShortcut "%%i"
+    ) else (
+        for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL') do call:fixShortcut "%%i"
+    )
 
     REM : fix progress bar shortcut
     set "progressBar="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\resources\progressBar.lnk""
@@ -153,10 +159,16 @@ REM : functions
 
         echo findpos = InStr^(oSc^.Arguments^, "launchGame") >> !TMP_VBS_FILE!
         echo If findpos ^<^> 0 Then >> !TMP_VBS_FILE!
-        echo     Dim rpxPath  >> !TMP_VBS_FILE!
-        echo     rpxPath=Split^(oSc^.Arguments^, Chr^(34^)^) >> !TMP_VBS_FILE!
+        echo     Dim vbsArgsLine  >> !TMP_VBS_FILE!
+        echo     vbsArgsLine=Split^(oSc^.Arguments^, Chr^(34^)^) >> !TMP_VBS_FILE!
         echo     Set fso = CreateObject^("Scripting.FileSystemObject"^)  >> !TMP_VBS_FILE!
-        echo     If fso^.FileExists^(rpxPath^(5^)^) Then  >> !TMP_VBS_FILE!
+        echo     If fso^.FileExists^(vbsArgsLine^(5^)^) Then  >> !TMP_VBS_FILE!
+        echo        oSc^.Save  >> !TMP_VBS_FILE!
+        echo     Else  >> !TMP_VBS_FILE!
+        echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
+        echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
+        echo     End If  >> !TMP_VBS_FILE!
+        echo     If fso^.FolderExists^(vbsArgsLine^(4^)^) Then  >> !TMP_VBS_FILE!
         echo        oSc^.Save  >> !TMP_VBS_FILE!
         echo     Else  >> !TMP_VBS_FILE!
         echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!

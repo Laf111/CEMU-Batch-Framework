@@ -305,10 +305,10 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     set "fullPath=!parentFolder:~0,-2!""
     set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
 
-    set "gameFolderName=!initialGameFolderName:?=!"
-
+    set "tmpFolderName=!initialGameFolderName:?=!"
     REM : secureGameTitle
-    call:secureGameTitle !gameFolderName! gameFolderName
+    call:secureGameTitle !tmpFolderName! gameFolderName
+    
     echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
     type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
@@ -470,7 +470,7 @@ REM : functions
             pause
             exit /b 65
         )
-        
+
         REM : get the last modified folder in
         set "mf="NOT_FOUND""
         for /F "delims=~" %%x in ('dir /O:D /T:W /B /S meta.xml 2^>NUL ^| find /V /I "aoc" ^| find /V /I "update"') do set "mf="%%x""
@@ -487,7 +487,7 @@ REM : functions
         set "fullPath=!parentFolder:~0,-2!""
         set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
         set "gameFolderName=!initialGameFolderName:?=!"
-        
+
         REM : secure Game Title
         
         REM : if game exists in internal database
@@ -520,8 +520,10 @@ REM : functions
             goto:setGameLogFile
         )
 
-        REM : else        
-        call:secureGameTitle !gameFolderName! gameFolderName
+        REM : else
+        
+        set "tmpName=!gameFolderName!"
+        call:secureGameTitle !tmpName! gameFolderName
         echo "!gameFolderName!" | find "[" > NUL 2>&1 && for /F "tokens=1-2 delims=[" %%i in (!gameFolderName!) do set "gameFolderName="%%~nxi""
 
         :setGameLogFile
@@ -533,7 +535,9 @@ REM : functions
         echo --------------------------------------------------------------->> !gamelogFile!
                 
         set /A "totalSizeInMb=0"
+        
         call:getSize !titleId! !str! "Game  " gSize
+        
         if !totalSizeInMb! EQU 0 (
             echo ERROR^: Java call failed^, check system^'s security policies
             pause
@@ -542,6 +546,8 @@ REM : functions
         echo Game   size = !gSize! Mb >> !gamelogFile!
 
         type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
+        
+        
             call:getSize !utid! !str! Update uSize
             echo Update size = !uSize! Mb >> !gamelogFile!
         )
@@ -594,7 +600,55 @@ REM : functions
         call:download
 
         REM : get the JNUSTools folder size
-        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+REM : duplicate getFolderSizeInMb function ctontent to avoid implicit resolution of initialGameFolderName (fail if folder use unsupported charcaters)
+REM        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+        set /A "sizeDl=0"
+        
+        REM : when data kept crypted 
+        if !decryptMode! EQU 0 (
+            set /A "sg=0"
+            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            call:getSizeInMb !tmpGf! sg            
+            set /A "sd=0"
+            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            call:getSizeInMb !tmpDf! sd
+            set /A "su=0"
+            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            call:getSizeInMb !tmpUf! su
+            
+            set /A "sizeDl=sg+sd+su"
+            
+        ) else (
+        
+            set "sizeDl=-1"
+            !du! /accepteula -nobanner -q -c !initialGameFolderName! > !duLogFile!
+
+            set "sizeRead=-1"
+            for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
+
+            if ["!sizeRead!"] == ["-1"] goto:endSizeInMb
+            if ["!sizeRead!"] == ["0"] set "sizeDl=0" & goto:endSizeInMb
+
+            REM : 1/(1024^2)=0.00000095367431640625
+            for /F %%a in ('!multiply! !sizeRead! 95367431640625') do set "result=%%a"
+
+            set /A "lr=0"
+            call:strLength !result! lr
+            REM : size in Mb
+            if !lr! GTR 20 (
+                set /A "sizeDl=!result:~0,-20!"
+            ) else (
+                set /A "sizeDl=1"
+            )
+
+            :endSizeInMb
+            echo. > NUL 2>&1
+  
+REM            call:getSizeInMb !folder! sizeofAll
+        )        
+        
+        
         
         REM : do not continue if not complete (in case of user close downloading windows before this windows)
         set /A "progression=(!sizeDl!*100)/!totalSizeInMb!"
@@ -606,7 +660,7 @@ REM : functions
             echo Transfert seems to be incomplete^, relaunching^.^.^. >> !gamelogFile!
             echo. >> !gamelogFile!
             goto:initDownload
-        )
+        )        
         
         REM : get current date
         for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
@@ -769,8 +823,54 @@ REM : functions
         wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "downloadTitleId.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
 
             if !finalize! EQU 0 (
-                REM : get the JNUSTools folder size
-                call:getFolderSizeInMb !initialGameFolderName! sizeDl
+
+            REM : get the JNUSTools folder size
+REM : duplicate getFolderSizeInMb function ctontent to avoid implicit resolution of initialGameFolderName (fail if folder use unsupported charcaters)
+REM                call:getFolderSizeInMb !initialGameFolderName! sizeDl
+                set /A "sizeDl=0"
+                
+                REM : when data kept crypted 
+                if !decryptMode! EQU 0 (
+                    set /A "sg=0"
+                    set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+                    call:getSizeInMb !tmpGf! sg            
+                    set /A "sd=0"
+                    set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+                    call:getSizeInMb !tmpDf! sd
+                    set /A "su=0"
+                    set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+                    call:getSizeInMb !tmpUf! su
+                    
+                    set /A "sizeDl=sg+sd+su"
+                    
+                ) else (
+                
+                    set "sizeDl=-1"
+                    !du! /accepteula -nobanner -q -c !initialGameFolderName! > !duLogFile!
+
+                    set "sizeRead=-1"
+                    for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
+
+                    if ["!sizeRead!"] == ["-1"] goto:endSizeInMb
+                    if ["!sizeRead!"] == ["0"] set "sizeDl=0" & goto:endSizeInMb
+
+                    REM : 1/(1024^2)=0.00000095367431640625
+                    for /F %%a in ('!multiply! !sizeRead! 95367431640625') do set "result=%%a"
+
+                    set /A "lr=0"
+                    call:strLength !result! lr
+                    REM : size in Mb
+                    if !lr! GTR 20 (
+                        set /A "sizeDl=!result:~0,-20!"
+                    ) else (
+                        set /A "sizeDl=1"
+                    )
+
+                    :endSizeInMb
+                    echo. > NUL 2>&1
+          
+        REM            call:getSizeInMb !folder! sizeofAll
+                )  
 
                 REM : progression
                 set /A "curentSize=!sizeDl!
@@ -808,6 +908,7 @@ REM : functions
                     echo ^> Finalizing^.^.^. >> !gamelogFile!
                     echo ^> Finalizing^.^.^.
                     set /A "finalize=1"
+                    
                     goto:waitingLoop
                 )
 
@@ -820,17 +921,65 @@ REM : functions
                 if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
                 if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: !progression!%%
             
-                goto:waitingLoop
+                timeout /t 10 > NULL 
+                call:endAllTransferts
             )
         )
         if !decryptMode! EQU 0 title Downloading WUP of !currentTitle! [!currentTitleRegion!] ^: 100%%
         if !decryptMode! EQU 1 title Downloading RPX package of !currentTitle! [!currentTitleRegion!] ^: 100%%
 
         REM : get the initialGameFolderName folder size
-        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+REM : duplicate getFolderSizeInMb function ctontent to avoid implicit resolution of initialGameFolderName (fail if folder use unsupported charcaters)
+REM        call:getFolderSizeInMb !initialGameFolderName! sizeDl
+        set /A "sizeDl=0"
+        
+        REM : when data kept crypted 
+        if !decryptMode! EQU 0 (
+            set /A "sg=0"
+            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            call:getSizeInMb !tmpGf! sg            
+            set /A "sd=0"
+            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            call:getSizeInMb !tmpDf! sd
+            set /A "su=0"
+            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            call:getSizeInMb !tmpUf! su
+            
+            set /A "sizeDl=sg+sd+su"
+            
+        ) else (
+        
+            set "sizeDl=-1"
+            !du! /accepteula -nobanner -q -c !initialGameFolderName! > !duLogFile!
+
+            set "sizeRead=-1"
+            for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
+
+            if ["!sizeRead!"] == ["-1"] goto:endSizeInMb
+            if ["!sizeRead!"] == ["0"] set "sizeDl=0" & goto:endSizeInMb
+
+            REM : 1/(1024^2)=0.00000095367431640625
+            for /F %%a in ('!multiply! !sizeRead! 95367431640625') do set "result=%%a"
+
+            set /A "lr=0"
+            call:strLength !result! lr
+            REM : size in Mb
+            if !lr! GTR 20 (
+                set /A "sizeDl=!result:~0,-20!"
+            ) else (
+                set /A "sizeDl=1"
+            )
+
+            :endSizeInMb
+            echo. > NUL 2>&1
+  
+REM            call:getSizeInMb !folder! sizeofAll
+
+        )
 
         REM : progression
         set /A "curentSize=!sizeDl!
+        
 
         echo downloaded successfully  >> !gamelogFile!
         echo.  >> !gamelogFile!
@@ -887,33 +1036,34 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     
-    REM : ------------------------------------------------------------------
-    :getFolderSizeInMb
+    REM REM : ------------------------------------------------------------------
+    REM :getFolderSizeInMb
 
-        set "folder="%~1""
-        set /A "sizeofAll=0"
+        REM set "folder=%1"
+        REM set /A "sizeofAll=0"
         
-        REM : when data kept crypted 
-        if !decryptMode! EQU 0 (
-            set /A "sg=0"
-            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
-            call:getSizeInMb !tmpGf! sg            
-            set /A "sd=0"
-            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
-            call:getSizeInMb !tmpDf! sd
-            set /A "su=0"
-            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
-            call:getSizeInMb !tmpUf! su
+        REM REM : when data kept crypted 
+        REM if !decryptMode! EQU 0 (
+            REM set /A "sg=0"
+            REM set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            REM call:getSizeInMb !tmpGf! sg            
+            REM set /A "sd=0"
+            REM set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            REM call:getSizeInMb !tmpDf! sd
+            REM set /A "su=0"
+            REM set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            REM call:getSizeInMb !tmpUf! su
             
-            set /A "sizeofAll=sg+sd+su"
+            REM set /A "sizeofAll=sg+sd+su"
             
-        ) else (
-            call:getSizeInMb !folder! sizeofAll
-        )
+        REM ) else (
         
-        set "%2=!sizeofAll!"
-    goto:eof
-    REM : ------------------------------------------------------------------
+            REM call:getSizeInMb !folder! sizeofAll
+        REM )
+        
+        REM set "%2=!sizeofAll!"
+    REM goto:eof
+    REM REM : ------------------------------------------------------------------
         
     
     REM : fetch size of download
@@ -942,7 +1092,7 @@ REM : functions
         set "strSize="
         for /F "tokens=1" %%i in ("!strRead!") do set "strSize=%%i"
 
-        echo !strSize! | find /I "0." > NUL 2>&1 && (
+        echo !strSize! | findStr /R "^0\.*.$" > NUL 2>&1 && (
             set "intSize=1"
             goto:endFctGetSize
         )
@@ -953,7 +1103,6 @@ REM : functions
         :endFctGetSize
         set "%4=!intSize!"
         set /A "totalSizeInMb=!totalSizeInMb!+!intSize!"
-
         echo !type! size = !strSize! Mb
 
         del /F !logMetaFile! > NUL 2>&1

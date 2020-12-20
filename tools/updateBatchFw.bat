@@ -233,6 +233,26 @@ REM : functions
             move /Y !oldName! !newName! > NUL 2>&1
         )
 
+        REM : get the last location from logFile
+        set "OUTPUT_FOLDER="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create" 2^>NUL') do set "OUTPUT_FOLDER="%%i""
+        if not [!OUTPUT_FOLDER!] == ["NONE"] (
+
+            REM : instanciate a fixBrokenShortcut.bat
+            set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
+
+            if not exist !fbsf! (
+                mkdir !fbsf! > NUL 2>&1
+                robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+            )
+            set "target="!fbsf:"=!\fixBrokenShortcuts.bat""
+            attrib -R !target!
+
+            set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
+            !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+            del /F !fnrLog! > NUL 2>&1
+        )
+
     goto:eof
     REM : ------------------------------------------------------------------
 

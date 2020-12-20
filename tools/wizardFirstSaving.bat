@@ -199,7 +199,13 @@ REM : main
         echo No informations found on the game with a titleId %titleId%
         echo Adding this game in the data base !wiiTitlesDataBase! ^(720p^,60FPS^)
         attrib -r !wiiTitlesDataBase! > NUL 2>&1
-        echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60 >> !wiiTitlesDataBase!
+        echo '%titleId%';!GAME_TITLE!;-;-;-;-;-;-;'%titleId%';720;60;SYNCSCR >> !wiiTitlesDataBase!
+        REM sorting the file
+        set "tmpFile=!wiiTitlesDataBase:.csv=.tmp!"
+        type !wiiTitlesDataBase! | sort > !tmpFile!
+        move /Y !tmpFile! !wiiTitlesDataBase! > NUL 2>&1
+        del /F !tmpFile! > NUL 2>&1
+
         attrib +r !wiiTitlesDataBase! > NUL 2>&1
         echo.
         echo Check if ^:
@@ -518,8 +524,15 @@ REM : main
     )
 
     if exist !REF_CEMU_FOLDER! (
+
+
         REM : basename of REF_CEMU_FOLDER (used to name shortcut)
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
+
+        REM : search in logFile, getting only the last occurence
+        set "installPath="NONE""
+        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "!proposedVersion! install folder path" 2^>NUL') do set "installPath="%%i""
+        if [!installPath!] == ["NONE"] goto:askToCompare
 
         choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, compare or use ^(if no differences were found^) this game profile file ? (y, n) : "
         if !ERRORLEVEL! EQU 2 goto:askToCompare
@@ -669,8 +682,11 @@ REM : main
     if !v112! LEQ 1 echo    REFRESH games^'list  ^(right click^)
     echo.
 
+    
     echo    - set all controller profiles for all players
-    echo    - select graphic pack^(s^)
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get currentrefreshrate /value 2^>NUL ^| findStr /R "=[0-9]*.$"') do set /A "refreshRate=%%i"
+    echo    - select graphic packs ^(refresh rate = !refreshRate!Hz^)
+
     echo    - select amiibo paths^(NFC Tags^)
 
     

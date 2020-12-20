@@ -22,6 +22,32 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+20/12/2020 V21-2 :
+add : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19
+fix : in launchGame.bat clean old update location at the end of the script (this folder is created by links 
+      to 00050000e and 00050000c in updateGameGraphicPacks) to avoid red hightlining in CEMU
+fix : when opening CEMU for the first time set GAMES_FOLDER as Games Path to avoid CEMU popup on first run
+add : compute data size needed only if source and target partitions differs
+add : "Fix broken shortcuts.lnk" now also remove shortcuts with invalid CEMU install paths (removed or moved)
+fix : created FPS CAP packs also if a 60FPS pack exists (clean code and comments), FPS++ detection remains
+add : a column in internal Wii-U title database used for FPS CAP packs : Cap effect (enum = NOEF, SPEED, SYNCSCR)
+      - NOEF : NO speed-up, no FPS increase or incompatible or it exists a FPS++ pack
+      - SPEED : affect emulation speed
+      - SYNCSCR : increase the FPS only
+      Values are set by myself and using the game dev team (and the game engine they usualy use) otherwise
+      Unknown/unchecked games in the database are set to the default value = SYNCSCR 
+fix : CAP FPS packs are now created using "SetFps" instead of "Speed" and only for SPEED and SYNCSCR games 
+add : save screen refresh rate of every host used
+add : a FPS CAP preset to fit refresh rate of all the monitors you use (for each host defined)
+      On games where only the FPS is affected (SYNCSCR : emulation speed didn't changed but FPS is increased), 
+      it allows to push the FPS close to what your screen can display.      
+fix : Wipeout & crash download failure (due to '&' charcater). Remove the implicit resolution throught function
+      call (duplicate the code) to enhance robustness for games with name containing unsupported chars
+fix : random bug that finalize downloads too earlier and can cause games to be not completed
+fix : download windows that not closing when finalizing downloads
+fix : in setup.bat import controller profiles before opening CEMU for the first time 
+fix : in wizardFirstSaving.bat when importing a gameProfile from the last settings used : check CEMU's folder still exists
+
 13/12/2020 V21-1 :
 add : replace multiplyLongInteger.bat with multiply.bat (floats support)
 add : updating games : remove FPS++/60FPS warning raised when a GFX pack is found for the game

@@ -49,6 +49,7 @@ REM : main
     set "brcPath="!BFW_RESOURCES_PATH:"=!\BRC_Unicode_64\BRC64.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
+    set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -155,6 +156,14 @@ REM : main
     call:cleanHostLogFile RESOLUTION
 
     set "msg="RESOLUTION=!scrWidth!x!scrHeight!""
+    call:log2HostFile !msg!
+
+    REM : flush logFile of REFRESH_RATE
+    call:cleanHostLogFile REFRESH_RATE
+
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get currentrefreshrate /value 2^>NUL ^| findStr /R "=[0-9]*.$"') do set /A "refreshRate=%%i"
+
+    set "msg="REFRESH_RATE=!refreshRate!""
     call:log2HostFile !msg!
 
     REM : cd to GAMES_FOLDER
@@ -1402,6 +1411,34 @@ REM : ------------------------------------------------------------------
     REM : ------------------------------------------------------------------
 
 
+    :syncControllerProfiles
+
+        set "CONTROLLER_PROFILE_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
+        if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
+
+        set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
+        if not exist !ccp! goto:eof
+
+        pushd !ccp!
+        REM : import from CEMU_FOLDER to CONTROLLER_PROFILE_FOLDER
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
+            set "ccpf="!ccp:"=!\%%x""
+            set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
+            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL 2>&1
+        )
+
+        pushd !CONTROLLER_PROFILE_FOLDER!
+        REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
+        for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
+            set "ccpf="!ccp:"=!\%%x""
+            set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
+            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
+        )
+        pushd !GAMES_FOLDER!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :regCemuInstall
 
         set "cemuNumber=%1"
@@ -1435,6 +1472,10 @@ REM : ------------------------------------------------------------------
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         if exist !clog! if exist !cs! goto:getCemuVersion
+
+        REM : importing !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles
+        call:syncControllerProfiles
+
         echo ---------------------------------------------------------
         echo opening CEMU^.^.^.
         echo.
@@ -1443,7 +1484,7 @@ REM : ------------------------------------------------------------------
         echo - Ignore quick start assistant ^(next^).
         echo.
         echo Set your REGION^, language and all common settings for your
-        echo games ^(sound^, overlay^.^.^.^)
+        echo games ^(default API^, controllers^, sound^, overlay^.^.^.^)
         echo.
         echo Then close CEMU to continue
         echo.
@@ -1453,6 +1494,14 @@ REM : ------------------------------------------------------------------
 
         set "cemu="!CEMU_FOLDER:"=!\Cemu.exe""
         wscript /nologo !StartWait! !cemu!
+
+        REM : set GAMES_FOLDER as Games Path (to avoid CEMU popup on first run)
+        set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
+        !xmlS! ed -s "//GamePaths" -t elem -n "Entry" -v !GAMES_FOLDER! !cs! > !csTmp! 2>NUL
+        if exist !csTmp! (
+            del /F !cs! > NUL 2>&1
+            move /Y !csTmp! !cs! > NUL 2>&1
+        )
 
        :getCemuVersion
         set "clog="!CEMU_FOLDER:"=!\log.txt""

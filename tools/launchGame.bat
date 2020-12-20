@@ -596,14 +596,30 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : CEMU transShaderCache folder
     set "ctscf="!cemuShaderCache:"=!\transferable""
 
+    REM : check graphic API set
+    set "graphicApi=OpenGL"
+    if exist !cs! (
+        pushd !BFW_RESOURCES_PATH!
+        call:getValueInXml "//Graphic/api/text()" !cs! value
+        if not ["!value!"] == ["NOT_FOUND"] if ["!value!"] == ["1"] (
+            set "graphicApi=Vulkan"
+            pushd !BFW_TOOLS_PATH!
+        )
+    )
+
     REM : copy transferable shader cache, if exist in GAME_FOLDER_PATH
     set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
     if not exist !gtscf! (
         mkdir !gtscf! > NUL 2>&1
-        call:getTransferableCache
-        if !ERRORLEVEL! NEQ 0 (
-            if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
-            goto:launch3rdPartySoftware
+        if ["!graphicApi!"] == ["OpenGL"] (
+            call:getTransferableCache
+            if !ERRORLEVEL! NEQ 0 (
+                if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+                goto:launch3rdPartySoftware
+            )
+        ) else (
+            REM : async compile introduced in v1.19
+            if !v1182! EQU 2 call:getTransferableCache
         )
     )
 
@@ -746,17 +762,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     )
 
     set "GPU_DRIVERS_VERSION=!string: =!"
-
-    REM : check graphic API set
-    set "graphicApi=OpenGL"
-    if exist !cs! (
-        pushd !BFW_RESOURCES_PATH!
-        call:getValueInXml "//Graphic/api/text()" !cs! value
-        if not ["!value!"] == ["NOT_FOUND"] if ["!value!"] == ["1"] (
-            set "graphicApi=Vulkan"
-            pushd !BFW_TOOLS_PATH!
-        )
-    )
 
     REM : search your current GpuCache
     REM : check last path saved in log file
@@ -1480,6 +1485,11 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         set "gpLink="!GAME_GP_FOLDER:"=!\%%a""
         rmdir /Q !gpLink! > NUL 2>&1
     )
+
+    REM : clean old update folder (this folder in created by links to 00050000e and 00050000c in updateGameGraphicPacks)
+    REM : to avoid red hightlining in CEMU
+    set "oldUpdateLocation="!GAME_FOLDER_PATH:"=!\mlc01\usr\title\00050000""
+    rmdir /Q /S !oldUpdateLocation! > NUL 2>&1
 
     REM : restoreBackups
     if exist !cs! call:restoreFile !cs!
