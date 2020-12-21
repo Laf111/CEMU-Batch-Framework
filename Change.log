@@ -22,7 +22,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
-20/12/2020 V21-2 :
+21/12/2020 V21-2 :
 add : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19
 fix : in launchGame.bat clean old update location at the end of the script (this folder is created by links 
       to 00050000e and 00050000c in updateGameGraphicPacks) to avoid red hightlining in CEMU

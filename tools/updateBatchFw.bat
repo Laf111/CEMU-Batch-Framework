@@ -239,18 +239,19 @@ REM : functions
         if not [!OUTPUT_FOLDER!] == ["NONE"] (
 
             REM : instanciate a fixBrokenShortcut.bat
-            set "fbsf="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Shortcuts""
+            set "fbsf="!OUTPUT_FOLDER:"=!\BatchFw\Tools\Shortcuts""
 
-            if not exist !fbsf! (
-                mkdir !fbsf! > NUL 2>&1
-                robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
-            )
+            mkdir !fbsf! > NUL 2>&1
             set "target="!fbsf:"=!\fixBrokenShortcuts.bat""
-            attrib -R !target!
 
-            set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
+            del /F !target! > NUL 2>&1
+            robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
+
+            set "fnrLog="!BFW_LOGS_PATH:"=!\fnr_setup.log""
             !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
             del /F !fnrLog! > NUL 2>&1
+            attrib +R !target!
+
         )
 
     goto:eof
