@@ -318,7 +318,7 @@
 '0005000010131C00';WiiU Panorama Viewinteractivetrailer;wup-p-spgp;-;-;v0;eur;yes;'0005000010131C00';720;60;SYNCSCR
 '0005000010131D00';Fe;wup-n-asej;1;-;v17;jpn;yes;'0005000010131D00';720;60;SYNCSCR
 '0005000010131E00';U;wup-n-wcnj;-;-;v0;jpn;yes;'0005000010131E00';720;60;SYNCSCR
-'0005000010131F00';Yoshi s Woolly World;wup-n-aycj;1;-;v0,v32;jpn;yes;'0005000010184E00';720;60;SPEED
+'0005000010131F00';Yoshi s Woolly World;wup-n-aycj;1;-;v0,v32;jpn;yes;'0005000010184E00';720;60;SYNCSCR
 '0005000010132000';Wii Street U Powered By Google;-;-;-;v144;usa;yes;'000500001012D300';720;60;SYNCSCR
 '0005000010132100';Wii Street U Powered By Google;-;-;-;v144;eur;yes;'000500001012D300';720;60;SYNCSCR
 '0005000010132200';Wiiu;wup-n-at5j;00af;-;v1;jpn;yes;'0005000010132200';720;60;SYNCSCR
@@ -967,8 +967,8 @@
 '0005000010184400';Infinity Runner;wup-p-brnp;-;-;-;eur;yes;'0005000010183C00';720;60;SYNCSCR
 '0005000010184500';Frederic-Resurrection Of Music;wup-n-brme;-;-;v0;usa;yes;'0005000010184500';720;60;SYNCSCR
 '0005000010184900';Slender-The Arrival;wup-n-bsae;-;-;v0;usa;yes;'0005000010184900';720;60;SYNCSCR
-'0005000010184D00';Yoshi s Woolly World;wup-n-ayce;1;-;v0,v17;usa;yes;'0005000010184D00';720;60;SPEED
-'0005000010184E00';Yoshi s Woolly World;wup-p-aycp;1;-;v0;eur;yes;'0005000010184E00';720;60;SPEED
+'0005000010184D00';Yoshi s Woolly World;wup-n-ayce;1;-;v0,v17;usa;yes;'0005000010184D00';720;60;SYNCSCR
+'0005000010184E00';Yoshi s Woolly World;wup-p-aycp;1;-;v0;eur;yes;'0005000010184E00';720;60;SYNCSCR
 '0005000010185100';Nintendoland;-;-;-;v32;jpn;yes;'0005000010102100';720;60;SYNCSCR
 '0005000010185200';New Super Mario Bros U;-;-;-;v64;jpn;yes;'0005000010101D00';720;60;SYNCSCR
 '0005000010185300';Pikmin 3;-;-;-;v96;jpn;yes;'000500001012BE00';720;30;SYNCSCR
