@@ -19,7 +19,7 @@ REM : main
     echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
     echo There^'s no need to fix shortcuts.
     echo.
-    choice /C yn /N /M "Do you meant to remove broken shortcuts for uninstalled games/Cemu versions (y, n)? : "
+    choice /C yn /N /M "Do you mean to remove broken shortcuts for uninstalled games/Cemu versions (y, n)? : "
     set /A "allShortcuts=!ERRORLEVEL!"
     if !allShortcuts! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
 
@@ -168,7 +168,7 @@ REM : functions
         echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
         echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
         echo     End If  >> !TMP_VBS_FILE!
-        echo     If fso^.FolderExists^(vbsArgsLine^(4^)^) Then  >> !TMP_VBS_FILE!
+        echo     If fso^.FolderExists^(vbsArgsLine^(3^)^) Then  >> !TMP_VBS_FILE!
         echo        oSc^.Save  >> !TMP_VBS_FILE!
         echo     Else  >> !TMP_VBS_FILE!
         echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
