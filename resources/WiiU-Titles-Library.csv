@@ -115,7 +115,7 @@
 '000500001010FF00';Game Party Champions;wup-p-agpp;00wr;-;v16;eur;yes;'000500001010FF00';720;60;SYNCSCR
 '0005000010110000';Tekken Tag Tournament 2 wiiu Edition;wup-n-akne;00af;-;v32;usa;yes;'0005000010110000';720;60;SYNCSCR
 '0005000010110100';Nano Assault Neo;wup-n-wase;00jx;-;v17;usa;yes;'0005000010110100';720;60;SYNCSCR
-'0005000010110200';Warriors Orochi 3 Hyper;wup-n-ahbe;00c8;-;v32;usa;yes;'0005000010110200';720;60;SYNCSCR
+'0005000010110200';Warriors Orochi 3 Hyper;wup-n-ahbe;00c8;-;v32;usa;yes;'0005000010110200';720;30;SPEED
 '0005000010110500';Puddle;wup-n-wdle;-;-;v1;usa;yes;'0005000010110500';720;60;SYNCSCR
 '0005000010110600';Nano Assault Neo;wup-p-wasp;00jx;-;v17;eur;yes;'0005000010110100';720;60;SYNCSCR
 '0005000010110700';007 Legends;-;-;-;v0;eur;notmd;'0005000010110700';720;60;NOEF
@@ -143,7 +143,7 @@
 '0005000010112200';Trine 2 Director s Cut;wup-p-wbdp;00fz;-;v16;eur;yes;'00050000101B7800';720;30;SYNCSCR
 '0005000010112300';ZombiU;wup-n-azuj;41;-;v32;jpn;yes;'000500001011A700';720;30;SYNCSCR
 '0005000010112900';Batman Arkham City;wup-n-abtj;-;-;v0;jpn;yes;'0005000010111300';720;30;SYNCSCR
-'0005000010112B00';Warriors Orochi 3 Hyper;wup-p-ahbp;00c8;-;v32;eur;yes;'0005000010110200';720;60;SYNCSCR
+'0005000010112B00';Warriors Orochi 3 Hyper;wup-p-ahbp;00c8;-;v32;eur;yes;'0005000010110200';720;30;SPEED
 '0005000010112E00';Disney Epic Mickey 2;-;-;-;v0;eur;yes;'000500001010DB00';720;60;SYNCSCR
 '0005000010112F00';NBA 2013;wup-p-anbp;54;-;v32;eur;yes;'0005000010112F00';720;60;SYNCSCR
 '0005000010113200';FamilyParty 30 Great Games Obstacle Arcade;wup-p-afpp;-;-;v0;eur;yes;'0005000010113200';720;60;SYNCSCR
@@ -396,7 +396,7 @@
 '0005000010138B00';Assassin s Creed IV Black Flag;wup-n-asbe;41;-;v32;usa;yes;'0005000010138800';720;30;SYNCSCR
 '0005000010138D00';F1 Race Stars Powered Up Edition;wup-n-af9e;-;-;v1;usa;yes;'0005000010131900';720;60;SYNCSCR
 '0005000010138E00';Rayman Legends Challenges App;wup-p-wb7p;41;-;v16;eur;yes;'0005000010111400';1080;60;SYNCSCR
-'0005000010138F00';Devil s Third;wup-n-adnj;1;-;v16;jpn;yes;'0005000010177600';720;60;SYNCSCR
+'0005000010138F00';Devil s Third;wup-n-adnj;1;-;v16;jpn;yes;'0005000010177600';720;60;NOEF
 '0005000010139200';Skylanders Swap Force;wup-n-asfe;52;-;v16;usa;yes;'0005000010140400';720;60;SYNCSCR
 '0005000010139400';Phineas And Ferb Quest For Cool Stuff;wup-p-apfe;005g;-;v0;usa;yes;'0005000010139400';720;60;SYNCSCR
 '0005000010139500';Rayman Legends Challenges App;wup-u-wb7e;41;-;v16;usa;yes;'0005000010111400';1080;60;SYNCSCR
@@ -834,8 +834,8 @@
 '0005000010177300';Fit Music;wup-n-afme;-;-;v0;usa;yes;'0005000010177300';720;60;SYNCSCR
 '0005000010177400';Luv Me Buddies Wonderland;wup-n-alve;-;-;v0;usa;yes;'0005000010154E00';720;60;SYNCSCR
 '0005000010177500';Nihilumbra;wup-n-whle;-;-;v0;usa;yes;'000500001016DA00';720;60;SYNCSCR
-'0005000010177600';Devil s Third;wup-n-adne;1;-;v16;usa;yes;'0005000010177600';720;60;SYNCSCR
-'0005000010177700';Devil s Third;wup-p-adnp;1;-;v16;eur;yes;'0005000010177600';720;60;SYNCSCR
+'0005000010177600';Devil s Third;wup-n-adne;1;-;v16;usa;yes;'0005000010177600';720;60;NOEF
+'0005000010177700';Devil s Third;wup-p-adnp;1;-;v16;eur;yes;'0005000010177600';720;60;NOEF
 '0005000010177800';Sonic Boom-Rise Of Lyric;wup-p-bssp;008p;-;v16;eur;yes;'0005000010177800';720;60;SYNCSCR
 '0005000010177B00';Mighty Final Fight;wup-n-fdke;-;-;v0;usa;yes;'0005000010177B00';720;60;SYNCSCR
 '0005000010177C00';Mighty Final Fight;wup-n-fdkp;-;-;v0;eur;yes;'0005000010177B00';720;60;SYNCSCR
@@ -1113,7 +1113,7 @@
 '0005000010197200';Cosmophony;wup-n-bcye;-;-;v16;usa;yes;'0005000010195C00';720;60;SYNCSCR
 '0005000010197300';Electronic Super Joy-Groove City;wup-n-bese;-;-;v16;usa;yes;'0005000010197300';1080;60;SYNCSCR
 '0005000010197800';Costume Quest 2;wup-p-acqp;011s;-;v0;eur;yes;'000500001017DA00';720;60;SYNCSCR
-'0005000010197D00';Devil s Third;-;-;-;v0;jpn;yes;'0005000010177600';720;60;SYNCSCR
+'0005000010197D00';Devil s Third;-;-;-;v0;jpn;yes;'0005000010177600';720;60;NOEF
 '0005000010197E00';Medabots-Rokusho;wup-n-pb5p;-;-;v0;eur;yes;'0005000010197E00';720;60;SYNCSCR
 '0005000010197F00';Medabots-Rokusho;wup-n-pb5e;-;-;-;usa;yes;'0005000010197F00';720;60;SYNCSCR
 '0005000010198000';Corever;wup-n-pb5j;-;-;v0;jpn;yes;'0005000010198000';720;60;SYNCSCR
@@ -2053,6 +2053,7 @@
 '000500001020ED00';Wall Ball;wup-n-bw8e;-;-;-;usa;yes;'000500001020E600';720;60;SYNCSCR
 '0005000010213B00';Cubeshift;wup-p-wshe;024g;-;v0;usa;yes;'0005000010213B00';720;60;SYNCSCR
 '0005000010216900';Masked Forces;-;-;-;-;-;-;'0005000010216900';720;60;SYNCSCR 
+'0005000010217B00';Forest Escape;-;-;-;-;-;-;'0005000010217B00';720;60;SYNCSCR 
 '000500001F600800';Super Mario Maker;wup-p-cndp;1;-;v0;eur;yes;'000500001018DC00';720;60;SYNCSCR
 '000500001F600900';Paper Mario Color Splash;wup-n-cnfj;-;-;-;jpn;yes;'000500001F600B00';720;30;NOEF
 '000500001F600A00';Paper Mario Color Splash;wup-n-cnfe;-;-;-;usa;yes;'000500001F600B00';720;30;NOEF
