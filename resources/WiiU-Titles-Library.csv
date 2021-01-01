@@ -179,7 +179,7 @@
 '0005000010116100';Xenoblade X;wup-n-ax5j;1;-;v16;jpn;yes;'00050000101C4C00';720;30;SPEED
 '0005000010116300';The Wonderful 101;wup-n-acmj;1;-;v16;jpn;yes;'0005000010135300';720;60;SYNCSCR
 '0005000010116500';Toki Tori 2;wup-p-waap;00tw;-;v32;eur;yes;'0005000010116500';720;60;SYNCSCR
-'0005000010116600';Fist Of The Northstar Ken s Rage 2;wup-n-ah9j;00c8;-;v17;jpn;yes;'000500001012B800';720;60;NOEF
+'0005000010116600';Fist Of The Northstar Ken s Rage 2;wup-n-ah9j;00c8;-;v17;jpn;yes;'000500001012B800';720;60;SYNCSCR
 '0005000010116700';Kickbeat Special Edition;wup-n-wkbe;-;-;v0;usa;yes;'0005000010113B00';720;60;SYNCSCR
 '0005000010117200';Monster Hunter 3 Ultimate;wup-p-ahdp;8;-;v32;eur;yes;'0005000010117200';720;30;SYNCSCR
 '0005000010117700';Chasing Aurora;wup-p-wcap;00tj;-;v17;eur;yes;'0005000010117700';720;60;SYNCSCR
@@ -257,8 +257,8 @@
 '000500001012B400';Resident Evil Revelations;wup-p-abhp;8;-;v16;eur;yes;'000500001012B400';720;60;SYNCSCR
 '000500001012B500';The Cave;wup-p-wcvp;-;-;v0;eur;yes;'000500001010FA00';720;60;SYNCSCR
 '000500001012B700';Need For SYNCSCR Most Wanted U;wup-n-ansj;13;-;v32;jpn;yes;'0005000010128400';720;30;SYNCSCR
-'000500001012B800';Fist Of The Northstar Ken s Rage 2;wup-p-ah9p;-;-;v0;eur;yes;'000500001012B800';720;60;NOEF
-'000500001012B900';Fist Of The Northstar Ken s Rage 2;wup-n-ah9e;-;-;v0;usa;yes;'000500001012B800';720;60;NOEF
+'000500001012B800';Fist Of The Northstar Ken s Rage 2;wup-p-ah9p;-;-;v0;eur;yes;'000500001012B800';720;60;SYNCSCR
+'000500001012B900';Fist Of The Northstar Ken s Rage 2;wup-n-ah9e;-;-;v0;usa;yes;'000500001012B800';720;60;SYNCSCR
 '000500001012BA00';Deus Ex Human Revolution Director s Cut;wup-n-adxe;-;-;v0;usa;yes;'000500001012B200';720;30;SYNCSCR
 '000500001012BC00';Pikmin 3;tha-n-ac3e;1;-;v96;usa;yes;'000500001012BE00';720;30;SYNCSCR
 '000500001012BD00';Pikmin 3;wup-n-ac3e;1;-;v96;usa;yes;'000500001012BE00';720;30;SYNCSCR
@@ -1043,7 +1043,7 @@
 '000500001018DC00';Super Mario Maker;wup-n-amae;1;-;v48;usa;yes;'000500001018DC00';720;60;SYNCSCR
 '000500001018DD00';Super Mario Maker;wup-p-amap;1;-;v16;eur;yes;'000500001018DC00';720;60;SYNCSCR
 '000500001018DE00';Tetrobot And Co;wup-p-atcp;00nk;-;v0;eur;yes;'000500001018DE00';720;60;SYNCSCR
-'000500001018E400';Super Ghouls n GhostsÉÑ;wup-n-pbse;-;-;v0;usa;yes;'000500001018E500';720;60;SYNCSCR
+'000500001018E400';Super Ghouls n Ghosts¬É¬Ñ;wup-n-pbse;-;-;v0;usa;yes;'000500001018E500';720;60;SYNCSCR
 '000500001018E500';Super Ghouls n Ghosts;wup-n-pbsp;-;-;v0;eur;yes;'000500001018E500';720;60;SYNCSCR
 '000500001018E700';Mega Man Bass;wup-n-pbte;-;-;v0;usa;yes;'000500001018E700';720;60;SYNCSCR
 '000500001018E800';Mega Man Bass;wup-n-pbtp;-;-;v0;eur;yes;'000500001018E800';720;60;SYNCSCR
@@ -1347,7 +1347,7 @@
 '00050000101B2800';The Fall;wup-p-btfp;-;-;v0;eur;yes;'0005000010189300';720;60;SYNCSCR
 '00050000101B2900';Dragon Fantasy-The Black Tome Of Ice;wup-n-afye;-;-;-;usa;yes;'00050000101B2900';720;60;SYNCSCR
 '00050000101B2A00';Dragon Fantasy-The Volumes Of Westeria;wup-n-adwe;-;-;v1;usa;yes;'00050000101B2A00';720;60;SYNCSCR
-'00050000101B2C00';ShÅtshimi;wup-n-bsee;-;-;-;usa;yes;'00050000101B2C00';720;60;SYNCSCR
+'00050000101B2C00';Sh¬Åtshimi;wup-n-bsee;-;-;-;usa;yes;'00050000101B2C00';720;60;SYNCSCR
 '00050000101B2E00';Tri-Strip;wup-n-atpe;-;-;v0;usa;yes;'00050000101B2E00';720;60;SYNCSCR
 '00050000101B2F00';2014;wup-n-bdkj;-;-;v0;jpn;yes;'00050000101B2F00';720;60;SYNCSCR
 '00050000101B3000';2014;wup-n-bmjj;-;-;v0;jpn;yes;'00050000101B3000';720;60;SYNCSCR
