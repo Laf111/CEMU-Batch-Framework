@@ -643,7 +643,7 @@ REM Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided 
 REM If it is not^, change the native resolution to 720p in ^
 REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM )
-        set "gfxVersion=!gfxType:V=!"
+        set /A "gfxVersion=!gfxType:V=!"
         echo version = !gfxVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
 
@@ -669,7 +669,7 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         echo [Preset] >> !bfwRulesFile!
         echo name = %overwriteWidth%x%overwriteHeight% %~3 >> !bfwRulesFile!
 
-        set "gfxVersion=!gfxType:V=!"
+        set /A "gfxVersion=!gfxType:V=!"
         if !gfxVersion! GEQ 6 (
             echo category = TV Resolution >> !bfwRulesFile!
         )

@@ -318,7 +318,7 @@ REM : functions
         ) else (
             echo description = Created by BatchFw considering that the native resolution is 1080p. Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. If it is not^, change the native resolution to 720p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
-        set "gfxVersion=!gfxType:V=!"
+        set /A "gfxVersion=!gfxType:V=!"
         echo version = !gfxVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
 
@@ -344,7 +344,7 @@ REM : functions
         echo [Preset] >> !bfwRulesFile!
         echo name = %overwriteWidth%x%overwriteHeight% %~3 >> !bfwRulesFile!
 
-        set "gfxVersion=!gfxType:V=!"
+        set /A "gfxVersion=!gfxType:V=!"
         
         if !gfxVersion! GEQ 6 (
             echo category = TV Resolution >> !bfwRulesFile!

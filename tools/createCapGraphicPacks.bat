@@ -587,7 +587,7 @@ REM : functions
         ) else (
             echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^). BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         )
-        set "gfxVersion=!gfxType:V=!"
+        set /A "gfxVersion=!gfxType:V=!"
         echo version = !gfxVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
 
