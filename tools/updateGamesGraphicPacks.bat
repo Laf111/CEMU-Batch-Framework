@@ -186,7 +186,7 @@ REM    call:checkGpFolders
 
     REM : check if BatchFw have to complete graphic packs for this game
     type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && goto:searchForGfxPacks
-    goto:CreateLinks
+    goto:createLinks
 
     :searchForGfxPacks
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""

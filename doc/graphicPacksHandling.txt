@@ -25,7 +25,7 @@ It will creates all missing presets for your aspect ratio (for every host you us
 During the setup, BatchFw compute your aspect ratio with your current screen resolution.
 So it will work whatever the display configuration you use.
 
-The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the offcial repository.
+The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the official repository.
 
 Also, BatchFw create FPS CAP packs to control the emulation speed on games that use a dynamic FPS engine such as : Mario Kart 8, DKTF, Wind waker...
 They are created only if no FPS++ and/or a 60FPS is/are found.

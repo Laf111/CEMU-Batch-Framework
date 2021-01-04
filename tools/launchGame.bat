@@ -603,14 +603,18 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         call:getValueInXml "//Graphic/api/text()" !cs! value
         if not ["!value!"] == ["NOT_FOUND"] if ["!value!"] == ["1"] (
             set "graphicApi=Vulkan"
-            pushd !BFW_TOOLS_PATH!
         )
+        pushd !BFW_TOOLS_PATH!
     )
+
+    echo Grapic API used ^: !graphicApi!
+    echo Grapic API used ^: !graphicApi! >> !batchFwLog!
 
     REM : copy transferable shader cache, if exist in GAME_FOLDER_PATH
     set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
     if not exist !gtscf! (
         mkdir !gtscf! > NUL 2>&1
+
         if ["!graphicApi!"] == ["OpenGL"] (
             call:getTransferableCache
             if !ERRORLEVEL! NEQ 0 (
@@ -619,7 +623,13 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             )
         ) else (
             REM : async compile introduced in v1.19
-            if !v1182! EQU 2 call:getTransferableCache
+            if !v1182! EQU 2  (
+                call:getTransferableCache
+                if !ERRORLEVEL! NEQ 0 (
+                    if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+                    goto:launch3rdPartySoftware
+                )
+            )
         )
     )
 
@@ -643,10 +653,22 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : check if cacheFile was found
     if ["!cacheFile!"] == ["NONE"] (
-        call:getTransferableCache
-        if !ERRORLEVEL! NEQ 0 (
-            if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
-            goto:launch3rdPartySoftware
+
+        if ["!graphicApi!"] == ["OpenGL"] (
+            call:getTransferableCache
+            if !ERRORLEVEL! NEQ 0 (
+                if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+                goto:launch3rdPartySoftware
+            )
+        ) else (
+            REM : async compile introduced in v1.19
+            if !v1182! EQU 2  (
+                call:getTransferableCache
+                if !ERRORLEVEL! NEQ 0 (
+                    if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
+                    goto:launch3rdPartySoftware
+                )
+            )
         )
     )
 

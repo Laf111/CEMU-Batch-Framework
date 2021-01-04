@@ -21,8 +21,12 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+04/01/2021 V21-3 :
+add : update CAP FPS behaviors of some titles in the internal database
+add : handle GFX packs V7 and up
+fix : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19
 
-21/12/2020 V21-2 :
+22/12/2020 V21-2 :
 add : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19
 fix : in launchGame.bat clean old update location at the end of the script (this folder is created by links 
       to 00050000e and 00050000c in updateGameGraphicPacks) to avoid red hightlining in CEMU
@@ -34,7 +38,7 @@ add : a column in internal Wii-U title database used for FPS CAP packs : Cap eff
       - NOEF : NO speed-up, no FPS increase or incompatible or it exists a FPS++ pack
       - SPEED : affect emulation speed
       - SYNCSCR : increase the FPS only
-      Values are set by myself and using the game dev team (and the game engine they usualy use) otherwise
+      Values are set by myself using the game dev team (and the game engine they usualy use) otherwise
       Unknown/unchecked games in the database are set to the default value = SYNCSCR 
 fix : CAP FPS packs are now created using "SetFps" instead of "Speed" and only for SPEED and SYNCSCR games 
 add : save screen refresh rate of every host used

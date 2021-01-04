@@ -643,10 +643,11 @@ REM Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided 
 REM If it is not^, change the native resolution to 720p in ^
 REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM )
-        echo version = !gfxType:V=! >> !bfwRulesFile!
+        set "gfxVersion=!gfxType:V=!"
+        echo version = !gfxVersion! >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
 
-        if ["!gfxType!"] == ["V6"] (
+        if !gfxVersion! GEQ 6 (
             echo. >> !bfwRulesFile!
             echo [Default] >> !bfwRulesFile!
             echo $width = !nativeWidth! >> !bfwRulesFile!
@@ -668,14 +669,15 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         echo [Preset] >> !bfwRulesFile!
         echo name = %overwriteWidth%x%overwriteHeight% %~3 >> !bfwRulesFile!
 
-        if ["!gfxType!"] == ["V6"] (
+        set "gfxVersion=!gfxType:V=!"
+        if !gfxVersion! GEQ 6 (
             echo category = TV Resolution >> !bfwRulesFile!
         )
 
         echo $width = %overwriteWidth% >> !bfwRulesFile!
         echo $height = %overwriteHeight% >> !bfwRulesFile!
 
-        if ["!gfxType!"] == ["V4"] (
+        if !gfxVersion! LEQ 4 (
             echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
             echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
         )
