@@ -41,6 +41,24 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
 **IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : go to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" section in this page to get the last released version else **see recommendations at the end of this page**.
 #
 
+
+## How it works:
+
+All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
+
+With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw use the -mlc argument (introduced since 1.10) to set the mlc01 folder path outside the CEMU's folder. 
+
+The mlc01 path is in the game folder so:
+
+- your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
+
+- you didn't go with a "big" mlc01 folder containing mixed saves, updates and DLC (including games you have deleted/installed) anymore (which is still the case if you use an external mlc01 folder);
+
+- you can backup a whole game by compressing its folder (saves, updates, DLC, controller profiles, settings... are ALL included).
+
+- uninstalling a game consist just in delete its folder.
+
+
 ## Main purpose and features :
 
 - **Making easier the installation of many versions of CEMU** to launch your games (with BatchFw CEMU installs size only few MB);
@@ -105,24 +123,6 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
     - enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update);
     - ping the wii-U to avoid online simultaneous access;
     - inject Games using NUSspli
-    
-
-
-## How it works:
-
-All by creating shortcuts (or executables) on your desktop - or a folder of your choice.
-
-With BatchFw there's no need to bother about saves, caches, controller profiles, CEMU or CemuHook settings and precompiled cache ignoring if you're an NVidia user - since you won't need to build a shader cache for each version. BatchFw use the -mlc argument (introduced since 1.10) to set the mlc01 folder path outside the CEMU's folder. 
-
-The mlc01 path is in the game folder so:
-
-- your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
-
-- you didn't go with a "big" mlc01 folder containing mixed saves, updates and DLC (including games you have deleted/installed) anymore (which is still the case if you use an external mlc01 folder);
-
-- you can backup a whole game by compressing its folder (saves, updates, DLC, controller profiles, settings... are ALL included).
-
-- uninstalling a game consist just in delete its folder.
 
 
 
