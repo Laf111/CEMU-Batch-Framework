@@ -52,7 +52,7 @@ The mlc01 path is in the game folder so:
 
 - your games library becomes portable: you can put it on an external drive and play on differents hosts (settings are stored by host and you only have to manage the shortcuts you created for each Cemu install on each host);
 
-- you didn't go with a "big" mlc01 folder containing mixed saves, updates and DLC (including games you have deleted/installed) anymore (which is still the case if you use an external mlc01 folder);
+- you didn't go with a "big" mlc01 folder containing mixed saves, updates and DLC (including games you have deleted/uninstalled which is the case by default or even if you use an external mlc01 folder);
 
 - you can backup a whole game by compressing its folder (saves, updates, DLC, controller profiles, settings... are ALL included).
 
