@@ -67,9 +67,9 @@ The mlc01 path is in the game folder so:
 
 - **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
 
-- **Batch install of uncompressed Games+Update+DLC folders (no need to install update and DLC using CEMU)**;
-
 - **Avoid regression on games (and downgrade CEMU version)** by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);
+
+- **Batch install of uncompressed Games+Update+DLC folders (no need to install update and DLC using CEMU)**;
 
 - **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones;
 
