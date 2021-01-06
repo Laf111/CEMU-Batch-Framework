@@ -67,13 +67,13 @@ The mlc01 path is in the game folder so:
 
 - **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
 
-- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games** (no need to dig in the mlc01 folder);
+- **Batch install of uncompressed Games+Update+DLC folders (no need to install update and DLC using CEMU)**;
 
 - **Avoid regression on games (and downgrade CEMU version)** by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);
 
 - **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones;
 
-- **create FPS packs** : for games using a FPS engine model, it allows you to play at 105, 110 or 120% emulation speed (V-sync need to be disabled).
+- **create FPS packs** (V-sync need to be disabled) : it allows you to **play some games at 105, 110 or 120% emulation speed** and for most of titles **boost FPS to your refresh screen rate;**  
 
 - **launch and close one or more third party softwares (DS4windows, Wiimotehook ...);**
 
