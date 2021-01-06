@@ -23,7 +23,7 @@ A lock file is used to allow only one instance of CEMU and to **avoid thread saf
 
 If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
-**Last GFX packs checked (presets completion) : V726**
+**Last GFX packs checked (presets completion) : V727**
 
 BatchFw **creates resolution GFX packs for games** with no GFX packs provided (which are automatically replaced by the official ones when they'll be available). 
 It computes the current aspect ratio using your screen resolution (so it **works on every display configuration setup**, dual triple screen...) 
@@ -41,7 +41,7 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
 **IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : go to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" section in this page to get the last released version else **see recommendations at the end of this page**.
 #
 
-## Main purpose:
+## Main purpose and features :
 
 - **Making easier the installation of many versions of CEMU** to launch your games (with BatchFw CEMU installs size only few MB);
 
@@ -56,8 +56,10 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
 - **Handle more than one user/save also with versions of CEMU < 1.15.19**;
 
 - **Make your loadiine games library portable :**
-    - save settings PER user (including GFX and mods packs) and PER host,
-    - game stats per user (using all version of CEMU that supports it) for all hosts used
+    - save settings PER user (including GFX and mods packs) and PER host;
+    - game stats per user (using all version of CEMU that supports it) for all hosts used;
+    - handle drive letter changing when used on an external drive (rebuild all the links so you can also use this feature if you want to move your games location);
+    - synchronize saves, transferable cache and game stats between BatchFw installs;
 
 - **Keep my games up to date** (silently check update and DLC availability);
 
@@ -69,14 +71,40 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
 
 - **Secure your saves and trabferable cache** with 2 levels of backup
 
+- **Provide scripts to import/export saves, transferable cache and game stats to a CEMU install** (including CEMU accounts handling);
+
+- **GPU Cache backup/restore** (AMD, NVIDIA / OpenGL, Vulkan) **per game (to avoid a big cache mixing all game shaders);**
+
+- **Automatic GLCache cleanup when updating display drivers (CEMU leaves the old one);**
+
+- **Your own games compatibility datase per host** you use (BatchFW logs silently the first version of CEMU that manages to run a game on this host);
+
+- **Your own CEMU X.Y.Z games compatibility list per host**: compatibility per version and per host of all your games (last column in the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically with your specs and the settings used);
+
+- **Easy game profile configuration** per version (using shortcuts);
+
+- **Side by side game profile comparison**;
+
+- **Double automatic backup of your transferable cache and saves for each games to avoid their corruption that can occur on CEMU crash;**
+
+- **Automatic graphic packs update (check availability);**
+
+- **Automatic update (check availability);**
+
+- **check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution);**
+
+- **optional progress bar to follow pre and post treatments;**
+
 - **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
-    - get/sync online files (account, friends'list),
-    - sync saves between CEMU with the Wii-U
-    - sync game stats between CEMU and the Wii-U,
-    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb),
-    - dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw),
-    - enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update)
-    - ping the wii-U to avoid online simultaneous access
+    - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC, NUSspli);
+    - get/sync online files (account, friends'list);
+    - sync saves between CEMU with the Wii-U;
+    - sync game stats between CEMU and the Wii-U;
+    - get a snapshot of the games installed (saves, update, dlc, location mlc/usb);
+    - dump safely a list of games automatically (scripts using a snapshot taken previously, ignoring errors caused by symlinks and using 2 passes of sync command). Games are ready to be launched (saves, update and DLC are installed automatically by BatchFw);
+    - enable/disable Wii-U firmware update feature (by removing/creating the folder /storage_mlc/sys/update);
+    - ping the wii-U to avoid online simultaneous access;
+    - inject Games using NUSspli
     
 
 
@@ -96,88 +124,6 @@ The mlc01 path is in the game folder so:
 
 - uninstalling a game consist just in delete its folder.
 
-
-
-## Main features:
-
-- Launch and close one or more third party softwares (DS4windows, Wiimotehook ...);
-
-- Handle muti users saves (per windows's profile) and online accounts (Wii-U owners);
-
-- Automatic graphics pack creation: you don't need to wait for the release of graphics packs for a yet not supported game to play at a resolution other than the native one (tested successfully on dozens of games) since BatchFW will try to create them automatically. And when an official pack for the game comes out BatchFW will automatically replace the created one;
-
-- Automatic graphics pack completion (optional): BatchFw complete the range of available resolutions for your aspect ratios used. BatchFw compute your aspect ratio with the current resolution on each hosts. Common TV aspect ratios are proposed and you can define your own aspect ratio (by giving a resolution if you don't know the fractional number corresponding); 
-
-- Save separate CEMU settings per users (allow users to use differents mods) and per hosts;
-
-- Handling game stats for every user taking all CEMU's versions (>= 1.15.18) and all hosts into account;
-
-- Synchronize controller profiles between CEMU installs;
-
-- Handle drive letter changing when used on an external drive (rebuild all the links so you can also use this feature if you want to move your games location);
-
-- Supports CEMU accounts to import/export games saves;
-
-- Provide scripts to import/export saves, transferable cache and game stats to a "classic" CEMU install (including CEMU accounts handling);
-
-- Synchronize saves, transferable cache and game stats between BatchFw installs;
-
-- Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC);
-
-- FTP transferts with your Wii-U (optional) : 
-    - BatchFw use WinScp for FTP transferts (WinScp.com + an ini file template);
-The first time you need to access to your Wii-U, you'll have to enter the IP and the port of the Wii-U and an ini file is created.
-If you're using a static IP adress policy on your local network, no need to create a another configuration.
-You'll be able to use the first one you created.
-Note that if you want to run \_BatchFw\_Install\resources\winScp\winScp.exe (WinwScp UI) it will also use this ini file.
-You'll only have to start/stop the ftpiiu server on your Wii-U and launch the provided scripts.
-    - Map BatchFw's users to Wii-U profiles;
-    - Automatically get online files and install files when an active network connection is found (you still need to dump opt.bin and seeprom.bin manually with NANDDUMPER);
-    - List all your games installed on the Wii-U by taking a snapshot to a csv file containing for each game:
-        - its location (mlc/usb);
-        - if saves were found (for one user at least);
-        - if an update is installed;
-        - if a DLC is installed;
-    - Dump a list of games :
-        - define the list of games to dump (accordingly to the last snapshot taken)
-        - decide if you want to import saves for all/a user/select for each game
-        - dump sumultanously code, content, meta folder (game, update, DLC if found)
-        - prepare the games to be emulated (install update, DLC and saves in the mlc01 folder of the game)
-    - Enable/Disable Wii-U firmware update (by removing/creating the folder /storage_mlc/sys/update)
-    - Import saves from the Wii-U (for all selected users including games stats from Wii-U);
-    - Export saves to the Wii-U (for all selected users including CEMU games stats -> Wii-U)
-   
-    
-    
-### Other features:
-
-- Secure CEMU threads by using a lock file (Though you won't be able to open multiple instances at once);
-
-- GPU Cache backup/restore per game (AMD, NVIDIA / OpenGL, Vulkan);
-
-- Automatic GLCache cleanup when updating display drivers (CEMU leaves the old one);
-
-- Push the CEMU process priority to "above nromal" to "high" to minimize FPS drops while in game;
-
-- Your own games compatibility datase per host you use (BatchFW logs silently the first version of CEMU that manages to run a game on this host);
-
-- Your own CEMU X.Y.Z games compatibility list per host: compatibility per version and per host of all your games (last column in the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically with your specs and the settings used);
-
-- Easy game profile configuration per version (using shortcuts);
-
-- Side by side game profile comparison;
-
-- Double automatic backup of your transferable cache and saves for each games to avoid their corruption that can occur on CEMU crash;
-
-- Automatic import of external transferable cache (you don't need to rename it with the right shaderCacheId of your game's region) to track broken shaderCacheId (as it happened with CEMU 1.8);
-
-- Automatic graphic packs update (check availability);
-
-- Automatic update (check availability);
-
-- check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution);
-
-- optional progress bar to follow pre and post treatments
 
 
 ## Install: 
