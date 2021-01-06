@@ -45,6 +45,12 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
 
 - **Making easier the installation of many versions of CEMU** to launch your games (with BatchFw CEMU installs size only few MB);
 
+- **Switch freely from a version of CEMU** to another for a given game, and play with the same data you had on the first one;
+
+- **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
+
+- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games (no need to dig in the mlc01 folder);**
+
 - **Avoid regression on games (and downgrade CEMU version)** by keeping the versions that work best with your games (CEMU as a reverse engineering software oftenlty tends to introduce regression on some games to enhance emulation of other ones);
 
 - **Complete/create GFX packs for ALL games** (even if they are still not officially supported). Support all aspect ratios (multi-screen) including TV one (HDTV, ultrawide, DCI) and also support custom user's ones;
@@ -62,12 +68,6 @@ For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your
     - synchronize saves, transferable cache and game stats between BatchFw installs;
 
 - **Keep my games up to date** (silently check update and DLC availability);
-
-- **Switch freely from a version of CEMU** to another for a given game, and play with the same data you had on the first one;
-
-- **Switch from game to game and automatically have all your data saved or restored** on a given version of the CEMU emulator;
-
-- **Ease install, backup (game+update+DLC+saves+settings) and uninstall games (no need to dig in the mlc01 folder);**
 
 - **Secure your saves and trabferable cache** with 2 levels of backup
 
