@@ -124,7 +124,7 @@ The mlc01 path is in the game folder so:
 
 
 
-## Install: 
+## Install/Uninstall: 
 
 - **Extract in your games folder**;
 - **Launch _BatchFW_Install\\setup.bat**;
@@ -135,6 +135,8 @@ The mlc01 path is in the game folder so:
 When done, you can copy the whole directory containing your games and BatchFw install folder on an external drive to make your games library portable. To play on a new host, install CEMU on the new host and install BatchFw from the external device to create shortcuts (users and trird party software already defined on another host are imported automatically, online files as well). 
 
 Settings are saved by host (and per users). Transferable cache, controller profiles, graphic packs are shared/completed by all users on all hosts.
+
+To uninstall BatchFw, use the dedicated script.
 
 
 
