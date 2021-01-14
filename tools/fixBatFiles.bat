@@ -9,7 +9,7 @@ REM : main
     call:setCharSet
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version to produce
-    set "BFW_NEXT_VERSION=V21-3"
+    set "BFW_NEXT_VERSION=V21-4"
 
     set "THIS_SCRIPT=%~0"
 
@@ -28,6 +28,7 @@ REM : main
     if not exist !BFW_LOGS! mkdir !BFW_LOGS! > NUL 2>&1
     
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "fixBatFilesLog="!BFW_LOGS:"=!\fixBatFiles.log""  
 
     REM : get the last version
     for /F "delims=~= tokens=2" %%i in ('type setup.bat ^| find "BFW_VERSION=V"') do set "value=%%i"
@@ -76,7 +77,7 @@ REM : main
     if not ["!BFW_OLD_VERSION!"] == ["!BFW_NEXT_VERSION!"] (
         echo Replacing !BFW_OLD_VERSION! with !BFW_NEXT_VERSION! in setup.bat
         attrib -R !sf! > NUL 2>&1
-        !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!"
+        !fnrPath! --cl --dir !BFW_PATH! --fileMask setup.bat --find "!BFW_OLD_VERSION!" --replace "!BFW_NEXT_VERSION!" --logFile !fixBatFilesLog!
     )
 
     set "toBeRemoved=%BFW_PATH:"=%\"
@@ -104,8 +105,6 @@ REM : main
     echo ^> Check bat files^.^.^.
     echo.
     
-    set "fixBatFilesLog="!BFW_LOGS:"=!\fixBatFiles.log""  
-
     REM : Convert all files to ANSI and set them readonly
     set "pat="*.bat""
     for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiply" ^| find /V "downloadGames" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (

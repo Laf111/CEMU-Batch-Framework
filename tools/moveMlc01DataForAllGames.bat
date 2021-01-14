@@ -30,8 +30,9 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
-
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
@@ -164,12 +165,16 @@ REM : main
         choice /C y /T 2 /D y /N /M "Cancelled by user, exiting in 2s"
         goto:eof
     )
-    cls
-    :scanGamesFolder
 
-    REM : add a call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
+    :scanGamesFolder
+    cls
+
+    REM : check if exist game's folder(s) containing non supported characters
+    REM : is done in importSaves.bat
+
+    REM : call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
     set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
-    wscript /nologo !StartWait! !importSave! !script! !MLC01_FOLDER_PATH!
+    wscript /nologo !StartWait! !importSave! !MLC01_FOLDER_PATH!
 
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_mmdfag.log""
@@ -190,6 +195,7 @@ REM : main
         goto:eof
     )
     set /A NB_GAMES_TREATED=0
+
     REM : loop on game's code folders found
     for /F "delims=~" %%g in ('dir /b /o:n /a:d /s code 2^>NUL ^| find /I /V "\mlc01" ^| find /I /V "\_BatchFw_Install"') do (
 
@@ -493,6 +499,26 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
+        REM : get game's title from wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "Desc=%%b"
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )
+
+        set "gfxPackGameTitle=%Desc: =%"
 
         REM : import cache if CEMU's folder
         if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
@@ -544,7 +570,7 @@ REM : functions
         :treatMlc01Data
 
         echo =========================================================
-        echo - !GAME_TITLE!
+        echo - !GAME_TITLE! ^(%nativeHeight%p @ %nativeFps%FPS^)
         echo ---------------------------------------------------------
 
         REM : asking for associating the current game with this CEMU VERSION
@@ -584,12 +610,12 @@ REM : functions
         set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy  !sysSrc! !sysTarget! /MT /S /MOVE /IS /IT  > NUL 2>&1
 
         set /A NB_GAMES_TREATED+=1
 
         REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! move mlc01 data from=!MLC01_FOLDER_PATH:"=!""
+        set "msg="!gfxPackGameTitle!:!DATE!-!USERDOMAIN! move mlc01 data from=!MLC01_FOLDER_PATH:"=!""
         call:log2GamesLibraryFile !msg!
 
     goto:eof
@@ -661,7 +687,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy !source! !target! /MT /S /MOVE /IS /IT  > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"

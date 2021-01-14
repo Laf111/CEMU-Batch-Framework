@@ -25,6 +25,7 @@ REM : main
     set "initProgressBar="!BFW_TOOLS_PATH:"=!\initProgressBar.bat""
     set "progressBar="!BFW_RESOURCES_PATH:"=!\progressBar.lnk""
     set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
 
@@ -334,7 +335,7 @@ REM : main
     REM : V4 packs support
     set "gfxType=V4"
 
-    REM : TODO : uncomment when V4 and V6 not mixed anymore
+    REM : TODO : uncomment when V4 packs will not be mixed with V6 one in GFX repo
     if exist !gfxv4! goto:checkV1182
 
     mkdir !gfxv4! > NUL 2>&1
@@ -712,7 +713,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     echo Copying transferable cache !OLD_SHADER_CACHE_ID! to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
 
     REM : copy all !sci!.bin file (2 files if separable and conventionnal)
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /IS /IT > NUL 2>&1
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /MT /IS /IT > NUL 2>&1
 
     :launch3rdPartySoftware
     REM : launching third party software if defined
@@ -961,8 +962,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM GPU_CACHE_PATH already created before (if missing)
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%*.* 2^>NUL') do (
         set "file="%%f""
-        if !v1182! LEQ 1 echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MOV /IS /IT > NUL 2>&1
-        echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
+        if !v1182! LEQ 1 echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MT /MOV > NUL 2>&1
+        echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MT /MOV > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -1065,7 +1066,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
             if !v1153b! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
 
-            if !v1153b! LEQ 1 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
+            if !v1153b! LEQ 1 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /MT /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             REM : version < 1.14 => version < 1.15.3b
             set /A "v1153b=2"
@@ -1073,7 +1074,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     )
 
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GAME_GP_FOLDER! !graphicPacks! /MT /mir > NUL 2>&1
 
     :launchCemu
 
@@ -1266,13 +1267,13 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     pushd !GPU_CACHE!
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MT /MOV > NUL 2>&1
     )
     if !v1182! LEQ 1 (
         pushd !precompFolder!
         for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%_spirv.* 2^>NUL') do (
             set "file="%%f""
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !precompFolder! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !precompFolder! !targetFolder! !file! /MT /MOV > NUL 2>&1
         )
     )
     pushd !BFW_TOOLS_PATH!
@@ -1521,6 +1522,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : del log folder for fnr.exe
     if exist !fnrLogFolder! rmdir /Q /S !fnrLogFolder! > NUL 2>&1
 
+    del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
 
     if %cr_cemu% EQU 0 if exist !userGameSave! (
         set "logFileTmp="!TMP:"=!\BatchFw_process.list""
@@ -1779,7 +1781,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
 
         REM : else robocopy
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !source! !target! /MT /S /MOVE > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! GTR 7 set /A "%3=1"
@@ -2060,7 +2062,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         echo Import settings from !previousSettingsFolder:"=! >> !batchFwLog!
 
         set /A "settingsImported=1"
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !previousSettingsFolder! !nsf! /S > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !previousSettingsFolder! !nsf! /MT /S > NUL 2>&1
 
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!currentUser!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
@@ -2175,7 +2177,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set "controllersProfilesSaved="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "controllersProfiles="!CEMU_FOLDER:"=!\controllerProfiles""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !controllersProfilesSaved! !controllersProfiles! > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !controllersProfilesSaved! !controllersProfiles! /MT > NUL 2>&1
 
         REM : set onlines files for user if an active connection was found
         if !wizardLaunched! EQU 0 if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] call:setOnlineFiles
@@ -2539,7 +2541,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!gcp:"=!\%%x"
-            if not exist !ccpf!  wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gcp! !ccp! "%%x"
+            if not exist !ccpf!  wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gcp! !ccp! "%%x" /MT
         )
 
         pushd !ccp!
@@ -2547,7 +2549,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*"
+            if not exist !bcpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*"
         )
 
         :syncWithBatchFW
@@ -2556,7 +2558,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
+            if not exist !ccpf! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
         )
         pushd !BFW_TOOLS_PATH!
 
@@ -2783,7 +2785,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set "gcp="!GAME_FOLDER_PATH:"=!\Cemu\controllerProfiles""
         set "ccp="!CEMU_FOLDER:"=!\controllerProfiles""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp!
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ccp! !gcp! /MT
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -2899,7 +2901,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         mkdir !gtscf! > NUL 2>&1
         REM :  move CEMU transferable shader cache file to GAME_FOLDER_PATH
         echo move !ctscf! to !gtscf!>> !batchFwLog!
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MT /MOV
         goto:eof
 
         :handleShaderFiles
@@ -2966,7 +2968,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             move /Y !otscf! !otscr! > NUL 2>&1
             echo - >> !tscl!
             echo - Moving CEMU^'s transferable shader cache to game^'s folder >> !tscl!
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MT /MOV
             echo - >> !tscl!
 
             set "tscrl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_replace_!OLD_SHADER_CACHE_ID!_with_!NEW_SHADER_CACHE_ID!""
@@ -3043,7 +3045,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             set "NEW_TRANS_SHADER=!NEW_TRANS_SHADER:.bin=_j.bin!"
         )
 
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT  > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MT /MOV > NUL 2>&1
 
         REM : delete transShaderCache.log (useless)
         if exist !tscl! del /F /S !tscl! > NUL 2>&1

@@ -31,7 +31,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
-
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
@@ -134,7 +134,6 @@ REM : main
     )
     echo  - loadiine Wii-U Games under^: !GAMES_FOLDER!
     echo  - source mlc01 folder^: !MLC01_FOLDER_PATH!
-    echo =========================================================
     echo.
 
     REM : compute size needed only if source and target partitions are differents
@@ -145,14 +144,15 @@ REM : main
     echo.
     REM : compute the size needed
     call:getFolderSizeInMb !MLC01_FOLDER_PATH! sizeNeeded
+
     choice /C yn /N /M "A maximum of !sizeNeeded! Mb are needed on the target partition, continue (y, n)? : "
     if !ERRORLEVEL! EQU 2 (
         REM : Cancelling
         echo Cancelled by user^, exiting in 2s
         exit /b 49
     )
-
     :beginScan
+    echo =========================================================
     if !QUIET_MODE! EQU 1 goto:scanGamesFolder
     echo Launching in 30s
     echo     ^(y^)^: launch now
@@ -173,7 +173,7 @@ REM : main
 
     REM : call to importSaves.bat (it asks which user is concerned by the Mlc01 folder and create his compressed save)
     set "importSave="!BFW_TOOLS_PATH:"=!\importSaves.bat""
-    wscript /nologo !StartWait! !importSave! !script! !MLC01_FOLDER_PATH!
+    wscript /nologo !StartWait! !importSave! !MLC01_FOLDER_PATH!
 
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_PATH:"=!\logs\detectInvalidGamesFolder_cmdfag.log""
@@ -269,10 +269,10 @@ REM : main
     echo ^(otherwise you^'ll get an error when launching the game ask you to do this^)
     echo ---------------------------------------------------------
     echo This windows will close automatically in 12s
-    echo     ^(n^)^: don^'t close^, i want to read history log first
-    echo     ^(q^)^: close it now and quit
+    echo     ^(n^) ^: don^'t close^, i want to read history log first
+    echo     ^(q^) ^: close it now and quit
     echo ---------------------------------------------------------
-    call:getUserInput "Enter your choice ? : " "q,n" ANSWER 30
+    call:getUserInput "Enter your choice? : " "q,n" ANSWER 30
     if [!ANSWER!] == ["n"] (
         REM : Waiting before exiting
         pause
@@ -409,7 +409,6 @@ REM : functions
             echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
             echo "Then close notepad to continue"
 
-            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
             wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
             REM : create the meta.xml file
             echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
@@ -428,6 +427,26 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
+        REM : get game's title from wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "Desc=%%b"
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )
+
+        set "gfxPackGameTitle=%Desc: =%"
 
         REM : import cache if CEMU's folder
         if !cemuFolderDetected! EQU 0 goto:treatMlc01Data
@@ -447,7 +466,7 @@ REM : functions
         set "tgtScf="!gtscf:"=!\!sci!.bin""
 
         if not exist !srcScf! goto:handleNewTC
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1 & goto:handleNewTC
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1 & goto:handleNewTC
 
         set /A "srcSize=0"
         for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
@@ -455,7 +474,7 @@ REM : functions
         for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
 
         REM : compare their size : copy only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1
 
         :handleNewTC
         REM : for version > 1.16 sci=titleId
@@ -467,7 +486,7 @@ REM : functions
         if not exist !srcScf! goto:treatMlc01Data
 
         set "tgtScf="!gtscf:"=!\!sci!.bin""
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1 & goto:treatMlc01Data
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1 & goto:treatMlc01Data
 
         set /A "srcSize=0"
         for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
@@ -475,12 +494,12 @@ REM : functions
         for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
 
         REM : compare their size : copy only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT > NUL 2>&1
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1
         
         :treatMlc01Data
 
         echo =========================================================
-        echo - !GAME_TITLE!
+        echo - !GAME_TITLE! ^(%nativeHeight%p @ %nativeFps%FPS^)
         echo ---------------------------------------------------------
 
         echo If you play !GAME_TITLE! with !CEMU_FOLDER_NAME:"=!^:
@@ -518,12 +537,12 @@ REM : functions
         set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /S > NUL 2>&1
+        robocopy  !sysSrc! !sysTarget! /MT /S > NUL 2>&1
 
         set /A NB_GAMES_TREATED+=1
 
         REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! copy mlc01 data from=!MLC01_FOLDER_PATH:"=!""
+        set "msg="!gfxPackGameTitle!:!DATE!-!USERDOMAIN! copy mlc01 data from=!MLC01_FOLDER_PATH:"=!""
         call:log2GamesLibraryFile !msg!
 
     goto:eof
@@ -611,7 +630,7 @@ REM : functions
         set "metaFolder="!target:"=!\meta""
         if exist !metaFolder! goto:eof
 
-        robocopy !tf! !target! /S > NUL 2>&1
+        robocopy !tf! !target! /MT /S > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
             echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
@@ -681,12 +700,12 @@ REM : functions
 
             if [%cr%] == [!j!] (
                 REM : value found , return function value
-
                 set "%3=%%i"
                 goto:eof
             )
             set /A j+=1
         )
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -742,7 +761,6 @@ REM : functions
     :log2HostFile
         REM : arg1 = msg
         set "msg=%~1"
-
 
         if not exist !logFile! (
             set "logFolder="!BFW_PATH:"=!\logs""

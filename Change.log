@@ -21,10 +21,26 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-04/01/2021 V21-3 :
-add : update CAP FPS behaviors of some titles in the internal database
+
+14/01/2021 V21-4 :
+add : minimize time of all files copy (add robocopy multithreaded option). Pre and post launching CEMU times are lowered by 30~50% 
+      on my 8 cores CPU.
+add : update gamesLibrary.log when scanning games (to remove uninstalled games and avoid conflicts if you re-install them)
+fix : when registering a CEMU install in setup.bat, ask to import mlc01 data only if settings.xml exists 
+fix : clean all fnr logs before exiting launchGame.bat
+fix : remove old script deleteAllInGameSaves.bat left by mistake in the project
+
+06/01/2021 V21-3 :
 add : handle GFX packs V7 and up
+add : update CAP FPS behaviors of some titles in the internal database
+add : broken shortcuts deletion now also remove broken shortcuts to game's profile, custom GFX packs handling...
+      now removes shortcut with  
+        - invalid target and icon location (uninstalled game, CEMU's version)
+        - game's shortcuts for uninstalled CEMU's versions
 fix : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19
+fix : bug on broken shortcuts deletion
+fix : some unwanted cmd flash when using fnr.exe (stdout/stderr redirections)
+fix : remove old script injectDumpsToWiiu.bat left by mistake in the project (replaced by injectGamesToWiiu.bat)
 
 22/12/2020 V21-2 :
 add : in launchGame.bat searching for a transferable cache for API=OpenGL and for Vulkan if CEMU < 1.19

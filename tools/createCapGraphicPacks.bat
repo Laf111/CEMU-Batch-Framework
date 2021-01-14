@@ -269,7 +269,7 @@ REM    color 4F
     if exist !fnrLogLggp! del /F !fnrLogLggp! > NUL 2>&1
 
     REM : Search FPS++ patch
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogLggp!  > NUL
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogLggp!
 
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
 REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
@@ -402,7 +402,7 @@ REM : functions
         if exist !fnrPacthDb! del /F !fnrPacthDb! > NUL 2>&1
 
         REM : Replace 60 by 30 in capLinesTmp
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BatchFw_createCapGfx_newLines.list" --find ";60" --replace ";30" --logFile !fnrPacthDb!  > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BatchFw_createCapGfx_newLines.list" --find ";60" --replace ";30" --logFile !fnrPacthDb!
 
         REM : remove the line and add the new one with 30FPS as nativeFps
         set "wiiTitlesDataBaseTmp="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.tmp""
@@ -633,7 +633,7 @@ REM : functions
         set "logFileLastVersion="!fnrLogFolder:"=!\!gameName:"=!-LastVersion_!fps!cap.log""
         if exist !logFileLastVersion! del /F !logFileLastVersion!
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileLastVersion! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileLastVersion!
 
     goto:eof
     REM : ------------------------------------------------------------------

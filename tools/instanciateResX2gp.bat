@@ -114,7 +114,7 @@ echo tmplRatioValue=!tmplRatioValue!
     if not exist !gp! mkdir !gp! > NUL 2>&1
 
     REM : copy ResX2gpp one content in
-    robocopy !gpResX2gp! !gp! /S > NUL 2>&1
+    robocopy !gpResX2gp! !gp! /MT /S > NUL 2>&1
 
     REM : rules.txt
     set "rulesFile="!gp:"=!\rules.txt""

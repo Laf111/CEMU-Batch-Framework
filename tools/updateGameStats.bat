@@ -151,8 +151,8 @@ echo -------------------------------------------------------
         rem : replace in file
         set "BfwSettingsLog="!BFW_LOGS_PATH:"=!\fnr_BfwSettings.log""
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog! > NUL
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog! > NUL
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find "<<" --replace "<" --logFile !BfwSettingsLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TMP! --fileMask "BfwSettings_!DATE!.xml" --find ">/>" --replace ">" --logFile !BfwSettingsLog!
 
         echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         echo pretty indent !scTgt!

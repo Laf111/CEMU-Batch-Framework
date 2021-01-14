@@ -738,7 +738,7 @@ REM : main
 
             if ["!v1153b!"] == [""] echo Error when comparing versions
             if !v1153b! EQU 50 echo Error when comparing versions
-            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1 && goto:launchCemu
+            if !v1153b! LEQ 1 robocopy !GAME_GP_FOLDER! !graphicPacks! /MT /mir > NUL 2>&1 && goto:launchCemu
         ) else (
             REM : version < 1.14 => version < 1.15.3b
             set /A "v1153b=2"
@@ -746,7 +746,7 @@ REM : main
     )
 
     mklink /D /J !graphicPacks! !GAME_GP_FOLDER! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /mir > NUL 2>&1
+    if !ERRORLEVEL! NEQ 0 robocopy !GAME_GP_FOLDER! !graphicPacks! /MT /mir > NUL 2>&1
 
     :launchCemu
 
@@ -1514,7 +1514,7 @@ REM : functions
         REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
         for /F "delims=" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
-            if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
+            if not exist !ccpf! robocopy  !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
         )
         echo ---------------------------------------------------------
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!\ControllerProfiles vs _BatchFW_Controller_Profiles^)

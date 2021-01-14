@@ -19,7 +19,7 @@ REM : main
     echo BatchFw install is still in !LAST_GAMES_FOLDER_PATH!
     echo There^'s no need to fix shortcuts.
     echo.
-    choice /C yn /N /M "Do you mean to remove broken shortcuts for uninstalled games/Cemu versions (y, n)? : "
+    choice /C yn /N /M "Do you mean remove broken shortcuts for uninstalled games/Cemu versions (y, n)? : "
     set /A "allShortcuts=!ERRORLEVEL!"
     if !allShortcuts! EQU 1 set "NEW_GAMES_FOLDER_PATH=!LAST_GAMES_FOLDER_PATH!" & goto:fix
 
@@ -71,7 +71,7 @@ REM : main
 
     REM : Loop on every shorcuts found recursively
     if !allShortcuts! EQU 1 (
-        for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL ^| find /V "BatchFw\" ^| find /V "_BatchFw " ^| find /V "CEMU\" ^| find /V "Wii-U\"') do call:fixShortcut "%%i"
+        for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL ^| find /V "_BatchFw " ^| find /V "Wii-U\"') do call:fixShortcut "%%i"    
     ) else (
         for /F "delims=~" %%i in ('dir /S /B "*.lnk" 2^>NUL') do call:fixShortcut "%%i"
     )
@@ -82,7 +82,7 @@ REM : main
 
     REM : update this script
     set "fnrLog="!NEW_GAMES_FOLDER_PATH:"=!\_BatchFw_Install\logs\fnr_brokenShortcuts.log""
-    !fnrPath! --cl --dir !shortcutsToolsFolder! --fileMask "fixBrokenShortcuts.bat" --find !LAST_GAMES_FOLDER_PATH! --replace !NEW_GAMES_FOLDER_PATH! --logFile !fnrLog! > NUL 2>&1
+    !fnrPath! --cl --dir !shortcutsToolsFolder! --fileMask "fixBrokenShortcuts.bat" --find !LAST_GAMES_FOLDER_PATH! --replace !NEW_GAMES_FOLDER_PATH! --logFile !fnrLog!
     del /F !fnrLog! > NUL 2>&1
 
     echo.
@@ -157,26 +157,55 @@ REM : functions
         echo oSc^.WorkingDirectory = Replace^(oSc^.WorkingDirectory^,!LAST_GAMES_FOLDER_PATH!^,!NEW_GAMES_FOLDER_PATH!^) >> !TMP_VBS_FILE!
         echo oSc^.IconLocation = Replace^(oSc^.IconLocation^,!LAST_GAMES_FOLDER_PATH!^,!NEW_GAMES_FOLDER_PATH!^) >> !TMP_VBS_FILE!
 
+        REM : file / folder handler
+        echo Set fso = CreateObject^("Scripting.FileSystemObject"^) >> !TMP_VBS_FILE!
+
+        REM : remove shortcut with broken location (log files...)
+        echo If NOT fso^.FileExists^(oSc^.TargetPath^) Then  >> !TMP_VBS_FILE!
+        echo    If NOT fso^.FolderExists^(oSc^.TargetPath^) Then  >> !TMP_VBS_FILE!
+	
+        echo        WScript^.echo !shortcut!+" deleted : target path does not exist = "+oSc^.TargetPath >> !TMP_VBS_FILE!
+
+        echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
+        echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
+        echo     End If  >> !TMP_VBS_FILE!
+        echo End If  >> !TMP_VBS_FILE!
+
+        REM : remove shortcuts with a broken icon location (all game's shortcuts for an uninstalled/removed game)
+        echo Dim icoData >> !TMP_VBS_FILE!
+        echo icoData = Split^(oSc^.IconLocation, Chr^(44^)^) >> !TMP_VBS_FILE!
+
+REM echo WScript^.echo !shortcut!  >> !TMP_VBS_FILE!
+REM echo WScript^.echo "    target="+oSc^.TargetPath  >> !TMP_VBS_FILE!
+REM echo WScript^.echo "    icon="+icoData^(0^) >> !TMP_VBS_FILE!
+
+        echo If icoData^(0^) ^<^> "" Then >> !TMP_VBS_FILE!
+
+            echo If NOT fso.FileExists^(icoData^(0^)^) Then >> !TMP_VBS_FILE!
+            echo    WScript^.echo !shortcut!+" deleted : icon path does not exist = "+icoData^(0^) >> !TMP_VBS_FILE!
+            echo    fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
+            echo    WScript^.Quit 1  >> !TMP_VBS_FILE!
+            echo End If  >> !TMP_VBS_FILE!
+        echo End If  >> !TMP_VBS_FILE!
+
+        REM : remove games shortcuts for uninstalled versions of CEMU
         echo findpos = InStr^(oSc^.Arguments^, "launchGame") >> !TMP_VBS_FILE!
         echo If findpos ^<^> 0 Then >> !TMP_VBS_FILE!
         echo     Dim vbsArgsLine  >> !TMP_VBS_FILE!
+        REM : split the command line "!launchGame!" "!CEMU_FOLDER!" "!GAME_FILE_PATH!" "!OUTPUT_FOLDER!" "!ICO_PATH!" "!MLC01_FOLDER_PATH!" !user:"=!"
+        REM : using " as separator
         echo     vbsArgsLine=Split^(oSc^.Arguments^, Chr^(34^)^) >> !TMP_VBS_FILE!
-        echo     Set fso = CreateObject^("Scripting.FileSystemObject"^)  >> !TMP_VBS_FILE!
-        echo     If fso^.FileExists^(vbsArgsLine^(5^)^) Then  >> !TMP_VBS_FILE!
-        echo        oSc^.Save  >> !TMP_VBS_FILE!
-        echo     Else  >> !TMP_VBS_FILE!
+        REM : vbsArgsLine(3)=!CEMU_FOLDER!
+        echo     If NOT fso^.FolderExists^(vbsArgsLine^(3^)^) Then  >> !TMP_VBS_FILE!
+        REM : uninstalled version of CEMU, remove the shortcut
+        echo    WScript^.echo !shortcut!+" CEMU path does not exist = "+vbsArgsLine^(3^) >> !TMP_VBS_FILE!
         echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
         echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
         echo     End If  >> !TMP_VBS_FILE!
-        echo     If fso^.FolderExists^(vbsArgsLine^(3^)^) Then  >> !TMP_VBS_FILE!
-        echo        oSc^.Save  >> !TMP_VBS_FILE!
-        echo     Else  >> !TMP_VBS_FILE!
-        echo        fso^.DeleteFile^(!shortcut!^) >> !TMP_VBS_FILE!
-        echo        WScript^.Quit 1  >> !TMP_VBS_FILE!
-        echo     End If  >> !TMP_VBS_FILE!
-        echo Else >> !TMP_VBS_FILE!
-        echo     oSc^.Save  >> !TMP_VBS_FILE!
         echo End If     >> !TMP_VBS_FILE!
+
+        echo oSc^.Save  >> !TMP_VBS_FILE!
+        echo WScript^.Quit 1  >> !TMP_VBS_FILE!
 
         REM : running VBS file
         cscript /nologo !TMP_VBS_FILE!

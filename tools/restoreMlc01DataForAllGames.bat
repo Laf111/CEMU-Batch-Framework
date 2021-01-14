@@ -34,6 +34,7 @@ REM : main
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
     REM : checking GAMES_FOLDER folder
@@ -490,6 +491,27 @@ REM : functions
 
         set "endTitleId=%titleId:~8,8%"
 
+        REM : get game's title from wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "Desc=%%b"
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )
+
+        set "gfxPackGameTitle=%Desc: =%"
+
         set "pat="!GAME_FOLDER_PATH:"=!\mlc01\usr\title""
         for /F "delims=~" %%i in ('dir /b /o:n /a:d !pat! 2^>NUL') do (
             if !moveFlag! EQU 1 (
@@ -500,7 +522,7 @@ REM : functions
         )
 
         REM : log to games library log file
-        set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! restore mlc01 data for !GAME_TITLE! in=!MLC01_FOLDER_PATH:"=!""
+        set "msg="!gfxPackGameTitle!:!DATE!-!USERDOMAIN! restore mlc01 data for !GAME_TITLE! in=!MLC01_FOLDER_PATH:"=!""
         call:log2GamesLibraryFile !msg!
 
         set /A NB_GAMES_TREATED+=1
@@ -518,7 +540,7 @@ REM : functions
         if not exist !metaFolder! goto:eof
 
         set "target="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
-        robocopy !tf! !target! /S > NUL 2>&1
+        robocopy !tf! !target! /MT /S > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
             echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
@@ -593,7 +615,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
+        robocopy !source! !target! /MT /S /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"

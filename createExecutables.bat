@@ -48,6 +48,8 @@ REM : main
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
     
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -56,7 +58,8 @@ REM : main
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
 
     REM : check if folder name contains forbiden character for batch file
     call:securePathForDos !GAMES_FOLDER! SAFE_PATH
@@ -486,10 +489,10 @@ REM : main
 
    :checkV4Packs
     REM : 1.14 <= version < 1.22
-    REM : TODO uncomment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+    REM : TODO uncomment when V4 packs will not be mixed with V6 one in GFX repo
 REM    set "gfxv4="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
 REM    if exist !gfxv4! goto:checkCemuHook
-    REM : TODO comment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+    REM : TODO comment when V4 packs will not be mixed with V6 one in GFX repo
     goto:checkCemuHook
 
     mkdir !gfxv4! > NUL 2>&1
@@ -634,6 +637,10 @@ REM    call:log2HostFile !msg!
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
 
+    REM : temporary game library log file (updated here to remove uninstalled games data)
+    set "glogFileNew="!BFW_PATH:"=!\logs\gamesLibrary.new""
+    del /F /S !glogFileNew! > NUL 2>&1
+
     set /A "NB_GAMES_TREATED=0"
     set /A "NB_OUTPUTS=0"
 
@@ -703,6 +710,11 @@ REM    call:log2HostFile !msg!
     )
     rmdir /S /Q  !launchersFolder! > NUL 2>&1
 
+    REM : if not called from the setup.bat
+    if !QUIET_MODE! EQU 0 (
+        type !glogFileNew! | sort > !glogFile!
+        del /F /S !glogFileNew! > NUL 2>&1
+    )
 
     if !QUIET_MODE! EQU 1 if !treatAllGames! EQU 0 goto:log
     echo =========================================================
@@ -994,7 +1006,7 @@ REM : functions
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL 2>&1
+            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*" > NUL 2>&1
         )
 
         pushd !CONTROLLER_PROFILE_FOLDER!
@@ -1002,7 +1014,7 @@ REM : functions
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
+            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
         )
         pushd !GAMES_FOLDER!
 
@@ -1812,6 +1824,30 @@ REM : functions
 
         for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
 
+        REM : get game's title from wii-u database file
+        set "libFileLine="NONE""
+        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
+
+        REM : strip line to get data
+        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
+           set "titleIdRead=%%a"
+           set "Desc=%%b"
+           set "productCode=%%c"
+           set "companyCode=%%d"
+           set "notes=%%e"
+           set "versions=%%f"
+           set "region=%%g"
+           set "acdn=%%h"
+           set "icoId=%%i"
+           set "nativeHeight=%%j"
+           set "nativeFps=%%k"
+        )
+
+        set "gfxPackGameTitle=%Desc: =%"
+
+        REM : extract gfxPackGameTitle data and fill to the updated file
+        if !QUIET_MODE! EQU 0 type !gLogFile! | find !gfxPackGameTitle! >> !gLogFileNew!
+
         :searchIco
 
         REM : icon dl flag
@@ -1894,7 +1930,7 @@ REM : functions
 
             REM : asking for associating the current game with this CEMU VERSION
             echo =========================================================
-            echo - !GAME_TITLE!
+            echo - !GAME_TITLE! ^(%nativeHeight%p @ %nativeFps%FPS^)
             echo ---------------------------------------------------------
             echo.
             echo Creating a Executable for !GAME_TITLE! using !CEMU_FOLDER! ^?
@@ -2003,8 +2039,6 @@ goto:eof
             set "titleIdIco=%titleId%"
             goto:copyIcoFile
         )
-
-        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
         REM : get information on game using WiiU Library File
         set "libFileLine="NONE""

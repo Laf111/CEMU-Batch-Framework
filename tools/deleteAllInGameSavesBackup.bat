@@ -159,7 +159,7 @@ REM : main
     )
 
     if !NB_SAVES_TREATED! NEQ 0 (
-        set "msg="!GAME_TITLE!:!DATE!-!USERDOMAIN! delete all in game saves backup""
+        set "msg="!USERNAME!:!DATE!-!USERDOMAIN! delete all in game saves backup""
         call:log2GamesLibraryFile !msg!
     )
 

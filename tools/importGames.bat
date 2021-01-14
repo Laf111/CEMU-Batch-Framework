@@ -585,7 +585,7 @@ REM : functions
         ) else (
             echo Copying game^'s files^.^.^.
 
-            robocopy !source! !target! /S > NUL 2>&1
+            robocopy !source! !target! /MT /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 if !attemptTgt! EQU 1 (
@@ -710,7 +710,7 @@ REM : functions
                 goto:eof
             )
         ) else (
-            robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
+            robocopy !GAME_FOLDER_PATH! !target! /MT /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
 
@@ -814,7 +814,7 @@ REM : functions
             move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
 
         ) else (
-            robocopy !GAME_FOLDER_PATH! !target! /S > NUL 2>&1
+            robocopy !GAME_FOLDER_PATH! !target! /MT /S > NUL 2>&1
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 if !attemptTgt! EQU 1 (
@@ -876,7 +876,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
+        robocopy !source! !target! /MT /S /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! GTR 7 set /A "%3=1"

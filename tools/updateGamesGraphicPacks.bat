@@ -750,7 +750,7 @@ REM    REM : ------------------------------------------------------------------
 
         REM : No new gfx pack found but is a V4 gfx pack exists ?
 
-        REM : TODO update when V6 GFX packs only in _BatchFw_Graphic_Packs root
+        REM : TODO update when V4 packs will not be mixed with V6 one in GFX repo
         REM : if not exist !gfxPacksV4Folder! goto:checkV2packs
 
         REM : check if a gfx pack with version > 2 exists ?

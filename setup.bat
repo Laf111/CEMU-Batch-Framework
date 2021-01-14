@@ -1054,7 +1054,7 @@ REM : main
         attrib -R !target!
 
         set "fnrLog="!BFW_LOGS:"=!\fnr_setup.log""
-        !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+        !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!
         del /F !fnrLog! > NUL 2>&1
     )
 
@@ -1424,7 +1424,7 @@ REM : ------------------------------------------------------------------
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /XF "controller*.*" > NUL 2>&1
+            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*" > NUL 2>&1
         )
 
         pushd !CONTROLLER_PROFILE_FOLDER!
@@ -1432,7 +1432,7 @@ REM : ------------------------------------------------------------------
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" > NUL 2>&1
+            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
         )
         pushd !GAMES_FOLDER!
 
@@ -1445,6 +1445,7 @@ REM : ------------------------------------------------------------------
         set "CEMU_FOLDER="%~2""
 
         for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
+        set "cs="!CEMU_FOLDER:"=!\settings.xml""
 
         if %nbArgs% EQU 1 goto:openCemuAFirstTime
         if !useMlcFolderFlag! EQU 1 goto:openCemuAFirstTime
@@ -1456,20 +1457,21 @@ REM : ------------------------------------------------------------------
             if %QUIET_MODE% EQU 0  wscript /nologo !Start! "%windir%\System32\notepad.exe" !tmpFile!
         )
 
-        choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy^/move mlc01 ^(updates^, dlc^, game saves^) to games^' folders^? (^y^,n^)^:"
-        if !ERRORLEVEL! EQU 2 goto:openCemuAFirstTime
+        if exist !cs! (
+            choice /C yn /CS /N /M "Use !CEMU_FOLDER_NAME! to copy^/move mlc01 ^(updates^, dlc^, game saves^) to games^' folders^? (^y^,n^)^:"
+            if !ERRORLEVEL! EQU 2 goto:openCemuAFirstTime
 
-        choice /C mc /CS /N /M "Move (m) or copy (c)?"
-        set /A "cr=!ERRORLEVEL!"
+            choice /C mc /CS /N /M "Move (m) or copy (c)?"
+            set /A "cr=!ERRORLEVEL!"
 
-        set "mlc01="!CEMU_FOLDER:"=!\mlc01""
+            set "mlc01="!CEMU_FOLDER:"=!\mlc01""
 
-        if !cr! EQU 1 call:move
-        if !cr! EQU 2 call:copy
+            if !cr! EQU 1 call:move
+            if !cr! EQU 2 call:copy
+        )
 
        :openCemuAFirstTime
 
-        set "cs="!CEMU_FOLDER:"=!\settings.xml""
         set "clog="!CEMU_FOLDER:"=!\log.txt""
         if exist !clog! if exist !cs! goto:getCemuVersion
 
@@ -1577,10 +1579,10 @@ REM : ------------------------------------------------------------------
 
        :checkV4Packs
         REM : 1.14 <= version < 1.22
-        REM : TODO uncomment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+        REM : TODO uncomment when V4 packs will not be mixed with V6 one in GFX repo
     REM    set "gfxv4="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs\_graphicPacksV4""
     REM    if exist !gfxv4! goto:checkCemuHook
-        REM : TODO comment when BatchFw will create V6 packs (and V4 packs will not be miwed with V6 one in GFX repo)
+        REM : TODO comment when V4 packs will not be mixed with V6 one in GFX repo
         goto:checkCemuHook
 
         mkdir !gfxv4! > NUL 2>&1
@@ -1906,7 +1908,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /MT /S /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["shaderCache"] (
@@ -1918,7 +1920,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /MT /S /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["graphicPacks"] (
@@ -1930,7 +1932,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /MT /S /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
 

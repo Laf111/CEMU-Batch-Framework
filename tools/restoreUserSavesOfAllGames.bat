@@ -39,6 +39,8 @@ REM : main
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     REM : RAR.exe path
@@ -455,7 +457,6 @@ REM : functions
             if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
             echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
             echo "Then close notepad to continue"
-            set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
             wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
 
             REM : create the meta.xml file

@@ -248,7 +248,7 @@ REM : functions
             robocopy !BFW_TOOLS_PATH! !fbsf! "fixBrokenShortcuts.bat" > NUL 2>&1
 
             set "fnrLog="!BFW_LOGS_PATH:"=!\fnr_setup.log""
-            !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!  > NUL
+            !fnrPath! --cl --dir !fbsf! --fileMask "fixBrokenShortcuts.bat" --find "TO_BE_REPLACED" --replace !GAMES_FOLDER! --logFile !fnrLog!
             del /F !fnrLog! > NUL 2>&1
             attrib +R !target!
 
