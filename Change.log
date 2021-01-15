@@ -23,8 +23,9 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 
 15/01/2021 V21-5 :
-add : support for resolution GFX pack using aspect ratio presets (BOTW gfx pack >= 734)
+add : support for completing resolution GFX pack that uses aspect ratio presets (BOTW gfx pack >= 734)
 add : in launchGame.bat clean useless log files
+fix : in setup.bat create*.bat copy controller profiles before opening CEMU for the very first time 
 
 14/01/2021 V21-4 :
 add : minimize time of all files copy  (add robocopy multithreaded option) 
