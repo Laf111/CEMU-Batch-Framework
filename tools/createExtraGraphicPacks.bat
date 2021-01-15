@@ -182,7 +182,7 @@ REM    color 4F
     set "lastVersion=NONE"
     for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "lastVersion=%%i"
     set "lastVersion=!lastVersion:"=!"
-    
+
     set "titleId=!titleId:"=!"
 
     REM : fix for incomplete titleId
@@ -544,20 +544,29 @@ REM : functions
         set "gpResX2="
         set /A "showEdFlag=0"
 
-        if !vGfxPack! NEQ 2 if !vGfxPack! LSS 6 (
-            set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
-            if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
-            set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
+        REM : add a flag for aspect ratios presets (BOTW)
+        set /A "existAspectRatioPreset=0"
 
-            REM : here the rules.txt is stock (extraDirectives are 16/9 ones)
-            call:getExtraDirectives > !extraDirectives!
-            copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
+        if !vGfxPack! NEQ 2 (
+            if !vGfxPack! LSS 6 (
+                set "extraDirectives="!fnrLogFolder:"=!\extraDirectives.log""
+                if exist !extraDirectives! del /F !extraDirectives! > NUL 2>&1
+                set "extraDirectives169="!fnrLogFolder:"=!\extraDirectives169.log""
 
-            REM : replacing directives in extraDirectives.log
-            set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
-            if exist !logFileED! del /F !logFileED! > NUL 2>&1
+                REM : here the rules.txt is stock (extraDirectives are 16/9 ones)
+                call:getExtraDirectives > !extraDirectives!
+                copy /Y !extraDirectives! !extraDirectives169! > NUL 2>&1
+
+                REM : replacing directives in extraDirectives.log
+                set "logFileED="!fnrLogFolder:"=!\fnr_extraDirectives.log""
+                if exist !logFileED! del /F !logFileED! > NUL 2>&1
+            ) else (
+                REM : check if aspect ratio presets exist
+                type !rulesFile! | find "$aspectRatioWidth" > NUL 2>&1 && (
+                    set /A "existAspectRatioPreset=1"
+                )
+            )
         )
-
         REM : reset extra directives file
         if !vGfxPack! NEQ 2 if !vGfxPack! LSS 6 if exist !extraDirectives169! copy /Y !extraDirectives169! !extraDirectives! > NUL 2>&1
 
@@ -845,7 +854,7 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
 
         set "hc=!hi!"
         set "wc=!wi!"
-        
+
         REM : fullscreen resolutions
         if !hi! EQU !nativeHeight! if !wi! EQU !nativeWidth! goto:eof
         if !n5Found! EQU 1 call:addPresets & goto:eof
@@ -994,6 +1003,16 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         REM : compute Width and Height using ratioPassed
         for /F "delims=- tokens=1-2" %%a in ("!ratioPassed!") do set "wr=%%a" & set "hr=%%b"
 
+        set "aspectRatioWidth=!wr!"
+        set "aspectRatioHeight=!hr!"
+        REM  : if a aspect ratio preset exists (push back one)
+        if !existAspectRatioPreset! EQU 1 (
+            if not ["!ratioPassed: =!"] == ["16-9"] (
+                set "logFileAr="!fnrLogFolder:"=!\!gpFolderName:"=!-!ratioPassed!.log""
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "[[]Preset[]].*\nname[ ]*=[ ]*16:9.*\ncategory[ ]*=[ ]*Aspect[ ]*Ratio" --replace "[Preset]\nname = 16:9 (Default)\ncategory = Aspect Ratio\n\n[Preset]\nname = !aspectRatioWidth!:!aspectRatioHeight!\ncategory = Aspect Ratio\n$aspectRatioWidth = !aspectRatioWidth!\n$aspectRatioHeight = !aspectRatioHeight!" --logFile !logFileAr!
+            )
+        )
+
         if !vGfxPack! EQU 2 goto:setFsPresets
         if not exist !extraDirectives! goto:setFsPresets
         set "ed="
@@ -1052,7 +1071,11 @@ REM pause
         if !vGfxPack! LSS 6 (
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edup!" --replace "[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\n$width = !previousW!\n$height = !previousH!\n\$gameWidth = !nativeWidth!\n\$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
         ) else (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n" --logFile !logFileNewGp!
+            if !existAspectRatioPreset! EQU 0 (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n" --logFile !logFileNewGp!
+            ) else (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\ncondition[ ]*=[ ]*\(\(\(\$aspectRatioWidth[ ]*-[ ]*!aspectRatioWidth!\)[ ]*==[ ]*0\)[ ]*\+[ ]*\(\(\$aspectRatioHeight[ ]*-[ ]*!aspectRatioHeight!\)[ ]*==[ ]*0\)\)[ ]*==[ ]*2.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\ncondition = ((($aspectRatioWidth - !aspectRatioWidth!) == 0) + (($aspectRatioHeight - !aspectRatioHeight!) == 0)) == 2\n$width = !wc!\n$height = !hc!\n\n[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\ncondition = ((($aspectRatioWidth - !aspectRatioWidth!) == 0) + (($aspectRatioHeight - !aspectRatioHeight!) == 0)) == 2\n$width = !previousW!\n$height = !previousH!\n" --logFile !logFileNewGp!
+            )
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1063,7 +1086,11 @@ REM pause
         if !vGfxPack! LSS 6 (
             wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n!edup!" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\n$width = !previousW!\n$height = !previousH!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!\n\n[Preset]\nname = !wc!x!hc!!desc!\n$width = !wc!\n$height = !hc!\n$gameWidth = !nativeWidth!\n$gameHeight = !nativeHeight!\n!edu!" --logFile !logFileNewGp!
         ) else (
-            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+            if !existAspectRatioPreset! EQU 0 (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\n$width = !previousW!\n$height = !previousH!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+            ) else (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ ]*!previousW!x!previousH!.*\ncategory[ ]*=[ ]*(TV|) Resolution.*\ncondition[ ]*=[ ]*\(\(\(\$aspectRatioWidth[ ]*-[ ]*!aspectRatioWidth!\)[ ]*==[ ]*0\)[ ]*\+[ ]*\(\(\$aspectRatioHeight[ ]*-[ ]*!aspectRatioHeight!\)[ ]*==[ ]*0\)\)[ ]*==[ ]*2.*\n\$width[ ]*=[ ]*!previousW!.*\n\$height[ ]*=[ ]*!previousH!.*\n" --replace "[Preset]\nname = !previousW!x!previousH!!desc!\ncategory = TV Resolution\ncondition = ((($aspectRatioWidth - !aspectRatioWidth!) == 0) + (($aspectRatioHeight - !aspectRatioHeight!) == 0)) == 2\n$width = !previousW!\n$height = !previousH!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\ncondition = ((($aspectRatioWidth - !aspectRatioWidth!) == 0) + (($aspectRatioHeight - !aspectRatioHeight!) == 0)) == 2\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+            )
         )
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1336,7 +1363,11 @@ REM pause
             )
         )
         REM : V6 and older
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+        if !existAspectRatioPreset! EQU 0 (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+        ) else (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^version = !vGfxPack![ ]*" --replace "version = !vGfxPack!\n\n[Preset]\nname = !wc!x!hc!!desc!\ncategory = TV Resolution\ncondition = ((($aspectRatioWidth - !aspectRatioWidth!) == 0) + (($aspectRatioHeight - !aspectRatioHeight!) == 0)) == 2\n$width = !wc!\n$height = !hc!\n" --logFile !logFileNewGp!
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------

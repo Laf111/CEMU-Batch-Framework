@@ -186,7 +186,7 @@ REM    call:checkGpFolders
 
     REM : check if BatchFw have to complete graphic packs for this game
     type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && goto:searchForGfxPacks
-    goto:createLinks
+    goto:createUpdateAndDlcLinks
 
     :searchForGfxPacks
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
@@ -200,14 +200,14 @@ REM    call:checkGpFolders
 
     if ["!lastInstalledVersion!"] == ["!newVersion!"] (
         echo lastInstalledVersion = newVersion^, nothing to do >> !myLog!
-        goto:createLinks
+        goto:createUpdateAndDlcLinks
     )
     REM : flag to know if GFX pack is found
     set "gpfound=0"
     call:updateGraphicPacks
 
     set /A "attempt=1"
-    :createLinks
+    :createUpdateAndDlcLinks
     REM : before waitingLoop :
 
     REM : if needed create the new folder tree for update and DLC
@@ -238,12 +238,12 @@ REM    call:checkGpFolders
             if !attempt! EQU 1 (
                 cscript /nologo !MessageBox! "Moving !oldUpdateFolder:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
-                goto:createLinks
+                goto:createUpdateAndDlcLinks
             )
             call:fillOwnerShipPatch !MLC01_FOLDER_PATH! "!GAME_TITLE!" patch
 
             cscript /nologo !MessageBox! "Move still failed^, take the ownership on !MLC01_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
-            if !ERRORLEVEL! EQU 6 goto:createLinks
+            if !ERRORLEVEL! EQU 6 goto:createUpdateAndDlcLinks
         ) else (
             rmdir /Q /S "!oldUpdateFolder:"=!_tmp" > NUL 2>&1
         )
