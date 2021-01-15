@@ -22,9 +22,12 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+15/01/2021 V21-5 :
+add : support for resolution GFX pack using aspect ratio presets (BOTW gfx pack >= 734)
+add : in launchGame.bat clean useless log files
+
 14/01/2021 V21-4 :
-add : minimize time of all files copy (add robocopy multithreaded option). Pre and post launching CEMU times are lowered by 30~50% 
-      on my 8 cores CPU.
+add : minimize time of all files copy  (add robocopy multithreaded option) 
 add : update gamesLibrary.log when scanning games (to remove uninstalled games and avoid conflicts if you re-install them)
 fix : when registering a CEMU install in setup.bat, ask to import mlc01 data only if settings.xml exists 
 fix : clean all fnr logs before exiting launchGame.bat
