@@ -543,55 +543,25 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
-
-    REM : search the last modified save file for other user
-    set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-
-    set "suffix="
-    REM : default (no extra slots)
-    set /A "slotNumber=0"
-    set slotLabel=""
-
-    REM : get the active slot from gLogFile
-    call:getActiveExtraSaveSlot slotNumber slotLabel
-    if !slotNumber! NEQ 0 set "suffix=_slot!slotNumber!"
-
-    set "userGameSave="!igsvf:"=!\!GAME_TITLE!_!currentUser!!suffix!.rar""
+    REM : importing game's saves for !user!
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
     if not exist !userGameSave! (
+        REM : search the last modified save file for other user
+        set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
-        if !slotNumber! GEQ 2 (
-            set "otherSlot="NONE""
-
-            pushd !igsvf!
-            REM : loop on all file found (reverse sorted by date => exit loop whith the lats modified one)
-            for /F "delims=~" %%i in ('dir /B /O:-D /T:W !GAME_TITLE!_!currentUser!_slot*.rar  2^>NUL') do (
-                set "otherSlot="%%i""
-            )
-            pushd !BFW_TOOLS_PATH!
-
-            if not [!otherSlot!] == ["NONE"] (
-
-                cscript /nologo !MessageBox! "Saves of slot !slotNumber! does not exist, use !otherSlot:"=! ?" 4132
-                if !ERRORLEVEL! EQU 7 goto:savesLoaded
-                set "isv="!igsvf:"=!\!otherSlot:"=!""
-                copy /Y !isv! !userGameSave! > NUL 2>&1
-                goto:savesLoaded
-            )
-        )
-        set "saveFromOtherUser="NONE""
+        set "OTHER_SAVE="NONE""
 
         pushd !igsvf!
-        REM : loop on all file found (reverse sorted by date => exit loop whith the lats modified one)
-        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !GAME_TITLE!_*.rar  2^>NUL') do (
-            set "saveFromOtherUser="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:D /T:W !GAME_TITLE!_*.rar  2^>NUL') do (
+            set "OTHER_SAVE="%%i""
         )
         pushd !BFW_TOOLS_PATH!
 
-        if [!saveFromOtherUser!] == ["NONE"] goto:savesLoaded
+        if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
 
         cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one (from another user) ?" 4132
         if !ERRORLEVEL! EQU 7 goto:savesLoaded
-        set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!saveFromOtherUser:"=!""
+        set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
         copy /Y !isv! !userGameSave! > NUL 2>&1
     )
 
@@ -1581,37 +1551,6 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 REM : ------------------------------------------------------------------
 REM : functions
 
-    :getActiveExtraSaveSlot
-
-        REM : get game's title from wii-u database file
-        set "libFileLine="NONE""
-        for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%titleId%';"') do set "libFileLine="%%i""
-
-        REM : strip line to get data
-        for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
-           set "titleIdRead=%%a"
-           set "Desc=%%b"
-           set "productCode=%%c"
-           set "companyCode=%%d"
-           set "notes=%%e"
-           set "versions=%%f"
-           set "region=%%g"
-           set "acdn=%%h"
-           set "icoId=%%i"
-           set "nativeHeight=%%j"
-           set "nativeFps=%%k"
-        )
-        REM : game title has it appears in gLogFile
-        set "gfxPackGameTitle=%Desc: =%"
-
-        for /F "tokens=2,3 delims=~=" %%i in ('type !glogFile! ^| find /I "!gfxPackGameTitle!:!currentUser! use extra save slot" 2^>NUL') do (
-            set /A "slotNumber=%%i"
-            set "slotLabel=[%%j]"
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :fillOwnerShipPatch
         set "folder=%1"
         set "title=%2"
@@ -1757,7 +1696,6 @@ REM : functions
 rem        set "launchGameLogFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
 rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !launchGameLogFileTmp!
 
-        if !slotNumber! NEQ 0 cscript /nologo !MessageBox! "you are using the extra saves slot !slotNumber! !slotLabel!" pop5sec
 
         set "launchGameLogFileTmp="!TMP:"=!\BatchFw_launchGame_process.list""
 
