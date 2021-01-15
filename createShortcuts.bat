@@ -996,7 +996,7 @@ REM : functions
         if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
-        if not exist !ccp! goto:eof
+        if not exist !ccp! goto:batchFwToCemu
 
         pushd !ccp!
         REM : import from CEMU_FOLDER to CONTROLLER_PROFILE_FOLDER
@@ -1006,6 +1006,7 @@ REM : functions
             if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*" > NUL 2>&1
         )
 
+        :batchFwToCemu
         pushd !CONTROLLER_PROFILE_FOLDER!
         REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
@@ -1014,6 +1015,7 @@ REM : functions
             if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
         )
         pushd !GAMES_FOLDER!
+
 
     goto:eof
     REM : ------------------------------------------------------------------

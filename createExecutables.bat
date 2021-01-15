@@ -47,7 +47,7 @@ REM : main
     set "imgConverter="!BFW_RESOURCES_PATH:"=!\convert.exe""
     set "quick_Any2Ico="!BFW_RESOURCES_PATH:"=!\quick_Any2Ico.exe""
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
-    
+
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -999,7 +999,7 @@ REM : functions
         if not exist !CONTROLLER_PROFILE_FOLDER! mkdir !CONTROLLER_PROFILE_FOLDER! > NUL 2>&1
 
         set "ccp="!CEMU_FOLDER:"=!\ControllerProfiles""
-        if not exist !ccp! goto:eof
+        if not exist !ccp! goto:batchFwToCemu
 
         pushd !ccp!
         REM : import from CEMU_FOLDER to CONTROLLER_PROFILE_FOLDER
@@ -1009,6 +1009,7 @@ REM : functions
             if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*" > NUL 2>&1
         )
 
+        :batchFwToCemu
         pushd !CONTROLLER_PROFILE_FOLDER!
         REM : import from CONTROLLER_PROFILE_FOLDER to CEMU_FOLDER
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
@@ -1181,7 +1182,7 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo Creating a shortcut to Wii-U error codes documentation
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         set "scansFolder="!GAMES_FOLDER:"=!\_BatchFw_WiiU\Scans""
         if exist !scansFolder! (
             REM : create a shortcut to explore scans saved
@@ -1273,7 +1274,7 @@ REM : functions
             set "usbDrive=!caption:~0,-1!"
             if ["!usbDrive!"] == ["!drive!"] set /A "installedOnUsb=1"
         )
-        
+
         set "ARGS=ON"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
@@ -1337,7 +1338,7 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo Creating a shortcut to updateGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         REM : create a shortcut to progressBar.bat (if needed)
         set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar^.lnk""
         set "LINK_DESCRIPTION="Link to progressBar""
