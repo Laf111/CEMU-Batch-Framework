@@ -1909,7 +1909,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["shaderCache"] (
@@ -1921,7 +1921,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose to move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
             if ["%%k"] == ["graphicPacks"] (
@@ -1933,7 +1933,7 @@ REM        call:log2HostFile !msg!
                 echo   ^(if you haven't used a BatchFW V10 or later, choose move without a second thought^)
                 choice /C md /CS /N /M " > Move (m) or delete (d)?"
                 set /A "cr=!ERRORLEVEL!"
-                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MOVE /IS /IT > NUL 2>&1
+                if !cr! EQU 1 robocopy !folder! !cemuFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
                 if !cr! EQU 2 rmdir /Q /S !folder! > NUL 2>&1
             )
 
