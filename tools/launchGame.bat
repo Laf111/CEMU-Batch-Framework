@@ -1791,7 +1791,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         )
 
         REM : else robocopy
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !source! !target! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! GTR 7 set /A "%3=1"

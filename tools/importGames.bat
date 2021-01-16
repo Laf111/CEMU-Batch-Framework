@@ -876,7 +876,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
+        robocopy !source! !target! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! GTR 7 set /A "%3=1"

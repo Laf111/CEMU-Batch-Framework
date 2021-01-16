@@ -539,7 +539,7 @@ REM : functions
         set "tgtScf="!gtscf:"=!\!sci!.bin""
 
         if not exist !srcScf! goto:handleNewTC
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1 & goto:handleNewTC
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MT:32 /MOVE > NUL 2>&1 & goto:handleNewTC
 
         set /A "srcSize=0"
         for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
@@ -547,7 +547,7 @@ REM : functions
         for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
 
         REM : compare their size : move only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MOVE > NUL 2>&1
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /IS /IT /MT:32 /MOVE > NUL 2>&1
 
         :handleNewTC
         REM : for version > 1.16 sci=titleId
@@ -610,7 +610,7 @@ REM : functions
         set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy  !sysSrc! !sysTarget! /S /MT:32 /MOVE /IS /IT  > NUL 2>&1
 
         set /A NB_GAMES_TREATED+=1
 
@@ -687,7 +687,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy !source! !target! /S /MT:32 /MOVE /IS /IT  > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"
