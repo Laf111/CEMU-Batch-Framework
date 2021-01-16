@@ -23,7 +23,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 
 
 16/01/2021 V21-6 :
-add : push robocpoy thread to 32 max
+add : push robocopy's threads number to 32 (max)
 fix : regression on GPU Cache copy
 
 15/01/2021 V21-5 :
