@@ -466,7 +466,7 @@ REM : functions
         set "tgtScf="!gtscf:"=!\!sci!.bin""
 
         if not exist !srcScf! goto:handleNewTC
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1 & goto:handleNewTC
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT:32 /IS /IT > NUL 2>&1 & goto:handleNewTC
 
         set /A "srcSize=0"
         for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
@@ -474,7 +474,7 @@ REM : functions
         for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
 
         REM : compare their size : copy only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT:32 /IS /IT > NUL 2>&1
 
         :handleNewTC
         REM : for version > 1.16 sci=titleId
@@ -486,7 +486,7 @@ REM : functions
         if not exist !srcScf! goto:treatMlc01Data
 
         set "tgtScf="!gtscf:"=!\!sci!.bin""
-        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1 & goto:treatMlc01Data
+        if not exist !tgtScf! robocopy !ctscf! !gtscf! !sci!.bin /MT:32 /IS /IT > NUL 2>&1 & goto:treatMlc01Data
 
         set /A "srcSize=0"
         for /F "tokens=*" %%s in (!srcScf!)  do set "srcSize=%%~zs"
@@ -494,7 +494,7 @@ REM : functions
         for /F "tokens=*" %%s in (!tgtScf!)  do set "tgtSize=%%~zs"
 
         REM : compare their size : copy only if greater
-        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT /IS /IT > NUL 2>&1
+        if !srcSize! GTR !tgtSize! robocopy !ctscf! !gtscf! !sci!.bin /MT:32 /IS /IT > NUL 2>&1
         
         :treatMlc01Data
 
@@ -537,7 +537,7 @@ REM : functions
         set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /MT /S > NUL 2>&1
+        robocopy  !sysSrc! !sysTarget! /MT:32 /S > NUL 2>&1
 
         set /A NB_GAMES_TREATED+=1
 
@@ -630,7 +630,7 @@ REM : functions
         set "metaFolder="!target:"=!\meta""
         if exist !metaFolder! goto:eof
 
-        robocopy !tf! !target! /MT /S > NUL 2>&1
+        robocopy !tf! !target! /MT:32 /S > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
             echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!

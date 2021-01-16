@@ -610,7 +610,7 @@ REM : functions
         set "sysTmpl="!GAME_FOLDER_PATH:"=!\mlc01\sys\title\0005001b\10056000\content""
 
         if not exist !sysTarget! mkdir !sysTmpl! > NUL 2>&1
-        robocopy  !sysSrc! !sysTarget! /MT /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy  !sysSrc! !sysTarget! /S /MOVE /IS /IT  > NUL 2>&1
 
         set /A NB_GAMES_TREATED+=1
 
@@ -687,7 +687,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /MT /S /MOVE /IS /IT  > NUL 2>&1
+        robocopy !source! !target! /S /MOVE /IS /IT  > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"

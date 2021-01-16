@@ -540,7 +540,7 @@ REM : functions
         if not exist !metaFolder! goto:eof
 
         set "target="!MLC01_FOLDER_PATH:"=!\usr\title\%~1\%endTitleId%""
-        robocopy !tf! !target! /MT /S > NUL 2>&1
+        robocopy !tf! !target! /MT:32 /S > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
             echo ERROR when robocopy !sf! !target!^, cr=!ERRORLEVEL!
@@ -615,7 +615,7 @@ REM : functions
         )
 
         REM : else robocopy
-        robocopy !source! !target! /MT /S /MOVE /IS /IT > NUL 2>&1
+        robocopy !source! !target! /S /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 set /A "%3=1"
         if !cr! GEQ 0 set /A "%3=0"

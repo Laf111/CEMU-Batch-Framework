@@ -316,7 +316,7 @@ REM : functions
                 set "GAME_MOD_PATH="!GAME_FOLDER_PATH:"=!\Cemu\mods""
                 if not exist !GAME_MOD_PATH! mkdir !GAME_MOD_PATH! > NUL 2>&1
                 set "targetModPath="!GAME_MOD_PATH:"=!\!name!""
-                robocopy !srcModPath! !targetModPath! /MT /S > NUL 2>&1
+                robocopy !srcModPath! !targetModPath! /MT:32 /S > NUL 2>&1
                 echo ---------------------------------------------------------
                 echo ^> !name! for !GAME_TITLE! was successfull imported
             )

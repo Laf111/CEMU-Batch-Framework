@@ -1003,7 +1003,7 @@ REM : functions
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT /XF "controller*.*" > NUL 2>&1
+            if not exist !bcpf! robocopy !ccp! !CONTROLLER_PROFILE_FOLDER! "%%x" /MT:32 /XF "controller*.*" > NUL 2>&1
         )
 
         :batchFwToCemu
@@ -1012,7 +1012,7 @@ REM : functions
         for /F "delims=~" %%x in ('dir /b * 2^>NUL') do (
             set "ccpf="!ccp:"=!\%%x""
             set "bcpf="!CONTROLLER_PROFILE_FOLDER:"=!\%%x"
-            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT > NUL 2>&1
+            if not exist !ccpf! robocopy !CONTROLLER_PROFILE_FOLDER! !ccp! "%%x" /MT:32 > NUL 2>&1
         )
         pushd !GAMES_FOLDER!
 

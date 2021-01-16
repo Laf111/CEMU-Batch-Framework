@@ -635,8 +635,8 @@ REM : functions
                 set "targetFolder="!TARGET_GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
 
                 REM : compare their size : copy only if greater
-                if !srcSize! GTR !tgtSize! robocopy !sourceFolder! !targetFolder! !fileName! /MT > NUL 2>&1 & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE!
-                if !srcSize! LSS !tgtSize! robocopy !targetFolder! !sourceFolder! !fileName! /MT > NUL 2>&1 & echo ^< Importing !fileName! for!GAME_TITLE! >> !myLog! & echo ^< Importing !fileName! for !GAME_TITLE!
+                if !srcSize! GTR !tgtSize! robocopy !sourceFolder! !targetFolder! !fileName! /MT:32 /IS /IT > NUL 2>&1 & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE! >> !myLog! & echo ^> Exporting !fileName! for !TARGET_GAME_TITLE!
+                if !srcSize! LSS !tgtSize! robocopy !targetFolder! !sourceFolder! !fileName! /MT:32 /IS /IT > NUL 2>&1 & echo ^< Importing !fileName! for!GAME_TITLE! >> !myLog! & echo ^< Importing !fileName! for !GAME_TITLE!
 
                 if !srcSize! EQU !tgtSize! echo ^= !fileName! size are identicals >> !myLog! & echo ^= !fileName! size are identicals
             )

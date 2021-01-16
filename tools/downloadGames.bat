@@ -128,7 +128,7 @@ REM : main
     )
 
     REM : copy JNUSFolder content in !targetFolder!
-    robocopy !JNUSFolder! !targetFolder! /MT /S /IS /IT  > NUL 2>&1
+    robocopy !JNUSFolder! !targetFolder! /MT:32 /S /IS /IT  > NUL 2>&1
 
     REM : override JNUSFolder path
     set "JNUSFolder=!targetFolder!"
