@@ -335,12 +335,7 @@ REM : functions
                 goto:askSlotToActivate
 
             ) else (
-                call:getLastSlotNumber slotToActivate
-                if !slotToActivate! EQU !activeSlot! (
-                    REM : already active exit
-                    echo slot!slotToActivate! is already active
-                    goto:eof
-                )
+                call:getLastSlotNumber slotToActivate                
                 set "slotFile="!igsvf:"=!\!title!_!currentUser!_slot!slotToActivate!.rar""
             )
         )

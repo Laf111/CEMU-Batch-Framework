@@ -1810,7 +1810,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : remove trace
         del /F !launchGameLogFileTmp! > NUL 2>&1
 
-        if !slotNumber! NEQ 0 cscript /nologo !MessageBox! "You are using the !slotNumber!th slot [!slotLabel:"=!]. To change use '!currentUser!\_BatchFw - set extra slots saves.lnk'" pop8sec
+        if !slotNumber! NEQ 0 cscript /nologo !MessageBox! "You are using the slot !slotNumber! [!slotLabel:"=!]. To change use '!currentUser!\_BatchFw - set extra slots saves.lnk'" pop8sec
 
 
     goto:eof
