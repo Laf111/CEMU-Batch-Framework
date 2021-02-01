@@ -42,6 +42,16 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
+    
     REM : clean ftp logs
     set "pat="!BFW_PATH:"=!\logs\ftp*.log""
     del /F /S !pat! > NUL 2>&1
@@ -217,14 +227,14 @@ REM : main
     REM : selected games
     set /A "nbGamesSelected=0"
 
-    set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
+    set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
     call:checkListOfGames !listGamesSelected!
     if !ERRORLEVEL! NEQ 0 goto:getList
     echo ---------------------------------------------------------
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
     if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
     if !ERRORLEVEL! EQU 2 goto:getList
-
+    
     cls
     echo =========================================================
     if !nbGamesSelected! EQU 0 (
@@ -240,8 +250,21 @@ REM : main
         set "USERSARRAY[!nbUsers!]=%%i"
         set /A "nbUsers+=1"
     )
-    REM : ask for saves import mode
+
+    REM : ask for saves import mode and set shutdownFlag accordingly
+    set /A "shutdownFlag=0"
     call:getSavesUserMode userSavesToImport
+
+    if !shutdownFlag! EQU 1 (
+        choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
+        if !ERRORLEVEL! EQU 2 (
+            set /A "shutdownFlag=0"
+        ) else (
+            echo Please^, save all your opened documents before continue^.^.^.
+            pause
+        )
+    )
+
     cls
     set /A "nbGamesSelected-=1"
     set "START_DATE="
@@ -302,6 +325,7 @@ REM : main
     )
 
     :launchSetup
+        
     if !nbGamesSelected! NEQ 0 (
         echo New Games were added to your library^, launching setup^.bat^.^.^.
         set "setup="!BFW_PATH:"=!\setup.bat""
@@ -320,6 +344,10 @@ REM : main
         )
         exit 15
     )
+
+    REM : if shutdwon is asked
+    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00
+    
     echo =========================================================
     echo games dumped successfully ^(!totalMoCopied! Mb^)
     echo.
@@ -346,42 +374,70 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :getSavesUserMode
-        REM : init to none
+        REM : init to none (choice number 1)
         set "%1=none"
+        set /A "shutdownFlag=1"
 
         echo.
-        echo You can choose a user for which all saves found will be imported^.
-        echo Or you can choose to select which user saves to import for each game^.
+        if ["!wiiuSaveMode!"] == ["SYNCR"] (
+            echo You choose to synchronize CEMU and Wii-U saves^,
+        ) else (
+            echo You choose to keep both saves ^(CEMU and Wii-U saves^)^,
+        )
+         choice /C yn /N /M "Do you want to change it? (y/n): "
+        if !ERRORLEVEL! EQU 2 goto:saveModeOK
+
+        set "wiiuSaveMode=BOTH"
+        choice /C yn /N /M "Synchronize your saves between CEMU and your Wii-U? (y/n): "
+        if !ERRORLEVEL! EQU 1 set "wiiuSaveMode=SYNCR"
+
+        set "msg="WII-U_SAVE_MODE=!wiiuSaveMode!""
+        call:log2HostFile !msg!
+
+        :saveModeOK
         echo.
-        echo Note that it will interrupt each game^'s download^, to ask your selection ^!
-        echo.
-        echo So if you plan to download more than one game^, you'd better choose
-        echo to download all saves found for all users OR no saves at all^.
-        echo You still can use the importWiiuSaves script to do it afterward.
+        echo Please select an import mode for Wii-U saves ^:
         echo.
 
-        choice /C yn /N /M "Do you want to import Wii-U saves during the process (y, n)? : "
-        if !ERRORLEVEL! EQU 2 goto:eof
-
-        choice /C yn /N /M "For all users (y, n)? : "
-        if !ERRORLEVEL! EQU 1 set "%1=all" & goto:eof
-
-        choice /C yn /N /M "Do you want to choose a user now  (y, n = select users during process)? : "
-        if !ERRORLEVEL! EQU 2 set "%1=select" & goto:eof
-
-        set /A "nbUserm1=nbUsers-1"
-        for /L %%i in (0,1,!nbUserm1!) do echo %%i ^: !USERSARRAY[%%i]!
-
+        :getChoice
+        echo    1 ^: do not import saves for all games and users
+        echo    2 ^: import all saves for all BatchFw^'s user
+        echo    3 ^: import all saves only for a given BatchFw^'s user
+        echo    4 ^: select what to do ^(per game and per user^)
+        echo        ^(will interrupt the downloading process^)
         echo.
-        :askUser
-        set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
+        choice /C 12345 /N /M "Please, enter you choice : "
+        set "userChoice=!ERRORLEVEL!"
 
-        echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+        choice /C yn /N /M "Confirm choice !userChoice!? (y/n to cancel) : "
+        if !ERRORLEVEL! EQU 2 goto:getChoice
 
-        if %num% LSS 0 goto:askUser
-        if %num% GEQ %nbUsers% goto:askUser
+        REM : handling choice
+        if !userChoice! EQU 1 goto:eof
 
-        set "%1=!USERSARRAY[%num%]!"
+        if !userChoice! EQU 2 set "%1=all" & goto:eof
+
+        if !userChoice! EQU 3 (
+            echo.
+            set /A "nbUserm1=nbUsers-1"
+            for /L %%i in (0,1,!nbUserm1!) do echo %%i ^: !USERSARRAY[%%i]!
+
+            echo.
+            :askUser
+            set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
+
+            echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+
+            if %num% LSS 0 goto:askUser
+            if %num% GEQ %nbUsers% goto:askUser
+
+            set "%1=!USERSARRAY[%num%]!"
+            goto:eof
+        )
+
+        set "%1=select"
+        set /A "shutdownFlag=0"
+
     goto:eof
     REM : ------------------------------------------------------------------
 

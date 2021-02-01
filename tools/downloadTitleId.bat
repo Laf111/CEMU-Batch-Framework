@@ -51,29 +51,29 @@ REM : main
 
     if %nbArgs% LSS 3 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" jnusFolder titleId decryptMode titleKey^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" jnusFolder titleId decryptMode titleKey^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^*
         echo given {%*}
         exit /b 99
     )
     if %nbArgs% GTR 4 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" jnusFolder titleId decryptMode titleKey^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" jnusFolder titleId decryptMode titleKey^*
+        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^* >> !cgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^*
         echo given {%*}
         exit /b 99
     )
 
     REM : get args
-    set "jnusFolder=!args[0]!"
-    set "jarFile="!jnusFolder:"=!\JNUSTool.jar""
+    set "JNUSTFolder=!args[0]!"
+    set "jarFile="!JNUSTFolder:"=!\JNUSTool.jar""
 
     if not exist !jarFile! (
         echo ERROR^: JNUSTool^.jar was not found^, exiting
         tiemout /T 10 > NUL 2>&1
         exit /b 51
     )
-    pushd !jnusFolder!
+    pushd !JNUSTFolder!
 
     set "titleId=!args[1]!"
     set "titleId=!titleId:"=!"

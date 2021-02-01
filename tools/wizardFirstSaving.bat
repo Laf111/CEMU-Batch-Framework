@@ -525,7 +525,6 @@ REM : main
 
     if exist !REF_CEMU_FOLDER! (
 
-
         REM : basename of REF_CEMU_FOLDER (used to name shortcut)
         for /F "delims=~" %%i in (!REF_CEMU_FOLDER!) do set "proposedVersion=%%~nxi"
 
@@ -1271,7 +1270,7 @@ REM : functions
 
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""

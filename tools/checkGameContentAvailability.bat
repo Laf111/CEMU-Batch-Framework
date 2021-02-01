@@ -26,10 +26,10 @@ REM : main
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
     set "duLogFile="!BFW_LOGS:"=!\du.log""
 
-    set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
-    REM : exit in case of no JNUSFolder folder exists
-    if not exist !JNUSFolder! (
-        echo ERROR^: !JNUSFolder! not found
+    set "JNUSTFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
+    REM : exit in case of no JNUSTFolder folder exists
+    if not exist !JNUSTFolder! (
+        echo ERROR^: !JNUSTFolder! not found
         exit /b 80
     )
 
@@ -120,14 +120,14 @@ REM : main
         set "endTitleId=!titleId:~8,8!"
     )
 
-    set "config="!JNUSFolder:"=!\config""
+    set "config="!JNUSTFolder:"=!\config""
     REM : if JNUS config is not "ready"
     type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
         if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: COMMONKEY not found in !config!
         timeout /t 2 > NUL 2>&1
         exit /b 81
     )
-    set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
+    set "titleKeysDataBase="!JNUSTFolder:"=!\titleKeys.txt""
 
     if not exist !titleKeysDataBase! (
         if !DIAGNOSTIC_MODE! EQU 0 echo ERROR^: !titleKeysDataBase! not found
@@ -136,9 +136,9 @@ REM : main
     )
 
     REM : cd to JNUSTool folder
-    pushd !JNUSFolder!
+    pushd !JNUSTFolder!
 
-    REM : delete subfolders in !JNUSFolder!
+    REM : delete subfolders in !JNUSTFolder!
     for /F "delims=~" %%x in ('dir /O:D /T:W /B /S *') do rmdir /Q /S "%%x"  > NUL 2>&1
 
     set "tid=!contentType!!endTitleId!"
@@ -184,13 +184,13 @@ REM : main
         set "contentFolder=!parentFolder:~0,-2!""
         for %%a in (!contentFolder!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
-        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+        set "initialGameFolderName=!gamesFolder:%JNUSTFolder:"=%\=!"
 
     ) else (
 
         for %%a in (!fullPath!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
-        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+        set "initialGameFolderName=!gamesFolder:%JNUSTFolder:"=%\=!"
 
         REM : get the version of the content (DLC)
         set "metaContentPath="!fullPath:"=!\meta\meta.xml""

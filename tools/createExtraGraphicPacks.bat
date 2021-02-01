@@ -705,7 +705,6 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         :beginLoopRes
 
         set /A "r=!nativeHeight!%%!resRatio!"
-        REM : check if result is an integer
         if !r! NEQ 0 set /A "resRatio+=1" & goto:beginLoopRes
 
         REM : compute targetHeight
@@ -1009,7 +1008,7 @@ REM _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
         if !existAspectRatioPreset! EQU 1 (
             if not ["!ratioPassed: =!"] == ["16-9"] (
                 set "logFileAr="!fnrLogFolder:"=!\!gpFolderName:"=!-!ratioPassed!.log""
-                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "[[]Preset[]].*\nname[ ]*=[ ]*16:9.*\ncategory[ ]*=[ ]*Aspect[ ]*Ratio" --replace "[Preset]\nname = 16:9 (Default)\ncategory = Aspect Ratio\n\n[Preset]\nname = !aspectRatioWidth!:!aspectRatioHeight!\ncategory = Aspect Ratio\n$aspectRatioWidth = !aspectRatioWidth!\n$aspectRatioHeight = !aspectRatioHeight!" --logFile !logFileAr!
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "[[]Preset[]].*\nname[ ]*=[ ]*16:9.*\ncategory[ ]*=[ ]*Aspect[ ]*Ratio" --replace "[Preset]\nname = 16:9 (Default)\ncategory = Aspect Ratio\n\n[Preset]\nname = !aspectRatioWidth!:!aspectRatioHeight! (!description: =_!)\ncategory = Aspect Ratio\n$aspectRatioWidth = !aspectRatioWidth!\n$aspectRatioHeight = !aspectRatioHeight!" --logFile !logFileAr!
             )
         )
 

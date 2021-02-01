@@ -379,6 +379,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     echo.
     echo Set your REGION^, language and all common settings for your
     echo games ^(default GFX API^, controllers^, sound^, overlay^.^.^.^)
+    echo No need to set accounts for user^(s^)
     echo.
     echo Then close CEMU to continue
     echo.
@@ -1265,6 +1266,16 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to compressAndUninstall.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Compress and uninstall games^.lnk""
+        set "LINK_DESCRIPTION="Backup then uninstall games""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\compressAndUninstall.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\compress.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to compressAndUninstall^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+        )
+
         REM : check if installed on an usb drive
         set /A "installedOnUsb=0"
         for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value 2^>NUL ^| find "="') do (
@@ -1272,7 +1283,7 @@ REM : functions
             set "usbDrive=!caption:~0,-1!"
             if ["!usbDrive!"] == ["!drive!"] set /A "installedOnUsb=1"
         )
-        
+                
         set "ARGS=ON"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
@@ -1318,7 +1329,7 @@ REM : functions
         set "ARGS="NONE""
 
         REM : create a shortcut to downloadGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download Games^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download games^.lnk""
         set "LINK_DESCRIPTION="Download Wii-U titles for CEMU or your Wii-U using JNUSTool""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGames.ico""
@@ -1328,7 +1339,7 @@ REM : functions
         )
 
         REM : create a shortcut to updateGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update Games^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update games^.lnk""
         set "LINK_DESCRIPTION="Update Games using JNUSTool""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\updateGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\updateGames.ico""
@@ -1660,7 +1671,17 @@ REM : functions
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
 
+            REM : create a shortcut to setExtraSavesSlots.bat
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\_BatchFw - set extra slots saves^.lnk""
+            set "LINK_DESCRIPTION="Manage !ARGS:"=!^'s extra saves slots""
+            set "TARGET_PATH="!BFW_PATH:"=!\tools\setExtraSavesSlots.bat""
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\saveSlots.ico""
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to setExtraSavesSlots^.bat
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+            )
         )
+
         set "ARGS=ALL"
 
         REM : create a shortcut to deleteBatchFwGraphicPacks.bat (if needed)

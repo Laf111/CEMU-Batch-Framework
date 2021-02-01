@@ -7,9 +7,20 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+    
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
+    
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version to produce
-    set "BFW_NEXT_VERSION=V21-4"
+    set "BFW_NEXT_VERSION=V21-7"
 
     set "THIS_SCRIPT=%~0"
 
@@ -107,7 +118,7 @@ REM : main
     
     REM : Convert all files to ANSI and set them readonly
     set "pat="*.bat""
-    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiply" ^| find /V "downloadGames" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
+    for /F "delims=~" %%f in ('dir /S /B !pat! ^| find /V "fixBatFile" ^| find /V "multiply" ^| find /V "downloadGames" ^| find /V "convertWiiuFiles.bat" ^| find /V "updateGame.bat" ^| find /V "checkGameContentAvailability" ^| find /V "detectAndRenameInvalidPath" ^| find /V "downloadTitleId"') do (
 
         set "filePath="%%f""
 
@@ -158,8 +169,16 @@ REM : main
     echo ^> tools/downloadGames.bat
 
     attrib +R !filePath! > NUL 2>&1
+REM    type !filePath! | find /I "™" > NUL 2>&1 && goto:checkConvertWiiuFiles
+REM    echo ERROR^: char ™ not found, the file format is not ANSI anymore ^?
+
+REM    :checkConvertWiiuFiles
+REM    set "filePath="!BFW_TOOLS_PATH:"=!\convertWiiuFiles.bat""
+REM    echo ^> tools/convertWiiuFiles.bat
+
+REM    attrib +R !filePath! > NUL 2>&1
     type !filePath! | find /I "™" > NUL 2>&1 && goto:checkmultiply
-    echo ERROR^: Specific char not found line 988^, the file format is not ANSI anymore ^?
+    echo ERROR^: char ™ not found, the file format is not ANSI anymore ^?
 
     :checkmultiply
     set "filePath="!BFW_TOOLS_PATH:"=!\multiply.bat""
@@ -286,11 +305,13 @@ REM : functions
                 echo.
                 echo WARNING ^: !label! not used in !filePath!
                 set /A "wngDetected=1"
+                pause
             )
             if !nbGoto! EQU 0 if !nbCall! EQU 0 if !wngDetected! EQU 0 (
                 echo.
                 echo WARNING ^: !label! not used in !filePath!
                 set /A "wngDetected=1"
+                pause
             )
         )
         if !wngDetected! EQU 1 timeout /T 3 > NUL 2>&1

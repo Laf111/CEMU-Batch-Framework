@@ -76,7 +76,7 @@ REM : ------------------------------------------------------------------
     echo temporary file ^: !csTmp!
 
     REM : if GameCache node exist in csTgt (CEMU >= 1.12.0)
-    type !csTgt! | find /I "GameCache" > NUL 2>&1 && call:update
+    type !csTgt! | find /I "<GameCache>" > NUL 2>&1 && call:update
 
 
     exit /b !cr!

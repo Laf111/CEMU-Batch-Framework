@@ -30,6 +30,16 @@ REM : ------------------------------------------------------------------
     REM : set current char codeset
     call:setCharSet
 
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit 100
+    )
+    
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -249,8 +259,8 @@ REM : ------------------------------------------------------------------
 
         if not exist !lls! goto:eof
 
-        pushd !sf!
         :getLastModifiedSettings
+        pushd !sf!
         for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
 
         if not exist !ls!  (
@@ -258,7 +268,7 @@ REM : ------------------------------------------------------------------
 
             REM : rebuild it
             call:getModifiedFile !sf! "!currentUser!_settings.xml" last css
-            if not exist !css! del /F !lls! > NUL 2>&1 && goto:eof
+            if not exist !css! del /F !lls! > NUL 2>&1 & pushd !BFW_RESOURCES_PATH! & goto:eof
             call:resolveSettingsPath ltarget
             @echo !ltarget!> !lls!
 
@@ -281,6 +291,12 @@ REM : ------------------------------------------------------------------
         call:getValueInXml "//GameCache/Entry[path='!rpxFilePath:"=!']/title_id/text()" !lst! gid
 
         if ["!gid!"] == ["NOT_FOUND"] goto:eof
+	
+        REM : get the rpxFilePath used
+        set "timePlayed="0""
+        for /F "delims=~<> tokens=3" %%p in ('type !lst! ^| find "<time_played>" 2^>NUL') do set "timePlayed="%%p""
+
+        if [!timePlayed!] == ["0"] goto:eof
 
         REM : update !cs! games stats for !GAME_TITLE! using !ls! ones
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\updateGameStats.bat""

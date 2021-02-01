@@ -29,7 +29,7 @@ REM : main
     !cmdOw! @ /MAX > NUL 2>&1
 
     set "du="!BFW_RESOURCES_PATH:"=!\du.exe""
-    set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
+    set "JNUSTFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -44,6 +44,17 @@ REM : main
     set "notePad="%windir%\System32\notepad.exe""
     set "explorer="%windir%\explorer.exe""
 
+    
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
+    
     REM : output folder
     set "targetFolder=!GAMES_FOLDER!"
 
@@ -79,13 +90,12 @@ REM : main
     REM : set current char codeset
     call:setCharSet
 
-    set "config="!JNUSFolder:"=!\config""
+    set "config="!JNUSTFolder:"=!\config""
     type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
         echo To use this feature^, obviously you^'ll have to setup JNUSTool
         echo and get the files requiered by yourself^.
         echo.
         echo First you need to find the ^'Wii U common key^' with google
-        echo It should be 32 chars long and start with ^'D7^'^.
         echo.
 
         echo Then replace ^'[COMMONKEY]^' with the ^'Wii U common key^' in JNUST^\config
@@ -95,7 +105,7 @@ REM : main
         wscript /nologo !StartWait! !notePad! !config!
     )
 
-    set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
+    set "titleKeysDataBase="!JNUSTFolder:"=!\titleKeys.txt""
 
     if not exist !titleKeysDataBase! call:createKeysFile
 
@@ -127,11 +137,11 @@ REM : main
         goto:askOutputFolder
     )
 
-    REM : copy JNUSFolder content in !targetFolder!
-    robocopy !JNUSFolder! !targetFolder! /MT:32 /S /IS /IT  > NUL 2>&1
+    REM : copy JNUSTFolder content in !targetFolder!
+    robocopy !JNUSTFolder! !targetFolder! /MT:32 /S /IS /IT  > NUL 2>&1
 
-    REM : override JNUSFolder path
-    set "JNUSFolder=!targetFolder!"
+    REM : override JNUSTFolder path
+    set "JNUSTFolder=!targetFolder!"
     
     :selectGames
 
@@ -151,13 +161,12 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     echo Transfert mode ^: !mode!
     echo.
     
-    pushd !JNUSFolder!
+    pushd !JNUSTFolder!
     
-    REM : compute sizes on disk JNUSFolder
-    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+    REM : compute sizes on disk JNUSTFolder
 
     set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
-    for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
+    for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!drive!" 2^>NUL') do (
         set "fsbStr=%%i"
         set /A "clusterSizeInB=%%j"
     )
@@ -167,8 +176,8 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     set /A "totalFreeSpaceLeft=fskb/1024"
 
     REM cls
-    echo Free Space left on !targetDrive! ^: !totalFreeSpaceLeft! Mb
-    echo Cluster size on !targetDrive! is !clusterSizeInB! Bytes
+    echo Free Space left on !drive! ^: !totalFreeSpaceLeft! Mb
+    echo Cluster size on !drive! is !clusterSizeInB! Bytes
     
     REM : number of games selected
     set /A "nbGames=0"
@@ -178,7 +187,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     if !decryptMode! EQU 1  (
     
         set "mf="NOT_FOUND""
-        REM : get the last modified folder in JNUSFolder
+        REM : get the last modified folder in JNUSTFolder
         for /F "delims=~" %%x in ('dir /A:D /O:D /T:W /B * 2^>NUL') do (
             if [!mf!] == ["NOT_FOUND"] echo ---------------------------------------------------------------
             echo Uncomplete download detected : "%%x"
@@ -303,7 +312,7 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     set "dirname=!parentFolder:~0,-2!""
     for %%a in (!dirname!) do set "parentFolder="%%~dpa""
     set "fullPath=!parentFolder:~0,-2!""
-    set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
+    set "initialGameFolderName=!fullPath:%JNUSTFolder:"=%\=!"
 
     set "tmpFolderName=!initialGameFolderName:?=!"
     REM : secureGameTitle
@@ -319,15 +328,15 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
         call:getSize !dtid! !str! "DLC   " dSize
     )
 
-    REM : compute size need on targetDrive
+    REM : compute size need on drive
     call:getSizeOnDisk !totalSizeInMb! sizeNeededOnDiskInMb
     set /A "totalSpaceNeeded+=sizeNeededOnDiskInMb"
     echo.
     if !sizeNeededOnDiskInMb! LSS !freeSpaceLeft! (
-        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !targetDrive! ^(!freeSpaceLeft! Mb estimate left^)
+        echo At least !sizeNeededOnDiskInMb! Mb are requiered on disk !drive! ^(!freeSpaceLeft! Mb estimate left^)
 
     ) else (
-        echo ERROR ^: not enought space left on !targetDrive!
+        echo ERROR ^: not enought space left on !drive!
         echo Needed !sizeNeededOnDiskInMb! ^/ still available !freeSpaceLeft! Mb
         echo Ignoring this game
         goto:askKeyWord
@@ -392,9 +401,19 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
     echo.
     echo.
     echo !totalSpaceNeeded! Mb to download
-    echo !freeSpaceLeft! Mb left on !targetDrive! at the end of all transferts
+    echo !freeSpaceLeft! Mb left on !drive! at the end of all transferts
     echo.
     echo.
+    
+    set /A "shutdownFlag=0"
+    choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
+    if !ERRORLEVEL! EQU 1 (
+        echo Please^, save all your opened documents before continue^.^.^.
+        pause
+        set /A "shutdownFlag=1"
+    )
+    echo.
+    
     echo Hit any key to launch your downloads
     echo.
     
@@ -434,6 +453,9 @@ REM    if !decryptMode! EQU 1 set "str="Total Size of Decrypted Files""
         )
     )
     rmdir /Q /S !initialGameFolderName! > NUL 2>&1
+    
+    REM : if shutdwon is asked
+    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00
     
     :endDg
     endlocal
@@ -485,7 +507,7 @@ REM : functions
         set "dirname=!parentFolder:~0,-2!""
         for %%a in (!dirname!) do set "parentFolder="%%~dpa""
         set "fullPath=!parentFolder:~0,-2!""
-        set "initialGameFolderName=!fullPath:%JNUSFolder:"=%\=!"
+        set "initialGameFolderName=!fullPath:%JNUSTFolder:"=%\=!"
         set "gameFolderName=!initialGameFolderName:?=!"
 
         REM : secure Game Title
@@ -529,9 +551,9 @@ REM : functions
         :setGameLogFile
         set "gamelogFile="!BFW_LOGS:"=!\jnust_!gameFolderName:"=!.log""
 
-        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=!
+        echo Temporary folder ^: !JNUSTFolder:"=!\!initialGameFolderName:"=!
         echo ---------------------------------------------------------------
-        echo Temporary folder ^: !JNUSFolder:"=!\!initialGameFolderName:"=! > !gamelogFile!
+        echo Temporary folder ^: !JNUSTFolder:"=!\!initialGameFolderName:"=! > !gamelogFile!
         echo --------------------------------------------------------------->> !gamelogFile!
                 
         set /A "totalSizeInMb=0"
@@ -608,13 +630,13 @@ REM        call:getFolderSizeInMb !initialGameFolderName! sizeDl
         REM : when data kept crypted 
         if !decryptMode! EQU 0 (
             set /A "sg=0"
-            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            set "tmpGf="!JNUSTFolder:"=!/tmp_!titleId!""
             call:getSizeInMb !tmpGf! sg            
             set /A "sd=0"
-            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            set "tmpDf="!JNUSTFolder:"=!/tmp_!dtid!""
             call:getSizeInMb !tmpDf! sd
             set /A "su=0"
-            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            set "tmpUf="!JNUSTFolder:"=!/tmp_!utid!""
             call:getSizeInMb !tmpUf! su
             
             set /A "sizeDl=sg+sd+su"
@@ -700,10 +722,10 @@ REM            call:getSizeInMb !folder! sizeofAll
             set "folder=tmp_!dtid!"
             if exist !folder! move /Y !folder! !dName! > NUL 2>&1
 
-            REM : clean targetFolder from JNUSFolder files
+            REM : clean targetFolder from JNUSTFolder files
             call:cleanTargetFolder
 
-            echo WUP packages created in !JNUSFolder:"=!
+            echo WUP packages created in !JNUSTFolder:"=!
             echo.
             
         ) else (
@@ -743,7 +765,7 @@ REM            call:getSizeInMb !folder! sizeofAll
 
     :download
     
-        wscript /nologo !StartMinimized! !download! !JNUSFolder! !currentTitleId! !decryptMode! !currentTitleKey!
+        wscript /nologo !StartMinimized! !download! !JNUSTFolder! !currentTitleId! !decryptMode! !currentTitleKey!
 
         if ["!mode!"] == ["sequential"] call:monitorTransfert !gSize!
 
@@ -751,7 +773,7 @@ REM            call:getSizeInMb !folder! sizeofAll
         type !titleKeysDataBase! | find /I "!utid!" > NUL 2>&1 && (
             echo ^> Downloading update found for !currentTitle! [!currentTitleRegion!]^.^.^.
             echo ^> Downloading update found for !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
-            wscript /nologo !StartMinimized! !download! !JNUSFolder! !utid! !decryptMode!
+            wscript /nologo !StartMinimized! !download! !JNUSTFolder! !utid! !decryptMode!
             set /A "guSize=gSize+uSize"
 
             if ["!mode!"] == ["sequential"] call:monitorTransfert !guSize!
@@ -761,7 +783,7 @@ REM            call:getSizeInMb !folder! sizeofAll
         type !titleKeysDataBase! | find /I "!dtid!" > NUL 2>&1 && (
             echo ^> Downloading DLC found !currentTitle! [!currentTitleRegion!]^.^.^.
             echo ^> Downloading DLC found !currentTitle! [!currentTitleRegion!]^.^.^. >> !gamelogFile!
-            wscript /nologo !StartMinimized! !download! !JNUSFolder! !dtid! !decryptMode!
+            wscript /nologo !StartMinimized! !download! !JNUSTFolder! !dtid! !decryptMode!
 
             if ["!mode!"] == ["sequential"] call:monitorTransfert !threshold!
         )
@@ -832,13 +854,13 @@ REM                call:getFolderSizeInMb !initialGameFolderName! sizeDl
                 REM : when data kept crypted 
                 if !decryptMode! EQU 0 (
                     set /A "sg=0"
-                    set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+                    set "tmpGf="!JNUSTFolder:"=!/tmp_!titleId!""
                     call:getSizeInMb !tmpGf! sg            
                     set /A "sd=0"
-                    set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+                    set "tmpDf="!JNUSTFolder:"=!/tmp_!dtid!""
                     call:getSizeInMb !tmpDf! sd
                     set /A "su=0"
-                    set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+                    set "tmpUf="!JNUSTFolder:"=!/tmp_!utid!""
                     call:getSizeInMb !tmpUf! su
                     
                     set /A "sizeDl=sg+sd+su"
@@ -936,13 +958,13 @@ REM        call:getFolderSizeInMb !initialGameFolderName! sizeDl
         REM : when data kept crypted 
         if !decryptMode! EQU 0 (
             set /A "sg=0"
-            set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            set "tmpGf="!JNUSTFolder:"=!/tmp_!titleId!""
             call:getSizeInMb !tmpGf! sg            
             set /A "sd=0"
-            set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            set "tmpDf="!JNUSTFolder:"=!/tmp_!dtid!""
             call:getSizeInMb !tmpDf! sd
             set /A "su=0"
-            set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            set "tmpUf="!JNUSTFolder:"=!/tmp_!utid!""
             call:getSizeInMb !tmpUf! su
             
             set /A "sizeDl=sg+sd+su"
@@ -1045,13 +1067,13 @@ REM            call:getSizeInMb !folder! sizeofAll
         REM REM : when data kept crypted 
         REM if !decryptMode! EQU 0 (
             REM set /A "sg=0"
-            REM set "tmpGf="!JNUSFolder:"=!/tmp_!titleId!""
+            REM set "tmpGf="!JNUSTFolder:"=!/tmp_!titleId!""
             REM call:getSizeInMb !tmpGf! sg            
             REM set /A "sd=0"
-            REM set "tmpDf="!JNUSFolder:"=!/tmp_!dtid!""
+            REM set "tmpDf="!JNUSTFolder:"=!/tmp_!dtid!""
             REM call:getSizeInMb !tmpDf! sd
             REM set /A "su=0"
-            REM set "tmpUf="!JNUSFolder:"=!/tmp_!utid!""
+            REM set "tmpUf="!JNUSTFolder:"=!/tmp_!utid!""
             REM call:getSizeInMb !tmpUf! su
             
             REM set /A "sizeofAll=sg+sd+su"
@@ -1118,7 +1140,7 @@ REM            call:getSizeInMb !folder! sizeofAll
         echo Select and paste all in notepad
         echo.
         timeout /T 4 > NUL 2>&1
-        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
+        wscript /nologo !StartWait! !notePad! "!JNUSTFolder:"=!\titleKeys.txt"
         echo.
         echo.
         echo Save and relaunch this script when done^.

@@ -36,10 +36,21 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
 
     REM : flag for Batch user creation from wiiU accounts (1 if arg given)
     set /A "useWiiuAccounts=0"
@@ -99,12 +110,29 @@ REM : main
     echo Get online files from your Wii-U
     echo =========================================================
     echo.
-    echo Make sure the Wii U account you want to dump^/use has
-    echo the "Save password" option checked ^(auto login^) ^!
-    echo.
+    echo You can synchronize Wii-U games^'saves with CEMU ones or
+    echo choose to keep both saves ^(using extra slot feature^)
+    echo This will be applied for all BatchFw^'s users^.
     echo.
 
-    echo On your Wii-U^, you need to ^:
+    set "saveMode=BOTH"
+    choice /C yn /N /M "Synchronize your saves between CEMU and your Wii-U? (y/n): "
+    if !ERRORLEVEL! EQU 1 set "saveMode=SYNCR"
+
+    set "msg="WII-U_SAVE_MODE=!saveMode!""
+    call:log2HostFile !msg!
+
+    if ["!saveMode!"} == ["BOTH"] (
+        echo.
+        echo Extra saves slots will be used per user and activated for each game
+        echo Use ^'BFW_USER\_BatchFw - set extra slots saves^.lnk^' to manage slots
+        echo ^(to set the active slot when launching games^)
+        echo.
+    )
+    echo.
+    echo.
+    echo To download files throught FTP^, on your Wii-U^ you need to ^:
+    echo.
     echo - disable the sleeping^/shutdown features
     echo - if you^'re using a permanent hack ^(CBHC^)^:
     echo    ^* launch HomeBrewLauncher
@@ -112,8 +140,10 @@ REM : main
     echo - if you^'re not^:
     echo    ^* first run Mocha CFW HomeBrewLauncher
     echo    ^* then ftp-everywhere for MOCHA
-    echo.
     echo - get the IP adress displayed on Wii-U gamepad
+    echo.
+    echo Make sure the Wii U account you want to dump^/use has
+    echo the "Save password" option checked ^(auto login^) ^!
     echo.
     echo Press any key to continue when you^'re ready
     echo ^(CTRL-C^) to abort
@@ -257,7 +287,7 @@ REM : main
     set "BFW_MLC01_ONLINE_FOLDER="!BFW_ONLINE_FOLDER:"=!\mlc01""
     set "mlc01OnlineFiles="!BFW_ONLINE_FOLDER:"=!\mlc01OnlineFiles.rar""
 
-    wscript /nologo !StartHidden! !rarExe! u -ep1 -inul -w!TMP! !mlc01OnlineFiles! !BFW_MLC01_ONLINE_FOLDER!
+    wscript /nologo !StartHidden! !rarExe! u -ep1 -inul -w!BFW_LOGS! !mlc01OnlineFiles! !BFW_MLC01_ONLINE_FOLDER!
 
     echo.
     echo ---------------------------------------------------------

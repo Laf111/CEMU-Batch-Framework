@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V21-6"
+    set "BFW_VERSION=V21-7"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=6"
@@ -395,32 +395,39 @@ REM : main
         echo ---------------------------------------------------------
         echo This is the very first time you install BatchFw ^:
         echo ---------------------------------------------------------
-        call:getUserInput "Read the goals of BatchFW? (y,n = default in 6s)" "n,y" ANSWER 6
+        call:getUserInput "Read the goals of BatchFW? (y,n = default in 6s) : " "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:goalsOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\goal.txt""
         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :goalsOK
-        call:getUserInput "Read informations on CEMU interfaces history? (y,n = default in 6s)" "n,y" ANSWER 6
+        call:getUserInput "Read informations on CEMU interfaces history? (y,n = default in 6s) : " "n,y" ANSWER 6
         if [!ANSWER!] == ["n"] goto:iFOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\cemuInterfacesHistory.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
        :iFOK
-        call:getUserInput "Read how graphic packs are handled? (y,n = default in 6s)" "n,y" ANSWER 6
-        if [!ANSWER!] == ["n"] goto:wiiuOK
+        call:getUserInput "Read how graphic packs are handled? (y,n = default in 6s) : " "n,y" ANSWER 6
+        if [!ANSWER!] == ["n"] goto:gfxPacksOK
 
         set "tmpFile="!BFW_PATH:"=!\doc\graphicPacksHandling.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
 
-       :wiiuOK
-        call:getUserInput "Read about Wii-U transferts feature? (y,n = default in 6s)" "n,y" ANSWER 6
-        if [!ANSWER!] == ["n"] goto:useProgressBar
+       :gfxPacksOK
+        call:getUserInput "Read about users saves/extra slots feature? (y,n = default in 6s) : " "n,y" ANSWER 6
+        if [!ANSWER!] == ["n"] goto:savesOK
 
+        set "tmpFile="!BFW_PATH:"=!\doc\userSavesAndSlots.txt""
+         wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+
+       :savesOK
+        call:getUserInput "Read about Wii-U transferts feature? (y,n = default in 6s) : " "n,y" ANSWER 6
+        if [!ANSWER!] == ["n"] goto:useProgressBar
         set "tmpFile="!BFW_PATH:"=!\doc\syncWii-U.txt""
          wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !tmpFile!
+
     )
 
     :useProgressBar
@@ -665,7 +672,7 @@ REM : main
     REM : extract embeded packs
     set "rarFile="!BFW_RESOURCES_PATH:"=!\GFX_Packs.rar""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting GFX_Packs^.rar^, exiting 1
@@ -1400,7 +1407,7 @@ REM : ------------------------------------------------------------------
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
 
         :extractCemuHook
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo WARNING ^: while extracting CemuHook
@@ -1487,7 +1494,8 @@ REM : ------------------------------------------------------------------
         echo - Ignore quick start assistant ^(next^).
         echo.
         echo Set your REGION^, language and all common settings for your
-        echo games ^(default API^, controllers^, sound^, overlay^.^.^.^)
+        echo games ^(default GFX API^, controllers^, sound^, overlay^.^.^.^)
+        echo No need to set accounts for user^(s^)
         echo.
         echo Then close CEMU to continue
         echo.
@@ -1569,7 +1577,7 @@ REM : ------------------------------------------------------------------
         echo ---------------------------------------------------------
         echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv2! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo ERROR while extracting V2_GFX_Packs^, exiting 21
@@ -1592,7 +1600,7 @@ REM : ------------------------------------------------------------------
         echo ---------------------------------------------------------
         echo graphic pack V4 are needed for this version^, extracting^.^.^.
 
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv4! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo ERROR while extracting V4_GFX_Packs^, exiting 22
@@ -1616,7 +1624,7 @@ REM : ------------------------------------------------------------------
         if exist !sharedFonts! goto:setOptArgs
         echo Installing sharedFonts^.^.^.
         set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo WARNING ^: while extracting sharedFonts

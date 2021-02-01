@@ -348,7 +348,7 @@ REM : main
 
     if !usePbFlag! EQU 1 call:setProgressBar 12 12 "pre processing" "installing V4 GFX packs"
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv4! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         echo ERROR while extracting V4_GFX_Packs, exiting 1
@@ -411,7 +411,7 @@ REM : main
 
     if !usePbFlag! EQU 1 call:setProgressBar 12 12 "pre processing" "installing V2 GFX packs"
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv2! > NUL 2>&1
     set /A cr=!ERRORLEVEL!
     if !cr! GTR 1 (
         echo ERROR while extracting V2_GFX_Packs, exiting 1
@@ -539,31 +539,63 @@ REM : main
     )
 
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >> !batchFwLog!
-REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     if !usePbFlag! EQU 1 call:setProgressBar 16 30 "pre processing" "install !currentUser!^'s saves"
 
-    REM : importing game's saves for !user!
-    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
-    if not exist !userGameSave! (
-        REM : search the last modified save file for other user
-        set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
-        set "OTHER_SAVE="NONE""
+    REM : search the last modified save file for other user
+    set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
-        pushd !igsvf!
-        for /F "delims=~" %%i in ('dir /B /O:D /T:W !GAME_TITLE!_*.rar  2^>NUL') do (
-            set "OTHER_SAVE="%%i""
-        )
+    if not exist !igsvf! mkdir !igsvf! > NUL 2>&1 & goto:savesLoaded
+
+    REM : cd to inGameSaves folder
+    pushd !igsvf!
+    
+    REM : CEMU default save for currentUser
+    set "userGameSaveName="!GAME_TITLE!_!currentUser!.rar""
+
+    REM : default (no extra slots)
+    set /A "slotNumber=0"
+    set "slotLabel="
+
+    REM : get the active slot from gLogFile
+    call:getUserSave userGameSaveName
+
+    if not exist !userGameSaveName! (
+        REM : try to use another slots
+        set "otherSlot="NONE""
+
+        REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !GAME_TITLE!_!currentUser!_slot*.rar  2^>NUL') do set "otherSlot="%%i""
         pushd !BFW_TOOLS_PATH!
 
-        if [!OTHER_SAVE!] == ["NONE"] goto:savesLoaded
+        if not [!otherSlot!] == ["NONE"] (
+
+            cscript /nologo !MessageBox! "Saves of slot !slotNumber! does not exist, use !otherSlot:"=! ?" 4132
+            if !ERRORLEVEL! EQU 7 goto:savesLoaded
+
+            copy /Y !otherSlot! !userGameSaveName! > NUL 2>&1
+            goto:saveFound
+        )
+
+        set "saveFromOtherUser="NONE""
+
+        pushd !igsvf!
+        REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !GAME_TITLE!_*.rar  2^>NUL') do (
+            set "saveFromOtherUser="%%i""
+        )
+        if [!saveFromOtherUser!] == ["NONE"] goto:savesLoaded
 
         cscript /nologo !MessageBox! "No saves found for this user, do you want to use the last modifed one (from another user) ?" 4132
         if !ERRORLEVEL! EQU 7 goto:savesLoaded
-        set "isv="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!OTHER_SAVE:"=!""
-        copy /Y !isv! !userGameSave! > NUL 2>&1
+        copy /Y !saveFromOtherUser! !userGameSaveName! > NUL 2>&1
     )
+    :saveFound
+    pushd !BFW_TOOLS_PATH!
+    echo Using !userGameSaveName! as save file
+    echo Using !userGameSaveName! as save file>> !batchFwLog!
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!userGameSaveName:=!""
 
     REM : make a backup of saves fo userGameSave
     set "saveBackup=!userGameSave:.rar=-backupLaunchN.rar!"
@@ -580,10 +612,12 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     set "EXTRACT_PATH=!parentFolder:~0,-2!""
 
     pushd !BFW_TOOLS_PATH!
+    echo Loading saves for !currentUser!^.^.^.
     echo Loading saves for !currentUser!^.^.^.>> !batchFwLog!
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !userGameSave! !EXTRACT_PATH!
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !userGameSave! !EXTRACT_PATH!
 
     :savesLoaded
+    pushd !BFW_TOOLS_PATH!
 
     REM : Batch Game info file
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
@@ -608,8 +642,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         pushd !BFW_TOOLS_PATH!
     )
 
-    echo Grapic API used ^: !graphicApi!
-    echo Grapic API used ^: !graphicApi! >> !batchFwLog!
+    echo Grapic API used by default ^: !graphicApi!
+    echo Grapic API used by default ^: !graphicApi! >> !batchFwLog!
 
     REM : copy transferable shader cache, if exist in GAME_FOLDER_PATH
     set "gtscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable""
@@ -767,7 +801,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
         set "graphicApi=Vulkan"
     )
     pushd !BFW_TOOLS_PATH!
-    
+
     REM : handling GPU shader cache backup
     REM : ----------------------------
 
@@ -826,8 +860,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM : handling Game
     REM : ----------------------------
     :handlingGame
-    echo Grapic API used ^: !graphicApi!
-    echo Grapic API used ^: !graphicApi! >> !batchFwLog!
+    echo Grapic API used for this game^: !graphicApi!
+    echo Grapic API used for this game^: !graphicApi! >> !batchFwLog!
     set "GPU_CACHE_PATH=!GPU_CACHE!"
 
     REM : CEMU >= 1.15.1
@@ -971,8 +1005,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     REM GPU_CACHE_PATH already created before (if missing)
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%*.* 2^>NUL') do (
         set "file="%%f""
-        if !v1182! LEQ 1 echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MOV /IS /IT> NUL 2>&1
-        echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MOV /IS /IT > NUL 2>&1
+        if !v1182! LEQ 1 echo !file! | find "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !precompFolder! !file! /MT:32 /MOV /IS /IT> NUL 2>&1
+        echo !file! | find /V "_spirv" > NUL 2>&1 && wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gpuCacheBackupFolder! !GPU_CACHE_PATH! !file! /MT:32 /MOV /IS /IT > NUL 2>&1
     )
     pushd !BFW_TOOLS_PATH!
 
@@ -1165,8 +1199,8 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
     REM : saving game's saves for user
     set "bgs="!BFW_TOOLS_PATH:"=!\backupInGameSaves.bat""
-    echo !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! >> !batchFwLog!
-    wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user!
+    echo !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! !endTitleId! !slotNumber! >> !batchFwLog!
+    wscript /nologo !StartHidden! !bgs! !GAME_FOLDER_PATH! !MLC01_FOLDER_PATH! !user! !endTitleId! !slotNumber!
 
     :getTransCacheBack
     REM : get SHADER_MODE
@@ -1276,13 +1310,13 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     pushd !GPU_CACHE!
     for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%.* 2^>NUL') do (
         set "file="%%f""
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !GPU_CACHE! !targetFolder! !file! /MT:32 /MOV /IS /IT > NUL 2>&1
     )
     if !v1182! LEQ 1 (
         pushd !precompFolder!
         for /F "delims=~" %%f in ('dir /O:D /T:W /B %shaderCacheFileName%_spirv.* 2^>NUL') do (
             set "file="%%f""
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !precompFolder! !targetFolder! !file! /MOV /IS /IT > NUL 2>&1
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !precompFolder! !targetFolder! !file! /MT:32 /MOV /IS /IT > NUL 2>&1
         )
     )
     pushd !BFW_TOOLS_PATH!
@@ -1457,7 +1491,7 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
     if %cr_cemu% NEQ 0 goto:endMain
 
     if exist !userGameSave! (
-        echo Compress game^'s saves for !currentUser! in inGameSaves^\!GAME_TITLE!_!currentUser!^.rar >> !batchFwLog!
+        echo Compressing game^'s saves for !currentUser! in !userGameSave! >> !batchFwLog!
     )
 
     REM : if exist a problem happen with shaderCacheId, write new "!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
@@ -1559,6 +1593,35 @@ REM    echo Automatic settings import ^: !AUTO_IMPORT_MODE! >> !batchFwLog!
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+REM : must run in !igsvf! !
+    :getUserSave
+
+        REM : contains the active slot (relative path to the rar file)
+        set "userActiveSlotFile="!GAME_TITLE!_!currentUser!_activeSlot.txt""
+
+        REM : if not exist slotNumber=0
+        if not exist !userActiveSlotFile! goto:eof
+
+        for /F "delims=~" %%i in ('type !userActiveSlotFile! 2^>NUL') do set "activeSave="%%i""
+
+        if not exist !activeSave! goto:eof
+        
+        REM : activeSave = !GAME_TITLE!_!currentUser!_slot%slotNumber%.rar""
+        set "activeTextFile=!activeSave:.rar=.txt!"
+
+        set "str=!activeSave:"=!"
+        set "str=!str:~-5!"
+        set /A "slotNumber=!str:.rar=!"
+
+        for /F "delims=~" %%i in ('type !activeTextFile! 2^>NUL') do set "slotLabel="%%i""
+        echo !currentUser! use the slot!slotNumber! [!slotLabel:"=!]>> !batchFwLog!
+
+        set "%1=!activeSave!"
+
+        
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     :fillOwnerShipPatch
         set "folder=%1"
@@ -1705,7 +1768,6 @@ REM : functions
 rem        set "launchGameLogFileTmp="!TMP:"=!\BatchFw_process.beforeWaiting""
 rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | find /I /V "find" > !launchGameLogFileTmp!
 
-
         set "launchGameLogFileTmp="!TMP:"=!\BatchFw_launchGame_process.list""
 
         :waitingLoopProcesses
@@ -1747,6 +1809,9 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         REM : remove trace
         del /F !launchGameLogFileTmp! > NUL 2>&1
+
+        if !slotNumber! NEQ 0 cscript /nologo !MessageBox! "You are using the !slotNumber!th slot [!slotLabel:"=!]. To change use '!currentUser!\_BatchFw - set extra slots saves.lnk'" pop8sec
+
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1926,7 +1991,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
         REM : deafult profile file
         set "default="%CEMU_FOLDER:"=%\gameProfiles\default\%titleId%.ini""
 
-        if not exist !default! robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
+        if not exist !default! robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" /MT:32 > NUL 2>&1
 
         :isSettingsExist
 
@@ -2095,7 +2160,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : loading CEMU settings
         set "binUser="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
         if exist !binUser! (
-            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.bin" > NUL 2>&1
+            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.bin" /MT:32 > NUL 2>&1
             set "src="!CEMU_FOLDER:"=!\!currentUser!_settings.bin""
             if exist !src! (
                 if exist !csb! del /F !csb! > NUL 2>&1
@@ -2104,7 +2169,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         )
         set "xmlUser="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
         if exist !xmlUser! (
-            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.xml" > NUL 2>&1
+            robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_settings.xml" /MT:32 > NUL 2>&1
             set "src="!CEMU_FOLDER:"=!\!currentUser!_settings.xml""
             if exist !src! (
                 if exist !cs! del /F !cs! > NUL 2>&1
@@ -2119,6 +2184,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             call:compareVersions !versionRead! "1.15.18" result > NUL 2>&1
             if ["!result!"] == [""] echo Error when comparing versions >> !batchFwLog!
             if !result! EQU 50 echo Error when comparing versions >> !batchFwLog!
+            REM : if version of CEMU < 1.15.18, CEMU do not track playtime when launching a game via command line (bug#206) => goto:cemuHookSettings
             if !result! EQU 2 goto:cemuHookSettings
         ) else (
             goto:cemuHookSettings
@@ -2178,7 +2244,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         pushd !BFW_TOOLS_PATH!
         set "chIniUser="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
-        if exist !chIniUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_cemuhook.ini"
+        if exist !chIniUser! robocopy !SETTINGS_FOLDER! !CEMU_FOLDER! "!currentUser!_cemuhook.ini" /MT:32
         set "src="!CEMU_FOLDER:"=!\!currentUser!_cemuhook.ini""
         if exist !src! (
             if exist !chs! del /F !chs! > NUL 2>&1
@@ -2512,7 +2578,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : extract systematically (in case of sync friends list with the wii-u)
         set "mlc01OnlineFiles="!BFW_ONLINE:"=!\mlc01OnlineFiles.rar""
 
-        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
+        if exist !mlc01OnlineFiles! wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !mlc01OnlineFiles! !GAME_FOLDER_PATH!
 
         REM : copy otp.bin and seeprom.bin if needed
         set "t1="!CEMU_FOLDER:"=!\otp.bin""
@@ -2526,8 +2592,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if exist !s1! if exist !t1! move /Y !t1! !t1o! > NUL 2>&1
         if exist !s2! if exist !t2! move /Y !t2! !t2o! > NUL 2>&1
 
-        if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" > NUL 2>&1
-        if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" > NUL 2>&1
+        if exist !s1! robocopy !BFW_ONLINE! !CEMU_FOLDER! "otp.bin" /MT:32 > NUL 2>&1
+        if exist !s2! robocopy !BFW_ONLINE! !CEMU_FOLDER! "seeprom.bin" /MT:32 > NUL 2>&1
 
         echo Online account for !currentUser! enabled ^: !accId! >> !batchFwLog!
 
@@ -2619,7 +2685,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : add a shortcut in Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles to edit game's profile
         REM : shortcut to game's profile
         set "profileShortcut="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk""
-        if exist !profileShortcut! goto:eof
+        REM : COMMENT to rebuild the game profile in case of a user modification after the first creation
+        REM : if exist !profileShortcut! goto:eof
+        if not exist !PROFILE_FILE! goto:eof
 
         REM : temporary vbs file for creating a windows shortcut
         set "TMP_VBS_FILE="!TEMP!\CEMU_!DATE!.vbs""
@@ -2768,24 +2836,24 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if exist !SETTINGS_FOLDER! (
 
             REM : saving CEMU an cemuHook settings
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin > NUL 2>&1
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.bin /MT:32 > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.bin""
             set "st="!SETTINGS_FOLDER:"=!\!currentUser!_settings.bin""
             move /Y !src! !st! > NUL 2>&1
 
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml > NUL 2>&1
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! settings.xml /MT:32 > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\settings.xml""
             set "css="!SETTINGS_FOLDER:"=!\!currentUser!_settings.xml""
             move /Y !src! !css! > NUL 2>&1
 
-            REM : update the last modified setting file
+            REM : update the last modified setting file used for game stats and in wizardFirstSaving to get the last version used
+            REM : => !css! need to be created with all versions even if game stats are not filled
+
             set "lls="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
-
             call:resolveSettingsPath ltarget
-
             echo !ltarget!> !lls!
 
-            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini > NUL 2>&1
+            robocopy !CEMU_FOLDER! !SETTINGS_FOLDER! cemuhook.ini /MT:32 > NUL 2>&1
             set "src="!SETTINGS_FOLDER:"=!\cemuhook.ini""
             set "target="!SETTINGS_FOLDER:"=!\!currentUser!_cemuhook.ini""
             move /Y !src! !target! > NUL 2>&1
@@ -2911,7 +2979,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         mkdir !gtscf! > NUL 2>&1
         REM :  move CEMU transferable shader cache file to GAME_FOLDER_PATH
         echo move !ctscf! to !gtscf!>> !batchFwLog!
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf!  !gtscf! "!NEW_TRANS_SHADER!" /MT:32 /MOV /IS /IT
         goto:eof
 
         :handleShaderFiles
@@ -2978,7 +3046,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             move /Y !otscf! !otscr! > NUL 2>&1
             echo - >> !tscl!
             echo - Moving CEMU^'s transferable shader cache to game^'s folder >> !tscl!
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MOV /IS /IT
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MT:32 /MOV /IS /IT
             echo - >> !tscl!
 
             set "tscrl="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!CEMU_FOLDER_NAME!_replace_!OLD_SHADER_CACHE_ID!_with_!NEW_SHADER_CACHE_ID!""
@@ -3055,7 +3123,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             set "NEW_TRANS_SHADER=!NEW_TRANS_SHADER:.bin=_j.bin!"
         )
 
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MT:32 /MOV /IS /IT > NUL 2>&1
 
         REM : delete transShaderCache.log (useless)
         if exist !tscl! del /F /S !tscl! > NUL 2>&1

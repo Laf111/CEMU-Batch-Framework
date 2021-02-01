@@ -31,6 +31,7 @@ REM : main
 
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS_PATH:"=!\gamesLibrary.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
@@ -197,10 +198,9 @@ REM : main
     del /F !pws_target! > NUL 2>&1
     del /F !uplog! > NUL 2>&1
 
-    if !QUIET_MODE! EQU 0 (
+    type !logFile! | find "COMPLETE_GP=YES" > NUL 2>&1 && (
 
-        type !logFile! | find "COMPLETE_GP=YES" > NUL 2>&1 && (
-
+        if !QUIET_MODE! EQU 0 (
             echo.
             echo If you do not plan to play at once^, you can now complete GFX packs
             echo for ALL your games in a row ^? ^(to avoid build on each next run^)
@@ -209,15 +209,20 @@ REM : main
             if [!ANSWER!] == ["n"] (
                 exit /b 0
             )
+
             pushd !BFW_TOOLS_PATH!
-            
+
             REM : complete all GFX packs for games installed
             set "tobeLaunch="!BFW_PATH:"=!\tools\buildExtraGraphicPacks.bat""
             wscript /nologo !Start! !tobeLaunch!
 
         )
+
+        REM : in all case and specially when the updated is forced, clean last version used for completing GFX packs in glogFile
+        if exist !glogFile! (
+            for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "graphic packs version=!zipFile:.zip=!" 2^>NUL') do call:cleanGameLogFile "graphic packs version=!zipFile:.zip=!"
+        )
     )
-    
     exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
@@ -226,6 +231,18 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :cleanGameLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
+
+        type !glogFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to get user input in allowed valuesList (beginning with default timeout value) from question and return the choice
     :getUserInput

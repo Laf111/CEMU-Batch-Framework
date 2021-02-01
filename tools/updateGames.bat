@@ -35,7 +35,7 @@ REM : main
     !cmdOw! @ /MAX > NUL 2>&1
 
     set "du="!BFW_RESOURCES_PATH:"=!\du.exe""
-    set "JNUSFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
+    set "JNUSTFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
 
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -53,6 +53,9 @@ REM : main
 
     REM : output folder
     set "targetFolder=!GAMES_FOLDER!"
+
+    REM : set current char codeset
+    call:setCharSet
 
     REM : search if this script is not already running (nb of search results)
     set /A "nbI=0"
@@ -80,14 +83,11 @@ REM : main
         )
     )
 
-    REM : exit in case of no JNUSFolder folder exists
-    if not exist !JNUSFolder! (
-        echo ERROR^: !JNUSFolder! not found
+    REM : exit in case of no JNUSTFolder folder exists
+    if not exist !JNUSTFolder! (
+        echo ERROR^: !JNUSTFolder! not found
         exit /b 80
     )
-
-    REM : set current char codeset
-    call:setCharSet
 
     REM : check if cemu if not already running
     set /A "nbI=0"
@@ -131,10 +131,7 @@ REM : main
         exit 51
     )
 
-    REM : set current char codeset
-    call:setCharSet
-
-    set "config="!JNUSFolder:"=!\config""
+    set "config="!JNUSTFolder:"=!\config""
     type !config! | find "[COMMONKEY]" > NUL 2>&1 && (
         echo To use this feature^, obviously you^'ll have to setup JNUSTool
         echo and get the files requiered by yourself^.
@@ -150,7 +147,7 @@ REM : main
         wscript /nologo !StartWait! !notePad! !config!
     )
 
-    set "titleKeysDataBase="!JNUSFolder:"=!\titleKeys.txt""
+    set "titleKeysDataBase="!JNUSTFolder:"=!\titleKeys.txt""
 
     if not exist !titleKeysDataBase! call:createKeysFile
 
@@ -163,8 +160,8 @@ REM : main
     REM : pattern used to evaluate size of games : set always extracted size since size of some cryted titles are wrong
     set "str="Total Size of Decrypted Files""
 
-    REM : compute sizes on disk JNUSFolder
-    for %%a in (!JNUSFolder!) do set "targetDrive=%%~da"
+    REM : compute sizes on disk JNUSTFolder
+    for %%a in (!JNUSTFolder!) do set "targetDrive=%%~da"
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -179,6 +176,14 @@ REM : main
     if !ERRORLEVEL! EQU 1 set /A "askUser=0"
     echo.
 
+    set /A "shutdownFlag=0"
+    choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
+    if !ERRORLEVEL! EQU 1 (
+        echo Please^, save all your opened documents before continue^.^.^.
+        pause
+        set /A "shutdownFlag=1"
+    )
+    
     set /A "NB_UPDATE_TREATED=0"
     set /A "NB_DLC_TREATED=0"
 
@@ -196,6 +201,8 @@ REM : main
     echo Installed !NB_DLC_TREATED! DLC
     echo.
 
+    REM : if shutdwon is asked
+    if !shutdownFlag! EQU 1 echo shutdown in 30s^.^.^. & timeout /T 30 /NOBREAK & shutdown -s -f -t 00
     pause
 
     endlocal
@@ -264,7 +271,7 @@ REM : functions
         set "updatesFolder=!parentFolder:~0,-2!""
         for %%a in (!updatesFolder!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
-        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+        set "initialGameFolderName=!gamesFolder:%JNUSTFolder:"=%\=!"
 
         echo.
         echo Note that if 60FPS and^/or FPS^+^+ GFX packs for this game were not built
@@ -272,7 +279,7 @@ REM : functions
         echo.
         if !askUser! EQU 1 pause
 
-        pushd !JNUSFolder!
+        pushd !JNUSTFolder!
         set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
         for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
             set "fsbStr=%%i"
@@ -580,9 +587,9 @@ REM : functions
 
         for %%a in (!dlcPath!) do set "parentFolder="%%~dpa""
         set "gamesFolder=!parentFolder:~0,-2!""
-        set "initialGameFolderName=!gamesFolder:%JNUSFolder:"=%\=!"
+        set "initialGameFolderName=!gamesFolder:%JNUSTFolder:"=%\=!"
 
-        pushd !JNUSFolder!
+        pushd !JNUSTFolder!
         set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
         for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!targetDrive!" 2^>NUL') do (
             set "fsbStr=%%i"
@@ -789,7 +796,7 @@ REM : functions
             pause
             goto:eof
         )
-        wscript /nologo !StartMinimized! !downloadTid! !JNUSFolder! !utid! 1 !key!
+        wscript /nologo !StartMinimized! !downloadTid! !JNUSTFolder! !utid! 1 !key!
         call:monitorTransfert !threshold! !version!
 
     goto:eof
@@ -1039,7 +1046,7 @@ REM : functions
         echo Select and paste all in notepad
         echo.
         timeout /T 4 > NUL 2>&1
-        wscript /nologo !StartWait! !notePad! "!JNUSFolder:"=!\titleKeys.txt"
+        wscript /nologo !StartWait! !notePad! "!JNUSTFolder:"=!\titleKeys.txt"
         echo.
         echo.
         echo Save and relaunch this script when done^.

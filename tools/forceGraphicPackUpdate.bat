@@ -28,7 +28,6 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
@@ -86,9 +85,9 @@ REM : main
     echo Force graphic packs update ^?
     echo.
     echo Note that :
-    echo     - V2 graphic packs will be untouched
-    echo     - If you^'ve chosen to let BatchFw complete your GFX
-    echo     - It will rebuild all the first time you launch a game
+    echo     - earlier graphic packs will be untouched
+    echo     - If you^'ve chosen to let BatchFw complete your GFX^, it
+    echo       will rebuild them on next run
     echo =========================================================
 
     echo Launching in 30s
@@ -119,11 +118,6 @@ REM : main
         if !cr! NEQ 0 (
             echo ERROR ^: Graphic pack folder update failed ^!
         )
-        set "BFW_LOGS="!BFW_PATH:"=!\logs""
-        set "GLFile="!BFW_LOGS:"=!\gamesLibrary.log""
-
-        REM : flush GamesLibrary log
-        if exist !GLFile! call:cleanGameLibFile "graphic packs version=graphicPacks"
     )
     :endMain
     if !QUIET_MODE! EQU 0 (
@@ -155,7 +149,7 @@ REM : functions
 
         REM : extract embeded packs
         set "rarFile="!BFW_RESOURCES_PATH:"=!\GFX_Packs.rar""
-        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             cscript /nologo !MessageBox! "ERROR while extracting GFX_Packs.rar please check what happened" 4112
@@ -168,18 +162,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :cleanGameLibFile
-        REM : pattern to ignore in log file
-        set "pat=%~1"
-        set "logFileTmp="!GLFile:"=!.bfw_tmp""
-
-        type !GLFile! | find /I /V "!pat!" > !logFileTmp! 2>&1
-
-        del /F /S !GLFile! > NUL 2>&1
-        move /Y !logFileTmp! !GLFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :checkPathForDos
 

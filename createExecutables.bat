@@ -377,6 +377,7 @@ REM : main
     echo.
     echo Set your REGION^, language and all common settings for your
     echo games ^(default GFX API^, controllers^, sound^, overlay^.^.^.^)
+    echo No need to set accounts for user^(s^)
     echo.
     echo Then close CEMU to continue
     echo.
@@ -478,7 +479,7 @@ REM : main
     echo ---------------------------------------------------------
     echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv2! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting V2_GFX_Packs^, exit 21
@@ -501,7 +502,7 @@ REM    if exist !gfxv4! goto:checkCemuHook
     echo ---------------------------------------------------------
     echo graphic pack V4 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv4! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting V4_GFX_Packs^, exiting 22
@@ -526,7 +527,7 @@ REM    if exist !gfxv4! goto:checkCemuHook
     if exist !sharedFonts! goto:autoImportMode
     echo Installing sharedFonts^.^.^.
     set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo WARNING ^: while extracting sharedFonts
@@ -829,7 +830,7 @@ REM : functions
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
 
         :extractCemuHook
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo WARNING ^: while extracting CemuHook
@@ -1267,6 +1268,16 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
+        REM : create a shortcut to compressAndUninstall.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Compress and uninstall games^.lnk""
+        set "LINK_DESCRIPTION="Backup then uninstall games""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\compressAndUninstall.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\compress.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to compressAndUninstall^.bat
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+        )        
+
         REM : check if installed on an usb drive
         set /A "installedOnUsb=0"
         for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value 2^>NUL ^| find "="') do (
@@ -1320,7 +1331,7 @@ REM : functions
         set "ARGS="NONE""
 
         REM : create a shortcut to downloadGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download Games^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Download games^.lnk""
         set "LINK_DESCRIPTION="Download Wii-U titles for CEMU or your Wii-U using JNUSTool""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\downloadGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\downloadGames.ico""
@@ -1330,7 +1341,7 @@ REM : functions
         )
 
         REM : create a shortcut to updateGames.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update Games^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Update games^.lnk""
         set "LINK_DESCRIPTION="Update Games using JNUSTool""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\updateGames.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\updateGames.ico""
@@ -1662,6 +1673,15 @@ REM : functions
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
 
+            REM : create a shortcut to setExtraSavesSlots.bat
+            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\!ARGS:"=!\_BatchFw - set extra slots saves^.lnk""
+            set "LINK_DESCRIPTION="Manage !ARGS:"=!^'s extra saves slots""
+            set "TARGET_PATH="!BFW_PATH:"=!\tools\setExtraSavesSlots.bat""
+            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\saveSlots.ico""
+            if not exist !LINK_PATH! (
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to setExtraSavesSlots^.bat
+                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
+            )
         )
         set "ARGS=ALL"
 

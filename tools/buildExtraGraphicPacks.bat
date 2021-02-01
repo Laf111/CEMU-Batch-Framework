@@ -56,7 +56,7 @@ REM : main
         set "newVersion=!fileName:.doNotDelete=!"
     )
 
-    REM : get the last version used for launching this game
+    REM : gamesLibrary.log
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
     
     pushd !GAMES_FOLDER!

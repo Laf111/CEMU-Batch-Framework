@@ -106,12 +106,13 @@ REM    color 4F
     echo.
     echo Which version of pack to you wish to create ^?
     echo.
-    echo     - 2 ^: CEMU ^< 1^.14
-    echo     - 4 ^: 1^.14 ^< CEMU ^< 1^.21
-    echo     - 6 ^: 1^.21 ^< CEMU
+    echo     - 1 ^: CEMU ^< 1^.14
+    echo     - 2 ^: 1^.14 ^< CEMU ^< 1^.21
+    echo     - 3 ^: CEMU ^> 1^.21
     echo.
-    choice /C 246 /T 15 /D 6 /N /M "Enter your choice ? : "
-    set "gfxType=V!ERRORLEVEL!"
+    choice /C 123 /T 15 /D 3 /N /M "Enter your choice ? : "
+    set /A "crx2=!ERRORLEVEL!*2"
+    set "gfxType=V!crx2!"
 
     goto:inputsAvailables
 
@@ -783,7 +784,7 @@ echo targetFps=!targetFps!
         echo ----------------------------------
 
         echo [Preset] >> !bfwRulesFile!
-        echo name = %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !bfwRulesFile!
+        echo name = !USERDOMAIN! %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !bfwRulesFile!
         echo $FPS = %fps% >> !bfwRulesFile!
         echo. >> !bfwRulesFile!
 

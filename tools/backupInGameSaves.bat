@@ -31,9 +31,11 @@ REM : main
 
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : checking GAMES_FOLDER folder
     call:checkPathForDos !GAMES_FOLDER!
@@ -57,9 +59,9 @@ REM : main
         goto:continue
     :end
 
-    if %nbArgs% NEQ 3 (
+    if %nbArgs% NEQ 5 (
         echo ERROR on arguments passed^!
-        echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user
+        echo SYNTAX^: %THIS_FILE% GAME_FOLDER_PATH MLC01_FOLDER_PATH user endTitleId slotNumber
         echo given {%*}
         pause
         exit /b 99
@@ -82,54 +84,26 @@ REM : main
     )
 
     set "user=!args[2]!"
+    set "currentUser=!user:"=!"
+
+    set "endTitleId=!args[3]!"
+    set "endTitleId=!endTitleId:"=!"
+    set "endTitleId=!endTitleId: =!"
+
+    set "slotNumberStr=!args[4]!"
+    set "slotNumberStr=!slotNumberStr:"=!"
+    set /A "slotNumber=!slotNumberStr: =!"
 
     REM : basename of GAME FOLDER PATH (to get GAME_TITLE)
     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
-
-    set META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml"
-    if not exist !META_FILE! (
-        echo No meta folder not found under game folder^?^, aborting ^^!
-        goto:metaFix
-    )
-
-    REM : get Title Id from meta.xml
-    :getTitleLine
-    set "titleLine="NONE""
-    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
-    if [!titleLine!] == ["NONE"] (
-        echo No titleId found in the meta^.xml file
-        :metafix
-        echo No game profile was found because no meta^/meta^.xml file exist under game^'s folder
-        set "metaFolder="!GAME_FOLDER_PATH:"=!\meta""
-        if not exist !metaFolder! mkdir !metaFolder! > NUL 2>&1
-        echo "Please pick your game titleId ^(copy to clipboard^) in WiiU-Titles-Library^.csv"
-        echo "Then close notepad to continue"
-
-        set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !wiiTitlesDataBase!
-
-        REM : create the meta.xml file
-        echo ^<^?xml^ version=^"1.0^"^ encoding=^"utf-8^"^?^> > !META_FILE!
-        echo ^<menu^ type=^"complex^"^ access=^"777^"^> >> !META_FILE!
-        echo ^ ^ ^<title_version^ type=^"unsignedInt^"^ length=^"4^"^>0^<^/title_version^> >> !META_FILE!
-        echo ^ ^ ^<title_id^ type=^"hexBinary^"^ length=^"8^"^>################^<^/title_id^> >> !META_FILE!
-        echo ^<^/menu^> >> !META_FILE!
-        echo "Paste-it in meta^/meta^.xml file ^(replacing ################ by the title id of the game ^(16 characters^)^)"
-        echo "Then close notepad to continue"
-        wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !META_FILE!
-        goto:getTitleLine
-    )
-    for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
-
-    if !titleId! == "################" goto:metafix
-
-    set "endTitleId=%titleId:~8,8%"
 
     set "inGameSavesFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
     if not exist !inGameSavesFolder! mkdir !inGameSavesFolder! > NUL 2>&1
 
     pushd !inGameSavesFolder!
-    set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!user:"=!.rar""
+    set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!.rar""
+
+    if !slotNumber! NEQ 0 set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_slot!slotNumber!.rar""
 
     REM : if exist rename-it
     set "oldFile=!rarFile:.rar=.bfw_old!"
@@ -139,36 +113,6 @@ REM : main
     for /F "delims=~" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
         call:compress "%%i" cr
     )
-
-    set "emulatorSaveFolder="!MLC01_FOLDER_PATH:"=!\emulatorSave""
-
-    if not exist !emulatorSaveFolder! goto:done
-
-    REM : compress old saved files (before Cemu 1.10)
-    set "shaderCacheIdLine=NONE"
-    set gameFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt"
-    for /F "delims=~" %%i in ('type !gameFile! ^| find /I "shaderCache"') do set "shaderCacheIdLine="%%i""
-
-    if [!shaderCacheIdLine!] == ["NONE"] goto:done
-
-    set "shaderCacheId="NONE""
-    for /F "tokens=1-2 delims=~=" %%a in (!shaderCacheIdLine!) do set "strTmp=%%b"
-    set "strTmp=!strTmp: =!"
-    set "shaderCacheId=!strTmp:"=!"
-
-    if !cr! EQU 0 (
-        if exist !rarFile! (
-            echo Backup in !rarFile!
-            del /F !oldFile! > NUL 2>&1
-        ) else (
-            move /Y !oldFile! !rarFile! > NUL 2>&1
-        )
-    ) else (
-        if exist !oldFile! if exist !rarFile! del /F !rarFile! > NUL 2>&1
-        move /Y !oldFile! !rarFile! > NUL 2>&1
-        echo Error when backup !rarFile!^, restoring it
-    )
-
 
     if %nbArgs% EQU 0 endlocal
     exit /b 0
@@ -188,7 +132,7 @@ REM : functions
         if not exist !userFolder! goto:eof
 
         if exist !sf! (
-            !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul !rarFile! !sf! > NUL 2>&1
+            !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul -w!BFW_LOGS! !rarFile! !sf! > NUL 2>&1
             set "%1=!ERRORLEVEL!"
         )
 

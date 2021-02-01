@@ -31,11 +31,23 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "setExtraSavesSlots="!BFW_TOOLS_PATH:"=!\setExtraSavesSlots.bat""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
 
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit 100
+    )
+    
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -49,6 +61,11 @@ REM : main
     REM : J2000 unix timestamp (/ J1970)
     set /A "j2000=946684800"
 
+    REM : by default
+    set "wiiuSaveMode=SYNCR"
+    REM : read the configuration parameters for Wii-U saves (SYNCR/BOTH)
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "WII-U_SAVE_MODE=" 2^>NUL') do set "wiiuSaveMode=%%i"
+    
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     title Import CEMU saves from WiiU
@@ -56,6 +73,25 @@ REM : main
     echo =========================================================
     echo Import Wii-U saves to CEMU
     echo =========================================================
+    echo.
+
+    if ["!wiiuSaveMode!"] == ["SYNCR"] (
+        echo You choose to synchronize CEMU and Wii-U saves^.
+    ) else (
+        echo You choose to keep both saves ^(CEMU and Wii-U saves^)^.
+    )
+     choice /C yn /N /M "Do you want to change it? (y/n): "
+    if !ERRORLEVEL! EQU 2 goto:saveModeOK
+
+    set "wiiuSaveMode=BOTH"
+    choice /C yn /N /M "Synchronize your saves between CEMU and your Wii-U? (y/n): "
+    if !ERRORLEVEL! EQU 1 set "wiiuSaveMode=SYNCR"
+
+    set "msg="WII-U_SAVE_MODE=!wiiuSaveMode!""
+    call:log2HostFile !msg!
+
+    :saveModeOK
+    echo.
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - if you^'re using a permanent hack ^(CBHC^)^:
@@ -213,7 +249,7 @@ REM : main
     REM : selected games
     set /A "nbGamesSelected=0"
 
-    set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
+    set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
     call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
     if !ERRORLEVEL! NEQ 0 (
         echo Invalid numbers or forbiden characters found^, please retry
@@ -248,6 +284,30 @@ REM : main
     )
 
     set "userSavesToImport="select""
+
+    REM : get BatchFw users list
+    set "USERSARRAY="
+    set /A "nbUsers=0"
+    for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do (
+        set "USERSARRAY[!nbUsers!]=%%i"
+        set /A "nbUsers+=1"
+    )
+
+    REM : ask for saves import mode and set shutdownFlag accordingly
+    set /A "shutdownFlag=0"
+    call:getSavesUserMode userSavesToImport
+
+    if !shutdownFlag! EQU 1 (
+        choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
+        if !ERRORLEVEL! EQU 2 (
+            set /A "shutdownFlag=0"
+        ) else (
+            echo Please^, save all your opened documents before continue^.^.^.
+            pause
+        )
+
+    )
+    
     goto:treatments
 
     :getArgsValue
@@ -314,6 +374,9 @@ REM : main
     echo =========================================================
     if %nbArgs% EQU 0 pause
 
+    REM : if shutdwon is asked
+    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00
+
     if !ERRORLEVEL! NEQ 0 (
         if %nbArgs% NEQ 0 exit /b !ERRORLEVEL!
         exit /b !ERRORLEVEL!
@@ -328,6 +391,58 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
+
+    :getSavesUserMode
+        REM : init to none (choice number 1)
+        set "%1=none"
+        set /A "shutdownFlag=1"
+
+        echo.
+        echo Please select an import mode for Wii-U saves ^:
+        echo.
+
+        :getChoice
+        echo    1 ^: do not import saves for all games and users
+        echo    2 ^: import all saves for all BatchFw^'s user
+        echo    3 ^: import all saves only for a given BatchFw^'s user
+        echo    4 ^: select what to do ^(per game and per user^)
+        echo        ^(will interrupt the downloading process^)
+        echo.
+        choice /C 12345 /N /M "Please, enter you choice : "
+        set "userChoice=!ERRORLEVEL!"
+
+        choice /C yn /N /M "Confirm choice !userChoice!? (y/n to cancel) : "
+        if !ERRORLEVEL! EQU 2 goto:getChoice
+
+        REM : handling choice
+        if !userChoice! EQU 1 goto:eof
+
+        if !userChoice! EQU 2 set "%1=all" & goto:eof
+
+        if !userChoice! EQU 3 (
+            echo.
+            set /A "nbUserm1=nbUsers-1"
+            for /L %%i in (0,1,!nbUserm1!) do echo %%i ^: !USERSARRAY[%%i]!
+
+            echo.
+            :askUser
+            set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
+
+            echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+
+            if %num% LSS 0 goto:askUser
+            if %num% GEQ %nbUsers% goto:askUser
+
+            set "%1=!USERSARRAY[%num%]!"
+            goto:eof
+        )
+
+        set "%1=select"
+        set /A "shutdownFlag=0"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
 
     :hex2Dec
         set "hex=%~1"
@@ -356,7 +471,7 @@ REM : functions
     REM : ------------------------------------------------------------------
 
 
-    :updateLastSettings
+    :updateGameStatsInLastSettings
 
         REM : get the last_played from Wii-U
         call:getValueInXml "//account[@persistentId='!folder!']/timestamp/text()" !saveInfo! wtsj2kHex
@@ -454,6 +569,7 @@ REM : functions
 
         for %%l in (!list!) do (
             if %%l GEQ %nbGames% exit /b 2
+            echo %%l | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && exit /b 3
         )
         exit /b 0
 
@@ -523,43 +639,158 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : get the last modified save file (including slots if defined)
+    :getLastModifiedSaveFile
+
+        set "saveFile="NONE""
+
+        REM : patern
+        set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!*.rar""
+
+        REM : reverse loop => last elt is the last modified
+        for /F "delims=~" %%g in ('dir /S /B /O:-D /T:W !pat! 2^>NUL') do set "saveFile="%%g""
+
+        set "%1=!saveFile!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
+    REM : search for Wii-U import slot or create one
+    :getWiiUSlot
+        set "%2="NONE""
+
+        REM : check if slots are defined
+        set "activeSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
+        if exist !activeSlotFile! (
+
+            REM : search for last slots used with a label containing "Wii-U import"
+            set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot*.txt""
+            for /F "delims=~" %%i in ('dir /S /B /O:D !pat!') do (
+
+                findstr /S /I "Wii-U import" "%%i" > NUL 2>&1 && (
+                    REM : found the first slot used for Wii-U import
+                    set "slotLabelFile="%%i""
+                    set "slotFile=!slotLabelFile:.txt=.rar!"
+                    if exist !slotFile! (
+                        REM : activate it
+                        attrib -R !activeSlotFile! > NUL 2>&1
+                        echo !slotFile!>!activeSlotFile!
+                        attrib +R !activeSlotFile! > NUL 2>&1
+
+                        set "%2=!slotFile!"
+                        goto:eof
+                    )
+                )
+
+            )
+        )
+        REM : if not found, create a new extra slot and activate it
+        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+        REM : get the last modified save for currentUser
+        set "lastSlot="NONE""
+        call:getLastModifiedSaveFile lastSlot
+        if exist !lastSlot! set "%2=!lastSlot!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+
     :importSavesForCurrentUser
 
+        REM : here userSavesToImport <> none
+
+        set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
+        if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
+
+        REM : for the current user :
+        set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+    
         if not [!userSavesToImport!] == ["all"] (
 
             if [!userSavesToImport!] == ["select"] (
                 choice /C yn /N /M "Import !currentUser! saves from Wii-U (y, n)? : "
                 if !ERRORLEVEL! EQU 2 goto:eof
+
+                REM : check if slots are defined
+                set "activeSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
+                if exist !activeSlotFile! (
+
+                    REM : Display / select active slot for this game and user
+                    echo "Extra save slots were defined for this game by !currentUser! ^:
+
+                    REM : display/create slos
+                    call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH!
+
+                    REM : enter the slot to use
+                    :askSlot
+                    set /P "answer=Please, enter the slot's number to use : "
+                    echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlot
+                    set /A "srcSlot=!answer!"
+
+                    set "srcSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot!srcSlot!.rar""
+                    if exist !srcSlotFile! goto:slotFound
+                    echo ERROR^: slot!srcSlot! does not exist^!
+                    goto:askSlot
+
+                    :slotFound
+                    set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot!srcSlot!.rar""
+
+                ) else (
+
+                    REM : create a first extra slot save / overwrite the user save ?
+                    choice /C yn /N /M "A save already exists for !currentUser!, create a new extra slot and activate it? (y, n) : "
+                    if !ERRORLEVEL! EQU 1 (
+                        REM : create a new extra slot and activate it
+                        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+
+                        REM : get the last modified save for currentUser
+                        set "lastSlot="NONE""
+                        call:getLastModifiedSaveFile lastSlot
+                        if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
+
+                    ) else (
+                        choice /C yn /N /M "Overwrite save for !currentUser! ? (y, n) : "
+                        if !ERRORLEVEL! EQU 2 goto:eof
+
+                        REM : backup the CEMU save
+                        set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
+                        copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
+                    )
+                )
+                REM else rarFile unchanged
             ) else (
-                REM : here userSavesToImport define a user name
+                REM : one user mode
                 if not [!userSavesToImport!] == ["!currentUser!"] goto:eof
+            )
+
+            if [!wiiuSaveMode!] == ["BOTH"] (
+                REM : get and activate OR create a slots for Wii-U save
+
+                call:getWiiUSlot lastSlot
+                if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
             )
 
             REM : treatment for the user
             echo Importing !folder! save ^(!currentUser!^)
 
-            set "inGameSaveFolder="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
-            if not exist !inGameSaveFolder! mkdir !inGameSaveFolder! > NUL 2>&1
-
-            REM : for the current user :
-            set "rarFile="!inGameSaveFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
-
             REM : backup the CEMU save
-            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
-            if exist !rarFile! copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
-
-            REM : delete the user's save
-            if exist !rarFile! del /F !rarFile! > NUL 2>&1
+            if exist !rarFile! (
+                set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
+                copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
+                REM : copy OK : delete the user's save
+                if !ERRORLEVEL! EQU 0  del /F !rarFile! > NUL 2>&1
+            )
 
             cd !folder!
             REM : add the user's folder content, rename folder to 80000001 in the archive file
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
 
             cd ..
             REM : common folder
             if exist common (
                 cd common
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
+                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
                 cd ..
             )
             REM : cd to meta
@@ -569,7 +800,7 @@ REM : functions
             echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
             REM : add the meta folder content
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul -w!TMP! !rarFile! * > NUL 2>&1
+            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
 
             echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
         )
@@ -617,7 +848,7 @@ REM : functions
             pushd !BFW_RESOURCES_PATH!
 
             REM : update user last settings using saveinfo file
-            call:updateLastSettings
+            call:updateGameStatsInLastSettings
 
             pushd !GAMES_FOLDER!
 

@@ -37,7 +37,8 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""    
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     REM : set current char codeset
     call:setCharSet
@@ -90,7 +91,7 @@ REM : main
     REM : install content
     set "sdCardContent="!BFW_RESOURCES_PATH:"=!\WiiuSDcard.rar""
 
-    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!TMP! !sdCardContent! !SDCARD! > NUL 2>&1
+    wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !sdCardContent! !SDCARD! > NUL 2>&1
     echo done
     echo =========================================================
 

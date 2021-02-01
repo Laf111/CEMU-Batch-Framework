@@ -127,7 +127,6 @@ REM : main
     :beginLoopRes
 
     set /A "r=!nativeHeight!%%!resRatio!"
-    REM : check if result is an integer
     if !r! NEQ 0 set /A "resRatio+=1" & goto:beginLoopRes
 
     REM : compute targetHeight

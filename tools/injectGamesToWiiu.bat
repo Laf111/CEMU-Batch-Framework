@@ -22,7 +22,6 @@ REM : main
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
-    set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
@@ -51,14 +50,14 @@ REM : main
     set /A "totalMoNeeded=0"
     cls
     title Inject Games dumps to your Wii-U
-    echo This functionality is usefull to upload your games
-    echo on the Wii-U and then finish the installation
-    echo using NUSspli (else only already installed and dumped
-    echo games will work on the Wii-U)
+    echo WARNING^: you must have a permanent CFW installed on the
+    echo Wii-U ^(CBHC^) or you^'ll need to launch SIG Patcher each
+    echo time you^'ll play the game on the Wii-U^.
     echo.
-    echo Note that it won^'t work for games available only on disks^!
-    echo For such games^, use the WUP Package to install them directlty
-    echo on the Wii-U^.
+    echo NOTE ^: the candidates games are only the ones you previously
+    echo dumped ^(code^\title^.^* files exist and for which no transfer
+    echo errors were detected by BatchFw during the dumping process^)
+    echo.
     pause
     cls
     echo On your Wii-U^, you need to ^:
@@ -184,8 +183,19 @@ REM : main
         for /F "tokens=1-2 delims=>" %%j in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%k""
         for /F "delims=<" %%j in (!titleLine!) do (
 
+            for %%a in (!META_FILE!) do set "parentFolder="%%~dpa""
+            set "str=!parentFolder:~0,-2!""
+            for %%a in (!str!) do set "parentFolder="%%~dpa""
+            set "GAME_FOLDER_PATH=!parentFolder:~0,-2!""
+
+            set "titleFst="!GAME_FOLDER_PATH:"=!\code\title.fst""
+            set "titletmd="!GAME_FOLDER_PATH:"=!\code\title.tmd""
+
+            REM : list game only if title.* files exist
+            if exist !titleFst! if exist !titletmd! (
                 set /A "NB_GAMES+=1"
                 echo %%j >> !localTid!
+            )
         )
     )
 
@@ -202,7 +212,7 @@ REM : main
 
     cls
     echo =========================================================
-    echo List of games found ^:
+    echo List of valid games^'dumps found ^(code^\title^.^* files exist^)
     echo =========================================================
 
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
@@ -226,7 +236,7 @@ REM : main
     REM : selected games
     set /A "nbGamesSelected=0"
 
-    set /P "listGamesSelected=Please enter game's numbers list (separate with a space): "
+    set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
     call:checkListOfGames !listGamesSelected!
     if !ERRORLEVEL! NEQ 0 goto:getList
     echo ---------------------------------------------------------
@@ -242,6 +252,16 @@ REM : main
         exit 11
     )
     set /A "nbGamesSelected-=1"
+
+
+    set /A "shutdownFlag=0"
+    choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
+    if !ERRORLEVEL! EQU 1 (
+        echo Please^, save all your opened documents before continue^.^.^.
+        pause
+        set /A "shutdownFlag=1"
+    )
+
 
     pushd !GAMES_FOLDER!
 
@@ -301,8 +321,12 @@ REM : main
     echo - start ^: !START_DATE!
     echo - end   ^: !DATE!
     echo ---------------------------------------------------------
-    pause
 
+    REM : if shutdwon is asked
+    if !shutdownFlag! EQU 1 echo shutdown in 30s^.^.^. & timeout /T 30 /NOBREAK & shutdown -s -f -t 00
+
+    pause
+    
     if !ERRORLEVEL! NEQ 0 exit !ERRORLEVEL!
     exit 0
 
@@ -326,6 +350,8 @@ REM : functions
             set "codeFolder="!sourceFolder:"=!\code""
             set "contentFolder="!sourceFolder:"=!\content""
             set "metaFolder="!sourceFolder:"=!\meta""
+            set "updateFolder="!sourceFolder:"=!\mlc01\usr\title\0005000e\!endTitleIdFolder!""
+            set "dlcFolder="!sourceFolder:"=!\mlc01\usr\title\0005000c\!endTitleIdFolder!""
 
             !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/00050000/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
 
@@ -489,6 +515,27 @@ REM : functions
 
         wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
 
+        REM : search if this game has an update
+        set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
+        type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+
+            if !nbPass! EQU 1 echo - injecting update
+            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000e/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+
+            REM : YES : import update in mlc01/usr/title (minimized + no wait)
+            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
+        )
+
+        REM : search if this game has a DLC
+        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
+        type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+
+            if !nbPass! EQU 1 echo - injecting DLC
+            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+            REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
+            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
+        )
+
         REM : get saves only the first pass
         if !nbPass! GTR 1 goto:endInject
 
@@ -538,6 +585,20 @@ REM : functions
         call:getFolderSizeInMb !folder! sgContent
         set /A "totalMoNeeded+=!sgContent!"
         set /A "totalGameSize+=!sgContent!"
+
+        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000e""
+        if not exist !folder! goto:dlc
+
+        call:getFolderSizeInMb !folder! sgUpdate
+        set /A "totalMoNeeded+=!sgUpdate!"
+
+        :dlc
+        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
+        if not exist !folder! goto:eof
+
+        call:getFolderSizeInMb !folder! sgDlc
+        set /A "totalMoNeeded+=!sgDlc!"
+        set /A "totalGameSize+=!sgDlc!"
 
         echo size needed for !title! ^: !totalGameSize! Mb
 

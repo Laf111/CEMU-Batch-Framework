@@ -29,8 +29,11 @@ REM : main
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+    set "BFW_LOGS="!BFW_LOGS:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
+
+    set "setExtraSavesSlots="!BFW_TOOLS_PATH:"=!\setExtraSavesSlots.bat""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
@@ -48,6 +51,17 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
+
 
     set "USERSLIST="
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do set "USERSLIST=%%i !USERSLIST!"
@@ -183,7 +197,7 @@ REM : main
 
     set /A "nbAccount=1"
     set "accounts="
-    set "currentAccount="!BFW_PATH:"=!\logs\currentAccount.log""
+    set "currentAccount="!BFW_LOGS:"=!\currentAccount.log""
 
     :loopAccounts
     dir /B /S /A:D 8000000!nbAccount! > !currentAccount! 2>&1
@@ -524,6 +538,22 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : get the last modified save file (including slots if defined)
+    :getLastModifiedSaveFile
+
+        set "saveFile="NONE""
+
+        REM : patern
+        set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!*.rar""
+
+        REM : reverse loop => last elt is the last modified
+        for /F "delims=~" %%g in ('dir /S /B /O:-D /T:W !pat! 2^>NUL') do set "saveFile="%%g""
+
+        set "%1=!saveFile!"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :importSavesForUsers
 
         REM : get bigger rpx file present under game folder
@@ -594,10 +624,10 @@ REM : functions
         REM : create a rar file that contains all accounts
         pushd !inGameSavesFolder!
         set "commonRarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_common.rar""
-        wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -w!TMP! !commonRarFile! !saveFolder!
+        wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%" -ep1 -r -inul -w!BFW_LOGS! !commonRarFile! !saveFolder!
 
         REM : delete all accounts in
-        wscript /nologo !StartHiddenWait! !rarExe! d -r -inul -w!TMP! !commonRarFile! "mlc01\usr\save\00050000\101d6000\user\8000000*\*"
+        wscript /nologo !StartHiddenWait! !rarExe! d -r -inul -w!BFW_LOGS! !commonRarFile! "mlc01\usr\save\00050000\101d6000\user\8000000*\*"
 
         REM : Loop on accounts array
         for /L %%l in (0,1,!nbAccount!) do (
@@ -607,7 +637,7 @@ REM : functions
 
             if exist !accountFolder! if not ["!accounts[%%l]!"] == ["SKIPPED"] (
                 set "currentUser=!accounts[%%l]!"
-
+                
                 REM : save file
                 set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
                 echo =========================================================
@@ -615,33 +645,84 @@ REM : functions
                 echo ---------------------------------------------------------
                 echo.
                 if exist !rarFile! (
-                    choice /C yn /N /M "A save already exists for !currentUser!, overwrite ? (y, n)"
-                    if !ERRORLEVEL! EQU 1 (
+
+                    REM : check if slots are defined
+                    set "activeSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
+
+                    if exist !activeSlotFile! (
+                        echo "Extra save slots were defined for this game by !currentUser! ^:
+
+                        REM : display/create slos
+                        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH!
+
+                        REM : enter the slot to use
+                        :askSlot
+                        set /P "answer=Please, enter the slot's number to use : "
+                        echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlot
+                        set /A "srcSlot=!answer!"
+
+                        set "srcSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot!srcSlot!.rar""
+                        if exist !srcSlotFile! goto:slotFound
+                        echo ERROR^: slot!srcSlot! does not exist^!
+                        goto:askSlot
+
+                        :slotFound
+                        set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot!srcSlot!.rar""
+                        REM : prepare the archive with commonRarFile
+                        copy /Y !commonRarFile! !rarFile! > NUL 2>&1
+                        REM : add user account in commonRarFile
+                        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! "!accountFolder:"=!\*"
+
+                    ) else (
+
+                        REM : create a first extra slot save / overwrite the user save ?
+                        choice /C yn /N /M "A save already exists for !currentUser!, create a new extra slot and activate it? (y, n) : "
+                        if !ERRORLEVEL! EQU 1 (
+                            REM : create a new extra slot and activate it
+                            call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "imported from !MLC01_FOLDER_PATH:"=!"
+
+                            REM : get the last modified save for currentUser
+                            set "lastSlot="NONE""
+                            call:getLastModifiedSaveFile lastSlot
+                            if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
+
+                        ) else (
+                            choice /C yn /N /M "Overwrite save for !currentUser! ? (y, n) : "
+                            if !ERRORLEVEL! EQU 2 goto:endFct
+
+                            REM : backup the CEMU save
+                            set "rarFileCemu="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar""
+                            copy /Y !rarFile! !rarFileCemu! > NUL 2>&1
+                        )
+
                         REM : prepare the archive with commonRarFile
                         copy /Y !commonRarFile! !rarFile! > NUL 2>&1
 
                         REM : add user account in commonRarFile
-                        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
-                        set /A NB_SAVES_TREATED+=1
+                        wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! "!accountFolder:"=!\*"
                     )
+
                 ) else (
+                    REM : creates it
                     REM : prepare the archive with commonRarFile
                     copy /Y !commonRarFile! !rarFile! > NUL 2>&1
 
                     REM : add user account in commonRarFile
-                    wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!TMP! !rarFile! "!accountFolder:"=!\*"
-                    set /A NB_SAVES_TREATED+=1
+                    wscript /nologo !StartHidden! !rarExe! a -ed -ap"mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! "!accountFolder:"=!\*"
                 )
+
                 if !importGsFlag! EQU 1 if [!gamesStatUser!] == ["!currentUser!"] (
                     echo Importing games^' stats for !currentUser!
                     echo.
                     call:importGamesStats
                 )
+                set /A NB_SAVES_TREATED+=1
             )
         )
-        del /F !commonRarFile! > NUL 2>&1
         set "targetSaveFolder="!GAME_FOLDER_PATH:"=!\mlc01\usr\save\%startTitleId%\%endTitleId%""
         if not exist !targetSaveFolder! mkdir !targetSaveFolder! > NUL 2>&1
+        :endFct
+        del /F !commonRarFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------

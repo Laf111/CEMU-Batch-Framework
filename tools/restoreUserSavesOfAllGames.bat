@@ -33,7 +33,9 @@ REM : main
     set "BFW_ONLINE_FOLDER="!BFW_WIIU_FOLDER:"=!\OnlineFiles""
     set "USERS_ACCOUNTS_FOLDER="!BFW_ONLINE_FOLDER:"=!\usersAccounts""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -51,6 +53,16 @@ REM : main
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : search if launchGame.bat is not already running
+    set /A "nbI=0"
+    for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"
+    if %nbI% GEQ 1 (
+        echo ERROR^: launchGame^.bat is already^/still running^! If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!
+        wmic process get Commandline 2>NUL | find /I "cmd.exe" | find /I "launchGame.bat" | find /I /V "find"
+        pause
+        exit /b 100
+    )
 
     set "USERSLIST="
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "USER_REGISTERED" 2^>NUL') do set "USERSLIST=%%i !USERSLIST!"
@@ -379,7 +391,7 @@ REM : functions
         echo ^> !GAME_TITLE! ^: restore !currentUser! saves [!currentAccount!]
         REM : extract save (that for CEMU portability used account 80000001)
 
-        !rarExe! x -o+ -inul -w!TMP! !rarFile! > NUL 2>&1
+        !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! > NUL 2>&1
         REM : now get a folder structure
         REM : %CEMU_FOLDER%\bfwTmpExtract\mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001
         set "gf=mlc01\usr\save\%startTitleId%\%endTitleId%"
@@ -396,6 +408,22 @@ REM : functions
             move /Y !tgtFolder! ..\%gf%\user > NUL 2>&1
         )
         set /A NB_SAVES_TREATED+=1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : get the last modified save file (including slots if defined)
+    :getLastModifiedSaveFile
+
+        set "saveFile="NONE""
+
+        REM : patern
+        set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!*.rar""
+
+        REM : reverse loop => last elt is the last modified
+        for /F "delims=~" %%g in ('dir /S /B /O:-D /T:W !pat! 2^>NUL') do set "saveFile="%%g""
+
+        set "%1=!saveFile!"
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -491,10 +519,15 @@ REM : functions
 
             if not ["!accounts[%%l]!"] == ["SKIPPED"] (
                 set "currentUser=!users[%%l]!"
-                REM : save file
-                set "rarFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!.rar""
+                REM : get the save file to use
+
+                set "rarFile="NONE""
+                call:getLastModifiedSaveFile rarFile
+
                 set "currentAccount=!accounts[%%l]!"
-                if exist !rarFile! call:extractSaveForUser
+                if not [!rarFile!] == ["NONE"] (
+                    if exist !rarFile! call:extractSaveForUser
+                )
             )
 
         )

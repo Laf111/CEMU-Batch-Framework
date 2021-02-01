@@ -31,6 +31,7 @@ REM : main
     set "GAME_FOLDER_PATH="NONE""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
 
     set "myLog="!BFW_PATH:"=!\logs\updateGamesGraphicPacks.log""
     set "fnrLogUggp="!BFW_PATH:"=!\logs\fnr_updateGamesGraphicPacks.log""
@@ -169,8 +170,6 @@ REM    call:checkGpFolders
     )
 
     REM : get the last version used for launching this game
-    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
-
     set "lastInstalledVersion=NOT_FOUND"
     if not exist !glogFile! goto:treatOneGame
 
@@ -883,7 +882,6 @@ REM    REM : ------------------------------------------------------------------
         REM : arg1 = msg
         set "msg=%~1"
 
-        set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
         if not exist !glogFile! (
             set "logFolder="!BFW_PATH:"=!\logs""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
