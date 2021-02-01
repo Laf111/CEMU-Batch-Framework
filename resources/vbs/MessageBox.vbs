@@ -9,8 +9,8 @@ If (objArgs.Count = 1) Then
 Else
     If (objArgs.Count = 2) Then
         critLevel = objArgs(1)
-        If (critLevel = "pop5sec") Then
-            createobject("wscript.shell").popup messageText, 5, "CEMU's BatchFw", 64
+        If (critLevel = "pop8sec") Then
+            createobject("wscript.shell").popup messageText, 8, "CEMU's BatchFw", 64
         Else
             ' critLevel values : 
 
