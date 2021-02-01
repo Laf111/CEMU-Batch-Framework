@@ -48,19 +48,28 @@ Associate BatchFw's user to Wii-U accounts : _BatchFw_WiiU\OnlineFiles\usersAcco
 ---------------------------------------------------------
 This script associate BatchFw's users to Wii-U accounts.
 Once done, files (account.dat) are automatically installed when launching Cemu.
-You'll received a warning if your Wii-U is detected on the network to ensure that no one is using your account Id at the same 
-time (risk of ban)
+You'll received a warning if your Wii-U is detected on the network to ensure that no one is using 
+your account Id at the same time (risk of ban)
 
 ---------------------------------------------------------
 Import saves from my Wii-U :
 ---------------------------------------------------------
 The script will use the last scan results (or your can launch a new scan) to be sure that the game is 
-installed on your Wii-U and your PC then import the saves for all users that have an accountId (so an associated folder 80000XX) and 
-saves for this game.
-For all user, their folders are replaced by 8000001 (the only user CEMU handle for now) and the saveInfo.xml file is updated (only 
-one user = 8000001).
-Saves are then compressed directly in %GAMES_FOLDER_PATH%\Cemu\inGameSaves\!GAME_TITLE!_!user!.rar
-A backup of the CEMU's ones is made and saved as %GAMES_FOLDER_PATH%\Cemu\inGameSaves\!GAME_TITLE!_!user!_Cemu.rar
+installed on your Wii-U AND on your PC then import the saves for all users that have an accountId (so an associated 
+folder 80000XX) and saves for this game.
+For all user, their folders are replaced by 8000001 (the only user CEMU handle in old versions) and the saveInfo.xml file 
+is updated (only one user = 8000001).
+
+You can choose to syncronize your saves : continue to play Wii-U saves with CEMU (but your CEMU's save will be lost, in 
+fact backuped under _BatchFw_WiiU\ImportSave)
+Since BatchFw introduce extra save slots, you can choose to create a slot to continue to play both saves with CEMU.
+
+In this mode, BatchFw will try to find an existing slot defined with a label containing "Wii-U import" 
+and use it. If not found : 
+* if a default user save exists : it will create automatically a slot labelled "Wii-U import @DATE" and activate it (use it)
+* no CEMU saves exists for the user: the Wii-U save will become the CEMU one (without creating a slot for this game)
+
+Have a look to the documentation in userSavesAndSlots.txt for further informations.
 
 ---------------------------------------------------------
 Export Cemu saves to my Wii-U :

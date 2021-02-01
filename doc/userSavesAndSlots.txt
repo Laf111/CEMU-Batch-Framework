@@ -1,0 +1,77 @@
+=========================================================
+BatchFw's user saves and extra slots handling : 
+=========================================================
+
+1°) Default user save :
+-----------------------
+
+Before v1.15.19, CEMU handle only one account (80000001 = one user). 
+
+When launching 'Wii-Games\Set BatchFw settings and register CEMU installs.lnk' or directlty setup.bat
+you'll be asked to create BatchFw's users.
+If you don't, a defaut user will be created using your Windows' profile name.
+
+In BatchFw, all users defined use in fact the default account 80000001 (that ensure the compatibility with versions < v1.15.19)
+
+Saves are stored under %GAME_FOLDER_PATH%\Cemu\inGameSaves\%GAME_TITLE%_%BFW_USER%.rar
+
+NOTES : 
+    - like the packages created when you use 'Wii-U Games\Compress and uninstall games.lnk' you'll need an archive manager that 
+      supports RAR5 compression to open them under windows.
+    - when you launch a game for the first time and when another user have a save available, you'll be asked to use it or not.
+
+    
+2°) Extra slot concept :
+------------------------
+
+It allows BatchFw's users to handle multiple save for a same game.
+
+Some games (like BOTW) have to few saves slots.
+With BatchFw you'll be able to create as many saves as you like.
+
+The principle is simple : 
+- When you create a slot, you'll be asked to give an initial slot (0 for duplicating the default save) and a description (label)
+- 3 files are created under %GAME_FOLDER_PATH%\Cemu\inGameSaves
+    * %GAME_TITLE%_%BFW_USER%_slot%SLOT_NUMBER%.rar (archive file) 
+    * %GAME_TITLE%_%BFW_USER%_slot%SLOT_NUMBER%.txt (containing a short description you entered)
+  and a file %GAME_TITLE%_%BFW_USER%_activeSlot.txt containing the relative path to the archive file of the active slot
+- if the file %GAME_TITLE%_%BFW_USER%_activeSlot.txt does not exist => the default save is used 
+  %GAME_FOLDER_PATH%\Cemu\inGameSaves\%GAME_TITLE%_%BFW_USER%.rar
+
+3°) Available shortcuts : 
+-------------------------
+
+%BFW_USER%\_BatchFw - set extra slots saves.lnk : call "setExtraSavesSlots.bat %BFW_USER%"
+
+    Handle extra slots of %BFW_USER%.
+    You can :
+        - create a new extra slot and activate it
+        - activate a slot
+        - delete an existing slot
+        - override default's user save with a given slot and deactivate all slots
+        - override default's user save with a given slot and delete all slots
+        - delete all slots (keep default user's save) 
+        - deactivate all slots (use default user's save and do not delete slots) 
+      
+
+4°) Use in others scripts : 
+---------------------------
+
+- restoreUserSavesOfAllGames.bat : this script will continue to use the last modified save files for each users (slots or 
+  default user's save files)
+
+- importSaves.bat : will ask if you want to manage/create slot(s) for each games. If you don't, you can choose to overwrite the 
+  defaut user's save or not. If you choose to overwrite, a backup is created anyway (as !GAME_TITLE!_!currentUser!_Cemu_!DATE!.rar)
+  If you choose to create a new slot, it will be activated.
+
+- importWiiuSaves.bat : add a parmeters is added in host log file WII-U_SAVE_MODE to keep both CEMU and Wii-U saves.
+In this mode, BatchFw will try to find an existing slot defined with a label containing "Wii-U import" 
+and use it. If not found : 
+* if a default user save exists : it will create automatically a slot labelled "Wii-U import @DATE" and activate it (use it)
+* no CEMU saves exists for the user: the Wii-U save will become the CEMU one (without creating a slot for this game)
+  
+- exportSavesToWiiu.bat : will search to use an existing slot with label containing "Wii-U import"
+  If not found, will use the last save (default one or a slot) used (last modified date).
+
+- launchGame.bat : will search for the slot file indicated in activeSlot.txt (active slot) and popup 5sec the number and label of the 
+  slot used. Otherwise it will use the default save (like before)
