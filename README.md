@@ -20,6 +20,8 @@ To download a previous version of CEMU (VX.Y.Z), go to http://cemu.info/releases
 CEMU's process is monitored and its priority pushed from "above nromal" to "high" to **minimize FPS drops while in game**. 
 A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
+BatchFw handles as many users as you want. All users can play even with old versions of CEMU (in BatcFw all users use the default account 8000001).
+It also allows to create extra saves slots to define **multiple saves per user for each games**.
 
 If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
@@ -35,7 +37,8 @@ It also **creates FPS GFX packs** to control the **emulation's speed or increasi
 If you update to a more recent configuration not listed here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (to use stocks ones).
 
 
-For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**.
+For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**. You can choose to **synchronize your CEMU save with the Wii-One or choose to keep both saves to play with CEMU** (an extra slot is created and use automatically for import/export saves process)
+
 
 # 
 **IMPORTANT : Do not clone the repository (unless you're quite familiar with batch scripts) because GitHub will format all files from ANSI to UTF-8 and it might break silentlty some scripts** : go to the "[releases](https://github.com/Laf111/CEMU-Batch-Framework/releases)" section in this page to get the last released version else **see recommendations at the end of this page**.
@@ -78,6 +81,8 @@ The mlc01 path is in the game folder so:
 - **launch and close one or more third party softwares (DS4windows, Wiimotehook ...);**
 
 - **Handle more than one user/save also with versions of CEMU < 1.15.19**;
+
+- **Handle multiple saves per user for each games (extra save slots)**;
 
 - **Make your loadiine games library portable :**
     - save settings PER user (including GFX and mods packs) and PER host;
