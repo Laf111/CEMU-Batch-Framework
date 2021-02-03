@@ -290,7 +290,7 @@ REM : functions
 
         set /A "wngDetected=0"
         REM : loop on ':' find in the file
-        for /F "delims=:~ tokens=2" %%p in ('type !filePath! ^| find /I /V "REM" ^| find /I /V "echo" ^| find "   :" ^| find /V "=" ^| findStr /R "[A-Z]*" 2^>NUL') do (
+        for /F "delims=:~ tokens=2" %%p in ('type !filePath! ^| find /I /V "REM" ^| find /I /V "echo" ^| find "   :" ^| find /V "=" ^| find /I /V "choice " ^| findStr /R "[A-Z]*" 2^>NUL') do (
 
             set "label=%%p"
             REM : search for "call:!label!" count occurences

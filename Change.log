@@ -21,15 +21,11 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-TODO : 
-UPDATE BatchFw.png
-v752 for GFX pack
-v1.22.5 for CEMU
-
-
-01/02/2021 V21-7 :
-add : Extra save slots concept to handle multiple saves per user
-add : Script to set extra slot enabled (shortcut in Wii-Games\%BATCHFW_USER%\_BatchFw - Set saves slots)
+03/02/2021 V21-7 :
+add : Extra save slots concept to handle multiple saves per user 
+      New shortcut in Wii-Games\%BATCHFW_USER%\_BatchFw - Set saves slots.lnk
+      (you have to launch shortcuts or excutable creation to create it)
+add : Script to set extra slot enabled 
       - list %BATCHFW_USER% games with active slots, 
       - create a new extra slot and activate it
       - activate a given slot
@@ -51,9 +47,12 @@ add : Wii-U / now you can choose to synchronize OR keep both saves (CEMU AND Wii
        "Wii-U import" is picked)
 add : documentation (create userSavesAndSlots.txt and modify syncWii-U.txt)
 add : Script to select games to be compressed and uninstalled (create a COMPLETE rar archive of each game)
+      New shortcut in Wii-Games\Compress and uninstall games.lnk
+      (you have to launch shortcuts or excutable creation to create it)
       Archive files contains : game + update + DLC + all saves for all users + transferable cache + all settings used by 
       all users on every host (including controller profiles and mod used)
       The files are created in %GAMES_FOLDER% (and this folder is used as working one). 
+      Size left on device is checked before all operations.
       If archive file already exist, it is updated instead of be replaced.
       The backup file is a max compressed RAR 5 (you need RAR 5 support to open it with a GUI) file that have passed the final files check.
       Delete the game's folder only if the operation succeeds (analyse Rar.exe return code) 
@@ -65,12 +64,12 @@ add : robustness on games stats computation
 add : checking if BatchFw is not already/still running in scripts that might needs it
 add : extend integer checks for user's input using regexp
 add : a backup of existing save in importSaves.bat
+add : GFX pack version in the title bar when updating GFX pack folder
 fix : GFX packs not rebuilding when forcing a GFX packs update with packs already completed earlier using the same version
 fix : use a local working dir for RAR.exe operations to skip the move time
 fix : clean dead code in backupInGameSaves.bat
 fix : restore the old version of "injectGamesToWiiu.bat" that inject games/updates and DLC that you have 
       previously dumped (will be usefull if eShop goes down definitively one day)
-
 
 16/01/2021 V21-6 :
 add : push robocpoy thread to 32 max

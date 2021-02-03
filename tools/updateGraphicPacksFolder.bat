@@ -139,7 +139,7 @@ REM : main
         if !ERRORLEVEL! EQU 2 exit /b 2
     )
     :updateGP
-
+    
     REM : launch graphic pack update
     if !QUIET_MODE! EQU 0 echo =========================================================
     if !QUIET_MODE! EQU 0 echo Updating BatchFW^'s graphic packs
@@ -147,7 +147,7 @@ REM : main
 
 
     :noMsg
-
+    if !QUIET_MODE! EQU 0 title Updating GFX packs to !zipFile:.zip=!
     REM : clean old packs
     for /F "delims=~" %%a in ('dir /A:D /B !BFW_GP_FOLDER! 2^>NUL ^| find /I /V "_graphicPacksV"') do (
         set "pack="!BFW_GP_FOLDER:"=!\%%a""
@@ -205,7 +205,7 @@ REM : main
             echo If you do not plan to play at once^, you can now complete GFX packs
             echo for ALL your games in a row ^? ^(to avoid build on each next run^)
             echo.
-            call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 20sec)" "y,n" ANSWER 20
+            call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 30sec)" "y,n" ANSWER 30
             if [!ANSWER!] == ["n"] (
                 exit /b 0
             )

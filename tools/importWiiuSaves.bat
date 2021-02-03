@@ -251,14 +251,27 @@ REM : main
 
     set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
     call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
-    if !ERRORLEVEL! NEQ 0 (
-        echo Invalid numbers or forbiden characters found^, please retry
-        pause
+    if not ["!listGamesSelected: =!"] == [""] (
+        echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
+
+        echo =========================================================
+        for %%l in (!listGamesSelected!) do (
+            echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
+            set /A "number=%%l"
+            if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+
+            echo - !titles[%%l]!
+            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
+            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
+            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+
+            set /A "nbGamesSelected+=1"
+        )
+    ) else (
         goto:getList
     )
-    call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
-    echo ---------------------------------------------------------
+    echo =========================================================
+    echo.
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
     if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
     if !ERRORLEVEL! EQU 2 goto:getList
@@ -428,7 +441,7 @@ REM : functions
             :askUser
             set /P "num=Enter the BatchFw user's number [0, !nbUserm1!] : "
 
-            echo %num% | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askUser
+            echo %num% | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askUser
 
             if %num% LSS 0 goto:askUser
             if %num% GEQ %nbUsers% goto:askUser
@@ -539,39 +552,6 @@ REM : functions
                 for /F "delims=~" %%a in (!GAME_FOLDER_PATH!) do set "selectedTitles[%num%]=%%~nxa"
             )
         )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : check list of games and create selection
-    :checkListOfGames
-
-        echo ---------------------------------------------------------
-        echo Import saves for ^:
-        echo.
-        for %%l in (!listGamesSelected!) do (
-            if %%l GEQ !nbGames! exit /b 1
-            echo - !titles[%%l]!
-            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
-            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
-            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
-
-            set /A "nbGamesSelected+=1"
-            )
-        exit /b 0
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : check list of integers
-    :checkListOfIntegers
-        set "list="%~1""
-
-        for %%l in (!list!) do (
-            if %%l GEQ %nbGames% exit /b 2
-            echo %%l | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && exit /b 3
-        )
-        exit /b 0
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -725,7 +705,7 @@ REM : functions
                     REM : enter the slot to use
                     :askSlot
                     set /P "answer=Please, enter the slot's number to use : "
-                    echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlot
+                    echo !answer! | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askSlot
                     set /A "srcSlot=!answer!"
 
                     set "srcSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot!srcSlot!.rar""

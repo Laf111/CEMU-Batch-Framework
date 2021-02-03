@@ -239,9 +239,27 @@ REM : main
     set /A "nbGamesSelected=0"
 
     set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
-    call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
-    echo ---------------------------------------------------------
+    if not ["!listGamesSelected: =!"] == [""] (
+        echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
+
+        echo =========================================================
+        for %%l in (!listGamesSelected!) do (
+            echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
+            set /A "number=%%l"
+            if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+
+            echo - !titles[%%l]!
+            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
+            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
+            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+
+            set /A "nbGamesSelected+=1"
+        )
+    ) else (
+        goto:getList
+    )
+    echo =========================================================
+    echo.
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
     if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
     if !ERRORLEVEL! EQU 2 goto:getList
@@ -359,27 +377,6 @@ REM : main
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-
-    REM : check list of games and create selection
-    :checkListOfGames
-
-        echo ---------------------------------------------------------
-        echo Export saves for ^:
-        echo.
-        for %%l in (!listGamesSelected!) do (
-            if %%l GEQ !nbGames! exit /b 1
-            echo - !titles[%%l]!
-            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
-            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
-            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
-
-            set /A "nbGamesSelected+=1"
-            )
-        exit /b 0
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :updateTitle
 

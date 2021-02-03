@@ -180,8 +180,28 @@ REM : main
 
     set /P "listGamesSelected=Please enter game's ID numbers list (separated with a space): "
     echo.
-    call:checkListOfGames !listGamesSelected!
-    if !ERRORLEVEL! NEQ 0 goto:getList
+    if not ["!listGamesSelected: =!"] == [""] (
+        echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
+
+        echo =========================================================
+        for %%l in (!listGamesSelected!) do (
+            echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
+            set /A "number=%%l"
+            if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+
+            set "selectedGames[!nbGamesSelected!]=!arrayGames[%%l]!"
+            set "selectedSlots[!nbGamesSelected!]=!arraySlots[%%l]!"
+            set "selectedLabels[!nbGamesSelected!]=!arrayLabels[%%l]!"
+
+            for /F "delims=~" %%g in (!arrayGames[%%l]!) do set "GAME_TITLE=%%~nxg"
+            echo !GAME_TITLE!
+
+            set /A "nbGamesSelected+=1"
+        )
+    ) else (
+        goto:getList
+    )
+    echo =========================================================
     echo.
 
     choice /C ync /N /M "Continue (y, n : define another list) or cancel (c)? : "
@@ -261,7 +281,7 @@ REM : functions
         ) else (
             :askSlot
             set /P "answer=Please, enter the slot's number to overwrite default save : "
-            echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlot
+            echo !answer! | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askSlot
 
             set /A "srcSlot=!answer!"
             set "srcSlotFile="!igsvf:"=!\!title!_!currentUser!_slot!srcSlot!.rar""
@@ -326,7 +346,7 @@ REM : functions
             if !nbSlots! GEQ 2 (
                 :askSlotToActivate
                 set /P "answer=Please, enter the slot's number to activate : "
-                echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlotToActivate
+                echo !answer! | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askSlotToActivate
                 set /A "slotToActivate=!answer!"
 
                 set "slotFile="!igsvf:"=!\!title!_!currentUser!_slot!slotToActivate!.rar""
@@ -335,7 +355,7 @@ REM : functions
                 goto:askSlotToActivate
 
             ) else (
-                call:getLastSlotNumber slotToActivate                
+                call:getLastSlotNumber slotToActivate
                 set "slotFile="!igsvf:"=!\!title!_!currentUser!_slot!slotToActivate!.rar""
             )
         )
@@ -367,7 +387,11 @@ REM : functions
         attrib +R !activeSlotFile! > NUL 2>&1
         REM : update activeSlot
         set /A "activeSlot=!slotToActivate!"
-        if ["!slotToActivate!"] == [""] pause
+        if ["!slotToActivate!"] == [""] (
+            pause
+        ) else (
+            timeout /T 2 > NUL 2>&1
+        )
 
     goto:eof
     REM : -----------------------------------------------------------------
@@ -383,7 +407,7 @@ REM : functions
         if !nbSlots! GEQ 2 (
             :askSlot
             set /P "answer=Please, enter the slot's number to delete : "
-            echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSlot
+            echo !answer! | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askSlot
             set /A "slotToDelete=!answer!"
 
             set "slotFile="!igsvf:"=!\!title!_!currentUser!_slot!slotToDelete!.rar""
@@ -398,12 +422,9 @@ REM : functions
 
         :slotFound
         type !activeSlotFile! | find "!currentUser!_slot!slotToDelete!" > NUl 2>&1 && (
-            if !nbSlots! GEQ 2 (
+            if !nbSlots! GTR 2 (
                 echo This slot is the active one ^!
                 call:activateSlot
-            ) else (
-                call:getLastSlotNumber slotToActivate
-                call:activateSlot !slotToActivate!
             )
         )
 
@@ -416,7 +437,15 @@ REM : functions
 
         del /F !slotFile! > NUL 2>&1
         del /F !slotFileLabel! > NUL 2>&1
+        set /A "nbSlots-=1"
 
+        type !activeSlotFile! | find "!currentUser!_slot!slotToDelete!" > NUl 2>&1 && (
+            if !nbSlots! EQU 1 (
+                call:getLastSlotNumber slotToActivate
+                call:activateSlot !slotToActivate!
+            )
+        )
+        
         if !nbSlots! EQU 1 (
             REM : only one slot existed and now was deleted
 
@@ -426,7 +455,6 @@ REM : functions
                 del /F !activeSlotFile! > NUL 2>&1
             )
         )
-        set /A "nbSlots-=1"
         pause
 
     goto:eof
@@ -457,7 +485,7 @@ REM : functions
             if !nbSlots! GTR 1 (
                 :askSrcSlot
                 set /P "answer=Please, enter the source slot number for creating the new one (0 for defaut user save) : "
-                echo !answer! | findStr /R /V "^[0-9]*.$" > NUL 2>&1 && goto:askSrcSlot
+                echo !answer! | findStr /R /V "[0-9]" > NUL 2>&1 && goto:askSrcSlot
                 set /A "srcSlot=!answer!"
                 if !srcSlot! EQU 0 goto:slotFound
 
@@ -623,6 +651,7 @@ REM : functions
             echo  or
             echo.
             echo    2 ^: create a new extra slot and activate it
+
             if !nbSlots! GTR 0 (
                 echo    3 ^: activate a slot
                 echo    4 ^: delete an existing slot
@@ -630,12 +659,19 @@ REM : functions
                 echo    6 ^: override default^'s user save with a given slot and delete all slots
                 echo    7 ^: delete all slots ^(keep default user^'s save^)
                 echo    8 ^: deactivate all slots ^(use default user^'s save and do not delete slots^)
-            )
-            echo.
-            choice /C 12345678 /N /M "Please, enter you choice : "
-            set "userChoice=!ERRORLEVEL!"
 
-            choice /C yn /N /M "Confirm choice !userChoice!? (y/n to cancel) : "
+                echo.
+                choice /C 12345678 /N /M "Please, enter you choice   : "
+                set /A "userChoice=!ERRORLEVEL!"
+
+            ) else (
+                echo.
+                choice /C 12 /N /M "Please, enter you choice   : "
+                set /A "userChoice=!ERRORLEVEL!"
+
+            )
+
+            choice /C yn /N /M "Confirm !userChoice!? (y/n to cancel) : "
             if !ERRORLEVEL! EQU 2 goto:getChoice
 
             if !userChoice! EQU 1 timeout /T 3 > NUL 2>&1 & goto:eof
@@ -787,28 +823,6 @@ REM : functions
 
         set /A "nbGames+=1"
         pushd !GAMES_FOLDER!
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    REM : check list of games and create selection
-    :checkListOfGames
-
-        echo =========================================================
-        for %%l in (!listGamesSelected!) do (
-            if %%l GEQ !nbGames! echo ERROR^: %%l not in the list & pause & exit /b 1
-            set "selectedGames[!nbGamesSelected!]=!arrayGames[%%l]!"
-            set "selectedSlots[!nbGamesSelected!]=!arraySlots[%%l]!"
-            set "selectedLabels[!nbGamesSelected!]=!arrayLabels[%%l]!"
-
-            for /F "delims=~" %%g in (!arrayGames[%%l]!) do set "GAME_TITLE=%%~nxg"
-            echo !GAME_TITLE!
-
-            set /A "nbGamesSelected+=1"
-            )
-        echo =========================================================
-        exit /b 0
-
     goto:eof
     REM : ------------------------------------------------------------------
 

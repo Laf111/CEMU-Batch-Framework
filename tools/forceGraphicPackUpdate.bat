@@ -6,6 +6,7 @@ REM : main
     setlocal EnableDelayedExpansion
 
     color 4F
+    title Force GFX packs update
 
     set "THIS_SCRIPT=%~0"
 

@@ -595,7 +595,7 @@ REM : main
     pushd !BFW_TOOLS_PATH!
     echo Using !userGameSaveName! as save file
     echo Using !userGameSaveName! as save file>> !batchFwLog!
-    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!userGameSaveName:=!""
+    set "userGameSave="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!userGameSaveName:"=!""
 
     REM : make a backup of saves fo userGameSave
     set "saveBackup=!userGameSave:.rar=-backupLaunchN.rar!"
