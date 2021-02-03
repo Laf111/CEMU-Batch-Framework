@@ -25,7 +25,7 @@ It also allows to create extra saves slots to define **multiple saves per user f
 
 If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
-**Last GFX packs checked (presets completion) : V761**
+**Last GFX packs checked (presets completion) : V758**
 
 BatchFw **creates resolution GFX packs for games** with no GFX packs provided (which are automatically replaced by the official ones when they'll be available). 
 It computes the current aspect ratio using your screen resolution (so it **works on every display configuration setup**, dual triple screen...) 
