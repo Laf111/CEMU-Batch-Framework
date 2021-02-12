@@ -54,6 +54,7 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
 
 REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
 
@@ -277,6 +278,9 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+    REM : clean log files specific to a launch
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\jnust_*.*" > NUL 2>&1
 
     cls
     REM : check if folder name contains forbidden character for batch file
@@ -481,7 +485,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     echo ---------------------------------------------------------
     echo graphic pack V2 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv2! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv2! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting V2_GFX_Packs^, exit 21
@@ -504,7 +508,7 @@ REM    if exist !gfxv4! goto:checkCemuHook
     echo ---------------------------------------------------------
     echo graphic pack V4 are needed for this version^, extracting^.^.^.
 
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !gfxv4! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !gfxv4! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo ERROR while extracting V4_GFX_Packs^, exiting 22
@@ -529,7 +533,7 @@ REM    if exist !gfxv4! goto:checkCemuHook
     if exist !sharedFonts! goto:autoImportMode
     echo Installing sharedFonts^.^.^.
     set "rarFile="!BFW_RESOURCES_PATH:"=!\sharedFonts.rar""
-    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+    wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
         echo WARNING ^: while extracting sharedFonts
@@ -660,6 +664,7 @@ REM    call:log2HostFile !msg!
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 1 echo Please rename !GAME_FOLDER_PATH! to be DOS compatible^, otherwise it will be ignored by BatchFW ^^!
             if !cr! EQU 1 goto:scanGamesFolder
+
             call:gameShortcut
 
         ) else (
@@ -690,7 +695,7 @@ REM    call:log2HostFile !msg!
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attempt! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
                         set /A "attempt+=1"
                         goto:tryToMove
                     )
@@ -698,7 +703,7 @@ REM    call:log2HostFile !msg!
                     for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -827,7 +832,7 @@ REM : functions
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
 
         :extractCemuHook
-        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!TMP! !rarFile! !CEMU_FOLDER! > NUL 2>&1
+        wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
             echo WARNING ^: while extracting CemuHook
@@ -1017,7 +1022,6 @@ REM : functions
         )
         pushd !GAMES_FOLDER!
 
-
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -1181,7 +1185,7 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo Creating a shortcut to Wii-U error codes documentation
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         set "scansFolder="!GAMES_FOLDER:"=!\_BatchFw_WiiU\Scans""
         if exist !scansFolder! (
             REM : create a shortcut to explore scans saved
@@ -1283,7 +1287,7 @@ REM : functions
             set "usbDrive=!caption:~0,-1!"
             if ["!usbDrive!"] == ["!drive!"] set /A "installedOnUsb=1"
         )
-                
+
         set "ARGS=ON"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
@@ -1347,7 +1351,7 @@ REM : functions
                 if !QUIET_MODE! EQU 0 echo Creating a shortcut to updateGames^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
-        
+
         REM : create a shortcut to progressBar.bat (if needed)
         set "LINK_PATH="!BFW_RESOURCES_PATH:"=!\progressBar^.lnk""
         set "LINK_DESCRIPTION="Link to progressBar""
@@ -1681,7 +1685,6 @@ REM : functions
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
             )
         )
-
         set "ARGS=ALL"
 
         REM : create a shortcut to deleteBatchFwGraphicPacks.bat (if needed)
@@ -1810,6 +1813,45 @@ REM : functions
         )
     goto:eof
 
+    REM : fucntion to created shortcut to delete BatchFw's packs for this game
+    :createDeletePacksShorcut
+
+        REM : add a shortcut for deleting all packs created by BatchFw for thsi game
+        set "shortcutFolder="!OUTPUT_FOLDER:"=!\BatchFw\Tools\Graphic packs\BatchFw^^'s packs""
+        if not exist !shortcutFolder! mkdir !shortcutFolder! > NUL 2>&1
+
+        set "shortcut="!shortcutFolder:"=!\Force rebuilding !GAME_TITLE! packs.lnk""
+        if exist !shortcut! goto:eof
+
+        REM : temporary vbs file for creating a windows shortcut
+        set "TMP_VBS_FILE="!TEMP!\delete_!GAME_TITLE!_GfxPacks_!DATE!.vbs""
+
+        set "ARGS=!titleId!"
+
+        set "LINK_DESCRIPTION="Delete !GAME_TITLE!'s packs created by BatchFw""
+
+        REM : create object
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
+        echo sLinkFile = !shortcut! >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+
+        set "TARGET_PATH="!BFW_TOOLS_PATH:"=!\deleteBatchFwGraphicPacks.bat""
+
+        echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !BFW_TOOLS_PATH! >> !TMP_VBS_FILE!
+
+        echo oLink^.Save >> !TMP_VBS_FILE!
+
+        REM : running VBS file
+        cscript /nologo !TMP_VBS_FILE!
+
+        del /F  !TMP_VBS_FILE! > NUL 2>&1
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : function to create a shortcut for a game
     :gameShortcut
 
@@ -1862,11 +1904,11 @@ REM : functions
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-
+        REM : this string is the one used to name BatchFw gfx packs
         set "gfxPackGameTitle=%Desc: =%"
 
         REM : extract gfxPackGameTitle data and fill to the updated file
-        if !QUIET_MODE! EQU 0 type !gLogFile! | find !gfxPackGameTitle! >> !gLogFileNew!
+        if !QUIET_MODE! EQU 0 type !gLogFile! | find "!gfxPackGameTitle!" >> !gLogFileNew!
 
         :searchIco
 
@@ -1879,7 +1921,7 @@ REM : functions
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
-        REM : if no ico not file found, using cemu.exe icon
+        REM : if no icon file found, using cemu.exe icon
         if [!ICO_FILE!] == ["NONE"] (
             REM : search if exists in !BFW_PATH!\resources\gamesIcon using WiiU-Titles-Library.csv Ico file Id
             call:getIcon
@@ -1936,6 +1978,7 @@ REM : functions
                 call:userGameShortcut !user!
             )
         )
+
         if !NB_OUTPUTS! NEQ !previousNumber! set /A "NB_GAMES_TREATED+=1"
 
     goto:eof
@@ -2027,6 +2070,11 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
         if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
+
+
+        REM : create a shorcut to delete packs created for this games
+        call:createDeletePacksShorcut
+
         set /A "NB_OUTPUTS+=1"
     goto:eof
     REM : ------------------------------------------------------------------

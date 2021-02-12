@@ -54,6 +54,7 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
@@ -275,6 +276,9 @@ REM : main
     set /A "QUIET_MODE=1"
 
     :inputsAvailables
+    REM : clean log files specific to a launch
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\jnust_*.*" > NUL 2>&1
 
     cls
     REM : check if folder name contains forbidden character for batch file
@@ -692,7 +696,7 @@ REM    call:log2HostFile !msg!
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attempt! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
                         set /A "attempt+=1"
                         goto:tryToMove
                     )
@@ -700,7 +704,7 @@ REM    call:log2HostFile !msg!
                     for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -1276,7 +1280,7 @@ REM : functions
         if not exist !LINK_PATH! (
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to compressAndUninstall^.bat
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
-        )        
+        )
 
         REM : check if installed on an usb drive
         set /A "installedOnUsb=0"
@@ -1811,6 +1815,45 @@ REM : functions
         )
     goto:eof
 
+    REM : fucntion to created shortcut to delete BatchFw's packs for this game
+    :createDeletePacksShorcut
+
+        REM : add a shortcut for deleting all packs created by BatchFw for thsi game
+        set "shortcutFolder="!OUTPUT_FOLDER:"=!\BatchFw\Tools\Graphic packs\BatchFw^^'s packs""
+        if not exist !shortcutFolder! mkdir !shortcutFolder! > NUL 2>&1
+
+        set "shortcut="!shortcutFolder:"=!\Force rebuilding !GAME_TITLE! packs.lnk""
+        if exist !shortcut! goto:eof
+
+        REM : temporary vbs file for creating a windows shortcut
+        set "TMP_VBS_FILE="!TEMP!\delete_!GAME_TITLE!_GfxPacks_!DATE!.vbs""
+
+        set "ARGS=!titleId!"
+
+        set "LINK_DESCRIPTION="Delete !GAME_TITLE!'s packs created by BatchFw""
+
+        REM : create object
+        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
+        echo sLinkFile = !shortcut! >> !TMP_VBS_FILE!
+        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
+
+        set "TARGET_PATH="!BFW_TOOLS_PATH:"=!\deleteBatchFwGraphicPacks.bat""
+
+        echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
+        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
+        echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
+        echo oLink^.WorkingDirectory = !BFW_TOOLS_PATH! >> !TMP_VBS_FILE!
+
+        echo oLink^.Save >> !TMP_VBS_FILE!
+
+        REM : running VBS file
+        cscript /nologo !TMP_VBS_FILE!
+
+        del /F  !TMP_VBS_FILE! > NUL 2>&1
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : function to create a executable for a game
     :gameExecutable
 
@@ -1863,11 +1906,11 @@ REM : functions
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-
+        REM : this string is the one used to name BatchFw gfx packs
         set "gfxPackGameTitle=%Desc: =%"
 
         REM : extract gfxPackGameTitle data and fill to the updated file
-        if !QUIET_MODE! EQU 0 type !gLogFile! | find !gfxPackGameTitle! >> !gLogFileNew!
+        if !QUIET_MODE! EQU 0 type !gLogFile! | find "!gfxPackGameTitle!" >> !gLogFileNew!
 
         :searchIco
 
@@ -1880,7 +1923,7 @@ REM : functions
         set "pat="!GAME_FOLDER_PATH:"=!\Cemu\00050000*.ico""
         for /F "delims=~" %%i in ('dir /B !pat! 2^>NUL' ) do set "ICO_FILE="%%i""
 
-        REM : if no ico not file found, using cemu.exe icon
+        REM : if no icon file found, using cemu.exe icon
         if [!ICO_FILE!] == ["NONE"] (
             REM : search if exists in !BFW_PATH!\resources\gamesIcon using WiiU-Titles-Library.csv Ico file Id
             call:getIcon
@@ -2035,8 +2078,12 @@ REM        set "BatchFwCall=!sg! !lg! %ARGS% !batchLogFile!"
 
         pushd !GAMES_FOLDER!
         if !QUIET_MODE! EQU 0 echo - Executable for !user:"=! created ^!
+
+        REM : create a shorcut to delete packs created for this games
+        call:createDeletePacksShorcut
+
         set /A "NB_OUTPUTS+=1"
-goto:eof
+    goto:eof
     REM : ------------------------------------------------------------------
 
     :getIcon

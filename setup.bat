@@ -8,10 +8,10 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V21-7"
+    set "BFW_VERSION=V21-8"
 
     REM : version of GFX packs created
-    set "BFW_GFXP_VERSION=6"
+    set "BFW_GFXP_VERSION=V6"
 
     set "THIS_SCRIPT=%~0"
     title -= BatchFw %BFW_VERSION% setup =-
@@ -54,6 +54,7 @@ REM : main
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
+    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
@@ -62,6 +63,12 @@ REM : main
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
+
+    REM : replace ref in glogFile
+    set "msg="!BFW_VERSION! installed, version of graphic packs =!BFW_GFXP_VERSION!""
+    call:log2GamesLibraryFile !msg!
+
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     set "ACTIVE_ADAPTER=NONE"
@@ -145,6 +152,10 @@ REM : main
     :setChcp
     REM : set current char codeset
     call:setCharSet
+
+    REM : clean log files specific to a launch
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
+    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\jnust_*.*" > NUL 2>&1
 
     REM : get screen resolution
     pushd !BFW_RESOURCES_PATH!
@@ -339,7 +350,7 @@ REM : main
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attempt! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
                         set /A "attempt+=1"
                         goto:tryToMove
                     )
@@ -347,7 +358,7 @@ REM : main
                     for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -2230,6 +2241,31 @@ REM        call:log2HostFile !msg!
 
         chcp %CHARSET% > NUL 2>&1
         call:log2HostFile "charCodeSet=%CHARSET%"
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        if not exist !glogFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
