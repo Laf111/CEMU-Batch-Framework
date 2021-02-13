@@ -92,7 +92,7 @@
 '000500001010E700';Cabela's Dangerous Hunts 2013;wup-p-acae;-;-;v0;usa;notmd;'000500001010E700';720;60;SYNCSCR
 '000500001010E800';Wipeout 3;wup-p-aw3e;52;-;v0;usa;yes;'000500001010E800';720;60;SYNCSCR
 '000500001010EA00';Orochi 2 hyper;wup-n-ahbj;00c8;-;v64;jpn;yes;'000500001010EA00';720;60;SYNCSCR
-'000500001010EB00';Mario Kart 8;wup-n-amke;1;-;v32;jpn;yes;'000500001010ED00';720;60;SPEED
+'000500001010EB00';Mario Kart 8;wup-n-amkj;1;-;v32;jpn;yes;'000500001010ED00';720;60;SPEED
 '000500001010EC00';Mario Kart 8;wup-n-amke;1;-;v32;usa;yes;'000500001010ED00';720;60;SPEED
 '000500001010ED00';Mario Kart 8;wup-p-amkp;1;-;v32;eur;yes;'000500001010ED00';720;60;SPEED
 '000500001010EE00';FIFA 2013;wup-p-af3p;69;-;v16;eur;yes;'000500001010D900';720;60;SYNCSCR
@@ -124,7 +124,7 @@
 '0005000010110A00';Ninja Gaiden 3 Razor s Edge;wup-n-ange;1;-;v80;usa;yes;'0005000010110B00';720;60;SYNCSCR
 '0005000010110B00';Ninja Gaiden 3 Razor s Edge;wup-p-angp;1;-;v48;eur;yes;'0005000010110B00';720;60;SYNCSCR
 '0005000010110C00';FIFA 2013;wup-n-af3j;-;-;v0;jpn;yes;'000500001010EE00';720;60;SYNCSCR
-'0005000010110E00';Super Smash Bros WiiU;wup-n-axfe;1;-;v80;jpn;yes;'0005000010145000';1080;60;SYNCSCR
+'0005000010110E00';Super Smash Bros WiiU;wup-n-axfj;1;-;v80;jpn;yes;'0005000010145000';1080;60;SYNCSCR
 '0005000010110F00';Darksiders II;wup-p-ad2p;78;-;v1;eur;yes;'000500001010AD00';720;30;SYNCSCR
 '0005000010111000';Ben 10 Omniverse;wup-p-abep;00af;-;v0;eur;yes;'000500001010AC00';720;60;SYNCSCR
 '0005000010111100';Jeopardy;wup-n-ajpe;-;-;v0;usa;yes;'0005000010111100';720;60;SYNCSCR
@@ -233,7 +233,7 @@
 '0005000010128900';Game Wario;wup-p-asap;-;-;v0;eur;yes;'0005000010128900';720;60;SYNCSCR
 '0005000010128A00';Trine 2 Director s Cut;wup-n-wbde;00fz;-;v16;usa;yes;'00050000101B7800';720;30;SYNCSCR
 '0005000010128C00';Tank Tank Tank[dl];wup-p-wakp;-;-;v0;eur;yes;'000500001010FE00';720;60;SYNCSCR
-'0005000010128F00';Sonic Lost World;wup-n-asne;008p;-;v48;usa;yes;'000500001012B100';720;60;SYNCSCR
+'0005000010128F00';Sonic Lost World;wup-n-asne;008p;-;v48;usa;yes;'000500001012B100';720;60;NOEF
 '0005000010129000';DuckTales Remastered;wup-n-wdke;8;-;v32;usa;yes;'0005000010129200';1080;60;SYNCSCR
 '0005000010129200';DuckTales Remastered;wup-p-wdkp;8;-;v32;eur;yes;'0005000010129200';1080;60;SYNCSCR
 '0005000010129400';The Walking Dead Survival Instinct;-;-;-;v0;eur;notmd;'000500001011F300';720;60;SYNCSCR
@@ -252,7 +252,7 @@
 '000500001012A800';Virtual Console SNES;-;-;-;-;jpn;Yes;'000500001012A800';1080;60;SYNCSCR
 '000500001012AC00';Tom Clancy s Splinter Cell Black List;wup-p-as9p;41;-;v48;eur;yes;'000500001012AC00';720;30;SYNCSCR
 '000500001012AD00';Street Fighter II Hyper Fighting;wup-n-jayp;-;-;v0;eur;yes;'000500001012A600';720;60;SYNCSCR
-'000500001012B100';Sonic Lost World;wup-p-asnp;008p;-;v48;eur;yes;'000500001012B100';720;60;SYNCSCR
+'000500001012B100';Sonic Lost World;wup-p-asnp;008p;-;v48;eur;yes;'000500001012B100';720;60;NOEF
 '000500001012B200';Deus Ex Human Revolution Director s Cut;wup-p-adxp;00gd;-;v0;eur;yes;'000500001012B200';720;30;SYNCSCR
 '000500001012B400';Resident Evil Revelations;wup-p-abhp;8;-;v16;eur;yes;'000500001012B400';720;60;SYNCSCR
 '000500001012B500';The Cave;wup-p-wcvp;-;-;v0;eur;yes;'000500001010FA00';720;60;SYNCSCR
@@ -360,7 +360,7 @@
 '0005000010135300';The Wonderful 101;wup-p-acmp;1;-;v16;eur;yes;'0005000010135300';720;60;SYNCSCR
 '0005000010135500';Lego Batman 2 DC Superheroes;wup-p-albp;-;-;v0;eur;yes;'0005000010135500';720;30;SYNCSCR
 '0005000010135600';The Cave;wup-n-wcvj;-;-;v0;jpn;yes;'0005000010135600';720;60;SYNCSCR
-'0005000010135700';Sonic Lost World;wup-n-asnj;008p;-;v48;jpn;yes;'000500001012B100';720;60;SYNCSCR
+'0005000010135700';Sonic Lost World;wup-n-asnj;008p;-;v48;jpn;yes;'000500001012B100';720;60;NOEF
 '0005000010135E00';Lego Batman 2 DC Superheroes;wup-n-albe;00wr;-;v0;usa;yes;'0005000010135500';720;30;SYNCSCR
 '0005000010136000';Romance Of The Three Kingdoms IV Wall Of Fire;wup-n-jbcp;-;-;v0;eur;yes;'0005000010134700';720;60;SYNCSCR
 '0005000010136300';Runner 2 Future Legend Of Rhythm Alien;wup-p-wbtp;00xy;-;v17;eur;yes;'0005000010136300';720;60;SYNCSCR
@@ -812,7 +812,7 @@
 '0005000010175800';My Jurassic Farm;wup-n-wmje;-;-;v0;usa;yes;'0005000010175800';720;60;SYNCSCR
 '0005000010175900';My Arctic Farm;wup-n-wmae;-;-;v0;usa;yes;'0005000010175900';720;60;SYNCSCR
 '0005000010175A00';6180 The Moon;wup-n-wm6e;-;-;-;usa;yes;'0005000010175A00';720;60;SYNCSCR
-'0005000010175B00';Sonic Boom-Rise Of Lyric;wup-n-bsse;008p;-;v0;eur;yes;'0005000010177800';720;60;SYNCSCR
+'0005000010175B00';Sonic Boom-Rise Of Lyric;wup-n-bssp;008p;-;v0;eur;yes;'0005000010177800';720;60;SYNCSCR
 '0005000010175C00';One Piece Unlimited World Red;wup-n-aune;-;-;v0;usa;yes;'0005000010175C00';720;60;SYNCSCR
 '0005000010175D00';One Piece Unlimited World Red;wup-p-aunp;00af;-;v16;eur;yes;'0005000010175C00';720;60;SYNCSCR
 '0005000010175F00';D.m.l.c.--;wup-n-wdmj;-;-;v0;jpn;yes;'0005000010175F00';720;60;SYNCSCR
@@ -997,7 +997,7 @@
 '0005000010188700';3 Black;wup-n-pbrj;-;-;v0;jpn;yes;'0005000010188700';720;60;SYNCSCR
 '0005000010188800';Mega Man Battle Network 3 Blue;wup-n-pbre;-;-;v0;usa;yes;'0005000010188800';720;60;SYNCSCR
 '0005000010188900';Mega Man Battle Network 3 Blue;wup-n-pbrp;-;-;v0;eur;yes;'0005000010188900';720;60;SYNCSCR
-'0005000010188B00';Kirby And The Rainbow Curse;wup-n-axye;1;-;v16;jpn;yes;'00050000101ABC00';720;60;SYNCSCR
+'0005000010188B00';Kirby And The Rainbow Curse;wup-n-axyj;1;-;v16;jpn;yes;'00050000101ABC00';720;60;SYNCSCR
 '0005000010188C00';Disney Infinity 2;wup-p-adrp;004q;-;v32;eur;yes;'000500001016DC00';720;60;SYNCSCR
 '0005000010188D00';Disney Infinity 2;wup-p-adrz;004q;-;v32;eur;yes;'000500001016DC00';720;60;SYNCSCR
 '0005000010188E00';Soul Axiom;wup-p-baxp;-;-;-;eur;yes;'0005000010188E00';720;60;SYNCSCR
@@ -1109,7 +1109,7 @@
 '0005000010195F00';Arrow Time U;wup-n-arue;-;-;v16;usa;yes;'0005000010195F00';720;60;SYNCSCR
 '0005000010196000';Ninja Pizza Girl;wup-n-anpe;-;-;-;usa;yes;'0005000010196000';720;60;SYNCSCR
 '0005000010196900';The Ignition Factor;wup-n-jene;-;-;v0;usa;yes;'0005000010196900';720;60;SYNCSCR
-'0005000010196B00';Flight of Light;-;-;-;-;-;-;'0005000010196B00';1080;60 ;SYNCSCR
+'0005000010196B00';Flight of Light;-;-;-;-;-;-;'0005000010196B00';1080;60;SYNCSCR
 '0005000010197200';Cosmophony;wup-n-bcye;-;-;v16;usa;yes;'0005000010195C00';720;60;SYNCSCR
 '0005000010197300';Electronic Super Joy-Groove City;wup-n-bese;-;-;v16;usa;yes;'0005000010197300';1080;60;SYNCSCR
 '0005000010197800';Costume Quest 2;wup-p-acqp;011s;-;v0;eur;yes;'000500001017DA00';720;60;SYNCSCR
