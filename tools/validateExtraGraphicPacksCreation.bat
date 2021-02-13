@@ -20,6 +20,12 @@ REM : main
     REM : set current char codeset
     call:setCharSetOnly
 
+    REM : TODO remove when updated
+    echo Need to be updated ^^!
+    pause
+    exit /b 200
+
+
     REM : search if launchGame.bat is not already running
     set /A "nbI=0"
     for /F "delims=~=" %%f in ('wmic process get Commandline 2^>NUL ^| find /I "cmd.exe" ^| find /I "launchGame.bat" ^| find /I /V "find" /C') do set /A "nbI=%%f"

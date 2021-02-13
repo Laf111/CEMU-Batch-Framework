@@ -34,6 +34,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -141,7 +142,7 @@ REM : main
             exit /b 14
         )
     ) else (
-        cscript /nologo !MessageBox! "A new version of BatchFw is available."
+        wscript /nologo !Start! !MessageBox! "A new version of BatchFw is available."
         exit /b 0
     )
 

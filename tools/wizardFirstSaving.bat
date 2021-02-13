@@ -173,7 +173,7 @@ REM : main
     set "titleLine="NONE""
     for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
     if [!titleLine!] == ["NONE"] (
-        cscript /nologo !MessageBox! "ERROR : unable to find titleId from meta.xml, please check ! exiting..." 4112
+        !MessageBox! "ERROR : unable to find titleId from meta.xml, please check ! exiting..." 4112
         goto:eof
     )
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
@@ -360,14 +360,6 @@ REM : main
 
     set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
-    REM : GFX version to set
-    set "setup="!BFW_PATH:"=!\setup.bat""
-    set "LastVersion=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION" 2^>NUL') do set "LastVersion=%%i"
-    set "LastVersion=!LastVersion:"=!"
-
-    set "gfxType=!LastVersion!"
-
     REM : suppose that version > 1.14 => > v1.12
     set /A "v114=1"
     set /A "v112=1"
@@ -380,8 +372,6 @@ REM : main
     if ["!v114!"] == [""] echo Error when comparing versions
     if !v114! EQU 50 echo Error when comparing versions
     if !v114! EQU 2 (
-        REM : version < 1.14
-        set "gfxType=V2"
 
         REM : compare with 1.12.0 (add games' list in UI)
         call:compareVersions !versionRead! "1.12.0" v112 > NUL 2>&1
@@ -643,9 +633,9 @@ REM : main
     :waitingLoop
     wmic process get Commandline 2>NUL | find ".exe" | find  /I "_BatchFW_Install" | find /I /V "wmic"  > !wfsLogFileTmp!
 
-    type !wfsLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER! > NUL 2>&1 && goto:waitingLoop
+    type !wfsLogFileTmp! | find /I "rar.exe" | find /I /V "winRar" | find /I !GAMES_FOLDER!  | find /I /V "find" > NUL 2>&1 && goto:waitingLoop
 
-    type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
+    type !wfsLogFileTmp! | find /I "GraphicPacks.bat"  | find /I /V "find" > NUL 2>&1 && (
         if !disp! EQU 0 (
             echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             echo Creating ^/ completing graphic packs^, please wait ^.^.^.
@@ -654,7 +644,7 @@ REM : main
         goto:waitingLoop
     )
     
-    type !wfsLogFileTmp! | find /I "updateGamesGraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && goto:waitingLoop
+    type !wfsLogFileTmp! | find /I "GraphicPacks.bat" | find /I /V "find"  > NUL 2>&1 && goto:waitingLoop
     
     REM : remove trace
     del /F !wfsLogFileTmp! > NUL 2>&1
@@ -917,14 +907,14 @@ REM : functions
         move /Y !folder! !folderTmp! > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Check failed on !folder:"=!^, close any program that could use this location" 4112
+                !MessageBox! "Check failed on !folder:"=!^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMove
             )
 
             call:fillOwnerShipPatch !folder! "!GAME_TITLE!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !folder:"=! with running as an Administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on !folder:"=! with running as an Administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMove
 
             set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
@@ -1471,7 +1461,7 @@ REM : functions
                 echo useRDTSC = false
                 echo.
             )
-            cscript /nologo !MessageBox! "Custom timer declared in CemuHook and CEMU's default one (RDTSC) is not disabled in the game's profile" 4144
+            !MessageBox! "Custom timer declared in CemuHook and CEMU's default one (RDTSC) is not disabled in the game's profile" 4144
         )
 
     goto:eof

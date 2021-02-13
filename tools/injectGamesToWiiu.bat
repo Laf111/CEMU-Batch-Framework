@@ -369,8 +369,9 @@ REM : functions
             set "codeFolder="!sourceFolder:"=!\code""
             set "contentFolder="!sourceFolder:"=!\content""
             set "metaFolder="!sourceFolder:"=!\meta""
-            set "updateFolder="!sourceFolder:"=!\mlc01\usr\title\0005000e\!endTitleIdFolder!""
-            set "dlcFolder="!sourceFolder:"=!\mlc01\usr\title\0005000c\!endTitleIdFolder!""
+
+            REM set "updateFolder="!sourceFolder:"=!\mlc01\usr\title\0005000e\!endTitleIdFolder!""
+            REM set "dlcFolder="!sourceFolder:"=!\mlc01\usr\title\0005000c\!endTitleIdFolder!""
 
             !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/00050000/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
 
@@ -491,26 +492,30 @@ REM : functions
 
         wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
 
-        REM : search if this game has an update
-        set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
-        type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
 
-            if !nbPass! EQU 1 echo - injecting update
-            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000e/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+REM : (update and DLC can't be injected because some of thems use symlink to game's file on the wii-u file system)
+REM : those links disappear with RPX format (dump or uncompress) and cannot be replaced by files (symlink failed to be downloaded by FTP)
 
-            REM : YES : import update in mlc01/usr/title (minimized + no wait)
-            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
-        )
+        REM REM : search if this game has an update
+        REM set "srcRemoteUpdate=!remoteUpdates:SRC=%src%!"
+        REM type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
 
-        REM : search if this game has a DLC
-        set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
-        type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+            REM if !nbPass! EQU 1 echo - injecting update
+            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000e/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
 
-            if !nbPass! EQU 1 echo - injecting DLC
-            !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
-            REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
-            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
-        )
+            REM REM : YES : import update in mlc01/usr/title (minimized + no wait)
+            REM wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
+        REM )
+
+        REM REM : search if this game has a DLC
+        REM set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
+        REM type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
+
+            REM if !nbPass! EQU 1 echo - injecting DLC
+            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+            REM REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
+            REM wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
+        REM )
 
         REM : get saves only the first pass
         if !nbPass! GTR 1 goto:endInject
@@ -562,19 +567,22 @@ REM : functions
         set /A "totalMoNeeded+=!sgContent!"
         set /A "totalGameSize+=!sgContent!"
 
-        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000e""
-        if not exist !folder! goto:dlc
+REM : (update and DLC can't be injected because some of thems use symlink to game's file on the wii-u file system)
+REM : those links disappear with RPX format (dump or uncompress) and cannot be replaced by files (symlink failed to be downloaded by FTP)
 
-        call:getFolderSizeInMb !folder! sgUpdate
-        set /A "totalMoNeeded+=!sgUpdate!"
+        REM set "folder="!gamefolder:"=!\mlc01\usr\title\0005000e""
+        REM if not exist !folder! goto:dlc
 
-        :dlc
-        set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
-        if not exist !folder! goto:eof
+        REM call:getFolderSizeInMb !folder! sgUpdate
+        REM set /A "totalMoNeeded+=!sgUpdate!"
 
-        call:getFolderSizeInMb !folder! sgDlc
-        set /A "totalMoNeeded+=!sgDlc!"
-        set /A "totalGameSize+=!sgDlc!"
+        REM :dlc
+        REM set "folder="!gamefolder:"=!\mlc01\usr\title\0005000c""
+        REM if not exist !folder! goto:eof
+
+        REM call:getFolderSizeInMb !folder! sgDlc
+        REM set /A "totalMoNeeded+=!sgDlc!"
+        REM set /A "totalGameSize+=!sgDlc!"
 
         echo size needed for !title! ^: !totalGameSize! Mb
 

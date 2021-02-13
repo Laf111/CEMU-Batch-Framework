@@ -35,6 +35,8 @@ REM : main
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "multiply="!BFW_TOOLS_PATH:"=!\multiply.bat""
     
@@ -286,7 +288,7 @@ REM : functions
 
         echo COMPRESSING DATE ^: !DATE! >> !compresslogFile!
 
-        !rarExe! a -ep1 -t -r -m5 -w!BFW_LOGS! !archiveFile! "!GAME_TITLE!" >> !compresslogFile!
+        wscript /nologo !StartHiddenWait! !rarExe! a -ep1 -t -r -m5 -w!BFW_LOGS! !archiveFile! "!GAME_TITLE!" >> !compresslogFile!
         set /A "cr=!ERRORLEVEL!"
 
         if !cr! EQU 10 (

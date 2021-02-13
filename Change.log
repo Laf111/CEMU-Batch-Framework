@@ -22,6 +22,19 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+13/02/2021 V21-9 :
+opt : reduce launching time (33%)
+opt : rework the gfx packs handling : considering now the version of CEMU used to define the range of the GFX pack versions
+      to be selected.
+      Older packs are completed when needed.
+add : rework the extra slots handler scripts
+add : fix and enhance the documentation of GFX packs handling in BatchFw
+add : filter on the mods selected using the version of CEMU launched (range of GFX pack versions)
+add : secure all rarExe process calls (in other thread to let the operation complete if a KILL signal is sent)
+fix : force api = 0 in settings. xml when importing for v < 1.16 from v > 1.16 (Vulkan is not suported)
+fix : some issues when launching old version of CEMU with GFX packs V4 and V6 mixed (that is the case in the offcial repository)
+fix : Sonic Lost Word FPS cap effect behavior (NOEF) in Wii-U title database
+
 12/02/2021 V21-8 :
 hotfix : regression (.exe extension ot found when launching setup, create*.bat) due to a missing declaration
 fix : "find error" message when launching Create*.bat with selecting games

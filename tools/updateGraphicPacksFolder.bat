@@ -70,6 +70,7 @@ REM : main
         if [!args[0]!] == ["-warn"] set /A "WARN_MODE=1" & set /A "QUIET_MODE=1"
         if [!args[0]!] == ["-silent"] set /A "QUIET_MODE=1"
         if [!args[0]!] == ["-forced"] set /A "FORCED_MODE=1"
+        if [!args[0]!] == ["-forcedSilent"] set /A "FORCED_MODE=1" & set /A "FORCED_MODE_SLIENT=1"
     )
 
     REM : cd to GAMES_FOLDER
@@ -132,10 +133,10 @@ REM : main
     :msgBox
 
     if !WARN_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "A graphic packs update is available^, use Wii-U Games^\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!"
+        wscript /nologo !Start! !MessageBox! "A graphic packs update is available^, use Wii-U Games^\Update my graphic packs to latest^.lnk to update to !zipFile:.zip=!"
         exit /b 0
     ) else (
-        cscript /nologo !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ?" 4161
+        !MessageBox! "A graphic packs update is available^, do you want to update to !zipFile:.zip=! ?" 4161
         if !ERRORLEVEL! EQU 2 exit /b 2
     )
     :updateGP
@@ -200,15 +201,13 @@ REM : main
 
     type !logFile! | find "COMPLETE_GP=YES" > NUL 2>&1 && (
 
-        if !QUIET_MODE! EQU 0 (
+        if !QUIET_MODE! EQU 0 if !FORCED_MODE_SLIENT! EQU 0 (
             echo.
             echo If you do not plan to play at once^, you can now complete GFX packs
             echo for ALL your games in a row ^? ^(to avoid build on each next run^)
             echo.
             call:getUserInput "Do you want to complete GFX packs for ALL your games ? : (y by default in 30sec)" "y,n" ANSWER 30
-            if [!ANSWER!] == ["n"] (
-                exit /b 0
-            )
+            if [!ANSWER!] == ["n"] goto:flushGLogFile
 
             pushd !BFW_TOOLS_PATH!
 
@@ -218,9 +217,11 @@ REM : main
 
         )
 
-        REM : in all case and specially when the updated is forced, clean last version used for completing GFX packs in glogFile
+        :flushGLogFile
+        REM : in all case and specially when the updated is forced, clean all version used for completing GFX packs in glogFile
+        REM : it will also force to rebuild older packs on the next run (and take eventually new aspect ratios into account)
         if exist !glogFile! (
-            for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "graphic packs version=!zipFile:.zip=!" 2^>NUL') do call:cleanGameLogFile "graphic packs version=!zipFile:.zip=!"
+            for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "graphic packs version=" 2^>NUL') do call:cleanGameLogFile "graphic packs version"
         )
     )
     exit /b 0

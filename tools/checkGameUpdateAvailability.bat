@@ -22,6 +22,7 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
@@ -256,7 +257,7 @@ REM : main
             REM :     new > old popup msg
             if !DIAGNOSTIC_MODE! EQU 0 (
                 echo INFO^: new update available
-                cscript /nologo !MessageBox! "An update is available for !GAME_TITLE! ^! ^(v!newVersion! ^, !uSizeStr! MB^)^, use ^'Wii-U Games^\Update my games^.lnk^'"
+                wscript /nologo !Start! !MessageBox! "An update is available for !GAME_TITLE! ^! ^(v!newVersion! ^, !uSizeStr! MB^)^, use ^'Wii-U Games^\Update my games^.lnk^'"
             )
             rmdir /Q /S !gamesFolder! > NUL 2>&1
             timeout /t 4 > NUL 2>&1
@@ -265,7 +266,7 @@ REM : main
 
     ) else (
         REM : popup message and exit
-        if !DIAGNOSTIC_MODE! EQU 0 cscript /nologo !MessageBox! "An update is available for !GAME_TITLE! ^! ^(v!newVersion!^)^, use ^'Wii-U Games^\Update my games^.lnk^'"
+        if !DIAGNOSTIC_MODE! EQU 0 wscript /nologo !Start! !MessageBox! "An update is available for !GAME_TITLE! ^! ^(v!newVersion!^)^, use ^'Wii-U Games^\Update my games^.lnk^'"
         rmdir /Q /S !gamesFolder! > NUL 2>&1
         timeout /t 4 > NUL 2>&1
         exit /b 1

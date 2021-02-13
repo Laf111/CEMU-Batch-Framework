@@ -170,7 +170,7 @@ echo -------------------------------------------------------
         for /F "tokens=*" %%a in (!csTgt!) do if %%~za NEQ 0 echo done & goto:done
 
         echo done with error ^!
-        cscript /nologo !MessageBox! "ERROR : when patching settings.xml. Restoring settings.xml backup, game stats computation ignored !" 4112
+        !MessageBox! "ERROR : when patching settings.xml. Restoring settings.xml backup, game stats computation ignored !" 4112
         echo see !csTmp! and !csTgtTmp!
         set "backup="!cs:"=!_bfw_old""
         if exist !backup! del /F !cs! > NUL 2>&1 & move /Y !backup! !cs! > NUL 2>&1

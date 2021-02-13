@@ -33,7 +33,7 @@ REM : main
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
 
-    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
@@ -105,14 +105,18 @@ REM : main
 
     if !slotNumber! NEQ 0 set "rarFile="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves\!GAME_TITLE!_!currentUser!_slot!slotNumber!.rar""
 
-    REM : if exist rename-it
-    set "oldFile=!rarFile:.rar=.bfw_old!"
-    if exist !rarFile! move /Y !rarFile! !oldFile! > NUL 2>&1
+    REM : if exists rename-it the time of the compression
+    set "waitFile=!rarFile:.rar=.bfw_wait!"
+    if exist !waitFile! del /F !waitFile! > NUL 2>&1
+
+    if exist !rarFile! move /Y !rarFile! !waitFile! > NUL 2>&1
 
     set usrSaveFolder="!MLC01_FOLDER_PATH:"=!\usr\save"
     for /F "delims=~" %%i in ('dir /b /o:n /a:d !usrSaveFolder! 2^>NUL') do (
         call:compress "%%i" cr
     )
+    REM : compression ok? finished
+    if exist !rarFile! del /F !waitFile! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal
     exit /b 0
@@ -132,7 +136,7 @@ REM : functions
         if not exist !userFolder! goto:eof
 
         if exist !sf! (
-            !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul -w!BFW_LOGS! !rarFile! !sf! > NUL 2>&1
+            wscript /nologo !StartHiddenWait! !rarExe! u -ed -ap"mlc01\usr\save\%~1" -ep1 -r -inul -w!BFW_LOGS! !rarFile! !sf! > NUL 2>&1
             set "%1=!ERRORLEVEL!"
         )
 

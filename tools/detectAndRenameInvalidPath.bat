@@ -164,7 +164,7 @@ REM : main
         :tryToMove
         move /Y !FOLDER_PATH! !newName!
         if %ERRORLEVEL% NEQ 0 (
-            cscript /nologo !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!^, close any program that could use this location and check that you have the ownership on !FOLDER_PATH:"=!^. Do you wish to retry^?" 4116
+            !MessageBox! "Fail to move !GAME_FOLDER_PATH:"=!^, close any program that could use this location and check that you have the ownership on !FOLDER_PATH:"=!^. Do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMove
 
             echo Failed to rename !FOLDER_PATH! to !newName!^, please do it by yourself ^!

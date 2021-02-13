@@ -37,6 +37,7 @@ REM : main
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -304,7 +305,7 @@ REM : main
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attempt! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
                         set /A "attempt+=1"
                         goto:tryToMove
                     )
@@ -312,7 +313,7 @@ REM : main
                     for /F "delims=~" %%g in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxg"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -391,7 +392,7 @@ REM : functions
         echo ^> !GAME_TITLE! ^: restore !currentUser! saves [!currentAccount!]
         REM : extract save (that for CEMU portability used account 80000001)
 
-        !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! > NUL 2>&1
         REM : now get a folder structure
         REM : %CEMU_FOLDER%\bfwTmpExtract\mlc01\usr\save\%startTitleId%\%endTitleId%\user\80000001
         set "gf=mlc01\usr\save\%startTitleId%\%endTitleId%"

@@ -1724,7 +1724,7 @@ REM : functions
         set "ARGS=""!USERDOMAIN!"""
 
         REM : create a shortcut to deleteAllMySettings.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Delete all my CEMU's settings^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\CEMU\Delete all my CEMU^'s settings^.lnk""
         set "LINK_DESCRIPTION="Delete all my CEMU^'s settings saved""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\deleteAllMySettings.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\deleteAllMySettings.ico""
@@ -1817,7 +1817,7 @@ REM : functions
     :createDeletePacksShorcut
 
         REM : add a shortcut for deleting all packs created by BatchFw for thsi game
-        set "shortcutFolder="!OUTPUT_FOLDER:"=!\BatchFw\Tools\Graphic packs\BatchFw^^'s packs""
+        set "shortcutFolder="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Tools\Graphic packs\BatchFw^'s packs""
         if not exist !shortcutFolder! mkdir !shortcutFolder! > NUL 2>&1
 
         set "shortcut="!shortcutFolder:"=!\Force rebuilding !GAME_TITLE! packs.lnk""
@@ -2070,7 +2070,6 @@ REM        echo oLink^.TargetPath = !StartMaximizedWait! >> !TMP_VBS_FILE!
         if !ERRORLEVEL! EQU 0 del /F  !TMP_VBS_FILE!
 
         if !QUIET_MODE! EQU 0 echo - Shortcut for !user:"=! created ^!
-
 
         REM : create a shorcut to delete packs created for this games
         call:createDeletePacksShorcut

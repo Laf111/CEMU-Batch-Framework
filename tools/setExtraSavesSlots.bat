@@ -4,8 +4,7 @@ REM : ------------------------------------------------------------------
 REM : main
 
     setlocal EnableDelayedExpansion
-    REM color 4F
-    color F0
+    color 4F
 
     set "THIS_SCRIPT=%~0"
 
@@ -20,6 +19,11 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
 
@@ -146,8 +150,7 @@ REM : main
     if %nbArgs% NEQ 0 (
         cls
         echo =========================================================
-        echo ID_NUMBER ^: GAME_TITLE
-        echo       ^> USER ^: activeSlot [activeSlotLabel]
+        echo ID_NUMBER ^: GAME_TITLE =^> USER ^: activeSlot [activeSlotLabel]
         echo =========================================================
         echo.
     )
@@ -769,7 +772,7 @@ REM : functions
 
             if not exist !userSave! (
                 REM : overide slotLabel
-                set "slotLabel="No Save found for !currentUser!""
+                set "slotLabel="No Save found""
             )
         )
     goto:eof
@@ -779,11 +782,7 @@ REM : functions
 
 
         echo ---------------------------------------------------------
-        if %nbArgs% EQU 0 (
-            echo '!GAME_TITLE!' actives users slots
-        ) else (
-            echo !nbGames! ^: '!GAME_TITLE!' actives users slots
-        )
+
         REM : ingame saves folder
         set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves""
 
@@ -791,13 +790,14 @@ REM : functions
         set /A "slotNumber=0"
         set "slotLabel="No slots define yet""
         if not exist !igsvf! (
-            echo       No saves found
+            set "msg=no saves found"
             mkdir !igsvf! > NUl 2>&1
         ) else (
 
             REM cd to ingame saves folder
             pushd !igsvf!
             set /A "fromOne=nbUsers-1"
+            set "msg="
             for /L %%u in (0,1,!fromOne!) do (
 
                 REM : default values
@@ -809,11 +809,29 @@ REM : functions
 
                 call:treatUser
 
-                if !slotNumber! NEQ 0 echo       ^> !currentUser! ^: !slotNumber!^, !slotLabel:"=!
-                if !slotNumber! EQU 0 echo       ^> !currentUser!^, !slotLabel:"=!
+                if !slotNumber! NEQ 0 (
+                    if %nbArgs% EQU 0 (
+                        set "msg=!currentUser! [!slotNumber!=!slotLabel:"=!]^, !msg!"
+                    ) else (
+                        set "msg=!currentUser! [!slotNumber!=!slotLabel:"=!]"
+                    )
+                ) else (
+                    if %nbArgs% EQU 0 (
+                        set "msg=!currentUser! [!slotLabel:"=!]^, !msg!"
+                    ) else (
+                        set "msg=!currentUser! [!slotLabel:"=!]"
+                    )
+                )
 
             )
         )
+
+        if %nbArgs% EQU 0 (
+            echo '!GAME_TITLE!' ^: !msg!
+        ) else (
+            echo !nbGames! ^: '!GAME_TITLE!' =^>  !msg!
+        )
+
         REM : store in arrays only if nbArg <> 0
         if %nbArgs% NEQ 0 (
             set "arrayGames[!nbGames!]=!GAME_FOLDER_PATH!"

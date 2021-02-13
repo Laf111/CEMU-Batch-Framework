@@ -1,6 +1,7 @@
 =========================================================
-GRAPHIC_PACKS :
+GRAPHIC_PACKS in BatchFw
 =========================================================
+
 
 
 1°) Common GFX packs folder and update process
@@ -10,7 +11,7 @@ BatchFw has an auto-update process for his graphic packs folder (_BatchFW_Graphi
 updates availability. You can force this detection/update by using the shortcut "Wii-U Games\Update my graphic packs to latest.lnk",
 or force them to be re-donwloaded with "Wii-U Games\BatchFw\Tools\GraphicPacks\Force to update my graphic packs to latest.lnk".
 
-Note that only graphic packs needed for your games are installed when CEMU is launched.
+Note that only graphic packs needed for your games and supported are installed when a CEMU version is launched.
 
 This GFX packs folder is shared with all version of CEMU.
 BatchFw embeded the last official version of outdated packs (V2 and V4).
@@ -19,36 +20,81 @@ If you lanch CEMU < 1.14 : V2 packs are used (v100)
 1.14 <= CEMU < 1.21      : V4 packs are used (v703 if not found a most recent)
 CEMU >= 1.21             : V6 packs are used (if no V6 pack is available and a V4 pack is found, it will be used) 
 
-If during the setup you allow BatchFw to complete the GFX packs, it will complete existing packs (official ones) and creates ones for games with no packs available.
-It will creates all missing presets for your aspect ratio (for every host you use).
+Older gfx packs version are located in _BatchFW_Graphic_Packs\_graphicPacksVi (i=2,4...)
+
+Note that :
+- for V2 packs, version in rules.txt is in [0,2]
+- for V4 packs, version in rules.txt is in [3,5]
+- for V6 packs (latest), version in rules.txt is >=4 (for now V6 packs are not available for all games and V4 packs are mixed 
+  with V6 ones)
+
+  
+
+2°) Completing / Creating GFX packs
+-----------------------------------
+
+If during the setup you allow BatchFw to complete the GFX packs, it will complete existing packs (official ones) and creates ones 
+for games with no packs available.
+
+It will creates all missing presets for all aspects ratios (you registered for every host you use).
 
 During the setup, BatchFw compute your aspect ratio with your current screen resolution.
 So it will work whatever the display configuration you use.
 
-The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the official repository.
+The resolution packs created by BatchFw are automatically replaced by the official ones when they'll be available in the official 
+repository.
 
-Also, BatchFw create FPS CAP packs to control the emulation speed on games that use a dynamic FPS engine such as : Mario Kart 8, DKTF, Wind waker...
-They are created only if no FPS++ and/or a 60FPS is/are found.
+Also, BatchFw create FPS CAP packs to control the emulation speed on games that use a dynamic FPS engine such as : Mario Kart 8, 
+DKTF, Wind waker...
+
+They are created only if no FPS++ is found and take into account 30FPS native game (by doubling the vsync value)
+For other games (identified in the internal title database) with a gameplay not affected by using vsync values, BatchFw will create 
+FPS CAP pack to match the refresh rate of your screen.
+
+Also few games are completly insensitive to FPS cap pack and for this games no FPS packs will be created.
 
 
-2°) Resolution GFX pack created for unsupported game
-----------------------------------------------------
+
+3°) Completing packs process (if you choose so)
+----------------------------
+
+When the main GFX pack folder is updated. All packs found at the root of the folder are deleted.
+(So BatchFw packs created for unsupported games in the last version of GFX packs will be deleted).
+
+When updating, the version is saved with the presence of the file graphicPacksXXX.doNotDelete in the main GFX packs folder
+
+When you launch a game : on the first run after a GFX pack folder update, the resolution needed (V2,V4,V6...) is completed before
+launching the game. When done, the version of the downloaded GFX packs release used is saved in ./logs/gamesLibrary.log for this
+game.
+
+The next update, the version in ./logs/gamesLibrary.log will be lower than the downloaded one and packs will be completed.
+This true for V2, V4 and V6 packs.
+
+Check the image 'updateGamesGraphicPacks.png' in ./doc folder to get the algorithm used.
+
+
+
+4°) Tweaking GFX pack created (if needed)
+-------------------------------------------------------------
 
 The resolution packs are very simple since they are build automatically.
 
 The internal database contains native resolution and FPS of Wii-U games (used to create GFX and FPS packs)
 
-If on a new game graphics packs are not applied or if you have any issue, THE NATIVE RESOLUTION 
+If a created resolution pack is not applied or if you have any issue, THE NATIVE RESOLUTION 
 in BatchFW's internal database MIGHT BE WRONG for this game. 
 
 > Get the actual native resolution using CEMU's feature in the "/ Debug / View texture cache info" menu and 
 update BatchFW's database. 
 
-Also check if the cemu FPS value while in game (not in cutscene) is correct (for speed adjustement (FPS CAP) graphic packs) compared to BatchFW's database value set by default.
-Update BatchFW's database value is needed.
+If FPS CAP seems to not work correctlty : check if the cemu FPS value while in game (not in cutscene) is correct 
+(for speed adjustement (FPS CAP) graphic packs) compared to BatchFW's database value set by default.
+
+Update BatchFW's database value if needed.
 
 
-3°) User graphic packs
+
+5°) User graphic packs
 ----------------------
 
 If you have customized graphic packs, create them under %GAME_FOLDER_PATH%\Cemu\graphicPacks.
@@ -60,3 +106,12 @@ Those links are automatically updated (if drive letter changes), they are delete
 
 This to ensure your games library portability as WINDOWS links does not truly handle relative path for the target 
 (the drive letter might change if you have your games on an external USB drive)
+
+
+
+6°) Games mods
+--------------
+
+Like GFX packs, mods are filtered in function of the version of CEMU you launched.
+Use the shortcut 'Wii-U Games\Import mods for my games.lnk' to import mods for your game.
+They will be copied in the game's folder under Cemu\mods

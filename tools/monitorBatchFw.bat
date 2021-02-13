@@ -27,6 +27,7 @@ REM : main
 
     set "batchFwLog="!BFW_LOGS_PATH:"=!\logs\BatchFwLog.txt""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
+    set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
 
     set "killBatchFw="!BFW_TOOLS_PATH:"=!\killBatchFw.bat""
 
@@ -72,13 +73,13 @@ REM : functions
         type !logFileTmp! | find /I "GraphicPacks.bat" | find /I "create" > NUL 2>&1 && (
 
             REM : warn user with a retry/cancel msgBox
-            cscript /nologo !MessageBox! "GFX packs completion is still running. Wait 60sec more. If you want to kill all processes anyway, use .\BatchFw\Kill BatchFw Processes.lnk"
+            wscript /nologo !Start! !MessageBox! "GFX packs completion is still running. Wait 60sec more. If you want to kill all processes anyway, use .\BatchFw\Kill BatchFw Processes.lnk"
             set /A "duration-=60"
             goto:eof
         )
 
         REM : warn user with a retry/cancel msgBox
-        cscript /nologo !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? Wait a little longer [Yes] or kill it [No] ?" 4100
+        !MessageBox! "Hum... BatchFw is taken too much time. Killing it ? Wait a little longer [Yes] or kill it [No] ?" 4100
         if !ERRORLEVEL! EQU 6 set /A "duration-=30" && goto:eof
         del /F !logFileTmp! > NUL 2>&1
         call !killBatchFw! & exit 1

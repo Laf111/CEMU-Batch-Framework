@@ -764,13 +764,13 @@ REM : functions
 
             cd !folder!
             REM : add the user's folder content, rename folder to 80000001 in the archive file
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
+            wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\80000001" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
 
             cd ..
             REM : common folder
             if exist common (
                 cd common
-                !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
+                wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\user\common" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
                 cd ..
             )
             REM : cd to meta
@@ -780,7 +780,7 @@ REM : functions
             echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"80000001^"^>^<timestamp^>0000000000000000^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
             REM : add the meta folder content
-            !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
+            wscript /nologo !StartHiddenWait! !rarExe! a -ed -ap"mlc01\usr\save\00050000\%endTitleId%\meta" -ep1 -r -inul -w!BFW_LOGS! !rarFile! * > NUL 2>&1
 
             echo !DATE! ^: !GAME_TITLE! WII-U saves imported for !currentUser! >> !gslog!
         )

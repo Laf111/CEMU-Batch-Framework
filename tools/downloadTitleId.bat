@@ -51,14 +51,12 @@ REM : main
 
     if %nbArgs% LSS 3 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^* >> !cgpLogFile!
         echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^*
         echo given {%*}
         exit /b 99
     )
     if %nbArgs% GTR 4 (
         echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^* >> !cgpLogFile!
         echo SYNTAXE ^: "!THIS_SCRIPT!" JNUSTFolder titleId decryptMode titleKey^*
         echo given {%*}
         exit /b 99

@@ -126,11 +126,12 @@ echo tmplRatioValue=!tmplRatioValue!
     type !utf8! > !rulesFile!
     del /F !utf8! > NUL 2>&1
 
-    REM : Linux formating (CRLF -> LF)
-    call:dosToUnix
-
     REM : get gp name
     for /F "delims=~" %%i in (!gp!) do set "gpName=%%~nxi"
+    set "uTdLog="!fnrLogFolder:"=!\dosToUnix_instanciate_!gpName!.log""
+    
+    REM : Linux formating (CRLF -> LF)
+    call:dosToUnix
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
@@ -244,7 +245,6 @@ REM : functions
 
     :dosToUnix
     REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_instanciate.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!

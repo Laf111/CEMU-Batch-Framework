@@ -71,7 +71,7 @@ REM : main
 
     REM : if a network connection was not found, exit 10
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
-        cscript /nologo !MessageBox! "No active connection was found, do you want to restore embeded GFX packs ?" 4116
+        !MessageBox! "No active connection was found, do you want to restore embeded GFX packs ?" 4116
         if !ERRORLEVEL! EQU 6 (
             call:restoreEmbededGfxPacks
             goto:endMain
@@ -112,7 +112,9 @@ REM : main
 
         REM : update graphic packs
         set "ugp="!BFW_PATH:"=!\tools\updateGraphicPacksFolder.bat""
-        call !ugp! -forced
+
+        if !QUIET_MODE! EQU 1 call !ugp! -forcedSilent
+        if !QUIET_MODE! EQU 0 call !ugp! -forced
         set /A "cr=!ERRORLEVEL!"
         echo ---------------------------------------------------------
 
@@ -153,7 +155,7 @@ REM : functions
         wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !BFW_GP_FOLDER! > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 1 (
-            cscript /nologo !MessageBox! "ERROR while extracting GFX_Packs.rar please check what happened" 4112
+            !MessageBox! "ERROR while extracting GFX_Packs.rar please check what happened" 4112
             exit /b 1
         )
 

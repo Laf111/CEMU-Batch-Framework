@@ -22,6 +22,7 @@ REM : main
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
 
@@ -325,7 +326,7 @@ REM : main
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Monving %%i failed^, close any program that could use this location" 4112
+                !MessageBox! "Monving %%i failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMove
             )
@@ -334,7 +335,7 @@ REM : main
             for /F "delims=~" %%i in ("%%i") do set "name=%%~nxi"
             call:fillOwnerShipPatch "%%i" "!name!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on %%i with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on %%i with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMove
         )
     )

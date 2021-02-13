@@ -19,24 +19,26 @@ REM    color 4F
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-
-    set "createV2GraphicPacks="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
-
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-
+    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    set "cgpLogFile="!BFW_PATH:"=!\logs\createGameGraphicPacks.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "cggpLogFile="!BFW_LOGS:"=!\createGameGraphicPacks.log""
 
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
+    set "createLastVersion="!BFW_TOOLS_PATH:"=!\createLastGraphicPacks.bat""
+    set "createV4="!BFW_TOOLS_PATH:"=!\createV4GraphicPacks.bat""
+    set "createV2="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
 
     REM : set current char codeset
     call:setCharSet
+
+    REM : game's name
+    set "gameName="
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -53,6 +55,8 @@ REM    color 4F
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "startingDate=%ldt%"
     REM : starting DATE
+    echo starting date = %startingDate% > !cggpLogFile!
+    echo starting date = %startingDate%
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -62,27 +66,10 @@ REM    color 4F
     REM : check if exist external Graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
-        goto:getTitleId
-    )
-    echo Please select a reference graphicPacks folder
-
-    :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
-    if [!BFW_GP_FOLDER!] == ["NONE"] (
-        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
-        goto:askGpFolder
-    )
-    REM : check if folder name contains forbiden character for batch file
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !BFW_GP_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! GTR 1 (
-        echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
+        echo !BFW_GP_FOLDER! des not exist
         pause
-        goto:askGpFolder
+        exit /b 200
     )
-    :getTitleId
     set "checkLenght="
     set "titleId="
 
@@ -105,7 +92,7 @@ REM    color 4F
     )
     set "titleId=%titleId%"
 
-    REM : get gfxType version to create
+    REM : get gfxPackVersion version to create
     echo.
     echo Which version of pack to you wish to create ^?
     echo.
@@ -115,44 +102,47 @@ REM    color 4F
     echo.
     choice /C 123 /T 15 /D 3 /N /M "Enter your choice ? : "
     set /A "crx2=!ERRORLEVEL!*2"
-    set "gfxType=V!crx2!"
+    set "gfxPackVersion=V!crx2!"
 
     goto:inputsAvailables
 
-    REM : titleID and BFW_GP_FOLDER
+    REM : getArgsValue
     :getArgsValue
-    echo. > !cgpLogFile!
-    if %nbArgs% LSS 3 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^*
+    if %nbArgs% LEQ 3 (
+        echo ERROR ^: on arguments passed ^^! >> !cggpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^* >> !cggpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^*
+        echo where NAME is optional >> !cggpLogFile!
+        echo where NAME is optional
+        echo given {%*} >> !cggpLogFile!
         echo given {%*}
         exit /b 99
     )
-    if %nbArgs% GTR 4 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID NAME^*
+    if %nbArgs% GTR 5 (
+        echo ERROR ^: on arguments passed ^^! >> !cggpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^* >> !cggpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^*
+        echo where NAME is optional >> !cggpLogFile!
+        echo where NAME is optional
+        echo given {%*} >> !cggpLogFile!
         echo given {%*}
         exit /b 99
     )
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
 
-    if not exist !BFW_GP_FOLDER! (
-        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
-        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
-        exit /b 1
-    )
-    REM : get gfxType
-    set "gfxType=!args[1]!"
-    set "gfxType=!gfxType:"=!"
+    REM : gfx pack folder of the game
+    set "GAME_GP_FOLDER=!args[1]!"
+
+    REM : get gfxPackVersion
+    set "gfxPackVersion=!args[2]!"
+    set "gfxPackVersion=!gfxPackVersion:"=!"
 
     REM : get titleId
-    set "titleId=!args[2]!"
+    set "titleId=!args[3]!"
 
-    if %nbArgs% EQU 4 (
-        set "str=!args[3]!"
+    if %nbArgs% EQU 5 (
+        set "str=!args[4]!"
         set "gameName=!str:"=!"
     )
 
@@ -161,21 +151,10 @@ REM    color 4F
 
     :inputsAvailables
 
-    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
-
-    set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
-    set "gfxPacksV4Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV4""
-
     set "titleId=!titleId:"=!"
 
-    REM : fix for incomplete titleId
-    call:strLength !titleId! length
-    if !length! EQU 13 set "titleId=000!titleId!"
-    
-    REM : check if game is recognized
-    call:checkValidity !titleId!
-
-    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    REM : init with gameName
+    set "GAME_TITLE=!gameName!"
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
@@ -183,17 +162,14 @@ REM    color 4F
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
-
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
+        !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
-    echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cgpLogFile!
+    echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cggpLogFile!
     echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
-    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cggpLogFile!
     echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
-
-    goto:getTitleId
 
     :stripLine
     REM : strip line to get data
@@ -211,23 +187,18 @@ REM    color 4F
        set "nativeFps=%%k"
        )
 
-    set "title=%DescRead:"=%"
-    set "GAME_TITLE=%title: =%"
-
-    if %nbArgs% EQU 4 set "GAME_TITLE=!gameName!"
-
     REM get all title Id for this game
-    set "titleIdList=%titleId%"
+    set "titleIdsList=!titleId!"
     call:getAllTitleIds
 
-    echo ========================================================= >> !cgpLogFile!
+    set "title=%DescRead:"=%"
+    if ["!gameName!"] == [""] set "GAME_TITLE=%title: =%"
+
+    echo ========================================================= >> !cggpLogFile!
     echo =========================================================
-    echo Create !gfxType! graphic packs for !GAME_TITLE! >> !cgpLogFile!
-    echo Create !gfxType! graphic packs for !GAME_TITLE!
-    echo ========================================================= >> !cgpLogFile!
-    echo =========================================================
-    echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cgpLogFile!
+    echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cggpLogFile!
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv
+    echo ---------------------------------------------------------
     if !QUIET_MODE! EQU 1 goto:begin
     echo Launching in 15s
     echo     ^(y^) ^: launch now
@@ -238,28 +209,64 @@ REM    color 4F
         echo Cancelled by user ^!
         goto:eof
     )
-    cls
     :begin
-
-    if !nativeHeight! EQU 720 set /A "nativeWidth=1280"
-    if !nativeHeight! EQU 1080 set /A "nativeWidth=1920"
-
+    echo Creating GFX packs^.^.^.  >> !cggpLogFile!
+    echo Creating GFX packs^.^.^.
 
     REM : create resolution graphic packs
-    call:createResGP
+    if not ["!gfxPackVersion!"] == ["V2"] goto:V4packs
 
-    REM : waiting all children processes ending
-    if exist !BFW_GPV2_FOLDER! call:waitChildrenProcessesEnd
+    REM : V2 packs
+    echo !createV2! !BFW_GP_FOLDER! %titleId% !GAME_TITLE! >> !cggpLogFile!
+    REM : for V2 packs, as new folders are created and linked afterward in updateGamesGraphicPacks.bat
+    REM : do not wait if called from updateGamesGraphicPacks
+    echo Create V2 packs in background
+    if !QUIET_MODE! EQU 1 (
+        wscript /nologo !StartHidden! !createV2! !BFW_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE!
+    ) else (
+        :waitingLoop
+        REM : V2GraphicPack match createOneV2GraphicPack.bat, completeV2GraphicPacks.bat, createV2GraphicPacks.bat
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "V2GraphicPack" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            timeout /T 1 > NUL 2>&1
+            goto:waitingLoop
+        )
+    )
+    goto:endMain
 
+    :V4packs
+    if not ["!gfxPackVersion!"] == ["V4"] goto:V6packs
+
+    REM : V4 packs
+    echo !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+
+    REM : Do not wait also here because waiting loops in launchGame and wizardFirstSaving search for GraphicPacks.bat
+    REM : and link in GAME_GP_FOLDER is created in createV4
+    set "cgpv4LogFile="!BFW_LOGS:"=!\createV4GraphicPacks.log""
+    wscript /nologo !StartWait! !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
+    if exist !cgpv4LogFile! type !cgpv4LogFile! >> !cggpLogFile!
+    goto:endMain
+
+    :V6packs
+    REM : V4 packs
+    echo !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+
+    REM : Do not wait also here because waiting loops in launchGame and wizardFirstSaving search for GraphicPacks.bat
+    REM : and link in GAME_GP_FOLDER is created in createLastVersion
+    set "cgpvLogFile="!BFW_LOGS:"=!\createLastGraphicPacks.log""
+    call !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE!
+    if exist !cgpvLogFile! type !cgpvLogFile! >> !cggpLogFile!
+
+    :endMain
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "endingDate=%ldt%"
     REM : starting DATE
 
-    echo starting date = %startingDate% >> !cgpLogFile!
-    echo starting date = %startingDate%
-    echo ending date = %endingDate% >> !cgpLogFile!
+    echo ========================================================= >> !cggpLogFile!
+    echo =========================================================
+
+    echo ending date = %endingDate% >> !cggpLogFile!
     echo ending date = %endingDate%
 
     if %nbArgs% EQU 0 endlocal && pause
@@ -272,453 +279,18 @@ REM    color 4F
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : function to compute string length
-    :strLength
-        Set "s=#%~1"
-        Set "len=0"
-        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
-          if "!s:~%%N,1!" neq "" (
-            set /a "len+=%%N"
-            set "s=!s:~%%N!"
-          )
-        )
-        set /A "%2=%len%"
-    goto:eof
-    
-    :waitChildrenProcessesEnd
-
-        REM : waiting all children processes ending
-        :waitingLoop
-        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "createV2GraphicPacks" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
-            timeout /T 1 > NUL 2>&1
-            goto:waitingLoop
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :dosToUnix
-    REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_create.log""
-
-        REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !newGp! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :initResGraphicPack
-
-        echo [Definition] > !bfwRulesFile!
-        echo titleIds = !titleIdList! >> !bfwRulesFile!
-
-        echo name = Resolution >> !bfwRulesFile!
-        echo path = "!GAME_TITLE!/Graphics/Resolution" >> !bfwRulesFile!
-        if !nativeHeight! EQU 720 (
-            echo description = Created by BatchFw considering that the native resolution is 720p^. Check Debug^/View texture cache info in CEMU ^: 1280x720 must be overrided ^. If it is not^, change the native resolution to 1080p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
-        ) else (
-            echo description = Created by BatchFw considering that the native resolution is 1080p. Check Debug^/View texture cache info in CEMU ^: 1920x1080 must be overrided ^. If it is not^, change the native resolution to 720p in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
-        )
-        set /A "gfxVersion=!gfxType:V=!"
-        echo version = !gfxVersion! >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!
-
-        if !gfxVersion! GEQ 6 (
-            echo. >> !bfwRulesFile!
-            echo [Default] >> !bfwRulesFile!
-            echo $width = !nativeWidth! >> !bfwRulesFile!
-            echo $height = !nativeHeight! >> !bfwRulesFile!
-            echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
-            echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
-            echo. >> !bfwRulesFile!
-        )
-        echo. >> !bfwRulesFile!
-        echo # TV Resolution >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :fillResGraphicPack
-        set "overwriteWidth=%~1"
-        set "overwriteHeight=%~2"
-
-        echo [Preset] >> !bfwRulesFile!
-        echo name = %overwriteWidth%x%overwriteHeight% %~3 >> !bfwRulesFile!
-
-        set /A "gfxVersion=!gfxType:V=!"
-        
-        if !gfxVersion! GEQ 6 (
-            echo category = TV Resolution >> !bfwRulesFile!
-        )
-
-        echo $width = %overwriteWidth% >> !bfwRulesFile!
-        echo $height = %overwriteHeight% >> !bfwRulesFile!
-
-        if !gfxVersion! LEQ 4 (
-            echo $gameWidth = !nativeWidth! >> !bfwRulesFile!
-            echo $gameHeight = !nativeHeight! >> !bfwRulesFile!
-        )
-        echo. >> !bfwRulesFile!
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :finalizeResGraphicPack
-
-
-        REM : res ratios instructions ------------------------------------------------------
-        set /A "resRatio=1"
-
-        REM : loop to create res res/2 res/3 .... res/8
-        :beginLoopRes
-
-        set /A "r=!nativeHeight!%%!resRatio!"
-        if !r! NEQ 0 set /A "resRatio+=1" & goto:beginLoopRes
-
-        REM : compute targetHeight
-        set /A "targetHeight=!nativeHeight!/!resRatio!"
-
-        REM : compute targetWidth
-        set /A "targetWidth=!nativeWidth!/!resRatio!"
-
-        REM 1^/%resRatio% res : %targetWidth%x%targetHeight%
-        call:writeRoundedFilters >> !bfwRulesFile!
-
-        if !targetHeight! LEQ 8 goto:addFilters
-        if !resRatio! GEQ 12 goto:addFilters
-        set /A "resRatio+=1"
-        goto:beginLoopRes
-
-        :addFilters
-
-        REM : add commonly used 16/9 res filters
-        echo # add commonly used 16^/9 res filters >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-
-        if !nativeHeight! EQU 720 (
-            REM : (1080/2 = 540, for 1080 treated when resRatio = 2)
-
-            echo # 960 x 540 Res >> !bfwRulesFile!
-            echo [TextureRedefine] >> !bfwRulesFile!
-            echo width = 960 >> !bfwRulesFile!
-            echo height = 540 >> !bfwRulesFile!
-            echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-            echo formatsExcluded = 0x431 >> !bfwRulesFile!
-            echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
-            echo overwriteHeight = ^($height^/$gameHeight^) ^* 540 >> !bfwRulesFile!
-            echo #  >> !bfwRulesFile!
-
-            echo # 960 x 544 Res >> !bfwRulesFile!
-            echo [TextureRedefine] >> !bfwRulesFile!
-            echo width = 960 >> !bfwRulesFile!
-            echo height = 544 >> !bfwRulesFile!
-            echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-            echo formatsExcluded = 0x431 >> !bfwRulesFile!
-            echo overwriteWidth = ^($width^/$gameWidth^) ^* 960 >> !bfwRulesFile!
-            echo overwriteHeight = ^($height^/$gameHeight^) ^* 544 >> !bfwRulesFile!
-            echo #  >> !bfwRulesFile!
-        )
-
-        echo # 1137 x 640 Res >> !bfwRulesFile!
-        echo [TextureRedefine] >> !bfwRulesFile!
-        echo width = 1137 >> !bfwRulesFile!
-        echo height = 640 >> !bfwRulesFile!
-        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        echo overwriteWidth = ^($width^/$gameWidth^) ^* 1137 >> !bfwRulesFile!
-        echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-
-        echo # 1152 x 640 Res >> !bfwRulesFile!
-        echo [TextureRedefine] >> !bfwRulesFile!
-        echo width = 1152 >> !bfwRulesFile!
-        echo height = 640 >> !bfwRulesFile!
-        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        echo overwriteWidth = ^($width^/$gameWidth^) ^* 1152 >> !bfwRulesFile!
-        echo overwriteHeight = ^($height^/$gameHeight^) ^* 640 >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-
-        echo # 896 x 504 Res >> !bfwRulesFile!
-        echo [TextureRedefine] >> !bfwRulesFile!
-        echo width = 896 >> !bfwRulesFile!
-        echo height = 504 >> !bfwRulesFile!
-        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        echo overwriteWidth = ^($width^/$gameWidth^) ^* 896 >> !bfwRulesFile!
-        echo overwriteHeight = ^($height^/$gameHeight^) ^* 504 >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-
-        echo # 768 x 432 Res >> !bfwRulesFile!
-        echo [TextureRedefine] >> !bfwRulesFile!
-        echo width = 768 >> !bfwRulesFile!
-        echo height = 432 >> !bfwRulesFile!
-        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        echo overwriteWidth = ^($width^/$gameWidth^) ^* 768 >> !bfwRulesFile!
-        echo overwriteHeight = ^($height^/$gameHeight^) ^* 432 >> !bfwRulesFile!
-        echo #  >> !bfwRulesFile!
-
-        echo # 512 x 288 Res >> !bfwRulesFile!
-        echo [TextureRedefine] >> !bfwRulesFile!
-        echo width = 512 >> !bfwRulesFile!
-        echo height = 288 >> !bfwRulesFile!
-        echo tileModesExcluded = 0x001 # For Video Playback >> !bfwRulesFile!
-        echo formatsExcluded = 0x431 >> !bfwRulesFile!
-        echo overwriteWidth = ^($width^/$gameWidth^) ^* 512 >> !bfwRulesFile!
-        echo overwriteHeight = ^($height^/$gameHeight^) ^* 288 >> !bfwRulesFile!
-
-        REM : force UTF8 format
-        set "utf8=!bfwRulesFile:rules.txt=rules.bfw_tmp!"
-        copy /Y !bfwRulesFile! !utf8! > NUL 2>&1
-        type !utf8! > !bfwRulesFile!
-        del /F !utf8! > NUL 2>&1
-
-        REM : Linux formating (CRLF -> LF)
-        call:dosToUnix
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :writeRoundedFilters
-
-        REM : loop on -8,-4,0,4,12 (rounded values)
-        set /A "rh=0"
-        for /L %%i in (-8,4,12) do (
-
-            echo # 1/!resRatio! Res rounded at %%i
-            echo [TextureRedefine]
-            echo width = !targetWidth!
-
-            set /A "rh=!targetHeight!+%%i"
-            echo height = !rh!
-            echo tileModesExcluded = 0x001 # For Video Playback
-            echo formatsExcluded = 0x431
-            echo overwriteWidth = ^($width^/$gameWidth^) ^* !targetWidth!
-            echo overwriteHeight = ^($height^/$gameHeight^) ^* !rh!
-            echo.
-        )
-        echo.
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :setParams
-
-        echo !ratio! | find /I " (361/210)" > NUL 2>&1 && set "desc= (16/10) windowed"
-
-        echo !ratio! | find /I " (401/210)" > NUL 2>&1 && set "desc= (16/9) windowed"
-
-        echo !ratio! | find /I " (377/192)" > NUL 2>&1 && set "desc= (16/9 laptop) windowed"
-
-        echo !ratio! | find /I " (683/384)" > NUL 2>&1 && set "desc= (16/9 laptop)"
-
-        REM : others ratios already have a description up to date
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :addResolution
-
-        set "hc=!hi!"
-        set "wc=!wi!"
-
-        set "desc= (!description:"=!)"
-
-        call:setParams
-
-        echo + !wc!x!hc!!desc! GFX packs >> !cgpLogFile!
-        echo + !wc!x!hc!!desc! GFX packs
-
-        REM : V2 packs
-        if exist !gfxPacksV2Folder! wscript /nologo !StartHidden! !createV2GraphicPacks! !nativeWidth! !nativeHeight! !wc! !hc! "!GAME_TITLE!" "!desc!" "!titleIdList!"
-
-        REM : V3 and up
-        set "descUpdated=!desc!"
-        if !hc! EQU !nativeHeight! if !wc! EQU !nativeWidth! (
-            set "descUpdated=!desc:)=! Default)"
-        )
-        call:fillResGraphicPack !wc! !hc! "!descUpdated!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    :setPresets
-
-        set "ratio= (!wr!/!hr!)"
-
-        REM : define resolution range with height, length=25
-        set "hList=480 540 720 840 900 1080 1200 1320 1440 1560 1680 1800 2040 2160 2400 2640 2880 3240 3600 3960 4320 4440 4920 5400 5880"
-        REM : customize for */10 ratios, length=25
-        if ["!hr!"] == ["10"] set "hList=400 600 800 900 950 1050 1200 1350 1500 1600 1800 1950 2250 2400 2550 2700 3000 3200 3600 3900 4200 4500 4950 5400 5850"
-
-        set /A "nbH=0"
-        for %%i in (%hList%) do set "hArray[!nbH!]=%%i" && set /A "nbH+=1"
-
-        set /A "hMax=%hArray[24]%"
-        set /A "previous=!hMax!"
-
-        REM :   - loop from (24,-1,0)
-        for /L %%i in (24,-1,0) do (
-            set /A "hi=!hArray[%%i]!"
-
-            REM : compute wi
-            set /A "wi=!hi!*!wr!"
-            set /A "wi=!wi!/!hr!"
-
-            set /A "isOdd=!wi!%%2"
-            if !isOdd! EQU 1 set /A "wi+=1"
-
-            call:addResolution
-            set /A "previous=!hi!"
-        )
-
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    :createGfxPacks
-        REM : ratioPassed, ex 16-9
-        set "ratioPassed=%~1"
-        REM : description
-        set "description="%~2""
-
-        echo ---------------------------------------------------------  >> !cgpLogFile!
-        echo ---------------------------------------------------------
-        echo Create !ratioPassed:-=/! resolution packs >> !cgpLogFile!
-        echo Create !ratioPassed:-=/! resolution packs
-        echo ---------------------------------------------------------  >> !cgpLogFile!
-        echo ---------------------------------------------------------
-
-        REM : compute Width and Height using ratioPassed
-        for /F "delims=- tokens=1-2" %%a in ("!ratioPassed!") do set "wr=%%a" & set "hr=%%b"
-
-        REM : GFX packs
-        call:setPresets
-
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :getAllTitleIds
 
         REM now searching using icoId
         for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             set "titleIdRead=%%i"
             set "titleIdRead=!titleIdRead:'=!"
-            echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
-                set "titleIdList=!titleIdList!^,!titleIdRead!"
+            echo !titleIdsList! | find /V "!titleIdRead!" > NUL 2>&1 && (
+                set "titleIdsList=!titleIdsList!^,!titleIdRead!"
             )
         )
+        set "titleIdsList="!titleIdsList!""
 
-    goto:eof
-
-    :createResGP
-
-        REM : SCREEN_MODE
-        set "screenMode=fullscreen"
-        set "aspectRatiosArray="
-        set "aspectRatiosList="
-        set "descArray="
-        set /A "nbAr=0"
-
-        REM : search in all Host_*.log
-        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
-
-        for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
-            set "currentLogFile="%%i""
-
-            REM : get aspect ratio to produce from HOSTNAME.log (asked during setup)
-            for /F "tokens=2-3 delims=~=" %%j in ('type !currentLogFile! ^| find /I "DESIRED_ASPECT_RATIO" 2^>NUL') do (
-
-                echo !aspectRatiosList! | find /I /V "%%j" > NUL 2>&1 && (
-                    set "aspectRatiosArray[!nbAr!]=%%j"
-                    set "descArray[!nbAr!]=%%k"
-                    set /A "nbAr+=1"
-                    set "aspectRatiosList=!aspectRatiosList! %%j"
-                )
-            )
-            REM : get the SCREEN_MODE
-            for /F "tokens=2 delims=~=" %%j in ('type !currentLogFile! ^| find /I "SCREEN_MODE" 2^>NUL') do set "screenMode=%%j"
-        )
-
-
-        if !nbAr! EQU 0 (
-            echo Unable to get desired aspect ratio ^(choosen during setup^) ^? >> !cgpLogFile!
-            echo Unable to get desired aspect ratio ^(choosen during setup^) ^?
-            echo Delete batchFW outputs and relaunch >> !cgpLogFile!
-            echo Delete batchFW outputs and relaunch
-            if !QUIET_MODE! EQU 0 pause
-            exit /b 2
-        ) else (
-            set /A "nbAr-=1"
-        )
-
-        REM : initialize graphic pack
-        set "newGp="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\Graphics""
-        if ["!gfxType!"] == ["V4"] set "newGp="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_Resolution""
-
-        if exist !newGp! (
-            echo ^^! !GAME_TITLE! already exists, skipped ^^! >> !cgpLogFile!
-            echo ^^! !GAME_TITLE! already exists, skipped ^^!
-            goto:eof
-        )
-        if not exist !newGp! mkdir !newGp! > NUL 2>&1
-        set "bfwRulesFile="!newGp:"=!\rules.txt""
-
-        call:initResGraphicPack !nativeHeight! !nativeWidth! !GAME_TITLE!
-
-        for /L %%a in (0,1,!nbAr!) do (
-
-            call:createGfxPacks "!aspectRatiosArray[%%a]!" "!descArray[%%a]!"
-
-            if not ["!screenMode!"] == ["fullscreen"] (
-                REM : add windowed ratio for 16-10
-                if ["!aspectRatiosArray[%%a]!"] == ["16-10"] call:createGfxPacks "361-210" "16/10 windowed"
-                REM : add windowed ratio for 16-9
-                if ["!aspectRatiosArray[%%a]!"] == ["16-9"] call:createGfxPacks "401-210" "16/9 windowed"
-                REM : add windowed ratio for 683-384
-                if ["!aspectRatiosArray[%%a]!"] == ["683-384"] call:createGfxPacks "377-192" "16/9 laptop windowed"
-            )
-
-        )
-
-        call:finalizeResGraphicPack
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : function to check unrecognized game
-    :checkValidity
-        set "id=%~1"
-
-        REM : check if titleId correspond to a game wihtout meta\meta.xml file
-        set "begin=%id:~0,8%"
-        call:check8hexValue %begin%
-        set "end=%id:~8,8%"
-        call:check8hexValue %end%
-
-    goto:eof
-
-    :check8hexValue
-        set "halfId=%~1"
-
-        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
-        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
-
-        echo Ooops it look like your game have a problem ^:
-        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        echo   will help you to create one^.
-        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        echo   you might have made a mistake when applying a DLC over game^'s files
-        echo   to fix^, overwrite game^'s file with its last update or if no update
-        echo   are available^, re-dump the game ^!
-        exit /b 2
     goto:eof
     REM : ------------------------------------------------------------------
 

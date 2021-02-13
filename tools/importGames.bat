@@ -272,7 +272,7 @@ REM : main
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attempt! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=!^, close any program that could use this location" 4112
                         set /A "attempt+=1"
                         goto:tryToMove
                     )
@@ -280,7 +280,7 @@ REM : main
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:tryToMove
                 )
             )
@@ -558,7 +558,7 @@ REM : functions
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attemptSrc! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !source:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !source:"=!^, close any program that could use this location" 4112
                         set /A "attemptSrc+=1"
                         goto:treatGame
                     )
@@ -567,17 +567,17 @@ REM : functions
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
+                    !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
                     goto:eof
                 )
             )
             call:moveFolder !source! !target! cr
             if !cr! NEQ 0 (
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving game to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptTgt+=1"
                     goto:treatGame
                 )
@@ -586,10 +586,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
+                !MessageBox! "ERROR While moving !GAME_TITLE!^'s files ^!" 4112
                 goto:eof
             )
         ) else (
@@ -599,7 +599,7 @@ REM : functions
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying game to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying game to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptSrc+=1"
                     goto:treatGame
                 )
@@ -608,10 +608,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatGame
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s files ^!" 4112
+                !MessageBox! "ERROR While copying !GAME_TITLE!^'s files ^!" 4112
                 goto:eof
             )
         )
@@ -684,7 +684,7 @@ REM : functions
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attemptSrc! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !source:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !source:"=!^, close any program that could use this location" 4112
                         set /A "attemptSrc+=1"
                         goto:treatUpdate
                     )
@@ -693,10 +693,10 @@ REM : functions
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
+                    !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
                     goto:eof
                 )
             )
@@ -704,7 +704,7 @@ REM : functions
             if !cr! NEQ 0 (
 
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving update to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptTgt+=1"
                     goto:treatUpdate
                 )
@@ -713,10 +713,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
+                !MessageBox! "ERROR While moving !GAME_TITLE!^'s update files ^!" 4112
                 goto:eof
             )
         ) else (
@@ -725,7 +725,7 @@ REM : functions
             if !cr! GTR 7 (
 
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptTgt+=1"
                     goto:treatUpdate
                 )
@@ -734,10 +734,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatUpdate
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files ^!" 4112
+                !MessageBox! "ERROR While copying !GAME_TITLE!^'s update files ^!" 4112
                 goto:eof
             )
         )
@@ -786,7 +786,7 @@ REM : functions
                 if !ERRORLEVEL! NEQ 0 (
 
                     if !attemptSrc! EQU 1 (
-                        cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !source:"=!^, close any program that could use this location" 4112
+                        !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !source:"=!^, close any program that could use this location" 4112
                         set /A "attemptSrc+=1"
                         goto:treatDlc
                     )
@@ -795,10 +795,10 @@ REM : functions
                     for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                     call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                    cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                    !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                     if !ERRORLEVEL! EQU 6 goto:treatDlc
 
-                    cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files ^!" 4112
+                    !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files ^!" 4112
                     goto:eof
                 )
             )
@@ -806,7 +806,7 @@ REM : functions
             if !cr! NEQ 0 (
 
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for moving Dlc to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptTgt+=1"
                     goto:treatDlc
                 )
@@ -815,10 +815,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatDlc
 
-                cscript /nologo !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
+                !MessageBox! "ERROR While moving !GAME_TITLE!^'s DLC files !" 4112
                 goto:eof
             )
             move /Y !target! !target:%endTitleId%_=! > NUL 2>&1
@@ -828,7 +828,7 @@ REM : functions
             set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 if !attemptTgt! EQU 1 (
-                    cscript /nologo !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying Dlc to !target:"=!^, close any program that could use this location" 4112
+                    !MessageBox! "Check failed on !GAME_FOLDER_PATH:"=! for copying Dlc to !target:"=!^, close any program that could use this location" 4112
                     set /A "attemptTgt+=1"
                     goto:treatDlc
                 )
@@ -837,10 +837,10 @@ REM : functions
                 for /F "delims=~" %%i in (!GAME_FOLDER_PATH!) do set "GAME_TITLE=%%~nxi"
                 call:fillOwnerShipPatch !GAME_FOLDER_PATH! "!GAME_TITLE!" patch
 
-                cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+                !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
                 if !ERRORLEVEL! EQU 6 goto:treatDlc
 
-                cscript /nologo !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files ^!" 4112
+                !MessageBox! "ERROR While copying !GAME_TITLE!^'s DLC files ^!" 4112
                 goto:eof
             )
         )

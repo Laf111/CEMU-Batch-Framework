@@ -20,21 +20,23 @@ REM    color 4F
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    set "cgpLogFile="!BFW_PATH:"=!\logs\createCapGraphicPacks.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "ccgpLogFile="!BFW_LOGS:"=!\createCapGraphicPacks.log""
 
 
     REM : set current char codeset
     call:setCharSet
 
     REM : game's name
-    set "gameName=NONE"
+    set "gameName="
 
     REM : checking arguments
     set /A "nbArgs=0"
@@ -49,7 +51,10 @@ REM    color 4F
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
+    set "startingDate=%ldt%"
+    REM : starting DATE
+    echo starting date = %startingDate% > !ccgpLogFile!
+    echo starting date = %startingDate%
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -59,28 +64,11 @@ REM    color 4F
     REM : check if exist external Graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if exist !BFW_GP_FOLDER! (
-        goto:getTitleId
-    )
-
-    echo Please select a reference graphics packs folder
-    :askGpFolder
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a graphic packs folder"') do set "folder=%%b" && set "BFW_GP_FOLDER=!folder:?= !"
-    if [!BFW_GP_FOLDER!] == ["NONE"] (
-        choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
-        if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit 75
-        goto:askGpFolder
-    )
-    REM : check if folder name contains forbiden character for batch file
-    set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !BFW_GP_FOLDER!
-    set /A "cr=!ERRORLEVEL!"
-    if !cr! GTR 1 (
-        echo Path to !BFW_GP_FOLDER! is not DOS compatible^!^, please choose another location
+        echo !BFW_GP_FOLDER! des not exist
         pause
-        goto:askGpFolder
+        exit /b 200
     )
-
-    :getTitleId
+    
     set "checkLenght="
     set "titleId="
 
@@ -102,9 +90,9 @@ REM    color 4F
         goto:getTitleId
     )
 
-    REM : get gfxType version to create
+    REM : get gfxPackVersion version to create
     echo.
-    echo Which version of pack to you wish to create ^?
+    echo Which version of pack to you wish to create ^^?
     echo.
     echo     - 1 ^: CEMU ^< 1^.14
     echo     - 2 ^: 1^.14 ^< CEMU ^< 1^.21
@@ -112,47 +100,48 @@ REM    color 4F
     echo.
     choice /C 123 /T 15 /D 3 /N /M "Enter your choice ? : "
     set /A "crx2=!ERRORLEVEL!*2"
-    set "gfxType=V!crx2!"
+    set "gfxPackVersion=V!crx2!"
 
     goto:inputsAvailables
 
-    REM : titleID and BFW_GP_FOLDER
+    REM : getArgsValue
     :getArgsValue
-    echo. > !cgpLogFile!
-    if %nbArgs% GTR 4 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^*
+    if %nbArgs% LEQ 3 (
+        echo ERROR ^: on arguments passed ^^! >> !ccgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^* >> !ccgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^*
+        echo where NAME is optional >> !ccgpLogFile!
+        echo where NAME is optional
+        echo given {%*} >> !ccgpLogFile!
         echo given {%*}
         exit /b 99
     )
-    if %nbArgs% LSS 3 (
-        echo ERROR ^: on arguments passed ^!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^* >> !cgpLogFile!
-        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER gfxType TITLE_ID GP_NAME^*
+    if %nbArgs% GTR 5 (
+        echo ERROR ^: on arguments passed ^^! >> !ccgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^* >> !ccgpLogFile!
+        echo SYNTAXE ^: "!THIS_SCRIPT!" BFW_GP_FOLDER GAME_GP_FOLDER gfxPackVersion TITLE_ID NAME^*
+        echo where NAME is optional >> !ccgpLogFile!
+        echo where NAME is optional
+        echo given {%*} >> !ccgpLogFile!
         echo given {%*}
         exit /b 99
     )
-
     REM : get and check BFW_GP_FOLDER
     set "BFW_GP_FOLDER=!args[0]!"
 
-    if not exist !BFW_GP_FOLDER! (
-        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^! >> !cgpLogFile!
-        echo ERROR ^: !BFW_GP_FOLDER! does not exist ^!
-        exit /b 1
-    )
-    REM : get gfxType
-    set "gfxType=!args[1]!"
-    set "gfxType=!gfxType:"=!"
+    REM : gfx pack folder of the game
+    set "GAME_GP_FOLDER=!args[1]!"
+
+    REM : get gfxPackVersion
+    set "gfxPackVersion=!args[2]!"
+    set "gfxPackVersion=!gfxPackVersion:"=!"
 
     REM : get titleId
-    set "titleId=!args[2]!"
-    set "titleId=%titleId: =%"
+    set "titleId=!args[3]!"
 
-    if %nbArgs% EQU 4 (
-        set "gameName=!args[3]!"
-        set "gameName=!gameName:"=!"
+    if %nbArgs% EQU 5 (
+        set "str=!args[4]!"
+        set "gameName=!str:"=!"
     )
 
     REM : with arguments to this script, deactivating user inputs
@@ -160,37 +149,25 @@ REM    color 4F
 
     :inputsAvailables
 
-    set "BFW_GP_FOLDER=!BFW_GP_FOLDER:\\=\!"
-    set "titleId=%titleId: =%"
+     set "titleId=!titleId:"=!"
 
-    set titleId=%titleId:"=%
+    REM : init with gameName
+    set "GAME_TITLE=!gameName!"
 
-    REM : fix for incomplete titleId
-    call:strLength !titleId! length
-    if !length! EQU 13 set "titleId=000!titleId!"
-
-    set "ftid=%titleId:~0,16%"
-
-    REM : check if game is recognized
-    call:checkValidity %ftid%
-
-    set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%ftid%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'!titleId!';"') do set "libFileLine="%%i""
 
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        cscript /nologo !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
-        exit /b 3
+        !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
+        exit /b 65
     )
-    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^? >> !cgpLogFile!
-    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %ftid% ^?
-    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cgpLogFile!
+    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^^? >> !ccgpLogFile!
+    echo createCapGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^^?
+    echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !ccgpLogFile!
     echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
-
-    goto:getTitleId
 
     :stripLine
     REM : strip line to get data
@@ -207,24 +184,27 @@ REM    color 4F
        set "nativeHeight=%%j"
        set "nativeFps=%%k"
        set "typeCapFps=%%l"
-       )
+    )
 
-    set "title=%DescRead:"=%"
-    set "GAME_TITLE=%title: =%"
-
-    REM get all title Id for this game (in case of a new res gp creation)
-    set "titleIdList=%titleId%"
+    REM get all title Id for this game
+    set "titleIdsList=!titleId!"
     call:getAllTitleIds
 
+    set "title=%DescRead:"=%"
+    REM : if FPS CAP does not work on this game, skipping
+    if ["!typeCapFps!"] == ["NOEF"] (
+        echo !title! is not sensible to FPS GFX pack ^(NOEF in !wiiTitlesDataBase!^)^, skipping^.^.^. >> !ccgpLogFile!
+        echo !title! is not sensible to FPS GFX pack ^(NOEF in !wiiTitlesDataBase!^)^, skipping^.^.^.
+        exit /b 0
+    )
 
-    REM : create FPS CAP graphic packs
-    if not ["!gameName!"] == ["NONE"] set "GAME_TITLE=!gameName!"
+    if ["!gameName!"] == [""] set "GAME_TITLE=%title: =%"
 
-    echo ========================================================= >> !cgpLogFile!
+    echo ========================================================= >> !ccgpLogFile!
     echo =========================================================
-    echo Create !gfxType! FPS cap graphic packs for !GAME_TITLE! >> !cgpLogFile!
-    echo Create !gfxType! FPS cap graphic packs for !GAME_TITLE!
-    echo ========================================================= >> !cgpLogFile!
+    echo Create !gfxPackVersion! FPS cap graphic packs for !GAME_TITLE! >> !ccgpLogFile!
+    echo Create !gfxPackVersion! FPS cap graphic packs for !GAME_TITLE!
+    echo ========================================================= >> !ccgpLogFile!
     echo =========================================================
     if !QUIET_MODE! EQU 1 goto:begin
 
@@ -239,6 +219,9 @@ REM    color 4F
     )
 
     :begin
+    echo Creating FPS GFX packs^.^.^.  >> !ccgpLogFile!
+    echo Creating FPS GFX packs^.^.^.
+
     REM : FPS++ found flag
     set /A "fpsPpOld=0"
     set /A "fpsPP=0"
@@ -248,17 +231,29 @@ REM    color 4F
     set /A "g30=0"
 
     REM : initialize graphic pack
-    set "gpLastVersion="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\SetFps""
-    if ["!gfxType!"] == ["V4"] set "gpLastVersion="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_SetFps""
+    set "gfxp="!BFW_GP_FOLDER:"=!\!GAME_TITLE!\SetFps""
 
-    set "bfwRulesFile="!gpLastVersion:"=!\rules.txt""
-    if exist !bfwRulesFile! (
-        echo !bfwRulesFile! already exist^, cancelling >> !cgpLogFile!
-        echo !bfwRulesFile! already exist^, cancelling
-        exit /b 1
+    REM : others BatchFW GFX packs folders for earlier version
+    set "gfxPacksV2Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
+    if ["!gfxPackVersion!"] == ["V2"] (
+        if not exist !gfxPacksV2Folder!  mkdir !gfxPacksV2Folder! > NUL 2>&1
+        REM : no check on gfxp
+        goto:process
+    )
+    set "gfxPacksV4Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV4""
+    if ["!gfxPackVersion!"] == ["V4"] (
+        if not exist !gfxPacksV4Folder!  mkdir !gfxPacksV4Folder! > NUL 2>&1
+        set "gfxp="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_SetFps""
     )
 
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
+    set "gfxpPath="!gfxp:"=!\rules.txt""
+    if exist !gfxpPath! (
+        echo !gfxpPath! already exist^, skipping^.^.^.
+        goto:linkPack
+    )
+
+    :process
+    set "fnrLogFolder="!BFW_LOGS:"=!\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
 
     set "LastVersionExistFlag=1"
@@ -266,7 +261,7 @@ REM    color 4F
     echo Native FPS in WiiU-Titles-Library^.csv = %nativeFps%
     echo.
 
-    set "fnrLogLggp="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacks.log""
+    set "fnrLogLggp="!BFW_LOGS:"=!\fnr_createCapGraphicPacks.log""
     if exist !fnrLogLggp! del /F !fnrLogLggp! > NUL 2>&1
 
     REM : Search FPS++ patch
@@ -281,7 +276,7 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
     REM : if no 60FPS pack is found
     if !fps60! EQU 0 goto:searchForFpsPp
 
-    echo 60FPS was found >> !cgpLogFile!
+    echo 60FPS was found >> !ccgpLogFile!
     echo 60FPS pack was found
 
     REM : that means that the nativeFPS of the game should be 30
@@ -294,15 +289,13 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
     :searchForFpsPp
     if !g30! EQU 1 (
         REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
-        if !fpsPP! EQU 1 echo FPS^+^+ was found >> !cgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
-        if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !cgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
-        echo no FPS^+^+ GFX pack found >> !cgpLogFile!
+        if !fpsPP! EQU 1 echo FPS^+^+ was found >> !ccgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
+        if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !ccgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
+        echo no FPS^+^+ GFX pack found >> !ccgpLogFile!
         echo no FPS^+^+ GFX pack found
 
         REM : search V2 FPS++ graphic pack or patch for this game
-        set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
-
-        set "pat="!bfwgpv2:"=!\!GAME_TITLE!*FPS++*""
+        set "pat="!gfxPacksV2Folder:"=!\!GAME_TITLE!*FPS++*""
         for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do set /A "fpsPpOld=1"
     )
     :computeFactor
@@ -314,7 +307,7 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
     if !g30! EQU 1 (
 
         REM : graphic pack created by BatchFw : gameName=NONE no FPS++
-        if [!gameName!] == ["NONE"] goto:create
+        if [!gameName!] == [""] goto:create
 
         REM : else = 30 FPS native games without FPS++ : double vsyncValue to cap at target FPS
 
@@ -324,60 +317,95 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
     )
 
     :create
-
     REM : computing fps references
     REM : for games running at 30FPS without FPS++ => 2x!nativeFps! else !nativeFps!
     set /A "newNativeFpsOldGp=!nativeFps!*!factorOldGp!"
     set /A "newNativeFps=!nativeFps!*!factor!"
 
 
-echo nativeFps=!nativeFps! >> !cgpLogFile!
+echo nativeFps=!nativeFps! >> !ccgpLogFile!
 echo nativeFps=!nativeFps!
-echo newNativeFps=!newNativeFps! >> !cgpLogFile!
+echo newNativeFps=!newNativeFps! >> !ccgpLogFile!
 echo newNativeFps=!newNativeFps!
-echo newNativeFpsOldGp=!newNativeFpsOldGp! >> !cgpLogFile!
+echo newNativeFpsOldGp=!newNativeFpsOldGp! >> !ccgpLogFile!
 echo newNativeFpsOldGp=!newNativeFpsOldGp!
 
-    if not exist !gpLastVersion! if !fpsPP! EQU 0 (
-        set "LastVersionExistFlag=0"
-        mkdir !gpLastVersion! > NUL 2>&1
-        call:initLastVersionCapGP
+    if not ["!gfxPackVersion!"] == ["V2"] (
+        if not exist !gfxp! if !fpsPP! EQU 0 (
+            set "LastVersionExistFlag=0"
+            mkdir !gfxp! > NUL 2>&1
+            call:initLastVersionCapGP
+        )
     )
-
     REM : create FPS cap graphic packs
     call:createCapGP
 
-    REM : finalize graphic packs if a FPS++ pack was not found
-    if !fpsPP! EQU 1 rmdir /Q /S !gpLastVersion! > NUL 2>&1 && set "LastVersionExistFlag=1"
-    if %LastVersionExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeLastVersionCapGP
+    if not ["!gfxPackVersion!"] == ["V2"] (
+        REM : finalize graphic packs if a FPS++ pack was not found
+        if !fpsPP! EQU 1 rmdir /Q /S !gfxp! > NUL 2>&1 && set "LastVersionExistFlag=1"
+        if %LastVersionExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeLastVersionCapGP
+    )
 
-    REM : create a shorcut to delete packs created for this games (as FPS CAP is called everytime
-    REM : it makes sense to do it here
-    call:createDeletePacksShorcut
-
+    :linkPack
+    REM : if not V2 (packs linked at the end of updateGameGraphicPacks.bat)
+    if not ["!gfxPackVersion!"] == ["V2"] (
+        REM : create link to res pack in GAME_GP_FOLDER (not found in searchFor*Packs)
+        set "relativePath=!gfxpPath:*_BatchFw_Graphic_Packs\=!"
+        call:createGfxpLink !relativePath!
+    )
     if %nbArgs% EQU 0 endlocal && pause
 
-    exit /b 0
-goto:eof
-
+    goto:eof
 
 REM : ------------------------------------------------------------------
 
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : function to compute string length
-    :strLength
-        Set "s=#%~1"
-        Set "len=0"
-        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
-          if "!s:~%%N,1!" neq "" (
-            set /a "len+=%%N"
-            set "s=!s:~%%N!"
-          )
-        )
-        set /A "%2=%len%"
+
+    :getMainGfxpFolder
+
+        set "folder=!targetPath!"
+        set "lastFolder=!folder!"
+
+        :rewindPath
+        for /F "delims=~" %%i in (!folder!) do set "folderName=%%~nxi"
+
+        echo !folderName! | find "_graphicPacksV" > NUL 2>&1 && goto:endFct
+        echo !folderName! | find "_BatchFw_Graphic_Packs" > NUL 2>&1 && goto:endFct
+
+        set "lastFolder=!folder!"
+        for %%a in (!folder!) do set "parentFolder="%%~dpa""
+        set "folder=!parentFolder:~0,-2!""
+        goto:rewindPath
+
+        :endFct
+        set "targetPath=!lastFolder!"
+
+        for /F "delims=~" %%i in (!lastFolder!) do set "folderName=%%~nxi"
+        set "linkPath="!GAME_GP_FOLDER:"=!\!folderName:"=!""
+        goto:eof
+    REM : ------------------------------------------------------------------
+
+    :createGfxpLink
+        set "rules="%~1""
+
+        set "gp=!rules:\rules.txt=!"
+        set "relativePath=!gp:*_BatchFw_Graphic_Packs\=!"
+
+        set "linkPath="!GAME_GP_FOLDER:"=!\!relativePath:"=!""
+        set "linkPath=!linkPath:\_graphicPacksV4=!"
+
+        REM : link already exist, exit
+        if exist !linkPath! goto:eof
+
+        set "targetPath="!BFW_GP_FOLDER:"=!\!relativePath:"=!""
+        call:getMainGfxpFolder
+
+        mklink /J /D !linkPath! !targetPath!
+
     goto:eof
+    REM : ------------------------------------------------------------------
 
     :patchInternalDataBase
 
@@ -385,7 +413,7 @@ REM : functions
         set "capLogFileTmp="!TMP:"=!\BatchFw_createCapGfx_process.list""
 
         REM : wait the create*.bat end before continue
-        echo Waiting create^/complete GFX processes end >> !cgpLogFile!
+        echo Waiting create^/complete GFX processes end >> !ccgpLogFile!
         echo Waiting create^/complete GFX processes end
 
         :waitLoop
@@ -399,7 +427,7 @@ REM : functions
         set "capLinesTmp="!TMP:"=!\BatchFw_createCapGfx_newLines.list""
         type !wiiTitlesDataBase! | find /I "%icoId%" > !capLinesTmp!
 
-        set "fnrPacthDb="!BFW_PATH:"=!\logs\fnr_patchWiiUtitlesDataBase.log""
+        set "fnrPacthDb="!BFW_LOGS:"=!\fnr_patchWiiUtitlesDataBase.log""
         if exist !fnrPacthDb! del /F !fnrPacthDb! > NUL 2>&1
 
         REM : Replace 60 by 30 in capLinesTmp
@@ -425,88 +453,17 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-
-    :createDeletePacksShorcut
-
-        REM : main shortcut folder
-        set "WIIU_GAMES_FOLDER="NONE""
-
-        REM : get the last location from logFile
-        for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create shortcuts" 2^>NUL') do set "WIIU_GAMES_FOLDER="%%i""
-        if [!WIIU_GAMES_FOLDER!] == ["NONE"] goto:eof
-
-        REM : add a shortcut for deleting all packs created by BatchFw for thsi game
-        set "shortcutFolder="!WIIU_GAMES_FOLDER:"=!\BatchFw\Tools\Graphic packs\BatchFw^'s packs""
-        if not exist !shortcutFolder! mkdir !shortcutFolder! > NUL 2>&1
-
-        set "shortcut="!shortcutFolder:"=!\Force rebuilding !GAME_TITLE! packs.lnk""
-        if exist !shortcut! goto:eof
-
-        REM : get GAME_FOLDER_PATH
-        set "fnrSearch="!BFW_PATH:"=!\logs\fnr_createCapGraphicPacksShortcut.log""
-
-        REM : check if the game exist in !TARGET_GAMES_FOLDER! (not dependant of the game folder's name)
-        if exist !fnrSearch! del /F !fnrSearch!
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask "meta.xml" --ExcludeDir "content, code, mlc01, Cemu" --includeSubDirectories --find !titleId!  --logFile !fnrSearch!
-
-        REM : main shortcut folder
-        set "GAME_FOLDER_PATH="NONE""
-        for /F "tokens=2-3 delims=." %%j in ('type !fnrSearch! ^| find /I /V "^!" ^| find "File:"') do (
-            set "metaFile="!GAMES_FOLDER:"=!%%j.%%k""
-            set "GAME_FOLDER_PATH=!metaFile:\meta\meta.xml=!"
-        )
-        if [!GAME_FOLDER_PATH!] == ["NONE"] goto:eof
-
-        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\delete.ico""
-
-        pushd !GAMES_FOLDER!
-        for /F "delims=~" %%i in ('dir /A:D /S /B Cemu 2^>NUL') do (
-            set "ico="%%i\!titleId!.ico""
-            if exist !ico! (
-                set "ICO_PATH=!ico!"
-                set "ICO_PATH=!ICO_PATH:_BatchFw_Install\logs\=!"
-            )
-        )
-
-        REM : temporary vbs file for creating a windows shortcut
-        set "TMP_VBS_FILE="!TEMP!\delete_!GAME_TITLE!_GfxPacks_!DATE!.vbs""
-
-        set "ARGS=!titleId!"
-
-        set "LINK_DESCRIPTION="Delete !GAME_TITLE!'s packs created by BatchFw""
-
-        REM : create object
-        echo Set oWS = WScript^.CreateObject^("WScript.Shell"^) > !TMP_VBS_FILE!
-        echo sLinkFile = !shortcut! >> !TMP_VBS_FILE!
-        echo Set oLink = oWS^.createShortCut^(sLinkFile^) >> !TMP_VBS_FILE!
-
-        set "TARGET_PATH="!BFW_TOOLS_PATH:"=!\deleteBatchFwGraphicPacks.bat""
-
-        echo oLink^.TargetPath = !TARGET_PATH! >> !TMP_VBS_FILE!
-        echo oLink^.Description = !LINK_DESCRIPTION! >> !TMP_VBS_FILE!
-        echo oLink^.IconLocation = !ICO_PATH! >> !TMP_VBS_FILE!
-        echo oLink^.Arguments = "!ARGS!" >> !TMP_VBS_FILE!
-        echo oLink^.WorkingDirectory = !BFW_TOOLS_PATH! >> !TMP_VBS_FILE!
-
-        echo oLink^.Save >> !TMP_VBS_FILE!
-
-        REM : running VBS file
-        cscript /nologo !TMP_VBS_FILE!
-
-        del /F  !TMP_VBS_FILE! > NUL 2>&1
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :getAllTitleIds
 
         REM now searching using icoId
         for /F "delims=~; tokens=1" %%i in ('type !wiiTitlesDataBase! ^| find /I ";%icoId%;"') do (
             set "titleIdRead=%%i"
             set "titleIdRead=!titleIdRead:'=!"
-            echo !titleIdList! | find /V "!titleIdRead!" > NUL 2>&1 && (
-                set "titleIdList=!titleIdList!^,!titleIdRead!"
+            echo !titleIdsList! | find /V "!titleIdRead!" > NUL 2>&1 && (
+                set "titleIdsList=!titleIdsList!,!titleIdRead!"
             )
         )
+        set "titleIdsList="!titleIdsList!""
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -525,13 +482,13 @@ REM : functions
         for /L %%i in (1,1,%decimals%) do set "one=!one!0"
 
         if not ["!numA:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numA% does not have %decimals% decimals >> !cgpLogFile!
+            echo ERROR ^: the number %numA% does not have %decimals% decimals >> !ccgpLogFile!
             echo ERROR ^: the number %numA% does not have %decimals% decimals
             exit /b 1
         )
 
         if not ["!numB:~-%decimalsP1%,1!"] == ["."] (
-            echo ERROR ^: the number %numB% does not have %decimals% decimals >> !cgpLogFile!
+            echo ERROR ^: the number %numB% does not have %decimals% decimals >> !ccgpLogFile!
             echo ERROR ^: the number %numB% does not have %decimals% decimals
             exit /b 2
         )
@@ -559,7 +516,7 @@ REM : functions
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix_cap.log""
 
         REM : replace all \n by \n
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gfxp! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -567,15 +524,16 @@ REM : functions
 
     :initLastVersionCapGP
 
-        echo [Definition] > !bfwRulesFile!
-        echo titleIds = !titleIdList! >> !bfwRulesFile!
+        echo [Definition] > !gfxpPath!
+        set "list=!titleIdsList:"=!"
+        echo titleIds = !list! >> !gfxpPath!
 
         if ["!typeCapFps!"] == ["SYNCSCR"] (
-            echo name = FPS adjustment >> !bfwRulesFile!
-            echo path = "!GAME_TITLE!/Modifications/FPS adjustment" >> !bfwRulesFile!
+            echo name = FPS adjustment >> !gfxpPath!
+            echo path = "!GAME_TITLE!/Modifications/FPS adjustment" >> !gfxpPath!
         ) else (
-            echo name = Emulation speed adjustment >> !bfwRulesFile!
-            echo path = "!GAME_TITLE!/Modifications/Emulation speed adjustment" >> !bfwRulesFile!
+            echo name = Emulation speed adjustment >> !gfxpPath!
+            echo path = "!GAME_TITLE!/Modifications/Emulation speed adjustment" >> !gfxpPath!
         )
         set "descSpeed=Adjust the emulation speed"
         set "descFPS=Increase the FPS"
@@ -584,28 +542,28 @@ REM : functions
         if ["!typeCapFps!"] == ["SYNCSCR"] set "description=!descFPS!"
 
         if ["%nativeFps%"] == ["30"] (
-            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^). BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^)^. BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
         ) else (
-            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^). BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !bfwRulesFile!
+            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^)^. BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
         )
-        set /A "gfxVersion=!gfxType:V=!"
-        echo version = !gfxVersion! >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!
+        set /A "gfxVersion=!gfxPackVersion:V=!"
+        echo version = !gfxVersion! >> !gfxpPath!
+        echo. >> !gfxpPath!
 
-        if !gfxVersion! LEQ 4 (
-            echo. >> !bfwRulesFile!
-            echo [Preset] >> !bfwRulesFile!
-            echo name = 100%% Speed ^(Default^) >> !bfwRulesFile!
-            echo $FPS = !newNativeFps! >> !bfwRulesFile!
-            echo. >> !bfwRulesFile!
+        if !gfxVersion! EQU 4 (
+            echo. >> !gfxpPath!
+            echo [Preset] >> !gfxpPath!
+            echo name = 100%% Speed ^(Default^) >> !gfxpPath!
+            echo $FPS = !newNativeFps! >> !gfxpPath!
+            echo. >> !gfxpPath!
         )
-        if !gfxVersion! GEQ 6 (
-            echo. >> !bfwRulesFile!
-            echo [Default] >> !bfwRulesFile!
-            echo $FPS = !newNativeFps! >> !bfwRulesFile!
-            echo. >> !bfwRulesFile!
+        if !gfxVersion! EQU 6 (
+            echo. >> !gfxpPath!
+            echo [Default] >> !gfxpPath!
+            echo $FPS = !newNativeFps! >> !gfxpPath!
+            echo. >> !gfxpPath!
         )
-        echo. >> !bfwRulesFile!
+        echo. >> !gfxpPath!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -618,15 +576,15 @@ REM : functions
         set "desc=!desc1!%% !desc2!"
         if %LastVersionExistFlag% EQU 0 (
 
-            echo [Preset] >> !bfwRulesFile!
-            echo name = !desc! >> !bfwRulesFile!
-            echo $FPS = !fps! >> !bfwRulesFile!
-            echo. >> !bfwRulesFile!
+            echo [Preset] >> !gfxpPath!
+            echo name = !desc! >> !gfxpPath!
+            echo $FPS = !fps! >> !gfxpPath!
+            echo. >> !gfxpPath!
             goto:eof
         )
 
         REM : search for "!desc1!" in rulesFile: if found exit
-        for /F "delims=~" %%i in ('type !bfwRulesFile! ^| find /I /V "#" ^| find /I "!desc1!"') do goto:eof
+        for /F "delims=~" %%i in ('type !gfxpPath! ^| find /I /V "#" ^| find /I "!desc1!"') do goto:eof
 
         REM : not found add it by replacing a [Preset] bloc
 
@@ -634,23 +592,23 @@ REM : functions
         set "logFileLastVersion="!fnrLogFolder:"=!\!gameName:"=!-LastVersion_!fps!cap.log""
         if exist !logFileLastVersion! del /F !logFileLastVersion!
 
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gpLastVersion! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileLastVersion!
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gfxp! --fileMask "rules.txt" --find "[Preset]\nname = 100" --replace "[Preset]\nname = !desc!\n$FPS = !fps!\n\n[Preset]\nname = 100" --logFile !logFileLastVersion!
 
     goto:eof
     REM : ------------------------------------------------------------------
 
     :finalizeLastVersionCapGP
 
-        echo [Control] >> !bfwRulesFile!
-        echo vsyncFrequency = $FPS >> !bfwRulesFile!
+        echo [Control] >> !gfxpPath!
+        echo vsyncFrequency = $FPS >> !gfxpPath!
 
         REM : Linux formating (CRLF -> LF)
         call:dosToUnix
 
         REM : force UTF8 format
-        set "utf8=!bfwRulesFile:rules.txt=rules.bfw_tmp!"
-        copy /Y !bfwRulesFile! !utf8! > NUL 2>&1
-        type !utf8! > !bfwRulesFile!
+        set "utf8=!gfxpPath:rules.txt=rules.bfw_tmp!"
+        copy /Y !gfxpPath! !utf8! > NUL 2>&1
+        type !utf8! > !gfxpPath!
         del /F !utf8! > NUL 2>&1
 
     goto:eof
@@ -660,15 +618,14 @@ REM : functions
 
         set "syncValue=%~1"
         set "displayedValue=%~2"
-        set "description="!GAME_TITLE!_%displayedValue%FPS_cap by BatchFw"
+        set "description="!GAME_TITLE!_%displayedValue%FPS_cap"
 
-        set "bfwgpv2="!BFW_GP_FOLDER:"=!\_graphicPacksV2""
-        if not exist !bfwgpv2! goto:eof
-        set "gp="!bfwgpv2:"=!\_BatchFw_%description: =_%""
+        if not exist !gfxPacksV2Folder! goto:eof
+        set "gp="!gfxPacksV2Folder:"=!\_BatchFw_%description: =_%""
 
         if exist !gp! (
-            echo !gp! already exists, skipped ^^^! >> !cgpLogFile!
-            echo !gp! already exists, skipped ^^^!
+            echo !gp! already exists, skipped ^^! >> !ccgpLogFile!
+            echo !gp! already exists, skipped ^^!
             goto:eof
         )
         if not exist !gp! mkdir !gp! > NUL 2>&1
@@ -676,7 +633,8 @@ REM : functions
         set "rulesFileV2="!gp:"=!\rules.txt""
 
         echo [Definition] > !rulesFileV2!
-        echo titleIds = !titleIdList! >> !rulesFileV2!
+        set "list=!titleIdsList:"=!"
+        echo titleIds = !list! >> !rulesFileV2!
 
         echo name = "%description:"=%" >> !rulesFileV2!
         echo version = 2 >> !rulesFileV2!
@@ -702,36 +660,40 @@ REM : functions
 
 echo g30=!g30!
 echo fpsPP=!fpsPP!
-echo g30=!g30! >> !cgpLogFile!
-echo fpsPP=!fpsPP! >> !cgpLogFile!
+echo g30=!g30! >> !ccgpLogFile!
+echo fpsPP=!fpsPP! >> !ccgpLogFile!
 
 
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
-        echo cap to 99%% ^(online compibility issue^) >> !cgpLogFile!
+        echo cap to 99%% ^(online compibility issue^) >> !ccgpLogFile!
         echo cap to 99%% ^(online compibility issue^)
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
         REM : cap to 100%-1FPS (online compatibility)
         set /A "fpsOldGp=!newNativeFpsOldGp!-1"
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
 
-echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+echo fpsOldGp=!fpsOldGp! >> !ccgpLogFile!
 echo fpsOldGp=!fpsOldGp!
-echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
+echo targetFpsOldGp=!targetFpsOldGp! >> !ccgpLogFile!
 echo targetFpsOldGp=!targetFpsOldGp!
-
-        call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
 set /A "fps=!newNativeFps!-1"
 set /A "targetFps=!fps!/!factor!"
-echo fps=!fps! >> !cgpLogFile!
+echo fps=!fps! >> !ccgpLogFile!
 echo fps=!fps!
-echo targetFps=!targetFps! >> !cgpLogFile!
+echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
-        if !fpsPP! EQU 0 type !bfwRulesFile! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
+        if ["!gfxPackVersion!"] == ["V2"] (
+            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+        ) else (
+            if !fpsPP! EQU 0 type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && (
+            call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
+        )
 
+        )
         if !fpsPpOld! EQU 1 goto:capMenu
 
         if !g30! EQU 1 goto:cap
@@ -763,10 +725,11 @@ echo targetFps=!targetFps!
 
         if ["!typeCapFps!"] == ["SYNCSCR"] call:createRefreshRatesGp
 
-        echo ========================================================= >> !cgpLogFile!
+        echo ========================================================= >> !ccgpLogFile!
         echo =========================================================
-        echo FPS cap graphic packs created ^! >> !cgpLogFile!
-        echo FPS cap graphic packs created ^!
+        echo FPS cap graphic packs created ^^! >> !ccgpLogFile!
+        echo FPS cap graphic packs created ^^!
+
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -776,23 +739,27 @@ echo targetFps=!targetFps!
         set "h=%~2"
 
         if !g30! EQU 1 set /A "fps=%fps%*2"
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
-        echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !cgpLogFile!
+        echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !ccgpLogFile!
         echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
 
-        echo [Preset] >> !bfwRulesFile!
-        echo name = !USERDOMAIN! %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !bfwRulesFile!
-        echo $FPS = %fps% >> !bfwRulesFile!
-        echo. >> !bfwRulesFile!
-
+        if ["!gfxPackVersion!"] == ["V2"] (
+            call:createCapOldGP %fps% %fpsToDisplay%
+        ) else (
+            echo [Preset] >> !gfxpPath!
+            echo name = !USERDOMAIN! %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !gfxpPath!
+            echo $FPS = %fps% >> !gfxpPath!
+            echo. >> !gfxpPath!
+        )
     goto:eof
     REM : ------------------------------------------------------------------
 
     :createRefreshRatesGp
 
+    
         set "refreshRatesArray="
         set "refreshRatesList="
         set "hostsArray="
@@ -800,7 +767,7 @@ echo targetFps=!targetFps!
         set /A "nbRf=0"
 
         REM : search in all Host_*.log
-        set "pat="!BFW_PATH:"=!\logs\Host_*.log""
+        set "pat="!BFW_LOGS:"=!\Host_*.log""
 
         for /F "delims=~" %%i in ('dir /S /B !pat! 2^>NUL') do (
             set "currentLogFile="%%i""
@@ -815,7 +782,7 @@ echo targetFps=!targetFps!
                     REM : if different than nativeFPS
                     if not ["%rf%"] == ["%nativeFps%"] (
                         REM : if preset does not already exist in the list the rules.txt
-                        type !bfwRulesFile! | find /I "$FPS = !rf!" > NUL 2>&1 && goto:skip
+                        if exist !gfxpPath! type !gfxpPath! | find /I "$FPS = !rf!" > NUL 2>&1 && goto:skip
 
                         set "tmpStr=!currentLogFile:*Host_=!"
                         set "host=!tmpStr:.log=!"
@@ -837,37 +804,6 @@ echo targetFps=!targetFps!
         for /L %%i in (0,1,%nm1%) do (
             call:createRfGp !refreshRatesArray[%%i]! !hostsArray[%%i]!
         )
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    REM : function to check unrecognized game
-    :checkValidity
-        set "id=%~1"
-
-        REM : check if titleId correspond to a game wihtout meta\meta.xml file
-        set "begin=%id:~0,8%"
-        call:check8hexValue %begin%
-        set "end=%id:~8,8%"
-        call:check8hexValue %end%
-
-    goto:eof
-
-    :check8hexValue
-        set "halfId=%~1"
-
-        if ["%halfId:ffffffff=%"] == ["%halfId%"] goto:eof
-        if ["%halfId:FFFFFFFF=%"] == ["%halfId%"] goto:eof
-
-        echo Ooops it look like your game have a problem ^:
-        echo - if no meta^\meta^.xml file exist^, CEMU give an id BEGINNING with ffffffff
-        echo   using the BATCH framework ^(wizardFirstSaving.bat^) on the game
-        echo   will help you to create one^.
-        echo - if CEMU not recognized the game^, it give an id ENDING with ffffffff
-        echo   you might have made a mistake when applying a DLC over game^'s files
-        echo   to fix^, overwrite game^'s file with its last update or if no update
-        echo   are available^, re-dump the game ^!
-        exit /b 2
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -896,7 +832,7 @@ echo targetFps=!targetFps!
         set "msg=%~1"
 
         if not exist !logFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
+            set "logFolder="!BFW_LOGS:"=!""
             if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
             goto:logMsg2HostFile
         )
@@ -913,11 +849,11 @@ echo targetFps=!targetFps!
 
         set "targetPercent=%~1"
 
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
-        echo cap to !targetPercent!%% >> !cgpLogFile!
+        echo cap to !targetPercent!%% >> !ccgpLogFile!
         echo cap to !targetPercent!%%
-        echo ---------------------------------- >> !cgpLogFile!
+        echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
         REM : cap to !targetPercent!%
 
@@ -927,19 +863,22 @@ echo targetFps=!targetFps!
         call:mulfloat "!newNativeFpsOldGp!.00" "!floatFactor!" 2 fpsOldGp
         set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
 
-echo fpsOldGp=!fpsOldGp! >> !cgpLogFile!
+echo fpsOldGp=!fpsOldGp! >> !ccgpLogFile!
 echo fpsOldGp=!fpsOldGp!
-echo targetFpsOldGp=!targetFpsOldGp! >> !cgpLogFile!
+echo targetFpsOldGp=!targetFpsOldGp! >> !ccgpLogFile!
 echo targetFpsOldGp=!targetFpsOldGp!
 
-        call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+        if ["!gfxPackVersion!"] == ["V2"] (
+            call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+            goto:eof
+        )
 
         if !fpsPP! EQU 0 (
             call:mulfloat "!newNativeFps!.00" "!floatFactor!" 2 fps
             set /A "targetFps=!fps!/!factor!"
-echo fps=!fps! >> !cgpLogFile!
+echo fps=!fps! >> !ccgpLogFile!
 echo fps=!fps!
-echo targetFps=!targetFps! >> !cgpLogFile!
+echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
             call:fillCapLastVersion "!targetPercent!" "Speed (!targetFps!FPS)"

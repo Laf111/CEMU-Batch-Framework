@@ -94,7 +94,7 @@ REM : main
 
     for /F "delims=~" %%j in ('tasklist ^| find /I "cemu.exe" ^| find /I /V "find" /C') do set /A "nbI=%%j"
     if %nbI% NEQ 0 (
-        cscript /nologo !MessageBox! "ERROR ^: Cemu is already running in the background ^! ^(nbi=%nbI%^)^. If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!" 4112
+        !MessageBox! "ERROR ^: Cemu is already running in the background ^! ^(nbi=%nbI%^)^. If needed^, use ^'Wii-U Games^\BatchFw^\Kill BatchFw Processes^.lnk^'^. Aborting^!" 4112
         echo "ERROR^: CEMU is already running ^!"
         tasklist | find /I "cemu.exe" | find /I /V "find"
         timeout /t 4 > NUL 2>&1
@@ -404,7 +404,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving !tmpUpdatePath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving !tmpUpdatePath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveUpdate
             )
@@ -412,7 +412,7 @@ REM : functions
             for /F "delims=~" %%i in (!tmpUpdatePath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !tmpUpdatePath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Move still failed^, take the ownership on !tmpUpdatePath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Move still failed^, take the ownership on !tmpUpdatePath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveUpdate
 
             REM : else skipping
@@ -432,7 +432,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveOldUpdate
             )
@@ -440,7 +440,7 @@ REM : functions
             for /F "delims=~" %%i in (!targetUpdatePath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !targetUpdatePath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveOldUpdate
 
             REM : else skipping
@@ -458,7 +458,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving to !targetUpdatePath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveNewUpdate
             )
@@ -466,7 +466,7 @@ REM : functions
             for /F "delims=~" %%i in (!targetUpdatePath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !targetUpdatePath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveNewUpdate
 
             REM : else skipping
@@ -698,7 +698,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving !tmpDlcPath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving !tmpDlcPath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveDlc
             )
@@ -706,7 +706,7 @@ REM : functions
             for /F "delims=~" %%i in (!tmpDlcPath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !tmpDlcPath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Move still failed^, take the ownership on !tmpDlcPath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Move still failed^, take the ownership on !tmpDlcPath:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveDlc
 
             REM : else skipping
@@ -726,7 +726,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveOldDlc
             )
@@ -734,7 +734,7 @@ REM : functions
             for /F "delims=~" %%i in (!targetDlcPath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !targetDlcPath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveOldDlc
 
             REM : else skipping
@@ -752,7 +752,7 @@ REM : functions
         if !ERRORLEVEL! NEQ 0 (
 
             if !attempt! EQU 1 (
-                cscript /nologo !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
+                !MessageBox! "Moving to !targetDlcPath:"=! failed^, close any program that could use this location" 4112
                 set /A "attempt+=1"
                 goto:tryToMoveNewDlc
             )
@@ -760,7 +760,7 @@ REM : functions
             for /F "delims=~" %%i in (!targetDlcPath!) do set "folderName=%%~nxi"
             call:fillOwnerShipPatch !targetDlcPath! "!folderName!" patch
 
-            cscript /nologo !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
+            !MessageBox! "Check still failed^, take the ownership on !GAME_FOLDER_PATH:"=! with running as an administrator the script !patch:"=!^. If it^'s done^, do you wish to retry^?" 4116
             if !ERRORLEVEL! EQU 6 goto:tryToMoveNewDlc
 
             REM : else skipping
