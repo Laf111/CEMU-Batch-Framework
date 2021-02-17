@@ -1180,17 +1180,10 @@ REM            call:getSizeInMb !folder! sizeofAll
     REM : remove DOS forbiden character from a string
     :secureGameTitle
 
-        echo "%~1" | find "*" > NUL 2>&1 && (
-            echo ^* is not allowed
-
-            set "%2=KO"
-            goto:eof
-        )
-
         REM : str is expected protected with double quotes
-        set "string=%~1"
+        set "string=%1"
 
-        call:checkStr "!string!" status
+        call:checkStr !string! status
         if ["!status!"] == ["KO"] (
             echo string is not valid
             pause
@@ -1217,7 +1210,7 @@ REM            call:getSizeInMb !folder! sizeofAll
         set "string=!string:©=!"
         set "string=!string:É=E!"
 
-        set "%2="!string!""
+        set "%2=!string!"
 
     goto:eof
     REM : ------------------------------------------------------------------

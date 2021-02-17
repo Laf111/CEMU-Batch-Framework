@@ -24,11 +24,9 @@ REM    color 4F
     set "createOneV2GraphicPack="!BFW_TOOLS_PATH:"=!\createOneV2GraphicPack.bat""
 
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
-    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
     set "cgpv2LogFile="!BFW_LOGS:"=!\createV2GraphicPacks.log""
 
     set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
@@ -89,9 +87,9 @@ REM    color 4F
     REM : create resolution graphic packs
     call:createResGP
 
-    REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
-    set "msg="!GAME_TITLE! graphic packs versionV2=completed""
-    call:log2GamesLibraryFile !msg!
+    echo Waiting all child process end^.^.^. >> !cv2gpLogFile!
+    echo Waiting all child process end^.^.^.
+    call:WaitAllChildProcessEnd
     
     exit /b 0
 
@@ -102,30 +100,21 @@ REM    color 4F
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : function to log info for current host
-    :log2GamesLibraryFile
-        REM : arg1 = msg
-        set "msg=%~1"
 
-        if not exist !glogFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2GamesLibraryFile
+    :WaitAllChildProcessEnd
+
+        echo Waiting until all chlid process end ^(V2 packs^)^.^.^.
+        :waitingLoop
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "_BatchFw_Install" | find  /I "V2GraphicPack" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            goto:waitingLoop
         )
-
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
-
-        :logMsg2GamesLibraryFile
-        echo !msg! >> !glogFile!
-        REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
-        type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+        wmic process get Commandline 2>NUL | find "fnr.exe" | find  /I "_BatchFw_Install" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            goto:waitingLoop
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------
+
 
     :setParams
 

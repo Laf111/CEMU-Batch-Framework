@@ -494,7 +494,7 @@ REM : main
     if !v116! EQU 50 echo Error when comparing versions >> !batchFwLog!
     if !v116! EQU 2 goto:getScreenMode
 
-    REM : if v > 1.16 update sci value with titleId
+    REM : if v > 1.16 update sci value with titleId (sci=titleId for CEMU > 1.16)
     call:lowerCase !titleId! sci
 
     :getScreenMode
@@ -660,7 +660,7 @@ REM : main
         mkdir !gtscf! > NUL 2>&1
 
         if ["!graphicApi!"] == ["OpenGL"] (
-            call:searchForTransferableCache
+            call:searchInternetForTransferableCache
             if !ERRORLEVEL! NEQ 0 (
                 if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
                 goto:launch3rdPartySoftware
@@ -668,7 +668,7 @@ REM : main
         ) else (
             REM : async compile introduced in v1.19
             if !v1182! EQU 2  (
-                call:searchForTransferableCache
+                call:searchInternetForTransferableCache
                 if !ERRORLEVEL! NEQ 0 (
                     if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
                     goto:launch3rdPartySoftware
@@ -685,21 +685,33 @@ REM : main
 
     REM : if new cache sci=titleId is not found AND if exist an old one => use it
     if ["!cacheFile!"] == ["NONE"] (
-        set "oldCache=!osci!.bin"
-        if exist !oldCache!  (
-            set "cacheFile=!sci!.bin"
-            copy /Y !oldCache! !cacheFile! > NUL 2>&1
-            echo Importing old transferable cache !oldCache! as new cache !cacheFile! >> !batchFwLog!
-            wscript /nologo !Start! !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! ^(after 1^.16 included^)"
+        REM : sci=osci for CEMU < 1.16
+        if ["!osci!"] == ["!sci!"] (
+            set "newCache=!titleId!.bin"
+            if exist !newCache!  (
+                set "cacheFile=!sci!.bin"
+                copy /Y !newCache! !cacheFile! > NUL 2>&1
+                echo Importing new transferable cache !newCache! as old cache !cacheFile! ^(fit CEMU earlier than 1^.16^) >> !batchFwLog!
+                wscript /nologo !Start! !MessageBox! "Importing new transferable cache !newCache! as old cache !cacheFile! ^(fit CEMU earlier than 1^.16^)"
+            )
+        ) else (
+            set "oldCache=!osci!.bin"
+            if exist !oldCache!  (
+                set "cacheFile=!sci!.bin"
+                copy /Y !oldCache! !cacheFile! > NUL 2>&1
+                echo Importing old transferable cache !oldCache! as new cache !cacheFile!  ^(fit CEMU after 1^.16^) >> !batchFwLog!
+                wscript /nologo !Start! !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! ^(fit CEMU after 1^.16^)"
+            )
         )
     )
+
     pushd !BFW_TOOLS_PATH!
 
     REM : check if cacheFile was found
     if ["!cacheFile!"] == ["NONE"] (
 
         if ["!graphicApi!"] == ["OpenGL"] (
-            call:searchForTransferableCache
+            call:searchInternetForTransferableCache
             if !ERRORLEVEL! NEQ 0 (
                 if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
                 goto:launch3rdPartySoftware
@@ -707,7 +719,7 @@ REM : main
         ) else (
             REM : async compile introduced in v1.19
             if !v1182! EQU 2  (
-                call:searchForTransferableCache
+                call:searchInternetForTransferableCache
                 if !ERRORLEVEL! NEQ 0 (
                     if !usePbFlag! EQU 1 call:setProgressBar 30 50 "pre processing" "launching third party software"
                     goto:launch3rdPartySoftware
@@ -2145,7 +2157,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set /A "settingsImported=1"
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !previousSettingsFolder! !nsf! /MT:32 /S > NUL 2>&1
 
-        set "csi="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!\!currentUser!_settings.xml""
+        set "csi="!nsf:"=!\!currentUser!_settings.xml""
         set "csTmp0=!csi:.xml=.bfw_tmp0"
 
         REM : if versionRead < 1.16 force Graphic api to 0
@@ -2893,7 +2905,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :searchForTransferableCache
+    :searchInternetForTransferableCache
 
         if not ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] (
             !MessageBox! "No transferable shader cache was found, do you want to search one on internet ? If you don't, you can import a cache afterward using the shortcut 'BatchFw\Tools\Shaders Caches\Import transferable cache'. No need to rename-it" 4145

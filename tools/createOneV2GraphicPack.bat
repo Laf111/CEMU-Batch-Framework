@@ -108,7 +108,8 @@ REM : main
     set "rulesFolder=!rulesFile:\rules.txt=!"
 
     echo [Definition] > !rulesFile!
-    echo titleIds = !titleIdsList:"=! >> !rulesFile!
+    set "list=!titleIdsList:"=!"
+    echo titleIds = !list! >> !rulesFile!
 
     set "name="!gameName! !overwriteWidth!x!overwriteHeight! !desc! created by BatchFw""
     if !overwriteWidth! EQU !nativeWidth! if !overwriteHeight! EQU !nativeHeight! (

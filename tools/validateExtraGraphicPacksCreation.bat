@@ -16,15 +16,18 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
+    set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+
+    set "glogFile="!BFW_PATH:"=!\logs\gamesLibrary.log""
+
+    REM : temporary folder for symlinks creation
+    set "gfxpLinksFolder="!BFW_PATH:"=!\logs\gfxpLinksFolder""
+
+    if exist !gfxpLinksFolder! rmdir /Q /S !gfxpLinksFolder! > NUL 2>&1
+    mkdir !gfxpLinksFolder! > NUL 2>&1
 
     REM : set current char codeset
     call:setCharSetOnly
-
-    REM : TODO remove when updated
-    echo Need to be updated ^^!
-    pause
-    exit /b 200
-
 
     REM : search if launchGame.bat is not already running
     set /A "nbI=0"
@@ -35,16 +38,60 @@ REM : main
         pause
         exit 100
     )
-    
-    pushd !BFW_GP_FOLDER!
-    REM : V2 to V6 gfx packs
-    for /F "delims=~" %%i in ('dir /B  /A:D *_Resolution 2^> NUL ^| find /I /V "_Gamepad" ^| find /I /V "_Performance_"') do (
-        call:treatGp "%%i"
+
+    cls
+    echo =========================================================
+    echo Check last GFX packs version completion
+    echo =========================================================
+    echo.
+
+    REM : flag for creating old update and DLC paths
+    set /A "buildOldUpdatePaths=1"
+
+    REM : get the last version of GFX packs downloaded
+    set "newVersion=NOT_FOUND"
+
+    set "pat="!BFW_GP_FOLDER:"=!\graphicPacks*.doNotDelete""
+
+    REM : --------------------------------------------------------------------------------------
+    REM : get the github version of the last downloaded packs
+    set "gpl="NOT_FOUND""
+    for /F "delims=~" %%a in ('dir /B !pat! 2^>NUL') do set "gpl="%%a""
+    if not [!gpl!] == ["NOT_FOUND"] set "zipLogFile="!BFW_GP_FOLDER:"=!\!gpl:"=!""
+
+    if [!gpl!] == ["NOT_FOUND"] (
+        echo WARNING ^: !pat! not found^, force extra pack creation ^!
+        REM : create one
+        set "dnd="!BFW_GP_FOLDER:"=!\graphicPacks703.doNotDelete""
+        echo. > !dnd!
     )
+
+    for /F "delims=~" %%i in (!zipLogFile!) do (
+        set "fileName=%%~nxi"
+        set "newVersion=!fileName:.doNotDelete=!"
+    )
+    echo ^> last github repository version downloaded      ^: !newVersion!
+
+    set "setup="!BFW_PATH:"=!\setup.bat""
+
+    set "strBfwMaxVgfxp=NONE"
+    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION=" 2^>NUL') do set "strBfwMaxVgfxp=%%i"
+    set "strBfwMaxVgfxp=!strBfwMaxVgfxp:"=!"
+    set /A "gfxPackVersion=!strBfwMaxVgfxp:V=!"
+
+    echo ^> last version of GFX packs supported by BatchFw ^: !strBfwMaxVgfxp!
+
+    REM : force GAME_GP_FOLDER
+    set "GAME_GP_FOLDER=!gfxpLinksFolder!"
+
+    pushd !BFW_GP_FOLDER!
     REM : V6 and up gfx packs
     for /F "delims=~" %%i in ('dir /B /S /A:D Graphics 2^> NUL') do (
         call:treatGpLatestVersion "%%i"
     )
+
+    if exist !gfxpLinksFolder! del /F /S !gfxpLinksFolder! > NUL 2>&1
+
     pause
     goto:eof
 REM : ------------------------------------------------------------------
@@ -72,51 +119,69 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
 
-    :treatGp
+        if not exist !glogFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
 
-        for /F "delims=~" %%i in (%1) do set "name=%%~nxi"
-        for /F "tokens=1 delims=_" %%j in ("!name!") do set "title=%%j"
-        set "rulesFile="!BFW_GP_FOLDER:"=!\%~1\rules.txt""
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
 
-        for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "tid=%%k"
-        echo #########################################################
-        echo !title!
-        echo #########################################################
-
-        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
-        echo.
-        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
-
-        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
-        echo.
-        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
-        echo #########################################################
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
 
     goto:eof
+    REM : ------------------------------------------------------------------
+    
+    :createPacks
 
+        set "argSup=%gameName%"
+        if ["%gameName%"] == [""] set "argSup="
+
+        echo Complete resolution graphic packs^.^.^.
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
+        call !toBeLaunch! !rulesFile! %titleId%
+
+        echo Create BatchFW FPS cap graphic packs^.^.^.
+        set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
+        echo !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !strBfwMaxVgfxp! %titleId% !argSup!
+
+        call !toBeLaunch! !BFW_GP_FOLDER!  !GAME_GP_FOLDER! !strBfwMaxVgfxp! %titleId% !argSup!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+    
     :treatGpLatestVersion
         set "graphicsFolder="%~1""
 
         for %%a in (!graphicsFolder!) do set "parentFolder="%%~dpa""
         set "gamePackFolder=!parentFolder:~0,-2!""
 
-
-        for /F "delims=~" %%i in (!gamePackFolder!) do set "title=%%~nxi"
+        for /F "delims=~" %%i in (!gamePackFolder!) do set "gameName=%%~nxi"
         set "rulesFile="!graphicsFolder:"=!\rules.txt""
 
-        for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "tid=%%k"
+        for /F "tokens=2 delims=~=," %%k in ('type !rulesFile! ^| find "titleIds"') do set "titleId=%%k"
+        set "titleId=!titleId: =!"
         echo #########################################################
-        echo !title!^, !tid!
+        echo !gameName! [!titleId!]
         echo #########################################################
 
-        echo "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
-        echo.
-        call "!BFW_PATH:"=!\tools\createExtraGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !rulesFile! !title!
+        echo Found a resolution graphic pack ^: !rulesFile!
+        call:createPacks
 
-        echo "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
-        echo.
-        call "!BFW_PATH:"=!\tools\createCapGraphicPacks.bat" "!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs" !tid! !title!
-        echo #########################################################
+        REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
+        set "msg="!gameName! [%titleId%] graphic packs version=!newVersion!""
+        call:log2GamesLibraryFile !msg!
 
     goto:eof

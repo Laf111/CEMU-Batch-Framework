@@ -40,13 +40,6 @@ REM : main
     REM : flag for creating old update and DLC paths
     set /A "buildOldUpdatePaths=1"
 
-    set "setup="!BFW_PATH:"=!\setup.bat""
-    REM : GFX version to set
-    set "strBfwMaxVgfxp=NONE"
-    for /F "tokens=2 delims=~=" %%i in ('type !setup! ^| find /I "BFW_GFXP_VERSION=" 2^>NUL') do set "strBfwMaxVgfxp=%%i"
-    set "strBfwMaxVgfxp=!strBfwMaxVgfxp:"=!"
-    set /A "gfxPackVersion=!strBfwMaxVgfxp:V=!"
-    
     REM : get the last version of GFX packs downloaded
     set "newVersion=NOT_FOUND"
 
@@ -114,6 +107,7 @@ REM : main
            set "typeCapFps=%%l"
         )
         set /A "resX2=!nativeHeight!*2"
+
         call:treatGame
 
         echo done for !GAME_FOLDER_PATH:%GAMES_FOLDER%=!
@@ -126,6 +120,30 @@ REM : ------------------------------------------------------------------
 REM : ------------------------------------------------------------------
 REM : functions
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        if not exist !glogFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
 
     REM : function to get and set char set code for current host
     :setCharSetOnly
@@ -142,18 +160,6 @@ REM : functions
         REM : set char code set, output to host log file
 
         chcp %CHARSET% > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :WaitAllChildProcessEnd
-
-        echo Waiting until all chlid process end ^(V2 packs^)^.^.^.
-        :waitingLoop
-        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "GraphicPacks.bat" | find /I /V "buildExtraGraphicPacks.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
-            timeout /T 1 > NUL 2>&1
-            goto:waitingLoop
-        )
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -175,13 +181,12 @@ REM : functions
         :createExtraGP
         echo Complete resolution graphic packs^.^.^.
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        call !toBeLaunch! !resGfxPack!
+        call !toBeLaunch! !resGfxPack! %titleId% 
 
         :createCapGP
         echo Create BatchFW FPS cap graphic packs^.^.^.
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
         echo !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! "V!vGfxPack!" %titleId% !argSup!
-
         call !toBeLaunch! !BFW_GP_FOLDER!  !GAME_GP_FOLDER! "V!vGfxPack!" %titleId% !argSup!
 
     goto:eof
@@ -236,12 +241,13 @@ REM : functions
                     echo Found a V!vGfxPack! resolution graphic pack ^: !rulesFile!
                     set "resGfxPvFound=!vGfxPack!"
 
-                    REM : get NativeHeight from rules.txt
-                    set "gpNativeHeight=NOT_FOUND"
-
                     call:createPacks
                 )
             )
+        )
+        if !resGfxPvFound! EQU 0 (
+            set "gameName=!DescRead: =!"
+            call:createPacks
         )
 
     goto:eof
@@ -266,7 +272,12 @@ REM : functions
 
         call:searchResolutionGfxPacks
 
-        call:WaitAllChildProcessEnd
+        REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
+        set "msg="!GAME_TITLE! [%titleId%] graphic packs version=!newVersion!""
+        call:log2GamesLibraryFile !msg!
+
+        REM : for older packs, it done in scripts called
+
 
         echo #########################################################
 

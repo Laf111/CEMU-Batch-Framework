@@ -19,7 +19,6 @@ REM    color 4F
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
-    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
     set "cv4gpLogFile="!BFW_LOGS:"=!\completeV4GraphicPacks.log""
 
@@ -49,11 +48,9 @@ REM    color 4F
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "startingDate=%ldt%"
     REM : starting DATE
-
-    echo starting date = %startingDate% > !cv4gpLogFile!
-    echo starting date = %startingDate%
+    set "startingDate=%ldt%"
+    echo. > !cv4gpLogFile!
 
     echo. >> !cv4gpLogFile!
     if %nbArgs% NEQ 1 (
@@ -73,17 +70,6 @@ REM    color 4F
     set "rulesFolder=!rulesFile:\rules.txt=!"
     for /F "delims=~" %%i in (!rulesFolder!) do set "gpNameFolder=%%~nxi"
     set "gpNameFolder=!gpNameFolder:_Resolution=!"
-
-    REM : remove when no more V4 in the current GFX repo
-    REM : treating a V4 pack not mixed in the last version of GFX packs repo
-    echo !rulesFile! | find /I "_graphicPacksV4" > NUL 2>&1 && (
-        REM : check completion status (if called from validateExtraGraphicPacksCreation.bat or buildExtraGraphicPacks.bat)
-        if exist !glogFile! type !glogFile! | find "!gpNameFolder! graphic packs versionV4=completed" > NUL 2>&1 && (
-            echo V4 packs already completed, nothing to do >> !cv4gpLogFile!
-            echo V4 packs already completed, nothing to do
-            goto:eof
-        )
-    )
 
     REM : Get the first titleId from the list in the GFX pack
     set "titleId=NOT_FOUND"
@@ -176,8 +162,6 @@ REM    color 4F
         set /A "nbAr-=1"
     )
 
-    set "gpNativeHeight=NOT_FOUND"
-
     REM : Linux formating (CRLF -> LF)
     call:dosToUnix
 
@@ -218,21 +202,13 @@ REM    color 4F
     echo =========================================================  >> !cv4gpLogFile!
     echo =========================================================
 
-
-    REM : set V4 gfx pack status if rules.txt is under _graphicPacksV4
-    echo !rulesFile! | find /I "_graphicPacksV4" > NUL 2>&1 && (
-        REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
-        set "msg="!GAME_TITLE! graphic packs versionV4=completed""
-        call:log2GamesLibraryFile !msg!
-    )
-
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "endingDate=%ldt%"
     REM : starting DATE
 
-    echo starting date = %startingDate% >> !cv4gpLogFile!
+    echo starting date = %startingDate% > !cv4gpLogFile!
     echo starting date = %startingDate%
     echo ending date = %endingDate% >> !cv4gpLogFile!
     echo ending date = %endingDate%
@@ -244,31 +220,6 @@ REM    color 4F
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-    REM : function to log info for current host
-    :log2GamesLibraryFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        if not exist !glogFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2GamesLibraryFile
-        )
-
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
-
-        :logMsg2GamesLibraryFile
-        echo !msg! >> !glogFile!
-        REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
-        type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     REM : function to create extra graphic packs for a game
     :completeGfxPacks

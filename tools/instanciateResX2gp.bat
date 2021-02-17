@@ -71,12 +71,13 @@ REM : main
 
     pushd !BFW_TOOLS_PATH!
 
-    REM : init for 16/9
+    REM : init with 16/9 values
     REM : tmplRatioValue will not be used for 16-9 (no patches.txt file)
     set "tmplRatioValue=1.777"
+    set "tmplResXScale=2.0"
+    set "tmplResYScale=2.0"
     if !nativeHeight! EQU 720 set /A "wResX2GpUsed=2560"
     if !nativeHeight! EQU 1080 set /A "wResX2GpUsed=3840"
-
     set "descValue=!wResX2GpUsed!x!hResX2GpUsed!"
     set "desc=!width!x!height!!desc!"
     
@@ -85,7 +86,8 @@ REM : main
         if !nativeHeight! EQU 720 set /A "wResX2GpUsed=3440"
         if !nativeHeight! EQU 1080 set /A "wResX2GpUsed=5120"
 
-        set "tmplRatioValue=2.370"
+        set "tmplRatioValue=2.389"
+        set "tmplResXScale=2.6875"
         set "descValue=!wResX2GpUsed!x!hResX2GpUsed! (21:9)"
     )
 
@@ -94,6 +96,7 @@ REM : main
         if !nativeHeight! EQU 1080 set /A "wResX2GpUsed=11520"
 
         set "tmplRatioValue=5.333"
+        set "tmplResXScale=6.0"
         set "descValue=!wResX2GpUsed!x!hResX2GpUsed! (16:3)"
     )
 
@@ -109,6 +112,7 @@ echo descValue=!descValue!
 echo wResX2GpUsed=!wResX2GpUsed!
 echo hResX2GpUsed=!hResX2GpUsed!
 echo tmplRatioValue=!tmplRatioValue!
+echo tmplResXScale=!tmplResXScale!
 
     REM : create graphic pack folder
     if not exist !gp! mkdir !gp! > NUL 2>&1
@@ -157,18 +161,18 @@ echo tmplRatioValue=!tmplRatioValue!
     )
     REM : replacing overwriteHeight = ResX2gp in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!height!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !hResX2GpUsed!" --replace "overwriteHeight = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !hResX2GpUsed!" --replace "overwriteHeight = !height!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteHeight[ ]*=[ ]*!hResX2GpUsed!" --replace "overwriteHeight = !height!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteHeight[ ]*=[ ]*!hResX2GpUsed!" --replace "overwriteHeight = !height!" --logFile !fnrLogFile!
 
     REM : replacing overwriteWidth = ResX2gp in rules.txt (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!height!asWidth.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !hResX2GpUsed!" --replace "overwriteWidth = !height!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !hResX2GpUsed!" --replace "overwriteWidth = !height!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth[ ]*=[ ]*!hResX2GpUsed!" --replace "overwriteWidth = !height!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth = !hResX2GpUsed!" --replace "overwriteWidth = !height!" --logFile !fnrLogFile!
 
     REM : replacing overwriteWidth = !wResX2GpUsed! in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!width!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !wResX2GpUsed!" --replace "overwriteWidth = !width!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !wResX2GpUsed!" --replace "overwriteWidth = !width!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth[ ]*=[ ]*!wResX2GpUsed!" --replace "overwriteWidth = !width!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth = !wResX2GpUsed!" --replace "overwriteWidth = !width!" --logFile !fnrLogFile!
 
     REM compute half target resolution
     set /A "halfHeight=!height!/2"
@@ -176,23 +180,24 @@ echo tmplRatioValue=!tmplRatioValue!
 
     REM : replacing half res height in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!halfHeight!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteHeight[ ]*=[ ]*!nativeHeight!" --replace "overwriteHeight = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteHeight = !nativeHeight!" --replace "overwriteHeight = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res height in rules.txt  (shadows)
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!halfHeight!asWidth.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeHeight!" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeHeight!" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth[ ]*=[ ]*!nativeHeight!" --replace "overwriteWidth = !halfHeight!" > !fnrLogFile!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth = !nativeHeight!" --replace "overwriteWidth = !halfHeight!" --logFile !fnrLogFile!
 
     REM : replacing half res width in rules.txt
     set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-!halfWidth!.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeWidth!" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --find "overwriteWidth = !nativeWidth!" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
+    echo !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth[ ]*=[ ]*!nativeWidth!" --replace "overwriteWidth = !halfWidth!" > !fnrLogFile!
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask "rules.txt" --useRegEx --find "overwriteWidth[ ]*=[ ]*!nativeWidth!" --replace "overwriteWidth = !halfWidth!" --logFile !fnrLogFile!
 
-    echo "!desc!" | find "(16/9)" > NUL 2>&1 && goto:endMain
+    echo "!desc!" | find "(16/9)" | find /I /V "win" > NUL 2>&1 && goto:endMain
 
     REM : treating extra files (*_*.txt) if needed
     set "pat="!gp:"=!\*_*s.txt""
+
     for /F "delims=~" %%d in ('dir !pat! 2^>NUL') do goto:treatExtraFiles
 
     goto:endMain
@@ -205,33 +210,31 @@ echo tmplRatioValue=!tmplRatioValue!
 echo xScale=!xScale!
 echo yScale=!yScale!
 
-    REM : replacing float resXScale = 2.0
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-xScale.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resXScale = 2.0" --replace "float resXScale = !xScale!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resXScale = 2.0" --replace "float resXScale = !xScale!" --logFile !fnrLogFile!
+    REM : replacing float resXScale = 2.0 (for every aspect ratios)
+    set "fnrLogFileExtraFiles="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-xScale.log""
+    echo !fnrPath! --cl --dir !gp! --fileMask "*_*s.txt" --useRegEx --find "resXScale[ ]*=[ ]*!tmplResXScale!" --replace "resXScale = !xScale!" > !fnrLogFileExtraFiles!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "*_*s.txt" --useRegEx --find "resXScale[ ]*=[ ]*!tmplResXScale!" --replace "resXScale = !xScale!" --logFile !fnrLogFileExtraFiles!
 
     REM : replacing float resYScale = 2.0
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-yScale.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resYScale = 2.0" --replace "float resYScale = !yScale!" > !fnrLogFile!
-    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resYScale = 2.0" --replace "float resYScale = !yScale!" --logFile !fnrLogFile!
+    set "fnrLogFileExtraFiles="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-yScale.log""
+    echo !fnrPath! --cl --dir !gp! --fileMask "*_*s.txt" --useRegEx --find "resYScale[ ]*=[ ]*!tmplResYScale!" --replace "resYScale = !yScale!" > !fnrLogFileExtraFiles!
+    wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !gp! --fileMask "*_*s.txt" --useRegEx --find "resYScale[ ]*=[ ]*!tmplResYScale!" --replace "resYScale = !yScale!" --logFile !fnrLogFileExtraFiles!
 
     REM : replacing float resScale = 2.0
-    set "fnrLogFile="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-scale.log""
-    echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" > !fnrLogFile!
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --find "float resScale = 2.0" --replace "float resScale = !yScale!" --logFile !fnrLogFile!
+    set "fnrLogFileExtraFiles="!fnrLogFolder:"=!\fnr_!wResX2GpUsed!xResX2gp-scale.log""
+    echo !fnrPath! --cl --dir !gp! --fileMask *_*s.txt --useRegEx --find "resScale[ ]*=[ ]*!tmplResXScale!" --replace "resScale = !xScale!" > !fnrLogFileExtraFiles!
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask "*_*s.txt" --useRegEx --find "resScale[ ]*=[ ]*!tmplResXScale!" --replace "resScale = !yScale!" --logFile !fnrLogFileExtraFiles!
 
     set "patchFile="!gp:"=!\patches.txt""
 
     if not exist !patchFile! goto:endMain
 
-    call:divIntegers !width! !height! ratio
-echo ratio=!ratio!
-    call:removeFromRight !ratio! 4 ratioValue
+    call:divIntegers !width! !height! ratioValue
 echo ratioValue=!ratioValue!
 
 
     REM : replace scale factor in patchFile
-    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask patches.txt --find !tmplRatioValue! --replace !ratioValue! --logFile !fnrLogFile!
+    wscript /nologo !StartHidden! !fnrPath! --cl --dir !gp! --fileMask "patches.txt" --find !tmplRatioValue! --replace !ratioValue! --logFile !fnrLogFileExtraFiles!
 
     :endMain
         
@@ -252,44 +255,30 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    :truncateStrFromRight
-        set "str=%~1"
-        REM : number of decimals/digits (integer) to be REMOVED
-        set /A "nbc=%~2"
 
-        call:strLen str length
+    :reduceFraction
 
-        if !length! LSS !nbc! goto:eof
-        set /A "left=length-nbc"
+        set /A "w=%~1"
+        set /A "h=%~2"
 
-        set "%3=!str:~0,%left%!"
+        for /L %%l in (19,-1,2) do (
 
-    goto:eof
-    REM : ------------------------------------------------------------------
+            set /A "multiplier=%%l"
+            set /A "r=!w!%%!multiplier!"
 
-    :removeFromRight
-
-        set "r=%~1"
-        REM : number of decimals/digits (integer) to be REMOVED
-        set /A "nbd=%~2"
-        REM : init for an integer => remove from right
-        set "%3=!r:~0,-%nbd%!"
-
-        REM : for a float only treat the decimal part
-        echo !r! | find "." > NUL 2>&1 && (
-
-            set "decPart="
-            for /F "delims=~. tokens=1-2" %%e in ("%r%") do set "intPart=%%e" & set "decPart=%%f"
-
-            REM : init with !nbd! GTR !tnbd!
-            set "%3=!intPart!.!decPart!"
-
-            call:strLen decPart tnbd
-            if !nbd! LEQ !tnbd! (
-                call:truncateStrFromRight !decPart! !nbd! decPartFormated
-                set "%3=!intPart!.!decPartFormated!"
+            if !r! EQU 0 (
+                set /A "r=!h!%%!multiplier!"
+                if !r! EQU 0 (
+                    set /A "w=w/!multiplier!"
+                    set /A "h=h/!multiplier!"
+                )
             )
         )
+        REM : avoid 8/5 for 16/10
+        if !w! EQU 8 if !h! EQU 5 set /A "w=16" & set /A "h=10"
+
+        set /A "%3=!w!"
+        set /A "%4=!h!"
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -305,10 +294,14 @@ REM : functions
     REM : function for dividing integers
     :divIntegers
 
+
+        REM : reduce the fraction of possible
+        call:reduceFraction %~1 %~2 sWr sHr
+
         REM : get a
-        set /A "fpA=%~1"
+        set /A "fpA=!sWr!"
         REM : get b
-        set /A "fpB=%~2"
+        set /A "fpB=!sHr!"
 
         REM : fix number of decimals to 7 (int 32 bits limitation)
         set /A "nbDec=7"

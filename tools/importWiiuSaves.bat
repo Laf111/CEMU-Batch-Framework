@@ -421,7 +421,7 @@ REM : functions
         echo    4 ^: select what to do ^(per game and per user^)
         echo        ^(will interrupt the downloading process^)
         echo.
-        choice /C 12345 /N /M "Please, enter you choice : "
+        choice /C 12345 /N /M "Please, enter your choice : "
         set "userChoice=!ERRORLEVEL!"
 
         choice /C yn /N /M "Confirm choice !userChoice!? (y/n to cancel) : "

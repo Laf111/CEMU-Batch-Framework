@@ -1282,14 +1282,6 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
 
-        REM : check if installed on an usb drive
-        set /A "installedOnUsb=0"
-        for /F "delims=~= tokens=2" %%i in ('wmic logicaldisk where "drivetype=2" get caption /value 2^>NUL ^| find "="') do (
-            set "caption=%%i"
-            set "usbDrive=!caption:~0,-1!"
-            if ["!usbDrive!"] == ["!drive!"] set /A "installedOnUsb=1"
-        )
-
         set "ARGS=ON"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Enable firmware update on the Wii-U^.lnk""
@@ -1300,17 +1292,16 @@ REM : functions
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to enabling firmware update on the Wii-U
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
-        if !installedOnUsb! EQU 0 (
-            REM : create a shortcut to displayProgressBar.bat
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Enable BatchFw^'s progress bar^.lnk""
-            set "LINK_DESCRIPTION="Enable BatchFw^'s progress bar""
-            set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
-            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\enableProgressBar.ico""
-            if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 echo Creating a shortcut to enable progress bar
-                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
-            )
+        REM : create a shortcut to displayProgressBar.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Enable BatchFw^'s progress bar^.lnk""
+        set "LINK_DESCRIPTION="Enable BatchFw^'s progress bar""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\enableProgressBar.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to enable progress bar
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
+
         set "ARGS=OFF"
         REM : create a shortcut to ftpSetWiiuFirmwareUpdateMode.bat
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Disable firmware update on the Wii-U^.lnk""
@@ -1321,17 +1312,16 @@ REM : functions
             if !QUIET_MODE! EQU 0 echo Creating a shortcut to disabling firmware update on the Wii-U
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
-        if !installedOnUsb! EQU 0 (
-            REM : create a shortcut to displayProgressBar.bat
-            set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Disable BatchFw^'s progress bar^.lnk""
-            set "LINK_DESCRIPTION="Disable BatchFw^'s progress bar""
-            set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
-            set "ICO_PATH="!BFW_PATH:"=!\resources\icons\disableProgressBar.ico""
-            if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 echo Creating a shortcut to disable progress bar
-                call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
-            )
+        REM : create a shortcut to displayProgressBar.bat
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\BatchFw\Disable BatchFw^'s progress bar^.lnk""
+        set "LINK_DESCRIPTION="Disable BatchFw^'s progress bar""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\displayProgressBar.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\disableProgressBar.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut to disable progress bar
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !GAMES_FOLDER!
         )
+
         set "ARGS="NONE""
 
         REM : create a shortcut to downloadGames.bat (if needed)
@@ -1760,6 +1750,77 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! "c:\Windows\System32"
         )
 
+        set "ARGS=1"
+        REM : create a shortcut for Converting WUX to WUD
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUX to WUD^.lnk""
+        set "LINK_DESCRIPTION="Convert WUX to WUD""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wux2Wud.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUX to WUD
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=2"
+        REM : create a shortcut for Converting WUX to WUP
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUX to WUP^.lnk""
+        set "LINK_DESCRIPTION="Convert WUX to WUP""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wux2Wup.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUX to WUP
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=3"
+        REM : create a shortcut for Converting WUX to RPX
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUX to RPX^.lnk""
+        set "LINK_DESCRIPTION="Convert WUX to RPX""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wux2Rpx.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUX to RPX
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=4"
+        REM : create a shortcut for Converting WUD to WUX
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUD to WUX^.lnk""
+        set "LINK_DESCRIPTION="Convert WUD to WUX""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wud2Wux.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUD to WUX
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=5"
+        REM : create a shortcut for Converting WUD to WUP
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUD to WUP^.lnk""
+        set "LINK_DESCRIPTION="Convert WUD to WUP""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wud2Wup.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUD to WUP
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=6"
+        REM : create a shortcut for Converting WUD to RPX
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUD to RPX^.lnk""
+        set "LINK_DESCRIPTION="Convert WUD to RPX""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wud2Rpx.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUD to RPX
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        set "ARGS=7"
+        REM : create a shortcut for Converting WUP to RPX
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Convert Wii-U files\Convert WUP to RPX^.lnk""
+        set "LINK_DESCRIPTION="Convert WUP to RPX""
+        set "TARGET_PATH="!BFW_PATH:"=!\tools\convertWiiuFiles.bat""
+        set "ICO_PATH="!BFW_PATH:"=!\resources\icons\Wup2Rpx.ico""
+        if not exist !LINK_PATH! (
+            if !QUIET_MODE! EQU 0 echo Creating a shortcut for converting WUP to RPX
+            call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
+        )
+        
         set "ARGS="NONE""
 
         REM : search your current GLCache

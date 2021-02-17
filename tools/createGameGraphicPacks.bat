@@ -21,13 +21,11 @@ REM    color 4F
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
-    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-    set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
     set "cggpLogFile="!BFW_LOGS:"=!\createGameGraphicPacks.log""
 
     set "createLastVersion="!BFW_TOOLS_PATH:"=!\createLastGraphicPacks.bat""
@@ -53,10 +51,9 @@ REM    color 4F
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "startingDate=%ldt%"
     REM : starting DATE
-    echo starting date = %startingDate% > !cggpLogFile!
-    echo starting date = %startingDate%
+    set "startingDate=%ldt%"
+    echo. > !cggpLogFile!
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -80,17 +77,17 @@ REM    color 4F
     set "checkLenght=!titleId:~15,1!"
 
     if ["x!checkLenght!x"] == ["xx"] (
-        echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have at least 16 hexadecimal characters^, given !titleId!
         goto:getTitleId
     )
     REM : check too long
     set "checkLenght=!titleId:~16,1!"
 
     if not ["x!checkLenght!x"] == ["xx"] (
-        echo Bad titleId ^^! must have 16 hexadecimal characters^, given %titleId%
+        echo Bad titleId ^^! must have 16 hexadecimal characters^, given !titleId!
         goto:getTitleId
     )
-    set "titleId=%titleId%"
+    set "titleId=!titleId!"
 
     REM : get gfxPackVersion version to create
     echo.
@@ -163,11 +160,11 @@ REM    color 4F
     if not [!libFileLine!] == ["NONE"] goto:stripLine
 
     if !QUIET_MODE! EQU 1 (
-        !MessageBox! "Unable to get informations on the game for titleId %titleId% in !wiiTitlesDataBase:"=!" 4112
+        !MessageBox! "Unable to get informations on the game for titleId !titleId! in !wiiTitlesDataBase:"=!" 4112
         exit /b 3
     )
-    echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^? >> !cggpLogFile!
-    echo createGameGraphicPacks ^: unable to get informations on the game for titleId %titleId% ^?
+    echo createGameGraphicPacks ^: unable to get informations on the game for titleId !titleId! ^? >> !cggpLogFile!
+    echo createGameGraphicPacks ^: unable to get informations on the game for titleId !titleId! ^?
     echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase! >> !cggpLogFile!
     echo Check your entry or if you sure^, add a row for this game in !wiiTitlesDataBase!
 
@@ -217,20 +214,14 @@ REM    color 4F
     if not ["!gfxPackVersion!"] == ["V2"] goto:V4packs
 
     REM : V2 packs
-    echo !createV2! !BFW_GP_FOLDER! %titleId% !GAME_TITLE! >> !cggpLogFile!
-    REM : for V2 packs, as new folders are created and linked afterward in updateGamesGraphicPacks.bat
-    REM : do not wait if called from updateGamesGraphicPacks
-    echo Create V2 packs in background
-    if !QUIET_MODE! EQU 1 (
-        wscript /nologo !StartHidden! !createV2! !BFW_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE!
-    ) else (
-        :waitingLoop
-        REM : V2GraphicPack match createOneV2GraphicPack.bat, completeV2GraphicPacks.bat, createV2GraphicPacks.bat
-        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "V2GraphicPack" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
-            timeout /T 1 > NUL 2>&1
-            goto:waitingLoop
-        )
-    )
+    echo !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+    echo Create V2 packs^.^.^.
+    call !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
+
+    REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
+    set "msg="!GAME_TITLE! [!titleId!] graphic packs versionV2=completed""
+    call:log2GamesLibraryFile !msg!
+
     goto:endMain
 
     :V4packs
@@ -238,34 +229,31 @@ REM    color 4F
 
     REM : V4 packs
     echo !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+    call !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
 
-    REM : Do not wait also here because waiting loops in launchGame and wizardFirstSaving search for GraphicPacks.bat
-    REM : and link in GAME_GP_FOLDER is created in createV4
-    set "cgpv4LogFile="!BFW_LOGS:"=!\createV4GraphicPacks.log""
-    wscript /nologo !StartWait! !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
-    if exist !cgpv4LogFile! type !cgpv4LogFile! >> !cggpLogFile!
+    REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
+    set "msg="!GAME_TITLE! [!titleId!] graphic packs versionV4=completed""
+    call:log2GamesLibraryFile !msg!
     goto:endMain
 
     :V6packs
     REM : V4 packs
-    echo !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+    echo !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+    call !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
 
-    REM : Do not wait also here because waiting loops in launchGame and wizardFirstSaving search for GraphicPacks.bat
-    REM : and link in GAME_GP_FOLDER is created in createLastVersion
-    set "cgpvLogFile="!BFW_LOGS:"=!\createLastGraphicPacks.log""
-    call !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! %titleId% !nativeHeight! !GAME_TITLE!
-    if exist !cgpvLogFile! type !cgpvLogFile! >> !cggpLogFile!
+    REM : !glogFile! is updated in updateGamesGraphicPacks
 
     :endMain
     REM : ending DATE
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
     set "endingDate=%ldt%"
-    REM : starting DATE
 
     echo ========================================================= >> !cggpLogFile!
     echo =========================================================
 
+    echo starting date = %startingDate% > !cggpLogFile!
+    echo starting date = %startingDate%
     echo ending date = %endingDate% >> !cggpLogFile!
     echo ending date = %endingDate%
 
@@ -313,6 +301,30 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2GamesLibraryFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        if not exist !glogFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2GamesLibraryFile
+        )
+
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
+
+        :logMsg2GamesLibraryFile
+        echo !msg! >> !glogFile!
+        REM : sorting the log
+        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
+        type !glogFile! | sort > !gLogFileTmp!
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
     REM : function to log info for current host
     :log2HostFile
         REM : arg1 = msg

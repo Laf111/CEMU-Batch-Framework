@@ -18,13 +18,13 @@ REM    color 4F
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
-    set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
-    set "cv2gpLogFile="!BFW_PATH:"=!\logs\completeV2GraphicPacks.log""
+    set "BFW_LOGS="!BFW_PATH:"=!\logs""
+    set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
+    set "cv2gpLogFile="!BFW_LOGS:"=!\completeV2GraphicPacks.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
 
-    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
@@ -62,13 +62,6 @@ REM    color 4F
 
     set "rulesFolder=!rulesFile:\rules.txt=!"
     for /F "delims=~" %%i in (!rulesFolder!) do set "gpNameFolder=%%~nxi"
-
-    REM : check completion status (if called from validateExtraGraphicPacksCreation.bat or buildExtraGraphicPacks.bat)
-    if exist !glogFile! type !glogFile! | find "!gpNameFolder! graphic packs versionV2=completed" > NUL 2>&1 && (
-        echo V2 packs already completed, nothing to do >> !cv2gpLogFile!
-        echo V2 packs already completed, nothing to do
-        goto:eof
-    )
 
     REM : Get the first titleId from the list in the GFX pack
     set "titleId=NOT_FOUND"
@@ -114,10 +107,14 @@ REM    color 4F
     if !nativeHeight! EQU 720 set /A "nativeWidth=1280"
     if !nativeHeight! EQU 1080 set /A "nativeWidth=1920"
 
+    REM : double of the native height of the game
+    set /A "resX2=!nativeHeight!*2"
+    set "GAME_TITLE=!gpNameFolder:_%resX2%p=!"
+    
     echo ========================================================= >> !cv2gpLogFile!
     echo =========================================================
-    echo Complete V2 graphic packs for !gpNameFolder! >> !cv2gpLogFile!
-    echo Complete V2 graphic packs for !gpNameFolder!
+    echo Complete V2 graphic packs for !GAME_TITLE! >> !cv2gpLogFile!
+    echo Complete V2 graphic packs for !GAME_TITLE!
     echo ========================================================= >> !cv2gpLogFile!
     echo =========================================================
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cv2gpLogFile!
@@ -161,9 +158,6 @@ REM    color 4F
         set /A "nbAr-=1"
     )
 
-    REM : double of the native height of the game
-    set /A "resX2=!nativeHeight!*2"
-
     set "rulesFolder=!rulesFile:\rules.txt=!"
 
     REM : basename of GAME FOLDER PATH (used to name shorcut)
@@ -200,10 +194,10 @@ REM    color 4F
 
     echo =========================================================  >> !cv2gpLogFile!
     echo =========================================================
+    echo Waiting all child process end^.^.^. >> !cv2gpLogFile!
+    echo Waiting all child process end^.^.^.
+    call:WaitAllChildProcessEnd
 
-    REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
-    set "msg="!GAME_TITLE! graphic packs versionV2=completed""
-    call:log2GamesLibraryFile !msg!
 
     exit /b 0
     goto:eof
@@ -213,27 +207,17 @@ REM    color 4F
 REM : ------------------------------------------------------------------
 REM : functions
 
-    REM : function to log info for current host
-    :log2GamesLibraryFile
-        REM : arg1 = msg
-        set "msg=%~1"
 
-        if not exist !glogFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2GamesLibraryFile
+    :WaitAllChildProcessEnd
+
+        echo Waiting until all chlid process end ^(V2 packs^)^.^.^.
+        :waitingLoop
+        wmic process get Commandline 2>NUL | find "cmd.exe" | find  /I "_BatchFw_Install" | find  /I "instanciateResX2gp.bat" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            goto:waitingLoop
         )
-
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
-
-        :logMsg2GamesLibraryFile
-        echo !msg! >> !glogFile!
-        REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
-        type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
+        wmic process get Commandline 2>NUL | find "fnr.exe" | find  /I "_BatchFw_Install" | find /I /V "wmic" | find /I /V "find" > NUL 2>&1 && (
+            goto:waitingLoop
+        )
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -272,7 +256,7 @@ REM : functions
 
         REM : fullscreen resolutions
         if !hi! EQU !nativeHeight! if !wi! EQU !nativeWidth! goto:eof
-        if !n5Found! EQU 1 call:addPresets & goto:eof
+        if ["!ratio!"] == [" (16/9)"] call:addPresets & goto:eof
 
         call:addCustomPresets
 
@@ -308,69 +292,6 @@ REM : functions
 
         set /A "isOdd=!wMax!%%2"
         if !isOdd! EQU 1 set /A "wMax+=1"
-
-        REM : in order to inser the preset sorted in the rules.txt file
-        REM : first check if the 1080 or (1050 for aspect ratio */10) preset already exist
-        REM : this prest if at the rank 6 (5 starting from 0) in the array
-
-        set /A "h5=!hArray[5]!"
-        REM : compute w5
-        set /A "w5=!h5!*!wr!"
-        set /A "w5=!w5!/!hr!"
-
-        set /A "isOdd=!w5!%%2"
-        if !isOdd! EQU 1 set /A "w5+=1"
-
-        set /A "n5Found=0"
-
-        set "logFileFindPreset="!fnrLogFolder:"=!\!gpFolderName:"=!-Find_!h5!x!w5!.log""
-        del /F !logFileFindPreset! > NUL 2>&1
-
-        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --useRegEx --useEscapeChars --find "^^[[]Preset[]].*\nname[ ]*=[ 0-9A-Z-:/\(\)]*\n\$width[ ]*=[ ]*!w5!.*\n\$height[ ]*=[ ]*!h5!.*\n\$gameWidth[ ]*=[ ]*!nativeWidth!.*\n\$gameHeight[ ]*=[ ]*!nativeHeight!\n" --logFile !logFileFindPreset!
-
-        for /F "tokens=2-3 delims=." %%i in ('type !logFileFindPreset! ^| find /I /V "^!" ^| find "File:" 2^>NUL') do set /A "n5Found=1"
-
-        if !n5Found! EQU 1 (
-
-            REM :   - loop from (4,-1,0)
-            set /A "previousH=!h5!"
-            set /A "previousW=!w5!"
-
-            for /L %%i in (4,-1,0) do (
-                set /A "hi=!hArray[%%i]!"
-
-                REM : compute wi
-                set /A "wi=!hi!*!wr!"
-                set /A "wi=!wi!/!hr!"
-
-                set /A "isOdd=!wi!%%2"
-                if !isOdd! EQU 1 set /A "wi+=1"
-
-                call:addResolution
-                set /A "previousH=!hi!"
-                set /A "previousW=!wi!"
-            )
-
-            set /A "previousH=!h5!"
-            set /A "previousW=!w5!"
-
-            REM :   - loop from (6,1,24)
-            for /L %%i in (6,1,24) do (
-                set /A "hi=!hArray[%%i]!"
-
-                REM : compute wi
-                set /A "wi=!hi!*!wr!"
-                set /A "wi=!wi!/!hr!"
-
-                set /A "isOdd=!wi!%%2"
-                if !isOdd! EQU 1 set /A "wi+=1"
-
-                call:addResolution
-                set /A "previousH=!hi!"
-                set /A "previousW=!wi!"
-            )
-            goto:eof
-        )
 
         set /A "previousH=!hMax!"
         set /A "previousW=!wMax!"
@@ -425,13 +346,6 @@ REM : functions
 
     REM : function to add an extra 16/9 preset in graphic pack of the game
     :addPresets
-
-        set "str=!gpFolderName:_Resolution=!"
-
-        set "gpPath="!gfxPacksV2Folder:"=!\!str:"=!""
-
-        set "newGp="!gpPath:"=!_!hc!p""
-        set "gpResX2="!gpPath:"=!_%resX2%p""
 
         set "gpPath=!rulesFolder:_%resX2%p=!"
         set "newGp="!gpPath:"=!_!hc!p!""
@@ -557,18 +471,11 @@ REM : functions
 
         call:setParams
 
-        set "gpPath="!gfxPacksV2Folder:"=!\!str:"=!""
-        set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
-        set "gpResX2="!gpPath:"=!_%resX2%p""
-
-
         set "gpPath=!rulesFolder:_%resX2%p=!"
         set "newGp="!gpPath:"=!_!hc!p!wp!!hp!!suffixGp!""
         set "gpResX2=!rulesFolder!"
 
-
         if not exist !newGp! (
-
             REM : search for ResX2p489
             set "gpResX2p="!gpResX2:"=!489""
 
@@ -580,7 +487,6 @@ REM : functions
             if exist !gpResX2p! (
                 set "gpResX2=!gpResX2p!"
             )
-
             wscript /nologo !StartHidden! !instanciateResX2gp! !nativeWidth! !nativeHeight! !gpResX2! !newGp! !wc! !hc! "!desc!" > NUL 2>&1
 
             echo + !wc!x!hc!!desc! V2 pack >> !cv2gpLogFile!

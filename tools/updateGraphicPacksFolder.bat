@@ -221,7 +221,8 @@ REM : main
         REM : in all case and specially when the updated is forced, clean all version used for completing GFX packs in glogFile
         REM : it will also force to rebuild older packs on the next run (and take eventually new aspect ratios into account)
         if exist !glogFile! (
-            for /F "tokens=2 delims=~=" %%i in ('type !glogFile! ^| find "graphic packs version=" 2^>NUL') do call:cleanGameLogFile "graphic packs version"
+            REM : clean log file for all games and GFX packs version (force to eventually add new aspect ratios)
+            call:cleanGameLogFile "graphic packs version"
         )
     )
     exit /b 0

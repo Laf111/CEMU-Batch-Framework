@@ -130,6 +130,8 @@ REM : main
 
             call:deleteFolder
         )
+        REM : clean the game library log for all games and version of packs
+        call:cleanGameLibFile "] graphic packs version"        
     ) else (
 
         set "gameTitle=NONE"
@@ -160,9 +162,8 @@ REM : main
             )
         )
 
-        REM : in case of no GFX packs were found, still clean the game library log
-        REM : it will also force to rebuild older packs on the next run (and take eventually new aspect ratios into account)
-        call:cleanGameLibFile "!gameTitle! graphic packs version"
+        REM : clean the game library log for this game (all version of packs)
+        call:cleanGameLibFile "[!selected!] graphic packs version"
     )
 
     echo =========================================================
@@ -191,13 +192,6 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :deleteFolder
-
-        REM : get game's name used for naming GFX packs
-        set "gfxPackName=!gfxPackName:_BatchFw_=!"
-        for /F "delims=~_ tokens=1" %%i in ("!gfxPackName!") do set "gameNameUsedForNaming=%%~nxi"
-
-        REM : flush GamesLibrary log for all gfx pack versions V2->newest
-        call:cleanGameLibFile "!gameNameUsedForNaming! graphic packs version"
 
         set /A "attempt=1"
         :tryToDelete

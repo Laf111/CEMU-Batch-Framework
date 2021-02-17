@@ -88,13 +88,6 @@ REM    color 4F
     if not exist !gfxp! mkdir !gfxp! > NUL 2>&1
     set "gfxpPath="!gfxp:"=!\rules.txt""
 
-    REM : if !gfxpPath! exist, do not exit but complete it (take eventually new aspect ratios) if no
-    REM : trace in glogFile
-    echo !gfxpPath! | find "_graphicPacksV6" > NUL 2>&1 && (
-        REM : for an old pack (saved under _graphicPacksV6), check gLogFile status
-        if exist !glogFile! type !glogFile! | find /I "!GAME_TITLE! graphic packs versionV6" > NUL 2>&1 && goto:eof
-    )
-
     echo =========================================================
     echo ========================================================= >> !cgpvLogFile!
     echo Create !strBfwMaxVgfxp! graphic packs for !GAME_TITLE!
@@ -173,7 +166,8 @@ REM : functions
     :initResGraphicPack
 
         echo [Definition] > !gfxpPath!
-        echo titleIds = !titleIdsList:"=! >> !gfxpPath!
+        set "list=!titleIdsList:"=!"
+        echo titleIds = !list! >> !gfxpPath!
 
         echo name = Resolution >> !gfxpPath!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !gfxpPath!

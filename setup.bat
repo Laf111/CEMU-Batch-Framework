@@ -66,7 +66,7 @@ REM : main
     set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
 
     REM : replace ref in glogFile
-    set "msg="!BFW_VERSION! installed, version of graphic packs =!BFW_GFXP_VERSION!""
+    set "msg="!BFW_VERSION! installed, version of graphic packs=!BFW_GFXP_VERSION!""
     call:log2GamesLibraryFile !msg!
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
@@ -1346,8 +1346,15 @@ REM : ------------------------------------------------------------------
         )
 
         echo ---------------------------------------------------------
-        call:getUserInput "BatchFw launching mode? (s = silent : default in 20sec, OR p = use progress bar): " "s,p" ANSWER 20
-        if [!ANSWER!] == ["p"] (
+        echo BatchFw comes with a progress bar to monitor pre and post
+        echo treatments^.
+        echo.
+        echo NOTE ^: Using the progressbar results in doubling launch times
+        echo         You can en^/disable it using the shortcuts under ^'Wii-U Games^\BatchFw^'
+        echo.
+
+        call:getUserInput "Use a progress bar to monitor treatments? (y, n=default in 20sec): " "n,y" ANSWER 20
+        if [!ANSWER!] == ["y"] (
             set "msg="USE_PROGRESSBAR=YES""
             call:log2HostFile !msg!
         )

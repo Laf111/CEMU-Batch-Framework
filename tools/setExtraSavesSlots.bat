@@ -664,12 +664,12 @@ REM : functions
                 echo    8 ^: deactivate all slots ^(use default user^'s save and do not delete slots^)
 
                 echo.
-                choice /C 12345678 /N /M "Please, enter you choice   : "
+                choice /C 12345678 /N /M "Please, enter your choice   : "
                 set /A "userChoice=!ERRORLEVEL!"
 
             ) else (
                 echo.
-                choice /C 12 /N /M "Please, enter you choice   : "
+                choice /C 12 /N /M "Please, enter your choice   : "
                 set /A "userChoice=!ERRORLEVEL!"
 
             )

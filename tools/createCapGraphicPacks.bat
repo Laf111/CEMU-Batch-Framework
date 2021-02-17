@@ -48,13 +48,7 @@ REM    color 4F
         goto:continue
     :end
 
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "startingDate=%ldt%"
-    REM : starting DATE
-    echo starting date = %startingDate% > !ccgpLogFile!
-    echo starting date = %startingDate%
+    echo. > !ccgpLogFile!
 
     if %nbArgs% NEQ 0 goto:getArgsValue
 
@@ -288,7 +282,7 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
 
     :searchForFpsPp
     if !g30! EQU 1 (
-        REM : when a FPS++ GFX is found on rules.txt, vsync is defined in => exit
+        REM : when a FPS++ GFX is found on rules.txt
         if !fpsPP! EQU 1 echo FPS^+^+ was found >> !ccgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
         if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !ccgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
         echo no FPS^+^+ GFX pack found >> !ccgpLogFile!
@@ -687,7 +681,9 @@ echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
         if ["!gfxPackVersion!"] == ["V2"] (
-            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+REM : for V2 create FPS CAP even if a FPS++ exist
+REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+            call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         ) else (
             if !fpsPP! EQU 0 type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && (
             call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
@@ -738,7 +734,8 @@ echo targetFps=!targetFps!
         set /A "fpsToDisplay=%fps%"
         set "h=%~2"
 
-        if !g30! EQU 1 set /A "fps=%fps%*2"
+        if !g30! EQU 1 if !fpsPp! EQU 0 set /A "fps=%fps%*2"
+
         echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
         echo !h! ^: %fpsToDisplay%Hz monitor ^(%fpsToDisplay% FPS^)>> !ccgpLogFile!

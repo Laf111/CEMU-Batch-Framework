@@ -23,7 +23,6 @@ REM    color 4F
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
-    set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
     set "cgpv4LogFile="!BFW_LOGS:"=!\createV4GraphicPacks.log""
 
@@ -83,13 +82,6 @@ REM    color 4F
     if not exist !gfxp! mkdir !gfxp! > NUL 2>&1
     set "gfxpPath="!gfxp:"=!\rules.txt""
 
-    REM : if !gfxpPath! exist, do not exit but complete it (take eventually new aspect ratios) if no
-    REM : trace in glogFile
-    echo !gfxpPath! | find "_graphicPacksV4" > NUL 2>&1 && (
-        REM : for an old pack (saved under _graphicPacksV4), check gLogFile status
-        if exist !glogFile! type !glogFile! | find /I "!GAME_TITLE! graphic packs versionV4" > NUL 2>&1 && goto:eof
-    )
-
     echo =========================================================
     echo ========================================================= >> !cgpv4LogFile!
     echo Create V4 graphic packs for !GAME_TITLE!
@@ -104,10 +96,6 @@ REM    color 4F
     set "relativePath=!gfxpPath:*_BatchFw_Graphic_Packs\=!"
     call:createGfxpLink !relativePath!
 
-    REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
-    set "msg="!GAME_TITLE! graphic packs versionV4=completed""
-    call:log2GamesLibraryFile !msg!
-
     exit /b 0
 
     goto:eof
@@ -116,31 +104,6 @@ REM    color 4F
 
 REM : ------------------------------------------------------------------
 REM : functions
-
-    REM : function to log info for current host
-    :log2GamesLibraryFile
-        REM : arg1 = msg
-        set "msg=%~1"
-
-        if not exist !glogFile! (
-            set "logFolder="!BFW_PATH:"=!\logs""
-            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
-            goto:logMsg2GamesLibraryFile
-        )
-
-        REM : check if the message is not already entierely present
-        for /F %%i in ('type !glogFile! ^| find /I "!msg!" 2^>NUL') do goto:eof
-
-        :logMsg2GamesLibraryFile
-        echo !msg! >> !glogFile!
-        REM : sorting the log
-        set "gLogFileTmp="!glogFile:"=!.bfw_tmp""
-        type !glogFile! | sort > !gLogFileTmp!
-        del /F /S !glogFile! > NUL 2>&1
-        move /Y !gLogFileTmp! !glogFile! > NUL 2>&1
-
-    goto:eof
-    REM : ------------------------------------------------------------------
 
     :getMainGfxpFolder
 
@@ -200,7 +163,8 @@ REM : functions
     :initResGraphicPack
 
         echo [Definition] > !gfxpPath!
-        echo titleIds = !titleIdsList:"=! >> !gfxpPath!
+        set "list=!titleIdsList:"=!"
+        echo titleIds = !list! >> !gfxpPath!
 
         echo name = Resolution >> !gfxpPath!
         echo path = "!GAME_TITLE!/Graphics/Resolution" >> !gfxpPath!

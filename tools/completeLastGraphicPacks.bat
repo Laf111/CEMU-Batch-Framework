@@ -47,11 +47,9 @@ REM    color 4F
     REM : get current date
     for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
     set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "startingDate=%ldt%"
     REM : starting DATE
-
-    echo starting date = %startingDate% > !clgpLogFile!
-    echo starting date = %startingDate%
+    set "startingDate=%ldt%"
+    echo. > !clgpLogFile!
 
     if %nbArgs% NEQ 1 (
         echo ERROR ^: on arguments passed ^!
@@ -82,17 +80,6 @@ REM    color 4F
     set "rulesFolder=!rulesFile:\rules.txt=!"
     set "gpFolder=!rulesFolder:\Graphics=!"
     for /F "delims=~" %%i in (!gpFolder!) do set "gpNameFolder=%%~nxi"
-
-    REM : remove when no more V6 in the current GFX repo
-    REM : treating a V6 pack not mixed in the last version of GFX packs repo
-    echo !rulesFile! | find /I "_graphicPacksV6" > NUL 2>&1 && (
-        REM : check completion status (if called from validateExtraGraphicPacksCreation.bat or buildExtraGraphicPacks.bat)
-        if exist !glogFile! type !glogFile! | find "!gpNameFolder! graphic packs versionV6=completed" > NUL 2>&1 && (
-            echo V6 packs already completed, nothing to do >> !clgpLogFile!
-            echo V6 packs already completed, nothing to do
-            goto:eof
-        )
-    )
 
     REM : Get the first titleId from the list in the GFX pack
     set "titleId=NOT_FOUND"
@@ -184,8 +171,6 @@ REM    color 4F
     ) else (
         set /A "nbAr-=1"
     )
-
-
 
     set "gpNativeHeight=NOT_FOUND"
 
