@@ -21,7 +21,7 @@ CEMU's process is monitored and its priority pushed from "above nromal" to "high
 A lock file is used to allow only one instance of CEMU and to **avoid thread safe issues**. CEMU's return code is analyzed before backuping your saves in order to **avoid saves corruption if CEMU crashes**.
 
 BatchFw handles as many users as you want. All users can play even with old versions of CEMU (in BatcFw all users use the default account 8000001).
-It also allows to create extra saves slots to define **multiple saves per user for each games**.
+It also allows to create extra saves slots to define **multiple saves per user for each game**.
 
 If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
 
