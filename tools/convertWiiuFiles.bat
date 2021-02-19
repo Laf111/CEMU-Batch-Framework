@@ -366,31 +366,15 @@ REM : main
     call:getSizeInMb !lastWupFolder! sizeWup
 echo WUP size = !sizeWup! MB
 
-    REM : source drive
-    for %%a in (!lastWupFolder!) do set "sourceDrive=%%~da"
-    REM : target drive
-    for %%a in (!JNUSTFolder!) do set "targetDrive=%%~da"
-
+    REM : check size available on drive (counting Wup size for RPX files)
+    call:checkSizeAvailable !drive! !sizeWup! 
+    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+    
     REM : JNUST WUP temporary folder         
     set "srcJtf="!JNUSTFolder:"=!\tmp_!titleId!""
-
-    REM : if folders are on the same drive
-    if ["!sourceDrive!"] == ["!targetDrive!"] (
-        REM : no need to check size
-        
-        move /Y !lastWupFolder! !srcJtf! > NUL 2>&1
-        set /A "cr=%ERRORLEVEL%"
-        if !cr! NEQ 0 (
-            echo ERROR^: when moving !lastWupFolder! to !srcJtf!^, aborting^.^.^.
-            pause
-            exit /b 71
-        )
-        set "moved=1"            
-    ) else (
-        REM : check size available on target drive
-        call:checkSizeAvailable !drive! !sizeWup! 
-        if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-        
+    set /A "moved=0" 
+    
+    if !CONVERT_ENUM! EQU 7 (
         REM : robocopy
         robocopy !lastWupFolder! !srcJtf! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
         set /A "cr=!ERRORLEVEL!"        
@@ -399,12 +383,44 @@ echo WUP size = !sizeWup! MB
             pause
             exit /b 72
         )
+        set /A "moved=0"
+        set /A "keepWup=0"        
+    ) else (
+    
+        REM : source drive
+        for %%a in (!lastWupFolder!) do set "sourceDrive=%%~da"
+        REM : target drive
+        for %%a in (!JNUSTFolder!) do set "targetDrive=%%~da"
+
+
+        REM : if folders are on the same drive
+        if ["!sourceDrive!"] == ["!targetDrive!"] (
+            REM : no need to check size
+            
+            move /Y !lastWupFolder! !srcJtf! > NUL 2>&1
+            set /A "cr=%ERRORLEVEL%"
+            if !cr! NEQ 0 (
+                echo ERROR^: when moving !lastWupFolder! to !srcJtf!^, aborting^.^.^.
+                pause
+                exit /b 71
+            )
+            set /A "moved=1"            
+        ) else (
+            REM : check size available on target drive
+            call:checkSizeAvailable !drive! !sizeWup! 
+            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+            
+            REM : robocopy
+            robocopy !lastWupFolder! !srcJtf! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
+            set /A "cr=!ERRORLEVEL!"        
+            if !cr! GTR 7 (
+                echo ERROR^: when Copying !lastWupFolder! to !srcJtf!^, aborting^.^.^.
+                pause
+                exit /b 72
+            )
+        )
     )
 echo Using temporary folder !srcJtf!
- 
-    REM : check size available on drive (counting Wup size for RPX files)
-    call:checkSizeAvailable !drive! !sizeWup! 
-    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 
     echo ---------------------------------------------------------        
     echo ^> Converting WUP to RPX package^.^.^."
@@ -459,10 +475,17 @@ echo JNUST return code = !ERRORLEVEL!
     REM )
 
     REM : rename RPX package
-    set "finalFolder="!JNUSTFolder:"=!\!GAME_TITLE!""    
-    move /Y !rpxFolder! !finalFolder! > NUL 2>&1
+    set "finalFolder="!JNUSTFolder:"=!\!GAME_TITLE!""
+    if not exist !finalFolder! (
+        move /Y !rpxFolder! !finalFolder! > NUL 2>&1
     
-    move /Y !finalFolder! ..\..\.. > NUL 2>&1
+        set "gamePath="!GAMES_FOLDER:"=!\!GAME_TITLE!""
+        if not exist !gamePath! (
+            move /Y !finalFolder! ..\..\.. > NUL 2>&1
+        ) else (
+            rmdir/Q /S !rpxFolder! > NUL 2>&1
+        )
+    )
     echo ^> RPX package moved to !GAMES_FOLDER:"=!
     echo   Launch setup or create script to take it into account
             
@@ -489,12 +512,20 @@ echo JNUST return code = !ERRORLEVEL!
             REM : move back user WUP package   
             move /Y !srcJtf! !targetFolder! > NUL 2>&1
         ) else (
+        
+            REM : check size available on target drive
+            call:checkSizeAvailable !targetDrive! !sizeWup! 
+            if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+        
             REM : robocopy
             robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
         ) 
         echo ^> WUP package copied under !targetFolder!
         
     ) else (
+echo keepWup=!keepWup!    
+echo moved=!moved!
+pause 
         if !keepWup! EQU 1 (
         
             set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
@@ -506,6 +537,10 @@ echo JNUST return code = !ERRORLEVEL!
                 REM : move back user WUP package   
                 move /Y !srcJtf! !targetFolder! > NUL 2>&1
             ) else (
+                REM : check size available on target drive
+                call:checkSizeAvailable !targetDrive! !sizeWup! 
+                if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
+            
                 REM : robocopy
                 robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
             )
@@ -516,7 +551,7 @@ echo JNUST return code = !ERRORLEVEL!
                 move /Y !srcJtf! !targetFolder! > NUL 2>&1
             ) else (
                 REM : was copied, clean JNUST folder
-                rmdir /Q /S !srcJtf! > NUL 2>&1            
+                rmdir /Q /S !srcJtf! > NUL 2>&1
             )
         )
     )
@@ -848,7 +883,7 @@ REM : functions
         for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"    
     
         REM : get the game code
-        set "gameCode=%wupName:~-4%"
+        set "gameCode=%wupName:~6,4%"
 echo gameCode=!gameCode!       
         REM : get game's title from wii-u database file
         set "libFileLine="NONE""
