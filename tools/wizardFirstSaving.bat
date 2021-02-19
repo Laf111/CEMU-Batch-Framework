@@ -217,12 +217,6 @@ REM : main
         pause
     )
 
-    REM : _BatchFW_Missing_Games_Profiles folder to store missing games profiles in CEMU_FOLDER\GamesProfiles
-    set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
-
-    REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
-    if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
-
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     set "versionRead=NOT_FOUND"
@@ -318,37 +312,8 @@ REM : main
     )
 
     :coreModeSet
-    REM : Creating game profile if needed
-    if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:handleVersions
-
-    REM : profile file can be NOT_FOUND or \%titleId%.ini or \default\%titleId%.ini
-
-    REM : define cemu profile path
-
-    REM : check if PROFILE_FILE exist under MISSING_PROFILES_FOLDER
-    set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-
     set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
-
-    REM : check if a ddefault profile exist
-    set "upf="!CEMU_PF:"=!\default\%titleId%.ini""
-
-    REM : if you already generated a profile under MISSING_PROFILES_FOLDER
-    REM : and if not default profile exists, use it
-    if exist !missingProfile! if not exist !PROFILE_FILE! if not exist !upf! (
-        robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" > NUL 2>&1
-        goto:handleVersions
-    )
-    
-    REM : else, create profile file in CEMU_FOLDER
-    if not exist !PROFILE_FILE! call:createGameProfile > NUL 2>&1
-
-    REM : if just created, copy it in MISSING_PROFILES_FOLDER (if a default one does not exist)
-    set "defaultProfile="!CEMU_PF:"=!\default\%titleId%.ini""
-    if not exist !missingProfile! if not exist !defaultProfile! robocopy !CEMU_PF! !MISSING_PROFILES_FOLDER! "%titleId%.ini" > NUL 2>&1
-
-
-    :handleVersions
+    call:createGameProfile
 
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
@@ -1468,23 +1433,43 @@ REM : functions
     REM : ------------------------------------------------------------------
 
     :createGameProfile
+
+        REM : CEMU is not affected by unused (newer) instructions in the game's profile
+        REM : only enums and integers have to be eventually changed in function of the
+        REM : version of CEMU launched.
        
         echo # !GAME_TITLE! > %PROFILE_FILE%
         echo [Graphics] >> %PROFILE_FILE%
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
         if !v1156! EQU 2 (
-            echo GPUBufferCacheAccuracy = 0 >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = 2 >> %PROFILE_FILE%
         ) else (
-            echo GPUBufferCacheAccuracy = high >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = low >> %PROFILE_FILE%
         )
         echo disableGPUFence = false >> %PROFILE_FILE%
-
         echo accurateShaderMul = min >> %PROFILE_FILE%
+
+        set "precompShaderState=enable"
+        set "precomShaderFlag=true"
+        if ["!gpuType!"] == ["NVIDIA"] (
+            set "precompShaderState=disable"
+            set "precomShaderFlag=false"
+        )
+        echo precompiledShaders = !precompShaderState!>>%PROFILE_FILE%
+        echo disablePrecompiledShaders = !precomShaderFlag!>>%PROFILE_FILE%
+
         echo [CPU] >> %PROFILE_FILE%
         echo cpuTimer = hostBased >> %PROFILE_FILE%
         echo cpuMode = !recommendedMode! >> %PROFILE_FILE%
         echo threadQuantum = 100000 >> %PROFILE_FILE%
+
+        set "pat="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\*.txt""
+        REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat!  2^>NUL') do set "lastController=%%i"
+
+        echo [Controller]>>%PROFILE_FILE%
+        echo controller1 = !lastController!>>%PROFILE_FILE%
 
         echo Creating a Game profile for tilte Id ^: %titleId%
 

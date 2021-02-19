@@ -126,14 +126,6 @@ REM : main
     rmdir /Q /S !BatchFW_Games_Compatibility_Reports!  > NUL 2>&1
     echo ^> _BatchFW_Games_Compatibility_Reports deleted ^!
     echo ---------------------------------------------------------
-    :removeMissing
-    set "BatchFW_Missing_Games_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
-    if not exist !BatchFW_Missing_Games_Profiles! goto:removeController
-    call:getUserInput "Remove _BatchFW_Missing_Games_Profiles folder ? (y, n)" "y,n" ANSWER
-    if [!ANSWER!] == ["n"] goto:removeController
-    rmdir /Q /S !BatchFW_Missing_Games_Profiles! > NUL 2>&1
-    echo ^> _BatchFW_Missing_Games_Profiles deleted ^!
-    echo ---------------------------------------------------------
     :removeController
     set "BatchFW_Controller_Profiles="!GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles""
     if not exist !BatchFW_Controller_Profiles! goto:removeGpuCache

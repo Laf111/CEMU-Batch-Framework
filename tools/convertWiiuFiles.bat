@@ -31,6 +31,8 @@ REM : main
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
 
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
@@ -49,14 +51,11 @@ REM : main
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "duLogFile="!BFW_PATH:"=!\logs\du.log""
 
-    REM : checking GAMES_FOLDER folder
-    call:checkPathForDos !GAMES_FOLDER!
-
     REM : set current char codeset
     call:setCharSet
 
-    REM : cd to GAMES_FOLDER
-    pushd !GAMES_FOLDER!
+    REM : cd to JNUSTFolder
+    pushd !JNUSTFolder!
 
     REM : search if the script convertWiiuFiles is not already running (nb of search results)
     set /A "nbI=0"
@@ -232,37 +231,38 @@ REM : main
         move /Y !oldTitleKey! !newTitleKey! > NUL 2>&1
     )    
     
-    REM : cd to JNUSTFolder
-    pushd !JNUSTFolder!
     set /A "keepWup=0"
     
     if !CONVERT_ENUM! EQU 1 goto:compressor
     if !CONVERT_ENUM! EQU 4 goto:compressor
     
-    if !CONVERT_ENUM! EQU 2 goto:wud2app
-    if !CONVERT_ENUM! EQU 5 goto:wud2app
+    if !CONVERT_ENUM! EQU 2 goto:wupAsked
+    if !CONVERT_ENUM! EQU 5 goto:wupAsked
     
     REM : here CONVERT_ENUM=3,6 or 7
     choice /C yn /N /M "Do you wish to keep the WUP package generated (y, n)? : "
     if !ERRORLEVEL! EQU 2 goto:wud2app
     
     :wupAsked
-    set "msg=Please browse to the folder where to put the WUP package^.^.^."
+    set "msg=Please browse to the folder where to put the WUP package..."
 
     if !CONVERT_ENUM! EQU 7 (
-        set "msg=Please browse to the WUP^.^.^."
+        set "msg=Please browse to the WUP..."
     ) else (
         set /A "mod3=CONVERT_ENUM%%3"
         if !mod3! EQU 0 (
-            set "msg=Please browse to the folder where to keep the WUP package^.^.^."
+            set "msg=Please browse to the folder where to keep the WUP package..."
             set /A "keepWup=1"
         )
     )
-    :getWupFolder
-    set "WupFolder="NOT_FOUND""
+    echo.
+    echo !msg!
     
-    for /F %%b in ('cscript /nologo !browseFolder! !msg!') do set "folder=%%b" && set "WupFolder=!folder:?= !"
-    if [!WupFolder!] == ["NOT_FOUND"] (
+    :getWupFolder
+    set "wupFolder="NOT_FOUND""
+    
+    for /F %%b in ('cscript /nologo !browseFolder! !msg!') do set "folder=%%b" && set "wupFolder=!folder:?= !"
+    if [!wupFolder!] == ["NOT_FOUND"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && goto:EndMain
         goto:getWupFolder
@@ -270,16 +270,17 @@ REM : main
     
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
-    call !tobeLaunch! !WupFolder!
+    call !tobeLaunch! !wupFolder!
     set /A "cr=!ERRORLEVEL!"
     if !cr! GTR 1 (
-        echo Path to !WupFolder! is not DOS compatible^!^, please choose another location
+        echo Path to !wupFolder! is not DOS compatible^!^, please choose another location
         pause
         goto:getWupFolder
     )
-    echo.
-    echo ^> WUP package will be copied to !WupFolder! when done
-    
+    if !CONVERT_ENUM! NEQ 7 (
+        echo.
+        echo ^> WUP package will be copied to !wupFolder! when done
+    )
     if !CONVERT_ENUM! GEQ 4 goto:wud2app
 
     :compressor
@@ -348,10 +349,11 @@ REM : main
     echo !lastWupFolder! created sucessfully 
     echo ---------------------------------------------------------
     
-    if !CONVERT_ENUM! EQU 2 goto:moveWup
-    if !CONVERT_ENUM! EQU 5 goto:moveWup
-    
+    if !CONVERT_ENUM! EQU 2 set "srcJtf=!lastWupFolder!" & goto:moveWup
+    if !CONVERT_ENUM! EQU 5 set "srcJtf=!lastWupFolder!" & goto:moveWup
+        
     :wup2rpx
+    if !CONVERT_ENUM! EQU 7 set "lastWupFolder=!wupFolder!"
     
     call:getTitleData titleId GAME_TITLE productCode
     if !ERRORLEVEL! NEQ 0 (
@@ -363,6 +365,7 @@ REM : main
     REM : get the size of the WUP package
     call:getSizeInMb !lastWupFolder! sizeWup
 echo WUP size = !sizeWup! MB
+
     REM : source drive
     for %%a in (!lastWupFolder!) do set "sourceDrive=%%~da"
     REM : target drive
@@ -371,7 +374,6 @@ echo WUP size = !sizeWup! MB
     REM : JNUST WUP temporary folder         
     set "srcJtf="!JNUSTFolder:"=!\tmp_!titleId!""
 
-    set "moved=0"
     REM : if folders are on the same drive
     if ["!sourceDrive!"] == ["!targetDrive!"] (
         REM : no need to check size
@@ -406,14 +408,16 @@ echo Using temporary folder !srcJtf!
 
     echo ---------------------------------------------------------        
     echo ^> Converting WUP to RPX package^.^.^."
-    REM : run in hidden
-    start /B /MIN java -jar JNUSTool.jar %titleId% > jnust.log  2>&1
-    REM : timeout 2
+
+    set "wupBatFile="!JNUSTFolder:"=!\wup.bat""
+    del /F "jnust.log" > NUL 2>&1
+    echo java -jar JNUSTool^.jar %titleId% ^> jnust^.log > !wupBatFile!
+    wscript /nologo !StartHidden! !wupBatFile!
 
     timeout /T 2 > NUL 2>&1
-    
     REM : kill
     wmic path Win32_Process where "CommandLine like '%%JNUSTool.jar %titleId%%%'" call terminate > NUL 2>&1
+    del /F !wupBatFile! > NUL 2>&1
     
     REM : get the decrypted key
     for /F "tokens=2 delims=~:" %%d in ('type jnust^.log 2^>NUL ^| find "Encrypted Key"') do set "keyRead=%%d"
@@ -460,36 +464,62 @@ echo JNUST return code = !ERRORLEVEL!
     
     move /Y !finalFolder! ..\..\.. > NUL 2>&1
     echo ^> RPX package moved to !GAMES_FOLDER:"=!
-    echo    Launch setup or create script to take it into account
+    echo   Launch setup or create script to take it into account
             
     echo ---------------------------------------------------------
     
     :moveWup
     REM : init for a WUP output (CONVERT_ENUM=3,4)
-    set "targetFolder=!wupFolder!"
+
+    set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
+    set /A "wupIsFinal=0"
     
-    if !keepWup! EQU 1 (
-        set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
-        if !moved! EQU 0 (
-            REM : robocopy
-echo             robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT
-            robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT
-pause            
-        ) else (
+    if !CONVERT_ENUM! EQU 2 set /A "wupIsFinal=1"
+    if !CONVERT_ENUM! EQU 5 set /A "wupIsFinal=1"
+
+    if !wupIsFinal! EQU 1 (
+        
+        for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"        
+        set "targetFolder="!wupFolder:"=!\!wupName!""
+        if exist !targetFolder! goto:endMain        
+        
+        REM : target drive
+        for %%a in (!wupFolder!) do set "targetDrive=%%~da"
+        if ["!sourceDrive!"] == ["!targetDrive!"] (
             REM : move back user WUP package   
             move /Y !srcJtf! !targetFolder! > NUL 2>&1
-        )
-        echo ^> WUP package copied under !targetFolder!
-    ) else (     
-        if !moved! EQU 1 (
-            REM : move back user WUP package     
-            move /Y !srcJtf! !targetFolder! > NUL 2>&1
         ) else (
-            REM : was copied, clean JNUST folder
-            del /F /S !srcJtf! > NUL 2>&1            
+            REM : robocopy
+            robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
+        ) 
+        echo ^> WUP package copied under !targetFolder!
+        
+    ) else (
+        if !keepWup! EQU 1 (
+        
+            set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
+            if exist !targetFolder! goto:endMain
+            REM : target drive
+            for %%a in (!wupFolder!) do set "targetDrive=%%~da"
+
+            if ["!sourceDrive!"] == ["!targetDrive!"] (
+                REM : move back user WUP package   
+                move /Y !srcJtf! !targetFolder! > NUL 2>&1
+            ) else (
+                REM : robocopy
+                robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
+            )
+            echo ^> WUP package copied under !targetFolder!
+        ) else (     
+            if !moved! EQU 1 (
+                REM : move back user WUP package     
+                move /Y !srcJtf! !targetFolder! > NUL 2>&1
+            ) else (
+                REM : was copied, clean JNUST folder
+                rmdir /Q /S !srcJtf! > NUL 2>&1            
+            )
         )
     )
-    
     :endMain
     echo =========================================================
     REM : ending DATE

@@ -1991,30 +1991,11 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         if !usePbFlag! EQU 1 call:setProgressBar 54 60 "pre processing" "installing settings for !currentUser!"
 
-        if not [!PROFILE_FILE!] == ["NOT_FOUND"] goto:isSettingsExist
-
-        REM : IF GAME PROFILE EXIST and in case of auto-import check if missingProfile exists
-        set "MISSING_PROFILES_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
-
-        REM : create folder !GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles (if need)
-        if not exist !MISSING_PROFILES_FOLDER! mkdir !MISSING_PROFILES_FOLDER! > NUL 2>&1
-
-        REM : its path if already saved under _BatchFW_Missing_Games_Profiles
-        set "missingProfile="!MISSING_PROFILES_FOLDER:"=!\%titleId%.ini""
-        if not exist !missingProfile! goto:isSettingsExist
-
-        REM : copy profile file in CEMU_FOLDER (PROFILE_FILE=NOT_FOUND)
-        set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
-
-        REM : deafult profile file
-        set "default="%CEMU_FOLDER:"=%\gameProfiles\default\%titleId%.ini""
-
-        if not exist !default! robocopy !MISSING_PROFILES_FOLDER! !CEMU_PF! "%titleId%.ini" /MT:32 > NUL 2>&1
-
-        :isSettingsExist
-
         if exist !SETTINGS_FOLDER! goto:loaded
 
+        REM : else search for a suitable settings
+
+        set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
         REM : search for the last modified settings folder
         set "previousSettingsFolder="NONE""
 
@@ -2048,21 +2029,50 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if !usePbFlag! EQU 1 call:setProgressBar 60 70 "pre processing" "installing settings for !currentUser!"
 
         set "PROFILE_FILE="!CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
-        if not exist !OLD_PROFILE_FILE! goto:syncCP
+        if not exist !OLD_PROFILE_FILE! goto:createGameProfile
 
-        REM : if PROFILE_FILE does not exist use OLD_PROFILE_FILE
-        if not exist !PROFILE_FILE! copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:mapProfileFile
+        REM : import OLD_PROFILE_FILE
+        copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:mapProfileFile
 
-        REM : diff game's profiles, open winmerge on the two files
-        set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
+        :createGameProfile
 
-        wscript /nologo !StartWait! !WinMergeU! /xq !OLD_PROFILE_FILE! !PROFILE_FILE!
+        REM : Now BatchFw ignores the default game profile given by CEMU when importing
+        REM : CEMU is not affected by unused (newer) instructions in the game's profile
+        REM : only enums and integers have to be eventually changed in function of the
+        REM : version of CEMU launched.
+
+        echo # !GAME_TITLE!>!PROFILE_FILE!
+        echo [Graphics]>>!PROFILE_FILE!
+        echo GPUBufferCacheAccuracy = low>>!PROFILE_FILE!
+        echo disableGPUFence = false>>!PROFILE_FILE!
+        echo accurateShaderMul = min>>!PROFILE_FILE!
+
+        set "precompShaderState=enable"
+        set "precomShaderFlag=true"
+        if ["!gpuType!"] == ["NVIDIA"] (
+            set "precompShaderState=disable"
+            set "precomShaderFlag=false"
+        )
+        echo precompiledShaders = !precompShaderState!>>!PROFILE_FILE!
+        echo disablePrecompiledShaders = !precomShaderFlag!>>!PROFILE_FILE!
+
+        echo [CPU]>>!PROFILE_FILE!
+        echo cpuTimer = hostBased>>!PROFILE_FILE!
+        echo cpuMode = Auto>>!PROFILE_FILE!
+        echo threadQuantum = 100000>>!PROFILE_FILE!
+
+        set "pat="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\*.txt""
+        REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat! 2^>NUL') do set "lastController=%%i"
+
+        echo [Controller]>>!PROFILE_FILE!
+        echo controller1 = !lastController!>>!PROFILE_FILE!
 
         :mapProfileFile
         REM : PROFILE FILE Mapping (CEMU's version of PROFILE_FILE is undefined here)
         REM : --------------------
         REM : (profile file are not saved by BatchFw and remain with CEMU installations)
-        set "CEMU_PF="!CEMU_FOLDER:"=!\gameProfiles""
+
         REM : log file
         set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
 
@@ -2077,7 +2087,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
 
         REM : all treatments below are for versionRead >= 1.15.6
-        goto:syncCP
+        goto:checkCpuMode
 
         :supOrEqualv1156
         REM : versionRead >= 1.15.6
@@ -2087,12 +2097,12 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "1" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*1" --replace "gpuBufferCacheAccuracy = medium" --logFile !fnrLogFile!
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "0" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*0" --replace "gpuBufferCacheAccuracy = high" --logFile !fnrLogFile!
 
-
         REM : v1.21.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
 
         REM : versionRead >= v1.21.0 goto:supOrEqualv121
         if !v121! LEQ 1 goto:supOrEqualv121
 
+        :checkCpuMode
         REM : versionRead < 1.21.0 replace enums by integers (if found/need)
 
         REM : compute recommended mode (including for 1.21.5)
@@ -2118,6 +2128,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : replace Single/Multi-core with recommendedMode
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core recompiler" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core recompiler" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "cpuMode" | find /I "Auto" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Auto" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
 
         REM : all treatments below are for versionRead >= 1.21.0
         goto:syncCP
