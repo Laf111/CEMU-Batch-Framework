@@ -193,7 +193,7 @@ REM : main
         echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 && set "titleKey=!inputFile:_part1.wud=.key!"
         set "titleKey=!inputFile:.wud=.key!"
         
-        if not exist !titleKey! (
+        if !CONVERT_ENUM! NEQ 7 if !CONVERT_ENUM! NEQ 4 if !CONVERT_ENUM! NEQ 1 if not exist !titleKey! (
             echo !titleKey! not found close to wud file^, please fix
             pause
             goto:getAFile
