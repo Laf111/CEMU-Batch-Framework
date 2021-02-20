@@ -325,8 +325,6 @@ REM : main
     set "csTmp2="!CEMU_FOLDER:"=!\settings.bfw_tmp2""
     set "csTmp="!CEMU_FOLDER:"=!\settings.bfw_tmp""
     del /F !csTmp!* > NUL 2>&1
-
-    set "exampleFile="!CEMU_FOLDER:"=!\gameProfiles\example.ini""
     
     REM : suppose that version > 1.14 => > v1.12
     set /A "v114=1"
@@ -463,7 +461,7 @@ REM : main
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "!proposedVersion! install folder path" 2^>NUL') do set "installPath="%%i""
         if [!installPath!] == ["NONE"] goto:instanciateGameProfile
 
-        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, use this game profile file ? (y, n) : "
+        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, adpat the settings from this file ? (y, n) : "
         if !ERRORLEVEL! EQU 2 call:instanciateGameProfile
 
         REM : search in logFile, getting only the last occurence
