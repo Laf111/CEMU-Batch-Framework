@@ -143,7 +143,7 @@ REM : main
 
     set "GAME_FOLDER_PATH="!GAMES_FOLDER:"=!\!GAME_TITLE!""
     REM : check game profile
-    :checkGameProfile
+    :checkMetaFile
     REM : Get Game information using titleId
     set "META_FILE="!GAME_FOLDER_PATH:"=!\meta\meta.xml""
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
@@ -178,7 +178,7 @@ REM : main
     )
     for /F "delims=<" %%i in (!titleLine!) do set "titleId=%%i"
     REM : In case of non saving
-    if ["%titleId%"] == ["################"] goto:checkGameProfile
+    if ["%titleId%"] == ["################"] goto:checkMetaFile
 
     if ["%titleId:ffffffff=%"] == ["%titleId%"] goto:getTitleFromDataBase
     if ["%titleId:FFFFFFFF=%"] == ["%titleId%"] goto:getTitleFromDataBase
@@ -220,7 +220,7 @@ REM : main
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     set "versionRead=NOT_FOUND"
-    if not exist !cemuLog! goto:checkProfile
+    if not exist !cemuLog! goto:initGameProfile
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
 
@@ -229,6 +229,7 @@ REM : main
     set "versionReadFormated=NONE"
     REM : suppose that version > 1.17.2 > 1.15.19 > 1.15.15 > 1.15.6 => > 1.11.6
     set /A "v122=1"
+    set /A "v121=1"
     set /A "v1172=1"
     set /A "v11519=1"
     set /A "v11515=1"
@@ -239,8 +240,16 @@ REM : main
     if ["!v122!"] == [""] echo Error when comparing versions
     if !v122! EQU 50 echo Error when comparing versions
 
-    REM : version > 1.22.0 => > 1.17.2 > ....
-    if !v122! LEQ 1 goto:checkProfile
+    REM : version > 1.22.0 => > 1.21.0 > ....
+    if !v122! LEQ 1 goto:initGameProfile
+
+    REM : comparing version to V1.21.0 (GFX packs V4 -> 7 and up)
+    call:compareVersions !versionRead! "1.21.0" v121 > NUL 2>&1
+    if ["!v121!"] == [""] echo Error when comparing versions
+    if !v121! EQU 50 echo Error when comparing versions
+
+    REM : version > 1.21.0 => > 1.17.2 > ....
+    if !v121! LEQ 1 goto:initGameProfile
     
     REM : comparing version to V1.17.2
     call:compareVersions !versionRead! "1.17.2" v1172 > NUL 2>&1
@@ -248,7 +257,7 @@ REM : main
     if !v1172! EQU 50 echo Error when comparing versions
 
     REM : version > 1.17.2 => > v1.15.19 > ....
-    if !v1172! LEQ 1 goto:checkProfile
+    if !v1172! LEQ 1 goto:initGameProfile
 
     REM : else comparing version to V1.15.19
     call:compareVersions !versionRead! "1.15.19" v11519 > NUL 2>&1
@@ -256,7 +265,7 @@ REM : main
     if !v11519! EQU 50 echo Error when comparing versions
 
     REM : version > 1.15.19 => > v1.15.15...
-    if !v11519! LEQ 1 goto:checkProfile
+    if !v11519! LEQ 1 goto:initGameProfile
 
     REM : else comparing version to V1.15.15
     set /A "v11515=2"
@@ -265,14 +274,14 @@ REM : main
     if !v11515! EQU 50 echo Error when comparing versions
 
     REM : version > 1.15.15 => > v1.15.6 => > 1.11.6
-    if !v11515! LEQ 1 goto:checkProfile
+    if !v11515! LEQ 1 goto:initGameProfile
 
     REM : else compare
     set /A "v1156=2"
     call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
     if ["!v1156!"] == [""] echo Error when comparing versions ^, result ^= !v1156!
 
-    :checkProfile
+    :initGameProfile
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
     REM : get CPU threads number
@@ -285,35 +294,29 @@ REM : main
         goto:coreModeSet
     )
     
-    REM : version >=1.17.2 (including 1.21.5, job is done here)
-    if !v1172! LEQ 1 (
+    REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
+    set /A "cpuNeeded=3"
 
-        REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
-        set /A "cpuNeeded=3"
-
-        REM : get GPU_VENDOR
-        set "gpuType=NO_NVIDIA"
-        for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
-            set "string=%%i"
-            echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
-                set "gpuType=NVIDIA"
-            )
+    REM : get GPU_VENDOR
+    set "gpuType=NO_NVIDIA"
+    for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
+        set "string=%%i"
+        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+            set "gpuType=NVIDIA"
         )
-        if ["!gpuType!"] == ["NVIDIA"] (
-            echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in
-            echo in 3D settings of the control panel
-            set /A "cpuNeeded+=1"
-        )
-        if !nbCpuThreads! GTR !cpuNeeded! (
-            set "recommendedMode=DualCore-recompiler"
-            set /A "cpuNeeded+=1"
-            if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
-        )
+    )
+    if ["!gpuType!"] == ["NVIDIA"] (
+        echo NVIDIA GPU detected ^: be sure to have enable ^'optimization threaded'^ option in
+        echo in 3D settings of the control panel
+        set /A "cpuNeeded+=1"
+    )
+    if !nbCpuThreads! GTR !cpuNeeded! (
+        set "recommendedMode=DualCore-recompiler"
+        set /A "cpuNeeded+=1"
+        if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
     )
 
     :coreModeSet
-    set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
-    call:createGameProfile
 
     REM : settings.xml files (a backup is already done in LaunchGame.bat)
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
@@ -395,10 +398,10 @@ REM : main
         call:checkOwnerShip !sf!
     )
 
-    if not exist !cs! goto:displayGameProfile
+    if not exist !cs! goto:useAnotherGameProfile
 
     REM : check the file size
-    for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:diffProfileFile
+    for /F "tokens=*" %%a in (!cs!) do if %%~za EQU 0 goto:useAnotherGameProfile
     
     REM : create a link to GAME_FOLDER_PATH in log folder
     set "TMP_GAME_FOLDER_PATH="!BFW_LOGS:"=!\!GAME_TITLE!""
@@ -432,38 +435,8 @@ REM : main
 
     !xmlS! ed -u "//mlc_path" -v "!MLC01_FOLDER_PATH!/" !csTmp! > !cs! 2>NUL
     if exist !cs! del /F !csTmp!* > NUL 2>&1
-    goto:diffProfileFile
 
-    :displayGameProfile
-
-    echo SET THE GAME^'S PROFILE
-    echo ---------------------------------------------------------
-    echo.
-    echo All settings defined in the game^'s profile override CEMU^'s UI ones ^!
-    echo.
-    echo To see which parameters are handled in this version^, you can
-    echo choose to open the example^.ini below^.
-    echo Define at least ^:
-    echo.
-    echo [Graphics]
-    echo GPUBufferCacheAccuracy = 1 ^(2^:low^, 1^:medium^, 0^:high^)
-    echo.
-    echo [CPU]
-    echo cpuMode = Singlecore-Recompiler ^(Singlecore-Interpreter^, Singlecore-Recompiler^, Dualcore-Recompiler^, Triplecore-Recompiler^)
-    echo cpuTimer = hostBased ^(cycleCounter^, hostBased^)
-    echo.
-    echo ---------------------------------------------------------
-
-    REM : ask to open example.ini of this version
-    if not exist !exampleFile! goto:openProfileFile
-
-    choice /C yn /CS /N /M "Do you want to open !exampleFile:"=! to see all settings you can set? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:diffProfileFile
-
-    wscript /nologo !Start! !exampleFile!
-
-    :diffProfileFile
-
+    REM : get the last version used to launch this game (if available)
     set "lls="!sf:"=!\!currentUser!_lastSettings.txt"
 
     if exist !lls! (
@@ -478,6 +451,8 @@ REM : main
         )
     )
 
+    :useAnotherGameProfile
+    set "PROFILE_FILE="!CEMU_PF:"=!\%titleId%.ini""
     if exist !REF_CEMU_FOLDER! (
 
         REM : basename of REF_CEMU_FOLDER (used to name shortcut)
@@ -486,10 +461,10 @@ REM : main
         REM : search in logFile, getting only the last occurence
         set "installPath="NONE""
         for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "!proposedVersion! install folder path" 2^>NUL') do set "installPath="%%i""
-        if [!installPath!] == ["NONE"] goto:askToCompare
+        if [!installPath!] == ["NONE"] goto:instanciateGameProfile
 
-        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, compare or use ^(if no differences were found^) this game profile file ? (y, n) : "
-        if !ERRORLEVEL! EQU 2 goto:askToCompare
+        choice /C yn /CS /N /M "!GAME_TITLE! was last played on !USERDOMAIN! with !proposedVersion!, use this game profile file ? (y, n) : "
+        if !ERRORLEVEL! EQU 2 call:instanciateGameProfile
 
         REM : search in logFile, getting only the last occurence
         set "pat="!proposedVersion! install folder path""
@@ -498,53 +473,85 @@ REM : main
 
         if ["!lastPath!"] == ["NONE"] (
             echo Cancel ^: !proposedVersion! install path not found ^!
-            goto:askToCompare
+            goto:instanciateGameProfile
         )
-        set "REF_CEMU_FOLDER=!lastPath!"
-
-        goto:launchDiff
+        set "OLD_PROFILE_FILE="!lastPath:"=!\gameProfiles\%titleId%.ini""
+        opy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1
+        goto:patchGameProfile
     )
 
-    :askToCompare
+    :instanciateGameProfile
+    call:createGameProfile
 
-    choice /C yn /CS /N /M "Do you want to compare !GAME_TITLE! game profile with an existing profile file? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:openProfileFile
-    
-    REM : get cemu install folder for existing game's profile
-    :askRefCemuFolder
+    :patchGameProfile
 
-    for /F %%b in ('cscript /nologo !browseFolder! "Select a Cemu's install folder as reference"') do set "folder=%%b" && set "REF_CEMU_FOLDER=!folder:?= !"
-    if [!REF_CEMU_FOLDER!] == ["NONE"] goto:openProfileFile
+    REM : log file
+    set "fnrLogFile="!fnrLogFolder:"=!\gameProfile.log""
 
-    :launchDiff
+    REM : v1.15.6 replace integer values by enums for gpuBufferCacheAccuracy
 
-    REM : check that profile file exist in
-    set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\%titleId%.ini""
+    REM : versionRead >= v1.15.6 goto:supOrEqualv1156
+    if !v1156! LEQ 1 goto:supOrEqualv1156
 
-    if not exist !refProfileFile! set "refProfileFile="!REF_CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+    REM : versionRead < 1.15.6 replace enums by integers (if found/need)
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
 
-    if not exist !refProfileFile! (
-        echo No game^'s profile file found ^!
-        goto:askRefCemuFolder
+    REM : all treatments below are for versionRead >= 1.15.6
+    goto:checkCpuMode
+
+    :supOrEqualv1156
+    REM : versionRead >= 1.15.6
+
+    REM : if needed (found) replace integers by enums
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "2" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*2" --replace "gpuBufferCacheAccuracy = low" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "1" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*1" --replace "gpuBufferCacheAccuracy = medium" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "0" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*0" --replace "gpuBufferCacheAccuracy = high" --logFile !fnrLogFile!
+
+    REM : versionRead >= v1.15.8 goto:supOrEqualv1158
+    if !v1158! LEQ 1 goto:supOrEqualv1158
+    REM : use disablePrecompiledShaders
+    type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "true" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*true" --replace "disablePrecompiledShaders = true" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "false" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*false" --replace "disablePrecompiledShaders = false" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "auto" > NUL 2>&1 && (
+        if ["!gpuType!"] == ["NVIDIA"] (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*auto" --replace "disablePrecompiledShaders = true" --logFile !fnrLogFile!
+        ) else (
+            wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*auto" --replace "disablePrecompiledShaders = false" --logFile !fnrLogFile!
+        )
     )
 
-    REM : open winmerge on files
-    set "WinMergeU="!BFW_PATH:"=!\resources\winmerge\WinMergeU.exe""
-    call !WinMergeU! /xq !refProfileFile! !PROFILE_FILE!
+    :supOrEqualv1158
+    REM : use precompiledShaders
+    type !PROFILE_FILE! | find /I "disablePrecompiledShaders" | find /I "true" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "disablePrecompiledShaders[ ]*=[ ]*true" --replace "precompiledShaders = true" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "disablePrecompiledShaders" | find /I "false" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "disablePrecompiledShaders[ ]*=[ ]*false" --replace "precompiledShaders = false" --logFile !fnrLogFile!
 
-    goto:step2
+    REM : v1.21.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
 
-    :openProfileFile
+    REM : versionRead >= v1.21.0 goto:supOrEqualv121
+    if !v121! LEQ 1 goto:supOrEqualv121
 
-    REM : if version of CEMU >= 1.12.0
-    if !v112! LEQ 1 goto:step2
+    :checkCpuMode
+    REM : versionRead < 1.21.0 replace enums by integers (if found/need)
 
-    echo opening !PROFILE_FILE:"=! ^.^.^.
-    echo Complete it ^(if needed^) then close notepad to continue
-    wscript /nologo !StartWait! "%windir%\System32\notepad.exe" !PROFILE_FILE!
-    echo ---------------------------------------------------------
+    REM : replace Single/Multi-core with recommendedMode
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core recompiler" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core recompiler" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "Auto" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Auto" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
 
-    :step2
+    REM : all treatments below are for versionRead >= 1.21.0
+    goto:displayGameData
+
+    :supOrEqualv121
+    REM : versionRead >= 1.21.0
+
+    REM : if needed (found) replace Single/Dual/TripleCore-recompiler with Single/Multi-core
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "SingleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*SingleCore-recompiler" --replace "cpuMode = Single-core recompiler" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "DualCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*DualCore-recompiler" --replace "cpuMode = Multi-core recompiler" --logFile !fnrLogFile!
+    type !PROFILE_FILE! | find /I "cpuMode" | find /I "TripleCore-recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*TripleCore-recompiler" --replace "cpuMode = Multi-core recompiler" --logFile !fnrLogFile!
+
+    :displayGameData
     cls
     REM : create a text file in game's folder to save data for current game
     set "gameInfoFile="!GAME_FOLDER_PATH:"=!\Cemu\!GAME_TITLE!.txt""
@@ -569,29 +576,7 @@ REM : main
     REM : display main CEMU and CemuHook settings and check conistency
     call:checkCemuSettings
 
-    REM : if version of CEMU >= 1.15.6 (v1156<=1)
-    if !v1156! LEQ 1 goto:wait
-
-    set "PF="!CEMU_FOLDER:"=!\gameProfiles""
-    REM : replace gpuBufferCacheAccuracy = low
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "low" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*low" --replace "gpuBufferCacheAccuracy = 2" --logFile !fnrLogFile!
-    REM : replace gpuBufferCacheAccuracy = medium
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "medium" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*medium" --replace "gpuBufferCacheAccuracy = 1" --logFile !fnrLogFile!
-    REM : replace gpuBufferCacheAccuracy = high
-    type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "high" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*high" --replace "gpuBufferCacheAccuracy = 0" --logFile !fnrLogFile!
-    
-    echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    choice /C yn /CS /N /M "Open !exampleFile:"=! to see all settings you can override in the game's profile? (y, n) : "
-    if !ERRORLEVEL! EQU 2 goto:reopen
-
-    wscript /nologo !Start! !exampleFile!
-    :reopen
-    choice /C yn /CS /N /M "Do you need to re-open profile file to modify overrided settings? (y, n) : "
-    if !ERRORLEVEL! EQU 1 goto:openProfileFile
-
     REM : waiting updateGamesGraphicPacks processes ending
-    :wait
-
     set /A "disp=0"
     set "wfsLogFileTmp="!TMP:"=!\BatchFw_wizardFirstSaving_process.list""
 
@@ -998,26 +983,16 @@ REM : functions
         if !v1158! LEQ 1 goto:eof
 
         REM : check if cemuHook.ini exist
-        if not exist !chs! goto:patchGp
+        if not exist !chs! goto:eof
 
         REM : else verifiy cemu hook install
         set dllFile="!CEMU_FOLDER:"=!\keystone.dll""
 
         REM : if not exist exit
-        if not exist !dllFile! goto:patchGp
+        if not exist !dllFile! goto:eof
 
         REM : force ignorePrecompiledShaderCache = true in cemuHook.ini
         call:patchGraphicSection !chs! "ignorePrecompiledShaderCache" %value%
-        
-        :patchGp
-
-        if !v1158! EQU 2 call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
-        if !v1158! LEQ 1 (
-            set "value=false"
-            call:patchGraphicSection !PROFILE_FILE! "precompiledShaders" !value!
-        ) else (
-            call:patchGraphicSection !PROFILE_FILE! "disablePrecompiledShaders" %value%
-        )
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -1438,38 +1413,55 @@ REM : functions
         REM : only enums and integers have to be eventually changed in function of the
         REM : version of CEMU launched.
        
-        echo # !GAME_TITLE! > %PROFILE_FILE%
-        echo [Graphics] >> %PROFILE_FILE%
+        echo # !GAME_TITLE! > !PROFILE_FILE!
+        echo [Graphics] >> !PROFILE_FILE!
 
         REM : if version of CEMU < 1.15.6 (v1156<=1)
         if !v1156! EQU 2 (
-            echo GPUBufferCacheAccuracy = 2 >> %PROFILE_FILE%
+            echo GPUBufferCacheAccuracy = 2 >> !PROFILE_FILE!
         ) else (
-            echo GPUBufferCacheAccuracy = low >> %PROFILE_FILE%
+            REM : try to use the default value of GPUBufferCacheAccuracy
+            set "dp="!CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+            set "dgbc=NONE"
+            if exist !dp! (
+                type !dp! | find "GPUBufferCacheAccuracy" > NUL 2>&1 && (
+                    for /F "tokens=2 delims=~=" %%g in ('type !dp! ^| find "GPUBufferCacheAccuracy" 2^>NUL') do set "dgbc=%%g"
+                )
+            )
+            set "gbc=low"
+            if not ["!dgbc!"] == ["NONE"] set "gbc=!dgbc: =!"
+            echo GPUBufferCacheAccuracy = !gbc!>>!PROFILE_FILE!
         )
-        echo disableGPUFence = false >> %PROFILE_FILE%
-        echo accurateShaderMul = min >> %PROFILE_FILE%
+        echo disableGPUFence = false >> !PROFILE_FILE!
+        echo accurateShaderMul = min >> !PROFILE_FILE!
 
-        set "precompShaderState=enable"
-        set "precomShaderFlag=true"
-        if ["!gpuType!"] == ["NVIDIA"] (
-            set "precompShaderState=disable"
-            set "precomShaderFlag=false"
+        if !v1158! LEQ 1 (
+            set "precompShaderState=enable"
+            if ["!gpuType!"] == ["NVIDIA"] (
+                set "precompShaderState=disable"
+            )
+            echo precompiledShaders = !precompShaderState!>>!PROFILE_FILE!
+        ) else (
+            set "precomShaderFlag=true"
+            if ["!gpuType!"] == ["NVIDIA"] (
+                set "precomShaderFlag=false"
+            )
+            echo disablePrecompiledShaders = !precomShaderFlag!>>!PROFILE_FILE!
         )
-        echo precompiledShaders = !precompShaderState!>>%PROFILE_FILE%
-        echo disablePrecompiledShaders = !precomShaderFlag!>>%PROFILE_FILE%
-
-        echo [CPU] >> %PROFILE_FILE%
-        echo cpuTimer = hostBased >> %PROFILE_FILE%
-        echo cpuMode = !recommendedMode! >> %PROFILE_FILE%
-        echo threadQuantum = 100000 >> %PROFILE_FILE%
+        echo [CPU] >> !PROFILE_FILE!
+        echo cpuTimer = hostBased >> !PROFILE_FILE!
+        echo cpuMode = !recommendedMode! >> !PROFILE_FILE!
+        echo threadQuantum = 100000 >> !PROFILE_FILE!
 
         set "pat="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\*.txt""
         REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
-        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat!  2^>NUL') do set "lastController=%%i"
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat!  2^>NUL') do set "lastController="%%i""
 
-        echo [Controller]>>%PROFILE_FILE%
-        echo controller1 = !lastController!>>%PROFILE_FILE%
+        REM : basename of GAME FOLDER PATH (used to name shorcut)
+        for /F "delims=~" %%i in (!lastController!) do set "controllerName=%%~nxi"
+
+        echo [Controller]>>!PROFILE_FILE!
+        echo controller1 = !controllerName:.txt=!>>!PROFILE_FILE!
 
         echo Creating a Game profile for tilte Id ^: %titleId%
 

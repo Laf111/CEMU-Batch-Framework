@@ -326,6 +326,7 @@ REM : main
     set /A "v11519=1"
     set /A "v11515=1"
     set /A "v1156=1"
+    set /A "v1158=1"
     set /A "v114=1"
 
     REM : comparing version to V1.21.0 (GFX packs V4 -> 7 and up)
@@ -382,8 +383,15 @@ REM : main
     if ["!v11515!"] == [""] echo Error when comparing versions >> !batchFwLog!
     if !v11515! EQU 50 echo Error when comparing versions >> !batchFwLog!
 
-    REM : version > 1.15.15 => > v1.15.6 > ....
+    REM : version > 1.15.15 => > v1.15.8 > ....
     if !v11515! LEQ 1 goto:getTitleId
+
+    call:compareVersions !versionRead! "1.15.8" v1158 > NUL 2>&1
+    if ["!v1158!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v1158! EQU 50 echo Error when comparing versions >> !batchFwLog!
+
+    REM : version > 1.15.8 => > v1.15.6 > ....
+    if !v1158! LEQ 1 goto:getTitleId
 
     call:compareVersions !versionRead! "1.15.6" v1156 > NUL 2>&1
     if ["!v1156!"] == [""] echo Error when comparing versions >> !batchFwLog!
@@ -2032,7 +2040,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if not exist !OLD_PROFILE_FILE! goto:createGameProfile
 
         REM : import OLD_PROFILE_FILE
-        copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:mapProfileFile
+        copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1 && goto:patchGameProfile
 
         :createGameProfile
 
@@ -2043,18 +2051,35 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         echo # !GAME_TITLE!>!PROFILE_FILE!
         echo [Graphics]>>!PROFILE_FILE!
-        echo GPUBufferCacheAccuracy = low>>!PROFILE_FILE!
+
+        REM : try to use the default value of GPUBufferCacheAccuracy
+        set "dp="!CEMU_FOLDER:"=!\gameProfiles\default\%titleId%.ini""
+        set "dgbc=NONE"
+        if exist !dp! (
+            type !dp! | find "GPUBufferCacheAccuracy" > NUL 2>&1 && (
+                for /F "tokens=2 delims=~=" %%g in ('type !dp! ^| find "GPUBufferCacheAccuracy" 2^>NUL') do set "dgbc=%%g"
+            )
+        )
+        set "gbc=low"
+        if not ["!dgbc!"] == ["NONE"] set "gbc=!dgbc: =!"
+        echo GPUBufferCacheAccuracy = !gbc!>>!PROFILE_FILE!
+
         echo disableGPUFence = false>>!PROFILE_FILE!
         echo accurateShaderMul = min>>!PROFILE_FILE!
 
-        set "precompShaderState=enable"
-        set "precomShaderFlag=true"
-        if ["!gpuType!"] == ["NVIDIA"] (
-            set "precompShaderState=disable"
-            set "precomShaderFlag=false"
+        if !v1158! LEQ 1 (
+            set "precompShaderState=enable"
+            if ["!gpuType!"] == ["NVIDIA"] (
+                set "precompShaderState=disable"
+            )
+            echo precompiledShaders = !precompShaderState!>>!PROFILE_FILE!
+        ) else (
+            set "precomShaderFlag=true"
+            if ["!gpuType!"] == ["NVIDIA"] (
+                set "precomShaderFlag=false"
+            )
+            echo disablePrecompiledShaders = !precomShaderFlag!>>!PROFILE_FILE!
         )
-        echo precompiledShaders = !precompShaderState!>>!PROFILE_FILE!
-        echo disablePrecompiledShaders = !precomShaderFlag!>>!PROFILE_FILE!
 
         echo [CPU]>>!PROFILE_FILE!
         echo cpuTimer = hostBased>>!PROFILE_FILE!
@@ -2063,12 +2088,15 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
 
         set "pat="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\*.txt""
         REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
-        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat! 2^>NUL') do set "lastController=%%i"
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat!  2^>NUL') do set "lastController="%%i""
+
+        REM : basename of GAME FOLDER PATH (used to name shorcut)
+        for /F "delims=~" %%i in (!lastController!) do set "controllerName=%%~nxi"
 
         echo [Controller]>>!PROFILE_FILE!
-        echo controller1 = !lastController!>>!PROFILE_FILE!
+        echo controller1 = !controllerName:.txt=!>>!PROFILE_FILE!
 
-        :mapProfileFile
+        :patchGameProfile
         REM : PROFILE FILE Mapping (CEMU's version of PROFILE_FILE is undefined here)
         REM : --------------------
         REM : (profile file are not saved by BatchFw and remain with CEMU installations)
@@ -2097,6 +2125,24 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "1" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*1" --replace "gpuBufferCacheAccuracy = medium" --logFile !fnrLogFile!
         type !PROFILE_FILE! | find /I "gpuBufferCacheAccuracy" | find /I "0" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "gpuBufferCacheAccuracy[ ]*=[ ]*0" --replace "gpuBufferCacheAccuracy = high" --logFile !fnrLogFile!
 
+        REM : versionRead >= v1.15.8 goto:supOrEqualv1158
+        if !v1158! LEQ 1 goto:supOrEqualv1158
+        REM : use disablePrecompiledShaders
+        type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "true" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*true" --replace "disablePrecompiledShaders = true" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "false" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*false" --replace "disablePrecompiledShaders = false" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "precompiledShaders" | find /I "auto" > NUL 2>&1 && (
+            if ["!gpuType!"] == ["NVIDIA"] (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*auto" --replace "disablePrecompiledShaders = true" --logFile !fnrLogFile!
+            ) else (
+                wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "precompiledShaders[ ]*=[ ]*auto" --replace "disablePrecompiledShaders = false" --logFile !fnrLogFile!
+            )
+        )
+
+        :supOrEqualv1158
+        REM : use precompiledShaders
+        type !PROFILE_FILE! | find /I "disablePrecompiledShaders" | find /I "true" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "disablePrecompiledShaders[ ]*=[ ]*true" --replace "precompiledShaders = true" --logFile !fnrLogFile!
+        type !PROFILE_FILE! | find /I "disablePrecompiledShaders" | find /I "false" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "disablePrecompiledShaders[ ]*=[ ]*false" --replace "precompiledShaders = false" --logFile !fnrLogFile!
+
         REM : v1.21.0+ introduce Single-core/Multi-core enums instead of Single/Dual/TripleCore-recompiler
 
         REM : versionRead >= v1.21.0 goto:supOrEqualv121
@@ -2110,21 +2156,18 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
         set "recommendedMode=SingleCore-recompiler"
 
-        REM : version >=1.17.2 (including 1.21.5, job is done here)
-        if !v1172! LEQ 1 (
+        REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
+        set /A "cpuNeeded=3"
 
-            REM : CEMU singleCore (1) GPU (1) Audio+misc (1)
-            set /A "cpuNeeded=3"
-
-            if ["!gpuType!"] == ["NVIDIA"] (
-                set /A "cpuNeeded+=1"
-            )
-            if !nbCpuThreads! GTR !cpuNeeded! (
-                set "recommendedMode=DualCore-recompiler"
-                set /A "cpuNeeded+=1"
-                if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
-            )
+        if ["!gpuType!"] == ["NVIDIA"] (
+            set /A "cpuNeeded+=1"
         )
+        if !nbCpuThreads! GTR !cpuNeeded! (
+            set "recommendedMode=DualCore-recompiler"
+            set /A "cpuNeeded+=1"
+            if !nbCpuThreads! GEQ !cpuNeeded! set "recommendedMode=TripleCore-recompiler"
+        )
+
         REM : replace Single/Multi-core with recommendedMode
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Single-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Single-core recompiler" --replace "cpuMode = SingleCore-recompiler" --logFile !fnrLogFile!
         type !PROFILE_FILE! | find /I "cpuMode" | find /I "Multi-core recompiler" > NUL 2>&1 && wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !CEMU_PF! --useRegEx --fileMask !titleId!.ini --find "cpuMode[ ]*=[ ]*Multi-core recompiler" --replace "cpuMode = !recommendedMode!" --logFile !fnrLogFile!
@@ -2341,6 +2384,8 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             goto:eof
         )
 
+        echo IMPORT SETTINGS ^: checking candidate !settingFolder!   >> !batchFwLog!
+        
         set "fileTmp="!BFW_PATH:"=!\logs\settings_target.bfw_tmp""
 
         REM : delete ignored nodes
@@ -2364,7 +2409,11 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 REM : check if the target node exist in the source file
                 for /F "delims=~" %%b in ('type !sSetXml! ^| find "!node!" 2^>NUL') do set /A "nb=1"
                 REM : if not found, %1 is still =0, del temporary files and exit
-                if !nb! EQU 0 del /F !pat! > NUL 2>&1 && goto:eof
+                if !nb! EQU 0 (
+                    echo !settingFolder! not valid because !node! not found  >> !batchFwLog!
+                    del /F !pat! > NUL 2>&1
+                    goto:eof
+                )
             )
         )
 

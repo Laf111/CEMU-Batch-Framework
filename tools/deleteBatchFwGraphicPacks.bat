@@ -9,7 +9,7 @@ REM : main
 
     set "THIS_SCRIPT=%~0"
 
-    title Delete BatchFW^'s graphic packs
+    title Delete BatchFw^'s graphic packs
 
     REM : checking THIS_SCRIPT path
     call:checkPathForDos "!THIS_SCRIPT!" > NUL 2>&1
@@ -158,6 +158,7 @@ REM : main
 
                 set "gpFolder=!rulesFile:\rules.txt=!"
                 for /F "delims=~" %%i in (!gpFolder!) do set "gfxPackName=%%~nxi"
+
                 call:deleteFolder
             )
         )
@@ -193,6 +194,7 @@ REM : functions
 
     :deleteFolder
 
+        title Delete BatchFw^'s graphic packs created for !gfxPackName!    
         set /A "attempt=1"
         :tryToDelete
         rmdir /Q /S !gpFolder! > NUL 2>&1

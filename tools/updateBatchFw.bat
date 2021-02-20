@@ -31,6 +31,7 @@ REM : main
 
     set "BFW_LOGS_PATH="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS_PATH:"=!\Host_!USERDOMAIN!.log""
+    set "glogFile="!BFW_LOGS_PATH:"=!\gamesLibrary.log""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
@@ -197,6 +198,19 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :cleanGameLogFile
+        REM : pattern to ignore in log file
+        set "pat=%~1"
+        set "logFileTmp="!glogFile:"=!.bfw_tmp""
+
+        type !glogFile! | find /I /V "!pat!" > !logFileTmp!
+
+        del /F /S !glogFile! > NUL 2>&1
+        move /Y !logFileTmp! !glogFile! > NUL 2>&1
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     REM : treatments to be done before updating to this release
     :cleanBeforeUpdate
 
@@ -255,6 +269,14 @@ REM : functions
 
         )
 
+        set "bcp="!GAMES_FOLDER:"=!\_BatchFw_Missing_Games_Profiles""
+        if exist !bcp! rmdir /Q /S !bcp! > NUL 2>&1
+
+        set "wm="!BFW_RESOURCES_PATH:"=!\winmerge""
+        if exist !wm! rmdir /Q /S !wm! > NUL 2>&1
+
+        call:cleanGameLogFile "graphic packs version"
+        
     goto:eof
     REM : ------------------------------------------------------------------
 
