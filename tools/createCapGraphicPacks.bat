@@ -378,7 +378,7 @@ REM : functions
         
         call:getMainGfxpFolder
 
-        if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
+        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -595,7 +595,7 @@ REM : functions
         set "syncValue=%~1"
         set "displayedValue=%~2"
         set "description="!GAME_TITLE!_%displayedValue%FPS_cap"
-
+        
         if not exist !gfxPacksV2Folder! goto:eof
         set "gp="!gfxPacksV2Folder:"=!\%description: =_%""
 
@@ -834,7 +834,8 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         set /A "minusOne=targetPercent-1"
         set "floatFactor=!minusOne:~0,1!.!minusOne:~1,2!"
 
-        call:mulfloat "!newNativeFps!.00" "!floatFactor!" 2 fpsOldGp
+        call:mulfloat "!newNativeFps!.00" "!floatFactor!" 2 fps
+        set /A "targetFps=!fps!/!factor!"
 
         if ["!gfxPackVersion!"] == ["V2"] (
             call:createCapOldGP !fps! !targetFps!
