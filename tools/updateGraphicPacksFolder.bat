@@ -188,7 +188,7 @@ REM : main
     )
 
     REM : rename folders that contains forbiden characters : & ! . ( )
-    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
+    wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE /RECURSIVE
 
     REM : delete all previous update log files in BFW_GP_FOLDER
     set "pat="graphicPacks*.doNotDelete""

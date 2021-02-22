@@ -217,7 +217,6 @@ REM    color 4F
     echo Creating FPS GFX packs^.^.^.
 
     REM : FPS++ found flag
-    set /A "fpsPpOld=0"
     set /A "fpsPP=0"
     REM : 60FPS++ found flag
     set /A "fps60=0"
@@ -240,7 +239,9 @@ REM    color 4F
         set "gfxp="!BFW_GP_FOLDER:"=!\_graphicPacksV4\!GAME_TITLE!_SetFps""
     )
 
+    if not exist !gfxp! mkdir !gfxp! > NUL 2>&1
     set "gfxpPath="!gfxp:"=!\rules.txt""
+
     if exist !gfxpPath! (
         echo !gfxpPath! already exist^, skipping^.^.^.
         goto:linkPack
@@ -249,8 +250,6 @@ REM    color 4F
     :process
     set "fnrLogFolder="!BFW_LOGS:"=!\fnr""
     if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
-
-    set "LastVersionExistFlag=1"
 
     echo Native FPS in WiiU-Titles-Library^.csv = %nativeFps%
     echo.
@@ -262,7 +261,7 @@ REM    color 4F
     wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV --find %titleId:~3% --logFile !fnrLogLggp!
 
     for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "FPS++" 2^>NUL') do set /A "fpsPP=1"
-REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
+    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^| find /V /I "player" 2^>NUL') do set /A "fps60=1"
 
     REM : 30FPS games
     if ["%nativeFps%"] == ["30"] set /A "g30=1"
@@ -284,18 +283,12 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
     if !g30! EQU 1 (
         REM : when a FPS++ GFX is found on rules.txt
         if !fpsPP! EQU 1 echo FPS^+^+ was found >> !ccgpLogFile! & echo FPS^+^+ pack was found & goto:computeFactor
-        if !fpsPpOld! EQU 1 echo Old FPS^+^+ GFX pack was found >> !ccgpLogFile! & echo Old FPS^+^+ GFX pack was found & goto:computeFactor
         echo no FPS^+^+ GFX pack found >> !ccgpLogFile!
         echo no FPS^+^+ GFX pack found
-
-        REM : search V2 FPS++ graphic pack or patch for this game
-        set "pat="!gfxPacksV2Folder:"=!\!GAME_TITLE!*FPS++*""
-        for /F "delims=~" %%d in ('dir /B !pat! 2^>NUL') do set /A "fpsPpOld=1"
     )
     :computeFactor
     REM : initialized for 60FPS games running @60FPS on WiiU
     set /A "factor=1"
-    set /A "factorOldGp=1"
 
     REM : for 30FPS games running @60FPS on WiiU
     if !g30! EQU 1 (
@@ -306,14 +299,12 @@ REM    for /F "tokens=2-3 delims=." %%i in ('type !fnrLogLggp! ^| find "60FPS" ^
         REM : else = 30 FPS native games without FPS++ : double vsyncValue to cap at target FPS
 
         if !fpsPP! EQU 0 set /A "factor=2"
-        if !fpsPpOld! EQU 0 set /A "factorOldGp=2"
 
     )
 
     :create
     REM : computing fps references
     REM : for games running at 30FPS without FPS++ => 2x!nativeFps! else !nativeFps!
-    set /A "newNativeFpsOldGp=!nativeFps!*!factorOldGp!"
     set /A "newNativeFps=!nativeFps!*!factor!"
 
 
@@ -321,24 +312,14 @@ echo nativeFps=!nativeFps! >> !ccgpLogFile!
 echo nativeFps=!nativeFps!
 echo newNativeFps=!newNativeFps! >> !ccgpLogFile!
 echo newNativeFps=!newNativeFps!
-echo newNativeFpsOldGp=!newNativeFpsOldGp! >> !ccgpLogFile!
-echo newNativeFpsOldGp=!newNativeFpsOldGp!
 
-    if not ["!gfxPackVersion!"] == ["V2"] (
-        if not exist !gfxp! if !fpsPP! EQU 0 (
-            set "LastVersionExistFlag=0"
-            mkdir !gfxp! > NUL 2>&1
-            call:initLastVersionCapGP
-        )
-    )
+
+    if not ["!gfxPackVersion!"] == ["V2"] call:initLastVersionCapGP
+
     REM : create FPS cap graphic packs
     call:createCapGP
 
-    if not ["!gfxPackVersion!"] == ["V2"] (
-        REM : finalize graphic packs if a FPS++ pack was not found
-        if !fpsPP! EQU 1 rmdir /Q /S !gfxp! > NUL 2>&1 && set "LastVersionExistFlag=1"
-        if %LastVersionExistFlag% EQU 0 if !fpsPP! EQU 0 call:finalizeLastVersionCapGP
-    )
+    if not ["!gfxPackVersion!"] == ["V2"] call:finalizeLastVersionCapGP
 
     :linkPack
     REM : if not V2 (packs linked at the end of updateGameGraphicPacks.bat)
@@ -665,13 +646,6 @@ echo fpsPP=!fpsPP! >> !ccgpLogFile!
         echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
         REM : cap to 100%-1FPS (online compatibility)
-        set /A "fpsOldGp=!newNativeFpsOldGp!-1"
-        set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-
-echo fpsOldGp=!fpsOldGp! >> !ccgpLogFile!
-echo fpsOldGp=!fpsOldGp!
-echo targetFpsOldGp=!targetFpsOldGp! >> !ccgpLogFile!
-echo targetFpsOldGp=!targetFpsOldGp!
 
 set /A "fps=!newNativeFps!-1"
 set /A "targetFps=!fps!/!factor!"
@@ -681,16 +655,15 @@ echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
         if ["!gfxPackVersion!"] == ["V2"] (
-REM : for V2 create FPS CAP even if a FPS++ exist
+            REM : for V2 create FPS CAP even if a FPS++ exist
 REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
-            call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+            call:createCapOldGP !fps! !targetFps!
         ) else (
-            if !fpsPP! EQU 0 type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && (
-            call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
+            type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
         )
 
         )
-        if !fpsPpOld! EQU 1 goto:capMenu
+        if !fpsPp! EQU 1 goto:capMenu
 
         if !g30! EQU 1 goto:cap
 
@@ -709,7 +682,6 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
 
         :capMenu
         if !fpsPP! EQU 0 goto:syncScr
-        if !fpsPpOld! EQU 0 goto:syncScr
 
         REM : 140-200% emulation speed presets
         for /L %%i in (140,20,240) do call:createCapPreset "%%i"
@@ -720,6 +692,7 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         :syncScr
 
         if ["!typeCapFps!"] == ["SYNCSCR"] call:createRefreshRatesGp
+
 
         echo ========================================================= >> !ccgpLogFile!
         echo =========================================================
@@ -735,6 +708,8 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         set "h=%~2"
 
         if !g30! EQU 1 if !fpsPp! EQU 0 set /A "fps=%fps%*2"
+
+        echo FPS CAP gfx pack ^: !gfxpPath! >> !ccgpLogFile!
 
         echo ---------------------------------- >> !ccgpLogFile!
         echo ----------------------------------
@@ -797,6 +772,7 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
                 )
             )
         )
+
         set /A "nm1=nbRf-1"
         for /L %%i in (0,1,%nm1%) do (
             call:createRfGp !refreshRatesArray[%%i]! !hostsArray[%%i]!
@@ -857,16 +833,10 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         set /A "minusOne=targetPercent-1"
         set "floatFactor=!minusOne:~0,1!.!minusOne:~1,2!"
 
-        call:mulfloat "!newNativeFpsOldGp!.00" "!floatFactor!" 2 fpsOldGp
-        set /A "targetFpsOldGp=!fpsOldGp!/!factorOldGp!"
-
-echo fpsOldGp=!fpsOldGp! >> !ccgpLogFile!
-echo fpsOldGp=!fpsOldGp!
-echo targetFpsOldGp=!targetFpsOldGp! >> !ccgpLogFile!
-echo targetFpsOldGp=!targetFpsOldGp!
+        call:mulfloat "!newNativeFps!.00" "!floatFactor!" 2 fpsOldGp
 
         if ["!gfxPackVersion!"] == ["V2"] (
-            call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
+            call:createCapOldGP !fps! !targetFps!
             goto:eof
         )
 

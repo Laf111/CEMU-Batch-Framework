@@ -357,6 +357,7 @@ REM : main
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
     if ["!ACTIVE_ADAPTER!"] == ["NOT_FOUND"] goto:setCemuGfxFolder
 
+    echo.
     choice /C yn /CS /N /M "Do you want to see if this game is reported in Cemu compatibility database? (y, n) : "
     if !ERRORLEVEL! EQU 2 goto:setCemuGfxFolder
     set "strSearched=!GAME_TITLE:TLOZ=!"

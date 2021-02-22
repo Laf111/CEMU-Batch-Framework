@@ -194,7 +194,7 @@ REM : functions
 
     :deleteFolder
 
-        title Delete BatchFw^'s graphic packs created for !gfxPackName!    
+        title Delete BatchFw^'s graphic packs created for !gameTitle!    
         set /A "attempt=1"
         :tryToDelete
         rmdir /Q /S !gpFolder! > NUL 2>&1

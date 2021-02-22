@@ -1097,7 +1097,7 @@ REM : main
 
     if !usePbFlag! EQU 1 call:setProgressBar 90 96 "pre processing" "providing GFX and mods packs to Cemu !versionRead!"
 
-    echo Linking packs for !GAME_TITLE! ^.^.^. >> !batchFwLog!
+    echo Linking GFX packs folder for !GAME_TITLE! in !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
 
     set /A "attempt=1"
     :tryToBackupGp
@@ -1819,7 +1819,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
 
         type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I /V "find" > NUL 2>&1 && (
 
-            echo waitProcessesEnd : updateGamesGraphicPacks scripts still running >> !batchFwLog!
+            echo waitProcessesEnd : graphic packs scripts still running >> !batchFwLog!
             if !disp! EQU 0 (
                 type !launchGameLogFileTmp! | find /I "_BatchFW_Install" | find /I "GraphicPacks.bat" | find /I /V "updateGame" | find /I /V "find" > NUL 2>&1 && (
                     echo Creating ^/ completing graphic packs^, please wait ^.^.^. >> !batchFwLog!
@@ -1830,7 +1830,7 @@ rem        wmic process get Commandline | find  ".exe" | find /I /V "wmic" | fin
             goto:waitingLoopProcesses
         )
         if !usePbFlag! EQU 1 if !wizardLaunched! EQU 0 (
-            call:setProgressBar 94 96 "pre processing" "waiting all child processes end"
+            call:setProgressBar 94 96 "pre processing" "waiting all child processes end^.^.^."
         )
 
         REM : remove trace
@@ -2191,7 +2191,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         echo Controller profiles folders synchronized ^(!CEMU_FOLDER_NAME!^\ControllerProfiles vs _BatchFW_Controller_Profiles^\!USERDOMAIN!^)>> !batchFwLog!
 
         if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] (
-            !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!?" 4145
+            !MessageBox! "Adapt !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!?" 4145
             if !ERRORLEVEL! EQU 2 (
                 set "previousSettingsFolder="NONE""
                 goto:continueLoad
@@ -2202,27 +2202,32 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 wscript /nologo !Start! !MessageBox! "Check all settings ^(set^/modify if needed^)^. Use ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Games Profiles^\!GAME_TITLE!^.lnk^' to edit the game^'s profile^. To cancel the import^, delete the settings using ^'Wii-U Games^\CEMU^\!CEMU_FOLDER_NAME!^\Delete all my !CEMU_FOLDER_NAME!^'s settings^.lnk^'^,relaunch and refuse the import^."
             )
         ) else (
-            wscript /nologo !Start! !MessageBox! "Use !OLD_CEMU_VERSION! settings for !CEMU_FOLDER_NAME!. Check all settings (set/modify if needed). Use 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk' to edit the game's profile. To cancel the import, delete the settings using 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!'s settings.lnk',relaunch and refuse the import."
+            wscript /nologo !Start! !MessageBox! "Check all settings (set/modify if needed). Use 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Games Profiles\!GAME_TITLE!.lnk' to edit the game's profile. To cancel the import, delete the settings using 'Wii-U Games\CEMU\!CEMU_FOLDER_NAME!\Delete all my !CEMU_FOLDER_NAME!'s settings.lnk',relaunch and refuse the import."
         )
 
         set "nsf="!GAME_FOLDER_PATH:"=!\Cemu\settings\!USERDOMAIN!\!CEMU_FOLDER_NAME!""
         echo Import settings from !previousSettingsFolder:"=! >> !batchFwLog!
 
         set /A "settingsImported=1"
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !previousSettingsFolder! !nsf! /MT:32 /S > NUL 2>&1
+        robocopy !previousSettingsFolder! !nsf! /MT:32 /S > NUL 2>&1
 
         set "csi="!nsf:"=!\!currentUser!_settings.xml""
-        set "csTmp0=!csi:.xml=.bfw_tmp0"
+        if exist !csi! (
+            set "csTmp0=!csi:.xml=.bfw_tmp0!"
 
-        REM : if versionRead < 1.16 force Graphic api to 0
-        if !v11519! LEQ 1 (
-            !xmlS! ed -u "//Graphic/api/text()" -v 0  !csi! > !csTmp0! 2>NUL
-            if exist !csTmp0! (
-                del /F !csi! > NUL 2>&1
-                move /Y !csTmp0! !csi! > NUL 2>&1
+            REM : if versionRead < 1.16 force Graphic api to 0
+            if !v116! EQU 2 (
+
+                echo Forcing API to OpenGL if needed >> !batchFwLog!
+
+                !xmlS! ed -u "//Graphic/api/text()" -v 0  !csi! > !csTmp0! 2>NUL
+                if exist !csTmp0! (
+                    del /F !csi! > NUL 2>&1
+                    move /Y !csTmp0! !csi! > NUL 2>&1
+                )
             )
         )
-
+        
         REM : log to games library log file
         set "msg="!GAME_TITLE!:!DATE!-!currentUser!@!USERDOMAIN! import settings in !nsf:"=! from=!previousSettingsFolder:"=!""
         call:log2GamesLibraryFile !msg!
@@ -2395,7 +2400,15 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         set "file1=!fileTmp:.bfw_tmp=.bfw_tmp1!"
         !xmlS! ed -d "//GameCache" !file0! > !file1! 2>NUL
 
-        !xmlS! ed -d "//GraphicPack" !file1! > !fileTmp! 2>NUL
+        set "file2=!fileTmp:.bfw_tmp=.bfw_tmp2!"
+
+        if !v11519! EQU 2 (
+            !xmlS! ed -d "//Online" !file1! > !file2! 2>NUL
+        ) else (
+            !xmlS! ed -d "//Account" !file1! > !file2! 2>NUL
+        )
+
+        !xmlS! ed -d "//GraphicPack" !file2! > !fileTmp! 2>NUL
         set "pat="!BFW_PATH:"=!\logs\settings_target.bfw_tmp*""
 
         REM : for each nodes in the filtered target xml file
@@ -2477,7 +2490,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
                 for /F "tokens=*" %%a in (!sSetBin!)  do set /A "sSetBinSize=%%~za"
 
                 REM : invalidate the import if size of source^'s file lower than target one
-                if !sSetBinSize! LSS !csbSize! (
+                if not exist !sSetXml! if !sSetBinSize! LSS !csbSize! (
                     echo Import cancelled bin size of source^'s file lower than target one>> !batchFwLog!
                     echo source !sSetBinSize! bytes>> !batchFwLog!
                     echo target !csbSize! bytes>> !batchFwLog!
