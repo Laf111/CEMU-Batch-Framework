@@ -29,9 +29,6 @@ REM    color 4F
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
     set "cgpv2LogFile="!BFW_LOGS:"=!\createV2GraphicPacks.log""
 
-    set "fnrLogFolder="!BFW_PATH:"=!\logs\fnr""
-    if not exist !fnrLogFolder! mkdir !fnrLogFolder! > NUL 2>&1
-
     REM : set current char codeset
     call:setCharSet
 
@@ -87,7 +84,7 @@ REM    color 4F
     REM : create resolution graphic packs
     call:createResGP
 
-    echo Waiting all child process end^.^.^. >> !cv2gpLogFile!
+    echo Waiting all child process end^.^.^. >> !cgpv2LogFile!
     echo Waiting all child process end^.^.^.
     call:WaitAllChildProcessEnd
     
@@ -264,7 +261,7 @@ REM : functions
             )
 
         )
-
+        
     goto:eof
     REM : ------------------------------------------------------------------
 

@@ -51,11 +51,21 @@ REM : main
         exit /b 99
     )
     REM : get and check BFW_GP_FOLDER
-    set /A "nativeWidth=!args[0]!"
-    set /A "nativeHeight=!args[1]!"
-    set /A "overwriteWidth=!args[2]!"
-    set /A "overwriteHeight=!args[3]!"
+    set "arg1=!args[0]!"
+    set /A "nativeWidth=!arg1:"=!"
+    
+    set "arg2=!args[1]!"
+    set /A "nativeHeight=!arg2:"=!"
+    
+    set "arg3=!args[2]!"
+    set /A "overwriteWidth=!arg3:"=!"
+    
+    set "arg4=!args[3]!"
+    set /A "overwriteHeight=!arg4:"=!"
+    
     set "gameName=!args[4]!"
+    set "gameName=!gameName:"=!"
+    
     set "desc=!args[5]!"
     set "titleIdsList=!args[6]!"
 
@@ -94,7 +104,7 @@ REM : main
 
     echo !desc! | find /I " (TV DCI 1.89:1)" > NUL 2>&1 && set "sd=TvDci_r189"
 
-    set "gp="!gfxPacksV2Folder:"=!\_BatchFw_!gameName!_!overwriteHeight!p!sd!""
+    set "gp="!gfxPacksV2Folder:"=!\!gameName!_!overwriteHeight!p!sd!""
 
     echo Creating !gp!
 
@@ -171,8 +181,14 @@ REM : ------------------------------------------------------------------
 REM : functions
 
     :dosToUnix
-    REM : convert CRLF -> LF (WINDOWS-> UNIX)
-        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_!rulesFolder:"=!.log""
+        REM : get current date
+        for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
+        set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
+        REM : starting DATE
+        set "date=%ldt%"
+    
+        REM : convert CRLF -> LF (WINDOWS-> UNIX)
+        set "uTdLog="!fnrLogFolder:"=!\dosToUnix_!gameName!_!overwriteWidth!_!date!.log""
 
         REM : replace all \n by \n
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !rulesFolder! --fileMask "rules.txt" --includeSubDirectories --useEscapeChars --find "\r\n" --replace "\n" --logFile !uTdLog!

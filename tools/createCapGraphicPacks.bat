@@ -375,9 +375,10 @@ REM : functions
         if exist !linkPath! goto:eof
 
         set "targetPath="!BFW_GP_FOLDER:"=!\!relativePath:"=!""
+        
         call:getMainGfxpFolder
 
-        mklink /J /D !linkPath! !targetPath!
+        if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -596,7 +597,7 @@ REM : functions
         set "description="!GAME_TITLE!_%displayedValue%FPS_cap"
 
         if not exist !gfxPacksV2Folder! goto:eof
-        set "gp="!gfxPacksV2Folder:"=!\_BatchFw_%description: =_%""
+        set "gp="!gfxPacksV2Folder:"=!\%description: =_%""
 
         if exist !gp! (
             echo !gp! already exists, skipped ^^! >> !ccgpLogFile!

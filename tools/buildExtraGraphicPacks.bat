@@ -175,12 +175,14 @@ REM : functions
         echo Create BatchFW resolution graphic packs^.^.^.
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
+        echo !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! "V!vGfxPack!" %titleId% !argSup!
         call !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! "V!vGfxPack!" %titleId% !argSup!
         goto:createCapGP
 
         :createExtraGP
         echo Complete resolution graphic packs^.^.^.
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
+        echo !toBeLaunch! !resGfxPack! %titleId% 
         call !toBeLaunch! !resGfxPack! %titleId% 
 
         :createCapGP

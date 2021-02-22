@@ -77,7 +77,7 @@ REM    color 4F
     set "gfxPacksV4Folder="!BFW_GP_FOLDER:"=!\_graphicPacksV4""
 
     REM : initialize graphic pack (always create new ones in gfxPacksV4Folder)
-    set "gfxp="!gfxPacksV4Folder:"=!\_BatchFw_!GAME_TITLE!_Resolution""
+    set "gfxp="!gfxPacksV4Folder:"=!\!GAME_TITLE!_Resolution""
 
     if not exist !gfxp! mkdir !gfxp! > NUL 2>&1
     set "gfxpPath="!gfxp:"=!\rules.txt""
@@ -145,7 +145,7 @@ REM : functions
         set "targetPath="!BFW_GP_FOLDER:"=!\!relativePath:"=!""
         call:getMainGfxpFolder
 
-        mklink /J /D !linkPath! !targetPath!
+        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
 
     goto:eof
     REM : ------------------------------------------------------------------

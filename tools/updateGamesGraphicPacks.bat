@@ -666,9 +666,7 @@ REM : functions
         set "targetPath="!BFW_GP_FOLDER:"=!\!relativePath:"=!""
         call:getMainGfxpFolder
 
-        if exist !targetPath! (
-            mklink /J /D !linkPath! !targetPath! >> !myLog!
-        )
+        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath! >> !myLog!
  
     goto:eof
     REM : ------------------------------------------------------------------
@@ -970,10 +968,10 @@ REM    REM : ------------------------------------------------------------------
         echo Create BatchFW graphic packs for this game ^.^.^. >> !myLog!
         REM : Create game's graphic pack
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createGameGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!" >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!"
         REM : not waiting because pack will be linked in create*GraphicPacks.bat and afterward for V2 packs
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup!
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!"
 
         REM : move to CAP gfx packs creation
         goto:createCapGP
@@ -1068,9 +1066,9 @@ REM    REM : ------------------------------------------------------------------
 
         REM : create FPS cap graphic packs
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createCapGraphicPacks.bat""
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup! >> !myLog!
-        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup!
-        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER!  !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% !argSup!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!" >> !myLog!
+        echo launching !toBeLaunch! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!"
+        wscript /nologo !StartHidden! !toBeLaunch! !BFW_GP_FOLDER!  !GAME_GP_FOLDER! !vgfxpRequiered! %titleId% "!argSup!"
 
     goto:eof
     REM : ------------------------------------------------------------------

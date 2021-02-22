@@ -22,12 +22,15 @@ REM    color 4F
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
+    set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
+    set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
     set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
     set "cggpLogFile="!BFW_LOGS:"=!\createGameGraphicPacks.log""
-
+    set "fnrSearch="!BFW_LOGS:"=!\fnr_createGameGraphicPacks.log""
+    
     set "createLastVersion="!BFW_TOOLS_PATH:"=!\createLastGraphicPacks.bat""
     set "createV4="!BFW_TOOLS_PATH:"=!\createV4GraphicPacks.bat""
     set "createV2="!BFW_TOOLS_PATH:"=!\createV2GraphicPacks.bat""
@@ -62,7 +65,7 @@ REM    color 4F
 
     REM : check if exist external Graphic pack folder
     set "BFW_GP_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
-    if exist !BFW_GP_FOLDER! (
+    if not exist !BFW_GP_FOLDER! (
         echo !BFW_GP_FOLDER! des not exist
         pause
         exit /b 200
@@ -100,6 +103,43 @@ REM    color 4F
     choice /C 123 /T 15 /D 3 /N /M "Enter your choice ? : "
     set /A "crx2=!ERRORLEVEL!*2"
     set "gfxPackVersion=V!crx2!"
+    
+    REM get all title Id for this game
+    set "titleIdsList=!titleId!"
+    call:getAllTitleIds
+    
+    set "list=!titleIdsList:^,= !"
+    set "list=!list:"=!"
+    
+    REM : search meta in games folder file that contains titleId
+    set "GAME_GP_FOLDER="NOT_FOUND""
+    REM : loop on all title Id for this game
+    for %%t in (%list%) do (
+        set "tid=%%t"
+        
+        REM : check if the game exist in !GAMES_FOLDER! (not dependant of the game folder's name)
+        set "fnrSearch="!BFW_LOGS:"=!\fnr_createGameGraphicPacks.log""
+        
+        if exist !fnrSearch! del /F !fnrSearch! > NUL 2>&1
+        wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask "meta.xml" --ExcludeDir "content, code, mlc01, Cemu" --includeSubDirectories --find !tid!  --logFile !fnrSearch!
+
+        for /F "tokens=2-3 delims=." %%j in ('type !fnrSearch! ^| find /I /V "^!" ^| find "File:"') do (
+
+            set "metaFile="!GAMES_FOLDER:"=!%%j.%%k""
+            
+            set "gameFolder=!metaFile:\meta\meta.xml=!"
+            for /F "delims=~" %%p in (!gameFolder!) do set "gameName=%%~nxp"            
+        
+            REM : get NAME from game's folder and set GAME_GP_FOLDER
+            set "GAME_GP_FOLDER="!gameFolder:"=!\Cemu\graphicPacks""
+            goto:inputsAvailables
+        )
+    )
+    if [!GAME_GP_FOLDER!] == ["NOT_FOUND"] (
+        echo GAME_FOLDER not found using titleId=!titleId!
+        pause
+        exit /b 201
+    )
 
     goto:inputsAvailables
 
@@ -214,9 +254,9 @@ REM    color 4F
     if not ["!gfxPackVersion!"] == ["V2"] goto:V4packs
 
     REM : V2 packs
-    echo !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
+    echo !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!" >> !cggpLogFile!
     echo Create V2 packs^.^.^.
-    call !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
+    call !createV2! !BFW_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!"
 
     REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
     set "msg="!GAME_TITLE! [!titleId!] graphic packs versionV2=completed""
@@ -228,8 +268,8 @@ REM    color 4F
     if not ["!gfxPackVersion!"] == ["V4"] goto:V6packs
 
     REM : V4 packs
-    echo !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
-    call !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
+    echo !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!" >> !cggpLogFile!
+    call !createV4! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!"
 
     REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
     set "msg="!GAME_TITLE! [!titleId!] graphic packs versionV4=completed""
@@ -238,8 +278,8 @@ REM    color 4F
 
     :V6packs
     REM : V4 packs
-    echo !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE! >> !cggpLogFile!
-    call !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! !GAME_TITLE!
+    echo !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!" >> !cggpLogFile!
+    call !createLastVersion! !BFW_GP_FOLDER! !GAME_GP_FOLDER! !titleIdsList! !nativeHeight! "!GAME_TITLE!"
 
     REM : !glogFile! is updated in updateGamesGraphicPacks
 

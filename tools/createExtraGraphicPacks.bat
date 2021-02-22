@@ -82,6 +82,7 @@ REM    color 4F
     echo Completing V!vGfxPack! pack^.^.^.  >> !cgpLogFile!
     echo Completing V!vGfxPack! pack^.^.^.
 
+    set "rulesFolder=!rulesFile:\rules.txt=!"
 
     if !vGfxPack! GTR 2 goto:V4packs
     REM : V2 packs
@@ -91,6 +92,9 @@ REM    color 4F
     REM : for V2 packs, as new folders are created and linked afterward in updateGamesGraphicPacks.bat
     REM : do not wait
     call !completeV2! !rulesFile!
+
+    for /F "delims=~" %%i in (!rulesFolder!) do set "gpNameFolder=%%~nxi"
+    set "GAME_TITLE=!gpNameFolder:_%resX2%p=!"
 
     REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
     set "msg="!GAME_TITLE! [%titleId%] graphic packs versionV2=completed""
@@ -107,6 +111,8 @@ REM    color 4F
 
     call !completeV4! !rulesFile!
 
+    set "GAME_TITLE=!gpNameFolder:_resolution=!"    
+    
     REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
     set "msg="!GAME_TITLE! [%titleId%] graphic packs versionV4=completed""
     call:log2GamesLibraryFile !msg!

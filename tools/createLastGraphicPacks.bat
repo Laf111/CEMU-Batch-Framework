@@ -148,7 +148,7 @@ REM : functions
         set "targetPath="!BFW_GP_FOLDER:"=!\!relativePath:"=!""
         call:getMainGfxpFolder
 
-        mklink /J /D !linkPath! !targetPath!
+        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -533,7 +533,7 @@ REM : functions
         for /F "delims=<" %%j in (!titleLine!) do set "titleId=%%j"
 
         REM : check if the game exist in !TARGET_GAMES_FOLDER! (not dependant of the game folder's name)
-        if exist !fnrSearch! del /F !fnrSearch!
+        if exist !fnrSearch! del /F !fnrSearch! > NUL 2>&1
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !TARGET_GAMES_FOLDER! --fileMask "meta.xml" --ExcludeDir "content, code, mlc01, Cemu" --includeSubDirectories --find !titleId!  --logFile !fnrSearch!
 
         for /F "tokens=2-3 delims=." %%j in ('type !fnrSearch! ^| find /I /V "^!" ^| find "File:"') do (
