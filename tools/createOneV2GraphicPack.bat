@@ -53,19 +53,19 @@ REM : main
     REM : get and check BFW_GP_FOLDER
     set "arg1=!args[0]!"
     set /A "nativeWidth=!arg1:"=!"
-    
+
     set "arg2=!args[1]!"
     set /A "nativeHeight=!arg2:"=!"
     
     set "arg3=!args[2]!"
     set /A "overwriteWidth=!arg3:"=!"
-    
+
     set "arg4=!args[3]!"
     set /A "overwriteHeight=!arg4:"=!"
-    
+
     set "gameName=!args[4]!"
     set "gameName=!gameName:"=!"
-    
+
     set "desc=!args[5]!"
     set "titleIdsList=!args[6]!"
 
@@ -186,7 +186,7 @@ REM : functions
         set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
         REM : starting DATE
         set "date=%ldt%"
-    
+
         REM : convert CRLF -> LF (WINDOWS-> UNIX)
         set "uTdLog="!fnrLogFolder:"=!\dosToUnix_!gameName!_!overwriteWidth!_!date!.log""
 

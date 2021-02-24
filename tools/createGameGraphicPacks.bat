@@ -103,33 +103,33 @@ REM    color 4F
     choice /C 123 /T 15 /D 3 /N /M "Enter your choice ? : "
     set /A "crx2=!ERRORLEVEL!*2"
     set "gfxPackVersion=V!crx2!"
-    
+
     REM get all title Id for this game
     set "titleIdsList=!titleId!"
     call:getAllTitleIds
-    
+
     set "list=!titleIdsList:^,= !"
     set "list=!list:"=!"
-    
+
     REM : search meta in games folder file that contains titleId
     set "GAME_GP_FOLDER="NOT_FOUND""
     REM : loop on all title Id for this game
     for %%t in (%list%) do (
         set "tid=%%t"
-        
+
         REM : check if the game exist in !GAMES_FOLDER! (not dependant of the game folder's name)
         set "fnrSearch="!BFW_LOGS:"=!\fnr_createGameGraphicPacks.log""
-        
+
         if exist !fnrSearch! del /F !fnrSearch! > NUL 2>&1
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !GAMES_FOLDER! --fileMask "meta.xml" --ExcludeDir "content, code, mlc01, Cemu" --includeSubDirectories --find !tid!  --logFile !fnrSearch!
 
         for /F "tokens=2-3 delims=." %%j in ('type !fnrSearch! ^| find /I /V "^!" ^| find "File:"') do (
 
             set "metaFile="!GAMES_FOLDER:"=!%%j.%%k""
-            
+
             set "gameFolder=!metaFile:\meta\meta.xml=!"
-            for /F "delims=~" %%p in (!gameFolder!) do set "gameName=%%~nxp"            
-        
+            for /F "delims=~" %%p in (!gameFolder!) do set "gameName=%%~nxp"
+
             REM : get NAME from game's folder and set GAME_GP_FOLDER
             set "GAME_GP_FOLDER="!gameFolder:"=!\Cemu\graphicPacks""
             goto:inputsAvailables

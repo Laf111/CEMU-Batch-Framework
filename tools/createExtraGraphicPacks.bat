@@ -111,7 +111,7 @@ REM    color 4F
 
     call !completeV4! !rulesFile!
 
-    set "GAME_TITLE=!gpNameFolder:_resolution=!"    
+    set "GAME_TITLE=!gpNameFolder:_resolution=!"
     
     REM : update !glogFile! (log2GamesLibraryFile does not add a already present message in !glogFile!)
     set "msg="!GAME_TITLE! [%titleId%] graphic packs versionV4=completed""

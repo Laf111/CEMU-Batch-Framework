@@ -183,43 +183,14 @@ REM : main
         goto:getAFile
     )
     
-    REM : flag WUX / WUD ? 
-    set /A "isWud=0"
+    call:secureFilePath !inputFile! newPath
     
-    echo !inputFile! | find /I ".wud" > NUL 2>&1 && (
-        set /A "isWud=1"
-   
-        REM : check title.key presence
-        echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 && set "titleKey=!inputFile:_part1.wud=.key!"
-        set "titleKey=!inputFile:.wud=.key!"
-        
-        if !CONVERT_ENUM! NEQ 7 if !CONVERT_ENUM! NEQ 4 if !CONVERT_ENUM! NEQ 1 if not exist !titleKey! (
-            echo !titleKey! not found close to wud file^, please fix
-            pause
-            goto:getAFile
-        )
-        
-        REM : chek multi Wud
-        echo !inputFile! | find /I ".wud" | find /I "_part" > NUL 2>&1 && (
-            echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 &&  (
-                echo !inputFile! is not the part 1 of the multi parts WUD
-                pause
-                goto:getAFile                
-            )
-        )
-    )
-    
-    for /F "delims=~" %%i in (!inputFile!) do set "oldName="%%~nxi""   
-    call:secureFileName !oldName! newName
-    
-    if not [!oldName!] == [!newName!] (
-    
-        for %%a in (!inputFile!) do set "parentFolder="%%~dpa""
-        set "newPath="!parentFolder:"=!\!newName:"=!""
+    if not [!inputFile!] == [!newPath!] (
+
         move /Y !inputFile! !newPath! > NUL 2>&1
         if !ERRORLEVEL! EQU 0 (
-            echo !oldName:"=! contains non supported characters
-            echo moving !oldName:"=! to !newName:"=!
+            echo !inputFile! contains non supported characters
+            echo moving !inputFile! to !newPath!
         )
         if !isWud! EQU 1 (
             set "oldTitleKey=!inputFile:.wud=.key!"        
@@ -230,7 +201,39 @@ REM : main
         )
         move /Y !oldTitleKey! !newTitleKey! > NUL 2>&1
     )    
+
+    REM : flag WUX / WUD ? 
+    set /A "isWud=0"
     
+    echo !inputFile! | find /I ".wud" > NUL 2>&1 && (
+        set /A "isWud=1"
+   
+        REM : chek multi Wud
+        echo !inputFile! | find /I ".wud" | find /I "_part" > NUL 2>&1 && (
+            echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 &&  (
+                echo !inputFile! is not the part 1 of the multi parts WUD
+                pause
+                goto:getAFile                
+            )
+        )
+    )
+
+    REM : check title.key presence
+    if !isWud! EQU 1 (
+        echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 && set "titleKey=!inputFile:_part1.wud=.key!"
+        set "titleKey=!inputFile:.wud=.key!"
+    ) else (
+        set "titleKey=!inputFile:.wux=.key!"
+    )  
+    
+    if !CONVERT_ENUM! NEQ 7 if !CONVERT_ENUM! NEQ 4 if !CONVERT_ENUM! NEQ 1 if not exist !titleKey! (
+        echo !titleKey! not found close to wud file^, please fix
+        echo If you don^'t have key^, maybe there^'s no need ^: try to download 
+        echo the game using ^'Wii-U Games\Download Games^.lnk^'
+        pause
+        exit /b 15
+    )
+       
     set /A "keepWup=0"
     
     if !CONVERT_ENUM! EQU 1 goto:compressor
@@ -344,6 +347,7 @@ REM : main
 
     if [!lastWupFolder!] == ["NOT_FOUND"] (
         echo "ERROR^: wud2app output not found ^!
+        pause
         exit /b 62
     )
     echo !lastWupFolder! created sucessfully 
@@ -523,9 +527,7 @@ echo JNUST return code = !ERRORLEVEL!
         echo ^> WUP package copied under !targetFolder!
         
     ) else (
-echo keepWup=!keepWup!    
-echo moved=!moved!
-pause 
+
         if !keepWup! EQU 1 (
         
             set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
@@ -584,14 +586,15 @@ REM : functions
         REM : exit in case of no JNUSTFolder folder exists
         if not exist !JNUSTFolder! (
             echo ERROR^: !JNUSTFolder! not found
-            exit 50
+            pause
+            exit /b 50
         )
         REM : check if java is installed
         java -version > NUL 2>&1
         if !ERRORLEVEL! NEQ 0 (
             echo ERROR^: java is not installed^, exiting
             pause
-            exit 51
+            exit /b 51
         )
 
         REM : check if an active network connexion is available
@@ -624,7 +627,7 @@ REM : functions
         if not exist !titleKeysDataBase! (
             echo ERROR^: no keys file found^, exiting
             pause
-            exit 53
+            exit /b 53
         )        
     goto:eof
     REM : ------------------------------------------------------------------
@@ -646,7 +649,7 @@ REM : functions
         echo Save and relaunch this script when done^.
         pause
 
-        exit 55
+        exit /b 55
     goto:eof
     REM : ------------------------------------------------------------------
     
@@ -798,56 +801,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
     
-    REM : function to optimize a folder move (move if same drive letter much type faster)
-    :moveFolder
-
-        REM arg1 source
-        set "source="%~1""
-        REM arg2 target
-        set "target="%~2""
-        REM arg3 = return code
-        REM arg4 = moved/copied
-
-        set "source=!source:\\=\!"
-        set "target=!target:\\=\!"
-
-        if not exist !source! goto:eof
-
-        REM : source drive
-        for %%a in (!source!) do set "sourceDrive=%%~da"
-
-        REM : target drive
-        for %%a in (!target!) do set "targetDrive=%%~da"
-
-        REM : if folders are on the same drive
-        if ["!sourceDrive!"] == ["!targetDrive!"] (
-
-            for %%a in (!target!) do set "parentFolder="%%~dpa""
-            set "parentFolder=!parentFolder:~0,-2!""
-            if exist !target! rmdir /Q /S !target! > NUL 2>&1
-
-            REM : use move command (much more faster)
-            move /Y !source! !parentFolder! > NUL 2>&1
-            set /A "cr=%ERRORLEVEL%"
-            set "%4=moved"
-            if !cr! EQU 1 (
-                set /A "%3=1"
-            ) else (
-                set /A "%3=0"
-            )
-
-           goto:eof
-        )
-
-        REM : else robocopy
-        robocopy !source! !target! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
-        set /A "cr=!ERRORLEVEL!"
-        set "%4=copied"
-        if !cr! GTR 7 set /A "%3=1"
-        if !cr! GEQ 0 set /A "%3=0"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
     
     :checkSizeAvailable
         REM : get drive
@@ -938,7 +891,7 @@ echo productCode=!productCode!
     REM : ------------------------------------------------------------------    
 
     REM : remove DOS forbiden character from a string
-    :secureFileName
+    :secureFilePath
 
         REM : str is expected protected with double quotes
         set "string=%1"
@@ -955,11 +908,9 @@ echo productCode=!productCode!
         set "string=!string:\!=!"
         set "string=!string:%%=!"
         set "string=!string:^=!"
-        set "string=!string:\=!"
         set "string=!string:/=!"
         set "string=!string:>=!"
         set "string=!string:<=!"
-        set "string=!string::=!"
         set "string=!string:)=]!"
         set "string=!string:(=[!"
         set "string=!string:|=!"

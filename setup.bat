@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V21-9"
+    set "BFW_VERSION=V22"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"
@@ -279,7 +279,7 @@ REM : main
     REM : check if exist game's folder(s) containing non supported characters
     set "tmpFile="!BFW_LOGS:"=!\detectInvalidGamesFolder.log""
     dir /B /A:D > !tmpFile! 2>&1
-    for /F %%i in ('type !tmpFile! ^| find "?"') do (
+    type !tmpFile! | find "?" > NUL 2>&1 && (
         echo =========================================================
         echo ERROR Unknown characters found in game^'s folder^(s^) that is not handled by your current DOS charset ^(%CHARSET%^)
         echo List of game^'s folder^(s^)^:

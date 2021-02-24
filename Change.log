@@ -22,6 +22,29 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+22/02/2021 V22 :
+opt : enhance settings and game profile import process
+opt : enhance scaling accuracy in V2 graphic packs completion
+add : Wii-U files format conversion script (need JNUSTool setup completed)
+      WUD <-> WUX, WUW,WUD -> WUP, WUX, WUD -> RPX, WUP -> RPX      
+      if targeted format is RPX : 
+      - you can choose to keep the WUP package (for example, add it directly on a SDCard for a future installation on your 
+        Wii-U)
+      - the game is installed automatically and if an active network is found on the next/first run
+        available upadte and DLC will be detected. Use 'Wii-U Games\Update Games.lnk' shortcut to download and install them
+        automatically.
+add : import new cache (titleId.bin) if old cache (shaderCacheId.bin) is not found (better than nothing for versions
+      of CEMU earlier than 1.16)
+add : use titleId in gamesLibrary.log to track GFX packs completion status
+      Fix some completion status computation failure for some games
+add : FPS CAP packs also when FPS++ is detected (BOTW, only sync monitors refresh rates presets)
+add : use a game profile template based on last version of CEMU in LaunchGame and WizardFirstLaunch systematically
+fix : remove the _BatchFW_Controller_Profiles folder (now using a template for all games)
+fix : remove winmerge and the game profile diff step when importing game's profile (simplify wizard process)
+fix : shortcuts to en/disable the progress bar are now always created 
+      Warning : using the progress bar double the launching times
+fix : regression on scaling V2 packs instanciated from existant one
+
 13/02/2021 V21-9 :
 opt : reduce launching time (33%)
 opt : rework the gfx packs handling : considering now the version of CEMU used to define the range of the GFX pack versions

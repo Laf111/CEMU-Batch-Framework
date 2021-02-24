@@ -182,7 +182,7 @@ REM : functions
         :createExtraGP
         echo Complete resolution graphic packs^.^.^.
         set "toBeLaunch="!BFW_TOOLS_PATH:"=!\createExtraGraphicPacks.bat""
-        echo !toBeLaunch! !resGfxPack! %titleId% 
+        echo !toBeLaunch! !resGfxPack! %titleId%
         call !toBeLaunch! !resGfxPack! %titleId% 
 
         :createCapGP
