@@ -767,12 +767,13 @@ REM    REM : ------------------------------------------------------------------
                                 set "resGfxPack=!rulesFile!"
 
                                 set "rulesFolder=!rulesFile:\rules.txt=!"
-                                if !vGfxPack! GEQ 6 (
+                                echo !rulesFile! | find /I "\Graphics" > NUL 2>&1 && (
                                     for %%a in (!rulesFolder!) do set "parentFolder="%%~dpa""
                                     set "titleFolder=!parentFolder:~0,-2!""
 
                                     for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
-                                ) else (
+                                )
+                                echo !rulesFile! | find /I "_Resolution\" > NUL 2>&1 && (
                                     for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
                                     set "gameName=!gameName:_Resolution=!"
                                 )
@@ -832,9 +833,17 @@ REM    REM : ------------------------------------------------------------------
                                 set "resGfxPack=!rulesFile!"
 
                                 set "rulesFolder=!rulesFile:\rules.txt=!"
-                                REM : V3, 5
-                                for /F "delims=~" %%i in (!rulesFolder!) do set "str=%%~nxi"
-                                set "gameName=!str:_Resolution=!"
+
+                                echo !rulesFile! | find /I "\Graphics" > NUL 2>&1 && (
+                                    for %%a in (!rulesFolder!) do set "parentFolder="%%~dpa""
+                                    set "titleFolder=!parentFolder:~0,-2!""
+
+                                    for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
+                                )
+                                echo !rulesFile! | find /I "_Resolution\" > NUL 2>&1 && (
+                                    for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
+                                    set "gameName=!gameName:_Resolution=!"
+                                )
                                 echo Found a V!vGfxPack! resolution graphic pack ^: !rulesFile! >> !myLog!
                                 set "resGfxPvFound=!vGfxPack!"
                                 set "relativePath=!rulesFile:*_BatchFw_Graphic_Packs\=!"
@@ -850,7 +859,7 @@ REM    REM : ------------------------------------------------------------------
                         call:createGfxpLink !relativePath!
                     )
                 )
-                REM : GFX pack not macthing
+                REM : GFX pack not matching
             )
         )
 

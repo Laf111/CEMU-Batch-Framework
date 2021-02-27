@@ -68,8 +68,17 @@ REM    color 4F
     set "rulesFile=!args[0]!"
 
     set "rulesFolder=!rulesFile:\rules.txt=!"
-    for /F "delims=~" %%i in (!rulesFolder!) do set "gpNameFolder=%%~nxi"
-    set "gpNameFolder=!gpNameFolder:_Resolution=!"
+
+    echo !rulesFile! | find /I "\Graphics" > NUL 2>&1 && (
+        for %%a in (!rulesFolder!) do set "parentFolder="%%~dpa""
+        set "titleFolder=!parentFolder:~0,-2!""
+
+        for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
+    )
+    echo !rulesFile! | find /I "_Resolution\" > NUL 2>&1 && (
+        for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
+        set "gameName=!gameName:_Resolution=!"
+    )
 
     REM : Get the first titleId from the list in the GFX pack
     set "titleId=NOT_FOUND"
@@ -117,8 +126,8 @@ REM    color 4F
 
     echo ========================================================= >> !cv4gpLogFile!
     echo =========================================================
-    echo Complete V4 graphic packs ^(missing presets^) for !gpNameFolder! >> !cv4gpLogFile!
-    echo Complete V4 graphic packs ^(missing presets^) for !gpNameFolder!
+    echo Complete V4 graphic packs ^(missing presets^) for !gameName! >> !cv4gpLogFile!
+    echo Complete V4 graphic packs ^(missing presets^) for !gameName!
     echo ========================================================= >> !cv4gpLogFile!
     echo =========================================================
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !cv4gpLogFile!
@@ -168,11 +177,12 @@ REM    color 4F
     REM : get NativeHeight from rules.txt
     set "gpNativeHeight=NOT_FOUND"
 
-    for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s"
+    for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Default" 2^>NUL') do set "gpNativeHeight=%%s" & goto:gpNativeHeightFound1
+    :gpNativeHeightFound1
     set "gpNativeHeight=!gpNativeHeight: =!"
 
-    if ["!gpNativeHeight!"] == ["NOT_FOUND"] for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Native" 2^>NUL') do set "gpNativeHeight=%%s"
-
+    if ["!gpNativeHeight!"] == ["NOT_FOUND"] for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Native" 2^>NUL') do set "gpNativeHeight=%%s" & goto:gpNativeHeightFound2
+    :gpNativeHeightFound2
     if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
         echo WARNING : native height was not found in !rulesFile! >> !cv4gpLogFile!
         echo WARNING : native height was not found in !rulesFile!
@@ -188,7 +198,7 @@ REM    color 4F
         echo WARNING : native height in rules.txt does not match
     )
 
-    call:completeGfxPacks !gpNameFolder!
+    call:completeGfxPacks !gameName!
 
     REM : Linux formating (CRLF -> LF)
     call:dosToUnix
@@ -208,7 +218,7 @@ REM    color 4F
     set "endingDate=%ldt%"
     REM : starting DATE
 
-    echo starting date = %startingDate% > !cv4gpLogFile!
+    echo starting date = %startingDate% >> !cv4gpLogFile!
     echo starting date = %startingDate%
     echo ending date = %endingDate% >> !cv4gpLogFile!
     echo ending date = %endingDate%

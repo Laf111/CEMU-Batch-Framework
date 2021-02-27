@@ -38,7 +38,7 @@ REM : main
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
-    set "fnrSearch="!BFW_LOGS_PATH:"=!\fnr_deleteBatchFwGraphicPacks.log""
+
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 
     REM : checking GAMES_FOLDER folder
@@ -118,7 +118,7 @@ REM : main
         pause
         cls
         REM : search rules.txt file that contains BatchFw
-
+        set "fnrSearch="!BFW_LOGS_PATH:"=!\fnr_deleteBatchFwGraphicPacks.log""
         if exist !fnrSearch! del /F !fnrSearch!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find "BatchFw" --logFile !fnrSearch!
 
@@ -146,6 +146,8 @@ REM : main
         echo.
         pause
         cls
+        set "fnrSearch="!BFW_LOGS_PATH:"=!\fnr_deleteBatchFwGraphicPacks_!gameTitle:"=!.log""
+        
         if exist !fnrSearch! del /F !fnrSearch!
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --find !selected! --logFile !fnrSearch!
 
@@ -166,7 +168,7 @@ REM : main
         REM : clean the game library log for this game (all version of packs)
         call:cleanGameLibFile "[!selected!] graphic packs version"
     )
-
+    if exist !fnrSearch! del /F !fnrSearch!
     echo =========================================================
     echo done successfully
     echo.

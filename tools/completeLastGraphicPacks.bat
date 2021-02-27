@@ -76,11 +76,19 @@ REM    color 4F
     )
     set /A "vGfxPack=!vGfxPackStr!"
 
-
     set "rulesFolder=!rulesFile:\rules.txt=!"
-    set "gpFolder=!rulesFolder:\Graphics=!"
-    for /F "delims=~" %%i in (!gpFolder!) do set "gpNameFolder=%%~nxi"
 
+    echo !rulesFile! | find /I "\Graphics" > NUL 2>&1 && (
+        for %%a in (!rulesFolder!) do set "parentFolder="%%~dpa""
+        set "titleFolder=!parentFolder:~0,-2!""
+
+        for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
+    )
+    echo !rulesFile! | find /I "_Resolution\" > NUL 2>&1 && (
+        for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
+        set "gameName=!gameName:_Resolution=!"
+    )
+                                
     REM : Get the first titleId from the list in the GFX pack
     set "titleId=NOT_FOUND"
     for /F "delims=~=, tokens=2" %%i in ('type !rulesFile! ^| find /I "titleIds"') do set "titleId=%%i"
@@ -127,8 +135,8 @@ REM    color 4F
 
     echo ========================================================= >> !clgpLogFile!
     echo =========================================================
-    echo Complete V6 graphic packs ^(missing presets^) for !gpNameFolder! >> !clgpLogFile!
-    echo Complete V6 graphic packs ^(missing presets^) for !gpNameFolder!
+    echo Complete V6 graphic packs ^(missing presets^) for !gameName! >> !clgpLogFile!
+    echo Complete V6 graphic packs ^(missing presets^) for !gameName!
     echo ========================================================= >> !clgpLogFile!
     echo =========================================================
     echo Native height set to !nativeHeight! in WiiU-Titles-Library^.csv  >> !clgpLogFile!
@@ -179,10 +187,12 @@ REM    color 4F
 
     REM : get NativeHeight from rules.txt
     set "gpNativeHeight=NOT_FOUND"
-    for /F "tokens=2 delims=~=" %%s in ('type !rulesFile! ^| findstr /R "^$gameHeight.*=" 2^>NUL') do set "gpNativeHeight=%%s"
+    for /F "tokens=2 delims=~=" %%s in ('type !rulesFile! ^| findstr /R "^$gameHeight.*=" 2^>NUL') do set "gpNativeHeight=%%s" & goto:gpNativeHeightFound1
+    :gpNativeHeightFound1
     set "gpNativeHeight=!gpNativeHeight: =!"
 
-    if ["!gpNativeHeight!"] == ["NOT_FOUND"] for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Native" 2^>NUL') do set "gpNativeHeight=%%s"
+    if ["!gpNativeHeight!"] == ["NOT_FOUND"] for /F "tokens=4 delims=x " %%s in ('type !rulesFile! ^| find /I "name" ^| find /I "Native" 2^>NUL') do set "gpNativeHeight=%%s" & goto:gpNativeHeightFound2
+    :gpNativeHeightFound2
 
     if ["!gpNativeHeight!"] == ["NOT_FOUND"] (
         echo WARNING : native height was not found in !rulesFile! >> !clgpLogFile!
@@ -199,7 +209,7 @@ REM    color 4F
         echo WARNING : native height in rules.txt does not match
     )
 
-    call:completeGfxPacks !gpNameFolder!
+    call:completeGfxPacks !gameName!
 
     REM : Linux formating (CRLF -> LF)
     call:dosToUnix

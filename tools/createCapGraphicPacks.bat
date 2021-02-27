@@ -378,7 +378,7 @@ REM : functions
 
         call:getMainGfxpFolder
 
-        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath!
+        if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath! > NUL 2>&1
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -550,14 +550,12 @@ REM : functions
         set "desc2=%~2"
 
         set "desc=!desc1!%% !desc2!"
-        if %LastVersionExistFlag% EQU 0 (
 
-            echo [Preset] >> !gfxpPath!
-            echo name = !desc! >> !gfxpPath!
-            echo $FPS = !fps! >> !gfxpPath!
-            echo. >> !gfxpPath!
-            goto:eof
-        )
+        echo [Preset] >> !gfxpPath!
+        echo name = !desc! >> !gfxpPath!
+        echo $FPS = !fps! >> !gfxpPath!
+        echo. >> !gfxpPath!
+        goto:eof
 
         REM : search for "!desc1!" in rulesFile: if found exit
         for /F "delims=~" %%i in ('type !gfxpPath! ^| find /I /V "#" ^| find /I "!desc1!"') do goto:eof
@@ -655,6 +653,7 @@ echo fps=!fps!
 echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
+echo OK
         if ["!gfxPackVersion!"] == ["V2"] (
             REM : for V2 create FPS CAP even if a FPS++ exist
 REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
@@ -662,8 +661,8 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         ) else (
             type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
         )
+echo OK2
 
-        )
         if !fpsPp! EQU 1 goto:capMenu
 
         if !g30! EQU 1 goto:cap

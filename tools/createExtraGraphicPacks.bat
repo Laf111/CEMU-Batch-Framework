@@ -138,7 +138,7 @@ REM    color 4F
     echo ========================================================= >> !cgpLogFile!
     echo =========================================================
 
-    echo starting date = %startingDate% > !cgpLogFile!
+    echo starting date = %startingDate% >> !cgpLogFile!
     echo starting date = %startingDate%
     echo ending date = %endingDate% >> !cgpLogFile!
     echo ending date = %endingDate%

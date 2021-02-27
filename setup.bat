@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V22"
+    set "BFW_VERSION=V22-1"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"
@@ -119,16 +119,18 @@ REM : main
     if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
     REM : check rights to launch vbs scripts
-    for /F "usebackq tokens=3" %%a in (`reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled 2^>nul`) do (
-        set /A "value=%%a"
-        if !value! EQU 0 (
-            echo Launching VBS scripts is not allowed^!
-            echo BatchFw use VBS scripts^, please contact !USERDOMAIN! administrator
-            pause
-            exit 22
-        )
+    for /F "tokens=3" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled') do set "value=%%a"
+    set /A "value=!value: =!"
+    if !value! EQU 0 (
+        echo Launching VBS scripts is not allowed^!
+        echo HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings\Enabled ^<^> 1
+        echo value=[!value!]
+        echo BatchFw use VBS scripts^, please contact !USERDOMAIN! administrator
+        pause
+        exit 22
+    ) else (
+        echo Rights to launch vbs scripts  ^: OK
     )
-    echo Rights to launch vbs scripts  ^: OK
 
     java -version > NUL 2>&1
     if !ERRORLEVEL! EQU 0 (

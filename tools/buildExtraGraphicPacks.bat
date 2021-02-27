@@ -229,8 +229,16 @@ REM : functions
                     ) else (
                         REM : V4
                         if !vGfxPack! GEQ 3 (
-                            for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
-                            set "gameName=!gameName:_Resolution=!"
+                            echo !rulesFile! | find /I "\Graphics" > NUL 2>&1 && (
+                                for %%a in (!rulesFolder!) do set "parentFolder="%%~dpa""
+                                set "titleFolder=!parentFolder:~0,-2!""
+
+                                for /F "delims=~" %%i in (!titleFolder!) do set "gameName=%%~nxi"
+                            )
+                            echo !rulesFile! | find /I "_Resolution\" > NUL 2>&1 && (
+                                for /F "delims=~" %%i in (!rulesFolder!) do set "gameName=%%~nxi"
+                                set "gameName=!gameName:_Resolution=!"
+                            )
                         ) else (
                             REM : V2
                             set "str=%%i"

@@ -94,15 +94,6 @@ REM : main
     echo ---------------------------------------------------------
     if [!ANSWER!] == ["n"] goto:eof
 
-    call:getUserInput "Do you want to delete all (including games) ? (y, n)" "y,n" ANSWER
-    echo ---------------------------------------------------------
-    if [!ANSWER!] == ["y"] (
-        call:getUserInput "Are you sure ? (y, n)" "y,n" ANSWER
-        if [!ANSWER!] == ["y"] (
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe"  /C rmdir /Q /S !GAMES_FOLDER! > NUL 2>&1
-            goto:eof
-        )
-    )
     set "BatchFW_Graphic_Packs="!GAMES_FOLDER:"=!\_BatchFw_Graphic_Packs""
     if not exist !BatchFW_Graphic_Packs! goto:removeWiiuFolder
     call:getUserInput "Remove _BatchFW_Graphic_Packs folder ? (y, n)" "y,n" ANSWER
@@ -338,7 +329,7 @@ REM : main
         for %%a in (!cf!) do set "parentFolder="%%~dpa""
         set "gf=!parentFolder:~0,-2!""
         set "cemuFolder="!gf:"=!\Cemu""
-        rmdir /Q /S !cemuFolder! > NUL 2>&1
+        if exist !cemuFolder! rmdir /Q /S !cemuFolder! > NUL 2>&1
     )
     echo ^> Batch FW^'s extra files and folders were removed
     echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -354,7 +345,7 @@ REM : main
     )
     if not [!WIIU_GAMES_FOLDER!] == ["NONE"] (
 
-        rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
+        if exist !WIIU_GAMES_FOLDER! rmdir /Q /S !WIIU_GAMES_FOLDER! > NUL 2>&1
         echo ^> !WIIU_GAMES_FOLDER! deleted ^!
         echo ---------------------------------------------------------
     )
@@ -365,7 +356,7 @@ REM : main
     timeout /T 4 > NUL 2>&1
 
     REM remove this folder
-    rmdir /Q /S !BFW_PATH! > NUL 2>&1
+    if exist !BFW_PATH! rmdir /Q /S !BFW_PATH! > NUL 2>&1
 
     if %nbArgs% EQU 0 endlocal
     exit /b 0
