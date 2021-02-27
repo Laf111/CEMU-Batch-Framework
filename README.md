@@ -37,7 +37,7 @@ It also **creates FPS GFX packs** to control the **emulation's speed or increasi
 If you update to a more recent configuration not listed here and encouter issues, just force the update the GFX packs folder after forbid BatchFw to complete the packs in the setup (to use stocks ones).
 
 
-For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**. You can choose to **synchronize your CEMU save with the Wii-U one or choose to keep both saves to play with CEMU** (an extra slot is created and use automatically for import/export saves process)
+For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**. You can choose to **synchronize your CEMU save with the Wii-U one or choose to keep both saves to play with CEMU** (an extra slot is created and used automatically for import/export saves process)
 
 
 # 
