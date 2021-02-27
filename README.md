@@ -23,7 +23,7 @@ A lock file is used to allow only one instance of CEMU and to **avoid thread saf
 BatchFw handles as many users as you want. All users can play even with old versions of CEMU (in BatcFw all users use the default account 8000001).
 It also allows to create extra saves slots to define **multiple saves per user for each game**.
 
-If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio.
+If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio (on every host used).
 
 **Last GFX packs checked (presets completion) : V765**
 
