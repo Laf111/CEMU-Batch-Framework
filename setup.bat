@@ -54,7 +54,6 @@ REM : main
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
-    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
 
@@ -156,8 +155,13 @@ REM : main
     call:setCharSet
 
     REM : clean log files specific to a launch
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\jnust_*.*" > NUL 2>&1
+    REM : clean log files specific to a launch
+    set "tobeDelete="!BFW_PATH:"=!\logs\fnr_*.*""
+    del /F /S !toBeDelete!  > NUL 2>&1
+    set "tobeDelete="!BFW_PATH:"=!\logs\jnust_*.*""
+    del /F /S !toBeDelete!  > NUL 2>&1
+    set "tobeDelete="!BFW_PATH:"=!\logs\fnr""
+    rmdir /Q /S !toBeDelete!  > NUL 2>&1
 
     REM : get screen resolution
     pushd !BFW_RESOURCES_PATH!

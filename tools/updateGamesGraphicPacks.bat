@@ -37,7 +37,6 @@ REM : main
     set "glogFile="!BFW_LOGS:"=!\gamesLibrary.log""
 
     set "myLog="!BFW_LOGS:"=!\updateGamesGraphicPacks.log""
-    set "fnrLogUggp="!BFW_LOGS:"=!\fnr_updateGamesGraphicPacks.log""
 
     REM : cd to GAMES_FOLDER
     pushd !GAMES_FOLDER!
@@ -51,12 +50,6 @@ REM : main
         shift
         goto:continue
     :end
-
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
-    echo Starting Date ^: !DATE! > !myLog!
 
     echo ========================================================= >> !myLog!
 
@@ -186,26 +179,41 @@ REM : main
     echo vgfxpUsed ^: !vgfxpUsed! >> !myLog!
     echo currentVgfxp  ^: !currentVgfxp! >> !myLog!
 
-    REM : check if BatchFw have to complete graphic packs for this game
-    type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && goto:searchForGfxPacks
-    goto:createUpdateAndDlcLinks
-
-    :searchForGfxPacks
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
 
-    if exist !fnrLogUggp! del /F !fnrLogUggp! > NUL 2>&1
     echo titleId^: %titleId% >> !myLog!
 
+    REM : optimization : save list of GFX packs in a file to avoid launching the search each time
+    REM : Lists V2, V4... are rebuilt only on a GFX packs update, or missing completion state in gLogFile
+    REM : those list are created using relative path to BFW_GP_FOLDER (portability OK)
+    set "fnrLogUggp="!GAME_FOLDER_PATH:"=!\!vgfxpRequiered:"=!Packs.list""
+
     if [!vgfxpRequiered!] == ["!strBfwMaxVgfxp!"] (
+        REM : if status is completed and list exist goto:gfxpSearchDone
+        if not ["!currentVgfxp!"] == ["NOT_FOUND"] if ["!vgfxpUsed!"] == ["!currentVgfxp!"] if exist !fnrLogUggp! goto:gfxpSearchDone
+        REM : otherwise, delete file
+        del /F /S !fnrLogUggp! > NUL 2>&1
+        REM : relaunch the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogUggp!
     )
     if [!vgfxpRequiered!] == ["V4"] (
+        REM : if status is completed and list exist goto:gfxpSearchDone
+        if exist !glogFile! type !glogFile! | find "[!titleId!] graphic packs versionV4=completed" > NUL 2>&1 && if exist !fnrLogUggp! goto:gfxpSearchDone
+        REM : otherwise, delete file
+        del /F /S !fnrLogUggp! > NUL 2>&1
+        REM : relaunch the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV2 --find %titleId:~3% --logFile !fnrLogUggp!
     )
     if [!vgfxpRequiered!] == ["V2"] (
+        REM : if status is completed and list exist goto:gfxpSearchDone
+        if exist !glogFile! type !glogFile! | find "[!titleId!] graphic packs versionV2=completed" > NUL 2>&1 && if exist !fnrLogUggp! goto:gfxpSearchDone
+        REM : otherwise, delete file
+        del /F /S !fnrLogUggp! > NUL 2>&1
+        REM : relaunch the search
         wscript /nologo !StartHiddenWait! !fnrPath! --cl --dir !BFW_GP_FOLDER! --fileMask "rules.txt" --includeSubDirectories --ExcludeDir _graphicPacksV4 --find %titleId:~3% --logFile !fnrLogUggp!
     )
+    :gfxpSearchDone
     call:updateGraphicPacks
 
     set /A "attempt=1"
@@ -339,7 +347,7 @@ REM : main
     dir /B /A:D !GAME_GP_FOLDER! > NUL 2>&1 && goto:endMain
 
     REM : warn user
-    !MessageBox! "WARNING : No GFX packs were found !" 4112
+    !MessageBox! "WARNING : No GFX packs were found ! checks logs" 4112
 
     REM : delete lock file in CEMU_FOLDER
     if exist !lockFile! del /F !lockFile! > NUL 2>&1
@@ -347,11 +355,6 @@ REM : main
     exit /b 80
 
     :endMain
-    REM : get current date
-    for /F "usebackq tokens=1,2 delims=~=" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set "ldt=%%j"
-    set "ldt=%ldt:~0,4%-%ldt:~4,2%-%ldt:~6,2%_%ldt:~8,2%-%ldt:~10,2%-%ldt:~12,6%"
-    set "DATE=%ldt%"
-    echo Ending Date ^: !DATE! >> !myLog!
 
     echo --------------------------------------------------------- >> !myLog!
     echo done >> !myLog!
@@ -699,24 +702,6 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM :linkGraphicPacks
-        REM REM : sort /R the output to treat GFX packs under root before those in _graphicPacksV* folders
-        REM for /F "tokens=2-3 delims=." %%i in ('type !fnrLogUggp! ^| sort /R ^| find /I /V "^!" ^| find "File:" 2^>NUL') do call:createGfxpLink "%%i"
-
-    REM goto:eof
-    REM REM : ------------------------------------------------------------------
-
-REM    :checkGpFolders
-REM
-REM        for /F "delims=~" %%i in ('dir /B /A:D !BFW_GP_FOLDER! 2^>NUL ^| find "^!"') do (
-REM            echo Treat GFX pack folder to be DOS compliant >> !myLog!
-REM            wscript /nologo !StartHiddenWait! !brcPath! /DIR^:!BFW_GP_FOLDER! /REPLACECI^:^^!^:# /REPLACECI^:^^^&^: /REPLACECI^:^^.^: /REPLACECI^:^^(^:[ /REPLACECI^:^^)^:] /EXECUTE
-REM            goto:eof
-REM        )
-REM
-REM    goto:eof
-REM    REM : ------------------------------------------------------------------
-
     :cleanGameLogFile
         REM : pattern to ignore in log file
         set "pat=%~1"
@@ -990,6 +975,9 @@ REM    REM : ------------------------------------------------------------------
         REM : are listed in !glogFile! with the string "!GAME_TITLE! [!titleId!] graphic packs version=graphicPacksXXX"
         REM : (where XXX is the last version of gfx packs downloaded from the CEMU graphic packs gitHub repository)
 
+        REM : check if BatchFw have to complete graphic packs for this game
+        type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && goto:createCapGP
+        
         if [!vgfxpRequiered!] == ["V2"] (
             REM : Games already completed for V2 of gfx packs are listed in !glogFile! with the string
             REM : "!GAME_TITLE! [!titleId!] graphic packs versionV2=completed"

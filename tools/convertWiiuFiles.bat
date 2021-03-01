@@ -174,9 +174,9 @@ REM : main
     :getAFile
     cls
     echo.
-    echo Please browse to the WUX or WUD file ^(game_part1^.wud for a muli part wud game^)^.^.^.
+    echo Please browse to the WUX or WUD file ^(game_part1^.wud for a multi part wud game^)^.^.^.
 
-    for /F %%b in ('cscript /nologo !browseFile! "Select a WUX or WUD file (game_part1.wud for a muli part wud game)"') do set "file=%%b" && set "inputFile=!file:?= !"
+    for /F %%b in ('cscript /nologo !browseFile! "Select a WUX or WUD file (game_part1.wud for a multi part wud game)"') do set "file=%%b" && set "inputFile=!file:?= !"
     if [!inputFile!] == ["NONE"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 20

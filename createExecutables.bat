@@ -54,7 +54,6 @@ REM : main
     set "StartWait="!BFW_RESOURCES_PATH:"=!\vbs\StartWait.vbs""
     set "StartHidden="!BFW_RESOURCES_PATH:"=!\vbs\StartHidden.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
-    set "StartHiddenCmd="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenCmd.vbs""
 
     set "browseFolder="!BFW_RESOURCES_PATH:"=!\vbs\BrowseFolderDialog.vbs""
     set "MessageBox="!BFW_RESOURCES_PATH:"=!\vbs\MessageBox.vbs""
@@ -277,8 +276,12 @@ REM : main
 
     :inputsAvailables
     REM : clean log files specific to a launch
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\fnr_*.*" > NUL 2>&1
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C del /F /S  "!BFW_PATH:"=!\logs\jnust_*.*" > NUL 2>&1
+    set "tobeDeleted="!BFW_PATH:"=!\logs\fnr_*.*""
+    del /F /S !tobeDeleted!  > NUL 2>&1
+    set "tobeDeleted="!BFW_PATH:"=!\logs\jnust_*.*""
+    del /F /S !tobeDeleted!  > NUL 2>&1
+    set "tobeDeleted="!BFW_PATH:"=!\logs\fnr""
+    rmdir /Q /S !tobeDeleted!  > NUL 2>&1
 
     cls
     REM : check if folder name contains forbidden character for batch file
