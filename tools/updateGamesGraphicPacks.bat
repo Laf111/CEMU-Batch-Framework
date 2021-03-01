@@ -181,13 +181,14 @@ REM : main
 
     set "codeFullPath="!GAME_FOLDER_PATH:"=!\code""
     set "GAME_GP_FOLDER="!GAME_FOLDER_PATH:"=!\Cemu\graphicPacks""
+    if not exist !GAME_GP_FOLDER! mkdir !GAME_GP_FOLDER! > NUL 2>&1
 
     echo titleId^: %titleId% >> !myLog!
 
     REM : optimization : save list of GFX packs in a file to avoid launching the search each time
     REM : Lists V2, V4... are rebuilt only on a GFX packs update, or missing completion state in gLogFile
     REM : those list are created using relative path to BFW_GP_FOLDER (portability OK)
-    set "fnrLogUggp="!GAME_FOLDER_PATH:"=!\!vgfxpRequiered:"=!Packs.list""
+    set "fnrLogUggp="!GAME_GP_FOLDER:"=!\!vgfxpRequiered:"=!Packs.list""
 
     if [!vgfxpRequiered!] == ["!strBfwMaxVgfxp!"] (
         REM : if status is completed and list exist goto:gfxpSearchDone
