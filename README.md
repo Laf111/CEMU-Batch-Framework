@@ -104,7 +104,7 @@ The mlc01 path is in the game folder so:
 
 - **Your own CEMU X.Y.Z games compatibility list per host**: compatibility per version and per host of all your games (last column in the csv file = code you have to enter @ http://compat.cemu.info/ to report your feedback for a game and it is filled automatically with your specs and the settings used);
 
-- **Easy game profile configuration** per version (using shortcuts) and **side by side game profile comparison**;
+- **Easy game profiles tweak** per version (using shortcuts);
 
 - **Double automatic backup of your transferable cache and saves for each games to avoid their corruption that can occur on CEMU crash;**
 
@@ -228,7 +228,7 @@ Code is well commented and is read only.
 #
 **Fix custom GFX packs created for games without any official packs (if needed):** https://1drv.ms/v/s!Apr2zdKB1g7fglEqBJ_Dzu2DVDC7?e=PFlBzA
 #
-**FPS CAP packs, side by side games comparison:** https://1drv.ms/v/s!Apr2zdKB1g7fgmlsZDp66rDYY-Y3?e=V4LNda 
+**FPS CAP packs:** https://1drv.ms/v/s!Apr2zdKB1g7fgmlsZDp66rDYY-Y3?e=V4LNda 
 #
 
 ## FAQ: 
