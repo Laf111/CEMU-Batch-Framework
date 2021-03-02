@@ -20,7 +20,7 @@ REM : main
     
     REM : ------------------------------------------------------------------
     REM : CEMU's Batch FrameWork Version to produce
-    set "BFW_NEXT_VERSION=V22-1"
+    set "BFW_NEXT_VERSION=V22-3"
 
     set "THIS_SCRIPT=%~0"
 

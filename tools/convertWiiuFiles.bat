@@ -43,11 +43,11 @@ REM : main
     set "notePad="%windir%\System32\notepad.exe""
     set "du="!BFW_RESOURCES_PATH:"=!\du.exe""
     set "multiply="!BFW_TOOLS_PATH:"=!\multiply.bat""
-    
+
     set "JNUSTFolder="!BFW_RESOURCES_PATH:"=!\JNUST""
     set "wud2app="!JNUSTFolder:"=!\wud2app.exe""
     set "wudComp="!JNUSTFolder:"=!\WudCompress.exe""
-    
+
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
     set "duLogFile="!BFW_PATH:"=!\logs\du.log""
 
@@ -89,7 +89,7 @@ REM : main
     )
     REM : check JNUST install
     call:checkJnust
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -125,7 +125,7 @@ REM : main
     )
 
     cls
-    
+
     REM : get and check inputFile
     set "arg1=!args[0]!"
     set "arg1=!arg1:"=!"
@@ -144,16 +144,16 @@ REM : main
     if !CONVERT_ENUM! EQU 5 set "goal=Convert WUD to WUP"
     if !CONVERT_ENUM! EQU 6 set "goal=Convert WUD to RPX"
     if !CONVERT_ENUM! EQU 7 set "goal=Convert WUP to RPX"
-    
-    REM : WUP to RPX ? 
-    
-    
+
+    REM : WUP to RPX ?
+
+
     title !goal!
     echo =========================================================
     echo !goal!
     echo =========================================================
-    echo.    
-    
+    echo.
+
     set /A "shutdownFlag=0"
     if !CONVERT_ENUM! EQU 1 goto:getAFile
     if !CONVERT_ENUM! EQU 4 goto:getAFile
@@ -165,12 +165,12 @@ REM : main
         set /A "shutdownFlag=1"
     )
     echo.
-    
+
     echo Hit any key to launch the conversion
-    echo.    
+    echo.
     pause
     if !CONVERT_ENUM! EQU 7 goto:wupAsked
-    
+
     :getAFile
     cls
     echo.
@@ -182,9 +182,9 @@ REM : main
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && exit /b 20
         goto:getAFile
     )
-    
+
     call:secureFilePath !inputFile! newPath
-    
+
     if not [!inputFile!] == [!newPath!] (
 
         move /Y !inputFile! !newPath! > NUL 2>&1
@@ -193,27 +193,27 @@ REM : main
             echo moving !inputFile! to !newPath!
         )
         if !isWud! EQU 1 (
-            set "oldTitleKey=!inputFile:.wud=.key!"        
+            set "oldTitleKey=!inputFile:.wud=.key!"
             set "newTitleKey=!newPath:.wud=.key!"
         ) else (
-            set "oldTitleKey=!inputFile:.wux=.key!"        
+            set "oldTitleKey=!inputFile:.wux=.key!"
             set "newTitleKey=!newPath:.wux=.key!"
         )
         move /Y !oldTitleKey! !newTitleKey! > NUL 2>&1
-    )    
+    )
 
-    REM : flag WUX / WUD ? 
+    REM : flag WUX / WUD ?
     set /A "isWud=0"
-    
+
     echo !inputFile! | find /I ".wud" > NUL 2>&1 && (
         set /A "isWud=1"
-   
+
         REM : chek multi Wud
         echo !inputFile! | find /I ".wud" | find /I "_part" > NUL 2>&1 && (
             echo !inputFile! | find /I /V "_part1.wud" > NUL 2>&1 &&  (
                 echo !inputFile! is not the part 1 of the multi parts WUD
                 pause
-                goto:getAFile                
+                goto:getAFile
             )
         )
     )
@@ -224,28 +224,28 @@ REM : main
         set "titleKey=!inputFile:.wud=.key!"
     ) else (
         set "titleKey=!inputFile:.wux=.key!"
-    )  
-    
+    )
+
     if !CONVERT_ENUM! NEQ 7 if !CONVERT_ENUM! NEQ 4 if !CONVERT_ENUM! NEQ 1 if not exist !titleKey! (
         echo !titleKey! not found close to wud file^, please fix
-        echo If you don^'t have key^, maybe there^'s no need ^: try to download 
+        echo If you don^'t have key^, maybe there^'s no need ^: try to download
         echo the game using ^'Wii-U Games\Download Games^.lnk^'
         pause
         exit /b 15
     )
-       
+
     set /A "keepWup=0"
-    
+
     if !CONVERT_ENUM! EQU 1 goto:compressor
     if !CONVERT_ENUM! EQU 4 goto:compressor
-    
+
     if !CONVERT_ENUM! EQU 2 goto:wupAsked
     if !CONVERT_ENUM! EQU 5 goto:wupAsked
-    
+
     REM : here CONVERT_ENUM=3,6 or 7
     choice /C yn /N /M "Do you wish to keep the WUP package generated (y, n)? : "
     if !ERRORLEVEL! EQU 2 goto:wud2app
-    
+
     :wupAsked
     set "msg=Please browse to the folder where to put the WUP package..."
 
@@ -260,17 +260,17 @@ REM : main
     )
     echo.
     echo !msg!
-    
+
     :getWupFolder
     set "wupFolder="NOT_FOUND""
-    
+
     for /F %%b in ('cscript /nologo !browseFolder! !msg!') do set "folder=%%b" && set "wupFolder=!folder:?= !"
     if [!wupFolder!] == ["NOT_FOUND"] (
         choice /C yn /N /M "No item selected, do you wish to cancel (y, n)? : "
         if !ERRORLEVEL! EQU 1 timeout /T 4 > NUL 2>&1 && goto:EndMain
         goto:getWupFolder
     )
-    
+
     REM : check if folder name contains forbiden character for !CEMU_FOLDER!
     set "tobeLaunch="!BFW_PATH:"=!\tools\detectAndRenameInvalidPath.bat""
     call !tobeLaunch! !wupFolder!
@@ -287,17 +287,17 @@ REM : main
     if !CONVERT_ENUM! GEQ 4 goto:wud2app
 
     :compressor
-    echo.    
+    echo.
     set "msg=^> Uncompressing !inputFile!^.^.^."
     if !CONVERT_ENUM! EQU 4 set "msg=^> Compressing !inputFile!^.^.^."
-    echo ---------------------------------------------------------    
+    echo ---------------------------------------------------------
     REM : check size Needed
-    
+
     REM : a WUD file is 23866 MB (~24000)
     set /A "sizeNeeded=24000"
 
     REM : even WUD -> WUX, check that 24000 MB are free
-   
+
     call:checkSizeAvailable !drive! !sizeNeeded!
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 
@@ -308,39 +308,39 @@ REM : main
         echo "ERROR^: wudCompressor error
         pause
         exit /b 51
-    )        
-    
-    echo.    
+    )
+
+    echo.
 
     if !CONVERT_ENUM! EQU 1 goto:endMain
     if !CONVERT_ENUM! EQU 4 goto:endMain
     echo ---------------------------------------------------------
-    
+
     :wud2app
     if !CONVERT_ENUM! EQU 7 goto:wup2rpx
 
     set "commonKey="!JNUSTFolder:"=!\common.key""
-    if not exist !commonKey! call:createCommonKey    
+    if not exist !commonKey! call:createCommonKey
 
-    echo. 
+    echo.
     echo ^> Converting WUD to WUP package^.^.^."
-    echo ---------------------------------------------------------    
+    echo ---------------------------------------------------------
     REM : a WUD file is 23866 MB (~24000)
     set /A "sizeNeeded=24000"
 
     REM : even for WUP, check that 24000 MB are free
-    call:checkSizeAvailable !drive! !sizeNeeded! 
+    call:checkSizeAvailable !drive! !sizeNeeded!
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    
+
     REM : convert using wud2app
     call !wud2app! !commonKey! !titleKey! !inputFile!
     if !ERRORLEVEL! NEQ 0 (
         echo "ERROR^: wud2app error
         pause
         exit /b 61
-    )        
-       
-    REM : get the last folder created under !JNUSTFolder:"=!\    
+    )
+
+    REM : get the last folder created under !JNUSTFolder:"=!\
     set "lastWupFolder="NOT_FOUND""
     set "pat="!JNUSTFolder:"=!\WUP*""
     for /F "delims=~" %%g in ('dir /S /B /O:-D /T:W !pat! 2^>NUL') do set "lastWupFolder="%%g""
@@ -350,15 +350,15 @@ REM : main
         pause
         exit /b 62
     )
-    echo !lastWupFolder! created sucessfully 
+    echo !lastWupFolder! created sucessfully
     echo ---------------------------------------------------------
-    
+
     if !CONVERT_ENUM! EQU 2 set "srcJtf=!lastWupFolder!" & goto:moveWup
     if !CONVERT_ENUM! EQU 5 set "srcJtf=!lastWupFolder!" & goto:moveWup
-        
+
     :wup2rpx
     if !CONVERT_ENUM! EQU 7 set "lastWupFolder=!wupFolder!"
-    
+
     call:getTitleData titleId GAME_TITLE productCode
     if !ERRORLEVEL! NEQ 0 (
         echo "ERROR^: WUP game not found in internal database ^!
@@ -371,26 +371,26 @@ REM : main
 echo WUP size = !sizeWup! MB
 
     REM : check size available on drive (counting Wup size for RPX files)
-    call:checkSizeAvailable !drive! !sizeWup! 
+    call:checkSizeAvailable !drive! !sizeWup!
     if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-    
-    REM : JNUST WUP temporary folder         
+
+    REM : JNUST WUP temporary folder
     set "srcJtf="!JNUSTFolder:"=!\tmp_!titleId!""
-    set /A "moved=0" 
-    
+    set /A "moved=0"
+
     if !CONVERT_ENUM! EQU 7 (
         REM : robocopy
         robocopy !lastWupFolder! !srcJtf! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
-        set /A "cr=!ERRORLEVEL!"        
+        set /A "cr=!ERRORLEVEL!"
         if !cr! GTR 7 (
             echo ERROR^: when Copying !lastWupFolder! to !srcJtf!^, aborting^.^.^.
             pause
             exit /b 72
         )
         set /A "moved=0"
-        set /A "keepWup=0"        
+        set /A "keepWup=0"
     ) else (
-    
+
         REM : source drive
         for %%a in (!lastWupFolder!) do set "sourceDrive=%%~da"
         REM : target drive
@@ -400,7 +400,7 @@ echo WUP size = !sizeWup! MB
         REM : if folders are on the same drive
         if ["!sourceDrive!"] == ["!targetDrive!"] (
             REM : no need to check size
-            
+
             move /Y !lastWupFolder! !srcJtf! > NUL 2>&1
             set /A "cr=%ERRORLEVEL%"
             if !cr! NEQ 0 (
@@ -408,15 +408,15 @@ echo WUP size = !sizeWup! MB
                 pause
                 exit /b 71
             )
-            set /A "moved=1"            
+            set /A "moved=1"
         ) else (
             REM : check size available on target drive
-            call:checkSizeAvailable !drive! !sizeWup! 
+            call:checkSizeAvailable !drive! !sizeWup!
             if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-            
+
             REM : robocopy
             robocopy !lastWupFolder! !srcJtf! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
-            set /A "cr=!ERRORLEVEL!"        
+            set /A "cr=!ERRORLEVEL!"
             if !cr! GTR 7 (
                 echo ERROR^: when Copying !lastWupFolder! to !srcJtf!^, aborting^.^.^.
                 pause
@@ -426,7 +426,7 @@ echo WUP size = !sizeWup! MB
     )
 echo Using temporary folder !srcJtf!
 
-    echo ---------------------------------------------------------        
+    echo ---------------------------------------------------------
     echo ^> Converting WUP to RPX package^.^.^."
 
     set "wupBatFile="!JNUSTFolder:"=!\wup.bat""
@@ -438,7 +438,7 @@ echo Using temporary folder !srcJtf!
     REM : kill
     wmic path Win32_Process where "CommandLine like '%%JNUSTool.jar %titleId%%%'" call terminate > NUL 2>&1
     del /F !wupBatFile! > NUL 2>&1
-    
+
     REM : get the decrypted key
     for /F "tokens=2 delims=~:" %%d in ('type jnust^.log 2^>NUL ^| find "Encrypted Key"') do set "keyRead=%%d"
     set "encKey=%keyRead: =%"
@@ -448,13 +448,13 @@ echo Encrypted Key=%encKey%
     REM : decrypth and uncompress
     java -jar JNUSTool.jar !titleId! %encKey%  -file /.*
 
-echo JNUST return code = !ERRORLEVEL!    
-  
+echo JNUST return code = !ERRORLEVEL!
+
     REM : get the last folder created under !JNUSTFolder:"=!\
     set "rpxFolder="NOT_FOUND""
     set "pat="!JNUSTFolder:"=!\*[*]""
     for /F "delims=~" %%g in ('dir /S /B /O:-D /T:W !pat! 2^>NUL') do set "rpxFolder="%%g""
-    
+
     if [!rpxFolder!] == ["NOT_FOUND"] (
         echo "ERROR^: RPX output folder not found ^!
         pause
@@ -467,8 +467,8 @@ echo JNUST return code = !ERRORLEVEL!
         pause
         exit /b 74
     )
-    
-    REM REM : copy title.* files in ./code folder    
+
+    REM REM : copy title.* files in ./code folder
     REM set "pat="!srcJtf:"=!\title.*""
     REM for /F "delims=~" %%g in ('dir /S /B /A:F !pat! 2^>NUL') do (
         REM set "srcTitleFile="%%g""
@@ -482,7 +482,7 @@ echo JNUST return code = !ERRORLEVEL!
     set "finalFolder="!JNUSTFolder:"=!\!GAME_TITLE!""
     if not exist !finalFolder! (
         move /Y !rpxFolder! !finalFolder! > NUL 2>&1
-    
+
         set "gamePath="!GAMES_FOLDER:"=!\!GAME_TITLE!""
         if not exist !gamePath! (
             move /Y !finalFolder! ..\..\.. > NUL 2>&1
@@ -492,64 +492,64 @@ echo JNUST return code = !ERRORLEVEL!
     )
     echo ^> RPX package moved to !GAMES_FOLDER:"=!
     echo   Launch setup or create script to take it into account
-            
+
     echo ---------------------------------------------------------
-    
+
     :moveWup
     REM : init for a WUP output (CONVERT_ENUM=3,4)
 
     set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
     set /A "wupIsFinal=0"
-    
+
     if !CONVERT_ENUM! EQU 2 set /A "wupIsFinal=1"
     if !CONVERT_ENUM! EQU 5 set /A "wupIsFinal=1"
 
     if !wupIsFinal! EQU 1 (
-        
-        for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"        
+
+        for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"
         set "targetFolder="!wupFolder:"=!\!wupName!""
-        if exist !targetFolder! goto:endMain        
-        
+        if exist !targetFolder! goto:endMain
+
         REM : target drive
         for %%a in (!wupFolder!) do set "targetDrive=%%~da"
         if ["!sourceDrive!"] == ["!targetDrive!"] (
-            REM : move back user WUP package   
+            REM : move back user WUP package
             move /Y !srcJtf! !targetFolder! > NUL 2>&1
         ) else (
-        
+
             REM : check size available on target drive
-            call:checkSizeAvailable !targetDrive! !sizeWup! 
+            call:checkSizeAvailable !targetDrive! !sizeWup!
             if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-        
+
             REM : robocopy
             robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
-        ) 
+        )
         echo ^> WUP package copied under !targetFolder!
-        
+
     ) else (
 
         if !keepWup! EQU 1 (
-        
+
             set "targetFolder="!wupFolder:"=!\!productCode:"=!_!GAME_TITLE: =!""
             if exist !targetFolder! goto:endMain
             REM : target drive
             for %%a in (!wupFolder!) do set "targetDrive=%%~da"
 
             if ["!sourceDrive!"] == ["!targetDrive!"] (
-                REM : move back user WUP package   
+                REM : move back user WUP package
                 move /Y !srcJtf! !targetFolder! > NUL 2>&1
             ) else (
                 REM : check size available on target drive
-                call:checkSizeAvailable !targetDrive! !sizeWup! 
+                call:checkSizeAvailable !targetDrive! !sizeWup!
                 if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
-            
+
                 REM : robocopy
                 robocopy !srcJtf! !targetFolder! /S /MT:32 /MOVE /IS /IT > NUL 2>&1
             )
             echo ^> WUP package copied under !targetFolder!
-        ) else (     
+        ) else (
             if !moved! EQU 1 (
-                REM : move back user WUP package     
+                REM : move back user WUP package
                 move /Y !srcJtf! !targetFolder! > NUL 2>&1
             ) else (
                 REM : was copied, clean JNUST folder
@@ -568,7 +568,7 @@ echo JNUST return code = !ERRORLEVEL!
     echo ending date = %endingDate%
 
     REM : if shutdwon is asked
-    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00    
+    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00
     pause
     exit /b 0
 
@@ -582,7 +582,7 @@ REM : functions
 
     REM : check JNUST pre-requisites and installation
     :checkJnust
-    
+
         REM : exit in case of no JNUSTFolder folder exists
         if not exist !JNUSTFolder! (
             echo ERROR^: !JNUSTFolder! not found
@@ -628,10 +628,10 @@ REM : functions
             echo ERROR^: no keys file found^, exiting
             pause
             exit /b 53
-        )        
+        )
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
 
     REM : create keys file
     :createKeysFile
@@ -652,7 +652,7 @@ REM : functions
         exit /b 55
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :strLength
         Set "s=#%~1"
         Set "len=0"
@@ -666,7 +666,7 @@ REM : functions
     goto:eof
 
     REM : ------------------------------------------------------------------
-    
+
     :hex2str
         set "NotDelayed=!"
         setlocal enableDelayedExpansion
@@ -712,25 +712,25 @@ REM : functions
     :readLine
         set "file=%1"
         set /A "lineNumber=%~2"
-        
+
         set /A "currentLine=1"
-        For /F "delims=~" %%l in ('type !file! 2^>NUL') do (        
+        For /F "delims=~" %%l in ('type !file! 2^>NUL') do (
             if !currentLine! EQU !lineNumber! set "%3="%%l"" & exit /b 0
             set /A "currentLine+=1"
         )
         set /A "currentLine-=1"
         echo WARNING^: End of file reached ^(!currentLine! lines read^)^!
-        
+
         exit /b 50
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    REM : create common.key for wud2app.exe using JNUST\config file    
+
+    REM : create common.key for wud2app.exe using JNUST\config file
     :createCommonKey
-        
-        set "cf="!JNUSTFolder:"=!\config""   
+
+        set "cf="!JNUSTFolder:"=!\config""
         set /A "lineNumber=2"
-        
+
         call:readLine !cf! %lineNumber% line
         if !ERRORLEVEL! NEQ 0 (
             echo ERROR^: in readLine function
@@ -739,11 +739,11 @@ REM : functions
 
         REM : get line length
         call:strLength !line! length
-        
+
         set /A "range=length-1"
         set /A "nbChar=2"
-        
-        REM : check consistency        
+
+        REM : check consistency
         set /A "mod=range%nbChar"
         if !mod! NEQ 0 (
             echo "ERROR^: modulo range%nbChar is not odd
@@ -753,7 +753,7 @@ REM : functions
         for /L %%l in (0,%nbChar%,%range%) do (
             set "str=!line:"=!"
             set "subStr=!str:~%%l,%nbChar%!"
-            
+
             if ["!bytes!"] == [""] (
                 set "bytes=!bytes!!subStr!"
             ) else (
@@ -761,25 +761,25 @@ REM : functions
             )
         )
         call:hex2str "!bytes!" strBytes
-        set "ck="!JNUSTFolder:"=!\common.key""   
+        set "ck="!JNUSTFolder:"=!\common.key""
 
         REM : create the common key
         set /p=!strBytes!>!ck!
         exit /b 0
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :getSizeInMb
 
         set "folder="%~1""
-        
+
         set "smb=-1"
         !du! /accepteula -nobanner -q -c !folder! > !duLogFile!
 
         set "sizeRead=-1"
         for /F "delims=~, tokens=6" %%a in ('type !duLogFile!') do set "sizeRead=%%a"
 
-        
+
         if ["!sizeRead!"] == ["-1"] goto:endFct
         if ["!sizeRead!"] == ["0"] set "smb=0" & goto:endFct
 
@@ -800,17 +800,17 @@ REM : functions
         set "%2=!smb!"
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     :checkSizeAvailable
         REM : get drive
         set "localDrive=%~1"
 
         set /A "sizeNeeded=%~2"
-        
+
         REM : Compute space left on localDrive
         REM : a WUD file is 24 000 MB, the WUP will be less but let's use 24000 for the check
-       
+
         set "psc="Get-CimInstance -ClassName Win32_Volume ^| Select-Object Name^, FreeSpace^, BlockSize ^| Format-Table -AutoSize""
         for /F "tokens=2-3" %%i in ('powershell !psc! ^| find "!localDrive!" 2^>NUL') do set "fsbStr=%%i"
 
@@ -825,19 +825,19 @@ REM : functions
             pause
             exit /b 40
         )
-        exit /b 0 
-        
+        exit /b 0
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
-    
+
+
     :getTitleData
-        
-        for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"    
-    
+
+        for /F "delims=~" %%i in (!lastWupFolder!) do set "wupName=%%~nxi"
+
         REM : get the game code
         set "gameCode=%wupName:~6,4%"
-echo gameCode=!gameCode!       
+echo gameCode=!gameCode!
         REM : get game's title from wii-u database file
         set "libFileLine="NONE""
         for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| find /I "!gameCode!;"') do set "libFileLine="%%i""
@@ -847,9 +847,9 @@ echo gameCode=!gameCode!
             echo         not found in !wiiTitlesDataBase!^, aborting^.^.^.
             pause
             exit /B 70
-            
+
         )
-        
+
         REM : strip line to get data
         for /F "tokens=1-11 delims=;" %%a in (!libFileLine!) do (
            set "titleId=%%a"
@@ -864,18 +864,18 @@ echo gameCode=!gameCode!
            set "nativeHeight=%%j"
            set "nativeFps=%%k"
         )
-echo titleId=!titleId:'=!       
-echo Desc=!Desc!       
-echo productCode=!productCode!       
+echo titleId=!titleId:'=!
+echo Desc=!Desc!
+echo productCode=!productCode!
 
         set "%1=!titleId:'=!"
         set "%2=!Desc!"
         set "%3=!productCode!"
 
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     REM : check if a string contain *
     :checkStr
 
@@ -888,7 +888,7 @@ echo productCode=!productCode!
         set "%2=OK"
 
     goto:eof
-    REM : ------------------------------------------------------------------    
+    REM : ------------------------------------------------------------------
 
     REM : remove DOS forbiden character from a string
     :secureFilePath
@@ -914,7 +914,7 @@ echo productCode=!productCode!
         set "string=!string:)=]!"
         set "string=!string:(=[!"
         set "string=!string:|=!"
-        
+
         REM : replace '_' by ' ' (if needed)
         set "string=!string:_= !"
 
@@ -923,12 +923,12 @@ echo productCode=!productCode!
         set "string=!string:®=!"
         set "string=!string:©=!"
         set "string=!string:É=E!"
-        
+
         set "%2=!string!"
 
     goto:eof
-    REM : ------------------------------------------------------------------    
-    
+    REM : ------------------------------------------------------------------
+
     REM : function to detect DOS reserved characters in path for variable's expansion : &, %, !
     :checkPathForDos
 
