@@ -114,9 +114,9 @@ The mlc01 path is in the game folder so:
 
 - **check pre requisites on each hosts (NTFS / mklink success / vbs & powershell scripts execution);**
 
-- **optional progress bar to follow pre and post treatments;**
+- **optional progress bar to follow pre and post treatments** (WARNING : cost to double launching time at least)
 
-- **For Wii-U owners: FTP interface + automatic installation of requiered files to play online** 
+- **For Wii-U owners: full automatic FTP interface + automatic installation of requiered files to play online** 
     - Prepare a SDcard content for your Wii-U (optional) : format using fat32format and install apps (HBL, DDD, NandDumper, CBHC, Loadiine_GX2, MOCHA, SigPatcher2SysMenu, WUP_installer_GX2, SaveMii_MOD, FTPiiU for MOCHA and CBHC, NUSspli);
     - get/sync online files (account, friends'list);
     - sync saves between CEMU with the Wii-U;
