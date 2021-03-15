@@ -107,9 +107,13 @@ REM : main
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
+    set "ipRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
-    REM : and teh port
+    if ["!ipRead!"] == [""] goto:getWiiuIp
+    REM : and the port
+    set "portRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
+    if ["!portRead!"] == [""] goto:getWiiuIp
 
     echo Found an existing FTP configuration ^:
     echo.
@@ -217,6 +221,7 @@ REM : main
     cls
     echo =========================================================
 
+    set "completeList="
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
 
         set "second=%%j"
@@ -229,6 +234,7 @@ REM : main
             set "titlesSrc[!nbGames!]=%%k"
             echo !nbGames!	: %%i
 
+            set "completeList=!nbGames! !completeList!"
             set /A "nbGames+=1"
         )
     )
@@ -238,25 +244,33 @@ REM : main
     REM : selected games
     set /A "nbGamesSelected=0"
 
-    set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
-    if not ["!listGamesSelected: =!"] == [""] (
-        echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
+    set /P "listGamesSelected=Please enter game's numbers list (separated with a space) or 'all' to treat all games : "
+    :displayList
 
-        echo =========================================================
-        for %%l in (!listGamesSelected!) do (
-            echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
-            set /A "number=%%l"
-            if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+    if not ["!listGamesSelected!"] == ["all"] (
 
-            echo - !titles[%%l]!
-            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
-            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
-            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+        if not ["!listGamesSelected!"] == [""] (
+            echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
 
-            set /A "nbGamesSelected+=1"
+            echo =========================================================
+            for %%l in (!listGamesSelected!) do (
+                echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
+                set /A "number=%%l"
+                if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+
+                echo - !titles[%%l]!
+                set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
+                set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
+                set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+
+                set /A "nbGamesSelected+=1"
+            )
+        ) else (
+            goto:getList
         )
     ) else (
-        goto:getList
+        set "listGamesSelected=!completeList!"
+        goto:displayList
     )
     echo =========================================================
     echo.
@@ -460,10 +474,11 @@ REM : functions
                 REM : export saves (if asked)
                 if not [!userSavesToExport!] == ["none]" call:exportSavesForCurrentAccount
             )
+            pushd !GAMES_FOLDER!
         )
-        pushd !GAMES_FOLDER!
 
-        echo Transfert !currentUser!^'s saves for !GAME_TITLE!^.^.^.
+
+        echo Transfert saves for !GAME_TITLE!^.^.^.
         echo ---------------------------------------------------------
 
         REM : launching transfert
@@ -471,7 +486,7 @@ REM : functions
         set "cr=!ERRORLEVEL!"
         if !cr! NEQ 0 (
             echo ERROR when exporting existing saves for !currentUser! ^!
-            del /F /S !cemuUserSaveFolder! > NUL 2>&1
+            rmdir /Q /S !cemuUserSaveFolder! > NUL 2>&1
             if %nbArgs% EQU 0 pause && exit 51
             exit /b 51
         )
@@ -486,130 +501,34 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-    REM : get a node value in a xml file
-    REM : !WARNING! current directory must be !BFW_RESOURCES_PATH!
-    :getValueInXml
-
-        set "xPath="%~1""
-        set "xmlFile="%~2""
-        set "%3=NOT_FOUND"
-
-        REM : return the first match
-        for /F "delims=~" %%x in ('xml.exe sel -t -c !xPath! !xmlFile! 2^>NUL') do (
-            set "%3=%%x"
-
-            goto:eof
-        )
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-
-    :getTs1970
-
-        set "arg=%~2"
-
-        set "ts="
-        if not ["!arg!"] == [""] set "ts=%arg%"
-
-        REM : if ts is not given : compute timestamp of the current date
-        if ["%ts%"] == [""] for /F "delims=~= tokens=2" %%t in ('wmic os get localdatetime /value') do set "ts=%%t"
-
-        set /A "yy=10000%ts:~0,4% %% 10000, mm=100%ts:~4,2% %% 100, dd=100%ts:~6,2% %% 100"
-        set /A "dd=dd-2472663+1461*(yy+4800+(mm-14)/12)/4+367*(mm-2-(mm-14)/12*12)/12-3*((yy+4900+(mm-14)/12)/100)/4"
-        set /A "ss=(((1%ts:~8,2%*60)+1%ts:~10,2%)*60)+1%ts:~12,2%-366100-%ts:~21,1%((1%ts:~22,3%*60)-60000)"
-
-        set /A "%1+=dd*86400"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    :strLength
-        Set "s=#%~1"
-        Set "len=0"
-        For %%N in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
-          if "!s:~%%N,1!" neq "" (
-            set /a "len+=%%N"
-            set "s=!s:~%%N!"
-          )
-        )
-        set /A "%2=%len%"
-    goto:eof
-    REM : ------------------------------------------------------------------
-
-    REM : number to hexa with 16 digits
-    :num2hex
-
-        set /a "num = %~1"
-        set "hex="
-        set "hex.10=a"
-        set "hex.11=b"
-        set "hex.12=c"
-        set "hex.13=d"
-        set "hex.14=e"
-        set "hex.15=f"
-
-        :loop
-        set /a "hextmp = num %% 16"
-        if %hextmp% gtr 9 set hextmp=!hex.%hextmp%!
-        set /a "num /= 16"
-        set "hex=%hextmp%%hex%"
-        if %num% gtr 0 goto loop
-
-        :loop2
-        call:strLength !hex! len
-        if !len! LSS 16 set "hex=0!hex!" & goto:loop2
-
-        set "%2=!hex!"
-
-    goto:eof
-    REM : ------------------------------------------------------------------
-
     :updateSaveInfoFile
 
-        REM : init the value with now (J2000)
-        call:getTs1970 now
-        set /A "nowJ2K=!now!-j2000"
-        call:num2hex !nowJ2K! hexValue
+        REM : workaround to FTP everywhere issue on dating files (timestamp not handled and equal to 0)
+        set "hexValue=0000000000000000"
 
-        REM : check if exist a last settings exist for !currentUser!
-        set "lus="!GAME_FOLDER_PATH:"=!\Cemu\settings\!currentUser!_lastSettings.txt""
-        if not exist !lus! goto:patch
-
-        REM : get the last modified settings for the current user
-        for /F "delims=~" %%i in ('type !lus!') do set "ls=%%i"
-        set "lst="!GAME_FOLDER_PATH:"=!\Cemu\settings\!ls:"=!""
-        if not exist !lst! goto:patch
-
-        REM : get last_played with RPX path
-        call:getValueInXml "//GameCache/Entry[path='!RPX_FILE:"=!']/last_played/text()" !lst! last_played
-        if ["!last_played!"] == ["NOT_FOUND"] goto:patch
-
-        REM : compute last_played in J2000
-        set /A "ctsj2k=!last_played!-j2000"
-        REM : compute hex value
-        call:num2hex !ctsj2k! hexValue
-
-        :patch
+        set "stmp=!saveInfo!tmp"
+        del /F !stmp! > NUL 2>&1
+            
         REM : if exist saveInfo.xml check if !folder! exist in saveinfo.xml
         if exist !saveInfo! (
             REM : if the account is not present in saveInfo.xml
-            type !saveInfo! | find /I !folder! > NUL 2>&1 && goto:updateSaveInfo
+            type !saveInfo! | find /I "!folder!" > NUL 2>&1 && goto:updateSaveInfo
             REM : add it
-            set "stmp=!saveInfo!tmp"
             xml ed -s "//info" -t elem -n "account persistentId=""!folder!""" !saveInfo! > !stmp!
             xml ed -s "//info/account[@persistentId='!folder!']" -t elem -n "timestamp" -v "!hexValue!" !stmp! > !saveInfo!
+            del /F !stmp! > NUL 2>&1
             goto:eof
 
             :updateSaveInfo
             REM : else update it
-            set "stmp=!saveInfo!tmp"
-            xml ed -u "//info/account[@persistentId='!folder!']" -v "!hexValue!" !saveInfo! > !stmp!
-            if !ERRORLEVEL! EQU 0 del /F !saveInfo! > NUL 2>&1 & move /Y !stmp! !saveInfo!
+
+            xml ed -u "//info/account[@persistentId='!folder!']/timestamp" -v "!hexValue!" !saveInfo! > !stmp!
+            if !ERRORLEVEL! EQU 0 del /F !saveInfo! > NUL 2>&1 & move /Y !stmp! !saveInfo! > NUL 2>&1
+            del /F !stmp! > NUL 2>&1
             goto:eof
         )
         REM : if saveinfo.xml does not exist
-        echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"!folder!^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
+        echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"00000000^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<account persistentId=^"!folder!^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -630,10 +549,39 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+REM : must run in !igsvf! !
+    :getUserSave
 
-    REM : search for Wii-U import slot or create one
+        REM : contains the active slot (relative path to the rar file)
+        set "userActiveSlotFile="!GAME_TITLE!_!currentUser!_activeSlot.txt""
+
+        REM : if not exist slotNumber=0
+        if not exist !userActiveSlotFile! goto:eof
+
+        for /F "delims=~" %%i in ('type !userActiveSlotFile! 2^>NUL') do set "activeSave="%%i""
+
+        if not exist !activeSave! goto:eof
+
+        REM : activeSave = !GAME_TITLE!_!currentUser!_slot%slotNumber%.rar""
+        set "activeTextFile=!activeSave:.rar=.txt!"
+
+        set "str=!activeSave:"=!"
+        set "str=!str:~-5!"
+        set /A "slotNumber=!str:.rar=!"
+
+        for /F "delims=~" %%i in ('type !activeTextFile! 2^>NUL') do set "slotLabel="%%i""
+        echo Use the slot!slotNumber! [!slotLabel:"=!] for !currentUser!
+
+        set "%1=!activeSave!"
+
+
+    goto:eof
+    REM : ------------------------------------------------------------------    
+
+    REM : search for last slot or create one (BOTH mode)
     :getWiiUSlot
-        set "%2="NONE""
+        REM : initialize with CEMU default save
+        set "%2=!rarFile!"
 
         REM : check if slots are defined
         set "activeSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
@@ -660,13 +608,32 @@ REM : functions
 
             )
         )
-        REM : if not found, create a new extra slot and activate it
-        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
-        REM : get the last modified save for currentUser
-        set "lastSlot="NONE""
-        call:getLastModifiedSaveFile lastSlot
-        if exist !lastSlot! set "%2=!lastSlot!"
 
+        if [!wiiuSaveMode!] == ["BOTH"] (
+            REM : get and activate OR create a slots for Wii-U save
+
+            REM : if not found, create a new extra slot and activate it
+            call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+            REM : get the last modified save for currentUser
+            set "lastSlot="NONE""
+            call:getLastModifiedSaveFile lastSlot
+            if exist !lastSlot! set "%2=!lastSlot!"
+            goto:eof
+        )
+
+        REM : SYNCR
+        if exist !activeSlotFile! (
+
+            set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves"
+            pushd !igsvf!
+            set "lastSlot="NONE""
+            call:getUserSave lastSlot
+            if exist !lastSlot! set "%2=!lastSlot!"
+
+            pushd !GAMES_FOLDER!
+            goto:eof
+        )
+        
     goto:eof
     REM : ------------------------------------------------------------------
     
@@ -690,12 +657,8 @@ REM : functions
                 if not [!userSavesToExport!] == ["!currentUser!"] goto:eof
             )
         )
-        if [!wiiuSaveMode!] == ["BOTH"] (
-            REM : get and activate OR create a slots for Wii-U save
-
-            call:getWiiUSlot lastSlot
-            if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
-        )
+        call:getWiiUSlot lastSlot
+        if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
 
         REM : treatment for the user
         echo Treating !currentUser! ^(!folder!^)
@@ -713,7 +676,7 @@ REM : functions
         REM : cd to BFW_RESOURCES_PATH to use xml.exe
         pushd !BFW_RESOURCES_PATH!
 
-        REM : update saveinfo file using user last settings
+        REM : update saveinfo file
         call:updateSaveInfoFile
 
         pushd !GAMES_FOLDER!

@@ -84,9 +84,13 @@ REM : main
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
+    set "ipRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
-    REM : and teh port
+    if ["!ipRead!"] == [""] goto:getWiiuIp
+    REM : and the port
+    set "portRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
+    if ["!portRead!"] == [""] goto:getWiiuIp
 
     echo Found an existing FTP configuration ^:
     echo.
@@ -101,9 +105,6 @@ REM : main
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
     set /P "port=Please enter the port used : "
-
-    set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
-
 
     REM : prepare winScp.ini file
     copy /Y  !winScpIniTmpl! !winScpIni! > NUL 2>&1

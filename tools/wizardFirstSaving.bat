@@ -1105,13 +1105,16 @@ REM : functions
         if not exist !winScpIni! goto:installAccount
 
         REM : get the hostname
+        set "ipRead="
         for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
         REM : check its state
 
-        call:getHostState !ipRead! state
-        if !state! EQU 1 (
-            echo "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue"
-            pause
+        if not ["!ipRead!"] == [""] (
+            call:getHostState !ipRead! state
+            if !state! EQU 1 (
+                echo "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue"
+                pause
+            )
         )
 
         :installAccount

@@ -2591,14 +2591,16 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         if not exist !winScpIni! goto:installAccount
 
         REM : get the hostname
+        set "ipRead="
         for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName=" 2^>NUL') do set "ipRead=%%i"
         REM : check its state
 
-        call:getHostState !ipRead! state
-        if !state! EQU 1 (
-            !MessageBox! "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue^." 4112
+        if not ["!ipRead!"] == [""] (
+            call:getHostState !ipRead! state
+            if !state! EQU 1 (
+                !MessageBox! "A host with your last Wii-U adress was found on the network^. Be sure that no one is using your account ^(!accId!^) to play online right now before continue^." 4112
+            )
         )
-
         :installAccount
         REM : copy !af! to "!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001\account.dat"
         set "cemuUserFolder="!MLC01_FOLDER_PATH:"=!\usr\save\system\act\80000001""

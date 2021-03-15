@@ -51,7 +51,7 @@ REM : main
         goto:continue
     :end
 
-    echo ========================================================= > !myLog!
+    echo ========================================================= >> !myLog!
 
     if %nbArgs% NEQ 5 (
         echo ERROR ^: on arguments passed ^!  >> !myLog!
@@ -192,7 +192,7 @@ REM : main
 
     if [!vgfxpRequiered!] == ["!strBfwMaxVgfxp!"] (
         REM : if status is completed and list exist goto:gfxpSearchDone
-        if not ["!vgfxpUsed!"] == ["NOT_FOUND"] if ["!vgfxpUsed!"] == ["!currentVgfxp!"] if exist !fnrLogUggp! goto:gfxpSearchDone
+        if not ["!currentVgfxp!"] == ["NOT_FOUND"] if ["!vgfxpUsed!"] == ["!currentVgfxp!"] if exist !fnrLogUggp! goto:gfxpSearchDone
         REM : otherwise, delete file
         del /F /S !fnrLogUggp! > NUL 2>&1
         REM : relaunch the search
@@ -671,7 +671,7 @@ REM : functions
         call:getMainGfxpFolder
 
         if exist !targetPath! if not exist !linkPath! mklink /J /D !linkPath! !targetPath! >> !myLog!
-
+ 
     goto:eof
     REM : ------------------------------------------------------------------
 
@@ -977,10 +977,10 @@ REM : functions
         REM : (where XXX is the last version of gfx packs downloaded from the CEMU graphic packs gitHub repository)
 
         REM : check if BatchFw have to complete graphic packs for this game
-        set /A "completing=0"
-        type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && set /A "completing=1"
-        if !completing! EQU 0 goto:createCapGP
-
+        set /A "comGP=0"
+        type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && set /A "comGP=1"
+        if !compGP! EQU 0 goto:createCapGP
+        
         if [!vgfxpRequiered!] == ["V2"] (
             REM : Games already completed for V2 of gfx packs are listed in !glogFile! with the string
             REM : "!GAME_TITLE! [!titleId!] graphic packs versionV2=completed"

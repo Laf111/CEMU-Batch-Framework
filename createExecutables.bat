@@ -1181,7 +1181,7 @@ REM : functions
             call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
         )
 
-        REM : create a shortcut to scanWiiU.bat (if needed)
+        REM : create a shortcut to Wii-U Error Codes (if needed)
         set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Wii-U error codes^.lnk""
         set "LINK_DESCRIPTION="Wii-U errors code list""
         set "TARGET_PATH="!BFW_PATH:"=!\doc\Wii U Error Codes.rtf""
@@ -1200,13 +1200,13 @@ REM : functions
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\scanResults.ico""
 
             if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Wii-I scans results
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Wii-U scans results
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
         )
 
         REM : create a shortcut to getWiiuOnlineFiles.bat (if needed)
-        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Get online files^, updated accounts from my Wii-U^.lnk""
+        set "LINK_PATH="!OUTPUT_FOLDER:"=!\Wii-U Games\Wii-U\Get online files^, update accounts from my Wii-U^.lnk""
         set "LINK_DESCRIPTION="Download all necessary files to play online with CEMU and update your accounts""
         set "TARGET_PATH="!BFW_PATH:"=!\tools\getWiiuOnlineFiles.bat""
         set "ICO_PATH="!BFW_PATH:"=!\resources\icons\online.ico""

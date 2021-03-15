@@ -174,7 +174,7 @@ REM : main
             set "folder=!folder:"=!"
         )
 
-        if ["!folder!"] == ["NONE"] (
+        if not ["!folder!"] == ["NONE"] (
             REM : use it
             set "accounts[!ua!]=!folder!"
             set /A "ua+=1"
@@ -182,16 +182,11 @@ REM : main
             set /A "nbUsers+=1"
 
         ) else (
-
-            REM : no account found, ask user
-            choice /C 123456789s /N /M "Account 8000000X to associate to !user! (1-9 or s to skip this user) ? : "
-            set /A "cr=!ERRORLEVEL!"
-            if !cr! LSS 10 (
-                set "accounts[!ua!]=8000000!cr!"
-                set /A "ua+=1"
-                set "users[!nbUsers!]=%%a"
-                set /A "nbUsers+=1"
-            )
+            call:getAccount account
+            set "accounts[!ua!]=!account!"
+            set /A "ua+=1"
+            set "users[!nbUsers!]=%%a"
+            set /A "nbUsers+=1"
         )
 
     )
@@ -357,6 +352,20 @@ REM : main
 REM : ------------------------------------------------------------------
 REM : functions
 
+    :getAccount
+
+        :askAccount
+        set /P "accRead=Please enter the source account Id (8XXXXXXX) : "
+        set /A "srcAccValidity=0"
+        echo !accRead!| findStr /R /I "^[8][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]$" > NUL 2>&1 && set /A "srcAccValidity=1"
+        if !srcAccValidity! EQU 0 (
+            echo ERROR^: !accRead! does no match the expected patern ^(8XXXXXXX^)
+            goto:askAccount
+        )
+
+    goto:eof
+    REM : ------------------------------------------------------------------
+
     :fillOwnerShipPatch
         set "folder=%1"
         set "title=%2"
@@ -384,8 +393,10 @@ REM : functions
         echo icacls !folder! /grant %%username%%^:F /T /L >> !patch!
         echo pause >> !patch!
         echo del /F %%0 >> !patch!
-    goto:eof
 
+    goto:eof
+    REM : ------------------------------------------------------------------
+        
     :extractSaveForUser
 
 

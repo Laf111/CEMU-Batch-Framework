@@ -58,6 +58,7 @@ REM : main
     echo       ^* FTP everywhere for CBHC ^(ftpiiu^)
     echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)
     echo       ^* nanddumper ^(to dump your NAND and get online files^)
+    echo       ^* dumpling ^(dump your games^)
     echo       ^* sigpatcher2sysmenu ^(DLC patch with non permanent CFW^)
     echo       ^* wup_installer_gx2 ^(installer for WUP format^)
     echo.
@@ -69,6 +70,9 @@ REM : main
     echo appStore to update^/install other apps.
     echo.
     echo =========================================================
+    echo.
+    echo Close ALL windows explorer instances^, before continue
+    echo.
     pause
 
     :askDrive

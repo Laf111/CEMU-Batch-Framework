@@ -115,9 +115,13 @@ REM : main
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
+    set "ipRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
-    REM : and teh port
+    if ["!ipRead!"] == [""] goto:getWiiuIp
+    REM : and the port
+    set "portRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
+    if ["!portRead!"] == [""] goto:getWiiuIp
 
     echo Found an existing FTP configuration ^:
     echo.
@@ -130,9 +134,6 @@ REM : main
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
     set /P "port=Please enter the port used : "
-
-    set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
-
 
     REM : prepare winScp.ini file
     copy /Y  !winScpIniTmpl! !winScpIni! > NUL 2>&1
@@ -228,6 +229,7 @@ REM : main
     cls
     echo =========================================================
 
+    set "completeList="
     for /F "delims=~; tokens=1-4" %%i in ('type !gamesList! ^| find /V "title"') do (
 
         set "second=%%j"
@@ -240,40 +242,49 @@ REM : main
             set "titlesSrc[!nbGames!]=%%k"
             echo !nbGames!	: %%i
 
+            set "completeList=!nbGames! !completeList!"
             set /A "nbGames+=1"
         )
     )
+
     echo =========================================================
 
     REM : list of selected games
     REM : selected games
     set /A "nbGamesSelected=0"
 
-    set /P "listGamesSelected=Please enter game's numbers list (separated with a space): "
-    call:checkListOfIntegers !listGamesSelected! > NUL 2>&1
-    if not ["!listGamesSelected: =!"] == [""] (
-        echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
+     set /P "listGamesSelected=Please enter game's numbers list (separated with a space) or 'all' to treat all games : "
+    :displayList
 
-        echo =========================================================
-        for %%l in (!listGamesSelected!) do (
-            echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
-            set /A "number=%%l"
-            if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+    if not ["!listGamesSelected!"] == ["all"] (
 
-            echo - !titles[%%l]!
-            set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
-            set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
-            set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+        if not ["!listGamesSelected!"] == [""] (
+            echo !listGamesSelected! | findStr /R /V /C:"^[0-9 ]*$" > NUL 2>&1 && echo ERROR^: not a list of integers && pause && goto:getList
 
-            set /A "nbGamesSelected+=1"
+            echo =========================================================
+            for %%l in (!listGamesSelected!) do (
+                echo %%l | findStr /R /V "[0-9]" > NUL 2>&1 && echo ERROR^: %%l not in the list && pause && goto:getList
+                set /A "number=%%l"
+                if !number! GEQ !nbGames! echo ERROR^: !number! not in the list & pause & goto:getList
+
+                echo - !titles[%%l]!
+                set "selectedTitles[!nbGamesSelected!]=!titles[%%l]!"
+                set "selectedEndTitlesId[!nbGamesSelected!]=!endTitlesId[%%l]!"
+                set "selectedtitlesSrc[!nbGamesSelected!]=!titlesSrc[%%l]!"
+
+                set /A "nbGamesSelected+=1"
+            )
+        ) else (
+            goto:getList
         )
     ) else (
-        goto:getList
+        set "listGamesSelected=!completeList!"
+        goto:displayList
     )
-    echo =========================================================
+        echo =========================================================
     echo.
     choice /C ync /N /M "Continue (y, n) or cancel (c)? : "
-    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit 98
+    if !ERRORLEVEL! EQU 3 echo Canceled by user^, exiting && timeout /T 3 > NUL 2>&1 && exit /b 98
     if !ERRORLEVEL! EQU 2 goto:getList
 
     cls
@@ -306,20 +317,8 @@ REM : main
         set /A "nbUsers+=1"
     )
 
-    REM : ask for saves import mode and set shutdownFlag accordingly
-    set /A "shutdownFlag=0"
+    REM : ask for saves import mode
     call:getSavesUserMode userSavesToImport
-
-    if !shutdownFlag! EQU 1 (
-        choice /C yn /N /T 12 /D n /M "Shutdown !USERDOMAIN! when done (y, n : default in 12s)? : "
-        if !ERRORLEVEL! EQU 2 (
-            set /A "shutdownFlag=0"
-        ) else (
-            echo Please^, save all your opened documents before continue^.^.^.
-            pause
-        )
-
-    )
     
     goto:treatments
 
@@ -387,9 +386,6 @@ REM : main
     echo =========================================================
     if %nbArgs% EQU 0 pause
 
-    REM : if shutdwon is asked
-    if !shutdownFlag! EQU 1 echo shutdown in 5min^.^.^. & timeout /T 300 /NOBREAK & shutdown -s -f -t 00
-
     if !ERRORLEVEL! NEQ 0 (
         if %nbArgs% NEQ 0 exit /b !ERRORLEVEL!
         exit /b !ERRORLEVEL!
@@ -408,7 +404,6 @@ REM : functions
     :getSavesUserMode
         REM : init to none (choice number 1)
         set "%1=none"
-        set /A "shutdownFlag=1"
 
         echo.
         echo Please select an import mode for Wii-U saves ^:
@@ -451,7 +446,6 @@ REM : functions
         )
 
         set "%1=select"
-        set /A "shutdownFlag=0"
 
     goto:eof
     REM : ------------------------------------------------------------------

@@ -110,26 +110,6 @@ REM : main
     echo Get online files from your Wii-U
     echo =========================================================
     echo.
-    echo You can synchronize Wii-U games^'saves with CEMU ones or
-    echo choose to keep both saves ^(using extra slot feature^)
-    echo This will be applied for all BatchFw^'s users^.
-    echo.
-
-    set "saveMode=BOTH"
-    choice /C yn /N /M "Synchronize your saves between CEMU and your Wii-U? (y/n): "
-    if !ERRORLEVEL! EQU 1 set "saveMode=SYNCR"
-
-    set "msg="WII-U_SAVE_MODE=!saveMode!""
-    call:log2HostFile !msg!
-
-    if ["!saveMode!"} == ["BOTH"] (
-        echo.
-        echo Extra saves slots will be used per user and activated for each game
-        echo Use ^'BFW_USER\_BatchFw - set extra slots saves^.lnk^' to manage slots
-        echo ^(to set the active slot when launching games^)
-        echo.
-    )
-    echo.
     echo.
     echo To download files throught FTP^, on your Wii-U^ you need to ^:
     echo.
@@ -160,9 +140,13 @@ REM : main
     if not exist !winScpIni! goto:getWiiuIp
 
     REM : get the hostname
+    set "ipRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "HostName="') do set "ipRead=%%i"
-    REM : and teh port
+    if ["!ipRead!"] == [""] goto:getWiiuIp
+    REM : and the port
+    set "portRead="
     for /F "delims=~= tokens=2" %%i in ('type !winScpIni! ^| find "PortNumber="') do set "portRead=%%i"
+    if ["!portRead!"] == [""] goto:getWiiuIp
 
     echo Found an existing FTP configuration ^:
     echo.
@@ -175,9 +159,6 @@ REM : main
     :getWiiuIp
     set /P "wiiuIp=Please enter your Wii-U local IP adress : "
     set /P "port=Please enter the port used : "
-
-    set "winScpIniTmpl="!WinScpFolder:"=!\WinSCP.ini-tmpl""
-
 
     REM : prepare winScp.ini file
     copy /Y  !winScpIniTmpl! !winScpIni! > NUL 2>&1

@@ -199,7 +199,7 @@ REM : main
     del /F !pws_target! > NUL 2>&1
     del /F !uplog! > NUL 2>&1
 
-    type !logFile! | find "COMPLETE_GP=YES" > NUL 2>&1 && (
+    type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && (
 
         if !QUIET_MODE! EQU 0 if !FORCED_MODE_SLIENT! EQU 0 (
             echo.
