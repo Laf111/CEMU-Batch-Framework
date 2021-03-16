@@ -25,6 +25,7 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 15/03/2021 V22-4 :
 add : WII-U / check (regExp) on accounts 
 add : WII-U / posibility to select all games in ExportSavesToWiiu.bat and importWiiuSaves.bat
+add : change Wii-U scrits icons
 fix : restoreUserSavesOfAllGames.bat.bat do not ask for account if WiiU ones exists
 fix : WII-U / exportSavesToWiiu.bat : in SYNCR mode if an active slot exists, use it instead of CEMU default save
 fix : WII-U / remove shutdown option in import/export saves

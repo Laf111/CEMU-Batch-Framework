@@ -356,8 +356,8 @@ REM : functions
 
         :askAccount
         set /P "accRead=Please enter the source account Id (8XXXXXXX) : "
-        set /A "srcAccValidity=0"
-        echo !accRead!| findStr /R /I "^[8][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]$" > NUL 2>&1 && set /A "srcAccValidity=1"
+        set /A "srcAccValidity=1"
+        echo !accRead!| findStr /R /V "^[8][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]$" > NUL 2>&1 && set /A "srcAccValidity=0"
         if !srcAccValidity! EQU 0 (
             echo ERROR^: !accRead! does no match the expected patern ^(8XXXXXXX^)
             goto:askAccount

@@ -43,7 +43,7 @@ REM : main
         pause
         exit /b 100
     )
-    
+
     REM : checking arguments
     set /A "nbArgs=0"
     :continue
@@ -63,7 +63,7 @@ REM : main
     set "wiiuSaveMode=SYNCR"
     REM : read the configuration parameters for Wii-U saves (SYNCR/BOTH)
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find /I "WII-U_SAVE_MODE=" 2^>NUL') do set "wiiuSaveMode=%%i"
-    
+
     if %nbArgs% NEQ 0 goto:getArgsValue
 
     echo.
@@ -161,7 +161,7 @@ REM : main
         goto:checkConnection
     )
     cls
-    
+
     REM : scans folder
     set /A "noOldScan=0"
     :scanMyWii
@@ -373,7 +373,7 @@ REM : main
     echo =========================================================
     echo Now you can stop FTPiiU server
     echo.
-    
+
     if %nbArgs% EQU 0 pause
     if !ERRORLEVEL! NEQ 0 timeout /T 3 > NUL 2>&1
 
@@ -443,7 +443,7 @@ REM : functions
         set "cemuSaveFolder="!TMP_ULSAVE_PATH:"=!\mlc01\usr\save\00050000\%endTitleId%""
         set "metaFolder="!cemuSaveFolder:"=!\meta""
         set "saveinfo="!metaFolder:"=!\saveinfo.xml""
-        
+
         echo =========================================================
         echo Export CEMU saves of !GAME_TITLE! to the Wii-U
         echo =========================================================
@@ -508,7 +508,7 @@ REM : functions
 
         set "stmp=!saveInfo!tmp"
         del /F !stmp! > NUL 2>&1
-            
+
         REM : if exist saveInfo.xml check if !folder! exist in saveinfo.xml
         if exist !saveInfo! (
             REM : if the account is not present in saveInfo.xml
@@ -549,14 +549,10 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
-REM : must run in !igsvf! !
-    :getUserSave
-
-        REM : contains the active slot (relative path to the rar file)
-        set "userActiveSlotFile="!GAME_TITLE!_!currentUser!_activeSlot.txt""
-
-        REM : if not exist slotNumber=0
-        if not exist !userActiveSlotFile! goto:eof
+    REM : must run in !igsvf! !
+    :getCemuUserSave
+        REM : initialize with CEMU default save
+        set "%1=!rarFile!"
 
         for /F "delims=~" %%i in ('type !userActiveSlotFile! 2^>NUL') do set "activeSave="%%i""
 
@@ -570,13 +566,15 @@ REM : must run in !igsvf! !
         set /A "slotNumber=!str:.rar=!"
 
         for /F "delims=~" %%i in ('type !activeTextFile! 2^>NUL') do set "slotLabel="%%i""
+        REM : avoid Wii-U slots
+        echo !slotLabel! | find "Wii-U import" > NUL 2>&1 && goto:eof
         echo Use the slot!slotNumber! [!slotLabel:"=!] for !currentUser!
 
         set "%1=!activeSave!"
 
 
     goto:eof
-    REM : ------------------------------------------------------------------    
+    REM : ------------------------------------------------------------------
 
     REM : search for last slot or create one (BOTH mode)
     :getWiiUSlot
@@ -584,8 +582,8 @@ REM : must run in !igsvf! !
         set "%2=!rarFile!"
 
         REM : check if slots are defined
-        set "activeSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
-        if exist !activeSlotFile! (
+        set "userActiveSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
+        if exist !userActiveSlotFile! (
 
             REM : search for last slots used with a label containing "Wii-U import"
             set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot*.txt""
@@ -597,9 +595,9 @@ REM : must run in !igsvf! !
                     set "slotFile=!slotLabelFile:.txt=.rar!"
                     if exist !slotFile! (
                         REM : activate it
-                        attrib -R !activeSlotFile! > NUL 2>&1
-                        echo !slotFile!>!activeSlotFile!
-                        attrib +R !activeSlotFile! > NUL 2>&1
+                        attrib -R !userActiveSlotFile! > NUL 2>&1
+                        echo !slotFile!>!userActiveSlotFile!
+                        attrib +R !userActiveSlotFile! > NUL 2>&1
 
                         set "%2=!slotFile!"
                         goto:eof
@@ -622,21 +620,21 @@ REM : must run in !igsvf! !
         )
 
         REM : SYNCR
-        if exist !activeSlotFile! (
+        if exist !userActiveSlotFile! (
 
             set "igsvf="!GAME_FOLDER_PATH:"=!\Cemu\inGameSaves"
             pushd !igsvf!
             set "lastSlot="NONE""
-            call:getUserSave lastSlot
+            call:getCemuUserSave lastSlot
             if exist !lastSlot! set "%2=!lastSlot!"
 
             pushd !GAMES_FOLDER!
             goto:eof
         )
-        
+
     goto:eof
     REM : ------------------------------------------------------------------
-    
+
     :exportSavesForCurrentAccount
 
         REM : for the current user : extract rar file in TMP_ULSAVE_PATH
@@ -662,7 +660,7 @@ REM : must run in !igsvf! !
 
         REM : treatment for the user
         echo Treating !currentUser! ^(!folder!^)
-        
+
         REM extract the CEMU saves for current user
         wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !TMP_ULSAVE_PATH! > NUL 2>&1
 
@@ -726,4 +724,3 @@ REM : must run in !igsvf! !
     goto:eof
     REM : ------------------------------------------------------------------
 
-    
