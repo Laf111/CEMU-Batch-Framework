@@ -62,7 +62,7 @@ REM    color 4F
         pause
         exit /b 200
     )
-    
+
     set "checkLenght="
     set "titleId="
 
@@ -518,9 +518,9 @@ REM : functions
         if ["!typeCapFps!"] == ["SYNCSCR"] set "description=!descFPS!"
 
         if ["%nativeFps%"] == ["30"] (
-            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^)^. BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
+            echo description = !description!^. Vsync AND ANY 60FPS patch GFX pack need to be disbaled^.^. BatchFw assume that the native FPS is 30^. If it is not^, change the native FPS to 60 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
         ) else (
-            echo description = !description! ^(you need to disable vsync AND ANY 60FPS patch GFX pack^)^. BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
+            echo description = !description!^. Vsync AND ANY 60FPS patch GFX pack need to be disbaled^.^. BatchFw assume that the native FPS is 60^. If it is not^, change the native FPS to 30 in _BatchFw_Install^/resources^/WiiU-Titles-Library^.csv >> !gfxpPath!
         )
         set /A "gfxVersion=!gfxPackVersion:V=!"
         echo version = !gfxVersion! >> !gfxpPath!
@@ -731,7 +731,7 @@ echo OK2
 
     :createRefreshRatesGp
 
-    
+
         set "refreshRatesArray="
         set "refreshRatesList="
         set "hostsArray="
