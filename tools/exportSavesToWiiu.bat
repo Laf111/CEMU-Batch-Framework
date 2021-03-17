@@ -27,6 +27,7 @@ REM : main
 
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
+    set "setExtraSavesSlots="!BFW_TOOLS_PATH:"=!\setExtraSavesSlots.bat""
 
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
     set "logFile="!BFW_LOGS:"=!\Host_!USERDOMAIN!.log""
@@ -528,7 +529,7 @@ REM : functions
             goto:eof
         )
         REM : if saveinfo.xml does not exist
-        echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"00000000^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<account persistentId=^"!folder!^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
+        echo ^<^?xml version=^"1^.0^" encoding=^"UTF-8^"^?^>^<info^>^<account persistentId=^"!folder!^"^>^<timestamp^>!hexValue!^<^/timestamp^>^<^/account^>^<^/info^> > !saveInfo!
 
     goto:eof
     REM : ------------------------------------------------------------------
@@ -579,27 +580,30 @@ REM : functions
     REM : search for last slot or create one (BOTH mode)
     :getWiiUSlot
         REM : initialize with CEMU default save
-        set "%2=!rarFile!"
+        set "%1=!rarFile!"
 
         REM : check if slots are defined
         set "userActiveSlotFile="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_activeSlot.txt""
+
         if exist !userActiveSlotFile! (
 
             REM : search for last slots used with a label containing "Wii-U import"
             set "pat="!inGameSavesFolder:"=!\!GAME_TITLE!_!currentUser!_slot*.txt""
-            for /F "delims=~" %%i in ('dir /S /B /O:D !pat!') do (
 
+
+            for /F "delims=~" %%i in ('dir /S /B /O:D !pat!') do (
                 findstr /S /I "Wii-U import" "%%i" > NUL 2>&1 && (
                     REM : found the first slot used for Wii-U import
                     set "slotLabelFile="%%i""
                     set "slotFile=!slotLabelFile:.txt=.rar!"
+
                     if exist !slotFile! (
                         REM : activate it
                         attrib -R !userActiveSlotFile! > NUL 2>&1
                         echo !slotFile!>!userActiveSlotFile!
                         attrib +R !userActiveSlotFile! > NUL 2>&1
 
-                        set "%2=!slotFile!"
+                        set "%1=!slotFile!"
                         goto:eof
                     )
                 )
@@ -607,15 +611,17 @@ REM : functions
             )
         )
 
+
         if [!wiiuSaveMode!] == ["BOTH"] (
             REM : get and activate OR create a slots for Wii-U save
 
             REM : if not found, create a new extra slot and activate it
-            call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+            call !setExtraSavesSlots! !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+
             REM : get the last modified save for currentUser
             set "lastSlot="NONE""
             call:getLastModifiedSaveFile lastSlot
-            if exist !lastSlot! set "%2=!lastSlot!"
+            if exist !lastSlot! set "%1=!lastSlot!"
             goto:eof
         )
 
@@ -626,7 +632,7 @@ REM : functions
             pushd !igsvf!
             set "lastSlot="NONE""
             call:getCemuUserSave lastSlot
-            if exist !lastSlot! set "%2=!lastSlot!"
+            if exist !lastSlot! set "%1=!lastSlot!"
 
             pushd !GAMES_FOLDER!
             goto:eof
@@ -655,6 +661,7 @@ REM : functions
                 if not [!userSavesToExport!] == ["!currentUser!"] goto:eof
             )
         )
+
         call:getWiiUSlot lastSlot
         if not [!lastSlot!] == ["NONE"]  set "rarFile=!lastSlot!"
 
@@ -663,7 +670,6 @@ REM : functions
 
         REM extract the CEMU saves for current user
         wscript /nologo !StartHiddenWait! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !TMP_ULSAVE_PATH! > NUL 2>&1
-
 
         REM : CEMU 80000001 folder for the current user
         set "cemuUserSaveFolder="!cemuSaveFolder:"=!\user\80000001""
@@ -678,6 +684,17 @@ REM : functions
         call:updateSaveInfoFile
 
         pushd !GAMES_FOLDER!
+
+        REM : BatchFw use only one account (the same for all users = 80000001)
+        REM : => never treat the common folder => remove it
+        set "commonUserSaveFolder="!cemuSaveFolder:"=!\user\!folder:"=!""
+        if exist !commonUserSaveFolder! (
+            REM : remove it before the transfert
+            rmdir /Q /S !commonUserSaveFolder! > NUL 2>&1
+
+            REM : no need to update the saveinfo.xml
+        )
+
 
         set /A "nbUsersTreated+=1"
     goto:eof
@@ -724,3 +741,20 @@ REM : functions
     goto:eof
     REM : ------------------------------------------------------------------
 
+    REM : function to log info for current host
+    :log2HostFile
+        REM : arg1 = msg
+        set "msg=%~1"
+
+        if not exist !logFile! (
+            set "logFolder="!BFW_PATH:"=!\logs""
+            if not exist !logFolder! mkdir !logFolder! > NUL 2>&1
+            goto:logMsg2HostFile
+        )
+        REM : check if the message is not already entierely present
+        for /F %%i in ('type !logFile! ^| find /I "!msg!"') do goto:eof
+        :logMsg2HostFile
+        echo !msg!>> !logFile!
+
+    goto:eof
+    REM : ------------------------------------------------------------------
