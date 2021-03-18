@@ -505,7 +505,7 @@ REM : those links disappear with RPX format (dump or uncompress) and cannot be r
         REM type !srcRemoteUpdate! | find "!endTitleIdFolder!" > NUL 2>&1 && (
 
             REM if !nbPass! EQU 1 echo - injecting update
-            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000e/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch on" "mkdir /storage_!src!/usr/title/0005000e/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
 
             REM REM : YES : import update in mlc01/usr/title (minimized + no wait)
             REM wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
@@ -516,7 +516,7 @@ REM : those links disappear with RPX format (dump or uncompress) and cannot be r
         REM type !srcRemoteDlc! | find "!endTitleIdFolder!" > NUL 2>&1 && (
 
             REM if !nbPass! EQU 1 echo - injecting DLC
-            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch continue" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
+            REM !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "option batch on" "mkdir /storage_!src!/usr/title/0005000c/!endTitleIdFolder!" "option batch off" "exit"  > !ftplogFile! 2>&1
             REM REM : YES : import dlc in mlc01/usr/title/0005000c/!endTitleIdFolder! (minimized + no wait)
             REM wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! remote !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
         REM )

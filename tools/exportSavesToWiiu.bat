@@ -20,6 +20,9 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
     set "fnrPath="!BFW_RESOURCES_PATH:"=!\fnr.exe""
 

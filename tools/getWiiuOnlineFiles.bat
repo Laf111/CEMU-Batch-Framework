@@ -370,6 +370,9 @@ REM : functions
                 echo WARNING^: this account seems to not have "Save password" option checked ^(auto login^) ^!
                 echo it might be unusable with CEMU
                 echo.
+                echo Check "Save password" option for %%d account on the Wii-U and relaunch this script
+                echo.
+                pause
             )
 
             REM : get AccountId from account.dat

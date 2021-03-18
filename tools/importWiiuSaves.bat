@@ -24,6 +24,9 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
+    !cmdOw! @ /MAX > NUL 2>&1
+
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
 
     set "syncFolder="!BFW_TOOLS_PATH:"=!\ftpSyncFolders.bat""
@@ -660,7 +663,7 @@ REM : functions
             )
         )
         REM : if not found, create a new extra slot and activate it
-        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+        call !setExtraSavesSlots! !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
         REM : get the last modified save for currentUser
         set "lastSlot="NONE""
         call:getLastModifiedSaveFile lastSlot
@@ -694,7 +697,7 @@ REM : functions
                     echo "Extra save slots were defined for this game by !currentUser! ^:
 
                     REM : display/create slos
-                    call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH!
+                    call !setExtraSavesSlots! !currentUser! !GAME_FOLDER_PATH!
 
                     REM : enter the slot to use
                     :askSlot
@@ -716,7 +719,7 @@ REM : functions
                     choice /C yn /N /M "A save already exists for !currentUser!, create a new extra slot and activate it? (y, n) : "
                     if !ERRORLEVEL! EQU 1 (
                         REM : create a new extra slot and activate it
-                        call:setExtraSavesSlots !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
+                        call !setExtraSavesSlots! !currentUser! !GAME_FOLDER_PATH! "Wii-U import"
 
                         REM : get the last modified save for currentUser
                         set "lastSlot="NONE""

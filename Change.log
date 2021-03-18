@@ -22,6 +22,10 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 ======================================================================================================
 
 
+18/03/2021 V22-5 :
+add : maximized windows for Export/Import scripts
+fix : FPS CAP GFX packs not shown in CEMU 1.22.8 (remove parenthesis in description)
+
 15/03/2021 V22-4 :
 add : WII-U / check (regExp) on accounts 
 add : WII-U / posibility to select all games in ExportSavesToWiiu.bat and importWiiuSaves.bat
