@@ -94,9 +94,10 @@ REM : main
     REM : check if not Linux tools are defined in the environnement
     echo test | find /I "test" > NUL
     if !ERRORLEVEL! NEQ 0 (
-        echo ERROR^: Found linux tools in your environnement
-        echo         Please define them add the end of your path if you
-        echo         want to launch BatchFw
+        echo Found linux tools in your environnement
+        echo Please define them add the end of your path if you
+        echo want to launch BatchFw
+        pause
         exit 2
     )
     echo DOS only environnement        ^: OK
