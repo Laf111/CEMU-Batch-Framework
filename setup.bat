@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V22-5"
+    set "BFW_VERSION=V22-6"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"
@@ -91,13 +91,23 @@ REM : main
     echo BatchFw pre-requisites check^.^.^.
     echo =========================================================
 
+    REM : check if not Linux tools are defined in the environnement
+    echo test | find /I "test" > NUL
+    if !ERRORLEVEL! NEQ 0 (
+        echo ERROR^: Found linux tools in your environnement
+        echo         Please define them add the end of your path if you
+        echo         want to launch BatchFw
+        exit 2
+    )
+    echo DOS only environnement        ^: OK
+
     REM : check if file system is NTFS (BatchFw use Symlinks and need to be installed on a NTFS volume)
     for %%i in (!BFW_PATH!) do for /F "tokens=2 delims=~=" %%j in ('wmic path win32_volume where "Caption='%%~di\\'" get FileSystem /value 2^>NUL ^| find /I /V "NTFS"') do (
 
         echo This volume is not an NTFS one^!
         echo BatchFw use Symlinks and need to be installed on a NTFS volume
         pause
-        exit 2
+        exit 3
     )
     echo File system NTFS              ^: OK
 
@@ -111,24 +121,27 @@ REM : main
         echo This user is not allowed to create links^!
         echo BatchFw use Symlinks^, please contact !USERDOMAIN! administrator
         pause
-        exit 21
+        exit 4
     )
     echo Rights to create symlinks     ^: OK
 
     if exist !linkCheck! rmdir /Q !linkCheck! > NUL 2>&1
 
     REM : check rights to launch vbs scripts
-    for /F "tokens=3" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled') do set "value=%%a"
-    set /A "value=!value: =!"
-    if !value! EQU 0 (
-        echo Launching VBS scripts is not allowed^!
-        echo HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings\Enabled ^<^> 1
-        echo value=[!value!]
-        echo BatchFw use VBS scripts^, please contact !USERDOMAIN! administrator
-        pause
-        exit 22
-    ) else (
-        echo Rights to launch vbs scripts  ^: OK
+    for /F "tokens=3" %%a in ('reg query "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings" /v Enabled 2^>NUL') do (
+        set "value=%%a"
+        set /A "value=!value: =!"
+
+        if !value! EQU 0 (
+            echo Launching VBS scripts is not allowed^!
+            echo HKEY_LOCAL_MACHINE\Software\Microsoft\Windows Script Host\Settings\Enabled ^<^> 1
+            echo value=[!value!]
+            echo BatchFw use VBS scripts^, please contact !USERDOMAIN! administrator
+            pause
+            exit 5
+        ) else (
+            echo Rights to launch vbs scripts  ^: OK
+        )
     )
 
     java -version > NUL 2>&1

@@ -21,6 +21,10 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+07/04/2021 V22-6 :
+add : a check on environnement to avoid system with Linux tools in DOS environnement
+fix : modify the check on VBS script launch permission
+fix : regression on graphic pack completion (deactivated by mistake)
 
 18/03/2021 V22-5 :
 add : maximized windows for Export/Import scripts

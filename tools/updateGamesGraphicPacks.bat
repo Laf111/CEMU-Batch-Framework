@@ -979,7 +979,7 @@ REM : functions
         REM : check if BatchFw have to complete graphic packs for this game
         set /A "comGP=0"
         type !logFile! | find /I "COMPLETE_GP=YES" > NUL 2>&1 && set /A "comGP=1"
-        if !compGP! EQU 0 goto:createCapGP
+        if !comGP! EQU 0 goto:createCapGP
         
         if [!vgfxpRequiered!] == ["V2"] (
             REM : Games already completed for V2 of gfx packs are listed in !glogFile! with the string
