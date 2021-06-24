@@ -2,7 +2,7 @@
 
 BatchFw is a free framework for **CEMU** (WII-U emulator) based on batch, wmic outputs, powershell, vbs scripts and 3rd party tools.
 
-It allows you to launch your loadiines games (uncompressed RPX) using **many versions of CEMU** without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (making your game library portable using the -mlc argument. CEMU needs to be installed on each host as the shader cache is host dependant).
+It allows you to launch your loadiines games (uncompressed RPX) using **many versions of CEMU** without messing around with controler profiles, saves, duplicating update and/or DLC installations, shaders caches... for many users on many hosts (making your **game library portable** using the -mlc argument. CEMU needs to be installed on each host as the shader cache is host dependant).
 
 As the mlc01 folder and settings are located in the game's one, you can backup the whole game including saves for all users, update, DLC, settings into a single archive file easily.
 
@@ -41,7 +41,7 @@ If you update to a more recent configuration not listed here and encouter issues
 
 For Wii-U owners, BatchFw comes with a **complete FTP interface** to update your accounts (online files, friends list...) and mostly to **import/export your saves for all users between CEMU and the Wii-U**. You can choose to **synchronize your CEMU save with the Wii-U one or choose to keep both saves to play with CEMU** (an extra slot is created and used automatically for import/export saves process). 
 
-Ftpiiu (ftp-everywhere and others) does not set rights on files injected. Some games (such as WWHD) invalidate the injected files, **you have to use [WiiU FTP Server]( https://github.com/Laf111/WiiUFtpServer) to fix it**.
+Ftpiiu (ftp-everywhere and others) does not set rights on files injected. Some games (such as WWHD) invalidate the injected files, **you have to use [WiiU FTP Server]( https://github.com/Laf111/WiiUFtpServer) to fix it** (provided in ./resources/WiiuSDcard.rar).
 
 
 # 
