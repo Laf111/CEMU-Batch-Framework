@@ -11,7 +11,7 @@ As the mlc01 folder and settings are located in the game's one, you can backup t
 ![CEMU-Batch-Framework](resources/BatchFw.png)
 
 
-**Versions of CEMU tested : 1.11.6 to 1.22.12** (if you want to use earlier versions, create an installation per game and per user)
+**Versions of CEMU tested : 1.11.6 to 1.24.0** (if you want to use earlier versions, create an installation per game and per user)
 
 (**1.22.7 is not compatible** because it did not parse the mlc argument correctlty)
 
@@ -27,7 +27,7 @@ It also allows to create extra saves slots to define **multiple saves per user f
 
 If you choose to let BatchFw complete your GFX packs during the setup, it will creates the missing resolution presets for the current aspect ratio (on every host used).
 
-**Last GFX packs checked (presets completion) : V806**
+**Last GFX packs checked (presets completion) : V816**
 
 BatchFw **creates resolution GFX packs for games** with no GFX packs provided (which are automatically replaced by the official ones when they'll be available). 
 It computes the current aspect ratio using your screen resolution (so it **works on every display configuration setup**, dual triple screen...) 
