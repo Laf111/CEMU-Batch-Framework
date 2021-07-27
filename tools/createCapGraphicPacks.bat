@@ -653,7 +653,6 @@ echo fps=!fps!
 echo targetFps=!targetFps! >> !ccgpLogFile!
 echo targetFps=!targetFps!
 
-echo OK
         if ["!gfxPackVersion!"] == ["V2"] (
             REM : for V2 create FPS CAP even if a FPS++ exist
 REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
@@ -661,7 +660,6 @@ REM            if !fpsPP! EQU 0 call:createCapOldGP !fpsOldGp! !targetFpsOldGp!
         ) else (
             type !gfxpPath! | find /I /V "FPS = !fps!" > NUL 2>&1 && call:fillCapLastVersion "99" "Speed (!targetFps!FPS)"
         )
-echo OK2
 
         if !fpsPp! EQU 1 goto:capMenu
 

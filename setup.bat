@@ -778,13 +778,7 @@ REM : main
 
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
-    echo - if you^'re using a permanent hack ^(CBHC^)^:
-    echo    ^* launch HomeBrewLauncher
-    echo    ^* then ftp-everywhere for CBHC
-    echo - if you^'re not^:
-    echo    ^* first run Mocha CFW HomeBrewLauncher
-    echo    ^* then ftp-everywhere for MOCHA
-    echo.
+    echo - launch WiiU FTP Server
     echo - get the IP adress displayed on Wii-U gamepad
     echo.
 

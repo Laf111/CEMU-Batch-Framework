@@ -128,7 +128,7 @@ REM : main
         :killingLoop
         REM : use () after do (wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C taskkill /F /pid %%i > NUL 2>&1 & goto:killingLoop does nothing)
         !cmdOw! /T | find /I "BatchFw pre processing" | sort /R > !logFileTmp!
-        for /F "tokens=3" %%i in ('type !logFileTmp!') do (
+        for /F "tokens=3" %%i in ('type !logFileTmp! 2^> NUL') do (
             taskkill /F /pid %%i > NUL 2>&1
             goto:killingLoop
         )
@@ -171,7 +171,7 @@ REM : main
 
     REM : get Title Id from meta.xml
     set "titleLine="NONE""
-    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id"') do set "titleLine="%%j""
+    for /F "tokens=1-2 delims=>" %%i in ('type !META_FILE! ^| find "title_id" 2^> NUL') do set "titleLine="%%j""
     if [!titleLine!] == ["NONE"] (
         !MessageBox! "ERROR : unable to find titleId from meta.xml, please check ! exiting..." 4112
         goto:eof
@@ -192,7 +192,7 @@ REM : main
 
     REM : get information on game using WiiU Library File
     set "libFileLine="NONE""
-    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%titleId%';"') do set "libFileLine="%%i""
+    for /F "delims=~" %%i in ('type !wiiTitlesDataBase! ^| findStr /R /I "^'%titleId%';" 2^> NUL') do set "libFileLine="%%i""
 
     if [!libFileLine!] == ["NONE"] (
         echo ---------------------------------------------------------
@@ -285,7 +285,7 @@ REM : main
     set "CEMU_PF="%CEMU_FOLDER:"=%\gameProfiles""
 
     REM : get CPU threads number
-    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "="') do set /A "nbCpuThreads=%%c"
+    for /F "delims=~= tokens=2" %%c in ('wmic CPU Get NumberOfLogicalProcessors /value ^| find "=" 2^> NUL') do set /A "nbCpuThreads=%%c"
     set "recommendedMode=SingleCore-recompiler"
 
     REM : version >=1.22.0
@@ -475,7 +475,7 @@ REM : main
             goto:instanciateGameProfile
         )
         set "OLD_PROFILE_FILE="!lastPath:"=!\gameProfiles\%titleId%.ini""
-        opy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1
+        copy /Y !OLD_PROFILE_FILE! !PROFILE_FILE!  > NUL 2>&1
         goto:patchGameProfile
     )
 
@@ -916,7 +916,7 @@ REM : functions
         type !file! | find /I "!strTargetWithoutSpace!" > NUL 2>&1 && goto:eof
 
         REM : if [Graphics] is found in file and is commented : goto patchGraphic
-        type !file! | find /I "[Graphics]" > NUL 2>&1 && for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]"') do goto:patchGraphic
+        type !file! | find /I "[Graphics]" > NUL 2>&1 && for /F "delims=~" %%j in ('type !file! ^| find /I "#[Graphics]" 2^> NUL') do goto:patchGraphic
 
         REM : if disablePrecompiledShaders=false found in !file!, replace in file
         type !file! | find /I "[Graphics]" > NUL 2>&1 && (
@@ -1020,7 +1020,7 @@ REM : functions
 
         pushd !sf!
         :getLastModifiedSettings
-        for /F "delims=~" %%i in ('type !lls!') do set "ls=%%i"
+        for /F "delims=~" %%i in ('type !lls! 2^> NUL') do set "ls=%%i"
 
         if not exist !ls! (
             REM : rebuild it
@@ -1457,7 +1457,7 @@ REM : functions
 
         set "pat="!GAMES_FOLDER:"=!\_BatchFW_Controller_Profiles\*.txt""
         REM : loop on all file found (reverse sorted by date => exit loop whith the last modified one)
-        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat!  2^>NUL') do set "lastController="%%i""
+        for /F "delims=~" %%i in ('dir /B /O:-D /T:W !pat! 2^>NUL') do set "lastController="%%i""
 
         REM : basename of GAME FOLDER PATH (used to name shorcut)
         for /F "delims=~" %%i in (!lastController!) do set "controllerName=%%~nxi"
@@ -1701,7 +1701,7 @@ REM : functions
 
         REM : get charset code for current HOST
         set "CHARSET=NOT_FOUND"
-        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "="') do set "CHARSET=%%f"
+        for /F "tokens=2 delims=~=" %%f in ('wmic os get codeset /value ^| find "=" 2^> NUL') do set "CHARSET=%%f"
 
         if ["%CHARSET%"] == ["NOT_FOUND"] (
             echo Host char codeSet not found in %0 ^?

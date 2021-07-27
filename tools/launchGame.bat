@@ -72,6 +72,9 @@ REM : main
     set "xmlS="!BFW_RESOURCES_PATH:"=!\xml.exe""
 
     set "batchFwLog="!BFW_PATH:"=!\logs\BatchFwLog.txt""
+    REM : initialize BatchFw report
+    echo. > !batchFwLog!
+
     REM : check if cemu if not already running
     set /A "nbI=0"
 
@@ -198,6 +201,7 @@ REM : main
     if [!args[8]!] == ["-Legacy"] set "argLeg=-Legacy"
 
     :getCemuFolder
+
     REM : get CEMU_FOLDER
     set "CEMU_FOLDER=!args[0]!"
 
@@ -255,8 +259,6 @@ REM : main
             exit 20
         )
     )
-    REM : initialize BatchFw report
-    echo. > !batchFwLog!
 
     REM : CEMU's log
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
@@ -275,7 +277,6 @@ REM : main
     set "ml="!BFW_TOOLS_PATH:"=!\monitorBatchFw.bat""
     wscript /nologo !StartHidden! !ml!
 
-
     REM : check if an internet connexion is active
     set "ACTIVE_ADAPTER=NOT_FOUND"
     for /F "tokens=1 delims=~=" %%f in ('wmic nic where "NetConnectionStatus=2" get NetConnectionID /value 2^>NUL ^| find "="') do set "ACTIVE_ADAPTER=%%f"
@@ -284,6 +285,7 @@ REM : main
 
     REM : check a graphic pack update
     set "script="!BFW_TOOLS_PATH:"=!\updateGraphicPacksFolder.bat""
+
     wscript /nologo !StartHidden! !script! -warn
 
     REM : GFX pack version of the last ones created/completed by BatchFw
@@ -320,7 +322,8 @@ REM : main
 
     REM : Get version of GFX packs requiered for this version of CEMU (extract packs if needed)
 
-    REM : suppose that version > 1.21.0 > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    REM : suppose that version > 1.25.0 > 1.21.0 > 1.18.2 > 1.15.19 > 1.15.15 > 1.15.6 > 1.14
+    set /A "v125=1"
     set /A "v121=1"
     set /A "v1182=1"
     set /A "v11519=1"
@@ -328,6 +331,14 @@ REM : main
     set /A "v1156=1"
     set /A "v1158=1"
     set /A "v114=1"
+
+    REM : comparing version to V1.25.0 (new shaders & vulkan pipeline cache)
+    call:compareVersions !versionRead! "1.25.0" v125 > NUL 2>&1
+    if ["!v125!"] == [""] echo Error when comparing versions >> !batchFwLog!
+    if !v125! EQU 50 echo Error when comparing versions >> !batchFwLog!
+
+    REM : version >= 1.25.0 => > v1.21.0 > ....
+    if !v125! LEQ 1 goto:getTitleId
 
     REM : comparing version to V1.21.0 (GFX packs V4 -> 7 and up)
     call:compareVersions !versionRead! "1.21.0" v121 > NUL 2>&1
@@ -337,10 +348,11 @@ REM : main
     REM : version > 1.21.0 => > v1.18.2 > ....
     if !v121! LEQ 1 goto:getTitleId
 
+
     REM : V4 packs support
     set "gfxPackVersionNeeded=V4"
 
-    REM : TODO : uncomment when V4 packs will not be mixed with V6 one in GFX repo
+    REM : TODO : uncomment when V4 packs will not be mixed with V6 ones in GFX repo
     if exist !gfxv4! goto:checkV1182
 
     mkdir !gfxv4! > NUL 2>&1
@@ -505,9 +517,12 @@ REM : main
     REM : if v > 1.16 update sci value with titleId (sci=titleId for CEMU > 1.16)
     call:lowerCase !titleId! sci
 
+    REM : if v >= 1.25
+    if !v125! LEQ 1 set "sci=!sci:"=!_shaders"
+
     :getScreenMode
-    echo Expected shaderCacheName ^: !sci! >> !batchFwLog!
-    echo Expected shaderCacheName ^: !sci!
+    echo Expected shaderCacheName ^: !sci:_shaders=! >> !batchFwLog!
+    echo Expected shaderCacheName ^: !sci:_shaders=!
 
     REM : if SCREEN_MODE is present in logHOSTNAME file : launch CEMU in windowed mode
     set "screenMode=-f"
@@ -689,26 +704,34 @@ REM : main
     pushd !gtscf!
 
     REM : getting the last modified one including _j.bin (conventionnal shader cache)
-    for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL ^| find /V "backup"') do set "cacheFile=%%i"
+    if !v125! EQU 2 (
+        for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!*.bin 2^>NUL ^| find /V "_" ^| find /V "backup"') do set "cacheFile=%%i"
+    ) else (
+        for /F "delims=~" %%i in ('dir /B /O:D /T:W !sci!_*.bin 2^>NUL ^| find /V "_vkpipeline" ^| find /V "backup"') do set "cacheFile=%%i"
+    )
 
     REM : if new cache sci=titleId is not found AND if exist an old one => use it
     if ["!cacheFile!"] == ["NONE"] (
         REM : sci=osci for CEMU < 1.16
         if ["!osci!"] == ["!sci!"] (
             set "newCache=!titleId!.bin"
+
             if exist !newCache!  (
                 set "cacheFile=!sci!.bin"
+
                 copy /Y !newCache! !cacheFile! > NUL 2>&1
                 echo Importing new transferable cache !newCache! as old cache !cacheFile! ^(fit CEMU earlier than 1^.16^) >> !batchFwLog!
                 wscript /nologo !Start! !MessageBox! "Importing new transferable cache !newCache! as old cache !cacheFile! ^(fit CEMU earlier than 1^.16^)"
             )
         ) else (
-            set "oldCache=!osci!.bin"
-            if exist !oldCache!  (
-                set "cacheFile=!sci!.bin"
-                copy /Y !oldCache! !cacheFile! > NUL 2>&1
-                echo Importing old transferable cache !oldCache! as new cache !cacheFile!  ^(fit CEMU after 1^.16^) >> !batchFwLog!
-                wscript /nologo !Start! !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! ^(fit CEMU after 1^.16^)"
+            if !v125! EQU 2 (
+                set "oldCache=!osci!.bin"
+                if exist !oldCache!  (
+                    set "cacheFile=!sci!.bin"
+                    copy /Y !oldCache! !cacheFile! > NUL 2>&1
+                    echo Importing old transferable cache !oldCache! as new cache !cacheFile!  ^(fit CEMU after 1^.16^) >> !batchFwLog!
+                    wscript /nologo !Start! !MessageBox! "Importing old transferable cache !oldCache! as new cache !cacheFile! ^(fit CEMU after 1^.16^)"
+                )
             )
         )
     )
@@ -746,6 +769,7 @@ REM : main
     REM : backup file will be lost and replace by a corrupt backup and you aknowledge that an issue occured only
     REM : on this run
     set "lastValid="!transF:"=!-backupLaunchN-1""
+
     if exist !tcBackup! wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !tcBackup! !lastValid!
 
     wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C copy /Y !transF! !tcBackup!
@@ -770,15 +794,23 @@ REM : main
 
     REM : build OLD_SHADER_CACHE_ID without _j.bin
     set OLD_SHADER_CACHE_ID=!cacheFile:_j=!
-    set OLD_SHADER_CACHE_ID=!cacheFile:.bin=!
+    set OLD_SHADER_CACHE_ID=!OLD_SHADER_CACHE_ID:_shaders=!
+    set OLD_SHADER_CACHE_ID=!OLD_SHADER_CACHE_ID:.bin=!
 
     REM : first launch the transferable cache copy in background before
-    echo Copying transferable cache !OLD_SHADER_CACHE_ID! to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
+    if not ["!OLD_SHADER_CACHE_ID!"] == ["NONE"] (
+        echo Copying transferable cache !OLD_SHADER_CACHE_ID! to !CEMU_FOLDER! ^.^.^. >> !batchFwLog!
+    )
 
-    REM : copy all !sci!.bin file (2 files if separable and conventionnal)
-    wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /MT:32 /IS /IT > NUL 2>&1
+    if !v125! EQU 2 (
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!*.bin" /MT:32 /IS /IT /XF !sci!_*.bin > NUL 2>&1
+    ) else (
+         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci!.bin" /MT:32 /IS /IT > NUL 2>&1
+         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !gtscf! !ctscf! "!sci:_shaders=_vkpipeline!.bin" /MT:32 /IS /IT > NUL 2>&1
+    )
 
     :launch3rdPartySoftware
+
     REM : launching third party software if defined
     set /A "useThirdPartySoft=0"
     type !logFile! | find /I "TO_BE_LAUNCHED" > NUL 2>&1 && set /A "useThirdPartySoft=1"
@@ -819,6 +851,7 @@ REM : main
             set "GPU_VENDOR=!string: =!"
         )
     )
+
     REM : load Cemu's options
     call:loadCemuOptions
 
@@ -1026,7 +1059,7 @@ REM : main
     REM : search for shader files
     pushd !gpuCacheBackupFolder!
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci:_shaders=!.bin 2^>NUL') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:lockCemu
 
@@ -1327,7 +1360,7 @@ REM : main
     pushd !GPU_CACHE!
 
     set "shaderCacheFileName=NOT_FOUND"
-    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci!*.bin 2^>NUL ^| find /V "backup"') do set "shaderCacheFileName=%%~nf"
+    for /F "delims=~" %%f in ('dir /O:D /T:W /B !sci:_shaders=!*.bin 2^>NUL ^| find /V "backup"') do set "shaderCacheFileName=%%~nf"
     pushd !BFW_TOOLS_PATH!
 
     if ["%shaderCacheFileName%"] == ["NOT_FOUND"] goto:warning
@@ -3068,8 +3101,9 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             goto:eof
         )
         set "NEW_SHADER_CACHE_ID=%strTmp: =%"
-        set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%.bin"
+        if !v125! LEQ 1 set "NEW_SHADER_CACHE_ID=!NEW_SHADER_CACHE_ID:"=!_shaders"
 
+        set "NEW_TRANS_SHADER=%NEW_SHADER_CACHE_ID%.bin"
         set "OLD_TRANS_SHADER=%OLD_SHADER_CACHE_ID%.bin"
 
         if ["!SHADER_MODE!"] == ["CONVENTIONAL"] (
@@ -3095,6 +3129,7 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : get the 2 files sizes
         set "otscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!OLD_TRANS_SHADER!""
         set "ntscf="!cemuShaderCache:"=!\transferable\!NEW_TRANS_SHADER!""
+        set "nvtscf="!cemuShaderCache:"=!\transferable\!NEW_TRANS_SHADER:_shaders=_vkpipeline!""
 
         if exist !ntscf! (
             for /F "tokens=*" %%a in (!ntscf!)  do set /A "newSize=%%~za"
@@ -3229,6 +3264,10 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         )
 
         wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MT:32 /MOV /IS /IT > NUL 2>&1
+
+        if exist !nvtscf! (
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER:_shaders=_vkpipeline! /MT:32 /MOV /IS /IT > NUL 2>&1
+        )
 
         REM : delete transShaderCache.log (useless)
         if exist !tscl! del /F /S !tscl! > NUL 2>&1

@@ -54,8 +54,7 @@ REM : main
     echo       ^* appStore ^(HomeBrew AppStore^)
     echo       ^* DDD ^(WiiU Disk itle Dumper^)
     echo       ^* MOCHA ^(MOCHA CFW^)
-    echo       ^* FTP everywhere for MOCHA ^(ftpiiu^)
-    echo       ^* FTP everywhere for CBHC ^(ftpiiu^)
+    echo       ^* WiiU FTP Server
     echo       ^* loadiine_gx2_y_mod ^(to launch DDD dumps^)
     echo       ^* nanddumper ^(to dump your NAND and get online files^)
     echo       ^* dumpling ^(dump your games^)
