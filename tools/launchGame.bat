@@ -3129,7 +3129,6 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
         REM : get the 2 files sizes
         set "otscf="!GAME_FOLDER_PATH:"=!\Cemu\shaderCache\transferable\!OLD_TRANS_SHADER!""
         set "ntscf="!cemuShaderCache:"=!\transferable\!NEW_TRANS_SHADER!""
-        set "nvtscf="!cemuShaderCache:"=!\transferable\!NEW_TRANS_SHADER:_shaders=_vkpipeline!""
 
         if exist !ntscf! (
             for /F "tokens=*" %%a in (!ntscf!)  do set /A "newSize=%%~za"
@@ -3263,10 +3262,10 @@ REM        if ["!AUTO_IMPORT_MODE!"] == ["DISABLED"] goto:continueLoad
             set "NEW_TRANS_SHADER=!NEW_TRANS_SHADER:.bin=_j.bin!"
         )
 
-        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER! /MT:32 /MOV /IS /IT > NUL 2>&1
+        wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER!" /MT:32 /MOV /IS /IT > NUL 2>&1
 
-        if exist !nvtscf! (
-            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! !NEW_TRANS_SHADER:_shaders=_vkpipeline! /MT:32 /MOV /IS /IT > NUL 2>&1
+        if !v125! LEQ 1  (
+            wscript /nologo !StartHiddenCmd! "%windir%\system32\cmd.exe" /C robocopy !ctscf! !gtscf! "!NEW_TRANS_SHADER:_shaders=_vkpipeline!" /MT:32 /MOV /IS /IT > NUL 2>&1
         )
 
         REM : delete transShaderCache.log (useless)
