@@ -842,13 +842,14 @@ REM : main
     set "graphicPacksBackup="!CEMU_FOLDER:"=!\graphicPacks_backup""
 
     REM : get GPU_VENDOR
+    set "gpuString=NOT_FOUND"
     set "GPU_VENDOR=NOT_FOUND"
     set "gpuType=NO_NVIDIA"
     for /F "tokens=2 delims=~=" %%i in ('wmic path Win32_VideoController get Name /value 2^>NUL ^| find "="') do (
-        set "string=%%i"
-        echo "!string!" | find /I "NVIDIA" > NUL 2>&1 && (
+        set "gpuString=%%i"
+        echo "!gpuString!" | find /I "NVIDIA" > NUL 2>&1 && (
             set "gpuType=NVIDIA"
-            set "GPU_VENDOR=!string: =!"
+            set "GPU_VENDOR=!gpuString: =!"
         )
     )
 
@@ -878,7 +879,7 @@ REM : main
 
     set "driversUpdateFlag=0"
 
-    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!string: =!"
+    if ["!GPU_VENDOR!"] == ["NOT_FOUND"] set "GPU_VENDOR=!gpuString: =!"
     echo gpuType ^: !GPU_VENDOR! >> !batchFwLog!
     echo gpuType ^: !GPU_VENDOR!
 
