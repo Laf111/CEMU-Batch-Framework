@@ -11,7 +11,7 @@ As the mlc01 folder and settings are located in the game's one, you can backup t
 ![CEMU-Batch-Framework](resources/BatchFw.png)
 
 
-**Versions of CEMU tested : 1.11.6 to 1.25.0** (if you want to use earlier versions, create an installation per game and per user)
+**Versions of CEMU tested : 1.11.6 to 1.25.1** (if you want to use earlier versions, create an installation per game and per user)
 
 (**1.22.7 is not compatible** because it did not parse the mlc argument correctlty)
 
