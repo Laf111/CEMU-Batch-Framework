@@ -21,6 +21,9 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+03/08/2021 V22-8 :
+add : cemuhook_1251_0574 install and disable shareFonts install for versions >= 1.25.1
+
 28/07/2021 V22-7 :
 add : replace FTPiiU by WiiuFtpServer  V4-3 in WiiuSDcard.rar and code
 add : support new transferable shaders cache (CEMU v1.25) and vulkanPermanentCacheFile

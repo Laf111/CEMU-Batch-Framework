@@ -434,17 +434,25 @@ REM : main
     exit /b 78
 
     :versionOK
-    REM : suppose : version > 1.15.1
+    REM : suppose : version > 1.25.1
+    set /A "v1251=1"
     set /A "v1151=1"
     set /A "v114=1"
     set /A "v1116=1"
 
-    call:compareVersions !versionRead! "1.22" v121 > NUL 2>&1
-    if ["!v121!"] == [""] echo Error when comparing versions
-    if !v121! EQU 50 echo Error when comparing versions
+    call:compareVersions !versionRead! "1.25.1" v1251 > NUL 2>&1
+    if ["!v1251!"] == [""] echo Error when comparing versions
+    if !v1251! EQU 50 echo Error when comparing versions
+
+    REM : version >= 1.25.1
+    if !v1251! LEQ 1 goto:checkCemuHook
+        
+    call:compareVersions !versionRead! "1.22" v122 > NUL 2>&1
+    if ["!v122!"] == [""] echo Error when comparing versions
+    if !v122! EQU 50 echo Error when comparing versions
 
     REM : version >= 1.22 (V6+V4 packs)
-    if !v121! LEQ 1 goto:checkCemuHook
+    if !v122! LEQ 1 goto:checkCemuHook
 
     REM : version < 1.22
 
@@ -527,6 +535,9 @@ REM    if exist !gfxv4! goto:checkCemuHook
     call:installCemuHook
 
     :checkSharedFonts
+
+    REM : disable SharedFonts install for CEMU >= 1.25.1
+    if !v1251! LEQ 1 goto:setOptArgs
 
     REM : check if sharedFonts were downloaded
     set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
@@ -828,13 +839,12 @@ REM : functions
 
         REM : cemuHook for versions < 1.12.1
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1116_0564.rar""
-
-        call:compareVersions !versionRead! "1.12.1" result > NUL 2>&1
-        if ["!result!"] == [""] echo Error when comparing with version 1^.12^.1
-        if !result! EQU 50 echo Error when comparing with version 1^.12^.1
-        if !result! EQU 2 goto:extractCemuHook
+        if !v122! EQU 2 goto:extractCemuHook
 
         set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1159_0573.rar""
+        if !v1251! EQU 2 goto:extractCemuHook
+
+        set "rarFile="!BFW_RESOURCES_PATH:"=!\cemuhook_1251_0574.rar""
 
         :extractCemuHook
         wscript /nologo !StartHidden! !rarExe! x -o+ -inul -w!BFW_LOGS! !rarFile! !CEMU_FOLDER! > NUL 2>&1
