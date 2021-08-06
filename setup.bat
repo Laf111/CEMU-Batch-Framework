@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V22-8"
+    set "BFW_VERSION=V22-9"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"

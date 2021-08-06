@@ -540,7 +540,7 @@ REM    if exist !gfxv4! goto:checkCemuHook
     :checkSharedFonts
 
     REM : disable SharedFonts install for CEMU >= 1.25.1
-    if !v1251! LEQ 1 goto:setOptArgs
+    if !v1251! LEQ 1 goto:autoImportMode
 
     REM : check if sharedFonts were downloaded
     set "sharedFonts="!CEMU_FOLDER:"=!\sharedFonts""
