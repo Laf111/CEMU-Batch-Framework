@@ -90,7 +90,7 @@ REM : main
     )
 
     echo On your Wii-U^, you need to ^:
-    echo - launch WiiU FTP Server
+    echo - launch WiiU FTP Server and press B to mount NAND paths
     echo - get the IP adress displayed on Wii-U gamepad
     echo.
     echo Press any key to continue when you^'re ready

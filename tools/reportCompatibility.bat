@@ -29,6 +29,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
 
     set "logFile="!BFW_PATH:"=!\logs\Host_!USERDOMAIN!.log""
 
@@ -104,12 +105,20 @@ REM : main
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
 
     set "versionRead=NOT_FOUND"
-    if not exist !cemuLog! goto:getGameData
+    if exist !cemuLog! (
 
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
-    set "VERSION=!versionRead!"
+        for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+        set "VERSION=!versionRead!"
+    ) else (
+        REM : get it from the executable
+        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
 
-    :getGameData
+        set "here="%CD:"=%""
+        pushd !BFW_TOOLS_PATH!
+        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+        set "VERSION=%versionRead:~0,-2%"
+        pushd !here!
+    )
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
 

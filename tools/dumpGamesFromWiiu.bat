@@ -76,18 +76,20 @@ REM : main
     echo Dump games installed on your Wii-U
     echo =========================================================
     echo.
-    echo WARNING ^: it is impossible to get the space left on your Wii-U
-    echo storage device^. Be sure that there^'s sufficient space ^!
+    echo WARNING ^: no check is done on amount of data donwloaded^.
+    @echo Be sure you have enough space left^!
     echo.
     echo BE AWARE ^: transfert errors on update and DLC files can occur
     echo on symlinks not handled by FTPiiU server^.
-    echo These files are not used by CEMU^. Just ignore them^.
+    echo These files are not used by CEMU^.
+    echo Just ignore those errors^.
     pause
     
     cls
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
-    echo - launch WiiU FTP Server
+    echo - launch WiiU FTP Server and press B to mount NAND paths
+    echo   if you have games on NAND
     echo - get the IP adress displayed on Wii-U gamepad
     echo.
     echo Press any key to continue when you^'re ready

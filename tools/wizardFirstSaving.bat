@@ -30,6 +30,7 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
     !cmdOw! @ /MIN > NUL 2>&1
@@ -220,9 +221,17 @@ REM : main
     REM : log CEMU
     set "cemuLog="!CEMU_FOLDER:"=!\log.txt""
     set "versionRead=NOT_FOUND"
-    if not exist !cemuLog! goto:initGameProfile
-
-    for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+    if exist !cemuLog! (
+        for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+    ) else (
+        REM : get it from the executable
+        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
+        set "here="%CD:"=%""
+        pushd !BFW_TOOLS_PATH!
+        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+        set "versionRead=%versionRead:~0,-2%"
+        pushd !here!
+    )
 
     title Collecting !versionRead! settings of !GAME_TITLE! for !currentUser!
 

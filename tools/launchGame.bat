@@ -22,6 +22,7 @@ REM : main
     set "BFW_LOGS="!BFW_PATH:"=!\logs""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
+    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
     set "initProgressBar="!BFW_TOOLS_PATH:"=!\initProgressBar.bat""
     set "progressBar="!BFW_RESOURCES_PATH:"=!\progressBar.lnk""
     set "getShaderCacheFolder="!BFW_RESOURCES_PATH:"=!\getShaderCacheName""
@@ -302,16 +303,14 @@ REM : main
 
     set "versionRead=NOT_FOUND"
     if not exist !cemuLog! (
+        REM : get it from the executable
+        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
 
-        REM : CEMU's exe
-        set "cemuExe="!CEMU_FOLDER:"=!\cemu.exe""
-        REM : Warn user with message box
-        !MessageBox! "No CEMU^'s log file was found^. Start !cemuExe! and relaunch" 4112
-        echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch >> !batchFwLog!
-        echo No CEMU^'s log file was found^. BatchFw use this file to get the version of CEMU^. Start !cemuExe! and relaunch
-
-        tumeout /T 3 > NUL 2>&1
-        exit /b 77
+        set "here="%CD:"=%""
+        pushd !BFW_TOOLS_PATH!
+        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+        set "versionRead=%versionRead:~0,-2%"
+        pushd !here!
     )
 
     for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"

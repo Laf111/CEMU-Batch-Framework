@@ -22,6 +22,8 @@ REM : ------------------------------------------------------------------
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
+    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
+    
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
@@ -177,12 +179,18 @@ REM : ------------------------------------------------------------------
 
         REM : check version > 1.12.0
         set "cemuLog="!cemuInstallFolder:"=!\log.txt""
-        if not exist !cemuLog! (
-            @echo WARNING^: No log^.txt found in the last Cemu^'s install in !cemuInstallFolder:"=! ^!
-            goto:eof
-        )
-        
-        for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+        if exist !cemuLog! (
+            for /f "tokens=1-6" %%a in ('type !cemuLog! ^| find "Init Cemu" 2^> NUL') do set "versionRead=%%e"
+        ) else (
+            REM : get it from the executable
+            set "cemuExe="!cemuInstallFolder:"=!\Cemu.exe""
+
+            set "here="%CD:"=%""
+            pushd !BFW_TOOLS_PATH!
+            for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+            set "versionRead=%versionRead:~0,-2%"
+            pushd !here!
+        )        
         if ["!versionRead!"] == ["NOT_FOUND"] goto:eof
 
         REM : if current version >=1.12.0

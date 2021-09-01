@@ -21,8 +21,11 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
-10/08/2021 V23 :
+01/09/2021 V23 :
 add : update WiiuFtpServer to V5 in .\resources\WiiuSDcard.rar
+add : comments for WiiuFtpServer when NAND acces is requiered
+add : support for CEMU v1.25.3 and up (read the version from the executable (log.txt is not created
+      anymore if no game is launched)
 
 06/08/2021 V22-9 :
 add : update WiiuFtpServer to V4-4 in .\resources\WiiuSDcard.rar (hotfix)

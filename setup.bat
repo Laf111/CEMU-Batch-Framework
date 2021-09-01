@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V22-9"
+    set "BFW_VERSION=V23"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"
@@ -41,8 +41,10 @@ REM : main
 
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
-    set "createWiiuSDcard="!BFW_PATH:"=!\createWiiuSDcard.bat""
-    set "dumpGames="!BFW_PATH:"=!\tools\dumpGamesFromWiiu.bat""
+    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
+
+    set "createWiiuSDcard="!BFW_TOOLS_PATH:"=!\createWiiuSDcard.bat""
+    set "dumpGames="!BFW_TOOLS_PATH:"=!\dumpGamesFromWiiu.bat""
     set "BFW_WIIU_FOLDER="!GAMES_FOLDER:"=!\_BatchFw_WiiU""
 
     set "rarExe="!BFW_RESOURCES_PATH:"=!\rar.exe""
@@ -1166,6 +1168,15 @@ REM : main
             set /A "NBCV-=1"
             goto:askCemuFolder
         )
+    ) else (
+        REM : get it from the executable
+        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
+
+        set "here="%CD:"=%""
+        pushd !BFW_TOOLS_PATH!
+        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+        set "versionRead=%versionRead:~0,-2%"
+        pushd !here!
     )
 
     REM : basename of CEMU_FOLDER
@@ -1512,7 +1523,20 @@ REM : ------------------------------------------------------------------
        :openCemuAFirstTime
 
         set "clog="!CEMU_FOLDER:"=!\log.txt""
-        if exist !clog! if exist !cs! goto:getCemuVersion
+        if exist !clog! (
+            if exist !cs! goto:getCemuVersion
+        ) else (
+            REM : get it from the executable
+            set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
+
+            set "here="%CD:"=%""
+            pushd !BFW_TOOLS_PATH!
+            set "here="%CD:"=%""
+            pushd !BFW_TOOLS_PATH!
+            for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+            set "versionRead=%versionRead:~0,-2%"
+            pushd !here!
+        )
 
         REM : importing !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles
         call:syncControllerProfiles
