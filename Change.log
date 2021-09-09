@@ -21,6 +21,16 @@ IF YOU ENCOUNTER ANY ISSUE WITH CEMU :
 4) DO NOT REPORT BUGS TO CEMU TEAM (discord or subreddit), CONTACT ME FIRST
 ======================================================================================================
 
+08/09/2021 V23-1 :
+add : fix CEMU 1.25.3 support
+add : update WiiuFtpServer to V6 in .\resources\WiiuSDcard.rar
+fix : only one concurent transfert when FTP to Wii-U (injectGamesToWiiu.bat, dumpGamesFromWiiu.bat)
+fix : BFW version not updated in main log
+
+03/09/2021 V23-1 :
+add : complete comments for WiiuFtpServer when NAND acces is requiered
+add : update WiiuFtpServer to V5-2 in .\resources\WiiuSDcard.rar
+
 01/09/2021 V23 :
 add : update WiiuFtpServer to V5 in .\resources\WiiuSDcard.rar
 add : comments for WiiuFtpServer when NAND acces is requiered
