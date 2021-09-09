@@ -68,7 +68,6 @@ REM : main
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - launch WiiU FTP Server and press B to mount NAND paths
-    echo   if you have games on NAND
     echo - get the IP adress displayed on Wii-U gamepad
     echo.
     echo Press any key to continue when you^'re ready
@@ -123,7 +122,8 @@ REM : main
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck_sw.log""
     !winScp! /command "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
-        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that WiiuFtpServer is launched
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that
+        echo WiiuFtpServer was launched with mounting NAND paths ^(press B^)
         echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection

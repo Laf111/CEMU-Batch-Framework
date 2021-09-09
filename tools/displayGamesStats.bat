@@ -21,8 +21,6 @@ REM : ------------------------------------------------------------------
     for %%a in (!BFW_PATH!) do set "drive=%%~da"
     set "GAMES_FOLDER=!parentFolder!"
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
-
-    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
     
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
@@ -187,7 +185,7 @@ REM : ------------------------------------------------------------------
 
             set "here="%CD:"=%""
             pushd !BFW_TOOLS_PATH!
-            for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+            for /F %%a in ('getDllOrExeVersion.bat !cemuExe!') do set "versionRead=%%a"
             set "versionRead=%versionRead:~0,-2%"
             pushd !here!
         )        

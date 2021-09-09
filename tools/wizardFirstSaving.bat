@@ -30,7 +30,6 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
-    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
     set "cmdOw="!BFW_RESOURCES_PATH:"=!\cmdOw.exe""
     !cmdOw! @ /MAX > NUL 2>&1
     !cmdOw! @ /MIN > NUL 2>&1
@@ -228,7 +227,7 @@ REM : main
         set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
         set "here="%CD:"=%""
         pushd !BFW_TOOLS_PATH!
-        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
+        for /F %%a in ('getDllOrExeVersion.bat !cemuExe!') do set "versionRead=%%a"
         set "versionRead=%versionRead:~0,-2%"
         pushd !here!
     )

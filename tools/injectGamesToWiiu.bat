@@ -118,7 +118,8 @@ REM : main
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck_idtw.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
-        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that WiiuFtpServer is launched
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that
+        echo WiiuFtpServer was launched with mounting NAND paths ^(press B^)
         echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection

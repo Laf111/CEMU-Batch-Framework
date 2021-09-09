@@ -8,7 +8,7 @@ REM : main
     color 4F
 
     REM : CEMU's Batch FrameWork Version
-    set "BFW_VERSION=V23"
+    set "BFW_VERSION=V23-1"
 
     REM : version of GFX packs created
     set "BFW_GFXP_VERSION=V6"
@@ -41,7 +41,6 @@ REM : main
 
     REM : paths and tools used
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
-    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
 
     set "createWiiuSDcard="!BFW_TOOLS_PATH:"=!\createWiiuSDcard.bat""
     set "dumpGames="!BFW_TOOLS_PATH:"=!\dumpGamesFromWiiu.bat""
@@ -178,6 +177,12 @@ REM : main
     del /F /S !toBeDelete!  > NUL 2>&1
     set "tobeDelete="!BFW_PATH:"=!\logs\fnr""
     rmdir /Q /S !toBeDelete!  > NUL 2>&1
+
+    REM : flush logFile of BFW_VERSION
+    call:cleanHostLogFile BFW_VERSION
+
+    set "msg="BFW_VERSION=%BFW_VERSION%""
+    call:log2HostFile !msg!
 
     REM : get screen resolution
     pushd !BFW_RESOURCES_PATH!
@@ -1157,28 +1162,6 @@ REM : main
         goto:askCemuFolder
     )
 
-    set "clog="!CEMU_FOLDER:"=!\log.txt""
-    if exist !clog! (
-        set "versionRead=NOT_FOUND"
-        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-        if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
-            echo Install earlier versions per game and per user
-            pause
-            set /A "NBCV-=1"
-            goto:askCemuFolder
-        )
-    ) else (
-        REM : get it from the executable
-        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
-
-        set "here="%CD:"=%""
-        pushd !BFW_TOOLS_PATH!
-        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
-        set "versionRead=%versionRead:~0,-2%"
-        pushd !here!
-    )
-
     REM : basename of CEMU_FOLDER
     for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
     echo CEMU install %NBCV%^: !CEMU_FOLDER!
@@ -1495,7 +1478,43 @@ REM : ------------------------------------------------------------------
         set "CEMU_FOLDER="%~2""
 
         for %%a in (!CEMU_FOLDER!) do set "CEMU_FOLDER_NAME=%%~nxa"
+        set "clog="!CEMU_FOLDER:"=!\log.txt""
         set "cs="!CEMU_FOLDER:"=!\settings.xml""
+
+        REM : get the version from log file (CEMU < 1.25.3) or from the executable
+        set "versionRead=NOT_FOUND"
+        if exist !clog! (
+            for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+        ) else (
+            REM : get it from the executable
+            set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
+
+            set "here="%CD:"=%""
+            pushd !BFW_TOOLS_PATH!
+            set "versionReadFromExe=NOT_FOUND"
+            for /F %%a in ('getDllOrExeVersion.bat !cemuExe!') do set "versionReadFromExe=%%a"
+
+            if not ["!versionReadFromExe!"] == ["NOT_FOUND"] set "versionRead=!versionReadFromExe:~0,-2!"
+            pushd !here!
+        )
+
+        if ["!versionRead!"] == ["NOT_FOUND"] (
+            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
+            echo Install earlier versions per game and per user
+            pause
+            set /A "NBCV-=1"
+            exit /b 77
+        )
+
+        echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+
+        echo ERROR^: BatchFw can^'t get CEMU^'s version^.
+        echo This version seems to be not supported.
+        pause
+        set /A "NBCV-=1"
+        exit /b 78
+
+        :versionOK
 
         if %nbArgs% EQU 1 goto:openCemuAFirstTime
         if !useMlcFolderFlag! EQU 1 goto:openCemuAFirstTime
@@ -1522,27 +1541,11 @@ REM : ------------------------------------------------------------------
 
        :openCemuAFirstTime
 
-        set "clog="!CEMU_FOLDER:"=!\log.txt""
-        if exist !clog! (
-            if exist !cs! goto:getCemuVersion
-        ) else (
-            REM : get it from the executable
-            set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
-
-            set "here="%CD:"=%""
-            pushd !BFW_TOOLS_PATH!
-            set "here="%CD:"=%""
-            pushd !BFW_TOOLS_PATH!
-            for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
-            set "versionRead=%versionRead:~0,-2%"
-            pushd !here!
-        )
-
         REM : importing !GAMES_FOLDER:"=!\_BatchFw_Controller_Profiles
         call:syncControllerProfiles
-
+        if exist !clog! if exist !cs! goto:compareCemuVersion
         echo ---------------------------------------------------------
-        echo opening CEMU^.^.^.
+        echo opening CEMU !versionRead!^.^.^.
         echo.
         echo - If a mlc01 folder creation message popup^, answer 'Yes'
         echo - Ignore graphic pack folder download notification^.
@@ -1569,30 +1572,7 @@ REM : ------------------------------------------------------------------
             move /Y !csTmp! !cs! > NUL 2>&1
         )
 
-       :getCemuVersion
-        set "clog="!CEMU_FOLDER:"=!\log.txt""
-        set /A "v1151=2"
-        set "versionRead=NOT_FOUND"
-        if not exist !clog! goto:openCemuAFirstTime
-
-        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-
-        if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
-            echo Install earlier versions per game and per user
-            echo exiting
-            pause
-            exit /b 77
-        )
-        echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:checkV2Packs
-
-        echo ERROR^: BatchFw can^'t get CEMU version from log^.
-        echo This version seems to be not supported.
-        echo exiting
-        pause
-        exit /b 78
-
-        :checkV2Packs
+        :compareCemuVersion
         REM : suppose : version > 1.25.1
         set /A "v1251=1"
         set /A "v122=1"

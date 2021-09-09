@@ -25,8 +25,6 @@ REM : main
     if not [!GAMES_FOLDER!] == ["!drive!\"] set "GAMES_FOLDER=!parentFolder:~0,-2!""
 
     set "BFW_TOOLS_PATH="!BFW_PATH:"=!\tools""
-    set "getVersionFromExe="!BFW_TOOLS_PATH:"=!\getDllOrExeVersion.bat""
-
     set "BFW_RESOURCES_PATH="!BFW_PATH:"=!\resources""
 
     REM : checking arguments
@@ -140,7 +138,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         timeout /t 4 > NUL 2>&1
         exit 75
     )
-
+    timeout /t 1 > NUL 2>&1
     cls
     echo Please select CEMU install folder
 
@@ -169,28 +167,6 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         goto:askCemuFolder
     )
 
-    set "clog="!CEMU_FOLDER:"=!\log.txt""
-    if exist !clog! (
-        set "versionRead=NOT_FOUND"
-        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-        if ["!versionRead!"] == ["NOT_FOUND"] (
-            echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
-            echo Install earlier versions per game and per user
-            pause
-            set /A "NBCV-=1"
-            goto:askCemuFolder
-        )
-    ) else (
-        REM : get it from the executable
-        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
-
-        set "here="%CD:"=%""
-        pushd !BFW_TOOLS_PATH!
-        for /F %%a in ('!getVersionFromExe! !cemuExe!') do set "versionRead=%%a"
-        set "versionRead=%versionRead:~0,-2%"
-        pushd !here!
-    )
-
     set "folder=NOT_FOUND"
     for /F "tokens=2 delims=~=" %%i in ('type !logFile! ^| find "Create " 2^>NUL') do set "folder=%%i"
     if ["!folder!"] == ["NOT_FOUND"] goto:askOutputFolder
@@ -216,10 +192,10 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         pause
         goto:askOutputFolder
     )
-
     goto:inputsAvailables
 
     :getArgsValue
+
     if %nbArgs% GTR 5 (
         echo ERROR on arguments passed ^(%nbArgs%^)
         echo SYNTAX^: "!THIS_SCRIPT!" CEMU_FOLDER OUTPUT_FOLDER -noImport^* -ignorePrecomp^* -no^/Legacy^*
@@ -289,7 +265,6 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :inputsAvailables
     REM : clean log files specific to a launch
-    REM : clean log files specific to a launch
     set "tobeDeleted="!BFW_PATH:"=!\logs\fnr_*.*""
     del /F /S !tobeDeleted!  > NUL 2>&1
     set "tobeDeleted="!BFW_PATH:"=!\logs\jnust_*.*""
@@ -313,6 +288,43 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     REM : CEMU's log file
     set "clog="!CEMU_FOLDER:"=!\log.txt""
+
+    REM : get the version from log file (CEMU < 1.25.3) or from the executable
+    set "versionRead=NOT_FOUND"
+    if exist !clog! (
+        for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
+    ) else (
+        REM : get it from the executable
+        set "cemuExe="!CEMU_FOLDER:"=!\Cemu.exe""
+
+        set "here="%CD:"=%""
+        pushd !BFW_TOOLS_PATH!
+        set "versionReadFromExe=NOT_FOUND"
+        for /F %%a in ('getDllOrExeVersion.bat !cemuExe!') do set "versionReadFromExe=%%a"
+
+        if not ["!versionReadFromExe!"] == ["NOT_FOUND"] set "versionRead=!versionReadFromExe:~0,-2!"
+        pushd !here!
+    )
+
+    if ["!versionRead!"] == ["NOT_FOUND"] (
+        echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
+        echo Install earlier versions per game and per user
+        echo exiting
+        pause
+        exit /b 77
+    )
+
+    echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
+
+    echo versionRead=!versionRead!
+    echo ERROR^: BatchFw can^'t get CEMU^'s version^.
+    echo This version seems to be not supported.
+    echo exiting
+    pause
+    exit /b 78
+
+    :versionOK
+
     set /A "treatAllGames=0"
 
     if !QUIET_MODE! EQU 1 goto:bfwShortcuts
@@ -336,7 +348,7 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
     )
     cls
     echo =========================================================
-    echo Creating CEMU shortcuts
+    echo Creating CEMU !versionRead! shortcuts
     echo =========================================================
 
 
@@ -388,9 +400,9 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
 
     :openCemuAFirstTime
     set "cs="!CEMU_FOLDER:"=!\settings.xml""
-    if exist !clog! if exist !cs! goto:getCemuVersion
+    if exist !clog! if exist !cs! goto:compareCemuVersion
     echo ---------------------------------------------------------
-    echo opening CEMU^.^.^.
+    echo opening CEMU !versionRead!^.^.^.
     echo.
     echo - If a mlc01 folder creation message popup^, answer 'Yes'
     echo - Ignore graphic pack folder download notification^.
@@ -417,37 +429,8 @@ REM    set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.v
         move /Y !csTmp! !cs! > NUL 2>&1
     )
 
-    :getCemuVersion
+    :compareCemuVersion
 
-    set /A "v1151=2"
-    set /A "v114=1"
-
-    if not exist !clog! (
-        echo ERROR^: BatchFw can^'t get CEMU version from log^.
-        echo This version seems to be not supported.
-        echo exiting
-        pause
-        exit /b 78
-    )
-
-    set "versionRead=NOT_FOUND"
-    for /f "tokens=1-6" %%a in ('type !clog! ^| find "Init Cemu"') do set "versionRead=%%e"
-    if ["!versionRead!"] == ["NOT_FOUND"] (
-        echo ERROR^: BatchFw supports only version of CEMU ^>= v1^.11^.6
-        echo Install earlier versions per game and per user
-        echo exiting
-        pause
-        exit /b 77
-    )
-    echo !versionRead! | findStr /R "^[0-9]*\.[0-9]*\.[0-9]*[a-z]*.$" > NUL 2>&1 && goto:versionOK
-
-    echo ERROR^: BatchFw can^'t get CEMU version from log^.
-    echo This version seems to be not supported.
-    echo exiting
-    pause
-    exit /b 78
-
-    :versionOK
     REM : suppose : version > 1.25.1
     set /A "v1251=1"
     set /A "v1151=1"
@@ -1224,7 +1207,7 @@ REM : functions
             set "ICO_PATH="!BFW_PATH:"=!\resources\icons\scanResults.ico""
 
             if not exist !LINK_PATH! (
-                if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Wii-I scans results
+                if !QUIET_MODE! EQU 0 echo Creating a shortcut to access to Wii-U scans results
                 call:shortcut  !TARGET_PATH! !LINK_PATH! !LINK_DESCRIPTION! !ICO_PATH! !BFW_TOOLS_PATH!
             )
         )

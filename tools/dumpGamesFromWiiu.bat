@@ -29,7 +29,6 @@ REM : main
     set "Start="!BFW_RESOURCES_PATH:"=!\vbs\Start.vbs""
     set "StartMinimizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimizedWait.vbs""
     set "StartMaximizedWait="!BFW_RESOURCES_PATH:"=!\vbs\StartMaximizedWait.vbs""
-    set "StartMinimized="!BFW_RESOURCES_PATH:"=!\vbs\StartMinimized.vbs""
     set "StartHiddenWait="!BFW_RESOURCES_PATH:"=!\vbs\StartHiddenWait.vbs""
 
     set "wiiTitlesDataBase="!BFW_RESOURCES_PATH:"=!\WiiU-Titles-Library.csv""
@@ -76,7 +75,7 @@ REM : main
     echo Dump games installed on your Wii-U
     echo =========================================================
     echo.
-    echo WARNING ^: no check is done on amount of data donwloaded^.
+    echo WARNING ^: no check can be done on amount of data donwloaded^.
     @echo Be sure you have enough space left^!
     echo.
     echo BE AWARE ^: transfert errors on update and DLC files can occur
@@ -89,7 +88,6 @@ REM : main
     echo On your Wii-U^, you need to ^:
     echo - disable the sleeping^/shutdown features
     echo - launch WiiU FTP Server and press B to mount NAND paths
-    echo   if you have games on NAND
     echo - get the IP adress displayed on Wii-U gamepad
     echo.
     echo Press any key to continue when you^'re ready
@@ -150,7 +148,8 @@ REM : main
     set "ftplogFile="!BFW_PATH:"=!\logs\ftpCheck.log""
     !winScp! /command "option batch on" "open ftp://USER:PASSWD@!wiiuIp!/ -timeout=5 -rawsettings FollowDirectorySymlinks=1 FtpForcePasvIp2=0 FtpPingType=0" "ls /storage_mlc/usr/save/system/act" "exit" > !ftplogFile! 2>&1
     type !ftplogFile! | find /I "Connection failed" > NUL 2>&1 && (
-        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that WiiuFtpServer is launched
+        echo ERROR ^: unable to connect^, check that your Wii-U is powered on and that
+        echo WiiuFtpServer was launched with mounting NAND paths ^(press B^)
         echo Pause this script until you fix it ^(CTRL-C to abort^)
         pause
         goto:checkConnection
@@ -520,11 +519,11 @@ REM : functions
 
         :importGame
         REM : Import the game (minimized + no wait)
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/code" "!name! (code)"
+        wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! local !codeFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/code" "!name! (code)"
 
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/content" "!name! (content)"
+        wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! local !contentFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/content" "!name! (content)"
 
-        wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
+        wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! local !metaFolder! "/storage_%src%/usr/title/00050000/!endTitleIdFolder!/meta" "!name! (meta)"
 
         call:waitEndOfTransfers
 
@@ -535,7 +534,7 @@ REM : functions
             if !nbPass! EQU 1 echo - dumping update
 
             REM : YES : import update in mlc01/usr/title (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
+            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! local !updateFolder! "/storage_%src%/usr/title/0005000e/!endTitleIdFolder!" "!name! (update)"
         )
         REM : search if this game has a DLC
         set "srcRemoteDlc=!remoteDlc:SRC=%src%!"
@@ -544,7 +543,7 @@ REM : functions
             if !nbPass! EQU 1 echo - dumping DLC
 
             REM : YES : import dlc in mlc01/usr/title/0005000C/!endTitleIdFolder! (minimized + no wait)
-            wscript /nologo !StartMinimized! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
+            wscript /nologo !StartMinimizedWait! !syncFolder! !wiiuIp! local !dlcFolder! "/storage_%src%/usr/title/0005000c/!endTitleIdFolder!" "!name! (DLC)"
         )
 
         call:waitEndOfTransfers
