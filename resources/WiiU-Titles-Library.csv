@@ -1043,7 +1043,7 @@
 '000500001018DC00';Super Mario Maker;wup-n-amae;1;-;v48;usa;yes;'000500001018DC00';720;60;SYNCSCR
 '000500001018DD00';Super Mario Maker;wup-p-amap;1;-;v16;eur;yes;'000500001018DC00';720;60;SYNCSCR
 '000500001018DE00';Tetrobot And Co;wup-p-atcp;00nk;-;v0;eur;yes;'000500001018DE00';720;60;SYNCSCR
-'000500001018E400';Super Ghouls n GhostsÉÑ;wup-n-pbse;-;-;v0;usa;yes;'000500001018E500';720;60;SYNCSCR
+'000500001018E400';Super Ghouls n Ghosts;wup-n-pbse;-;-;v0;usa;yes;'000500001018E500';720;60;SYNCSCR
 '000500001018E500';Super Ghouls n Ghosts;wup-n-pbsp;-;-;v0;eur;yes;'000500001018E500';720;60;SYNCSCR
 '000500001018E700';Mega Man Bass;wup-n-pbte;-;-;v0;usa;yes;'000500001018E700';720;60;SYNCSCR
 '000500001018E800';Mega Man Bass;wup-n-pbtp;-;-;v0;eur;yes;'000500001018E800';720;60;SYNCSCR
@@ -1347,7 +1347,7 @@
 '00050000101B2800';The Fall;wup-p-btfp;-;-;v0;eur;yes;'0005000010189300';720;60;SYNCSCR
 '00050000101B2900';Dragon Fantasy-The Black Tome Of Ice;wup-n-afye;-;-;-;usa;yes;'00050000101B2900';720;60;SYNCSCR
 '00050000101B2A00';Dragon Fantasy-The Volumes Of Westeria;wup-n-adwe;-;-;v1;usa;yes;'00050000101B2A00';720;60;SYNCSCR
-'00050000101B2C00';ShÅtshimi;wup-n-bsee;-;-;-;usa;yes;'00050000101B2C00';720;60;SYNCSCR
+'00050000101B2C00';ShÅutshimi;wup-n-bsee;-;-;-;usa;yes;'00050000101B2C00';720;60;SYNCSCR
 '00050000101B2E00';Tri-Strip;wup-n-atpe;-;-;v0;usa;yes;'00050000101B2E00';720;60;SYNCSCR
 '00050000101B2F00';2014;wup-n-bdkj;-;-;v0;jpn;yes;'00050000101B2F00';720;60;SYNCSCR
 '00050000101B3000';2014;wup-n-bmjj;-;-;v0;jpn;yes;'00050000101B3000';720;60;SYNCSCR
@@ -1532,9 +1532,9 @@
 '00050000101C8A00';Aperion Cyberstorm;wup-p-acyp;-;-;-;eur;yes;'00050000101BC900';720;60;SYNCSCR
 '00050000101C8B00';Wicked Monsters BLAST HD+;wup-p-awmp;00yt;-;v0;eur;yes;'00050000101C8B00';1080;60;SYNCSCR
 '00050000101C8D00';Monster High New Ghoul In School;wup-n-bmse;-;-;-;usa;yes;'00050000101C8D00';720;60;SYNCSCR
-'00050000101C9300';TLOZ Breath Of The Wild;wup-n-alzj;-;-;-;jpn;yes;'00050000101C9500';720;30;NOEF
-'00050000101C9400';TLOZ Breath Of The Wild;wup-n-alze;-;-;-;usa;yes;'00050000101C9500';720;30;NOEF
-'00050000101C9500';TLOZ Breath Of The Wild;wup-n-alzp;-;-;v208;eur;yes;'00050000101C9500';720;30;NOEF
+'00050000101C9300';TLOZ Breath Of The Wild;wup-n-alzj;1;-;-;jpn;yes;'00050000101C9500';720;30;NOEF
+'00050000101C9400';TLOZ Breath Of The Wild;wup-n-alze;1;-;-;usa;yes;'00050000101C9500';720;30;NOEF
+'00050000101C9500';TLOZ Breath Of The Wild;wup-n-alzp;1;-;v208;eur;yes;'00050000101C9500';720;30;NOEF
 '00050000101C9600';Mighty No9;wup-n-amqe;-;-;-;usa;yes;'00050000101C5A00';720;60;SYNCSCR
 '00050000101C9A00';Don t Starve-Giant Edition;wup-p-adap;-;-;v0;eur;yes;'00050000101C4300';720;60;SYNCSCR
 '00050000101C9B00';The Binding Of Isaac-Rebirth;wup-p-brxp;-;-;v0;eur;yes;'00050000101A3C00';720;60;SYNCSCR
